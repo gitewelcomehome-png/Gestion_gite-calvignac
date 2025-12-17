@@ -1,0 +1,6 @@
+# Fichiers à ignorer lors du déploiement
+.git
+.DS_Store
+*.md
+README*
+node_modules
