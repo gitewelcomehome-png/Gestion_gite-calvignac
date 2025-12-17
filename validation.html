@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Planning Ménage</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2C3E50; text-align: center; margin-bottom: 30px; font-size: 1.5rem; }
+        
+        .task-card { border-left: 5px solid #ddd; background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .task-card.trevoux { border-left-color: #667eea; }
+        .task-card.couzon { border-left-color: #f093fb; }
+        
+        .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .gite-name { font-weight: bold; font-size: 1.1rem; }
+        .date-display { font-weight: bold; color: #2C3E50; }
+        
+        .actions { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-validate { background: #2ecc71; }
+        .btn-propose { background: #f1c40f; color: #333; }
+        
+        input[type="date"] { padding: 10px; border: 1px solid #ccc; border-radius: 8px; flex: 1; }
+        
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .status-validé { background: #d4edda; color: #155724; }
+        .status-proposé { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Validation Ménages</h1>
+        
+        <div style="margin-bottom: 20px; text-align: center;">
+            <input type="month" id="monthFilter" style="padding: 8px; font-size: 1rem;">
+        </div>
+
+        <div id="tasks-container">
+            <p style="text-align:center;">Chargement...</p>
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mois par défaut = mois courant
+            const now = new Date();
+            const monthStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            const filter = document.getElementById('monthFilter');
+            filter.value = monthStr;
+            
+            loadTasks(monthStr);
+
+            filter.addEventListener('change', (e) => loadTasks(e.target.value));
+        });
+
+        async function loadTasks(monthStr) {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '<p style="text-align:center;">Chargement...</p>';
+
+            // 1. Récupérer les réservations qui finissent ce mois-ci
+            // On prend une plage large pour être sûr
+            const start = `${monthStr}-01`;
+            // Calcul dernier jour du mois
+            const [y, m] = monthStr.split('-');
+            const lastDay = new Date(y, m, 0).getDate();
+            const end = `${monthStr}-${lastDay}`;
+
+            const { data: resas, error } = await supabase
+                .from('reservations')
+                .select('*')
+                .gte('date_fin', start)
+                .lte('date_fin', end)
+                .order('date_fin');
+
+            // 2. Récupérer les validations existantes
+            const { data: validations } = await supabase.from('cleaning_validation').select('*');
+            const validMap = {};
+            if(validations) validations.forEach(v => validMap[v.reservation_id] = v);
+
+            if (error) {
+                container.innerHTML = `<p style="color:red">Erreur: ${error.message}</p>`;
+                return;
+            }
+
+            if (!resas || resas.length === 0) {
+                container.innerHTML = `<p style="text-align:center">Aucun départ prévu en ${monthStr}</p>`;
+                return;
+            }
+
+            let html = '';
+            resas.forEach(r => {
+                const depart = new Date(r.date_fin);
+                // Logique simplifiée date ménage (Dimanche -> Lundi)
+                let menageDate = new Date(depart);
+                if(depart.getDay() === 0) menageDate.setDate(depart.getDate()+1);
+                
+                const dateDisplay = menageDate.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+                const cssClass = r.gite === 'Trévoux' ? 'trevoux' : 'couzon';
+                
+                // Statut actuel
+                const val = validMap[r.id];
+                const statusBadge = val ? `<span class="status-badge status-${val.status.toLowerCase()}">${val.status}</span>` : '';
+                const defaultDateValue = val ? val.validated_date : menageDate.toISOString().split('T')[0];
+
+                html += `
+                <div class="task-card ${cssClass}" id="card-${r.id}">
+                    <div class="task-header">
+                        <span class="gite-name">🏠 ${r.gite}</span>
+                        ${statusBadge}
+                    </div>
+                    <div class="date-display">📅 ${dateDisplay} (Départ client)</div>
+                    <div style="font-size:0.9rem; color:#666; margin-top:5px;">
+                        Client: ${r.nom_client || 'Inconnu'} <br>
+                        Départ prévu : ${new Date(r.date_fin).toLocaleDateString()}
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-validate" onclick="updateStatus(${r.id}, '${r.gite}', '${r.date_fin}', '${defaultDateValue}', 'Validé')">
+                            <i class="fas fa-check"></i> Valider la date
+                        </button>
+                    </div>
+                    <div style="margin-top:10px; display:flex; gap:5px; align-items:center;">
+                        <span style="font-size:0.8rem;">Ou changer :</span>
+                        <input type="date" id="date-${r.id}" value="${defaultDateValue}">
+                        <button class="btn btn-propose" style="padding:5px 10px; font-size:0.8rem;" onclick="updateStatus(${r.id}, '${r.gite}', '${r.date_fin}', document.getElementById('date-${r.id}').value, 'Proposé')">
+                            Modifier
+                        </button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        async function updateStatus(id, gite, original, validated, status) {
+            const { error } = await supabase.from('cleaning_validation').upsert({
+                reservation_id: id,
+                gite: gite,
+                original_date: original,
+                validated_date: validated,
+                status: status
+            }, { onConflict: 'reservation_id' });
+
+            if(error) alert('Erreur : ' + error.message);
+            else {
+                // Recharger pour voir le badge
+                const filter = document.getElementById('monthFilter').value;
+                loadTasks(filter);
+            }
+        }
+    </script>
+</body>
+</html>
