@@ -4160,8 +4160,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 });
             }
             
-            // Filtrer les 2 prochains mois
+            // Filtrer les 2 prochains mois (uniquement dates futures)
             const now = new Date();
+            now.setHours(0, 0, 0, 0); // Début de journée
             const twoMonthsLater = new Date(now);
             twoMonthsLater.setMonth(now.getMonth() + 2);
             
