@@ -1325,7 +1325,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 </div>
 
                 <!-- ==================== TOUS LES CHAMPS ANGLAIS (cachés) ==================== -->
-                <div class="card" style="display: none;">
+                <div id="englishFieldsCard" class="card" style="display: none;">
                     <div class="card-header" style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white;">
                         <span class="card-icon">🇬🇧</span>
                         <h2 class="card-title">English Fields / Champs Anglais</h2>
@@ -6093,63 +6093,62 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             };
             
             // Fonction pour basculer entre FR et EN
+            // Variable pour suivre la langue actuelle
+            let currentLang = 'fr';
+            
             window.switchLanguage = function(lang) {
-                console.log('🌍 Switching to:', lang);
+                console.log('🌍 Switching to:', lang, '(was:', currentLang, ')');
                 
-                // Trouver toutes les cartes (sections) du formulaire
-                const allCards = document.querySelectorAll('#infosGiteForm .card');
+                // Si on est déjà dans cette langue, ne rien faire
+                if (currentLang === lang) {
+                    console.log('Already in this language');
+                    return;
+                }
+                
+                const englishCard = document.getElementById('englishFieldsCard');
+                const allCards = document.querySelectorAll('#infosGiteForm > .card:not(#englishFieldsCard)');
+                const saveButtonCard = document.querySelector('#infosGiteForm > .card:last-of-type');
                 
                 if (lang === 'fr') {
-                    // Mode français : afficher tous les champs FR normaux, cacher les sections EN
+                    // Mode français : afficher toutes les sections normales, cacher la carte EN
+                    console.log('Switching to FR mode');
+                    
+                    // Afficher toutes les cartes françaises
                     allCards.forEach(card => {
-                        // Chercher si c'est la carte des champs anglais (celle avec tous les _en)
-                        const isEnglishCard = card.querySelector('h2.card-title')?.textContent.includes('English Fields');
-                        
-                        if (isEnglishCard) {
-                            // Cacher complètement la carte anglaise
-                            card.style.display = 'none';
-                        } else {
-                            // Pour les cartes normales, afficher tous les champs FR et cacher les _en individuels
-                            card.style.display = '';
-                            
-                            // Trouver tous les divs avec des champs _en isolés et les cacher
-                            const enDivs = card.querySelectorAll('div[style*="display"]');
-                            enDivs.forEach(div => {
-                                const input = div.querySelector('input[id*="_en"], textarea[id*="_en"], select[id*="_en"]');
-                                if (input) {
-                                    div.style.display = 'none';
-                                }
-                            });
-                        }
+                        card.style.display = '';
                     });
+                    
+                    // Cacher la carte anglaise
+                    if (englishCard) {
+                        englishCard.style.display = 'none';
+                    }
+                    
+                    currentLang = 'fr';
                     showNotification('🇫🇷 Mode français activé', 'info');
                     
                 } else if (lang === 'en') {
-                    // Mode anglais : cacher les sections FR normales, afficher la carte EN
+                    // Mode anglais : cacher les sections FR, afficher la carte EN
+                    console.log('Switching to EN mode');
+                    
+                    // Cacher toutes les cartes françaises (sauf le bouton de sauvegarde)
                     allCards.forEach(card => {
-                        const isEnglishCard = card.querySelector('h2.card-title')?.textContent.includes('English Fields');
-                        const isSaveButton = card.querySelector('button[type="submit"]');
-                        
-                        if (isEnglishCard) {
-                            // Afficher la carte anglaise
-                            card.style.display = '';
-                        } else if (isSaveButton) {
-                            // Toujours afficher le bouton de sauvegarde
-                            card.style.display = '';
-                        } else {
-                            // Cacher les autres cartes (sections normales)
+                        // Ne pas cacher le bouton de sauvegarde
+                        if (!card.querySelector('button[type="submit"]')) {
                             card.style.display = 'none';
                         }
                     });
                     
-                    // Scroller vers la carte anglaise
-                    const englishCard = document.querySelector('.card h2.card-title')?.closest('.card');
-                    if (englishCard && englishCard.textContent.includes('English')) {
+                    // Afficher la carte anglaise
+                    if (englishCard) {
+                        englishCard.style.display = '';
+                        
+                        // Scroller vers la carte anglaise
                         setTimeout(() => {
                             englishCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }, 100);
                     }
                     
+                    currentLang = 'en';
                     showNotification('🇬🇧 English mode activated', 'info');
                 }
             };
