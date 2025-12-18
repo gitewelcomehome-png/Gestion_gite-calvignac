@@ -3098,6 +3098,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             document.getElementById('statCouzon').textContent = couzon.length;
             document.getElementById('statCA').textContent = caTotal.toFixed(0) + ' €';
             
+            // Mettre à jour les compteurs par plateforme et statistiques avancées
+            updatePlatformCounters(filteredReservations);
+            updateAdvancedStats(filteredReservations);
+            
             // Générer les checkboxes de comparaison d'années
             generateYearComparisonCheckboxes(reservations, historicalData);
             
