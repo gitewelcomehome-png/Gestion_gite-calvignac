@@ -3290,14 +3290,14 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 }
             });
             
-            // Graphique répartition par gîte (année courante uniquement)
+            // Graphique répartition par gîte (année sélectionnée)
             const ctx2 = document.getElementById('gitesChart').getContext('2d');
             if (gitesChartInstance) gitesChartInstance.destroy();
             
-            const currentYear = new Date().getFullYear();
-            const currentReservations = reservations.filter(r => parseLocalDate(r.dateDebut).getFullYear() === currentYear);
-            const trevoux = currentReservations.filter(r => r.gite === 'Trévoux');
-            const couzon = currentReservations.filter(r => r.gite === 'Couzon');
+            const selectedYear = parseInt(document.getElementById('yearFilterStats')?.value || new Date().getFullYear());
+            const currentReservations = reservationsForStats; // Utiliser les réservations déjà filtrées
+            const trevoux = currentReservations.filter(r => isTrevoux(r.gite));
+            const couzon = currentReservations.filter(r => isCouzon(r.gite));
             
             gitesChartInstance = new Chart(ctx2, {
                 type: 'doughnut',
@@ -3316,7 +3316,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         legend: { display: true, position: 'bottom' },
                         title: { 
                             display: true, 
-                            text: `Répartition par gîte (${currentYear})`, 
+                            text: `Répartition par gîte (${selectedYear})`, 
                             font: { size: 16, weight: 'bold' } 
                         }
                     }
@@ -3350,7 +3350,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         legend: { display: false },
                         title: { 
                             display: true, 
-                            text: `Répartition par plateforme (${currentYear})`, 
+                            text: `Répartition par plateforme (${selectedYear})`, 
                             font: { size: 16, weight: 'bold' } 
                         }
                     },
@@ -3360,11 +3360,11 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 }
             });
             
-            // Graphique CA vs Charges vs Bénéfice (année en cours uniquement)
+            // Graphique CA vs Charges vs Bénéfice (année sélectionnée)
             const ctx4 = document.getElementById('profitChart').getContext('2d');
             if (profitChartInstance) profitChartInstance.destroy();
             
-            // Calculer CA mensuel pour l'année en cours
+            // Calculer CA mensuel pour l'année sélectionnée
             const caParMois = Array(12).fill(0);
             currentReservations.forEach(r => {
                 const month = parseLocalDate(r.dateDebut).getMonth();
@@ -3377,7 +3377,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             charges.forEach(c => {
                 const chargeDate = new Date(c.date);
-                if (chargeDate.getFullYear() === currentYear) {
+                if (chargeDate.getFullYear() === selectedYear) {
                     if (c.type === 'mensuelle') {
                         // Charge mensuelle : répartir sur tous les mois
                         for (let i = 0; i < 12; i++) {
