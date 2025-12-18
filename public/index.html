@@ -2775,9 +2775,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             });
             
             const sortedWeeks = Array.from(allWeeks).sort((a, b) => {
-                const [yearA, weekA] = a.split('-W').map(Number);
-                const [yearB, weekB] = b.split('-W').map(Number);
-                return yearA !== yearB ? yearA - yearB : weekA - weekB;
+                // getWeekNumber retourne un nombre, pas une chaîne avec '-W'
+                return a - b;
             });
             
             // Générer le HTML avec en-têtes sticky par gîte
@@ -5440,12 +5439,12 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             };
             
             function updateProgressInfos() {
-                constFields = document.querySelectorAll('#infosGiteForm [required]');
+                const fields = document.querySelectorAll('#infosGiteForm [required]');
                 let filled = 0;
-               Fields.forEach(field => {
+                fields.forEach(field => {
                     if (field.value && field.value.trim()) filled++;
                 });
-                const percent = (filled /Fields.length) * 100;
+                const percent = (filled / fields.length) * 100;
                 const progressBar = document.getElementById('progressBarInfos');
                 const progressText = document.getElementById('progressText');
                 if (progressBar) progressBar.style.width = percent + '%';
