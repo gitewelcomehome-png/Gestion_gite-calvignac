@@ -5859,25 +5859,73 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     return;
                 }
                 
-                showNotification('🌍 Traduction en cours... Veuillez patienter', 'info');
+                // Créer une barre de progression visible
+                const progressDiv = document.createElement('div');
+                progressDiv.id = 'translationProgress';
+                progressDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 30px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    min-width: 400px;
+                    text-align: center;
+                `;
+                progressDiv.innerHTML = `
+                    <h3 style="margin-bottom: 20px; color: #667eea;">🌍 Traduction en cours...</h3>
+                    <div style="background: #f0f0f0; border-radius: 10px; height: 30px; overflow: hidden; margin-bottom: 15px;">
+                        <div id="progressBar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                    <p id="progressText" style="color: #555; font-size: 0.95rem;">Préparation...</p>
+                `;
+                document.body.appendChild(progressDiv);
                 
-                // Liste de tous les champs à traduire (sans le préfixe infos_)
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                
+                // Liste de TOUS les champs à traduire (sans le préfixe infos_)
                 const fieldsToTranslate = [
                     'adresse', 'telephone', 'email',
                     'wifiSSID', 'wifiPassword', 'wifiLocalisation', 'wifiZones',
-                    'heureArrivee', 'parkingDetails', 'instructionsCles', 'itineraireLogement', 'premiereVisite'
+                    'heureArrivee', 'arriveeTardive', 'parkingDispo', 'parkingPlaces', 'parkingDetails',
+                    'typeAcces', 'codeAcces', 'instructionsCles', 'etage', 'ascenseur',
+                    'itineraireLogement', 'premiereVisite',
+                    'typeChauffage', 'climatisation', 'instructionsChauffage',
+                    'equipementsCuisine', 'instructionsFour', 'instructionsPlaques',
+                    'instructionsLaveVaisselle', 'instructionsLaveLinge', 'secheLinge',
+                    'ferRepasser', 'lingeFourni', 'configurationChambres',
+                    'instructionsTri', 'joursCollecte', 'decheterie',
+                    'detecteurFumee', 'extincteur', 'coupureEau', 'disjoncteur', 'consignesUrgence',
+                    'heureDepart', 'departTardif', 'checklistDepart', 'restitutionCles',
+                    'tabac', 'animaux', 'nbMaxPersonnes', 'caution'
                 ];
                 
                 let translated = 0;
                 let skipped = 0;
+                let notFound = 0;
+                let total = fieldsToTranslate.length;
                 
                 try {
-                    for (const field of fieldsToTranslate) {
+                    for (let i = 0; i < fieldsToTranslate.length; i++) {
+                        const field = fieldsToTranslate[i];
                         const frInput = document.getElementById(`infos_${field}`);
                         const enInput = document.getElementById(`infos_${field}_en`);
                         
+                        // Mettre à jour la progression
+                        const percent = ((i + 1) / total) * 100;
+                        progressBar.style.width = percent + '%';
+                        progressText.textContent = `Traduction: ${i + 1}/${total} champs (${translated} traduits)`;
+                        
                         // Vérifier si les deux champs existent
-                        if (!frInput || !enInput) continue;
+                        if (!frInput || !enInput) {
+                            console.log(`❌ Champs non trouvés: infos_${field} ou infos_${field}_en`);
+                            notFound++;
+                            continue;
+                        }
                         
                         const frValue = frInput.value.trim();
                         const enValue = enInput.value.trim();
@@ -5887,34 +5935,48 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             try {
                                 // API gratuite MyMemory (limite: 1000 caractères par requête)
                                 const textToTranslate = frValue.substring(0, 1000);
+                                progressText.textContent = `Traduction: "${textToTranslate.substring(0, 30)}..."`;
+                                
                                 const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=fr|en`);
                                 const data = await response.json();
                                 
                                 if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
                                     enInput.value = data.responseData.translatedText;
                                     translated++;
+                                    console.log(`✅ Traduit: ${field} → "${data.responseData.translatedText.substring(0, 50)}..."`);
                                 } else {
-                                    console.warn(`Échec traduction pour ${field}:`, data);
+                                    console.warn(`⚠️ Échec traduction pour ${field}:`, data);
                                 }
                                 
                                 // Pause pour éviter rate limit (max 10 req/sec)
-                                await new Promise(resolve => setTimeout(resolve, 500));
+                                await new Promise(resolve => setTimeout(resolve, 600));
                                 
                             } catch (error) {
-                                console.error(`Erreur traduction ${field}:`, error);
+                                console.error(`❌ Erreur traduction ${field}:`, error);
                             }
                         } else if (enValue) {
                             skipped++;
+                            console.log(`⏭️ Ignoré (déjà rempli): ${field}`);
                         }
                     }
+                    
+                    progressText.textContent = '💾 Sauvegarde en cours...';
                     
                     // Sauvegarder automatiquement
                     sauvegarderDonneesInfos();
                     
-                    showNotification(`✓ Traduction terminée ! ${translated} champs traduits, ${skipped} déjà remplis`, 'success');
+                    // Supprimer la barre de progression
+                    document.body.removeChild(progressDiv);
+                    
+                    showNotification(`✓ Traduction terminée ! ${translated} champs traduits, ${skipped} déjà remplis, ${notFound} champs non trouvés`, 'success');
+                    
+                    console.log(`📊 Résumé: ${translated} traduits, ${skipped} ignorés, ${notFound} non trouvés sur ${total} total`);
                     
                 } catch (error) {
                     console.error('Erreur globale traduction:', error);
+                    if (document.body.contains(progressDiv)) {
+                        document.body.removeChild(progressDiv);
+                    }
                     showNotification('❌ Erreur lors de la traduction automatique', 'error');
                 }
             };
