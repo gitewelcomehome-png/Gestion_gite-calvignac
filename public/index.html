@@ -791,9 +791,14 @@ h1{font-size:2.1rem;}
 
                 <!-- ==================== SECTION 1 : INFORMATIONS DE BASE ==================== -->
                 <div class="card">
-                    <div class="card-header">
-                        <span class="card-icon">📍</span>
-                        <h2 class="card-title">Informations de Base</h2>
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="card-icon">📍</span>
+                            <h2 class="card-title">Informations de Base</h2>
+                        </div>
+                        <button type="button" onclick="resetGiteInfosQuick()" class="btn" style="background: #e74c3c; color: white; padding: 8px 16px; font-size: 0.85rem;">
+                            🗑️ Effacer
+                        </button>
                     </div>
 
                     <div style="display: grid; gap: 20px;">
@@ -5574,6 +5579,33 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         .eq('gite_nom', currentGiteInfos);
                     
                     showNotification(`✓ Données de ${currentGiteInfos} effacées`, 'success');
+                    
+                    // Recharger les champs vides
+                    await chargerDonneesInfos();
+                } catch (error) {
+                    console.error('Erreur suppression:', error);
+                    showNotification('❌ Erreur lors de la suppression', 'error');
+                }
+            };
+            
+            window.resetGiteInfosQuick = async function() {
+                if (!confirm(`⚠️ ATTENTION !\n\nVoulez-vous vraiment effacer TOUTES les informations du gîte ${currentGiteInfos} ?\n\n✓ Ceci supprimera :\n- Adresse et coordonnées\n- Informations WiFi\n- Instructions d'arrivée\n- Équipements\n- Toutes les autres données\n\n❌ Cette action est IRRÉVERSIBLE !\n\nCliquez sur OK pour confirmer la suppression.`)) {
+                    return;
+                }
+                
+                // Supprimer de localStorage
+                const data = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
+                delete data[currentGiteInfos];
+                localStorage.setItem(DB_KEY_INFOS, JSON.stringify(data));
+                
+                // Supprimer de Supabase
+                try {
+                    await supabase
+                        .from('infos_gites')
+                        .delete()
+                        .eq('gite_nom', currentGiteInfos);
+                    
+                    showNotification(`✓ Toutes les données de ${currentGiteInfos} ont été effacées`, 'success');
                     
                     // Recharger les champs vides
                     await chargerDonneesInfos();
