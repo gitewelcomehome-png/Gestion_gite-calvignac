@@ -737,62 +737,59 @@ h1{font-size:2.1rem;}
         <!-- ONGLET INFOS PRATIQUES ULTRA-COMPLET -->
         <div id="tab-infos-gites" class="tab-content">
             
-            <!-- SÉLECTEUR DE GÎTE -->
-            <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                <div class="card-header" style="border-bottom: 2px solid rgba(255,255,255,0.3);">
-                    <span class="card-icon">📋</span>
-                    <h2 class="card-title">Infos Pratiques - Guide Client Ultra-Complet</h2>
+            <!-- BARRE DE NAVIGATION COMPACTE -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 1.8rem;">📋</span>
+                    <h2 style="color: white; margin: 0; font-size: 1.4rem; font-weight: 700;">Infos Pratiques</h2>
                 </div>
-                <div style="padding: 20px;">
-                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 20px; margin-bottom: 20px;">
-                        <div style="display: flex; gap: 15px;">
-                            <button class="btn" onclick="selectGiteInfos('Trévoux')" id="btnTrevoux" style="background: white; color: #667eea; font-weight: 700; padding: 12px 30px;">
-                                🏡 Trévoux
-                            </button>
-                            <button class="btn" onclick="selectGiteInfos('Couzon')" id="btnCouzon" style="background: rgba(255,255,255,0.2); color: white; font-weight: 700; padding: 12px 30px;">
-                                ⛰️ Couzon
-                            </button>
-                        </div>
+                
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <!-- Sélecteur de gîte -->
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn" onclick="selectGiteInfos('Trévoux')" id="btnTrevoux" style="background: white; color: #667eea; font-weight: 700; padding: 10px 20px; border-radius: 25px; border: none; cursor: pointer; transition: all 0.3s;">
+                            🏡 Trévoux
+                        </button>
+                        <button class="btn" onclick="selectGiteInfos('Couzon')" id="btnCouzon" style="background: rgba(255,255,255,0.2); color: white; font-weight: 700; padding: 10px 20px; border-radius: 25px; border: 2px solid white; cursor: pointer; transition: all 0.3s;">
+                            ⛰️ Couzon
+                        </button>
                     </div>
                     
-
+                    <!-- Sélecteur de langue -->
+                    <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.15); padding: 6px; border-radius: 20px;">
+                        <button type="button" id="btnLangFR" onclick="switchLanguage('fr')" style="background: white; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px 12px; border-radius: 15px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" title="Français">
+                            🇫🇷
+                        </button>
+                        <button type="button" id="btnLangEN" onclick="switchLanguage('en')" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px 12px; border-radius: 15px; transition: all 0.3s; opacity: 0.7;" title="English">
+                            🇬🇧
+                        </button>
+                    </div>
+                    
+                    <!-- Bouton effacer -->
+                    <button type="button" onclick="resetGiteInfosQuick()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 10px; border-radius: 50%; transition: all 0.3s;" title="Effacer toutes les informations">
+                        🗑️
+                    </button>
                 </div>
             </div>
-
-
 
             <form id="infosGiteForm" onsubmit="sauvegarderInfosGiteComplet(event)">
 
                 <!-- ==================== SECTION 1 : INFORMATIONS DE BASE ==================== -->
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="card-icon">📍</span>
-                            <h2 class="card-title">Informations de Base</h2>
-                            <button type="button" onclick="switchLanguage('fr')" style="background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 5px; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Afficher en français">
-                                🇫🇷
-                            </button>
-                            <button type="button" onclick="switchLanguage('en')" style="background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 5px; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Translate to English">
-                                🇬🇧
-                            </button>
-                            <button type="button" onclick="autoTranslateFRtoEN()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(102,126,234,0.3);" title="Traduire automatiquement tous les champs FR → EN">
-                                🌍 Auto-traduction
-                            </button>
-                        </div>
-                        <button type="button" onclick="resetGiteInfosQuick()" style="background: transparent; border: none; color: #e74c3c; font-size: 1.2rem; cursor: pointer; padding: 5px;" title="Effacer toutes les informations de ce gîte">
-                            🗑️
-                        </button>
+                    <div class="card-header">
+                        <span class="card-icon">📍</span>
+                        <h2 class="card-title">Informations de Base</h2>
                     </div>
 
                     <div style="display: grid; gap: 20px;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète 🇫🇷 <span style="color: #ef4444;">*</span></label>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète <span style="color: #ef4444;">*</span></label>
                                 <input type="text" id="infos_adresse" class="form-control" placeholder="12 rue de la République, 01600 Trévoux">
                                 <small style="color: var(--gray); font-style: italic;">Adresse exacte avec code postal pour GPS</small>
                             </div>
                             <div style="display: none;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Full Address 🇬🇧 <span style="color: #ef4444;">*</span></label>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Full Address <span style="color: #ef4444;">*</span></label>
                                 <input type="text" id="infos_adresse_en" class="form-control" placeholder="12 Republic Street, 01600 Trévoux">
                                 <small style="color: var(--gray); font-style: italic;">Exact address with postal code for GPS</small>
                             </div>
@@ -1325,18 +1322,27 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 </div>
 
                 <!-- ==================== TOUS LES CHAMPS ANGLAIS (cachés) ==================== -->
-                <div id="englishFieldsCard" class="card" style="display: none;">
-                    <div class="card-header" style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white;">
-                        <span class="card-icon">🇬🇧</span>
-                        <h2 class="card-title">English Fields / Champs Anglais</h2>
-                        <small style="opacity: 0.9; display: block; margin-top: 5px;">These fields are filled automatically by translation / Ces champs se remplissent automatiquement</small>
+                <div id="englishFieldsCard" class="card" style="display: none; border: 3px solid #3b82f6; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);">
+                    <div class="card-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <span style="font-size: 2rem;">🇬🇧</span>
+                                <div>
+                                    <h2 class="card-title" style="margin: 0; font-size: 1.5rem;">English Version</h2>
+                                    <small style="opacity: 0.9; display: block; margin-top: 5px;">All fields below will be automatically translated from French</small>
+                                </div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem;">
+                                🌍 Auto-translated
+                            </div>
+                        </div>
                     </div>
                     
-                    <div style="display: grid; gap: 25px; padding: 20px;">
+                    <div style="display: grid; gap: 25px; padding: 25px;">
                         <!-- Section 3: Arrivée (EN) -->
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
-                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
-                                <span>🔑</span> Arrival & Access
+                        <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #3b82f6;">
+                            <h3 style="color: #1e3a8a; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #3b82f6; padding: 8px; border-radius: 10px;">🔑</span> Arrival & Access
                             </h3>
                             <div style="display: grid; gap: 15px;">
                                 <div>
@@ -1391,9 +1397,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         </div>
                         
                         <!-- Section 4: Logement (EN) -->
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
-                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
-                                <span>🏠</span> Accommodation & Equipment
+                        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #22c55e;">
+                            <h3 style="color: #166534; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #22c55e; padding: 8px; border-radius: 10px;">🏠</span> Accommodation & Equipment
                             </h3>
                             <div style="display: grid; gap: 15px;">
                                 <div>
@@ -1448,9 +1454,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         </div>
                         
                         <!-- Section 5: Déchets (EN) -->
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
-                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
-                                <span>♻️</span> Waste & Recycling
+                        <div style="background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #eab308;">
+                            <h3 style="color: #854d0e; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #eab308; padding: 8px; border-radius: 10px;">♻️</span> Waste & Recycling
                             </h3>
                             <div style="display: grid; gap: 15px;">
                                 <div>
@@ -1469,9 +1475,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         </div>
                         
                         <!-- Section 6: Sécurité (EN) -->
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
-                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
-                                <span>🚨</span> Safety & Emergencies
+                        <div style="background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #ef4444;">
+                            <h3 style="color: #991b1b; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #ef4444; padding: 8px; border-radius: 10px;">🚨</span> Safety & Emergencies
                             </h3>
                             <div style="display: grid; gap: 15px;">
                                 <div>
@@ -1498,9 +1504,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         </div>
                         
                         <!-- Section 7: Départ (EN) -->
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
-                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
-                                <span>👋</span> Departure & Check-out
+                        <div style="background: linear-gradient(135deg, #fdf4ff 0%, #f5d0fe 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #a855f7;">
+                            <h3 style="color: #6b21a8; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #a855f7; padding: 8px; border-radius: 10px;">👋</span> Departure & Check-out
                             </h3>
                             <div style="display: grid; gap: 15px;">
                                 <div>
@@ -1523,9 +1529,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         </div>
                         
                         <!-- Section 8: Règlement (EN) -->
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
-                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
-                                <span>📋</span> House Rules
+                        <div style="background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #f97316;">
+                            <h3 style="color: #9a3412; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #f97316; padding: 8px; border-radius: 10px;">📋</span> House Rules
                             </h3>
                             <div style="display: grid; gap: 15px;">
                                 <div>
@@ -6095,30 +6101,43 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             // Fonction pour basculer entre FR et EN
             // Variable pour suivre la langue actuelle
             let currentLang = 'fr';
+            let translationDone = false; // Pour ne traduire qu'une fois automatiquement
             
             window.switchLanguage = function(lang) {
-                console.log('🌍 Switching to:', lang, '(was:', currentLang, ')');
+                console.log('🌍 Switch language to:', lang, '| Current:', currentLang);
                 
-                // Si on est déjà dans cette langue, ne rien faire
-                if (currentLang === lang) {
-                    console.log('Already in this language');
-                    return;
-                }
-                
-                const englishCard = document.getElementById('englishFieldsCard');
-                const allCards = document.querySelectorAll('#infosGiteForm > .card:not(#englishFieldsCard)');
-                const saveButtonCard = document.querySelector('#infosGiteForm > .card:last-of-type');
+                // Mise à jour des boutons de langue
+                const btnFR = document.getElementById('btnLangFR');
+                const btnEN = document.getElementById('btnLangEN');
                 
                 if (lang === 'fr') {
-                    // Mode français : afficher toutes les sections normales, cacher la carte EN
-                    console.log('Switching to FR mode');
+                    // Mise à jour visuelle des boutons
+                    if (btnFR) {
+                        btnFR.style.background = 'white';
+                        btnFR.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+                        btnFR.style.opacity = '1';
+                    }
+                    if (btnEN) {
+                        btnEN.style.background = 'transparent';
+                        btnEN.style.boxShadow = 'none';
+                        btnEN.style.opacity = '0.7';
+                    }
                     
-                    // Afficher toutes les cartes françaises
-                    allCards.forEach(card => {
+                    // Afficher les champs FR, cacher les champs EN
+                    document.querySelectorAll('[data-lang="fr"]').forEach(el => {
+                        el.style.display = '';
+                    });
+                    document.querySelectorAll('[data-lang="en"]').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    
+                    // Afficher toutes les cartes du formulaire
+                    document.querySelectorAll('#infosGiteForm > .card').forEach(card => {
                         card.style.display = '';
                     });
                     
-                    // Cacher la carte anglaise
+                    // Cacher la carte anglaise si elle existe
+                    const englishCard = document.getElementById('englishFieldsCard');
                     if (englishCard) {
                         englishCard.style.display = 'none';
                     }
@@ -6127,18 +6146,28 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     showNotification('🇫🇷 Mode français activé', 'info');
                     
                 } else if (lang === 'en') {
-                    // Mode anglais : cacher les sections FR, afficher la carte EN
-                    console.log('Switching to EN mode');
+                    // Mise à jour visuelle des boutons
+                    if (btnFR) {
+                        btnFR.style.background = 'transparent';
+                        btnFR.style.boxShadow = 'none';
+                        btnFR.style.opacity = '0.7';
+                    }
+                    if (btnEN) {
+                        btnEN.style.background = 'white';
+                        btnEN.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+                        btnEN.style.opacity = '1';
+                    }
                     
-                    // Cacher toutes les cartes françaises (sauf le bouton de sauvegarde)
-                    allCards.forEach(card => {
-                        // Ne pas cacher le bouton de sauvegarde
-                        if (!card.querySelector('button[type="submit"]')) {
-                            card.style.display = 'none';
-                        }
+                    // Afficher les champs EN, cacher les champs FR dans les cartes normales
+                    document.querySelectorAll('[data-lang="fr"]').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    document.querySelectorAll('[data-lang="en"]').forEach(el => {
+                        el.style.display = '';
                     });
                     
-                    // Afficher la carte anglaise
+                    // Afficher la carte anglaise si elle existe
+                    const englishCard = document.getElementById('englishFieldsCard');
                     if (englishCard) {
                         englishCard.style.display = '';
                         
@@ -6150,10 +6179,66 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     
                     currentLang = 'en';
                     showNotification('🇬🇧 English mode activated', 'info');
+                    
+                    // Traduction automatique silencieuse (une seule fois)
+                    if (!translationDone) {
+                        setTimeout(() => {
+                            autoTranslateSilent();
+                        }, 500);
+                    }
                 }
             };
             
-            // Fonction de traduction automatique FR → EN
+            // Traduction automatique silencieuse (sans popup)
+            async function autoTranslateSilent() {
+                const fieldsToTranslate = [
+                    'adresse', 'telephone', 'email',
+                    'wifiSSID', 'wifiPassword', 'wifiLocalisation', 'wifiZones',
+                    'heureArrivee', 'arriveeTardive', 'parkingDispo', 'parkingPlaces', 'parkingDetails',
+                    'typeAcces', 'codeAcces', 'instructionsCles', 'etage', 'ascenseur',
+                    'itineraireLogement', 'premiereVisite',
+                    'typeChauffage', 'climatisation', 'instructionsChauffage',
+                    'equipementsCuisine', 'instructionsFour', 'instructionsPlaques',
+                    'instructionsLaveVaisselle', 'instructionsLaveLinge', 'secheLinge',
+                    'ferRepasser', 'lingeFourni', 'configurationChambres',
+                    'instructionsTri', 'joursCollecte', 'decheterie',
+                    'detecteurFumee', 'extincteur', 'coupureEau', 'disjoncteur', 'consignesUrgence',
+                    'heureDepart', 'departTardif', 'checklistDepart', 'restitutionCles',
+                    'supermarche', 'boulangerie', 'pharmacie', 'medecin', 'hopital', 'restaurants',
+                    'transportsCommuns', 'tourisme', 'activites', 'activitesEnfants', 'randonnees', 'plages',
+                    'reglesAnimaux', 'reglesFumeur', 'reglesCalme', 'reglesEvenements', 'autresRegles',
+                    'autresInfos', 'contactsLocaux', 'recommandations', 'messageClient'
+                ];
+                
+                let translated = 0;
+                
+                for (const field of fieldsToTranslate) {
+                    const frField = document.getElementById(`infos_${field}`);
+                    const enField = document.getElementById(`infos_${field}_en`);
+                    
+                    if (frField && enField && frField.value.trim() && !enField.value.trim()) {
+                        try {
+                            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(frField.value.trim())}&langpair=fr|en`);
+                            const data = await response.json();
+                            if (data.responseData && data.responseData.translatedText) {
+                                enField.value = data.responseData.translatedText;
+                                translated++;
+                            }
+                            // Petite pause entre les requêtes pour éviter le rate limiting
+                            await new Promise(resolve => setTimeout(resolve, 300));
+                        } catch (error) {
+                            console.log('Translation error for', field, error);
+                        }
+                    }
+                }
+                
+                if (translated > 0) {
+                    translationDone = true;
+                    showNotification(`🌍 ${translated} champs traduits automatiquement`, 'success');
+                }
+            }
+            
+            // Fonction de traduction automatique FR → EN (avec interface)
             window.autoTranslateFRtoEN = async function() {
                 if (!confirm('🌍 Voulez-vous traduire automatiquement tous les champs français vers l\'anglais ?\n\n⚠️ Cela peut prendre quelques minutes.\n\nLes champs anglais déjà remplis ne seront PAS écrasés.')) {
                     return;
