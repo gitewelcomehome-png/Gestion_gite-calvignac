@@ -756,6 +756,9 @@ h1{font-size:2.1rem;}
                     
                     <!-- Boutons Export/Import -->
                     <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
+                        <button onclick="resetGiteInfos()" class="btn" style="background: rgba(231, 76, 60, 0.3); color: white; padding: 10px 20px; display: flex; align-items: center; gap: 8px;">
+                            <span>🗑️</span> Effacer ce gîte
+                        </button>
                         <button onclick="exporterInfosGites()" class="btn" style="background: rgba(255,255,255,0.2); color: white; padding: 10px 20px; display: flex; align-items: center; gap: 8px;">
                             <span>📤</span> Exporter (Backup)
                         </button>
@@ -5553,6 +5556,33 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 showNotification('✓ Backup téléchargé !', 'success');
             };
             
+            window.resetGiteInfos = async function() {
+                if (!confirm(`⚠️ Voulez-vous vraiment effacer toutes les informations de ${currentGiteInfos} ?\n\nCette action est irréversible.`)) {
+                    return;
+                }
+                
+                // Supprimer de localStorage
+                const data = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
+                delete data[currentGiteInfos];
+                localStorage.setItem(DB_KEY_INFOS, JSON.stringify(data));
+                
+                // Supprimer de Supabase
+                try {
+                    await supabase
+                        .from('infos_gites')
+                        .delete()
+                        .eq('gite_nom', currentGiteInfos);
+                    
+                    showNotification(`✓ Données de ${currentGiteInfos} effacées`, 'success');
+                    
+                    // Recharger les champs vides
+                    await chargerDonneesInfos();
+                } catch (error) {
+                    console.error('Erreur suppression:', error);
+                    showNotification('❌ Erreur lors de la suppression', 'error');
+                }
+            };
+
             window.importerInfosGites = function() {
                 const input = document.createElement('input');
                 input.type = 'file';
