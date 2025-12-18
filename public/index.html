@@ -4178,11 +4178,11 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 }
             }
             
-            // Filtrer les 2 prochains mois (uniquement dates futures)
+            // Filtrer à partir de la date actuelle
             const now = new Date();
             now.setHours(0, 0, 0, 0); // Début de journée
             const twoMonthsLater = new Date(now);
-            twoMonthsLater.setMonth(now.getMonth() + 2);
+            twoMonthsLater.setMonth(now.getMonth() + 12);
             
             const relevant = reservations.filter(r => {
                 const dateFin = parseLocalDate(r.dateFin);
@@ -4298,10 +4298,15 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay } = menageInfo;
             const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
             
-            // Icône de statut
-            const statusIcon = validated ? 
-                '<span class="validation-status validated">✓</span>' : 
-                '<span class="validation-status pending">✗</span>';
+            // Icône et badge de statut
+            let statusIcon = '';
+            if (validated) {
+                statusIcon = '<span class="validation-status validated" title="Validé par société">✓ Validé</span>';
+            } else if (status === 'proposed') {
+                statusIcon = '<span class="validation-status pending" title="En attente validation">⏳ En attente</span>';
+            } else {
+                statusIcon = '<span class="validation-status pending" title="Non validé">✗ Pending</span>';
+            }
             
             const dateStr = displayDate.toLocaleDateString('fr-FR', { 
                 weekday: 'short', 
