@@ -2143,9 +2143,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         // ==========================================
         
         function updatePlatformCounters(reservations) {
-            // Utiliser directement les réservations passées (déjà filtrées si nécessaire)
-            console.log('updatePlatformCounters - Nombre de réservations:', reservations.length);
-            
             // Compter par plateforme
             let countAirbnb = 0;
             let countAbritel = 0;
@@ -2154,7 +2151,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             reservations.forEach(r => {
                 const site = (r.site || '').toLowerCase();
-                console.log('Réservation site:', r.site, '-> normalisé:', site);
                 if (site.includes('airbnb')) {
                     countAirbnb++;
                 } else if (site.includes('abritel') || site.includes('homeaway')) {
@@ -2165,8 +2161,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     countAutres++;
                 }
             });
-            
-            console.log('Compteurs - Airbnb:', countAirbnb, 'Abritel:', countAbritel, 'Gîtes:', countGites, 'Autres:', countAutres);
             
             // Mettre à jour les compteurs
             document.getElementById('countAirbnb').textContent = countAirbnb;
@@ -2186,7 +2180,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             // Taux d'occupation
             const trevoux = reservations.filter(r => isTrevoux(r.gite));
             const couzon = reservations.filter(r => isCouzon(r.gite));
-            console.log('Réservations Trévoux:', trevoux.length, 'Couzon:', couzon.length);
             
             const joursOccupesTrevoux = trevoux.reduce((sum, r) => {
                 const debut = parseLocalDate(r.dateDebut);
@@ -2220,15 +2213,12 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 totalNuits += nuits;
             });
             
-            console.log('Total nuits:', totalNuits, 'Total réservations:', reservations.length);
-            
             const prixMoyen = totalNuits > 0 ? (totalMontant / totalNuits).toFixed(0) : 0;
             document.getElementById('prixMoyen').textContent = prixMoyen + ' €';
             
             // Durée moyenne
             const dureeMoyenne = reservations.length > 0 ? (totalNuits / reservations.length).toFixed(1) : 0;
             document.getElementById('dureeMoyenne').textContent = dureeMoyenne + ' nuits';
-            console.log('Durée moyenne:', dureeMoyenne, 'nuits');
             
             // Meilleur mois - utiliser les données historiques si disponibles
             const moisCA = Array(12).fill(0);
@@ -2253,10 +2243,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     const monthIndex = date.getMonth();
                     moisCA[monthIndex] += r.montant;
                 });
-                console.log('Meilleur mois - Réservations utilisées');
             }
-            
-            console.log('CA par mois:', moisCA);
             
             let meilleurMoisIndex = 0;
             let meilleurCA = 0;
@@ -2269,8 +2256,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             });
             
             const meilleurMois = meilleurCA > 0 ? nomsMois[meilleurMoisIndex] : '-';
-            
-            console.log('Meilleur mois:', meilleurMois, 'avec', meilleurCA, '€');
             
             document.getElementById('meilleurMois').textContent = meilleurMois;
             document.getElementById('meilleurMoisCA').textContent = meilleurCA > 0 ? meilleurCA.toFixed(0) + ' €' : '-';
@@ -2548,17 +2533,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     // Utiliser dateToLocalString pour garder l'heure locale française
                     const dateDebut = dateToLocalString(event.startDate.toJSDate());
                     const dateFin = dateToLocalString(event.endDate.toJSDate());
-                    
-                    // 🔍 DEBUG: Logger les dates pour comprendre le problème
-                    console.log('📅 iCal Event:', {
-                        summary: summary,
-                        startDate_raw: event.startDate.toString(),
-                        endDate_raw: event.endDate.toString(),
-                        startDate_js: event.startDate.toJSDate(),
-                        endDate_js: event.endDate.toJSDate(),
-                        dateDebut: dateDebut,
-                        dateFin: dateFin
-                    });
                     
                     // Nom du client (rarement disponible dans les iCal publics pour confidentialité)
                     let nom = 'À COMPLÉTER';
