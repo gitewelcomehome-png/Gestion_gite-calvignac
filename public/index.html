@@ -2790,8 +2790,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 </div>
             `;
             
-            sortedWeeks.forEach(weekKey => {
-                const [year, weekNum] = weekKey.split('-W').map(Number);
+            sortedWeeks.forEach(weekNum => {
+                // weekNum est déjà un nombre (résultat de getWeekNumber)
+                const year = new Date().getFullYear(); // Année courante
                 const weekDates = getWeekDates(year, weekNum);
                 
                 // En-tête de semaine
@@ -2804,11 +2805,11 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         
                         <div class="week-content-grid" style="border-top: none;">
                             <div class="gite-column-inline">
-                                ${generateWeekReservations(byGite['Trévoux'], weekKey, 'trevoux', active)}
+                                ${generateWeekReservations(byGite['Trévoux'], weekNum, 'trevoux', active)}
                             </div>
                             
                             <div class="gite-column-inline">
-                                ${generateWeekReservations(byGite['Couzon'], weekKey, 'couzon', active)}
+                                ${generateWeekReservations(byGite['Couzon'], weekNum, 'couzon', active)}
                             </div>
                         </div>
                     </div>
