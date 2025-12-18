@@ -272,17 +272,34 @@
             const { reservation, dateMenage, validated, status, proposedDate, reservationEndBefore, reservationStartAfter } = menageInfo;
             const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
             
-            // Récupérer le moment (matin/après-midi) depuis la base ou par défaut
-            const timeOfDay = menageInfo.time_of_day || 'afternoon';
+            // Proposer automatiquement une date et un moment
+            let suggestedDate = reservationEndBefore;
+            let suggestedTime = 'afternoon'; // Par défaut après-midi le jour du départ
+            
+            // Si réservation le jour même du départ, proposer le matin de l'arrivée
+            if (reservationStartAfter) {
+                const daysDiff = Math.floor((reservationStartAfter - reservationEndBefore) / (1000 * 60 * 60 * 24));
+                if (daysDiff === 0) {
+                    // Même jour : ménage le matin avant l'arrivée
+                    suggestedDate = reservationStartAfter;
+                    suggestedTime = 'morning';
+                }
+            }
+            
+            // Récupérer le moment (matin/après-midi) depuis la base ou utiliser la suggestion
+            const timeOfDay = menageInfo.time_of_day || suggestedTime;
             const timeLabel = timeOfDay === 'morning' ? '🌅 Matin' : '☀️ Après-midi';
+            
+            // Déterminer s'il y a un conflit potentiel
+            const hasConflict = reservationStartAfter && Math.floor((reservationStartAfter - reservationEndBefore) / (1000 * 60 * 60 * 24)) <= 1;
             
             let statusBadge = '';
             if (validated) {
                 statusBadge = '<span class="status-badge status-validated">✓ Validé</span>';
-            } else if (status === 'modified' || status === 'proposed') {
-                statusBadge = '<span class="status-badge status-proposed">⚠ Proposé</span>';
+            } else if (status === 'proposed') {
+                statusBadge = '<span class="status-badge status-proposed">⏳ En attente propriétaire</span>';
             } else {
-                statusBadge = '<span class="status-badge status-pending">⏳ En attente</span>';
+                statusBadge = '<span class="status-badge status-pending">À valider</span>';
             }
             
             const dateStr = displayDate.toLocaleDateString('fr-FR', { 
@@ -326,6 +343,25 @@
                         ` : '<div class="timeline-item" style="color: #27ae60;">✓ Pas de réservation suivante immédiate</div>'}
                     </div>
                     
+                    ${hasConflict ? `
+                    <div class="conflict-warning" style="background: #fff3cd; border-left: 4px solid #ff9800; padding: 12px; margin: 15px 0; border-radius: 6px;">
+                        <strong>⚠️ Conflit détecté!</strong><br>
+                        Départ et arrivée dans les mêmes délais. Choisissez:
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button class="btn btn-quick" style="flex: 1; background: #2196F3;" 
+                                    onclick="selectQuickDate(${reservation.id}, '${reservationEndBefore.toISOString().split('T')[0]}', 'afternoon')">
+                                📅 Départ (après-midi)
+                            </button>
+                            ${reservationStartAfter ? `
+                            <button class="btn btn-quick" style="flex: 1; background: #4CAF50;" 
+                                    onclick="selectQuickDate(${reservation.id}, '${reservationStartAfter.toISOString().split('T')[0]}', 'morning')">
+                                📅 Avant arrivée (matin)
+                            </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
                     <div class="actions">
                         <button class="btn btn-validate" onclick="validateCleaning(${reservation.id}, '${displayDate.toISOString().split('T')[0]}', '${reservation.gite}', '${reservationEndBefore.toISOString().split('T')[0]}')">
                             <i class="fas fa-check"></i> Valider cette date
@@ -336,6 +372,8 @@
                         <label for="date-${reservation.id}">💡 Proposer une autre date :</label>
                         <input type="date" 
                                id="date-${reservation.id}" 
+                               data-gite="${reservation.gite}"
+                               data-end="${reservationEndBefore.toISOString().split('T')[0]}"
                                value="${displayDate.toISOString().split('T')[0]}"
                                min="${reservationEndBefore.toISOString().split('T')[0]}"
                                ${maxDate ? `max="${maxDate}"` : ''}
@@ -352,6 +390,17 @@
                     </div>
                 </div>
             `;
+        }
+
+        function selectQuickDate(resaId, date, time) {
+            const dateInput = document.getElementById(`date-${resaId}`);
+            const timeSelect = document.getElementById(`time-${resaId}`);
+            
+            dateInput.value = date;
+            timeSelect.value = time;
+            
+            // Proposer automatiquement cette date
+            proposeCleaning(resaId, dateInput.getAttribute('data-gite') || '', dateInput.getAttribute('data-end') || date);
         }
 
         function checkDateValidity(resaId, minDate, maxDate) {
