@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Supabase</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test Supabase - Données Historiques</h1>
+    <div id="result"></div>
+    
+    <script>
+        const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        async function testData() {
+            const result = document.getElementById('result');
+            
+            // Test 1: Réservations
+            const { data: reservations, error: errorRes } = await supabase
+                .from('reservations')
+                .select('*');
+            
+            result.innerHTML += `<h2>Réservations</h2>`;
+            result.innerHTML += `<p>Nombre: ${reservations ? reservations.length : 0}</p>`;
+            if (errorRes) result.innerHTML += `<p style="color:red">Erreur: ${errorRes.message}</p>`;
+            
+            // Test 2: Historical Data
+            const { data: historical, error: errorHist } = await supabase
+                .from('historical_data')
+                .select('*');
+            
+            result.innerHTML += `<h2>Données Historiques</h2>`;
+            result.innerHTML += `<p>Nombre: ${historical ? historical.length : 0}</p>`;
+            if (errorHist) result.innerHTML += `<p style="color:red">Erreur: ${errorHist.message}</p>`;
+            if (historical && historical.length > 0) {
+                result.innerHTML += `<pre>${JSON.stringify(historical, null, 2)}</pre>`;
+            }
+            
+            // Test 3: Charges
+            const { data: charges, error: errorCharges } = await supabase
+                .from('charges')
+                .select('*');
+            
+            result.innerHTML += `<h2>Charges</h2>`;
+            result.innerHTML += `<p>Nombre: ${charges ? charges.length : 0}</p>`;
+            if (errorCharges) result.innerHTML += `<p style="color:red">Erreur: ${errorCharges.message}</p>`;
+        }
+        
+        testData();
+    </script>
+</body>
+</html>
