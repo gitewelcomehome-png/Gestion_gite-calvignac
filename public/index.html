@@ -775,6 +775,9 @@ h1{font-size:2.1rem;}
                             <button type="button" onclick="switchLanguage('en')" style="background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 5px; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Translate to English">
                                 🇬🇧
                             </button>
+                            <button type="button" onclick="autoTranslateFRtoEN()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(102,126,234,0.3);" title="Traduire automatiquement tous les champs FR → EN">
+                                🌍 Auto-traduction
+                            </button>
                         </div>
                         <button type="button" onclick="resetGiteInfosQuick()" style="background: transparent; border: none; color: #e74c3c; font-size: 1.2rem; cursor: pointer; padding: 5px;" title="Effacer toutes les informations de ce gîte">
                             🗑️
@@ -5290,35 +5293,124 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             async function saveInfosGiteToSupabase(gite, formData) {
                 try {
-                    // Vérifier si une entrée existe déjà pour ce gîte
-                    const { data: existing, error: checkError } = await supabase
-                        .from('infos_gites')
-                        .select('id')
-                        .eq('gite_nom', gite)
-                        .single();
-                    
+                    // Convertir formData en format snake_case pour correspondre aux colonnes SQL
                     const dataToSave = {
-                        gite_nom: gite,
-                        data: formData,
-                        updated_at: new Date().toISOString()
+                        gite: gite.toLowerCase(),
+                        // Section 1: Base
+                        adresse: formData.adresse || null,
+                        telephone: formData.telephone || null,
+                        gps_lat: formData.gpsLat || null,
+                        gps_lon: formData.gpsLon || null,
+                        email: formData.email || null,
+                        adresse_en: formData.adresse_en || null,
+                        telephone_en: formData.telephone_en || null,
+                        email_en: formData.email_en || null,
+                        // Section 2: WiFi
+                        wifi_ssid: formData.wifiSSID || null,
+                        wifi_password: formData.wifiPassword || null,
+                        wifi_debit: formData.wifiDebit || null,
+                        wifi_localisation: formData.wifiLocalisation || null,
+                        wifi_zones: formData.wifiZones || null,
+                        wifi_ssid_en: formData.wifiSSID_en || null,
+                        wifi_password_en: formData.wifiPassword_en || null,
+                        wifi_debit_en: formData.wifiDebit_en || null,
+                        wifi_localisation_en: formData.wifiLocalisation_en || null,
+                        wifi_zones_en: formData.wifiZones_en || null,
+                        // Section 3: Arrivée
+                        heure_arrivee: formData.heureArrivee || null,
+                        arrivee_tardive: formData.arriveeTardive || null,
+                        parking_dispo: formData.parkingDispo || null,
+                        parking_places: formData.parkingPlaces || null,
+                        parking_details: formData.parkingDetails || null,
+                        type_acces: formData.typeAcces || null,
+                        code_acces: formData.codeAcces || null,
+                        instructions_cles: formData.instructionsCles || null,
+                        etage: formData.etage || null,
+                        ascenseur: formData.ascenseur || null,
+                        itineraire_logement: formData.itineraireLogement || null,
+                        premiere_visite: formData.premiereVisite || null,
+                        heure_arrivee_en: formData.heureArrivee_en || null,
+                        arrivee_tardive_en: formData.arriveeTardive_en || null,
+                        parking_dispo_en: formData.parkingDispo_en || null,
+                        parking_places_en: formData.parkingPlaces_en || null,
+                        parking_details_en: formData.parkingDetails_en || null,
+                        type_acces_en: formData.typeAcces_en || null,
+                        code_acces_en: formData.codeAcces_en || null,
+                        instructions_cles_en: formData.instructionsCles_en || null,
+                        etage_en: formData.etage_en || null,
+                        ascenseur_en: formData.ascenseur_en || null,
+                        itineraire_logement_en: formData.itineraireLogement_en || null,
+                        premiere_visite_en: formData.premiereVisite_en || null,
+                        // Section 4: Logement
+                        type_chauffage: formData.typeChauffage || null,
+                        climatisation: formData.climatisation || null,
+                        instructions_chauffage: formData.instructionsChauffage || null,
+                        equipements_cuisine: formData.equipementsCuisine || null,
+                        instructions_four: formData.instructionsFour || null,
+                        instructions_plaques: formData.instructionsPlaques || null,
+                        instructions_lave_vaisselle: formData.instructionsLaveVaisselle || null,
+                        instructions_lave_linge: formData.instructionsLaveLinge || null,
+                        seche_linge: formData.secheLinge || null,
+                        fer_repasser: formData.ferRepasser || null,
+                        linge_fourni: formData.lingeFourni || null,
+                        configuration_chambres: formData.configurationChambres || null,
+                        type_chauffage_en: formData.typeChauffage_en || null,
+                        climatisation_en: formData.climatisation_en || null,
+                        instructions_chauffage_en: formData.instructionsChauffage_en || null,
+                        equipements_cuisine_en: formData.equipementsCuisine_en || null,
+                        instructions_four_en: formData.instructionsFour_en || null,
+                        instructions_plaques_en: formData.instructionsPlaques_en || null,
+                        instructions_lave_vaisselle_en: formData.instructionsLaveVaisselle_en || null,
+                        instructions_lave_linge_en: formData.instructionsLaveLinge_en || null,
+                        seche_linge_en: formData.secheLinge_en || null,
+                        fer_repasser_en: formData.ferRepasser_en || null,
+                        linge_fourni_en: formData.lingeFourni_en || null,
+                        configuration_chambres_en: formData.configurationChambres_en || null,
+                        // Section 5: Déchets
+                        instructions_tri: formData.instructionsTri || null,
+                        jours_collecte: formData.joursCollecte || null,
+                        decheterie: formData.decheterie || null,
+                        instructions_tri_en: formData.instructionsTri_en || null,
+                        jours_collecte_en: formData.joursCollecte_en || null,
+                        decheterie_en: formData.decheterie_en || null,
+                        // Section 6: Sécurité
+                        detecteur_fumee: formData.detecteurFumee || null,
+                        extincteur: formData.extincteur || null,
+                        coupure_eau: formData.coupureEau || null,
+                        disjoncteur: formData.disjoncteur || null,
+                        consignes_urgence: formData.consignesUrgence || null,
+                        detecteur_fumee_en: formData.detecteurFumee_en || null,
+                        extincteur_en: formData.extincteur_en || null,
+                        coupure_eau_en: formData.coupureEau_en || null,
+                        disjoncteur_en: formData.disjoncteur_en || null,
+                        consignes_urgence_en: formData.consignesUrgence_en || null,
+                        // Section 7: Départ
+                        heure_depart: formData.heureDepart || null,
+                        depart_tardif: formData.departTardif || null,
+                        checklist_depart: formData.checklistDepart || null,
+                        restitution_cles: formData.restitutionCles || null,
+                        heure_depart_en: formData.heureDepart_en || null,
+                        depart_tardif_en: formData.departTardif_en || null,
+                        checklist_depart_en: formData.checklistDepart_en || null,
+                        restitution_cles_en: formData.restitutionCles_en || null,
+                        // Section 8: Règlement
+                        tabac: formData.tabac || null,
+                        animaux: formData.animaux || null,
+                        nb_max_personnes: formData.nbMaxPersonnes || null,
+                        caution: formData.caution || null,
+                        tabac_en: formData.tabac_en || null,
+                        animaux_en: formData.animaux_en || null,
+                        nb_max_personnes_en: formData.nbMaxPersonnes_en || null,
+                        caution_en: formData.caution_en || null,
+                        date_modification: new Date().toISOString()
                     };
                     
-                    if (existing) {
-                        // UPDATE
-                        const { error } = await supabase
-                            .from('infos_gites')
-                            .update(dataToSave)
-                            .eq('gite_nom', gite);
-                        
-                        if (error) throw error;
-                    } else {
-                        // INSERT
-                        const { error } = await supabase
-                            .from('infos_gites')
-                            .insert([dataToSave]);
-                        
-                        if (error) throw error;
-                    }
+                    // UPSERT avec gite comme clé unique
+                    const { error } = await supabase
+                        .from('infos_gites')
+                        .upsert(dataToSave, { onConflict: 'gite' });
+                    
+                    if (error) throw error;
                     
                     console.log(`✅ Infos ${gite} sauvegardées en base de données`);
                     return true;
@@ -5333,8 +5425,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 try {
                     const { data, error } = await supabase
                         .from('infos_gites')
-                        .select('data')
-                        .eq('gite_nom', gite)
+                        .select('*')
+                        .eq('gite', gite.toLowerCase())
                         .single();
                     
                     if (error) {
@@ -5346,8 +5438,119 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         throw error;
                     }
                     
+                    // Convertir de snake_case SQL vers camelCase JavaScript
+                    const formData = {
+                        // Section 1: Base
+                        adresse: data.adresse || '',
+                        telephone: data.telephone || '',
+                        gpsLat: data.gps_lat || '',
+                        gpsLon: data.gps_lon || '',
+                        email: data.email || '',
+                        adresse_en: data.adresse_en || '',
+                        telephone_en: data.telephone_en || '',
+                        email_en: data.email_en || '',
+                        // Section 2: WiFi
+                        wifiSSID: data.wifi_ssid || '',
+                        wifiPassword: data.wifi_password || '',
+                        wifiDebit: data.wifi_debit || '',
+                        wifiLocalisation: data.wifi_localisation || '',
+                        wifiZones: data.wifi_zones || '',
+                        wifiSSID_en: data.wifi_ssid_en || '',
+                        wifiPassword_en: data.wifi_password_en || '',
+                        wifiDebit_en: data.wifi_debit_en || '',
+                        wifiLocalisation_en: data.wifi_localisation_en || '',
+                        wifiZones_en: data.wifi_zones_en || '',
+                        // Section 3: Arrivée
+                        heureArrivee: data.heure_arrivee || '',
+                        arriveeTardive: data.arrivee_tardive || '',
+                        parkingDispo: data.parking_dispo || '',
+                        parkingPlaces: data.parking_places || '',
+                        parkingDetails: data.parking_details || '',
+                        typeAcces: data.type_acces || '',
+                        codeAcces: data.code_acces || '',
+                        instructionsCles: data.instructions_cles || '',
+                        etage: data.etage || '',
+                        ascenseur: data.ascenseur || '',
+                        itineraireLogement: data.itineraire_logement || '',
+                        premiereVisite: data.premiere_visite || '',
+                        heureArrivee_en: data.heure_arrivee_en || '',
+                        arriveeTardive_en: data.arrivee_tardive_en || '',
+                        parkingDispo_en: data.parking_dispo_en || '',
+                        parkingPlaces_en: data.parking_places_en || '',
+                        parkingDetails_en: data.parking_details_en || '',
+                        typeAcces_en: data.type_acces_en || '',
+                        codeAcces_en: data.code_acces_en || '',
+                        instructionsCles_en: data.instructions_cles_en || '',
+                        etage_en: data.etage_en || '',
+                        ascenseur_en: data.ascenseur_en || '',
+                        itineraireLogement_en: data.itineraire_logement_en || '',
+                        premiereVisite_en: data.premiere_visite_en || '',
+                        // Section 4: Logement
+                        typeChauffage: data.type_chauffage || '',
+                        climatisation: data.climatisation || '',
+                        instructionsChauffage: data.instructions_chauffage || '',
+                        equipementsCuisine: data.equipements_cuisine || '',
+                        instructionsFour: data.instructions_four || '',
+                        instructionsPlaques: data.instructions_plaques || '',
+                        instructionsLaveVaisselle: data.instructions_lave_vaisselle || '',
+                        instructionsLaveLinge: data.instructions_lave_linge || '',
+                        secheLinge: data.seche_linge || '',
+                        ferRepasser: data.fer_repasser || '',
+                        lingeFourni: data.linge_fourni || '',
+                        configurationChambres: data.configuration_chambres || '',
+                        typeChauffage_en: data.type_chauffage_en || '',
+                        climatisation_en: data.climatisation_en || '',
+                        instructionsChauffage_en: data.instructions_chauffage_en || '',
+                        equipementsCuisine_en: data.equipements_cuisine_en || '',
+                        instructionsFour_en: data.instructions_four_en || '',
+                        instructionsPlaques_en: data.instructions_plaques_en || '',
+                        instructionsLaveVaisselle_en: data.instructions_lave_vaisselle_en || '',
+                        instructionsLaveLinge_en: data.instructions_lave_linge_en || '',
+                        secheLinge_en: data.seche_linge_en || '',
+                        ferRepasser_en: data.fer_repasser_en || '',
+                        lingeFourni_en: data.linge_fourni_en || '',
+                        configurationChambres_en: data.configuration_chambres_en || '',
+                        // Section 5: Déchets
+                        instructionsTri: data.instructions_tri || '',
+                        joursCollecte: data.jours_collecte || '',
+                        decheterie: data.decheterie || '',
+                        instructionsTri_en: data.instructions_tri_en || '',
+                        joursCollecte_en: data.jours_collecte_en || '',
+                        decheterie_en: data.decheterie_en || '',
+                        // Section 6: Sécurité
+                        detecteurFumee: data.detecteur_fumee || '',
+                        extincteur: data.extincteur || '',
+                        coupureEau: data.coupure_eau || '',
+                        disjoncteur: data.disjoncteur || '',
+                        consignesUrgence: data.consignes_urgence || '',
+                        detecteurFumee_en: data.detecteur_fumee_en || '',
+                        extincteur_en: data.extincteur_en || '',
+                        coupureEau_en: data.coupure_eau_en || '',
+                        disjoncteur_en: data.disjoncteur_en || '',
+                        consignesUrgence_en: data.consignes_urgence_en || '',
+                        // Section 7: Départ
+                        heureDepart: data.heure_depart || '',
+                        departTardif: data.depart_tardif || '',
+                        checklistDepart: data.checklist_depart || '',
+                        restitutionCles: data.restitution_cles || '',
+                        heureDepart_en: data.heure_depart_en || '',
+                        departTardif_en: data.depart_tardif_en || '',
+                        checklistDepart_en: data.checklist_depart_en || '',
+                        restitutionCles_en: data.restitution_cles_en || '',
+                        // Section 8: Règlement
+                        tabac: data.tabac || '',
+                        animaux: data.animaux || '',
+                        nbMaxPersonnes: data.nb_max_personnes || '',
+                        caution: data.caution || '',
+                        tabac_en: data.tabac_en || '',
+                        animaux_en: data.animaux_en || '',
+                        nbMaxPersonnes_en: data.nb_max_personnes_en || '',
+                        caution_en: data.caution_en || '',
+                        dateModification: data.date_modification
+                    };
+                    
                     console.log(`✅ Infos ${gite} chargées depuis la base de données`);
-                    return data.data;
+                    return formData;
                 } catch (error) {
                     console.error('Erreur chargement Supabase:', error);
                     showNotification('⚠️ Chargement depuis sauvegarde locale', 'info');
@@ -5377,21 +5580,31 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             function sauvegarderDonneesInfos() {
                 const formData = {
-                    // Section 1: Base
+                    // Section 1: Base (FR)
                     adresse: document.getElementById('infos_adresse')?.value || '',
                     telephone: document.getElementById('infos_telephone')?.value || '',
                     gpsLat: document.getElementById('infos_gpsLat')?.value || '',
                     gpsLon: document.getElementById('infos_gpsLon')?.value || '',
                     email: document.getElementById('infos_email')?.value || '',
+                    // Section 1: Base (EN)
+                    adresse_en: document.getElementById('infos_adresse_en')?.value || '',
+                    telephone_en: document.getElementById('infos_telephone_en')?.value || '',
+                    email_en: document.getElementById('infos_email_en')?.value || '',
                     
-                    // Section 2: WiFi
+                    // Section 2: WiFi (FR)
                     wifiSSID: document.getElementById('infos_wifiSSID')?.value || '',
                     wifiPassword: document.getElementById('infos_wifiPassword')?.value || '',
                     wifiDebit: document.getElementById('infos_wifiDebit')?.value || '',
                     wifiLocalisation: document.getElementById('infos_wifiLocalisation')?.value || '',
                     wifiZones: document.getElementById('infos_wifiZones')?.value || '',
+                    // Section 2: WiFi (EN)
+                    wifiSSID_en: document.getElementById('infos_wifiSSID_en')?.value || '',
+                    wifiPassword_en: document.getElementById('infos_wifiPassword_en')?.value || '',
+                    wifiDebit_en: document.getElementById('infos_wifiDebit_en')?.value || '',
+                    wifiLocalisation_en: document.getElementById('infos_wifiLocalisation_en')?.value || '',
+                    wifiZones_en: document.getElementById('infos_wifiZones_en')?.value || '',
                     
-                    // Section 3: Arrivée
+                    // Section 3: Arrivée (FR)
                     heureArrivee: document.getElementById('infos_heureArrivee')?.value || '',
                     arriveeTardive: document.getElementById('infos_arriveeTardive')?.value || '',
                     parkingDispo: document.getElementById('infos_parkingDispo')?.value || '',
@@ -5404,8 +5617,21 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     ascenseur: document.getElementById('infos_ascenseur')?.value || '',
                     itineraireLogement: document.getElementById('infos_itineraireLogement')?.value || '',
                     premiereVisite: document.getElementById('infos_premiereVisite')?.value || '',
+                    // Section 3: Arrivée (EN)
+                    heureArrivee_en: document.getElementById('infos_heureArrivee_en')?.value || '',
+                    arriveeTardive_en: document.getElementById('infos_arriveeTardive_en')?.value || '',
+                    parkingDispo_en: document.getElementById('infos_parkingDispo_en')?.value || '',
+                    parkingPlaces_en: document.getElementById('infos_parkingPlaces_en')?.value || '',
+                    parkingDetails_en: document.getElementById('infos_parkingDetails_en')?.value || '',
+                    typeAcces_en: document.getElementById('infos_typeAcces_en')?.value || '',
+                    codeAcces_en: document.getElementById('infos_codeAcces_en')?.value || '',
+                    instructionsCles_en: document.getElementById('infos_instructionsCles_en')?.value || '',
+                    etage_en: document.getElementById('infos_etage_en')?.value || '',
+                    ascenseur_en: document.getElementById('infos_ascenseur_en')?.value || '',
+                    itineraireLogement_en: document.getElementById('infos_itineraireLogement_en')?.value || '',
+                    premiereVisite_en: document.getElementById('infos_premiereVisite_en')?.value || '',
                     
-                    // Section 4: Logement
+                    // Section 4: Logement (FR)
                     typeChauffage: document.getElementById('infos_typeChauffage')?.value || '',
                     climatisation: document.getElementById('infos_climatisation')?.value || '',
                     instructionsChauffage: document.getElementById('infos_instructionsChauffage')?.value || '',
@@ -5418,30 +5644,63 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     ferRepasser: document.getElementById('infos_ferRepasser')?.value || '',
                     lingeFourni: document.getElementById('infos_lingeFourni')?.value || '',
                     configurationChambres: document.getElementById('infos_configurationChambres')?.value || '',
+                    // Section 4: Logement (EN)
+                    typeChauffage_en: document.getElementById('infos_typeChauffage_en')?.value || '',
+                    climatisation_en: document.getElementById('infos_climatisation_en')?.value || '',
+                    instructionsChauffage_en: document.getElementById('infos_instructionsChauffage_en')?.value || '',
+                    equipementsCuisine_en: document.getElementById('infos_equipementsCuisine_en')?.value || '',
+                    instructionsFour_en: document.getElementById('infos_instructionsFour_en')?.value || '',
+                    instructionsPlaques_en: document.getElementById('infos_instructionsPlaques_en')?.value || '',
+                    instructionsLaveVaisselle_en: document.getElementById('infos_instructionsLaveVaisselle_en')?.value || '',
+                    instructionsLaveLinge_en: document.getElementById('infos_instructionsLaveLinge_en')?.value || '',
+                    secheLinge_en: document.getElementById('infos_secheLinge_en')?.value || '',
+                    ferRepasser_en: document.getElementById('infos_ferRepasser_en')?.value || '',
+                    lingeFourni_en: document.getElementById('infos_lingeFourni_en')?.value || '',
+                    configurationChambres_en: document.getElementById('infos_configurationChambres_en')?.value || '',
                     
-                    // Section 5: Déchets
+                    // Section 5: Déchets (FR)
                     instructionsTri: document.getElementById('infos_instructionsTri')?.value || '',
                     joursCollecte: document.getElementById('infos_joursCollecte')?.value || '',
                     decheterie: document.getElementById('infos_decheterie')?.value || '',
+                    // Section 5: Déchets (EN)
+                    instructionsTri_en: document.getElementById('infos_instructionsTri_en')?.value || '',
+                    joursCollecte_en: document.getElementById('infos_joursCollecte_en')?.value || '',
+                    decheterie_en: document.getElementById('infos_decheterie_en')?.value || '',
                     
-                    // Section 6: Sécurité
+                    // Section 6: Sécurité (FR)
                     detecteurFumee: document.getElementById('infos_detecteurFumee')?.value || '',
                     extincteur: document.getElementById('infos_extincteur')?.value || '',
                     coupureEau: document.getElementById('infos_coupureEau')?.value || '',
                     disjoncteur: document.getElementById('infos_disjoncteur')?.value || '',
                     consignesUrgence: document.getElementById('infos_consignesUrgence')?.value || '',
+                    // Section 6: Sécurité (EN)
+                    detecteurFumee_en: document.getElementById('infos_detecteurFumee_en')?.value || '',
+                    extincteur_en: document.getElementById('infos_extincteur_en')?.value || '',
+                    coupureEau_en: document.getElementById('infos_coupureEau_en')?.value || '',
+                    disjoncteur_en: document.getElementById('infos_disjoncteur_en')?.value || '',
+                    consignesUrgence_en: document.getElementById('infos_consignesUrgence_en')?.value || '',
                     
-                    // Section 7: Départ
+                    // Section 7: Départ (FR)
                     heureDepart: document.getElementById('infos_heureDepart')?.value || '',
                     departTardif: document.getElementById('infos_departTardif')?.value || '',
                     checklistDepart: document.getElementById('infos_checklistDepart')?.value || '',
                     restitutionCles: document.getElementById('infos_restitutionCles')?.value || '',
+                    // Section 7: Départ (EN)
+                    heureDepart_en: document.getElementById('infos_heureDepart_en')?.value || '',
+                    departTardif_en: document.getElementById('infos_departTardif_en')?.value || '',
+                    checklistDepart_en: document.getElementById('infos_checklistDepart_en')?.value || '',
+                    restitutionCles_en: document.getElementById('infos_restitutionCles_en')?.value || '',
                     
-                    // Section 8: Règlement
+                    // Section 8: Règlement (FR)
                     tabac: document.getElementById('infos_tabac')?.value || '',
                     animaux: document.getElementById('infos_animaux')?.value || '',
                     nbMaxPersonnes: document.getElementById('infos_nbMaxPersonnes')?.value || '',
                     caution: document.getElementById('infos_caution')?.value || '',
+                    // Section 8: Règlement (EN)
+                    tabac_en: document.getElementById('infos_tabac_en')?.value || '',
+                    animaux_en: document.getElementById('infos_animaux_en')?.value || '',
+                    nbMaxPersonnes_en: document.getElementById('infos_nbMaxPersonnes_en')?.value || '',
+                    caution_en: document.getElementById('infos_caution_en')?.value || '',
                     
                     dateModification: new Date().toISOString()
                 };
@@ -5539,7 +5798,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     await supabase
                         .from('infos_gites')
                         .delete()
-                        .eq('gite_nom', currentGiteInfos);
+                        .eq('gite', currentGiteInfos.toLowerCase());
                     
                     showNotification(`✓ Toutes les données de ${currentGiteInfos} ont été effacées`, 'success');
                     
@@ -5591,6 +5850,72 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         }
                     });
                     showNotification('🇬🇧 English mode activated', 'info');
+                }
+            };
+            
+            // Fonction de traduction automatique FR → EN
+            window.autoTranslateFRtoEN = async function() {
+                if (!confirm('🌍 Voulez-vous traduire automatiquement tous les champs français vers l\'anglais ?\n\n⚠️ Cela peut prendre quelques minutes.\n\nLes champs anglais déjà remplis ne seront PAS écrasés.')) {
+                    return;
+                }
+                
+                showNotification('🌍 Traduction en cours... Veuillez patienter', 'info');
+                
+                // Liste de tous les champs à traduire (sans le préfixe infos_)
+                const fieldsToTranslate = [
+                    'adresse', 'telephone', 'email',
+                    'wifiSSID', 'wifiPassword', 'wifiLocalisation', 'wifiZones',
+                    'heureArrivee', 'parkingDetails', 'instructionsCles', 'itineraireLogement', 'premiereVisite'
+                ];
+                
+                let translated = 0;
+                let skipped = 0;
+                
+                try {
+                    for (const field of fieldsToTranslate) {
+                        const frInput = document.getElementById(`infos_${field}`);
+                        const enInput = document.getElementById(`infos_${field}_en`);
+                        
+                        // Vérifier si les deux champs existent
+                        if (!frInput || !enInput) continue;
+                        
+                        const frValue = frInput.value.trim();
+                        const enValue = enInput.value.trim();
+                        
+                        // Ne traduire que si FR est rempli ET EN est vide
+                        if (frValue && !enValue) {
+                            try {
+                                // API gratuite MyMemory (limite: 1000 caractères par requête)
+                                const textToTranslate = frValue.substring(0, 1000);
+                                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=fr|en`);
+                                const data = await response.json();
+                                
+                                if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
+                                    enInput.value = data.responseData.translatedText;
+                                    translated++;
+                                } else {
+                                    console.warn(`Échec traduction pour ${field}:`, data);
+                                }
+                                
+                                // Pause pour éviter rate limit (max 10 req/sec)
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                                
+                            } catch (error) {
+                                console.error(`Erreur traduction ${field}:`, error);
+                            }
+                        } else if (enValue) {
+                            skipped++;
+                        }
+                    }
+                    
+                    // Sauvegarder automatiquement
+                    sauvegarderDonneesInfos();
+                    
+                    showNotification(`✓ Traduction terminée ! ${translated} champs traduits, ${skipped} déjà remplis`, 'success');
+                    
+                } catch (error) {
+                    console.error('Erreur globale traduction:', error);
+                    showNotification('❌ Erreur lors de la traduction automatique', 'error');
                 }
             };
 
