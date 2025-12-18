@@ -94,6 +94,25 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary)
 .week-reservation-details{font-size:0.85rem;color:#666;}
 .month-group{margin-bottom:20px;}
 .month-title{font-weight:700;font-size:1.1rem;color:var(--primary);margin-bottom:10px;padding:10px 15px;background:var(--bg-light);border-radius:8px;text-transform:uppercase;}
+.cleaning-week-table{width:100%;margin-bottom:30px;border-radius:15px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+.cleaning-week-header{background:linear-gradient(135deg,#0f172a 0%,#1f2937 100%);color:white;padding:15px;text-align:center;font-weight:700;font-size:1.1rem;}
+.cleaning-week-body{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #e5e7eb;}
+.cleaning-column{padding:0;}
+.cleaning-column-header{padding:15px;text-align:center;font-weight:700;font-size:1rem;color:white;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);}
+.cleaning-column-header.couzon{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);}
+.cleaning-item{padding:15px;border-bottom:1px solid #e5e7eb;min-height:80px;display:flex;flex-direction:column;gap:8px;}
+.cleaning-item:last-child{border-bottom:none;}
+.cleaning-item.empty{justify-content:center;align-items:center;color:#999;font-style:italic;background:#f9fafb;}
+.cleaning-date-row{display:flex;justify-content:space-between;align-items:center;}
+.cleaning-date{font-weight:600;color:#0f172a;font-size:0.95rem;}
+.validation-status{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;}
+.validation-status.validated{background:#10b981;color:white;}
+.validation-status.pending{background:#ef4444;color:white;}
+.cleaning-details{font-size:0.85rem;color:#6b7280;}
+.cleaning-actions{display:flex;gap:8px;margin-top:5px;}
+.btn-small{padding:6px 12px;font-size:0.8rem;border-radius:6px;border:none;cursor:pointer;font-weight:600;background:#f3f4f6;color:#374151;}
+.btn-small:hover{background:#e5e7eb;}
+@media (max-width:900px){.cleaning-week-body{grid-template-columns:1fr;}}
 .reservation-item{background:var(--bg-light);padding:15px;border-radius:10px;margin-bottom:10px;border-left:4px solid var(--primary);}
 .reservation-item.trevoux{border-left-color:var(--trevoux);}
 .reservation-item.couzon{border-left-color:var(--couzon);}
@@ -4140,6 +4159,202 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             }));
             
             showToast(`✓ Planning généré ! ${planning.length} ménages planifiés`);
+            
+            // Afficher le planning par semaine avec colonnes
+            await afficherPlanningParSemaine();
+        }
+        
+        // Nouvelle fonction pour afficher le planning par semaine avec colonnes Trévoux/Couzon
+        async function afficherPlanningParSemaine() {
+            const reservations = await getAllReservations();
+            
+            // Récupérer les validations de la société de ménage
+            const { data: cleaningSchedules } = await supabase
+                .from('cleaning_schedule')
+                .select('*');
+            
+            const validationMap = {};
+            if (cleaningSchedules) {
+                cleaningSchedules.forEach(cs => {
+                    validationMap[cs.reservation_id] = cs;
+                });
+            }
+            
+            // Filtrer les 2 prochains mois
+            const now = new Date();
+            const twoMonthsLater = new Date(now);
+            twoMonthsLater.setMonth(now.getMonth() + 2);
+            
+            const relevant = reservations.filter(r => {
+                const dateFin = parseLocalDate(r.dateFin);
+                return dateFin >= now && dateFin <= twoMonthsLater;
+            });
+            
+            // Organiser par semaine
+            const weeks = {};
+            const weekStarts = new Set();
+            
+            relevant.forEach(r => {
+                const dateFin = parseLocalDate(r.dateFin);
+                // Date ménage = généralement le jour du départ ou lendemain si dimanche
+                let dateMenage = new Date(dateFin);
+                if (dateFin.getDay() === 0) { // Dimanche
+                    dateMenage.setDate(dateMenage.getDate() + 1);
+                }
+                
+                // Trouver le lundi de cette semaine
+                const dayOfWeek = dateMenage.getDay();
+                const monday = new Date(dateMenage);
+                monday.setDate(dateMenage.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+                monday.setHours(0, 0, 0, 0);
+                
+                const weekKey = monday.toISOString().split('T')[0];
+                weekStarts.add(weekKey);
+                
+                if (!weeks[weekKey]) {
+                    weeks[weekKey] = {
+                        monday: monday,
+                        trevoux: [],
+                        couzon: []
+                    };
+                }
+                
+                const validation = validationMap[r.id];
+                const menageInfo = {
+                    reservation: r,
+                    dateMenage: dateMenage,
+                    validated: validation ? validation.validated_by_company : false,
+                    proposedDate: validation ? validation.proposed_date : null,
+                    reservationEndBefore: dateFin,
+                    reservationStartAfter: null // À calculer
+                };
+                
+                // Chercher la réservation suivante pour ce gîte
+                const nextReservation = reservations
+                    .filter(next => next.gite === r.gite && parseLocalDate(next.dateDebut) > dateFin)
+                    .sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut))[0];
+                
+                if (nextReservation) {
+                    menageInfo.reservationStartAfter = parseLocalDate(nextReservation.dateDebut);
+                }
+                
+                // Ajouter dans la bonne colonne
+                if (r.gite.toLowerCase().includes('trévoux') || r.gite.toLowerCase().includes('trevoux')) {
+                    weeks[weekKey].trevoux.push(menageInfo);
+                } else {
+                    weeks[weekKey].couzon.push(menageInfo);
+                }
+            });
+            
+            // Trier les semaines
+            const sortedWeeks = Array.from(weekStarts).sort();
+            
+            // Générer le HTML
+            let html = '<div style="margin-top: 20px;">';
+            
+            sortedWeeks.forEach((weekKey, index) => {
+                const week = weeks[weekKey];
+                const monday = week.monday;
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+                
+                const weekNumber = `S${index + 1}`;
+                const weekDisplay = `${monday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} - ${sunday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}`;
+                
+                html += `
+                    <div class="cleaning-week-table">
+                        <div class="cleaning-week-header">
+                            <div class="week-number-big">${weekNumber}</div>
+                            <div class="week-dates-small">${weekDisplay}</div>
+                        </div>
+                        <div class="cleaning-week-body">
+                            <div class="cleaning-column">
+                                <div class="cleaning-column-header">🏡 Trévoux</div>
+                                ${week.trevoux.length > 0 ? 
+                                    week.trevoux.map(m => generateCleaningItemHTML(m)).join('') :
+                                    '<div class="cleaning-item empty">Aucun ménage prévu</div>'
+                                }
+                            </div>
+                            <div class="cleaning-column">
+                                <div class="cleaning-column-header couzon">⛰️ Couzon</div>
+                                ${week.couzon.length > 0 ? 
+                                    week.couzon.map(m => generateCleaningItemHTML(m)).join('') :
+                                    '<div class="cleaning-item empty">Aucun ménage prévu</div>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            document.getElementById('menagePlanning').innerHTML = html;
+        }
+        
+        function generateCleaningItemHTML(menageInfo) {
+            const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter } = menageInfo;
+            const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
+            
+            const statusIcon = validated ? 
+                '<span class="validation-status validated">✓</span>' : 
+                '<span class="validation-status pending">✗</span>';
+            
+            const dateStr = displayDate.toLocaleDateString('fr-FR', { 
+                weekday: 'short', 
+                day: '2-digit', 
+                month: 'short' 
+            });
+            
+            return `
+                <div class="cleaning-item">
+                    <div class="cleaning-date-row">
+                        <span class="cleaning-date">📅 ${dateStr}</span>
+                        ${statusIcon}
+                    </div>
+                    <div class="cleaning-details">
+                        👤 ${reservation.nom || 'Inconnu'}<br>
+                        🚪 Départ: ${reservationEndBefore.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                        ${reservationStartAfter ? `<br>🔑 Arrivée suivante: ${reservationStartAfter.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}` : ''}
+                    </div>
+                    <div class="cleaning-actions">
+                        <button class="btn-small" onclick="modifierDateMenage(${reservation.id}, '${dateMenage.toISOString()}')">
+                            ✏️ Modifier
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function modifierDateMenage(reservationId, currentDate) {
+            const newDate = prompt('Nouvelle date de ménage (AAAA-MM-JJ):', currentDate.split('T')[0]);
+            if (!newDate) return;
+            
+            const reservation = (await getAllReservations()).find(r => r.id === reservationId);
+            if (!reservation) {
+                showToast('Réservation non trouvée', 'error');
+                return;
+            }
+            
+            // Sauvegarder dans cleaning_schedule
+            const { error } = await supabase
+                .from('cleaning_schedule')
+                .upsert({
+                    reservation_id: reservationId,
+                    gite: reservation.gite,
+                    scheduled_date: newDate,
+                    status: 'modified',
+                    validated_by_company: false,
+                    reservation_end: reservation.dateFin,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'reservation_id' });
+            
+            if (error) {
+                showToast('Erreur: ' + error.message, 'error');
+            } else {
+                showToast('Date de ménage modifiée avec succès');
+                afficherPlanningParSemaine();
+            }
         }
         
         function telechargerPlanningMenage() {
