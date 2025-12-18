@@ -242,7 +242,10 @@ h1{font-size:2.1rem;}
             <button class="nav-tab active" onclick="switchTab('reservations')">📝 Réservations</button>
             <button class="nav-tab" onclick="switchTab('statistiques')">📊 Statistiques</button>
             <button class="nav-tab" onclick="switchTab('charges')">💶 Charges & Rentabilité</button>
-            <button class="nav-tab" onclick="switchTab('menage')">🧹 Planning Ménage</button>
+            <button class="nav-tab" onclick="switchTab('menage')">
+                🧹 Planning Ménage
+                <span id="cleaning-notif-badge" style="display:none; background:#e74c3c; color:white; border-radius:50%; padding:2px 6px; margin-left:5px; font-size:0.8em; font-weight:bold;">0</span>
+            </button>
             <button class="nav-tab" onclick="switchTab('infos-gites')">📝 Infos Pratiques</button>
             <button class="nav-tab" onclick="switchTab('decouvrir')">🗺️ À Découvrir</button>
         </div>
@@ -4154,10 +4157,25 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 .select('*');
             
             const validationMap = {};
+            let pendingModifications = 0;
             if (cleaningSchedules) {
                 cleaningSchedules.forEach(cs => {
                     validationMap[cs.reservation_id] = cs;
+                    if (cs.status === 'proposed') {
+                        pendingModifications++;
+                    }
                 });
+            }
+            
+            // Afficher le badge de notification si modifications en attente
+            const notifBadge = document.getElementById('cleaning-notif-badge');
+            if (notifBadge) {
+                if (pendingModifications > 0) {
+                    notifBadge.textContent = pendingModifications;
+                    notifBadge.style.display = 'inline-block';
+                } else {
+                    notifBadge.style.display = 'none';
+                }
             }
             
             // Filtrer les 2 prochains mois (uniquement dates futures)
@@ -4206,6 +4224,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     dateMenage: dateMenage,
                     validated: validation ? validation.validated_by_company : false,
                     proposedDate: validation ? validation.proposed_date : null,
+                    status: validation ? validation.status : 'pending',
+                    timeOfDay: validation ? validation.time_of_day : 'afternoon',
                     reservationEndBefore: dateFin,
                     reservationStartAfter: null // À calculer
                 };
@@ -4275,9 +4295,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         }
         
         function generateCleaningItemHTML(menageInfo) {
-            const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter } = menageInfo;
+            const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay } = menageInfo;
             const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
             
+            // Icône de statut
             const statusIcon = validated ? 
                 '<span class="validation-status validated">✓</span>' : 
                 '<span class="validation-status pending">✗</span>';
@@ -4288,11 +4309,27 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 month: 'short' 
             });
             
-            // Récupérer le moment sauvegardé ou par défaut "afternoon"
-            const savedTime = localStorage.getItem(`cleaning_time_${reservation.id}`) || 'afternoon';
+            // Récupérer le moment sauvegardé
+            const savedTime = timeOfDay || localStorage.getItem(`cleaning_time_${reservation.id}`) || 'afternoon';
+            
+            // Afficher une alerte si modification proposée par la société
+            const proposalAlert = status === 'proposed' ? `
+                <div style="background: #fff3cd; border-left: 4px solid #ff9800; padding: 10px; margin: 10px 0; border-radius: 6px;">
+                    <strong>⚠️ Modification proposée par la société de ménage</strong><br>
+                    Nouvelle date: ${displayDate.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })} - ${savedTime === 'morning' ? '🌅 Matin' : '☀️ Après-midi'}
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="btn-small" onclick="approveModification(${reservation.id})" style="flex: 1; background: #27ae60;">
+                            ✓ Approuver
+                        </button>
+                        <button class="btn-small" onclick="rejectModification(${reservation.id})" style="flex: 1; background: #e74c3c;">
+                            ✗ Refuser
+                        </button>
+                    </div>
+                </div>
+            ` : '';
             
             return `
-                <div class="cleaning-item">
+                <div class="cleaning-item ${status === 'proposed' ? 'pending-approval' : ''}" style="${status === 'proposed' ? 'border: 2px solid #ff9800;' : ''}">
                     <div class="cleaning-date-row">
                         <span class="cleaning-date">📅 ${dateStr}</span>
                         ${statusIcon}
@@ -4301,6 +4338,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         🚪 Départ: ${reservationEndBefore.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
                         ${reservationStartAfter ? `<br>🔑 Arrivée suivante: ${reservationStartAfter.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}` : ''}
                     </div>
+                    ${proposalAlert}
                     <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
                         <input type="date" id="date-${reservation.id}" value="${displayDate.toISOString().split('T')[0]}" style="flex: 1; padding: 6px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.9rem;">
                         <select id="time-${reservation.id}" style="padding: 6px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.9rem;">
@@ -4357,6 +4395,48 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             }
         }
         
+        async function approveModification(reservationId) {
+            const { error } = await supabase
+                .from('cleaning_schedule')
+                .update({
+                    status: 'validated',
+                    validated_by_company: true,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('reservation_id', reservationId);
+            
+            if (error) {
+                showToast('Erreur lors de l\'approbation: ' + error.message, 'error');
+            } else {
+                showToast('✓ Modification approuvée');
+                afficherPlanningParSemaine();
+            }
+        }
+        
+        async function rejectModification(reservationId) {
+            // Remettre la date d'origine (jour du départ) et supprimer la proposition
+            const reservation = (await getAllReservations()).find(r => r.id === reservationId);
+            if (!reservation) return;
+            
+            const { error } = await supabase
+                .from('cleaning_schedule')
+                .update({
+                    scheduled_date: reservation.dateFin,
+                    proposed_date: null,
+                    status: 'pending',
+                    validated_by_company: false,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('reservation_id', reservationId);
+            
+            if (error) {
+                showToast('Erreur lors du refus: ' + error.message, 'error');
+            } else {
+                showToast('✗ Modification refusée - Date d\'origine restaurée');
+                afficherPlanningParSemaine();
+            }
+        }
+
         function telechargerPlanningMenage() {
             if (!window.planningMenageData || window.planningMenageData.length === 0) {
                 showToast('Aucun planning à télécharger. Générez d\'abord le planning.', 'error');
