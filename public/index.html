@@ -2175,13 +2175,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             const joursOccupesTrevoux = trevoux.reduce((sum, r) => {
                 const debut = parseLocalDate(r.dateDebut);
                 const fin = parseLocalDate(r.dateFin);
-                return sum + Math.ceil((fin - debut) / (1000 * 60 * 60 * 24));
+                return sum + Math.round((fin - debut) / (1000 * 60 * 60 * 24));
             }, 0);
             
             const joursOccupesCouzon = couzon.reduce((sum, r) => {
                 const debut = parseLocalDate(r.dateDebut);
                 const fin = parseLocalDate(r.dateFin);
-                return sum + Math.ceil((fin - debut) / (1000 * 60 * 60 * 24));
+                return sum + Math.round((fin - debut) / (1000 * 60 * 60 * 24));
             }, 0);
             
             const joursAnnee = 365;
@@ -2198,10 +2198,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             reservations.forEach(r => {
                 const debut = parseLocalDate(r.dateDebut);
                 const fin = parseLocalDate(r.dateFin);
-                const nuits = Math.ceil((fin - debut) / (1000 * 60 * 60 * 24));
+                // Calcul précis : différence en millisecondes divisée par 1 jour
+                const nuits = Math.round((fin - debut) / (1000 * 60 * 60 * 24));
                 totalMontant += r.montant;
                 totalNuits += nuits;
             });
+            
+            console.log('Total nuits:', totalNuits, 'Total réservations:', reservations.length);
             
             const prixMoyen = totalNuits > 0 ? (totalMontant / totalNuits).toFixed(0) : 0;
             document.getElementById('prixMoyen').textContent = prixMoyen + ' €';
@@ -2209,6 +2212,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             // Durée moyenne
             const dureeMoyenne = reservations.length > 0 ? (totalNuits / reservations.length).toFixed(1) : 0;
             document.getElementById('dureeMoyenne').textContent = dureeMoyenne + ' nuits';
+            console.log('Durée moyenne:', dureeMoyenne, 'nuits');
             
             // Meilleur mois
             const moisCA = {};
