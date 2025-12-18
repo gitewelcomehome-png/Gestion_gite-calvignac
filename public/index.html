@@ -5368,7 +5368,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             }
             
             // Sélection du gîte
-            window.selectGiteInfos = function(gite) {
+            window.selectGiteInfos = async function(gite) {
                 // Sauvegarder les données actuelles
                 sauvegarderDonneesInfos();
                 
@@ -5382,7 +5382,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 document.getElementById('btnCouzon').style.color = gite === 'Couzon' ? '#667eea' : 'white';
                 
                 // Charger les données du nouveau gîte
-                chargerDonneesInfos();
+                await chargerDonneesInfos();
                 
                 showNotification(`Gîte ${gite} sélectionné`, 'success');
             };
