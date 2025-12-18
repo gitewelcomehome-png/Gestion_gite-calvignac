@@ -2128,6 +2128,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         
         function updatePlatformCounters(reservations) {
             // Utiliser directement les réservations passées (déjà filtrées si nécessaire)
+            console.log('updatePlatformCounters - Nombre de réservations:', reservations.length);
             
             // Compter par plateforme
             let countAirbnb = 0;
@@ -2137,6 +2138,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             reservations.forEach(r => {
                 const site = (r.site || '').toLowerCase();
+                console.log('Réservation site:', r.site, '-> normalisé:', site);
                 if (site.includes('airbnb')) {
                     countAirbnb++;
                 } else if (site.includes('abritel') || site.includes('homeaway')) {
@@ -2147,6 +2149,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     countAutres++;
                 }
             });
+            
+            console.log('Compteurs - Airbnb:', countAirbnb, 'Abritel:', countAbritel, 'Gîtes:', countGites, 'Autres:', countAutres);
             
             // Mettre à jour les compteurs
             document.getElementById('countAirbnb').textContent = countAirbnb;
@@ -2161,10 +2165,12 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         
         function updateAdvancedStats(reservations) {
             // Utiliser directement les réservations passées (déjà filtrées si nécessaire)
+            console.log('updateAdvancedStats - Nombre de réservations:', reservations.length);
             
             // Taux d'occupation
             const trevoux = reservations.filter(r => isTrevoux(r.gite));
             const couzon = reservations.filter(r => isCouzon(r.gite));
+            console.log('Réservations Trévoux:', trevoux.length, 'Couzon:', couzon.length);
             
             const joursOccupesTrevoux = trevoux.reduce((sum, r) => {
                 const debut = parseLocalDate(r.dateDebut);
