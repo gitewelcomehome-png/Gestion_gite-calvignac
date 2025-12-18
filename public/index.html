@@ -746,15 +746,12 @@ h1{font-size:2.1rem;}
                 <div style="padding: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
                         <p style="font-size: 1.1rem; opacity: 0.95;">Remplissez toutes les informations pour créer le guide client parfait • Bilingue FR/EN</p>
-                        <div style="display: flex; gap: 15px; align-items: center;">
+                        <div style="display: flex; gap: 15px;">
                             <button class="btn" onclick="selectGiteInfos('Trévoux')" id="btnTrevoux" style="background: white; color: #667eea; font-weight: 700; padding: 12px 30px;">
                                 🏡 Trévoux
                             </button>
                             <button class="btn" onclick="selectGiteInfos('Couzon')" id="btnCouzon" style="background: rgba(255,255,255,0.2); color: white; font-weight: 700; padding: 12px 30px;">
                                 ⛰️ Couzon
-                            </button>
-                            <button class="btn" onclick="autoTranslateToEnglish()" style="background: rgba(46, 213, 115, 0.2); color: white; font-weight: 600; padding: 10px 20px; border: 2px solid rgba(46, 213, 115, 0.5);">
-                                🌍 Auto-traduction EN
                             </button>
                         </div>
                     </div>
@@ -789,6 +786,12 @@ h1{font-size:2.1rem;}
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span class="card-icon">📍</span>
                             <h2 class="card-title">Informations de Base</h2>
+                            <button type="button" onclick="switchLanguage('fr')" style="background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 5px; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Afficher en français">
+                                🇫🇷
+                            </button>
+                            <button type="button" onclick="switchLanguage('en')" style="background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 5px; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Translate to English">
+                                🇬🇧
+                            </button>
                         </div>
                         <button type="button" onclick="resetGiteInfosQuick()" style="background: transparent; border: none; color: #e74c3c; font-size: 1.2rem; cursor: pointer; padding: 5px;" title="Effacer toutes les informations de ce gîte">
                             🗑️
@@ -5574,50 +5577,37 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 }
             };
             
-            // Fonction de traduction automatique FR → EN
-            window.autoTranslateToEnglish = async function() {
-                showNotification('🌍 Traduction en cours...', 'info');
+            // Fonction pour basculer entre FR et EN
+            window.switchLanguage = function(lang) {
+                const allInputs = document.querySelectorAll('#infosGiteForm input, #infosGiteForm textarea, #infosGiteForm select');
                 
-                // Mapping des champs FR → EN (suffixe _en)
-                const fieldsToTranslate = [
-                    'adresse', 'wifiSSID', 'wifiPassword', 'wifiLocalisation', 'wifiZones',
-                    'heureArrivee', 'arriveeTardive', 'parkingDispo', 'parkingDetails',
-                    'typeAcces', 'codeAcces', 'instructionsCles', 'itineraireLogement',
-                    'premiereVisite', 'capacite', 'surface', 'typeLit', 'oreillers',
-                    'couvertures', 'draps', 'serviettes', 'chauffage', 'climatisation',
-                    'cuisine', 'electromenager', 'ustensiles', 'salleBain', 'linge',
-                    'espacesExterieurs', 'animaux', 'fumeur', 'bruit', 'parkingType',
-                    'parkingAcces', 'transportsCommun', 'commercesProches', 'urgenceNumero',
-                    'urgenceAdresse', 'wifi', 'chauffageDesc', 'eauChaude', 'electricite',
-                    'poubelles', 'recyclage', 'consignes', 'heureDepart', 'menage',
-                    'restitutionCles', 'tabac', 'nbMaxPersonnes', 'caution'
-                ];
-                
-                try {
-                    for (const field of fieldsToTranslate) {
-                        const frInput = document.getElementById(`infos_${field}`);
-                        const enInput = document.getElementById(`infos_${field}_en`);
-                        
-                        if (frInput && enInput && frInput.value && !enInput.value) {
-                            // Traduction via API gratuite MyMemory
-                            const text = frInput.value;
-                            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`);
-                            const data = await response.json();
-                            
-                            if (data.responseStatus === 200 && data.responseData.translatedText) {
-                                enInput.value = data.responseData.translatedText;
+                if (lang === 'fr') {
+                    // Afficher les champs français (ceux sans _en)
+                    allInputs.forEach(input => {
+                        const parentDiv = input.closest('.form-group, div[style*="display"]');
+                        if (parentDiv) {
+                            if (input.id.includes('_en')) {
+                                parentDiv.style.display = 'none';
+                            } else {
+                                parentDiv.style.display = '';
                             }
-                            
-                            // Pause pour éviter rate limit
-                            await new Promise(resolve => setTimeout(resolve, 300));
                         }
-                    }
-                    
-                    showNotification('✓ Traduction terminée !', 'success');
-                    sauvegarderDonneesInfos();
-                } catch (error) {
-                    console.error('Erreur traduction:', error);
-                    showNotification('❌ Erreur lors de la traduction', 'error');
+                    });
+                    showNotification('🇫🇷 Mode français activé', 'info');
+                } else if (lang === 'en') {
+                    // Afficher les champs anglais (ceux avec _en) OU créer si n'existe pas
+                    allInputs.forEach(input => {
+                        const parentDiv = input.closest('.form-group, div[style*="display"]');
+                        if (parentDiv) {
+                            if (input.id.includes('_en')) {
+                                parentDiv.style.display = '';
+                            } else if (!input.id.includes('_en')) {
+                                // Masquer les champs français
+                                parentDiv.style.display = 'none';
+                            }
+                        }
+                    });
+                    showNotification('🇬🇧 English mode activated', 'info');
                 }
             };
 
