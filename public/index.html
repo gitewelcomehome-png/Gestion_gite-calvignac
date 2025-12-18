@@ -1329,67 +1329,223 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     <div class="card-header" style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white;">
                         <span class="card-icon">🇬🇧</span>
                         <h2 class="card-title">English Fields / Champs Anglais</h2>
-                        <small style="opacity: 0.9;">These fields are filled automatically by translation / Ces champs se remplissent automatiquement</small>
+                        <small style="opacity: 0.9; display: block; margin-top: 5px;">These fields are filled automatically by translation / Ces champs se remplissent automatiquement</small>
                     </div>
                     
-                    <div style="display: grid; gap: 15px; padding: 20px;">
+                    <div style="display: grid; gap: 25px; padding: 20px;">
                         <!-- Section 3: Arrivée (EN) -->
-                        <h3 style="color: #667eea; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Arrival & Access</h3>
-                        <input type="text" id="infos_heureArrivee_en" class="form-control" placeholder="From 3:00 PM">
-                        <input type="text" id="infos_arriveeTardive_en" class="form-control" placeholder="Late arrival possible?">
-                        <input type="text" id="infos_parkingDispo_en" class="form-control" placeholder="Parking available?">
-                        <input type="text" id="infos_parkingPlaces_en" class="form-control" placeholder="Number of spaces">
-                        <textarea id="infos_parkingDetails_en" class="form-control" rows="3" placeholder="Parking instructions..."></textarea>
-                        <input type="text" id="infos_typeAcces_en" class="form-control" placeholder="Type of access">
-                        <input type="text" id="infos_codeAcces_en" class="form-control" placeholder="Access code">
-                        <textarea id="infos_instructionsCles_en" class="form-control" rows="3" placeholder="Key retrieval instructions..."></textarea>
-                        <input type="text" id="infos_etage_en" class="form-control" placeholder="Floor">
-                        <input type="text" id="infos_ascenseur_en" class="form-control" placeholder="Elevator available?">
-                        <textarea id="infos_itineraireLogement_en" class="form-control" rows="3" placeholder="Route from parking to entrance..."></textarea>
-                        <textarea id="infos_premiereVisite_en" class="form-control" rows="3" placeholder="First visit instructions..."></textarea>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                                <span>🔑</span> Arrival & Access
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Arrival Time</label>
+                                    <input type="text" id="infos_heureArrivee_en" class="form-control" placeholder="From 3:00 PM">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Late Arrival Possible?</label>
+                                    <input type="text" id="infos_arriveeTardive_en" class="form-control" placeholder="Yes, without extra charge">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Parking Available?</label>
+                                    <input type="text" id="infos_parkingDispo_en" class="form-control" placeholder="Yes, free on-site">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Number of Parking Spaces</label>
+                                    <input type="text" id="infos_parkingPlaces_en" class="form-control" placeholder="2 spaces">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Parking Instructions</label>
+                                    <textarea id="infos_parkingDetails_en" class="form-control" rows="3" placeholder="Enter through the blue gate, parking is on your right..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Type of Access</label>
+                                    <input type="text" id="infos_typeAcces_en" class="form-control" placeholder="Key box / In-person / Door code">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Access Code / Location</label>
+                                    <input type="text" id="infos_codeAcces_en" class="form-control" placeholder="Code 1234 - Box in front of the door">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Key Retrieval Instructions</label>
+                                    <textarea id="infos_instructionsCles_en" class="form-control" rows="4" placeholder="1. Park in the parking lot&#10;2. The key box is on the right wall&#10;3. Enter code 1234..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Floor</label>
+                                    <input type="text" id="infos_etage_en" class="form-control" placeholder="Ground floor / 1st floor / 2nd floor">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Elevator Available?</label>
+                                    <input type="text" id="infos_ascenseur_en" class="form-control" placeholder="Yes / No">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Route from Parking to Entrance</label>
+                                    <textarea id="infos_itineraireLogement_en" class="form-control" rows="3" placeholder="From the parking lot, take the stairs on your left..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">First Visit Instructions</label>
+                                    <textarea id="infos_premiereVisite_en" class="form-control" rows="4" placeholder="Upon arrival:&#10;1. LIGHTS: Switch on the right&#10;2. HEATING: Thermostat in the living room..."></textarea>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Section 4: Logement (EN) -->
-                        <h3 style="color: #667eea; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Accommodation & Equipment</h3>
-                        <input type="text" id="infos_typeChauffage_en" class="form-control" placeholder="Heating type">
-                        <input type="text" id="infos_climatisation_en" class="form-control" placeholder="Air conditioning?">
-                        <textarea id="infos_instructionsChauffage_en" class="form-control" rows="3" placeholder="Heating instructions..."></textarea>
-                        <textarea id="infos_equipementsCuisine_en" class="form-control" rows="3" placeholder="Kitchen equipment..."></textarea>
-                        <textarea id="infos_instructionsFour_en" class="form-control" rows="3" placeholder="Oven instructions..."></textarea>
-                        <textarea id="infos_instructionsPlaques_en" class="form-control" rows="3" placeholder="Cooktop instructions..."></textarea>
-                        <textarea id="infos_instructionsLaveVaisselle_en" class="form-control" rows="3" placeholder="Dishwasher instructions..."></textarea>
-                        <textarea id="infos_instructionsLaveLinge_en" class="form-control" rows="3" placeholder="Washing machine instructions..."></textarea>
-                        <input type="text" id="infos_secheLinge_en" class="form-control" placeholder="Dryer">
-                        <input type="text" id="infos_ferRepasser_en" class="form-control" placeholder="Iron location">
-                        <textarea id="infos_lingeFourni_en" class="form-control" rows="3" placeholder="Provided linens..."></textarea>
-                        <textarea id="infos_configurationChambres_en" class="form-control" rows="3" placeholder="Bedroom configuration..."></textarea>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                                <span>🏠</span> Accommodation & Equipment
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Heating Type</label>
+                                    <input type="text" id="infos_typeChauffage_en" class="form-control" placeholder="Electric / Gas / Heat pump">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Air Conditioning</label>
+                                    <input type="text" id="infos_climatisation_en" class="form-control" placeholder="Yes / No / Reversible AC">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Heating Instructions</label>
+                                    <textarea id="infos_instructionsChauffage_en" class="form-control" rows="4" placeholder="HEATING: Turn on the thermostat...&#10;AC: Press the snowflake button..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Kitchen Equipment</label>
+                                    <textarea id="infos_equipementsCuisine_en" class="form-control" rows="4" placeholder="- Electric oven&#10;- Induction cooktop&#10;- Dishwasher&#10;- Microwave"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Oven Instructions</label>
+                                    <textarea id="infos_instructionsFour_en" class="form-control" rows="3" placeholder="Whirlpool oven:&#10;1. Turn the mode dial...&#10;2. Set temperature..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Cooktop Instructions</label>
+                                    <textarea id="infos_instructionsPlaques_en" class="form-control" rows="3" placeholder="⚠️ INDUCTION: Compatible cookware only..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Dishwasher Instructions</label>
+                                    <textarea id="infos_instructionsLaveVaisselle_en" class="form-control" rows="3" placeholder="Siemens dishwasher:&#10;1. Add tablet...&#10;2. Select program..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Washing Machine Instructions</label>
+                                    <textarea id="infos_instructionsLaveLinge_en" class="form-control" rows="4" placeholder="Samsung washer:&#10;1. Load clothes&#10;2. Add detergent&#10;3. Select program"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Dryer</label>
+                                    <input type="text" id="infos_secheLinge_en" class="form-control" placeholder="Yes, in the laundry room / No / Drying rack available">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Iron Location</label>
+                                    <input type="text" id="infos_ferRepasser_en" class="form-control" placeholder="Entrance closet / Bedroom closet">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Provided Linens</label>
+                                    <textarea id="infos_lingeFourni_en" class="form-control" rows="3" placeholder="Provided:&#10;- Bed sheets&#10;- Towels&#10;- Kitchen towels"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Bedroom Configuration</label>
+                                    <textarea id="infos_configurationChambres_en" class="form-control" rows="4" placeholder="BEDROOM 1: 1 double bed 160x200cm&#10;BEDROOM 2: 2 single beds 90x200cm"></textarea>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Section 5: Déchets (EN) -->
-                        <h3 style="color: #667eea; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Waste & Recycling</h3>
-                        <textarea id="infos_instructionsTri_en" class="form-control" rows="3" placeholder="Sorting instructions..."></textarea>
-                        <textarea id="infos_joursCollecte_en" class="form-control" rows="2" placeholder="Collection days..."></textarea>
-                        <input type="text" id="infos_decheterie_en" class="form-control" placeholder="Recycling center">
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                                <span>♻️</span> Waste & Recycling
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Sorting Instructions</label>
+                                    <textarea id="infos_instructionsTri_en" class="form-control" rows="5" placeholder="🟡 YELLOW BIN: Plastic, cardboard...&#10;🟢 GREEN BIN: Glass&#10;⚫ BLACK BIN: Non-recyclable waste"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Collection Days</label>
+                                    <textarea id="infos_joursCollecte_en" class="form-control" rows="2" placeholder="Monday and Thursday mornings..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Recycling Center</label>
+                                    <input type="text" id="infos_decheterie_en" class="form-control" placeholder="123 Lyon Road, 3km away">
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Section 6: Sécurité (EN) -->
-                        <h3 style="color: #667eea; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Safety & Emergencies</h3>
-                        <input type="text" id="infos_detecteurFumee_en" class="form-control" placeholder="Smoke detector location">
-                        <input type="text" id="infos_extincteur_en" class="form-control" placeholder="Fire extinguisher location">
-                        <input type="text" id="infos_coupureEau_en" class="form-control" placeholder="Water shut-off valve">
-                        <input type="text" id="infos_disjoncteur_en" class="form-control" placeholder="Circuit breaker">
-                        <textarea id="infos_consignesUrgence_en" class="form-control" rows="3" placeholder="Emergency instructions..."></textarea>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                                <span>🚨</span> Safety & Emergencies
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Smoke Detector Location</label>
+                                    <input type="text" id="infos_detecteurFumee_en" class="form-control" placeholder="Hallway ceiling / Living room ceiling">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Fire Extinguisher Location</label>
+                                    <input type="text" id="infos_extincteur_en" class="form-control" placeholder="Kitchen, under the sink">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Water Shut-off Valve</label>
+                                    <input type="text" id="infos_coupureEau_en" class="form-control" placeholder="Under bathroom sink / Behind toilet">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Circuit Breaker / Electrical Panel</label>
+                                    <input type="text" id="infos_disjoncteur_en" class="form-control" placeholder="Entrance hallway / Utility room">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Emergency Instructions</label>
+                                    <textarea id="infos_consignesUrgence_en" class="form-control" rows="5" placeholder="IN CASE OF FIRE: 18 or 112&#10;MEDICAL EMERGENCY: 15 or 112&#10;POLICE: 17 or 112"></textarea>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Section 7: Départ (EN) -->
-                        <h3 style="color: #667eea; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Departure & Check-out</h3>
-                        <input type="text" id="infos_heureDepart_en" class="form-control" placeholder="Check-out time">
-                        <input type="text" id="infos_departTardif_en" class="form-control" placeholder="Late check-out possible?">
-                        <textarea id="infos_checklistDepart_en" class="form-control" rows="5" placeholder="Check-out checklist..."></textarea>
-                        <textarea id="infos_restitutionCles_en" class="form-control" rows="2" placeholder="Key return instructions..."></textarea>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                                <span>👋</span> Departure & Check-out
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Check-out Time</label>
+                                    <input type="text" id="infos_heureDepart_en" class="form-control" placeholder="Before 10:00 AM">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Late Check-out Possible?</label>
+                                    <input type="text" id="infos_departTardif_en" class="form-control" placeholder="Yes, with extra charge / No / Upon request">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Check-out Checklist</label>
+                                    <textarea id="infos_checklistDepart_en" class="form-control" rows="8" placeholder="✅ DISHES: Wash and put away&#10;✅ TRASH: Take out all garbage&#10;✅ APPLIANCES: Turn off all appliances&#10;✅ WINDOWS: Close all windows&#10;✅ HEATING/AC: Turn off thermostat"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Key Return Instructions</label>
+                                    <textarea id="infos_restitutionCles_en" class="form-control" rows="3" placeholder="Put the keys back in the key box and lock it..."></textarea>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Section 8: Règlement (EN) -->
-                        <h3 style="color: #667eea; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">House Rules</h3>
-                        <input type="text" id="infos_tabac_en" class="form-control" placeholder="Smoking policy">
-                        <input type="text" id="infos_animaux_en" class="form-control" placeholder="Pets policy">
-                        <input type="text" id="infos_nbMaxPersonnes_en" class="form-control" placeholder="Max persons">
-                        <input type="text" id="infos_caution_en" class="form-control" placeholder="Deposit amount">
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #1e40af; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                                <span>📋</span> House Rules
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Smoking Policy</label>
+                                    <input type="text" id="infos_tabac_en" class="form-control" placeholder="No smoking anywhere / Outdoor only / Terrace allowed">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Pets Policy</label>
+                                    <input type="text" id="infos_animaux_en" class="form-control" placeholder="No pets / Yes, free of charge / Yes, with extra fee / Upon request">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Maximum Number of Guests</label>
+                                    <input type="text" id="infos_nbMaxPersonnes_en" class="form-control" placeholder="6 persons">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Deposit Amount</label>
+                                    <input type="text" id="infos_caution_en" class="form-control" placeholder="€500 / $500">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -5938,34 +6094,62 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             // Fonction pour basculer entre FR et EN
             window.switchLanguage = function(lang) {
-                const allInputs = document.querySelectorAll('#infosGiteForm input, #infosGiteForm textarea, #infosGiteForm select');
+                console.log('🌍 Switching to:', lang);
+                
+                // Trouver toutes les cartes (sections) du formulaire
+                const allCards = document.querySelectorAll('#infosGiteForm .card');
                 
                 if (lang === 'fr') {
-                    // Afficher les champs français (ceux sans _en)
-                    allInputs.forEach(input => {
-                        const parentDiv = input.closest('.form-group, div[style*="display"]');
-                        if (parentDiv) {
-                            if (input.id.includes('_en')) {
-                                parentDiv.style.display = 'none';
-                            } else {
-                                parentDiv.style.display = '';
-                            }
+                    // Mode français : afficher tous les champs FR normaux, cacher les sections EN
+                    allCards.forEach(card => {
+                        // Chercher si c'est la carte des champs anglais (celle avec tous les _en)
+                        const isEnglishCard = card.querySelector('h2.card-title')?.textContent.includes('English Fields');
+                        
+                        if (isEnglishCard) {
+                            // Cacher complètement la carte anglaise
+                            card.style.display = 'none';
+                        } else {
+                            // Pour les cartes normales, afficher tous les champs FR et cacher les _en individuels
+                            card.style.display = '';
+                            
+                            // Trouver tous les divs avec des champs _en isolés et les cacher
+                            const enDivs = card.querySelectorAll('div[style*="display"]');
+                            enDivs.forEach(div => {
+                                const input = div.querySelector('input[id*="_en"], textarea[id*="_en"], select[id*="_en"]');
+                                if (input) {
+                                    div.style.display = 'none';
+                                }
+                            });
                         }
                     });
                     showNotification('🇫🇷 Mode français activé', 'info');
+                    
                 } else if (lang === 'en') {
-                    // Afficher les champs anglais (ceux avec _en) OU créer si n'existe pas
-                    allInputs.forEach(input => {
-                        const parentDiv = input.closest('.form-group, div[style*="display"]');
-                        if (parentDiv) {
-                            if (input.id.includes('_en')) {
-                                parentDiv.style.display = '';
-                            } else if (!input.id.includes('_en')) {
-                                // Masquer les champs français
-                                parentDiv.style.display = 'none';
-                            }
+                    // Mode anglais : cacher les sections FR normales, afficher la carte EN
+                    allCards.forEach(card => {
+                        const isEnglishCard = card.querySelector('h2.card-title')?.textContent.includes('English Fields');
+                        const isSaveButton = card.querySelector('button[type="submit"]');
+                        
+                        if (isEnglishCard) {
+                            // Afficher la carte anglaise
+                            card.style.display = '';
+                        } else if (isSaveButton) {
+                            // Toujours afficher le bouton de sauvegarde
+                            card.style.display = '';
+                        } else {
+                            // Cacher les autres cartes (sections normales)
+                            card.style.display = 'none';
                         }
                     });
+                    
+                    // Scroller vers la carte anglaise
+                    const englishCard = document.querySelector('.card h2.card-title')?.closest('.card');
+                    if (englishCard && englishCard.textContent.includes('English')) {
+                        setTimeout(() => {
+                            englishCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                    }
+                    
                     showNotification('🇬🇧 English mode activated', 'info');
                 }
             };
