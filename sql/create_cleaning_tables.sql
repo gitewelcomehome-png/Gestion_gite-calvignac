@@ -1,7 +1,7 @@
 -- Table pour le planning de ménage
 CREATE TABLE IF NOT EXISTS cleaning_schedule (
     id SERIAL PRIMARY KEY,
-    reservation_id INTEGER REFERENCES reservations(id) ON DELETE CASCADE,
+    reservation_id INTEGER UNIQUE REFERENCES reservations(id) ON DELETE CASCADE,
     gite VARCHAR(50) NOT NULL,
     scheduled_date DATE NOT NULL,
     time_of_day VARCHAR(20) DEFAULT 'afternoon', -- morning ou afternoon
