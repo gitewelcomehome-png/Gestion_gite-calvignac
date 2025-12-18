@@ -143,10 +143,12 @@
                 .select('*')
                 .order('date_debut');
 
-            // Récupérer les réservations qui finissent ce mois
+            // Récupérer les réservations qui finissent ce mois (uniquement futures)
+            const today = new Date().toISOString().split('T')[0];
             const { data: resas, error } = await supabase
                 .from('reservations')
                 .select('*')
+                .gte('date_fin', today)
                 .gte('date_fin', start)
                 .lte('date_fin', end)
                 .order('date_fin');
