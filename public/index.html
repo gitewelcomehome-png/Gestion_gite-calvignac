@@ -2215,22 +2215,30 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             console.log('Durée moyenne:', dureeMoyenne, 'nuits');
             
             // Meilleur mois
-            const moisCA = {};
+            const moisCA = Array(12).fill(0);
+            const nomsMois = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+            
             reservations.forEach(r => {
                 const date = parseLocalDate(r.dateDebut);
-                const mois = date.toLocaleDateString('fr-FR', { month: 'long' });
-                moisCA[mois] = (moisCA[mois] || 0) + r.montant;
+                const monthIndex = date.getMonth();
+                moisCA[monthIndex] += r.montant;
             });
             
-            let meilleurMois = '-';
+            console.log('CA par mois:', moisCA);
+            
+            let meilleurMoisIndex = 0;
             let meilleurCA = 0;
             
-            Object.keys(moisCA).forEach(mois => {
-                if (moisCA[mois] > meilleurCA) {
-                    meilleurCA = moisCA[mois];
-                    meilleurMois = mois.charAt(0).toUpperCase() + mois.slice(1);
+            moisCA.forEach((ca, idx) => {
+                if (ca > meilleurCA) {
+                    meilleurCA = ca;
+                    meilleurMoisIndex = idx;
                 }
             });
+            
+            const meilleurMois = meilleurCA > 0 ? nomsMois[meilleurMoisIndex] : '-';
+            
+            console.log('Meilleur mois:', meilleurMois, 'avec', meilleurCA, '€');
             
             document.getElementById('meilleurMois').textContent = meilleurMois;
             document.getElementById('meilleurMoisCA').textContent = meilleurCA > 0 ? meilleurCA.toFixed(0) + ' €' : '-';
