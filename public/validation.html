@@ -77,8 +77,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>🧹 Planning Ménage - Validation Société</h1>
-        <p class="subtitle">Gîtes de Calvignac - Trévoux & Couzon</p>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+                <h1>🧹 Planning Ménage - Validation Société</h1>
+                <p class="subtitle">Gîtes de Calvignac - Trévoux & Couzon</p>
+            </div>
+            <button onclick="showRulesModal()" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);">
+                📋 Règles
+            </button>
+        </div>
         
         <div class="filter-bar">
             <label for="monthFilter">📅 Sélectionner le mois :</label>
@@ -93,12 +100,35 @@
         </div>
     </div>
     
+    <!-- Modal Règles -->
+    <div id="rulesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative;">
+            <button onclick="closeRulesModal()" style="position: absolute; top: 15px; right: 15px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+            <h2 style="margin: 0 0 20px 0; color: #2c3e50;">📋 Règles de Planning Automatique</h2>
+            <div style="line-height: 1.8; color: #34495e;">
+                • <strong>Semaine (Lun-Ven) et Samedi</strong> : Ménage après-midi (12h00)<br>
+                • <strong>Dimanche</strong> : AUCUN ménage, sauf enchainement même jour → 13h00<br>
+                • <strong>Jours fériés</strong> : Ménage reporté au jour ouvré suivant (sauf enchainement)<br>
+                • <strong>Enchainement</strong> : Si départ matin + arrivée même jour avec ménage veille non fait → reporter au lendemain<br>
+                • <strong>Arrivée le jour du départ</strong> : Ménage le matin (07h00) si besoin avant l'arrivée
+            </div>
+            <button onclick="closeRulesModal()" style="margin-top: 20px; width: 100%; background: #3498db; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">Fermer</button>
+        </div>
+    </div>
+
     <div id="toast" class="toast">
         <i class="fas fa-check-circle"></i>
         <span id="toast-message">Action effectuée</span>
     </div>
 
     <script>
+        function showRulesModal() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+        
+        function closeRulesModal() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
         const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);

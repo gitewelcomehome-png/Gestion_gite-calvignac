@@ -694,6 +694,22 @@ h1{font-size:2.1rem;}
             </div>
         </div>
         
+        <!-- Modal Règles -->
+        <div id="rulesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative;">
+                <button onclick="closeRulesModal()" style="position: absolute; top: 15px; right: 15px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+                <h2 style="margin: 0 0 20px 0; color: #2c3e50;">📋 Règles de Planning Automatique</h2>
+                <div style="line-height: 1.8; color: #34495e;">
+                    • <strong>Semaine (Lun-Ven) et Samedi</strong> : Ménage après-midi (12h00)<br>
+                    • <strong>Dimanche</strong> : AUCUN ménage, sauf enchainement même jour → 13h00<br>
+                    • <strong>Jours fériés</strong> : Ménage reporté au jour ouvré suivant (sauf enchainement)<br>
+                    • <strong>Enchainement</strong> : Si départ matin + arrivée même jour avec ménage veille non fait → reporter au lendemain<br>
+                    • <strong>Arrivée le jour du départ</strong> : Ménage le matin (07h00) si besoin avant l'arrivée
+                </div>
+                <button onclick="closeRulesModal()" class="btn" style="margin-top: 20px; width: 100%; background: #3498db; color: white;">Fermer</button>
+            </div>
+        </div>
+
         <!-- ONGLET PLANNING MÉNAGE -->
         <div id="tab-menage" class="tab-content">
             <div class="card">
@@ -702,22 +718,13 @@ h1{font-size:2.1rem;}
                     <h2 class="card-title">Planning des Ménages</h2>
                 </div>
                 
-                <div class="alert alert-warning">
-                    <strong>📋 Règles de planning automatique :</strong><br>
-                    • <strong>Semaine (Lun-Ven) et Samedi</strong> : Ménage après-midi (12h00)<br>
-                    • <strong>Dimanche</strong> : AUCUN ménage, sauf enchainement même jour → 13h00<br>
-                    • <strong>Jours fériés</strong> : Ménage reporté au jour ouvré suivant (sauf enchainement)<br>
-                    • <strong>Enchainement</strong> : Si départ matin + arrivée même jour avec ménage veille non fait → reporter au lendemain<br>
-                    • <strong>Arrivée le jour du départ</strong> : Ménage le matin (07h00) si besoin avant l'arrivée
-                </div>
-                
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <button class="btn btn-menage" onclick="genererPlanningMenage()">
-                        <span>🧹</span> Générer Planning Ménage (2 prochains mois)
-                    </button>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
                     <a href="validation.html" target="_blank" class="btn btn-secondary" style="text-decoration: none; display: inline-flex;">
                         <span>🏢</span> Page Validation Société
                     </a>
+                    <button class="btn" onclick="showRulesModal()" style="background: #3498db; color: white;">
+                        <span>📋</span> Voir les Règles
+                    </button>
                 </div>
                 
                 <div id="menagePlanning" style="margin-top: 30px;">
@@ -2342,6 +2349,17 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             if (tabName === 'statistiques') updateAllCharts();
             if (tabName === 'archives') updateArchivesDisplay();
             if (tabName === 'charges') updateChargesDisplay();
+            if (tabName === 'menage') afficherPlanningParSemaine();
+        }
+        
+        function showRulesModal() {
+            const modal = document.getElementById('rulesModal');
+            if (modal) modal.style.display = 'flex';
+        }
+        
+        function closeRulesModal() {
+            const modal = document.getElementById('rulesModal');
+            if (modal) modal.style.display = 'none';
         }
         
         function autoSetDateFin() {
