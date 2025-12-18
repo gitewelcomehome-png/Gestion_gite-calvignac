@@ -1591,7 +1591,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
         
         // Vérifier si supabase n'est pas déjà déclaré (évite les erreurs de double chargement)
-        let supabase;
+        var supabase;
         if (typeof window.supabaseClient === 'undefined') {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             window.supabaseClient = supabase; // Stocker globalement
