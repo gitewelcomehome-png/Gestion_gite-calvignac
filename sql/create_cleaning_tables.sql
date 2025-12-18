@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS cleaning_schedule (
     reservation_id INTEGER REFERENCES reservations(id) ON DELETE CASCADE,
     gite VARCHAR(50) NOT NULL,
     scheduled_date DATE NOT NULL,
+    time_of_day VARCHAR(20) DEFAULT 'afternoon', -- morning ou afternoon
     week_number VARCHAR(10), -- S1, S2, S3, etc.
     status VARCHAR(20) DEFAULT 'pending', -- pending, validated, modified
     validated_by_company BOOLEAN DEFAULT FALSE,
