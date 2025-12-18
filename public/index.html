@@ -2214,15 +2214,31 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             document.getElementById('dureeMoyenne').textContent = dureeMoyenne + ' nuits';
             console.log('Durée moyenne:', dureeMoyenne, 'nuits');
             
-            // Meilleur mois
+            // Meilleur mois - utiliser les données historiques si disponibles
             const moisCA = Array(12).fill(0);
             const nomsMois = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
             
-            reservations.forEach(r => {
-                const date = parseLocalDate(r.dateDebut);
-                const monthIndex = date.getMonth();
-                moisCA[monthIndex] += r.montant;
-            });
+            // Vérifier s'il y a des données historiques pour l'année en cours
+            const selectedYear = parseInt(document.getElementById('yearFilterStats')?.value || new Date().getFullYear());
+            const historicalData = await getAllHistoricalData();
+            const histTotal = historicalData.find(d => d.year === selectedYear && d.gite === 'Total');
+            
+            if (histTotal) {
+                // Utiliser les données historiques
+                const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+                months.forEach((m, idx) => {
+                    moisCA[idx] = histTotal.months[m] || 0;
+                });
+                console.log('Meilleur mois - Données historiques utilisées');
+            } else {
+                // Utiliser les réservations
+                reservations.forEach(r => {
+                    const date = parseLocalDate(r.dateDebut);
+                    const monthIndex = date.getMonth();
+                    moisCA[monthIndex] += r.montant;
+                });
+                console.log('Meilleur mois - Réservations utilisées');
+            }
             
             console.log('CA par mois:', moisCA);
             
@@ -3094,36 +3110,61 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             // Filtrer par l'année sélectionnée
             const selectedYear = parseInt(document.getElementById('yearFilterStats')?.value || new Date().getFullYear());
-            const filteredReservations = reservations.filter(r => {
-                const year = parseLocalDate(r.dateDebut).getFullYear();
-                return year === selectedYear;
-            });
             
-            // Compter toutes les réservations de l'année (pas seulement futures)
-            // IMPORTANT: Ne compter QUE les réservations avec un gîte valide
-            const trevoux = filteredReservations.filter(r => isTrevoux(r.gite));
-            const couzon = filteredReservations.filter(r => isCouzon(r.gite));
+            // Vérifier si des données historiques "Total" existent pour cette année
+            const histTotal = historicalData.find(d => d.year === selectedYear && d.gite === 'Total');
             
-            const caTrevoux = trevoux.reduce((sum, r) => sum + r.montant, 0);
-            const caCouzon = couzon.reduce((sum, r) => sum + r.montant, 0);
-            const caTotal = caTrevoux + caCouzon;
+            let caTotal = 0;
+            let totalReservations = 0;
             
-            // Le total = Trévoux + Couzon (ignore les réservations sans gîte valide)
-            const totalReservations = trevoux.length + couzon.length;
+            if (histTotal) {
+                // Utiliser UNIQUEMENT les données historiques (pas les réservations)
+                console.log('✓ Utilisation des données historiques pour', selectedYear);
+                const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+                months.forEach(m => {
+                    caTotal += histTotal.months[m] || 0;
+                });
+                // Pour les données historiques, on ne peut pas compter les réservations individuelles
+                totalReservations = '-';
+                document.getElementById('statTotal').textContent = totalReservations;
+                document.getElementById('statTrevoux').textContent = '-';
+                document.getElementById('statCouzon').textContent = '-';
+            } else {
+                // Utiliser les réservations automatiques
+                console.log('✓ Utilisation des réservations automatiques pour', selectedYear);
+                const filteredReservations = reservations.filter(r => {
+                    const year = parseLocalDate(r.dateDebut).getFullYear();
+                    return year === selectedYear;
+                });
+                
+                const trevoux = filteredReservations.filter(r => isTrevoux(r.gite));
+                const couzon = filteredReservations.filter(r => isCouzon(r.gite));
+                
+                const caTrevoux = trevoux.reduce((sum, r) => sum + r.montant, 0);
+                const caCouzon = couzon.reduce((sum, r) => sum + r.montant, 0);
+                caTotal = caTrevoux + caCouzon;
+                
+                totalReservations = trevoux.length + couzon.length;
+                
+                document.getElementById('statTotal').textContent = totalReservations;
+                document.getElementById('statTrevoux').textContent = trevoux.length;
+                document.getElementById('statCouzon').textContent = couzon.length;
+                
+                // Mettre à jour les compteurs par plateforme et statistiques avancées
+                updatePlatformCounters(filteredReservations);
+                updateAdvancedStats(filteredReservations);
+            }
             
-            document.getElementById('statTotal').textContent = totalReservations;
-            document.getElementById('statTrevoux').textContent = trevoux.length;
-            document.getElementById('statCouzon').textContent = couzon.length;
             document.getElementById('statCA').textContent = caTotal.toFixed(0) + ' €';
-            
-            // Mettre à jour les compteurs par plateforme et statistiques avancées
-            updatePlatformCounters(filteredReservations);
-            updateAdvancedStats(filteredReservations);
             
             // Générer les checkboxes de comparaison d'années
             generateYearComparisonCheckboxes(reservations, historicalData);
             
             // Mettre à jour les graphiques avec les données filtrées
+            const filteredReservations = reservations.filter(r => {
+                const year = parseLocalDate(r.dateDebut).getFullYear();
+                return year === selectedYear;
+            });
             updateAllCharts(filteredReservations);
         }
         
@@ -3224,25 +3265,28 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     total: Array(12).fill(0)
                 };
                 
-                // Données des réservations
-                reservations.filter(r => parseLocalDate(r.dateDebut).getFullYear() === year).forEach(r => {
-                    const month = parseLocalDate(r.dateDebut).getMonth();
-                    // Normaliser le nom du gîte (enlever accents et mettre en minuscule)
-                    const giteNormalized = r.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                    if (dataByYear[year][giteNormalized]) {
-                        dataByYear[year][giteNormalized][month] += r.montant;
-                        dataByYear[year].total[month] += r.montant;
-                    }
-                });
-                
-                // Ajouter les données historiques si disponibles (gîte "Total")
+                // Vérifier si des données historiques existent pour cette année
                 const histTotal = historicalData.find(d => d.year === year && d.gite === 'Total');
                 
                 if (histTotal) {
+                    // Si données historiques existent, utiliser UNIQUEMENT celles-ci
+                    console.log(`📊 Graphique ${year}: Utilisation des données historiques`);
                     const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
                     months.forEach((m, idx) => {
                         const value = histTotal.months[m] || 0;
-                        dataByYear[year].total[idx] += value;
+                        dataByYear[year].total[idx] = value;
+                    });
+                } else {
+                    // Sinon, utiliser les données des réservations
+                    console.log(`📊 Graphique ${year}: Utilisation des réservations`);
+                    reservations.filter(r => parseLocalDate(r.dateDebut).getFullYear() === year).forEach(r => {
+                        const month = parseLocalDate(r.dateDebut).getMonth();
+                        // Normaliser le nom du gîte (enlever accents et mettre en minuscule)
+                        const giteNormalized = r.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        if (dataByYear[year][giteNormalized]) {
+                            dataByYear[year][giteNormalized][month] += r.montant;
+                            dataByYear[year].total[month] += r.montant;
+                        }
                     });
                 }
             });
