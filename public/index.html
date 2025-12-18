@@ -708,16 +708,13 @@ h1{font-size:2.1rem;}
                     • <strong>Arrivée le jour du départ</strong> : Ménage le matin (07h00) si besoin avant l'arrivée
                 </div>
                 
-                <button class="btn btn-menage" onclick="genererPlanningMenage()">
-                    <span>🧹</span> Générer Planning Ménage (Mois en cours + Prochain)
-                </button>
-
-                <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-                    <label for="menageExportMonth" style="font-size: 0.9rem;">Mois à exporter (ménages) :</label>
-                    <input type="month" id="menageExportMonth" style="padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); min-width: 180px;">
-                    <button class="btn btn-secondary" type="button" onclick="exportPlanningMenageMois()">
-                        <span>📊</span> Télécharger Excel ménages (mois sélectionné)
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button class="btn btn-menage" onclick="genererPlanningMenage()">
+                        <span>🧹</span> Générer Planning Ménage (2 prochains mois)
                     </button>
+                    <a href="validation.html" target="_blank" class="btn btn-secondary" style="text-decoration: none; display: inline-flex;">
+                        <span>🏢</span> Page Validation Société
+                    </a>
                 </div>
                 
                 <div id="menagePlanning" style="margin-top: 30px;">
@@ -4164,6 +4161,15 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             await afficherPlanningParSemaine();
         }
         
+        // Fonction pour calculer le numéro de semaine ISO (S1 = première semaine de l'année)
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        
         // Nouvelle fonction pour afficher le planning par semaine avec colonnes Trévoux/Couzon
         async function afficherPlanningParSemaine() {
             const reservations = await getAllReservations();
@@ -4258,7 +4264,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 const sunday = new Date(monday);
                 sunday.setDate(monday.getDate() + 6);
                 
-                const weekNumber = `S${index + 1}`;
+                // Calculer le vrai numéro de semaine de l'année
+                const weekNumber = `S${getWeekNumber(monday)}`;
                 const weekDisplay = `${monday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} - ${sunday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}`;
                 
                 html += `
@@ -4306,6 +4313,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 month: 'short' 
             });
             
+            // Récupérer le moment sauvegardé ou par défaut "afternoon"
+            const savedTime = localStorage.getItem(`cleaning_time_${reservation.id}`) || 'afternoon';
+            
             return `
                 <div class="cleaning-item">
                     <div class="cleaning-date-row">
@@ -4313,22 +4323,33 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         ${statusIcon}
                     </div>
                     <div class="cleaning-details">
-                        👤 ${reservation.nom || 'Inconnu'}<br>
                         🚪 Départ: ${reservationEndBefore.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
                         ${reservationStartAfter ? `<br>🔑 Arrivée suivante: ${reservationStartAfter.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}` : ''}
                     </div>
+                    <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+                        <input type="date" id="date-${reservation.id}" value="${displayDate.toISOString().split('T')[0]}" style="flex: 1; padding: 6px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.9rem;">
+                        <select id="time-${reservation.id}" style="padding: 6px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.9rem;">
+                            <option value="morning" ${savedTime === 'morning' ? 'selected' : ''}>🌅 Matin</option>
+                            <option value="afternoon" ${savedTime === 'afternoon' ? 'selected' : ''}>☀️ Après-midi</option>
+                        </select>
+                    </div>
                     <div class="cleaning-actions">
-                        <button class="btn-small" onclick="modifierDateMenage(${reservation.id}, '${dateMenage.toISOString()}')">
-                            ✏️ Modifier
+                        <button class="btn-small" onclick="modifierDateMenage(${reservation.id})" style="width: 100%;">
+                            ✏️ Enregistrer
                         </button>
                     </div>
                 </div>
             `;
         }
         
-        async function modifierDateMenage(reservationId, currentDate) {
-            const newDate = prompt('Nouvelle date de ménage (AAAA-MM-JJ):', currentDate.split('T')[0]);
-            if (!newDate) return;
+        async function modifierDateMenage(reservationId) {
+            const newDate = document.getElementById(`date-${reservationId}`).value;
+            const timeOfDay = document.getElementById(`time-${reservationId}`).value;
+            
+            if (!newDate) {
+                showToast('Veuillez sélectionner une date', 'error');
+                return;
+            }
             
             const reservation = (await getAllReservations()).find(r => r.id === reservationId);
             if (!reservation) {
@@ -4336,13 +4357,17 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 return;
             }
             
-            // Sauvegarder dans cleaning_schedule
+            // Sauvegarder le moment dans localStorage
+            localStorage.setItem(`cleaning_time_${reservationId}`, timeOfDay);
+            
+            // Sauvegarder dans cleaning_schedule avec le moment
             const { error } = await supabase
                 .from('cleaning_schedule')
                 .upsert({
                     reservation_id: reservationId,
                     gite: reservation.gite,
                     scheduled_date: newDate,
+                    time_of_day: timeOfDay,
                     status: 'modified',
                     validated_by_company: false,
                     reservation_end: reservation.dateFin,
@@ -4352,7 +4377,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             if (error) {
                 showToast('Erreur: ' + error.message, 'error');
             } else {
-                showToast('Date de ménage modifiée avec succès');
+                showToast('Date et horaire de ménage enregistrés avec succès');
                 afficherPlanningParSemaine();
             }
         }
