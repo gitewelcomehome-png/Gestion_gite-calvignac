@@ -796,8 +796,8 @@ h1{font-size:2.1rem;}
                             <span class="card-icon">📍</span>
                             <h2 class="card-title">Informations de Base</h2>
                         </div>
-                        <button type="button" onclick="resetGiteInfosQuick()" class="btn" style="background: #e74c3c; color: white; padding: 8px 16px; font-size: 0.85rem;">
-                            🗑️ Effacer
+                        <button type="button" onclick="resetGiteInfosQuick()" class="btn" style="background: #e74c3c; color: white; padding: 4px 10px; font-size: 0.75rem; border-radius: 4px;">
+                            🗑️
                         </button>
                     </div>
 
@@ -5606,6 +5606,15 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         .eq('gite_nom', currentGiteInfos);
                     
                     showNotification(`✓ Toutes les données de ${currentGiteInfos} ont été effacées`, 'success');
+                    
+                    // Vider tous les champs du formulaire
+                    const form = document.getElementById('infosGiteForm');
+                    if (form) {
+                        const inputs = form.querySelectorAll('input, textarea, select');
+                        inputs.forEach(input => {
+                            input.value = '';
+                        });
+                    }
                     
                     // Recharger les champs vides
                     await chargerDonneesInfos();
