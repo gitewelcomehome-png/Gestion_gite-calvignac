@@ -744,8 +744,7 @@ h1{font-size:2.1rem;}
                     <h2 class="card-title">Infos Pratiques - Guide Client Ultra-Complet</h2>
                 </div>
                 <div style="padding: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
-                        <p style="font-size: 1.1rem; opacity: 0.95;">Remplissez toutes les informations pour créer le guide client parfait • Bilingue FR/EN</p>
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 20px; margin-bottom: 20px;">
                         <div style="display: flex; gap: 15px;">
                             <button class="btn" onclick="selectGiteInfos('Trévoux')" id="btnTrevoux" style="background: white; color: #667eea; font-weight: 700; padding: 12px 30px;">
                                 🏡 Trévoux
@@ -760,23 +759,7 @@ h1{font-size:2.1rem;}
                 </div>
             </div>
 
-            <!-- BARRE DE PROGRESSION -->
-            <div class="card">
-                <div style="padding: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <strong style="color: var(--primary);">Progression du formulaire</strong>
-                        <span id="progressText" style="color: var(--gray);">0%</span>
-                    </div>
-                    <div style="background: var(--border); height: 10px; border-radius: 5px; overflow: hidden;">
-                        <div id="progressBarInfos" style="width: 0%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s;"></div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- ALERTE INFO -->
-            <div class="alert alert-info">
-                <strong>💡 Guide complet :</strong> Remplissez un maximum d'informations pour offrir la meilleure expérience client. Les champs marqués d'une <span style="color: #ef4444; font-weight: 700;">*</span> sont obligatoires.
-            </div>
 
             <form id="infosGiteForm" onsubmit="sauvegarderInfosGiteComplet(event)">
 
