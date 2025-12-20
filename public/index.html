@@ -7011,12 +7011,37 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     
                     console.log('📅 Événements de base:', toutesLesDonnees.length);
                     
-                    // Géocoder les activités en parallèle (plus rapide)
+                    // Traiter les activités
                     const promises = data.map(async (act, index) => {
-                        // Pause plus courte (250ms) entre chaque requête
-                        await new Promise(resolve => setTimeout(resolve, index * 250));
+                        let coords;
                         
-                        const coords = await geocodeAddress(act.adresse, gite);
+                        // Si les coordonnées sont déjà en BDD, les utiliser
+                        if (act.latitude && act.longitude) {
+                            console.log('✓ Coordonnées depuis BDD:', act.nom);
+                            coords = {
+                                lat: parseFloat(act.latitude),
+                                lng: parseFloat(act.longitude)
+                            };
+                        } else {
+                            // Sinon, géocoder et sauvegarder dans la BDD
+                            console.log('🔍 Géocodage nécessaire:', act.nom);
+                            await new Promise(resolve => setTimeout(resolve, index * 250));
+                            coords = await geocodeAddress(act.adresse, gite);
+                            
+                            // Sauvegarder les coordonnées dans la BDD
+                            try {
+                                await supabase
+                                    .from('activites_gites')
+                                    .update({ 
+                                        latitude: coords.lat, 
+                                        longitude: coords.lng 
+                                    })
+                                    .eq('id', act.id);
+                                console.log('💾 Coordonnées sauvegardées pour:', act.nom);
+                            } catch (updateError) {
+                                console.error('Erreur sauvegarde coordonnées:', updateError);
+                            }
+                        }
                         
                         return {
                             titre: act.nom,
@@ -7469,6 +7494,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 return;
             }
             
+            // Géocoder l'adresse pour obtenir les coordonnées GPS
+            showNotification('📍 Géocodage de l\'adresse...', 'info');
+            const coords = await geocodeAddress(adresse, gite);
+            
             // Créer le lien Google Maps
             const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
             
@@ -7484,7 +7513,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 note: note ? parseFloat(note) : null,
                 avis: avis ? parseInt(avis) : null,
                 prix,
-                google_maps_link: googleMapsLink
+                google_maps_link: googleMapsLink,
+                latitude: coords.lat,
+                longitude: coords.lng
             };
             
             try {
