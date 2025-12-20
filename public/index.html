@@ -6967,7 +6967,24 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 
                 // Utiliser Nominatim (OpenStreetMap) pour le géocodage
                 const encodedAddress = encodeURIComponent(address + ', France');
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`);
+                
+                // Ajouter un délai pour respecter la politique de Nominatim (1 req/sec max)
+                await new Promise(resolve => setTimeout(resolve, 1100));
+                
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`, {
+                    headers: {
+                        'User-Agent': 'GestionGite/1.0 (gite.welcomehome@gmail.com)'
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.warn('Erreur HTTP:', response.status, 'pour', address);
+                    // Utiliser coordonnées par défaut
+                    return gite === 'Trévoux' 
+                        ? { lat: 45.9394, lng: 4.7728 }
+                        : { lat: 45.8442, lng: 4.8365 };
+                }
+                
                 const data = await response.json();
                 
                 if (data && data.length > 0) {
@@ -7014,21 +7031,21 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     
                     console.log('📅 Événements de base:', toutesLesDonnees.length);
                     
-                    // Traiter les activités
-                    const promises = data.map(async (act, index) => {
+                    // Traiter les activités SÉQUENTIELLEMENT pour éviter le rate limiting
+                    for (let i = 0; i < data.length; i++) {
+                        const act = data[i];
                         let coords;
                         
                         // Si les coordonnées sont déjà en BDD, les utiliser
                         if (act.latitude && act.longitude) {
-                            console.log('✓ Coordonnées depuis BDD:', act.nom);
+                            console.log(`✓ (${i+1}/${data.length}) Coordonnées depuis BDD:`, act.nom);
                             coords = {
                                 lat: parseFloat(act.latitude),
                                 lng: parseFloat(act.longitude)
                             };
                         } else {
                             // Sinon, géocoder et sauvegarder dans la BDD
-                            console.log('🔍 Géocodage nécessaire:', act.nom);
-                            await new Promise(resolve => setTimeout(resolve, index * 250));
+                            console.log(`🔍 (${i+1}/${data.length}) Géocodage nécessaire:`, act.nom);
                             coords = await geocodeAddress(act.adresse, gite);
                             
                             // Sauvegarder les coordonnées dans la BDD
@@ -7046,7 +7063,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             }
                         }
                         
-                        return {
+                        toutesLesDonnees.push({
                             titre: act.nom,
                             nom: act.nom,
                             date: null,
@@ -7060,11 +7077,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             lng: coords.lng,
                             note: act.note,
                             categorie: act.categorie
-                        };
-                    });
-                    
-                    const activitesGeocodees = await Promise.all(promises);
-                    toutesLesDonnees.push(...activitesGeocodees);
+                        });
+                    }
                     
                     console.log('✅ Total points à afficher:', toutesLesDonnees.length);
                     
