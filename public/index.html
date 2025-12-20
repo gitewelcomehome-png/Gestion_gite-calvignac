@@ -2803,7 +2803,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         }
         
         async function syncCalendar(gite, platform, url) {
-            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+            // Utiliser corsproxy.io au lieu de allorigins (plus fiable)
+            const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
             
             try {
                 const response = await fetch(proxyUrl);
@@ -3096,6 +3097,14 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             html += '</div>';
             container.innerHTML = html;
+            
+            // Scroller automatiquement vers la première semaine (semaine actuelle)
+            setTimeout(() => {
+                const firstWeek = container.querySelector('.week-block');
+                if (firstWeek) {
+                    firstWeek.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
         }
         
         function generateWeekReservations(reservations, weekKey, cssClass, toutesReservations, validationMap = {}) {
@@ -6224,11 +6233,19 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     currentLang = 'en';
                     showNotification('🇬🇧 English mode activated', 'info');
                     
-                    // Traduction automatique silencieuse (une seule fois)
-                    if (!translationDone && enField && !enField.value.trim()) {
-                        setTimeout(() => {
-                            autoTranslateSilent();
-                        }, 500);
+                    // Traduction automatique silencieuse (une seule fois) si les champs EN sont vides
+                    if (!translationDone) {
+                        // Vérifier si au moins un champ EN est vide
+                        const hasEmptyEnFields = fieldsToSwitch.some(field => {
+                            const enField = document.getElementById(`infos_${field}_en`);
+                            return enField && !enField.value.trim();
+                        });
+                        
+                        if (hasEmptyEnFields) {
+                            setTimeout(() => {
+                                autoTranslateSilent();
+                            }, 500);
+                        }
                     }
                 }
             };
