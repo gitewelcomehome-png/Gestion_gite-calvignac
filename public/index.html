@@ -9,7 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Pas besoin de QRCode.js, on utilise une API -->
+    <!-- Leaflet pour la carte interactive -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <style> @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;600;700&display=swap');*{margin:0;padding:0;box-sizing:border-box;}
 :root{--primary:#2C5F7D;--primary-dark:#1A3A4D;--accent:#E8A87C;--accent-light:#F5D5B8;--bg-light:#F8F9FA;--text-dark:#2C3E50;--success:#27AE60;--trevoux:#667eea;--couzon:#f093fb;--border:#E0E4E8;--warning:#F39C12;--danger:#E74C3C;--airbnb:#FF5A5F;--abritel:#3498DB;--gites:#27AE60;}
@@ -1637,13 +1639,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         </div>
                     </div>
                     
-                    <!-- Carte interactive -->
-                    <div id="mapEvenements" style="height: 400px; border-radius: 12px; margin-bottom: 20px; background: #e0e0e0; display: none; position: relative; overflow: hidden;">
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #666;">
-                            <p>🗺️ Carte interactive des événements</p>
-                            <small>Cliquez sur les marqueurs pour plus d'infos</small>
-                        </div>
-                    </div>
+                    <!-- Carte interactive Leaflet -->
+                    <div id="mapEvenements" style="height: 500px; border-radius: 12px; margin-bottom: 20px; display: none; z-index: 1;"></div>
                     
                     <div id="evenementsListe" style="display: grid; gap: 15px;">
                         <p style="text-align: center; color: #999; padding: 40px;">
@@ -6949,10 +6946,69 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             // Charger et afficher les activités
             chargerActivites();
             
-            // Charger automatiquement les événements
+            // Charger automatiquement les événements et afficher TOUT sur la carte
             setTimeout(() => {
-                rechercherEvenements();
+                chargerToutSurCarte();
             }, 500);
+        }
+        
+        // Fonction pour charger et afficher TOUTES les données sur la carte
+        async function chargerToutSurCarte() {
+            const gite = document.getElementById('decouvrir_gite').value;
+            if (!gite) return;
+            
+            // 1. Charger les événements
+            await rechercherEvenements();
+            
+            // 2. Récupérer toutes les activités de Supabase pour ce gîte
+            try {
+                const { data, error } = await supabase
+                    .from('activites_gites')
+                    .select('*')
+                    .eq('gite', gite);
+                
+                if (!error && data) {
+                    // Combiner événements et activités
+                    const toutesLesDonnees = [...window.allEvenements];
+                    
+                    // Ajouter les activités avec leurs coordonnées
+                    data.forEach(act => {
+                        // Essayer d'obtenir des coordonnées approximatives basées sur l'adresse
+                        // Pour une vraie app, il faudrait géocoder les adresses
+                        const baseCoords = gite === 'Trévoux' 
+                            ? { lat: 45.9394, lng: 4.7728 }
+                            : { lat: 45.8442, lng: 4.8365 };
+                        
+                        // Ajouter un petit offset aléatoire pour éviter que tous les marqueurs se superposent
+                        const offset = 0.01;
+                        const randomLat = baseCoords.lat + (Math.random() - 0.5) * offset;
+                        const randomLng = baseCoords.lng + (Math.random() - 0.5) * offset;
+                        
+                        toutesLesDonnees.push({
+                            titre: act.nom,
+                            nom: act.nom,
+                            date: null,
+                            lieu: act.adresse,
+                            adresse: act.adresse,
+                            description: act.description,
+                            lien: act.website,
+                            icone: act.categorie ? act.categorie.split(' ')[0] : '📍',
+                            distance: act.distance || 0,
+                            lat: randomLat,
+                            lng: randomLng,
+                            note: act.note,
+                            categorie: act.categorie
+                        });
+                    });
+                    
+                    // Afficher tout sur la carte
+                    window.allEvenements = toutesLesDonnees;
+                    afficherCarteEvenements(toutesLesDonnees);
+                    filtrerEvenements();
+                }
+            } catch (error) {
+                console.error('Erreur chargement activités:', error);
+            }
         }
         
         // Rechercher automatiquement via Google Places API (simulation sans clé API)
@@ -7243,42 +7299,78 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             evenementsDiv.innerHTML = html;
         }
         
+        // Variable globale pour la carte
+        let mapInstance = null;
+        let allMarkers = [];
+        
         // Fonction pour afficher la carte avec les événements
         function afficherCarteEvenements(evenements) {
             const mapDiv = document.getElementById('mapEvenements');
+            mapDiv.style.display = 'block';
+            
+            // Détruire l'ancienne carte si elle existe
+            if (mapInstance) {
+                mapInstance.remove();
+            }
             
             // Calculer le centre de la carte
             const avgLat = evenements.reduce((sum, e) => sum + e.lat, 0) / evenements.length;
             const avgLng = evenements.reduce((sum, e) => sum + e.lng, 0) / evenements.length;
             
-            // Créer une carte simple avec les marqueurs
-            let mapHtml = `
-                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; flex-direction: column;">
-                    <div style="padding: 15px; color: white; background: rgba(0,0,0,0.2);">
-                        <h4 style="margin: 0;">🗺️ Carte des événements</h4>
-                        <small>Centre: ${avgLat.toFixed(4)}, ${avgLng.toFixed(4)}</small>
-                    </div>
-                    <div style="flex: 1; padding: 20px; overflow-y: auto;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
-            `;
+            // Créer la carte Leaflet
+            mapInstance = L.map('mapEvenements').setView([avgLat, avgLng], 11);
             
-            evenements.forEach((event, index) => {
-                mapHtml += `
-                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: transform 0.2s;" onclick="alert('${event.titre}\\n📍 ${event.lieu}\\n🗓️ ${event.date}\\n\\n${event.description}')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                        <div style="font-size: 2rem; margin-bottom: 5px;">${event.icone}</div>
-                        <div style="font-weight: 600; font-size: 0.9rem; color: #333; margin-bottom: 3px;">${event.titre}</div>
-                        <div style="font-size: 0.75rem; color: #667eea; font-weight: 600;">${event.distance} km</div>
+            // Ajouter les tuiles OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(mapInstance);
+            
+            // Effacer les anciens marqueurs
+            allMarkers = [];
+            
+            // Ajouter les marqueurs pour chaque événement/activité
+            evenements.forEach(item => {
+                // Créer une icône personnalisée avec l'emoji
+                const iconHtml = `
+                    <div style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 3px solid #667eea;">
+                        ${item.icone || '📍'}
                     </div>
                 `;
+                
+                const customIcon = L.divIcon({
+                    html: iconHtml,
+                    className: 'custom-marker',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+                
+                const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(mapInstance);
+                
+                // Popup avec les informations
+                const popupContent = `
+                    <div style="min-width: 200px;">
+                        <h3 style="margin: 0 0 10px 0; color: #667eea; font-size: 1.1rem;">
+                            ${item.icone || '📍'} ${item.titre || item.nom}
+                        </h3>
+                        <p style="margin: 5px 0; font-size: 0.9rem;"><strong>📍</strong> ${item.lieu || item.adresse || 'Non spécifié'}</p>
+                        ${item.date ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>🗓️</strong> ${item.date}</p>` : ''}
+                        ${item.distance ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>📏</strong> ${item.distance} km</p>` : ''}
+                        ${item.description ? `<p style="margin: 10px 0; font-size: 0.85rem; line-height: 1.4;">${item.description}</p>` : ''}
+                        ${item.note ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>⭐</strong> ${item.note}/5</p>` : ''}
+                        ${item.lien ? `<a href="${item.lien}" target="_blank" style="display: inline-block; margin-top: 10px; padding: 8px 15px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85rem;">🔗 Plus d'infos</a>` : ''}
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                allMarkers.push({ marker, item });
             });
             
-            mapHtml += `
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            mapDiv.innerHTML = mapHtml;
+            // Ajuster la vue pour inclure tous les marqueurs
+            if (evenements.length > 0) {
+                const group = L.featureGroup(allMarkers.map(m => m.marker));
+                mapInstance.fitBounds(group.getBounds().pad(0.1));
+            }
         }
         
         // Mettre à jour le label de distance
