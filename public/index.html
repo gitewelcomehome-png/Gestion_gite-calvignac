@@ -7183,10 +7183,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 return;
             }
             
-            // Filtrer tous les points (événements + activités) selon la catégorie
+            // Récupérer la distance max actuelle
+            const maxDistance = parseInt(document.getElementById('distanceFilter').value);
+            
+            // Filtrer tous les points (événements + activités) selon la catégorie ET la distance
             if (window.allEvenements) {
                 const pointsFiltres = window.allEvenements.filter(item => {
-                    return item.categorie === categorieRecherchee;
+                    return item.categorie === categorieRecherchee && item.distance <= maxDistance;
                 });
                 
                 console.log(`🔍 Filtrage ${categorieRecherchee}:`, pointsFiltres.length, 'résultats');
@@ -7194,9 +7197,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 // Mettre à jour la carte avec les points filtrés
                 if (pointsFiltres.length > 0) {
                     afficherCarteEvenements(pointsFiltres);
-                    showNotification(`✓ ${pointsFiltres.length} point(s) de type "${categorieRecherchee}"`, 'success');
+                    showNotification(`✓ ${pointsFiltres.length} point(s) de type "${categorieRecherchee}" (≤${maxDistance}km)`, 'success');
                 } else {
-                    showNotification(`ℹ️ Aucun point de type "${categorieRecherchee}" trouvé`, 'info');
+                    showNotification(`ℹ️ Aucun point de type "${categorieRecherchee}" à ≤${maxDistance}km`, 'info');
                 }
             }
             
@@ -7463,9 +7466,28 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             evenementsDiv.innerHTML = html;
         }
         
-        // Variable globale pour la carte
+        // Variables globales pour la carte
         let mapInstance = null;
         let markersLayer = null;
+        let giteMarker = null;
+        
+        // Coordonnées des gîtes
+        const giteCoords = {
+            'Trévoux': { lat: 45.9396, lng: 4.7733 },
+            'Couzon': { lat: 45.8439, lng: 4.8288 }
+        };
+        
+        // Fonction pour afficher tout (réinitialise les filtres)
+        function afficherTout() {
+            if (window.allEvenements && window.allEvenements.length > 0) {
+                // Réinitialiser le filtre de distance
+                const maxDistance = parseInt(document.getElementById('distanceFilter').value);
+                const pointsFiltres = window.allEvenements.filter(e => e.distance <= maxDistance);
+                
+                afficherCarteEvenements(pointsFiltres);
+                showNotification(`✓ ${pointsFiltres.length} points affichés (≤${maxDistance}km)`, 'success');
+            }
+        }
         
         // Fonction pour afficher la carte avec les événements
         function afficherCarteEvenements(evenements) {
@@ -7533,6 +7555,32 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             // Effacer tous les marqueurs existants
             markersLayer.clearLayers();
+            
+            // Ajouter un marqueur pour le gîte sélectionné
+            const giteSelectionne = document.getElementById('decouvrir_gite').value;
+            if (giteSelectionne && giteCoords[giteSelectionne]) {
+                const coords = giteCoords[giteSelectionne];
+                const giteIconHtml = `
+                    <div style="background: #ff5a5f; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 12px rgba(255,90,95,0.5); border: 4px solid white;">
+                        🏠
+                    </div>
+                `;
+                const giteIcon = L.divIcon({
+                    html: giteIconHtml,
+                    className: 'gite-marker',
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 25]
+                });
+                
+                giteMarker = L.marker([coords.lat, coords.lng], { icon: giteIcon });
+                giteMarker.bindPopup(`
+                    <div style="text-align: center; padding: 10px;">
+                        <h3 style="margin: 0; color: #ff5a5f;">🏠 Gîte ${giteSelectionne}</h3>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Point de référence</p>
+                    </div>
+                `);
+                giteMarker.addTo(markersLayer);
+            }
             
             // Ajouter les nouveaux marqueurs
             evenementsValides.forEach(item => {
