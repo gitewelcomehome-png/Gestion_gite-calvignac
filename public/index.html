@@ -7446,8 +7446,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 }
             }
             
-            // Vider le container
+            // Vider le container et supprimer les attributs Leaflet
             mapDiv.innerHTML = '';
+            mapDiv._leaflet_id = null;
+            delete mapDiv._leaflet_id;
             
             // Attendre un instant avant de recréer la carte
             setTimeout(() => {
