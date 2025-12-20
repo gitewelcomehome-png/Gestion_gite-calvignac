@@ -759,7 +759,7 @@ h1{font-size:2.1rem;}
                     <!-- Sélecteur de langue - UN SEUL BOUTON avec vraies images -->
                     <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.15); padding: 6px; border-radius: 20px;">
                         <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: none; cursor: pointer; padding: 8px; border-radius: 15px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;" title="Switch to English">
-                            <img id="flagIcon" src="https://flagcdn.com/w80/gb.png" alt="EN" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                            <img id="flagIcon" src="https://flagcdn.com/w80/fr.png" alt="FR" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
                         </button>
                     </div>
                     
@@ -6190,19 +6190,19 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 // Mettre à jour la langue actuelle
                 currentLang = newLang;
                 
-                // Mettre à jour le bouton pour afficher le drapeau de l'AUTRE langue
+                // Mettre à jour le bouton pour afficher le drapeau de la langue ACTIVE
                 const flagIcon = document.getElementById('flagIcon');
                 if (btn && flagIcon) {
                     if (currentLang === 'fr') {
-                        // On est en français, on affiche le drapeau UK pour passer en anglais
-                        flagIcon.src = 'https://flagcdn.com/w80/gb.png';
-                        flagIcon.alt = 'EN';
+                        // On est en français, on affiche le drapeau FR
+                        flagIcon.src = 'https://flagcdn.com/w80/fr.png';
+                        flagIcon.alt = 'FR';
                         btn.title = 'Switch to English';
                         showNotification('🇫🇷 Mode français activé', 'info');
                     } else {
-                        // On est en anglais, on affiche le drapeau FR pour revenir en français
-                        flagIcon.src = 'https://flagcdn.com/w80/fr.png';
-                        flagIcon.alt = 'FR';
+                        // On est en anglais, on affiche le drapeau UK
+                        flagIcon.src = 'https://flagcdn.com/w80/gb.png';
+                        flagIcon.alt = 'EN';
                         btn.title = 'Passer en français';
                         showNotification('🇬🇧 English mode activated', 'info');
                         
