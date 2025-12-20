@@ -6261,26 +6261,43 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     
                     if (frField && enField && frField.value.trim() && !enField.value.trim()) {
                         try {
-                            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(frField.value.trim())}&langpair=fr|en`);
+                            const originalText = frField.value.trim();
+                            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(originalText)}&langpair=fr|en`);
                             const data = await response.json();
+                            
                             if (data.responseData && data.responseData.translatedText) {
                                 let translatedText = data.responseData.translatedText;
                                 
-                                // Nettoyer les balises XML/HTML bizarres (sg, g, etc.)
-                                translatedText = translatedText.replace(/<[^>]+>/g, '');
+                                // Vérifier si la traduction contient des balises suspectes AVANT de nettoyer
+                                const hasSuspiciousTags = /<(sg|g|lsg)\s+id=/i.test(translatedText) || translatedText.includes('</>');
                                 
-                                // Vérifier que la traduction est valide (pas trop différente en longueur)
-                                const originalLength = frField.value.trim().length;
+                                if (hasSuspiciousTags) {
+                                    console.log('⚠️ Traduction avec balises suspectes ignorée pour', field, translatedText.substring(0, 100));
+                                    continue;
+                                }
+                                
+                                // Nettoyer les balises XML/HTML bizarres restantes
+                                translatedText = translatedText.replace(/<[^>]+>/g, '').trim();
+                                
+                                // Vérifier que la traduction est valide
+                                const originalLength = originalText.length;
                                 const translatedLength = translatedText.length;
                                 
-                                // Si la traduction est 3x plus longue que l'original, c'est suspect
-                                if (translatedLength > originalLength * 3) {
-                                    console.log('⚠️ Traduction suspecte ignorée pour', field);
+                                // Si la traduction est 3x plus longue OU moins de 20% de l'original, c'est suspect
+                                if (translatedLength > originalLength * 3 || translatedLength < originalLength * 0.2) {
+                                    console.log('⚠️ Traduction avec longueur suspecte ignorée pour', field, `(${originalLength} -> ${translatedLength})`);
+                                    continue;
+                                }
+                                
+                                // Vérifier que ce n'est pas juste des espaces ou vide
+                                if (!translatedText || translatedText.length < 2) {
+                                    console.log('⚠️ Traduction vide ignorée pour', field);
                                     continue;
                                 }
                                 
                                 enField.value = translatedText;
                                 translated++;
+                                console.log('✅ Traduit:', field, originalText.substring(0, 30), '->', translatedText.substring(0, 30));
                             }
                             // Petite pause entre les requêtes pour éviter le rate limiting
                             await new Promise(resolve => setTimeout(resolve, 300));
@@ -6386,17 +6403,31 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                                 if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
                                     let translatedText = data.responseData.translatedText;
                                     
-                                    // Nettoyer les balises XML/HTML bizarres (sg, g, etc.)
-                                    translatedText = translatedText.replace(/<[^>]+>/g, '');
+                                    // Vérifier si la traduction contient des balises suspectes AVANT de nettoyer
+                                    const hasSuspiciousTags = /<(sg|g|lsg)\s+id=/i.test(translatedText) || translatedText.includes('</>');
+                                    
+                                    if (hasSuspiciousTags) {
+                                        console.warn(`⚠️ Traduction avec balises suspectes ignorée pour ${field}`);
+                                        await new Promise(resolve => setTimeout(resolve, 600));
+                                        continue;
+                                    }
+                                    
+                                    // Nettoyer les balises XML/HTML bizarres restantes
+                                    translatedText = translatedText.replace(/<[^>]+>/g, '').trim();
                                     
                                     // Vérifier que la traduction est valide
-                                    if (translatedText.length <= textToTranslate.length * 3) {
-                                        enInput.value = translatedText;
-                                        translated++;
-                                        console.log(`✅ Traduit: ${field} → "${translatedText.substring(0, 50)}..."`);
-                                    } else {
-                                        console.warn(`⚠️ Traduction suspecte ignorée pour ${field}`);
+                                    const originalLength = textToTranslate.length;
+                                    const translatedLength = translatedText.length;
+                                    
+                                    if (translatedLength > originalLength * 3 || translatedLength < originalLength * 0.2 || !translatedText || translatedLength < 2) {
+                                        console.warn(`⚠️ Traduction suspecte ignorée pour ${field} (${originalLength} -> ${translatedLength})`);
+                                        await new Promise(resolve => setTimeout(resolve, 600));
+                                        continue;
                                     }
+                                    
+                                    enInput.value = translatedText;
+                                    translated++;
+                                    console.log(`✅ Traduit: ${field} → "${translatedText.substring(0, 50)}..."`);
                                 } else {
                                     console.warn(`⚠️ Échec traduction pour ${field}:`, data);
                                 }
