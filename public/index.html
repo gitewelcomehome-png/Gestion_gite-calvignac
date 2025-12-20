@@ -6952,10 +6952,46 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             }, 500);
         }
         
+        // Fonction pour géocoder une adresse (convertir adresse → coordonnées GPS)
+        async function geocodeAddress(address, gite) {
+            try {
+                // Si l'adresse est vide, utiliser les coordonnées du gîte
+                if (!address || address.trim() === '') {
+                    return gite === 'Trévoux' 
+                        ? { lat: 45.9394, lng: 4.7728 }
+                        : { lat: 45.8442, lng: 4.8365 };
+                }
+                
+                // Utiliser Nominatim (OpenStreetMap) pour le géocodage
+                const encodedAddress = encodeURIComponent(address + ', France');
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`);
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    return {
+                        lat: parseFloat(data[0].lat),
+                        lng: parseFloat(data[0].lon)
+                    };
+                }
+                
+                // Si le géocodage échoue, coordonnées par défaut du gîte
+                return gite === 'Trévoux' 
+                    ? { lat: 45.9394, lng: 4.7728 }
+                    : { lat: 45.8442, lng: 4.8365 };
+            } catch (error) {
+                console.error('Erreur géocodage:', address, error);
+                return gite === 'Trévoux' 
+                    ? { lat: 45.9394, lng: 4.7728 }
+                    : { lat: 45.8442, lng: 4.8365 };
+            }
+        }
+        
         // Fonction pour charger et afficher TOUTES les données sur la carte
         async function chargerToutSurCarte() {
             const gite = document.getElementById('decouvrir_gite').value;
             if (!gite) return;
+            
+            showNotification('🗺️ Chargement de la carte...', 'info');
             
             // 1. Charger les événements
             await rechercherEvenements();
@@ -6971,18 +7007,12 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     // Combiner événements et activités
                     const toutesLesDonnees = [...window.allEvenements];
                     
-                    // Ajouter les activités avec leurs coordonnées
-                    data.forEach(act => {
-                        // Essayer d'obtenir des coordonnées approximatives basées sur l'adresse
-                        // Pour une vraie app, il faudrait géocoder les adresses
-                        const baseCoords = gite === 'Trévoux' 
-                            ? { lat: 45.9394, lng: 4.7728 }
-                            : { lat: 45.8442, lng: 4.8365 };
+                    // Géocoder les activités en parallèle (avec délai pour respecter les limites API)
+                    for (const act of data) {
+                        // Pause de 1 seconde entre chaque requête pour respecter la politique de Nominatim
+                        await new Promise(resolve => setTimeout(resolve, 1000));
                         
-                        // Ajouter un petit offset aléatoire pour éviter que tous les marqueurs se superposent
-                        const offset = 0.01;
-                        const randomLat = baseCoords.lat + (Math.random() - 0.5) * offset;
-                        const randomLng = baseCoords.lng + (Math.random() - 0.5) * offset;
+                        const coords = await geocodeAddress(act.adresse, gite);
                         
                         toutesLesDonnees.push({
                             titre: act.nom,
@@ -6994,20 +7024,23 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             lien: act.website,
                             icone: act.categorie ? act.categorie.split(' ')[0] : '📍',
                             distance: act.distance || 0,
-                            lat: randomLat,
-                            lng: randomLng,
+                            lat: coords.lat,
+                            lng: coords.lng,
                             note: act.note,
                             categorie: act.categorie
                         });
-                    });
+                    }
                     
                     // Afficher tout sur la carte
                     window.allEvenements = toutesLesDonnees;
                     afficherCarteEvenements(toutesLesDonnees);
                     filtrerEvenements();
+                    
+                    showNotification(`✓ ${toutesLesDonnees.length} points chargés sur la carte`, 'success');
                 }
             } catch (error) {
                 console.error('Erreur chargement activités:', error);
+                showNotification('⚠️ Erreur chargement des données', 'warning');
             }
         }
         
