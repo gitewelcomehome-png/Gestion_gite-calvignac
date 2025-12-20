@@ -1613,6 +1613,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         <button type="button" class="btn" style="background: #ef4444;" onclick="rechercherEvenements()">
                             📅 Événements cette semaine
                         </button>
+                        <button type="button" class="btn" style="background: #6b7280;" onclick="afficherTout()">
+                            🗺️ Afficher Tout
+                        </button>
                     </div>
                 </div>
 
@@ -7111,13 +7114,30 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 return;
             }
             
+            // Filtrer tous les points (événements + activités) selon la catégorie
+            if (window.allEvenements) {
+                const pointsFiltres = window.allEvenements.filter(item => {
+                    return item.categorie === categorieRecherchee;
+                });
+                
+                console.log(`🔍 Filtrage ${categorieRecherchee}:`, pointsFiltres.length, 'résultats');
+                
+                // Mettre à jour la carte avec les points filtrés
+                if (pointsFiltres.length > 0) {
+                    afficherCarteEvenements(pointsFiltres);
+                    showNotification(`✓ ${pointsFiltres.length} point(s) de type "${categorieRecherchee}"`, 'success');
+                } else {
+                    showNotification(`ℹ️ Aucun point de type "${categorieRecherchee}" trouvé`, 'info');
+                }
+            }
+            
             // Récupérer les activités du gîte sélectionné
             const activites = activitesParGite[gite] || [];
             
             // Filtrer par catégorie
             const activitesFiltrees = activites.filter(act => act.categorie === categorieRecherchee);
             
-            // Afficher les résultats
+            // Afficher les résultats dans la liste
             const container = document.getElementById('activitesParCategorie');
             
             if (activitesFiltrees.length === 0) {
@@ -7127,7 +7147,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         <p style="color: #666;">Essayez d'ajouter des activités de cette catégorie manuellement ci-dessous.</p>
                     </div>
                 `;
-                showNotification(`ℹ️ Aucune activité de type "${categorieRecherchee}" trouvée`, 'info');
+                return;
                 return;
             }
             
@@ -7453,8 +7473,15 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             const distance = document.getElementById('distanceFilter').value;
             document.getElementById('distanceLabel').textContent = `≤ ${distance} km`;
             
-            // Refiltrer les événements si des événements sont chargés
+            // Refiltrer les événements et la carte si des événements sont chargés
             if (window.allEvenements && window.allEvenements.length > 0) {
+                const maxDistance = parseInt(distance);
+                const pointsFiltres = window.allEvenements.filter(e => e.distance <= maxDistance);
+                
+                // Mettre à jour la carte avec les points filtrés
+                afficherCarteEvenements(pointsFiltres);
+                
+                // Mettre à jour la liste
                 filtrerEvenements();
             }
         }
@@ -7462,6 +7489,23 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         // Rafraîchir les événements
         function refreshEvenements() {
             rechercherEvenements();
+        }
+        
+        // Afficher tous les points sur la carte
+        function afficherTout() {
+            if (window.allEvenements && window.allEvenements.length > 0) {
+                afficherCarteEvenements(window.allEvenements);
+                filtrerEvenements();
+                showNotification(`✓ ${window.allEvenements.length} points affichés`, 'success');
+                
+                // Réafficher toutes les activités dans la liste
+                const gite = document.getElementById('decouvrir_gite').value;
+                if (gite) {
+                    afficherActivites(gite);
+                }
+            } else {
+                showNotification('⚠️ Chargez d\'abord les données en sélectionnant un gîte', 'warning');
+            }
         }
         
         // Toggle du formulaire d'ajout d'activité
