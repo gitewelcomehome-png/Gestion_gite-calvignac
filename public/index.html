@@ -107,9 +107,10 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
 .cleaning-item.empty{justify-content:center;align-items:center;color:#999;font-style:italic;background:#f9fafb;}
 .cleaning-date-row{display:flex;justify-content:space-between;align-items:center;}
 .cleaning-date{font-weight:600;color:#0f172a;font-size:0.95rem;}
-.validation-status{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;}
+.validation-status{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:bold;}
 .validation-status.validated{background:#10b981;color:white;}
-.validation-status.pending{background:#ef4444;color:white;}
+.validation-status.pending{background:#f97316;color:white;}
+.validation-status.notvalidated{background:#ef4444;color:white;}
 .cleaning-details{font-size:0.85rem;color:#6b7280;}
 .cleaning-actions{display:flex;gap:8px;margin-top:5px;}
 .btn-small{padding:6px 12px;font-size:0.8rem;border-radius:6px;border:none;cursor:pointer;font-weight:600;background:#f3f4f6;color:#374151;}
@@ -3013,6 +3014,18 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
+            // Récupérer les validations de la société de ménage
+            const { data: cleaningSchedules } = await supabase
+                .from('cleaning_schedule')
+                .select('*');
+            
+            const validationMap = {};
+            if (cleaningSchedules) {
+                cleaningSchedules.forEach(cs => {
+                    validationMap[cs.reservation_id] = cs;
+                });
+            }
+            
             const active = reservations.filter(r => parseLocalDate(r.dateFin) >= today);
             
             const container = document.getElementById('planning-container');
@@ -3070,11 +3083,11 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         
                         <div class="week-content-grid" style="border-top: none;">
                             <div class="gite-column-inline">
-                                ${generateWeekReservations(byGite['Trévoux'], weekNum, 'trevoux', active)}
+                                ${generateWeekReservations(byGite['Trévoux'], weekNum, 'trevoux', active, validationMap)}
                             </div>
                             
                             <div class="gite-column-inline">
-                                ${generateWeekReservations(byGite['Couzon'], weekNum, 'couzon', active)}
+                                ${generateWeekReservations(byGite['Couzon'], weekNum, 'couzon', active, validationMap)}
                             </div>
                         </div>
                     </div>
@@ -3085,7 +3098,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             container.innerHTML = html;
         }
         
-        function generateWeekReservations(reservations, weekKey, cssClass, toutesReservations) {
+        function generateWeekReservations(reservations, weekKey, cssClass, toutesReservations, validationMap = {}) {
             // Trouver les réservations dont la date de DÉBUT est dans cette semaine
             const weekReservations = reservations.filter(r => {
                 const start = parseLocalDate(r.dateDebut);
@@ -3102,6 +3115,26 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 const dateMenage = calculerDateMenage(r, toutesReservations);
                 const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 600;">✓</span>' : '';
                 const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.9rem;">📱 ${r.telephone}</span>` : '';
+                
+                // Récupérer l'état de validation du ménage
+                const validation = validationMap[r.id];
+                let statusBadge = '';
+                if (validation) {
+                    if (validation.validated_by_company) {
+                        // VERT = Validé
+                        statusBadge = '<span class="validation-status validated" title="Validé par société" style="margin-left: 8px;">✓</span>';
+                    } else if (validation.status === 'proposed') {
+                        // ORANGE = En attente de validation
+                        statusBadge = '<span class="validation-status pending" title="En attente validation" style="margin-left: 8px;">⏳</span>';
+                    } else {
+                        // ROUGE = À valider
+                        statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
+                    }
+                } else {
+                    // Pas de validation enregistrée = ROUGE = À valider
+                    statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
+                }
+                
                 html += `
                     <div class="week-reservation ${cssClass}" style="position: relative; padding: 12px; padding-top: 40px;">
                         <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;">
@@ -3121,10 +3154,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             💰 <strong>${r.montant.toFixed(2)} €</strong>
                         </div>
                         
-                        <!-- Pied : Ménage à gauche, Plateforme à droite -->
+                        <!-- Pied : Ménage avec pastille à gauche, Plateforme à droite -->
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
-                            <div style="font-size: 0.85rem; color: #64748b;">
-                                🧹 ${dateMenage}
+                            <div style="font-size: 0.85rem; color: #64748b; display: flex; align-items: center;">
+                                🧹 ${dateMenage}${statusBadge}
                             </div>
                             <div>
                                 ${platformLogo}
@@ -4586,14 +4619,18 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay } = menageInfo;
             const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
             
-            // Icône et badge de statut
+            // Icône et badge de statut - 3 états uniquement :
+            // Rouge = à valider, Orange = en attente, Vert = validé
             let statusIcon = '';
             if (validated) {
-                statusIcon = '<span class="validation-status validated" title="Validé par société">✓ Validé</span>';
+                // VERT = Validé
+                statusIcon = '<span class="validation-status validated" title="Validé par société">✓</span>';
             } else if (status === 'proposed') {
-                statusIcon = '<span class="validation-status pending" title="En attente validation">⏳ En attente</span>';
+                // ORANGE = En attente de validation
+                statusIcon = '<span class="validation-status pending" title="En attente validation">⏳</span>';
             } else {
-                statusIcon = '<span class="validation-status pending" title="Non validé">✗ Pending</span>';
+                // ROUGE = À valider
+                statusIcon = '<span class="validation-status notvalidated" title="À valider">✗</span>';
             }
             
             const dateStr = displayDate.toLocaleDateString('fr-FR', { 
@@ -6110,6 +6147,26 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 const btnFR = document.getElementById('btnLangFR');
                 const btnEN = document.getElementById('btnLangEN');
                 
+                // Liste de tous les champs à basculer
+                const fieldsToSwitch = [
+                    'adresse', 'telephone', 'email',
+                    'wifiSSID', 'wifiPassword', 'wifiDebit', 'wifiLocalisation', 'wifiZones',
+                    'heureArrivee', 'arriveeTardive', 'parkingDispo', 'parkingPlaces', 'parkingDetails',
+                    'typeAcces', 'codeAcces', 'instructionsCles', 'etage', 'ascenseur',
+                    'itineraireLogement', 'premiereVisite',
+                    'typeChauffage', 'climatisation', 'instructionsChauffage',
+                    'equipementsCuisine', 'instructionsFour', 'instructionsPlaques',
+                    'instructionsLaveVaisselle', 'instructionsLaveLinge', 'secheLinge',
+                    'ferRepasser', 'lingeFourni', 'configurationChambres',
+                    'instructionsTri', 'joursCollecte', 'decheterie',
+                    'detecteurFumee', 'extincteur', 'coupureEau', 'disjoncteur', 'consignesUrgence',
+                    'heureDepart', 'departTardif', 'checklistDepart', 'restitutionCles',
+                    'supermarche', 'boulangerie', 'pharmacie', 'medecin', 'hopital', 'restaurants',
+                    'transportsCommuns', 'tourisme', 'activites', 'activitesEnfants', 'randonnees', 'plages',
+                    'reglesAnimaux', 'reglesFumeur', 'reglesCalme', 'reglesEvenements', 'autresRegles',
+                    'autresInfos', 'contactsLocaux', 'recommandations', 'messageClient'
+                ];
+                
                 if (lang === 'fr') {
                     // Mise à jour visuelle des boutons
                     if (btnFR) {
@@ -6123,24 +6180,15 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         btnEN.style.opacity = '0.7';
                     }
                     
-                    // Afficher les champs FR, cacher les champs EN
-                    document.querySelectorAll('[data-lang="fr"]').forEach(el => {
-                        el.style.display = '';
+                    // Basculer les valeurs : afficher FR dans les champs principaux
+                    fieldsToSwitch.forEach(field => {
+                        const frField = document.getElementById(`infos_${field}`);
+                        const enField = document.getElementById(`infos_${field}_en`);
+                        
+                        if (frField && enField) {
+                            frField.value = frField.value; // Garder FR dans FR
+                        }
                     });
-                    document.querySelectorAll('[data-lang="en"]').forEach(el => {
-                        el.style.display = 'none';
-                    });
-                    
-                    // Afficher toutes les cartes du formulaire
-                    document.querySelectorAll('#infosGiteForm > .card').forEach(card => {
-                        card.style.display = '';
-                    });
-                    
-                    // Cacher la carte anglaise si elle existe
-                    const englishCard = document.getElementById('englishFieldsCard');
-                    if (englishCard) {
-                        englishCard.style.display = 'none';
-                    }
                     
                     currentLang = 'fr';
                     showNotification('🇫🇷 Mode français activé', 'info');
@@ -6158,30 +6206,26 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         btnEN.style.opacity = '1';
                     }
                     
-                    // Afficher les champs EN, cacher les champs FR dans les cartes normales
-                    document.querySelectorAll('[data-lang="fr"]').forEach(el => {
-                        el.style.display = 'none';
-                    });
-                    document.querySelectorAll('[data-lang="en"]').forEach(el => {
-                        el.style.display = '';
-                    });
-                    
-                    // Afficher la carte anglaise si elle existe
-                    const englishCard = document.getElementById('englishFieldsCard');
-                    if (englishCard) {
-                        englishCard.style.display = '';
+                    // Basculer les valeurs : afficher EN dans les champs principaux
+                    fieldsToSwitch.forEach(field => {
+                        const frField = document.getElementById(`infos_${field}`);
+                        const enField = document.getElementById(`infos_${field}_en`);
                         
-                        // Scroller vers la carte anglaise
-                        setTimeout(() => {
-                            englishCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 100);
-                    }
+                        if (frField && enField) {
+                            // Sauvegarder temporairement la valeur FR
+                            const tempFR = frField.value;
+                            // Afficher EN dans le champ principal
+                            frField.value = enField.value;
+                            // Sauvegarder FR dans le champ EN (swap)
+                            enField.value = tempFR;
+                        }
+                    });
                     
                     currentLang = 'en';
                     showNotification('🇬🇧 English mode activated', 'info');
                     
                     // Traduction automatique silencieuse (une seule fois)
-                    if (!translationDone) {
+                    if (!translationDone && enField && !enField.value.trim()) {
                         setTimeout(() => {
                             autoTranslateSilent();
                         }, 500);
