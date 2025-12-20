@@ -6209,16 +6209,16 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 }
                 
                 // Vérifier si une traduction automatique est nécessaire après le swap
-                // On vérifie toujours les champs cachés (EN) pour voir s'ils sont vides
+                // On vérifie si les champs FR (actuellement cachés) ont du contenu à traduire
                 setTimeout(() => {
-                    const hasEmptyEnFields = fieldsToSwitch.some(field => {
+                    const hasFieldsToTranslate = fieldsToSwitch.some(field => {
                         const enField = document.getElementById(`infos_${field}_en`);
                         const frField = document.getElementById(`infos_${field}`);
-                        // Si le champ EN est vide mais le champ FR a du contenu
-                        return enField && frField && !enField.value.trim() && frField.value.trim();
+                        // Si le champ FR a du contenu, on traduit (même si EN existe déjà)
+                        return enField && frField && frField.value.trim();
                     });
                     
-                    if (hasEmptyEnFields) {
+                    if (hasFieldsToTranslate) {
                         console.log('🔄 Traduction automatique déclenchée après swap');
                         autoTranslateSilent();
                     }
@@ -6259,7 +6259,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     const frField = document.getElementById(`infos_${field}`);
                     const enField = document.getElementById(`infos_${field}_en`);
                     
-                    if (frField && enField && frField.value.trim() && !enField.value.trim()) {
+                    // Traduire si le champ FR a du contenu (écrase l'EN existant)
+                    if (frField && enField && frField.value.trim()) {
                         try {
                             const originalText = frField.value.trim();
                             const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(originalText)}&langpair=fr|en`);
