@@ -7003,18 +7003,22 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     .select('*')
                     .eq('gite', gite);
                 
+                console.log('📊 Activités chargées:', data ? data.length : 0);
+                
                 if (!error && data) {
                     // Combiner événements et activités
                     const toutesLesDonnees = [...window.allEvenements];
                     
-                    // Géocoder les activités en parallèle (avec délai pour respecter les limites API)
-                    for (const act of data) {
-                        // Pause de 1 seconde entre chaque requête pour respecter la politique de Nominatim
-                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    console.log('📅 Événements de base:', toutesLesDonnees.length);
+                    
+                    // Géocoder les activités en parallèle (plus rapide)
+                    const promises = data.map(async (act, index) => {
+                        // Pause plus courte (250ms) entre chaque requête
+                        await new Promise(resolve => setTimeout(resolve, index * 250));
                         
                         const coords = await geocodeAddress(act.adresse, gite);
                         
-                        toutesLesDonnees.push({
+                        return {
                             titre: act.nom,
                             nom: act.nom,
                             date: null,
@@ -7028,15 +7032,28 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             lng: coords.lng,
                             note: act.note,
                             categorie: act.categorie
-                        });
-                    }
+                        };
+                    });
+                    
+                    const activitesGeocodees = await Promise.all(promises);
+                    toutesLesDonnees.push(...activitesGeocodees);
+                    
+                    console.log('✅ Total points à afficher:', toutesLesDonnees.length);
                     
                     // Afficher tout sur la carte
                     window.allEvenements = toutesLesDonnees;
+                    
+                    // Réinitialiser le filtre de distance à 50km pour tout voir
+                    document.getElementById('distanceFilter').value = 50;
+                    updateDistanceLabel();
+                    
                     afficherCarteEvenements(toutesLesDonnees);
                     filtrerEvenements();
                     
                     showNotification(`✓ ${toutesLesDonnees.length} points chargés sur la carte`, 'success');
+                } else if (error) {
+                    console.error('Erreur Supabase:', error);
+                    showNotification('⚠️ Erreur chargement des activités', 'warning');
                 }
             } catch (error) {
                 console.error('Erreur chargement activités:', error);
