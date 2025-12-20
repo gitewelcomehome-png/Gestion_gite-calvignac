@@ -7411,8 +7411,34 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         // Variable globale pour la carte
         let mapInstance = null;
         let allMarkers = [];
+        let markersLayer = null;
         
-        // Fonction pour afficher la carte avec les événements
+        // Fonction pour initialiser la carte une seule fois
+        function initialiserCarte() {
+            if (mapInstance) return; // Déjà initialisée
+            
+            const mapContainer = document.getElementById('mapEvenements');
+            
+            try {
+                // Créer la carte Leaflet centrée sur la France
+                mapInstance = L.map('mapEvenements').setView([46.2276, 2.2137], 6);
+                
+                // Ajouter les tuiles OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 18
+                }).addTo(mapInstance);
+                
+                // Créer un layer group pour les marqueurs
+                markersLayer = L.layerGroup().addTo(mapInstance);
+                
+                console.log('✅ Carte initialisée');
+            } catch (error) {
+                console.error('❌ Erreur initialisation carte:', error);
+            }
+        }
+        
+        // Fonction pour mettre à jour les marqueurs sur la carte
         function afficherCarteEvenements(evenements) {
             const mapContainer = document.getElementById('mapEvenements');
             
@@ -7433,94 +7459,63 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             }
             
             console.log(`🗺️ Affichage de ${evenementsValides.length} points sur la carte`);
+            mapContainer.style.display = 'block';
             
-            // Détruire l'ancienne carte si elle existe
-            if (mapInstance) {
-                try {
-                    mapInstance.off();
-                    mapInstance.remove();
-                    mapInstance = null;
-                } catch (e) {
-                    console.warn('Erreur destruction carte:', e);
-                }
+            // Initialiser la carte si ce n'est pas déjà fait
+            initialiserCarte();
+            
+            if (!mapInstance || !markersLayer) {
+                console.error('❌ Carte non initialisée');
+                return;
             }
             
-            // Recréer complètement le container pour éviter les conflits Leaflet
-            const parent = mapContainer.parentNode;
-            const newMapContainer = document.createElement('div');
-            newMapContainer.id = 'mapEvenements';
-            newMapContainer.style.height = '500px';
-            newMapContainer.style.borderRadius = '12px';
-            newMapContainer.style.marginBottom = '20px';
-            newMapContainer.style.zIndex = '1';
-            parent.replaceChild(newMapContainer, mapContainer);
+            // Effacer tous les marqueurs existants
+            markersLayer.clearLayers();
+            allMarkers = [];
             
-            // Attendre un instant avant de créer la carte
-            setTimeout(() => {
-                try {
-                    // Calculer le centre de la carte
-                    const avgLat = evenementsValides.reduce((sum, e) => sum + e.lat, 0) / evenementsValides.length;
-                    const avgLng = evenementsValides.reduce((sum, e) => sum + e.lng, 0) / evenementsValides.length;
-                    
-                    // Créer la carte Leaflet
-                    mapInstance = L.map('mapEvenements').setView([avgLat, avgLng], 11);
-                    
-                    // Ajouter les tuiles OpenStreetMap
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors',
-                        maxZoom: 18
-                    }).addTo(mapInstance);
-                    
-                    // Effacer les anciens marqueurs
-                    allMarkers = [];
-                    
-                    // Ajouter les marqueurs pour chaque événement/activité
-                    evenementsValides.forEach(item => {
-                        // Créer une icône personnalisée avec l'emoji
-                        const iconHtml = `
-                            <div style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 3px solid #667eea;">
-                                ${item.icone || '📍'}
-                            </div>
-                        `;
-                        
-                        const customIcon = L.divIcon({
-                            html: iconHtml,
-                            className: 'custom-marker',
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20]
-                        });
-                        
-                        const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(mapInstance);
-                        
-                        // Popup avec les informations
-                        const popupContent = `
-                            <div style="min-width: 200px;">
-                                <h3 style="margin: 0 0 10px 0; color: #667eea; font-size: 1.1rem;">
-                                    ${item.icone || '📍'} ${item.titre || item.nom}
-                                </h3>
-                                <p style="margin: 5px 0; font-size: 0.9rem;"><strong>📍</strong> ${item.lieu || item.adresse || 'Non spécifié'}</p>
-                                ${item.date ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>🗓️</strong> ${item.date}</p>` : ''}
-                                ${item.distance ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>📏</strong> ${item.distance} km</p>` : ''}
-                                ${item.description ? `<p style="margin: 10px 0; font-size: 0.85rem; line-height: 1.4;">${item.description}</p>` : ''}
-                                ${item.note ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>⭐</strong> ${item.note}/5</p>` : ''}
-                                ${item.lien ? `<a href="${item.lien}" target="_blank" style="display: inline-block; margin-top: 10px; padding: 8px 15px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85rem;">🔗 Plus d'infos</a>` : ''}
-                            </div>
-                        `;
-                        
-                        marker.bindPopup(popupContent);
-                        allMarkers.push({ marker, item });
-                    });
-                    
-                    // Ajuster la vue pour inclure tous les marqueurs
-                    if (evenementsValides.length > 0) {
-                        const group = L.featureGroup(allMarkers.map(m => m.marker));
-                        mapInstance.fitBounds(group.getBounds().pad(0.1));
-                    }
-                } catch (error) {
-                    console.error('❌ Erreur création carte:', error);
-                    document.getElementById('mapEvenements').innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Erreur lors du chargement de la carte</p>';
-                }
-            }, 100);
+            // Ajouter les nouveaux marqueurs
+            evenementsValides.forEach(item => {
+                // Créer une icône personnalisée avec l'emoji
+                const iconHtml = `
+                    <div style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 3px solid #667eea;">
+                        ${item.icone || '📍'}
+                    </div>
+                `;
+                
+                const customIcon = L.divIcon({
+                    html: iconHtml,
+                    className: 'custom-marker',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+                
+                const marker = L.marker([item.lat, item.lng], { icon: customIcon });
+                
+                // Popup avec les informations
+                const popupContent = `
+                    <div style="min-width: 200px;">
+                        <h3 style="margin: 0 0 10px 0; color: #667eea; font-size: 1.1rem;">
+                            ${item.icone || '📍'} ${item.titre || item.nom}
+                        </h3>
+                        <p style="margin: 5px 0; font-size: 0.9rem;"><strong>📍</strong> ${item.lieu || item.adresse || 'Non spécifié'}</p>
+                        ${item.date ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>🗓️</strong> ${item.date}</p>` : ''}
+                        ${item.distance ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>📏</strong> ${item.distance} km</p>` : ''}
+                        ${item.description ? `<p style="margin: 10px 0; font-size: 0.85rem; line-height: 1.4;">${item.description}</p>` : ''}
+                        ${item.note ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>⭐</strong> ${item.note}/5</p>` : ''}
+                        ${item.lien ? `<a href="${item.lien}" target="_blank" style="display: inline-block; margin-top: 10px; padding: 8px 15px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85rem;">🔗 Plus d'infos</a>` : ''}
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                marker.addTo(markersLayer);
+                allMarkers.push({ marker, item });
+            });
+            
+            // Ajuster la vue pour inclure tous les marqueurs
+            if (evenementsValides.length > 0) {
+                const bounds = L.latLngBounds(evenementsValides.map(e => [e.lat, e.lng]));
+                mapInstance.fitBounds(bounds.pad(0.1));
+            }
         }
         
         // Mettre à jour le label de distance
