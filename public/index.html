@@ -7414,8 +7414,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         
         // Fonction pour afficher la carte avec les événements
         function afficherCarteEvenements(evenements) {
-            const mapDiv = document.getElementById('mapEvenements');
-            mapDiv.style.display = 'block';
+            const mapContainer = document.getElementById('mapEvenements');
             
             // Filtrer les points avec des coordonnées valides
             const evenementsValides = evenements.filter(e => {
@@ -7429,7 +7428,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             if (evenementsValides.length === 0) {
                 console.error('❌ Aucun point avec coordonnées valides');
-                mapDiv.style.display = 'none';
+                mapContainer.style.display = 'none';
                 return;
             }
             
@@ -7446,12 +7445,17 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 }
             }
             
-            // Vider le container et supprimer les attributs Leaflet
-            mapDiv.innerHTML = '';
-            mapDiv._leaflet_id = null;
-            delete mapDiv._leaflet_id;
+            // Recréer complètement le container pour éviter les conflits Leaflet
+            const parent = mapContainer.parentNode;
+            const newMapContainer = document.createElement('div');
+            newMapContainer.id = 'mapEvenements';
+            newMapContainer.style.height = '500px';
+            newMapContainer.style.borderRadius = '12px';
+            newMapContainer.style.marginBottom = '20px';
+            newMapContainer.style.zIndex = '1';
+            parent.replaceChild(newMapContainer, mapContainer);
             
-            // Attendre un instant avant de recréer la carte
+            // Attendre un instant avant de créer la carte
             setTimeout(() => {
                 try {
                     // Calculer le centre de la carte
@@ -7514,7 +7518,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     }
                 } catch (error) {
                     console.error('❌ Erreur création carte:', error);
-                    mapDiv.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Erreur lors du chargement de la carte</p>';
+                    document.getElementById('mapEvenements').innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Erreur lors du chargement de la carte</p>';
                 }
             }, 100);
         }
