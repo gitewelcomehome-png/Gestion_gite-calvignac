@@ -756,12 +756,9 @@ h1{font-size:2.1rem;}
                         </button>
                     </div>
                     
-                    <!-- Sélecteur de langue -->
+                    <!-- Sélecteur de langue - UN SEUL BOUTON -->
                     <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.15); padding: 6px; border-radius: 20px;">
-                        <button type="button" id="btnLangFR" onclick="switchLanguage('fr')" style="background: white; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px 12px; border-radius: 15px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" title="Français">
-                            🇫🇷
-                        </button>
-                        <button type="button" id="btnLangEN" onclick="switchLanguage('en')" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px 12px; border-radius: 15px; transition: all 0.3s; opacity: 0.7;" title="English">
+                        <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px 12px; border-radius: 15px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" title="Switch to English">
                             🇬🇧
                         </button>
                     </div>
@@ -6149,12 +6146,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             let currentLang = 'fr';
             let translationDone = false; // Pour ne traduire qu'une fois automatiquement
             
-            window.switchLanguage = function(lang) {
-                console.log('🌍 Switch language to:', lang, '| Current:', currentLang);
+            // Nouvelle fonction toggle avec un seul bouton
+            window.toggleLanguage = function() {
+                // Basculer vers l'autre langue
+                const newLang = currentLang === 'fr' ? 'en' : 'fr';
+                console.log('🌍 Toggle language from', currentLang, 'to', newLang);
                 
-                // Mise à jour des boutons de langue
-                const btnFR = document.getElementById('btnLangFR');
-                const btnEN = document.getElementById('btnLangEN');
+                const btn = document.getElementById('btnToggleLang');
                 
                 // Liste de tous les champs à basculer
                 const fieldsToSwitch = [
@@ -6176,77 +6174,54 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     'autresInfos', 'contactsLocaux', 'recommandations', 'messageClient'
                 ];
                 
-                if (lang === 'fr') {
-                    // Mise à jour visuelle des boutons
-                    if (btnFR) {
-                        btnFR.style.background = 'white';
-                        btnFR.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-                        btnFR.style.opacity = '1';
-                    }
-                    if (btnEN) {
-                        btnEN.style.background = 'transparent';
-                        btnEN.style.boxShadow = 'none';
-                        btnEN.style.opacity = '0.7';
-                    }
+                // SWAP des valeurs entre les champs FR et EN
+                fieldsToSwitch.forEach(field => {
+                    const frField = document.getElementById(`infos_${field}`);
+                    const enField = document.getElementById(`infos_${field}_en`);
                     
-                    // Basculer les valeurs : afficher FR dans les champs principaux
-                    fieldsToSwitch.forEach(field => {
-                        const frField = document.getElementById(`infos_${field}`);
-                        const enField = document.getElementById(`infos_${field}_en`);
+                    if (frField && enField) {
+                        // Échanger les valeurs
+                        const temp = frField.value;
+                        frField.value = enField.value;
+                        enField.value = temp;
+                    }
+                });
+                
+                // Mettre à jour la langue actuelle
+                currentLang = newLang;
+                
+                // Mettre à jour le bouton pour afficher le drapeau de l'AUTRE langue
+                if (btn) {
+                    if (currentLang === 'fr') {
+                        btn.innerHTML = '🇬🇧';
+                        btn.title = 'Switch to English';
+                        showNotification('🇫🇷 Mode français activé', 'info');
+                    } else {
+                        btn.innerHTML = '🇫🇷';
+                        btn.title = 'Passer en français';
+                        showNotification('🇬🇧 English mode activated', 'info');
                         
-                        if (frField && enField) {
-                            frField.value = frField.value; // Garder FR dans FR
-                        }
-                    });
-                    
-                    currentLang = 'fr';
-                    showNotification('🇫🇷 Mode français activé', 'info');
-                    
-                } else if (lang === 'en') {
-                    // Mise à jour visuelle des boutons
-                    if (btnFR) {
-                        btnFR.style.background = 'transparent';
-                        btnFR.style.boxShadow = 'none';
-                        btnFR.style.opacity = '0.7';
-                    }
-                    if (btnEN) {
-                        btnEN.style.background = 'white';
-                        btnEN.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-                        btnEN.style.opacity = '1';
-                    }
-                    
-                    // Basculer les valeurs : afficher EN dans les champs principaux
-                    fieldsToSwitch.forEach(field => {
-                        const frField = document.getElementById(`infos_${field}`);
-                        const enField = document.getElementById(`infos_${field}_en`);
-                        
-                        if (frField && enField) {
-                            // Sauvegarder temporairement la valeur FR
-                            const tempFR = frField.value;
-                            // Afficher EN dans le champ principal
-                            frField.value = enField.value;
-                            // Sauvegarder FR dans le champ EN (swap)
-                            enField.value = tempFR;
-                        }
-                    });
-                    
-                    currentLang = 'en';
-                    showNotification('🇬🇧 English mode activated', 'info');
-                    
-                    // Traduction automatique silencieuse (une seule fois) si les champs EN sont vides
-                    if (!translationDone) {
-                        // Vérifier si au moins un champ EN est vide
-                        const hasEmptyEnFields = fieldsToSwitch.some(field => {
-                            const enField = document.getElementById(`infos_${field}_en`);
-                            return enField && !enField.value.trim();
-                        });
-                        
-                        if (hasEmptyEnFields) {
-                            setTimeout(() => {
-                                autoTranslateSilent();
-                            }, 500);
+                        // Traduction automatique silencieuse si les champs EN sont vides
+                        if (!translationDone) {
+                            const hasEmptyEnFields = fieldsToSwitch.some(field => {
+                                const enField = document.getElementById(`infos_${field}_en`);
+                                return enField && !enField.value.trim();
+                            });
+                            
+                            if (hasEmptyEnFields) {
+                                setTimeout(() => {
+                                    autoTranslateSilent();
+                                }, 500);
+                            }
                         }
                     }
+                }
+            };
+            
+            // Ancienne fonction pour compatibilité (au cas où elle est appelée ailleurs)
+            window.switchLanguage = function(lang) {
+                if (lang !== currentLang) {
+                    toggleLanguage();
                 }
             };
             
