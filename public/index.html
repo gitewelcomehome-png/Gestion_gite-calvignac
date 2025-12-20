@@ -7410,35 +7410,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         
         // Variable globale pour la carte
         let mapInstance = null;
-        let allMarkers = [];
         let markersLayer = null;
         
-        // Fonction pour initialiser la carte une seule fois
-        function initialiserCarte() {
-            if (mapInstance) return; // Déjà initialisée
-            
-            const mapContainer = document.getElementById('mapEvenements');
-            
-            try {
-                // Créer la carte Leaflet centrée sur la France
-                mapInstance = L.map('mapEvenements').setView([46.2276, 2.2137], 6);
-                
-                // Ajouter les tuiles OpenStreetMap
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 18
-                }).addTo(mapInstance);
-                
-                // Créer un layer group pour les marqueurs
-                markersLayer = L.layerGroup().addTo(mapInstance);
-                
-                console.log('✅ Carte initialisée');
-            } catch (error) {
-                console.error('❌ Erreur initialisation carte:', error);
-            }
-        }
-        
-        // Fonction pour mettre à jour les marqueurs sur la carte
+        // Fonction pour afficher la carte avec les événements
         function afficherCarteEvenements(evenements) {
             const mapContainer = document.getElementById('mapEvenements');
             
@@ -7461,17 +7435,49 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             console.log(`🗺️ Affichage de ${evenementsValides.length} points sur la carte`);
             mapContainer.style.display = 'block';
             
-            // Initialiser la carte si ce n'est pas déjà fait
-            initialiserCarte();
+            // Vérifier si la carte existe déjà (via l'attribut Leaflet)
+            const carteExiste = mapContainer._leaflet_id !== undefined;
+            
+            // Si la carte n'existe pas encore, la créer
+            if (!carteExiste && !mapInstance) {
+                try {
+                    console.log('🗺️ Création de la carte...');
+                    
+                    // Créer la carte Leaflet
+                    mapInstance = L.map('mapEvenements', {
+                        center: [46.2276, 2.2137],
+                        zoom: 6
+                    });
+                    
+                    // Ajouter les tuiles OpenStreetMap
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 18
+                    }).addTo(mapInstance);
+                    
+                    // Créer un layer group pour les marqueurs
+                    markersLayer = L.layerGroup().addTo(mapInstance);
+                    
+                    console.log('✅ Carte créée avec succès');
+                } catch (error) {
+                    console.error('❌ Erreur création carte:', error);
+                    mapContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Erreur lors du chargement de la carte</p>';
+                    return;
+                }
+            }
+            
+            // Si la carte existe mais les layers pas, les recréer
+            if (mapInstance && !markersLayer) {
+                markersLayer = L.layerGroup().addTo(mapInstance);
+            }
             
             if (!mapInstance || !markersLayer) {
-                console.error('❌ Carte non initialisée');
+                console.error('❌ Carte ou layer non disponibles');
                 return;
             }
             
             // Effacer tous les marqueurs existants
             markersLayer.clearLayers();
-            allMarkers = [];
             
             // Ajouter les nouveaux marqueurs
             evenementsValides.forEach(item => {
@@ -7508,7 +7514,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 
                 marker.bindPopup(popupContent);
                 marker.addTo(markersLayer);
-                allMarkers.push({ marker, item });
             });
             
             // Ajuster la vue pour inclure tous les marqueurs
