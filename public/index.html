@@ -758,8 +758,8 @@ h1{font-size:2.1rem;}
                     
                     <!-- Sélecteur de langue - UN SEUL BOUTON -->
                     <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.15); padding: 6px; border-radius: 20px;">
-                        <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px 12px; border-radius: 15px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" title="Switch to English">
-                            🇬🇧
+                        <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: none; font-size: 1.2rem; font-weight: bold; cursor: pointer; padding: 10px 16px; border-radius: 15px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); color: #2C5F7D;" title="Switch to English">
+                            <span style="font-size: 1.5rem; margin-right: 5px;">🇬🇧</span> EN
                         </button>
                     </div>
                     
@@ -6193,11 +6193,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 // Mettre à jour le bouton pour afficher le drapeau de l'AUTRE langue
                 if (btn) {
                     if (currentLang === 'fr') {
-                        btn.innerHTML = '🇬🇧';
+                        // On est en français, on affiche le bouton pour passer en anglais
+                        btn.innerHTML = '<span style="font-size: 1.5rem; margin-right: 5px;">🇬🇧</span> EN';
                         btn.title = 'Switch to English';
                         showNotification('🇫🇷 Mode français activé', 'info');
                     } else {
-                        btn.innerHTML = '🇫🇷';
+                        // On est en anglais, on affiche le bouton pour revenir en français
+                        btn.innerHTML = '<span style="font-size: 1.5rem; margin-right: 5px;">🇫🇷</span> FR';
                         btn.title = 'Passer en français';
                         showNotification('🇬🇧 English mode activated', 'info');
                         
