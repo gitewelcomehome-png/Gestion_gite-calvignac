@@ -6205,22 +6205,24 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         flagIcon.alt = 'EN';
                         btn.title = 'Passer en français';
                         showNotification('🇬🇧 English mode activated', 'info');
-                        
-                        // Traduction automatique silencieuse si les champs EN sont vides
-                        if (!translationDone) {
-                            const hasEmptyEnFields = fieldsToSwitch.some(field => {
-                                const enField = document.getElementById(`infos_${field}_en`);
-                                return enField && !enField.value.trim();
-                            });
-                            
-                            if (hasEmptyEnFields) {
-                                setTimeout(() => {
-                                    autoTranslateSilent();
-                                }, 500);
-                            }
-                        }
                     }
                 }
+                
+                // Vérifier si une traduction automatique est nécessaire après le swap
+                // On vérifie toujours les champs cachés (EN) pour voir s'ils sont vides
+                setTimeout(() => {
+                    const hasEmptyEnFields = fieldsToSwitch.some(field => {
+                        const enField = document.getElementById(`infos_${field}_en`);
+                        const frField = document.getElementById(`infos_${field}`);
+                        // Si le champ EN est vide mais le champ FR a du contenu
+                        return enField && frField && !enField.value.trim() && frField.value.trim();
+                    });
+                    
+                    if (hasEmptyEnFields) {
+                        console.log('🔄 Traduction automatique déclenchée après swap');
+                        autoTranslateSilent();
+                    }
+                }, 500)
             };
             
             // Ancienne fonction pour compatibilité (au cas où elle est appelée ailleurs)
