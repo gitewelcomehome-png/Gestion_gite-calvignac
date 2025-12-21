@@ -212,29 +212,22 @@ async function searchPOIsOverpass(giteName, lat, lon, radius) {
 function generateSQL(allPOIs) {
     let sql = `-- ====================================
 -- Insertion des Points d'Intérêt (POIs)
--- Gîtes de Calvignac
+-- Gîtes de Calvignac - Structure Supabase
 -- ====================================
 -- Généré: ${new Date().toLocaleString('fr-FR')}
+-- Table: activites_gites
 
--- Assurez-vous que la table existe:
--- CREATE TABLE IF NOT EXISTS activites_gites (
---     id SERIAL PRIMARY KEY,
---     gite VARCHAR(100),
---     nom VARCHAR(255),
---     type VARCHAR(100),
---     adresse TEXT,
---     latitude DECIMAL(10, 8),
---     longitude DECIMAL(11, 8),
---     distance_km DECIMAL(5, 2),
---     website VARCHAR(500),
---     phone VARCHAR(50),
---     opening_hours TEXT,
---     created_at TIMESTAMP DEFAULT NOW()
--- );
+-- Champs mappés:
+-- gite (Trévoux/Couzon)
+-- nom (String)
+-- categorie (Type du POI)
+-- adresse (Adresse complète)
+-- latitude/longitude (Coordonnées GPS)
+-- distance (Distance depuis gîte en km)
+-- website, telephone (Si disponibles)
+-- note, avis, prix, google_maps_link (NULL ou valeurs)
 
--- Insertion des données
-
-`;
+\n`;
 
     // Grouper par gîte
     const byGite = {};
@@ -243,44 +236,82 @@ function generateSQL(allPOIs) {
         byGite[poi.gite].push(poi);
     }
 
-    // Générer les INSERT
+    // Générer les INSERT avec la bonne structure
     for (const [gite, pois] of Object.entries(byGite)) {
-        sql += `\n-- ${pois.length} POIs trouvés pour ${gite}\n`;
-        sql += `INSERT INTO activites_gites (gite, nom, type, adresse, latitude, longitude, distance_km, website, phone, opening_hours, created_at)\nVALUES\n`;
+        sql += `-- ====================================\n`;
+        sql += `-- ${gite}: ${pois.length} POIs\n`;
+        sql += `-- ====================================\n\n`;
+        
+        sql += `INSERT INTO activites_gites (gite, nom, categorie, adresse, latitude, longitude, distance, website, telephone, note, avis, prix, google_maps_link, created_at)\nVALUES\n`;
         
         const values = pois.map((poi, idx) => {
             const escapedNom = poi.nom.replace(/'/g, "''");
             const escapedAdresse = poi.adresse.replace(/'/g, "''");
-            const escapedType = poi.type.replace(/'/g, "''");
+            const escapedCategorie = poi.type.replace(/'/g, "''");
             const website = poi.website ? `'${poi.website.replace(/'/g, "''")}'` : 'NULL';
             const phone = poi.phone ? `'${poi.phone.replace(/'/g, "''")}'` : 'NULL';
-            const hours = poi.opening_hours ? `'${poi.opening_hours.replace(/'/g, "''")}'` : 'NULL';
             
-            return `('${gite}', '${escapedNom}', '${escapedType}', '${escapedAdresse}', ${poi.latitude}, ${poi.longitude}, ${poi.distance}, ${website}, ${phone}, ${hours}, NOW())`;
+            // Distance arrondie à 1 décimale
+            const distance = poi.distance ? poi.distance.toFixed(1) : 'NULL';
+            
+            // Note (NULL par défaut, à remplir manuellement ou via API)
+            const note = 'NULL';
+            
+            // Avis (NULL par défaut)
+            const avis = 'NULL';
+            
+            // Prix (NULL par défaut, possibilité d'estimer par type)
+            let prix = 'NULL';
+            if (['Restaurant', 'Café/Bar', 'Hôtel'].includes(poi.type)) {
+                prix = "'€€'"; // Défaut modéré
+            }
+            
+            // Google Maps Link (construit si on a les coords)
+            let mapsLink = 'NULL';
+            if (poi.latitude && poi.longitude) {
+                const mapsUrl = `https://www.google.com/maps?q=${poi.latitude},${poi.longitude}`;
+                mapsLink = `'${mapsUrl}'`;
+            }
+            
+            return `('${gite}', '${escapedNom}', '${escapedCategorie}', '${escapedAdresse}', ${poi.latitude}, ${poi.longitude}, ${distance}, ${website}, ${phone}, ${note}, ${avis}, ${prix}, ${mapsLink})`;
         }).join(',\n');
         
-        sql += values + ';\n';
+        sql += values + ';\n\n';
     }
 
-    sql += `\n-- ====================================
--- Résumé de l'insertion
--- ====================================\n`;
+    // Résumé
+    sql += `-- ====================================\n`;
+    sql += `-- RÉSUMÉ DE L'INSERTION\n`;
+    sql += `-- ====================================\n\n`;
     
     let totalCount = 0;
     for (const [gite, pois] of Object.entries(byGite)) {
         const byType = {};
+        let totalDist = 0;
+        
         for (const poi of pois) {
             if (!byType[poi.type]) byType[poi.type] = 0;
             byType[poi.type]++;
+            totalDist += poi.distance || 0;
         }
-        sql += `\n-- ${gite}: ${pois.length} POIs\n`;
-        for (const [type, count] of Object.entries(byType)) {
+        
+        const avgDist = (totalDist / pois.length).toFixed(1);
+        
+        sql += `-- ${gite}: ${pois.length} POIs (distance moyenne: ${avgDist} km)\n`;
+        const sortedTypes = Object.entries(byType)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+        
+        for (const [type, count] of sortedTypes) {
             sql += `--   • ${type}: ${count}\n`;
-            totalCount += count;
         }
+        sql += `\n`;
+        totalCount += pois.length;
     }
     
-    sql += `\n-- TOTAL: ${totalCount} POIs\n`;
+    sql += `-- TOTAL: ${totalCount} POIs\n`;
+    sql += `-- Date: ${new Date().toLocaleString('fr-FR')}\n`;
+    sql += `-- ====================================\n`;
     
     return sql;
 }
