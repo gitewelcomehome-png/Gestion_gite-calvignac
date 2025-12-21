@@ -7936,28 +7936,58 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             Object.keys(parCategorie).sort().forEach(cat => {
                 html += `
-                    <div style="margin-bottom: 25px;">
-                        <h4 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 3px solid #667eea; padding-bottom: 8px;">
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-bottom: 15px; font-size: 1.1rem; padding: 12px 16px; border-radius: 8px;">
                             ${cat} (${parCategorie[cat].length})
                         </h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                 `;
                 
                 parCategorie[cat].forEach(act => {
-                    const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) : '';
+                    const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) + ` ${act.note}/5` : '';
                     const distanceText = act.distance ? `📍 ${act.distance} km` : '';
                     const prixText = act.prix ? `💰 ${act.prix}` : '';
+                    const avisText = act.avis ? `(${act.avis} avis)` : '';
+                    const telText = act.telephone ? `📞 ${act.telephone}` : '';
                     
                     html += `
-                        <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-left: 5px solid #667eea; padding: 18px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px); this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.1)'">
-                            <h5 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #2C5F7D; word-wrap: break-word;">${act.nom}</h5>
-                            
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; font-size: 0.9rem; color: #555;">
-                                ${distanceText ? `<span style="background: white; padding: 4px 12px; border-radius: 20px;">${distanceText}</span>` : ''}
-                                ${noteStars ? `<span style="background: white; padding: 4px 12px; border-radius: 20px;">${noteStars}</span>` : ''}
-                                ${prixText ? `<span style="background: white; padding: 4px 12px; border-radius: 20px;">${prixText}</span>` : ''}
+                        <div style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                                <h5 style="margin: 0; font-size: 1rem; color: #2C5F7D; flex: 1; word-wrap: break-word;">${act.nom}</h5>
                             </div>
                             
+                            ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #666;">📍 ${act.adresse}</p>` : ''}
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; font-size: 0.85rem;">
+                                ${distanceText ? `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 16px;">${distanceText}</span>` : ''}
+                                ${prixText ? `<span style="background: #f3e5f5; color: #7b1fa2; padding: 4px 10px; border-radius: 16px;">${prixText}</span>` : ''}
+                            </div>
+                            
+                            ${noteStars ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #f59e0b;">${noteStars} ${avisText}</p>` : ''}
+                            
+                            ${telText ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #666;">${telText}</p>` : ''}
+                            
+                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                                ${act.google_maps_link ? `
+                                    <a href="${act.google_maps_link}" target="_blank" title="Google Maps" style="background: #4285f4; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">
+                                        🗺️ Itinéraire
+                                    </a>
+                                ` : ''}
+                                ${act.website ? `
+                                    <a href="${act.website}" target="_blank" title="Site web" style="background: #10b981; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                                        🌐 Site
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            });
+            
+            container.innerHTML = html;
+        }
                             ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #666;">📍 ${act.adresse}</p>` : ''}
                             ${act.telephone ? `<p style="margin: 5px 0; font-size: 0.85rem; color: #666;">📞 ${act.telephone}</p>` : ''}
                             
