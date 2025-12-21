@@ -7582,6 +7582,48 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         }
         
         // Fonction pour afficher la carte avec les événements
+        // 🎨 Fonction pour obtenir l'icône du marqueur selon la catégorie
+        function getMarkerIcon(item) {
+            let markerUrl = './images/location-pin.svg';
+            let markerColor = '#667eea';
+            
+            if (item.isActivite && item.categorie) {
+                switch(item.categorie) {
+                    case 'Restaurant':
+                        markerUrl = './images/marker-restaurant.svg';
+                        markerColor = '#10b981';
+                        break;
+                    case 'Musée':
+                        markerUrl = './images/marker-musee.svg';
+                        markerColor = '#3b82f6';
+                        break;
+                    case 'Café':
+                        markerUrl = './images/marker-cafe.svg';
+                        markerColor = '#f59e0b';
+                        break;
+                    case 'Parc':
+                        markerUrl = './images/marker-parc.svg';
+                        markerColor = '#8b5cf6';
+                        break;
+                    case 'Hôtel':
+                        markerUrl = './images/marker-hotel.svg';
+                        markerColor = '#ec4899';
+                        break;
+                }
+            }
+            
+            // Créer une icône avec l'image SVG
+            const iconHtml = `<img src="${markerUrl}" alt="${item.categorie || 'Marqueur'}" style="width: 40px; height: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">`;
+            
+            return L.divIcon({
+                html: iconHtml,
+                className: 'custom-marker',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+        }
+        
         function afficherCarteEvenements(evenements) {
             const mapContainer = document.getElementById('mapEvenements');
             
@@ -7676,19 +7718,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             // Ajouter les nouveaux marqueurs
             evenementsValides.forEach(item => {
-                // Créer une icône personnalisée avec l'emoji
-                const iconHtml = `
-                    <div style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 3px solid #667eea;">
-                        ${item.icone || '📍'}
-                    </div>
-                `;
-                
-                const customIcon = L.divIcon({
-                    html: iconHtml,
-                    className: 'custom-marker',
-                    iconSize: [40, 40],
-                    iconAnchor: [20, 20]
-                });
+                // Utiliser la fonction pour obtenir l'icône appropriée
+                const customIcon = getMarkerIcon(item);
                 
                 const marker = L.marker([item.lat, item.lng], { icon: customIcon });
                 
@@ -7696,9 +7727,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 const popupContent = `
                     <div style="min-width: 200px;">
                         <h3 style="margin: 0 0 10px 0; color: #667eea; font-size: 1.1rem;">
-                            ${item.icone || '📍'} ${item.titre || item.nom}
+                            ${item.titre || item.nom}
                         </h3>
-                        <p style="margin: 5px 0; font-size: 0.9rem;"><strong>📍</strong> ${item.lieu || item.adresse || 'Non spécifié'}</p>
+                        ${item.categorie ? `<p style="margin: 5px 0; font-size: 0.85rem; display: inline-block; padding: 4px 10px; border-radius: 16px; background: #f0f4f8; color: #667eea; font-weight: 600;"><strong>📂</strong> ${item.categorie}</p>` : ''}
+                        <p style="margin: 8px 0; font-size: 0.9rem;"><strong>📍</strong> ${item.lieu || item.adresse || 'Non spécifié'}</p>
                         ${item.date ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>🗓️</strong> ${item.date}</p>` : ''}
                         ${item.distance ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>📏</strong> ${item.distance} km</p>` : ''}
                         ${item.description ? `<p style="margin: 10px 0; font-size: 0.85rem; line-height: 1.4;">${item.description}</p>` : ''}
