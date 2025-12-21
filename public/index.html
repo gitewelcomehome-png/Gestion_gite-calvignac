@@ -7101,7 +7101,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 const { data, error } = await supabase
                     .from('activites_gites')
                     .select('*')
-                    .order('categorie', { ascending: true });
+                    .order('type', { ascending: true }); // 🔧 Colonne s'appelle 'type' pas 'categorie'
                 
                 if (error) throw error;
                 
@@ -7109,7 +7109,17 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     activitesParGite = { 'Trévoux': [], 'Couzon': [] };
                     data.forEach(act => {
                         if (activitesParGite[act.gite]) {
-                            activitesParGite[act.gite].push(act);
+                            // 🔧 Normaliser les champs Supabase
+                            const normalized = {
+                                ...act,
+                                categorie: act.type,  // Mapper 'type' à 'categorie'
+                                telephone: act.phone,
+                                distance: act.distance_km,
+                                prix: act.rating ? `${act.rating}/5⭐` : null,
+                                avis: act.reviews_count,
+                                note: act.rating
+                            };
+                            activitesParGite[act.gite].push(normalized);
                         }
                     });
                     console.log('Activités chargées:', activitesParGite);
@@ -7215,19 +7225,23 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     window.allActivites = data.map(act => ({
                         titre: act.nom,
                         nom: act.nom,
+                        id: act.id,
                         date: null,
                         lieu: act.adresse,
                         adresse: act.adresse,
-                        description: act.description,
+                        description: act.description || '',
                         lien: act.website,
                         icone: '📍',
-                        distance: act.distance || 0,
+                        distance: act.distance_km || 0,
                         lat: parseFloat(act.latitude),
                         lng: parseFloat(act.longitude),
-                        note: act.note,
-                        categorie: act.categorie,
+                        note: act.rating || null,
+                        telephone: act.phone || '',
+                        categorie: act.type,  // 🔧 Correction mapping
+                        avis: act.reviews_count || '',
+                        prix: act.rating ? `${act.rating}/5⭐` : null,
                         isActivite: true  // Marqueur pour différencier des événements
-                    })).filter(a => a.lat && a.lng);  // Garder seulement ceux avec coordonnées
+                    })).filter(a => a.lat && a.lng && isFinite(a.lat) && isFinite(a.lng));  // Garder seulement ceux avec coordonnées valides
                     
                     console.log('✅ Activités chargées pour carte:', window.allActivites.length);
                 }
@@ -7914,15 +7928,20 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         function afficherActivites(gite) {
             const activites = activitesParGite[gite] || [];
             const container = document.getElementById('activitesParCategorie');
-            
-            if (activites.length === 0) {
+            // Correction mapping: s'assurer que chaque activité a bien la propriété 'categorie'
+            const activitesValides = activites.map(act => ({
+                ...act,
+                categorie: act.categorie || act.type // Priorité à 'categorie', fallback sur 'type'
+            })).filter(act => act.categorie && act.lat && act.lng);
+
+            if (activitesValides.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune activité enregistrée pour ce gîte</p>';
                 return;
             }
-            
+
             // Grouper par catégorie
             const parCategorie = {};
-            activites.forEach(act => {
+            activitesValides.forEach(act => {
                 if (!parCategorie[act.categorie]) {
                     parCategorie[act.categorie] = [];
                 }
