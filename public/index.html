@@ -7848,8 +7848,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                                 <h5 style="margin: 0; font-size: 1rem; color: #2C5F7D; flex: 1; word-wrap: break-word;">${act.nom}</h5>
                                 <div style="display: flex; gap: 6px; margin-left: 8px;">
-                                    <button onclick="modifierActivite(${act.id})" title="Modifier" style="background: #4285f4; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">✏️</button>
-                                    <button onclick="supprimerActivite(${act.id})" title="Supprimer" style="background: #ef4444; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">🗑️</button>
+                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: #4285f4; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">✏️</button>
+                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: #ef4444; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">🗑️</button>
                                 </div>
                             </div>
                             
@@ -8045,6 +8045,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 document.getElementById('activite_telephone').value = data.telephone || '';
                 document.getElementById('activite_website').value = data.website || '';
                 
+                // Afficher/cacher le champ type de restaurant selon la catégorie
+                afficherTypeRestoSiRestaurant();
+                
                 // Stocker l'ID en cours de modification
                 window.activiteEnCoursDeModification = id;
                 
@@ -8055,10 +8058,12 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     btnSave.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
                 }
                 
-                // Scroll vers le formulaire
-                form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                
                 showNotification('✏️ Mode modification activé', 'info');
+                
+                // Scroll vers le formulaire sans event propagation
+                setTimeout(() => {
+                    document.getElementById('formAjoutActivite').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
                 
             } catch (error) {
                 console.error('Erreur modification activité:', error);
