@@ -1716,6 +1716,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     
                     <!-- FILTRES PAR CATÉGORIE -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px;">
+                        <button type="button" class="btn" style="background: #27AE60;" onclick="ouvrirModalActivite(false)">
+                            ➕ Ajouter une activité
+                        </button>
                         <button type="button" class="btn" style="background: #10b981;" onclick="filtrerActivitesParCategorie('Restaurant')">
                             🍽️ Restaurants
                         </button>
@@ -1757,104 +1760,114 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     </div>
 
                     <!-- FORMULAIRE D'AJOUT (CACHÉ PAR DÉFAUT) -->
-                    <div id="formAjoutActivite" style="display: none; margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 2px dashed #27AE60;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3 style="margin: 0; color: #27AE60; font-size: 1.3rem;">➕ Ajouter une Activité</h3>
-                            <button type="button" onclick="toggleFormAjout()" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #666;" title="Fermer">
-                                ✖️
-                            </button>
-                        </div>
-
-                        <div style="display: grid; gap: 20px;">
-                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nom de l'activité *</label>
-                                    <input type="text" id="activite_nom" class="form-control" placeholder="Restaurant Le Gourmet">
+                    <!-- MODALE MODIFICATION/AJOUT ACTIVITÉ -->
+                    <div id="modalActivite" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
+                        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+                            <div style="background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white;">
+                                    <h2 id="modalTitle" style="margin: 0; color: #2C5F7D; font-size: 1.4rem;">➕ Ajouter une Activité</h2>
+                                    <button type="button" onclick="fermerModalActivite()" style="background: transparent; border: none; font-size: 1.8rem; cursor: pointer; color: #666; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#666'" title="Fermer">
+                                        ✖️
+                                    </button>
                                 </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Catégorie *</label>
-                                    <select id="activite_categorie" class="form-control" onchange="afficherTypeRestoSiRestaurant()">
-                                        <option value="">-- Sélectionner --</option>
-                                        <option value="Restaurant">🍽️ Restaurant</option>
-                                        <option value="Café/Bar">☕ Café/Bar</option>
-                                        <option value="Musée">🏛️ Musée</option>
-                                        <option value="Château">🏰 Château</option>
-                                        <option value="Parc">🌳 Parc</option>
-                                        <option value="Hôtel">🏨 Hôtel</option>
-                                        <option value="Attraction">🎪 Attraction</option>
-                                    </select>
+
+                                <div style="padding: 24px; display: grid; gap: 20px;">
+                                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nom de l'activité *</label>
+                                            <input type="text" id="activite_nom" class="form-control" placeholder="Restaurant Le Gourmet">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Catégorie *</label>
+                                            <select id="activite_categorie" class="form-control" onchange="afficherTypeRestoSiRestaurant()">
+                                                <option value="">-- Sélectionner --</option>
+                                                <option value="Restaurant">🍽️ Restaurant</option>
+                                                <option value="Café/Bar">☕ Café/Bar</option>
+                                                <option value="Musée">🏛️ Musée</option>
+                                                <option value="Château">🏰 Château</option>
+                                                <option value="Parc">🌳 Parc</option>
+                                                <option value="Hôtel">🏨 Hôtel</option>
+                                                <option value="Attraction">🎪 Attraction</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Champ Type de Restaurant (caché par défaut) -->
+                                    <div id="typeRestoDiv" style="display: none;">
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Type de Restaurant</label>
+                                        <select id="activite_type_resto" class="form-control">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Restaurant traditionnel">Restaurant traditionnel</option>
+                                            <option value="Fast Food">Fast Food</option>
+                                            <option value="Burger">Burger</option>
+                                            <option value="Pizza">Pizza</option>
+                                            <option value="Asian">Cuisine asiatique</option>
+                                            <option value="Italian">Cuisine italienne</option>
+                                            <option value="Crêpes">Crêperie</option>
+                                            <option value="Steakhouse">Steakhouse</option>
+                                            <option value="Végétarien">Végétarien</option>
+                                            <option value="Gastronomique">Gastronomique</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Description</label>
+                                        <textarea id="activite_description" class="form-control" rows="3" placeholder="Excellent restaurant traditionnel français avec terrasse..."></textarea>
+                                    </div>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète *</label>
+                                            <input type="text" id="activite_adresse" class="form-control" placeholder="12 Place du Marché, 01600 Trévoux">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Distance (km)</label>
+                                            <input type="number" id="activite_distance" class="form-control" step="0.1" placeholder="2.5">
+                                        </div>
+                                    </div>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Site web</label>
+                                            <input type="url" id="activite_website" class="form-control" placeholder="https://restaurant-exemple.fr">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Téléphone</label>
+                                            <input type="tel" id="activite_telephone" class="form-control" placeholder="04 74 00 00 00">
+                                        </div>
+                                    </div>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Note Google (0-5)</label>
+                                            <input type="number" id="activite_note" class="form-control" step="0.1" min="0" max="5" placeholder="4.5">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nombre d'avis</label>
+                                            <input type="number" id="activite_avis" class="form-control" placeholder="127">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Gamme de prix</label>
+                                            <select id="activite_prix" class="form-control">
+                                                <option value="">-- Sélectionner --</option>
+                                                <option value="€">€ (Économique)</option>
+                                                <option value="€€">€€ (Moyen)</option>
+                                                <option value="€€€">€€€ (Élevé)</option>
+                                                <option value="€€€€">€€€€ (Très élevé)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                                        <button type="button" class="btn" style="background: #e0e0e0; color: #333;" onclick="fermerModalActivite()">
+                                            ✕ Annuler
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="btnSaveActivite" onclick="ajouterActivite()">
+                                            ➕ Ajouter cette activité
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <!-- Champ Type de Restaurant (caché par défaut) -->
-                            <div id="typeRestoDiv" style="display: none;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Type de Restaurant</label>
-                                <select id="activite_type_resto" class="form-control">
-                                    <option value="">-- Sélectionner --</option>
-                                    <option value="Restaurant traditionnel">Restaurant traditionnel</option>
-                                    <option value="Fast Food">Fast Food</option>
-                                    <option value="Burger">Burger</option>
-                                    <option value="Pizza">Pizza</option>
-                                    <option value="Asian">Cuisine asiatique</option>
-                                    <option value="Italian">Cuisine italienne</option>
-                                    <option value="Crêpes">Crêperie</option>
-                                    <option value="Steakhouse">Steakhouse</option>
-                                    <option value="Végétarien">Végétarien</option>
-                                    <option value="Gastronomique">Gastronomique</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Description</label>
-                                <textarea id="activite_description" class="form-control" rows="3" placeholder="Excellent restaurant traditionnel français avec terrasse..."></textarea>
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète *</label>
-                                    <input type="text" id="activite_adresse" class="form-control" placeholder="12 Place du Marché, 01600 Trévoux">
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Distance (km)</label>
-                                    <input type="number" id="activite_distance" class="form-control" step="0.1" placeholder="2.5">
-                                </div>
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Site web</label>
-                                    <input type="url" id="activite_website" class="form-control" placeholder="https://restaurant-exemple.fr">
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Téléphone</label>
-                                    <input type="tel" id="activite_telephone" class="form-control" placeholder="04 74 00 00 00">
-                                </div>
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Note Google (0-5)</label>
-                                    <input type="number" id="activite_note" class="form-control" step="0.1" min="0" max="5" placeholder="4.5">
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nombre d'avis</label>
-                                    <input type="number" id="activite_avis" class="form-control" placeholder="127">
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Gamme de prix</label>
-                                    <select id="activite_prix" class="form-control">
-                                        <option value="">-- Sélectionner --</option>
-                                        <option value="€">€ (Économique)</option>
-                                        <option value="€€">€€ (Moyen)</option>
-                                        <option value="€€€">€€€ (Élevé)</option>
-                                        <option value="€€€€">€€€€ (Très élevé)</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <button type="button" class="btn btn-primary" onclick="ajouterActivite()">
-                                ➕ Ajouter cette activité
-                            </button>
                         </div>
                     </div>
 
@@ -7021,6 +7034,45 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             'Couzon': []
         };
         
+        // Ouvrir la modale d'activité
+        function ouvrirModalActivite(isModification = false) {
+            document.getElementById('modalActivite').style.display = 'block';
+            const modalTitle = document.getElementById('modalTitle');
+            const btnSave = document.getElementById('btnSaveActivite');
+            
+            if (isModification) {
+                modalTitle.textContent = '✏️ Modifier l\'Activité';
+                btnSave.textContent = '✏️ Modifier cette activité';
+                btnSave.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+            } else {
+                modalTitle.textContent = '➕ Ajouter une Activité';
+                btnSave.textContent = '➕ Ajouter cette activité';
+                btnSave.style.background = 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)';
+            }
+            
+            // Scroll au top
+            document.querySelector('#modalActivite > div').scrollTop = 0;
+        }
+        
+        // Fermer la modale d'activité
+        function fermerModalActivite() {
+            document.getElementById('modalActivite').style.display = 'none';
+            // Réinitialiser le formulaire
+            document.getElementById('activite_nom').value = '';
+            document.getElementById('activite_categorie').value = '';
+            document.getElementById('activite_description').value = '';
+            document.getElementById('activite_adresse').value = '';
+            document.getElementById('activite_distance').value = '';
+            document.getElementById('activite_note').value = '';
+            document.getElementById('activite_avis').value = '';
+            document.getElementById('activite_prix').value = '';
+            document.getElementById('activite_telephone').value = '';
+            document.getElementById('activite_website').value = '';
+            document.getElementById('activite_type_resto').value = '';
+            document.getElementById('typeRestoDiv').style.display = 'none';
+            delete window.activiteEnCoursDeModification;
+        }
+        
         // Charger les activités depuis Supabase
         // Afficher/cacher le champ type de restaurant selon la catégorie
         function afficherTypeRestoSiRestaurant() {
@@ -7696,13 +7748,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         
         // Toggle du formulaire d'ajout d'activité
         function toggleFormAjout() {
-            const form = document.getElementById('formAjoutActivite');
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-                form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            } else {
-                form.style.display = 'none';
-            }
+            // Ouvrir la modale pour ajouter une activité
+            ouvrirModalActivite(false);
         }
         
         // Ajouter une activité manuellement
@@ -7764,12 +7811,11 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     // Réinitialiser le mode modification
                     delete window.activiteEnCoursDeModification;
                     
-                    // Restaurer le bouton original
-                    const btnSave = document.querySelector('#formDecouvrir button[onclick="ajouterActivite()"]');
-                    if (btnSave) {
-                        btnSave.textContent = '➕ Ajouter l\'activité';
-                        btnSave.style.background = 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)';
-                    }
+                    // Fermer la modale
+                    fermerModalActivite();
+                    
+                    // Recharger les activités
+                    await chargerActivites();
                     
                 } else {
                     // Mode AJOUT normal
@@ -7783,22 +7829,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     if (error) throw error;
                     
                     showNotification('✓ Activité ajoutée avec succès !', 'success');
+                    
+                    // Fermer la modale après ajout
+                    fermerModalActivite();
+                    
+                    // Recharger les activités
+                    await chargerActivites();
                 }
-                
-                // Réinitialiser le formulaire
-                document.getElementById('activite_nom').value = '';
-                document.getElementById('activite_categorie').value = '';
-                document.getElementById('activite_description').value = '';
-                document.getElementById('activite_adresse').value = '';
-                document.getElementById('activite_distance').value = '';
-                document.getElementById('activite_website').value = '';
-                document.getElementById('activite_telephone').value = '';
-                document.getElementById('activite_note').value = '';
-                document.getElementById('activite_avis').value = '';
-                document.getElementById('activite_prix').value = '';
-                
-                // Recharger et afficher
-                await chargerActivites();
                 
             } catch (error) {
                 console.error('Erreur activité:', error);
@@ -8027,12 +8064,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 
                 if (error) throw error;
                 
-                // Ouvrir le formulaire s'il est fermé
-                const form = document.getElementById('formAjoutActivite');
-                if (form.style.display === 'none' || form.style.display === '') {
-                    form.style.display = 'block';
-                }
-                
                 // Pré-remplir le formulaire
                 document.getElementById('activite_nom').value = data.nom || '';
                 document.getElementById('activite_categorie').value = data.categorie || '';
@@ -8051,19 +8082,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 // Stocker l'ID en cours de modification
                 window.activiteEnCoursDeModification = id;
                 
-                // Changer le bouton d'ajout en "Modifier"
-                const btnSave = document.querySelector('#formAjoutActivite button[onclick="ajouterActivite()"]');
-                if (btnSave) {
-                    btnSave.textContent = '✏️ Modifier l\'activité';
-                    btnSave.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-                }
+                // Ouvrir la modale en mode modification
+                ouvrirModalActivite(true);
                 
                 showNotification('✏️ Mode modification activé', 'info');
-                
-                // Scroll vers le formulaire sans event propagation
-                setTimeout(() => {
-                    document.getElementById('formAjoutActivite').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
                 
             } catch (error) {
                 console.error('Erreur modification activité:', error);
