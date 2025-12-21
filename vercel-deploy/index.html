@@ -7106,94 +7106,20 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             showNotification('🗺️ Chargement de la carte...', 'info');
             
-            // 1. Charger les événements
+            // 1. Charger UNIQUEMENT les événements (marchés, festivals, visites guidées)
             await rechercherEvenements();
             
-            // 2. Récupérer toutes les activités de Supabase pour ce gîte
-            try {
-                const { data, error } = await supabase
-                    .from('activites_gites')
-                    .select('*')
-                    .eq('gite', gite);
-                
-                console.log('📊 Activités chargées:', data ? data.length : 0);
-                
-                if (!error && data) {
-                    // Combiner événements et activités
-                    const toutesLesDonnees = [...window.allEvenements];
-                    
-                    console.log('📅 Événements de base:', toutesLesDonnees.length);
-                    
-                    // Traiter les activités SÉQUENTIELLEMENT pour éviter le rate limiting
-                    for (let i = 0; i < data.length; i++) {
-                        const act = data[i];
-                        let coords;
-                        
-                        // Si les coordonnées sont déjà en BDD, les utiliser
-                        if (act.latitude && act.longitude) {
-                            console.log(`✓ (${i+1}/${data.length}) Coordonnées depuis BDD:`, act.nom);
-                            coords = {
-                                lat: parseFloat(act.latitude),
-                                lng: parseFloat(act.longitude)
-                            };
-                        } else {
-                            // Sinon, géocoder et sauvegarder dans la BDD
-                            console.log(`🔍 (${i+1}/${data.length}) Géocodage nécessaire:`, act.nom);
-                            coords = await geocodeAddress(act.adresse, gite);
-                            
-                            // Sauvegarder les coordonnées dans la BDD
-                            try {
-                                await supabase
-                                    .from('activites_gites')
-                                    .update({ 
-                                        latitude: coords.lat, 
-                                        longitude: coords.lng 
-                                    })
-                                    .eq('id', act.id);
-                                console.log('💾 Coordonnées sauvegardées pour:', act.nom);
-                            } catch (updateError) {
-                                console.error('Erreur sauvegarde coordonnées:', updateError);
-                            }
-                        }
-                        
-                        toutesLesDonnees.push({
-                            titre: act.nom,
-                            nom: act.nom,
-                            date: null,
-                            lieu: act.adresse,
-                            adresse: act.adresse,
-                            description: act.description,
-                            lien: act.website,
-                            icone: act.categorie ? act.categorie.split(' ')[0] : '📍',
-                            distance: act.distance || 0,
-                            lat: coords.lat,
-                            lng: coords.lng,
-                            note: act.note,
-                            categorie: act.categorie
-                        });
-                    }
-                    
-                    console.log('✅ Total points à afficher:', toutesLesDonnees.length);
-                    
-                    // Afficher tout sur la carte
-                    window.allEvenements = toutesLesDonnees;
-                    
-                    // Réinitialiser le filtre de distance à 50km pour tout voir
-                    document.getElementById('distanceFilter').value = 50;
-                    updateDistanceLabel();
-                    
-                    afficherCarteEvenements(toutesLesDonnees);
-                    filtrerEvenements();
-                    
-                    showNotification(`✓ ${toutesLesDonnees.length} points chargés sur la carte`, 'success');
-                } else if (error) {
-                    console.error('Erreur Supabase:', error);
-                    showNotification('⚠️ Erreur chargement des activités', 'warning');
-                }
-            } catch (error) {
-                console.error('Erreur chargement activités:', error);
-                showNotification('⚠️ Erreur chargement des données', 'warning');
-            }
+            // 2. Charger les activités SÉPARÉMENT dans la nouvelle section
+            afficherActivites(gite);
+            
+            // Réinitialiser le filtre de distance à 50km pour tout voir
+            document.getElementById('distanceFilter').value = 50;
+            updateDistanceLabel();
+            
+            afficherCarteEvenements(window.allEvenements);
+            filtrerEvenements();
+            
+            showNotification(`✓ Carte et activités chargées`, 'success');
         }
         
         // Rechercher automatiquement via Google Places API (simulation sans clé API)
