@@ -7106,10 +7106,46 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             showNotification('🗺️ Chargement de la carte...', 'info');
             
-            // 1. Charger UNIQUEMENT les événements (marchés, festivals, visites guidées)
+            // 1. Charger les événements
             await rechercherEvenements();
             
-            // 2. Charger les activités SÉPARÉMENT dans la nouvelle section
+            // 2. Charger les activités Supabase et les ajouter à la carte
+            try {
+                const { data, error } = await supabase
+                    .from('activites_gites')
+                    .select('*')
+                    .eq('gite', gite);
+                
+                console.log('📊 Activités chargées:', data ? data.length : 0);
+                
+                if (!error && data && data.length > 0) {
+                    // Ajouter les activités aux événements pour la carte
+                    data.forEach(act => {
+                        if (act.latitude && act.longitude) {
+                            window.allEvenements.push({
+                                titre: act.nom,
+                                nom: act.nom,
+                                date: null,
+                                lieu: act.adresse,
+                                adresse: act.adresse,
+                                description: act.description,
+                                lien: act.website,
+                                icone: act.categorie ? '📍' : '📍',
+                                distance: act.distance || 0,
+                                lat: parseFloat(act.latitude),
+                                lng: parseFloat(act.longitude),
+                                note: act.note,
+                                categorie: act.categorie
+                            });
+                        }
+                    });
+                    console.log('✅ Activités ajoutées à la carte');
+                }
+            } catch (error) {
+                console.error('Erreur chargement activités pour carte:', error);
+            }
+            
+            // 3. Afficher activités dans la section dédiée
             afficherActivites(gite);
             
             // Réinitialiser le filtre de distance à 50km pour tout voir
@@ -7904,7 +7940,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         <h4 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 3px solid #667eea; padding-bottom: 8px;">
                             ${cat} (${parCategorie[cat].length})
                         </h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                 `;
                 
                 parCategorie[cat].forEach(act => {
