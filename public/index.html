@@ -7033,12 +7033,22 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         };
         
         // Ouvrir la modale d'activité
-        function ouvrirModalActivite(isModification = false) {
+        function ouvrirModalActivite(isModification = false, positionY = null) {
             const modal = document.getElementById('modalActivite');
             const overlay = document.getElementById('modalOverlay');
             
             modal.style.display = 'block';
             overlay.style.display = 'block';
+            
+            // Si une position est fournie, la modale s'affiche à cet endroit
+            if (positionY !== null) {
+                modal.style.top = positionY + 'px';
+                modal.style.transform = 'translate(-50%, -50%)';
+            } else {
+                // Sinon, centrée au milieu de l'écran
+                modal.style.top = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+            }
             
             const modalTitle = document.getElementById('modalTitle');
             const btnSave = document.getElementById('btnSaveActivite');
@@ -8056,12 +8066,18 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         // Modifier une activité
         async function modifierActivite(id) {
             try {
-                // Scroller jusqu'à l'activité
+                // Récupérer l'élément de l'activité
                 const element = document.querySelector(`[data-activite-id="${id}"]`);
+                let positionY = window.innerHeight / 2; // Par défaut au centre
+                
                 if (element) {
                     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     // Attendre un peu que le scroll soit fait
                     await new Promise(resolve => setTimeout(resolve, 300));
+                    
+                    // Récupérer la position de l'élément
+                    const rect = element.getBoundingClientRect();
+                    positionY = rect.top + window.scrollY + rect.height / 2;
                 }
                 
                 // Récupérer l'activité à modifier
@@ -8091,8 +8107,8 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 // Stocker l'ID en cours de modification
                 window.activiteEnCoursDeModification = id;
                 
-                // Ouvrir la modale en mode modification
-                ouvrirModalActivite(true);
+                // Ouvrir la modale en mode modification avec position
+                ouvrirModalActivite(true, positionY);
                 
                 showNotification('✏️ Mode modification activé', 'info');
                 
