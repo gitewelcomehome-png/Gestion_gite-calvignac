@@ -1707,12 +1707,49 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     </div>
                 </div>
 
-                <!-- LISTE DES ACTIVITÉS PAR CATÉGORIE -->
+                <!-- ACTIVITÉS PERMANENTES PAR CATÉGORIE -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🎯</span>
+                        <h2 class="card-title">Activités & Points d'Intérêt</h2>
+                    </div>
+                    
+                    <!-- FILTRES PAR CATÉGORIE -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px;">
+                        <button type="button" class="btn" style="background: #10b981;" onclick="filtrerActivitesParCategorie('Restaurant')">
+                            🍽️ Restaurants
+                        </button>
+                        <button type="button" class="btn" style="background: #3b82f6;" onclick="filtrerActivitesParCategorie('Musée')">
+                            🏛️ Musées & Châteaux
+                        </button>
+                        <button type="button" class="btn" style="background: #f59e0b;" onclick="filtrerActivitesParCategorie('Café')">
+                            ☕ Cafés & Bars
+                        </button>
+                        <button type="button" class="btn" style="background: #8b5cf6;" onclick="filtrerActivitesParCategorie('Parc')">
+                            🌳 Parcs & Loisirs
+                        </button>
+                        <button type="button" class="btn" style="background: #ec4899;" onclick="filtrerActivitesParCategorie('Hôtel')">
+                            🏨 Hôtels
+                        </button>
+                        <button type="button" class="btn" style="background: #6366f1;" onclick="afficherToutesActivites()">
+                            📋 Tous
+                        </button>
+                    </div>
+                    
+                    <!-- LISTE DES ACTIVITÉS -->
+                    <div id="activitesParCategorie" style="display: grid; gap: 20px;">
+                        <p style="text-align: center; color: #999; padding: 40px;">
+                            Sélectionne une catégorie ou "Tous" pour voir les activités...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FORMULAIRE D'AJOUT MANUEL (CACHÉ PAR DÉFAUT) -->
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 15px;">
-                            <span class="card-icon">📋</span>
-                            <h2 class="card-title">Activités Enregistrées</h2>
+                            <span class="card-icon">➕</span>
+                            <h2 class="card-title">Ajouter une Activité Personnalisée</h2>
                         </div>
                         <button type="button" onclick="toggleFormAjout()" style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(39,174,96,0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Ajouter une activité">
                             ➕
@@ -7881,6 +7918,108 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             } catch (error) {
                 console.error('Erreur suppression activité:', error);
                 showNotification('❌ Erreur : ' + error.message, 'error');
+            }
+        }
+        
+        // 🎯 FILTRER LES ACTIVITÉS PAR CATÉGORIE
+        function filtrerActivitesParCategorie(motCle) {
+            const gite = document.getElementById('decouvrir_gite')?.value;
+            if (!gite) {
+                showNotification('⚠️ Sélectionne d\'abord un gîte', 'warning');
+                return;
+            }
+            
+            const activites = activitesParGite[gite] || [];
+            const container = document.getElementById('activitesParCategorie');
+            
+            // Filtrer par mot-clé dans la catégorie
+            const filtrees = activites.filter(act => 
+                act.categorie.toLowerCase().includes(motCle.toLowerCase())
+            );
+            
+            if (filtrees.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #999; padding: 40px;">Aucune activité "${motCle}" trouvée pour ${gite}</p>`;
+                return;
+            }
+            
+            afficherActivitesFiltrées(filtrees, `${motCle} à ${gite}`);
+        }
+        
+        // 📋 AFFICHER TOUTES LES ACTIVITÉS
+        function afficherToutesActivites() {
+            const gite = document.getElementById('decouvrir_gite')?.value;
+            if (!gite) {
+                showNotification('⚠️ Sélectionne d\'abord un gîte', 'warning');
+                return;
+            }
+            
+            const activites = activitesParGite[gite] || [];
+            afficherActivitesFiltrées(activites, `Toutes les activités à ${gite}`);
+        }
+        
+        // 🎨 AFFICHER LES ACTIVITÉS FILTRÉES
+        function afficherActivitesFiltrées(activites, titre) {
+            const container = document.getElementById('activitesParCategorie');
+            
+            // Grouper par catégorie
+            const parCategorie = {};
+            activites.forEach(act => {
+                if (!parCategorie[act.categorie]) {
+                    parCategorie[act.categorie] = [];
+                }
+                parCategorie[act.categorie].push(act);
+            });
+            
+            let html = `<h3 style="color: #2C5F7D; font-size: 1.5rem; margin-bottom: 20px; text-align: center; padding: 20px; background: #f0f4f8; border-radius: 12px;">🎯 ${titre} (${activites.length})</h3>`;
+            
+            Object.keys(parCategorie).sort().forEach(cat => {
+                html += `
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 3px solid #667eea; padding-bottom: 8px;">
+                            ${cat} (${parCategorie[cat].length})
+                        </h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+                `;
+                
+                parCategorie[cat].forEach(act => {
+                    const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) : '';
+                    const distanceText = act.distance ? `📍 ${act.distance} km` : '';
+                    const prixText = act.prix ? `💰 ${act.prix}` : '';
+                    
+                    html += `
+                        <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-left: 5px solid #667eea; padding: 18px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px); this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.1)'">
+                            <h5 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #2C5F7D; word-wrap: break-word;">${act.nom}</h5>
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; font-size: 0.9rem; color: #555;">
+                                ${distanceText ? `<span style="background: white; padding: 4px 12px; border-radius: 20px;">${distanceText}</span>` : ''}
+                                ${noteStars ? `<span style="background: white; padding: 4px 12px; border-radius: 20px;">${noteStars}</span>` : ''}
+                                ${prixText ? `<span style="background: white; padding: 4px 12px; border-radius: 20px;">${prixText}</span>` : ''}
+                            </div>
+                            
+                            ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #666;">📍 ${act.adresse}</p>` : ''}
+                            ${act.telephone ? `<p style="margin: 5px 0; font-size: 0.85rem; color: #666;">📞 ${act.telephone}</p>` : ''}
+                            
+                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                                ${act.google_maps_link ? `
+                                    <a href="${act.google_maps_link}" target="_blank" title="Google Maps" style="background: #4285f4; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 1rem; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                        🗺️ Itinéraire
+                                    </a>
+                                ` : ''}
+                                ${act.website ? `
+                                    <a href="${act.website}" target="_blank" title="Site web" style="background: #10b981; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 1rem; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                        🌐 Site
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            });
+            
+            container.innerHTML = html;
+        }
             }
         }
         
