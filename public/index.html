@@ -7917,7 +7917,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             
                             <!-- Titre et boutons -->
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                                <h5 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #1f2937; flex: 1; word-wrap: break-word; font-family: 'Work Sans', sans-serif;">${act.nom}</h5>
+                                <div style="flex: 1;">
+                                    <h5 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #1f2937; word-wrap: break-word; font-family: 'Work Sans', sans-serif;">${act.nom}${distanceText ? ` <span style="font-size: 0.95rem; font-weight: 500; color: #6b7280;">• ${distanceText}</span>` : ''}</h5>
+                                </div>
                                 <div style="display: flex; gap: 4px; margin-left: 12px;">
                                     <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">✏️</button>
                                     <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">🗑️</button>
@@ -7930,11 +7932,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             <!-- Description -->
                             ${act.description ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #6b7280; font-style: italic; line-height: 1.5;">${act.description}</p>` : ''}
                             
-                            <!-- Grille 3 colonnes -->
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; background: ${colors.light}; padding: 12px; border-radius: 8px;">
-                                ${distanceText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">📏</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${distanceText}</div></div>` : ''}
-                                ${prixText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">💵</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${prixText}</div></div>` : ''}
-                                ${typeRestoText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">🍽️</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${typeRestoText}</div></div>` : ''}
+                            <!-- Prix et Type Restaurant -->
+                            <div style="display: flex; gap: 20px; margin: 12px 0; font-size: 0.9rem; color: #6b7280;">
+                                ${prixText ? `<div><span style="font-weight: 600;">💵 ${prixText}</span></div>` : ''}
+                                ${typeRestoText ? `<div><span style="font-weight: 600;">🍽️ ${typeRestoText}</span></div>` : ''}
                             </div>
                             
                             <!-- Note et avis -->
@@ -8067,7 +8068,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             
                             <!-- Titre et boutons -->
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                                <h5 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #1f2937; flex: 1; word-wrap: break-word; font-family: 'Work Sans', sans-serif;">${act.nom}</h5>
+                                <div style="flex: 1;">
+                                    <h5 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #1f2937; word-wrap: break-word; font-family: 'Work Sans', sans-serif;">${act.nom}${distanceText ? ` <span style="font-size: 0.95rem; font-weight: 500; color: #6b7280;">• ${distanceText}</span>` : ''}</h5>
+                                </div>
                                 <div style="display: flex; gap: 4px; margin-left: 12px;">
                                     <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">✏️</button>
                                     <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">🗑️</button>
@@ -8080,11 +8083,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             <!-- Description -->
                             ${act.description ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #6b7280; font-style: italic; line-height: 1.5;">${act.description}</p>` : ''}
                             
-                            <!-- Grille 3 colonnes -->
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; background: ${colors.light}; padding: 12px; border-radius: 8px;">
-                                ${distanceText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">📏</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${distanceText}</div></div>` : ''}
-                                ${prixText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">💵</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${prixText}</div></div>` : ''}
-                                ${typeRestoText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">🍽️</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${typeRestoText}</div></div>` : ''}
+                            <!-- Prix et Type Restaurant -->
+                            <div style="display: flex; gap: 20px; margin: 12px 0; font-size: 0.9rem; color: #6b7280;">
+                                ${prixText ? `<div><span style="font-weight: 600;">💵 ${prixText}</span></div>` : ''}
+                                ${typeRestoText ? `<div><span style="font-weight: 600;">🍽️ ${typeRestoText}</span></div>` : ''}
                             </div>
                             
                             <!-- Note et avis -->
