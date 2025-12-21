@@ -7775,7 +7775,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             const telephone = document.getElementById('activite_telephone').value.trim();
             const note = document.getElementById('activite_note').value;
             const avis = document.getElementById('activite_avis').value;
-            const prix = document.getElementById('activite_prix').value;
+            const prixValue = document.getElementById('activite_prix').value;
             
             if (!gite || !nom || !categorie || !adresse) {
                 showNotification('⚠️ Remplissez les champs obligatoires (nom, catégorie, adresse)', 'warning');
@@ -7800,7 +7800,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 telephone,
                 note: note ? parseFloat(note) : null,
                 avis: avis ? parseInt(avis) : null,
-                prix,
+                prix: prixValue || null,
                 google_maps_link: googleMapsLink,
                 latitude: coords.lat,
                 longitude: coords.lng
