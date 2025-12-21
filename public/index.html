@@ -1761,9 +1761,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
 
                     <!-- FORMULAIRE D'AJOUT (CACHÉ PAR DÉFAUT) -->
                     <!-- MODALE MODIFICATION/AJOUT ACTIVITÉ -->
-                    <div id="modalActivite" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; padding: 20px;">
-                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px 0;">
-                            <div style="background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                    <div id="modalActivite" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 90%; max-width: 700px;">
+                        <!-- Overlay semi-transparent -->
+                        <div id="modalOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; cursor: pointer;" onclick="fermerModalActivite()"></div>
+                        <div style="background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; position: relative; z-index: 1000;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white;">
                                     <h2 id="modalTitle" style="margin: 0; color: #2C5F7D; font-size: 1.4rem;">➕ Ajouter une Activité</h2>
                                     <button type="button" onclick="fermerModalActivite()" style="background: transparent; border: none; font-size: 1.8rem; cursor: pointer; color: #666; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#666'" title="Fermer">
@@ -7036,7 +7037,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         
         // Ouvrir la modale d'activité
         function ouvrirModalActivite(isModification = false) {
-            document.getElementById('modalActivite').style.display = 'block';
+            const modal = document.getElementById('modalActivite');
+            modal.style.display = 'block';
+            // Centrer la modale au milieu de l'écran
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            
             const modalTitle = document.getElementById('modalTitle');
             const btnSave = document.getElementById('btnSaveActivite');
             
@@ -7051,7 +7058,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             }
             
             // Scroll au top de la modale (si elle est longue)
-            document.querySelector('#modalActivite > div').scrollTop = 0;
+            const modalContent = modal.querySelector('div div');
+            if (modalContent) {
+                modalContent.scrollTop = 0;
+            }
         }
         
         // Fermer la modale d'activité
