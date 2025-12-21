@@ -7562,6 +7562,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         let mapInstance = null;
         let markersLayer = null;
         let giteMarker = null;
+        let filtreCategorieActive = null; // Variable pour stocker le filtre de catégorie actif
         
         // Coordonnées des gîtes
         const giteCoords = {
@@ -7628,7 +7629,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             const mapContainer = document.getElementById('mapEvenements');
             
             // Filtrer les points avec des coordonnées valides
-            const evenementsValides = evenements.filter(e => {
+            let evenementsValides = evenements.filter(e => {
                 const isValid = e.lat && e.lng && !isNaN(e.lat) && !isNaN(e.lng) && 
                                isFinite(e.lat) && isFinite(e.lng);
                 if (!isValid) {
@@ -7636,6 +7637,14 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 }
                 return isValid;
             });
+            
+            // 🔍 Appliquer le filtre de catégorie s'il est actif
+            if (filtreCategorieActive) {
+                evenementsValides = evenementsValides.filter(e => 
+                    e.categorie && e.categorie.toLowerCase().includes(filtreCategorieActive.toLowerCase())
+                );
+                console.log(`📌 Carte filtrée: ${evenementsValides.length} points pour "${filtreCategorieActive}"`);
+            }
             
             if (evenementsValides.length === 0) {
                 console.error('❌ Aucun point avec coordonnées valides');
@@ -8043,7 +8052,12 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 return;
             }
             
+            // 🗺️ Mettre à jour le filtre et la carte
+            filtreCategorieActive = motCle;
             afficherActivitesFiltrées(filtrees, `${motCle} à ${gite}`);
+            
+            // 📍 Afficher uniquement les activités filtrées sur la carte
+            afficherCarteEvenements();
         }
         
         // 📋 AFFICHER TOUTES LES ACTIVITÉS
@@ -8055,7 +8069,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             }
             
             const activites = activitesParGite[gite] || [];
+            
+            // 🗺️ Réinitialiser le filtre et afficher toutes les activités
+            filtreCategorieActive = null;
             afficherActivitesFiltrées(activites, `Toutes les activités à ${gite}`);
+            
+            // 📍 Afficher tous les marqueurs sur la carte
+            afficherCarteEvenements();
         }
         
         // 🎨 AFFICHER LES ACTIVITÉS FILTRÉES
