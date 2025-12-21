@@ -1,0 +1,75 @@
+🚀 DÉMARRAGE ULTRA-RAPIDE (2 minutes pour comprendre)
+
+════════════════════════════════════════════════════════════════════════════
+
+VOUS AVEZ REÇU:
+
+1. 4 SCRIPTS JAVASCRIPT
+   ✓ geocode_missing.js ........... Géocoder activités
+   ✓ search_pois.js ............... Chercher 500+ POIs (25 km)
+   ✓ configure_gites.js ........... Récupérer coords depuis Supabase
+   ✓ process_all.js ............... Tout exécuter automatiquement
+
+2. 2 FICHIERS SQL
+   ✓ sql/create_activites_table.sql ... Créer la table
+   ✓ sql/example_insert_pois.sql ...... Exemples
+
+3. 3 GUIDES COMPLETS
+   ✓ GUIDE_POIS_COMPLET.md ....... Explications détaillées
+   ✓ README_SCRIPTS.md ........... Vue d'ensemble
+   ✓ SUMMARY.txt ................. Résumé visuel
+
+════════════════════════════════════════════════════════════════════════════
+
+CE QUE VOUS ALLEZ OBTENIR:
+
+✅ Toutes les activités géocodées (lat/lon)
+✅ 500+ Points d'Intérêt trouvés (Restaurants, Musées, Parcs...)
+✅ Rayon de 25 km autour de chaque gîte
+✅ Données enrichies (site web, téléphone, horaires)
+✅ Requête SQL INSERT prête pour Supabase
+
+════════════════════════════════════════════════════════════════════════════
+
+3 ÉTAPES POUR RÉUSSIR:
+
+1️⃣  TÉLÉCHARGER
+    └─ Depuis VS Code: téléchargez les 4 scripts JavaScript
+    └─ Créez dossier ~/gites-process/
+    └─ Placez les 4 fichiers dedans
+
+2️⃣  EXÉCUTER
+    └─ Terminal: cd ~/gites-process
+    └─ Lancez: node process_all.js
+    └─ Attendez: 15-25 minutes
+
+3️⃣  INJECTER DANS SUPABASE
+    └─ Allez sur: app.supabase.com
+    └─ Copiez: sql/insert_activites.sql
+    └─ Collez dans SQL Editor
+    └─ Cliquez "Run"
+
+════════════════════════════════════════════════════════════════════════════
+
+⏱️  DURÉES ESTIMÉES:
+
+- Configuration: 2 minutes
+- Géocodage: 5-10 minutes
+- Recherche POIs: 2-5 minutes
+- Injection SQL: 2-3 minutes
+━━━━━━━━━━━━━━━━
+TOTAL: 15-25 minutes
+
+════════════════════════════════════════════════════════════════════════════
+
+❓ QUESTIONS?
+
+- Lisez: GUIDE_POIS_COMPLET.md (guide ultra-détaillé)
+- Ou: README_SCRIPTS.md (vue d'ensemble)
+- Ou: SUMMARY.txt (résumé visuel)
+
+════════════════════════════════════════════════════════════════════════════
+
+✨ C'EST TOUT! Lancez: node process_all.js
+
+════════════════════════════════════════════════════════════════════════════
