@@ -7106,10 +7106,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             showNotification('🗺️ Chargement de la carte...', 'info');
             
-            // 1. Charger les événements
+            // 1. Charger UNIQUEMENT les événements
             await rechercherEvenements();
             
-            // 2. Charger les activités Supabase et les ajouter à la carte
+            // 2. Charger les activités Supabase SÉPARÉMENT pour la carte
             try {
                 const { data, error } = await supabase
                     .from('activites_gites')
@@ -7119,30 +7119,28 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 console.log('📊 Activités chargées:', data ? data.length : 0);
                 
                 if (!error && data && data.length > 0) {
-                    // Ajouter les activités aux événements pour la carte
-                    data.forEach(act => {
-                        if (act.latitude && act.longitude) {
-                            window.allEvenements.push({
-                                titre: act.nom,
-                                nom: act.nom,
-                                date: null,
-                                lieu: act.adresse,
-                                adresse: act.adresse,
-                                description: act.description,
-                                lien: act.website,
-                                icone: act.categorie ? '📍' : '📍',
-                                distance: act.distance || 0,
-                                lat: parseFloat(act.latitude),
-                                lng: parseFloat(act.longitude),
-                                note: act.note,
-                                categorie: act.categorie
-                            });
-                        }
-                    });
-                    console.log('✅ Activités ajoutées à la carte');
+                    // Créer tableau séparé pour les activités (pas mélangé avec événements)
+                    window.allActivites = data.map(act => ({
+                        titre: act.nom,
+                        nom: act.nom,
+                        date: null,
+                        lieu: act.adresse,
+                        adresse: act.adresse,
+                        description: act.description,
+                        lien: act.website,
+                        icone: '📍',
+                        distance: act.distance || 0,
+                        lat: parseFloat(act.latitude),
+                        lng: parseFloat(act.longitude),
+                        note: act.note,
+                        categorie: act.categorie,
+                        isActivite: true  // Marqueur pour différencier des événements
+                    })).filter(a => a.lat && a.lng);  // Garder seulement ceux avec coordonnées
+                    
+                    console.log('✅ Activités chargées pour carte:', window.allActivites.length);
                 }
             } catch (error) {
-                console.error('Erreur chargement activités pour carte:', error);
+                console.error('Erreur chargement activités:', error);
             }
             
             // 3. Afficher activités dans la section dédiée
@@ -7152,7 +7150,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             document.getElementById('distanceFilter').value = 50;
             updateDistanceLabel();
             
-            afficherCarteEvenements(window.allEvenements);
+            // Afficher TOUT sur la carte (événements + activités)
+            const toutSurCarte = [...window.allEvenements, ...(window.allActivites || [])];
+            afficherCarteEvenements(toutSurCarte);
             filtrerEvenements();
             
             showNotification(`✓ Carte et activités chargées`, 'success');
