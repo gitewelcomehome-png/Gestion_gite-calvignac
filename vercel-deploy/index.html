@@ -7858,6 +7858,18 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         }
         
         // Afficher les activités par catégorie
+        // Fonction d'aide pour obtenir les couleurs par catégorie
+        function getCategoryColor(categorie) {
+            const colors = {
+                'Restaurant': { badge: '#10b981', light: '#d1fae5' },
+                'Musée': { badge: '#3b82f6', light: '#dbeafe' },
+                'Café': { badge: '#f59e0b', light: '#fef3c7' },
+                'Parc': { badge: '#8b5cf6', light: '#ede9fe' },
+                'Hôtel': { badge: '#ec4899', light: '#fce7f3' }
+            };
+            return colors[categorie] || { badge: '#667eea', light: '#e0e7ff' };
+        }
+        
         function afficherActivites(gite) {
             const activites = activitesParGite[gite] || [];
             const container = document.getElementById('activitesParCategorie');
@@ -7876,7 +7888,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 parCategorie[act.categorie].push(act);
             });
             
-            let html = `<h3 style="color: #2C5F7D; font-size: 1.5rem; margin-bottom: 20px; text-align: center; padding: 20px; background: #f0f4f8; border-radius: 12px;">🎯 Toutes les activités à ${gite} (${activites.length})</h3>`;
+            let html = `<h3 style="color: white; font-size: 1.6rem; margin-bottom: 24px; text-align: center; padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">✨ Toutes les activités à ${gite} <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activites.length}</span></h3>`;
             
             Object.keys(parCategorie).sort().forEach(cat => {
                 html += `
@@ -7888,38 +7900,51 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 `;
                 
                 parCategorie[cat].forEach(act => {
+                    const colors = getCategoryColor(act.categorie);
                     const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) + ` ${act.note}/5` : '';
-                    const distanceText = act.distance ? `📍 ${act.distance} km` : '';
-                    const prixText = act.prix ? `💰 ${act.prix}` : '';
                     const avisText = act.avis ? `(${act.avis} avis)` : '';
                     const telText = act.telephone ? `📞 ${act.telephone}` : '';
-                    const typeRestoText = act.type_restaurant ? `🍽️ ${act.type_restaurant}` : '';
+                    const distanceText = act.distance ? `${act.distance} km` : '';
+                    const prixText = act.prix ? `${act.prix}` : '';
+                    const typeRestoText = act.type_restaurant ? `${act.type_restaurant}` : '';
                     
                     html += `
-                        <div data-activite-id="${act.id}" style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                                <h5 style="margin: 0; font-size: 1rem; color: #2C5F7D; flex: 1; word-wrap: break-word;">${act.nom}</h5>
-                                <div style="display: flex; gap: 6px; margin-left: 8px;">
-                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: #4285f4; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">✏️</button>
-                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: #ef4444; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">🗑️</button>
+                        <div data-activite-id="${act.id}" style="background: white; border: none; padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease; position: relative;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 10px 28px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'">
+                            <!-- Badge catégorie -->
+                            <div style="display: inline-block; background: ${colors.badge}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                ${act.categorie}
+                            </div>
+                            
+                            <!-- Titre et boutons -->
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <h5 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #1f2937; flex: 1; word-wrap: break-word; font-family: 'Work Sans', sans-serif;">${act.nom}</h5>
+                                <div style="display: flex; gap: 4px; margin-left: 12px;">
+                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">✏️</button>
+                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">🗑️</button>
                                 </div>
                             </div>
                             
-                            ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #666;">📍 ${act.adresse}</p>` : ''}
+                            <!-- Adresse -->
+                            ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #4b5563; display: flex; align-items: center; gap: 6px;"><span style="font-size: 1rem;">📍</span> ${act.adresse}</p>` : ''}
                             
-                            ${act.description ? `<p style="margin: 10px 0; font-size: 0.85rem; color: #555; font-style: italic; line-height: 1.4;">${act.description}</p>` : ''}
+                            <!-- Description -->
+                            ${act.description ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #6b7280; font-style: italic; line-height: 1.5;">${act.description}</p>` : ''}
                             
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; font-size: 0.85rem;">
-                                ${distanceText ? `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 16px;">${distanceText}</span>` : ''}
-                                ${prixText ? `<span style="background: #f3e5f5; color: #7b1fa2; padding: 4px 10px; border-radius: 16px;">${prixText}</span>` : ''}
-                                ${typeRestoText ? `<span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 16px;">${typeRestoText}</span>` : ''}
+                            <!-- Grille 3 colonnes -->
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; background: ${colors.light}; padding: 12px; border-radius: 8px;">
+                                ${distanceText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">📏</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${distanceText}</div></div>` : ''}
+                                ${prixText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">💵</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${prixText}</div></div>` : ''}
+                                ${typeRestoText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">🍽️</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${typeRestoText}</div></div>` : ''}
                             </div>
                             
-                            ${noteStars ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #f59e0b;">${noteStars} ${avisText}</p>` : ''}
+                            <!-- Note et avis -->
+                            ${noteStars ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #f59e0b; font-weight: 600;">${noteStars} ${avisText}</p>` : ''}
                             
-                            ${telText ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #666;">${telText}</p>` : ''}
+                            <!-- Téléphone -->
+                            ${telText ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #6b7280;">${telText}</p>` : ''}
                             
-                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                            <!-- Liens d'action -->
+                            <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
                                 ${act.google_maps_link ? `
                                     <a href="${act.google_maps_link}" target="_blank" title="Google Maps" style="background: #4285f4; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">
                                         🗺️ Itinéraire
@@ -8025,38 +8050,51 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 `;
                 
                 parCategorie[cat].forEach(act => {
+                    const colors = getCategoryColor(act.categorie);
                     const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) + ` ${act.note}/5` : '';
-                    const distanceText = act.distance ? `📍 ${act.distance} km` : '';
-                    const prixText = act.prix ? `💰 ${act.prix}` : '';
                     const avisText = act.avis ? `(${act.avis} avis)` : '';
                     const telText = act.telephone ? `📞 ${act.telephone}` : '';
-                    const typeRestoText = act.type_restaurant ? `🍽️ ${act.type_restaurant}` : '';
+                    const distanceText = act.distance ? `${act.distance} km` : '';
+                    const prixText = act.prix ? `${act.prix}` : '';
+                    const typeRestoText = act.type_restaurant ? `${act.type_restaurant}` : '';
                     
                     html += `
-                        <div data-activite-id="${act.id}" style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                                <h5 style="margin: 0; font-size: 1rem; color: #2C5F7D; flex: 1; word-wrap: break-word;">${act.nom}</h5>
-                                <div style="display: flex; gap: 6px; margin-left: 8px;">
-                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: #4285f4; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">✏️</button>
-                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: #ef4444; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">🗑️</button>
+                        <div data-activite-id="${act.id}" style="background: white; border: none; padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease; position: relative;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 10px 28px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'">
+                            <!-- Badge catégorie -->
+                            <div style="display: inline-block; background: ${colors.badge}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                ${act.categorie}
+                            </div>
+                            
+                            <!-- Titre et boutons -->
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <h5 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #1f2937; flex: 1; word-wrap: break-word; font-family: 'Work Sans', sans-serif;">${act.nom}</h5>
+                                <div style="display: flex; gap: 4px; margin-left: 12px;">
+                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">✏️</button>
+                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">🗑️</button>
                                 </div>
                             </div>
                             
-                            ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #666;">📍 ${act.adresse}</p>` : ''}
+                            <!-- Adresse -->
+                            ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #4b5563; display: flex; align-items: center; gap: 6px;"><span style="font-size: 1rem;">📍</span> ${act.adresse}</p>` : ''}
                             
-                            ${act.description ? `<p style="margin: 10px 0; font-size: 0.85rem; color: #555; font-style: italic; line-height: 1.4;">${act.description}</p>` : ''}
+                            <!-- Description -->
+                            ${act.description ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #6b7280; font-style: italic; line-height: 1.5;">${act.description}</p>` : ''}
                             
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; font-size: 0.85rem;">
-                                ${distanceText ? `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 16px;">${distanceText}</span>` : ''}
-                                ${prixText ? `<span style="background: #f3e5f5; color: #7b1fa2; padding: 4px 10px; border-radius: 16px;">${prixText}</span>` : ''}
-                                ${typeRestoText ? `<span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 16px;">${typeRestoText}</span>` : ''}
+                            <!-- Grille 3 colonnes -->
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; background: ${colors.light}; padding: 12px; border-radius: 8px;">
+                                ${distanceText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">📏</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${distanceText}</div></div>` : ''}
+                                ${prixText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">💵</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${prixText}</div></div>` : ''}
+                                ${typeRestoText ? `<div style="text-align: center;"><div style="font-size: 1.1rem; margin-bottom: 4px;">🍽️</div><div style="font-size: 0.8rem; color: #374151; font-weight: 600;">${typeRestoText}</div></div>` : ''}
                             </div>
                             
-                            ${noteStars ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #f59e0b;">${noteStars} ${avisText}</p>` : ''}
+                            <!-- Note et avis -->
+                            ${noteStars ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #f59e0b; font-weight: 600;">${noteStars} ${avisText}</p>` : ''}
                             
-                            ${telText ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #666;">${telText}</p>` : ''}
+                            <!-- Téléphone -->
+                            ${telText ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #6b7280;">${telText}</p>` : ''}
                             
-                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                            <!-- Liens d'action -->
+                            <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
                                 ${act.google_maps_link ? `
                                     <a href="${act.google_maps_link}" target="_blank" title="Google Maps" style="background: #4285f4; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">
                                         🗺️ Itinéraire
