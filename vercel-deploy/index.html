@@ -5634,6 +5634,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             await updateReservationsList();
             await updateStats();
+            chargerActivites(); // Charger les activités depuis Supabase 🎯
             chargerActivitesEtSorties(); // Charger les activités
             chargerUrlsIcal(); // Charger les URLs iCal
             
