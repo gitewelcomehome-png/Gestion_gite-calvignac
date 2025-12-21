@@ -7112,6 +7112,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             activitesParGite[act.gite].push(act);
                         }
                     });
+                    console.log('Activités chargées:', activitesParGite);
                 }
                 
                 // Afficher si un gîte est sélectionné
@@ -7776,6 +7777,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             const note = document.getElementById('activite_note').value;
             const avis = document.getElementById('activite_avis').value;
             const prixValue = document.getElementById('activite_prix').value;
+            const typeRestaurant = document.getElementById('activite_type_resto').value.trim();
             
             if (!gite || !nom || !categorie || !adresse) {
                 showNotification('⚠️ Remplissez les champs obligatoires (nom, catégorie, adresse)', 'warning');
@@ -7793,6 +7795,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 gite,
                 nom,
                 categorie,
+                type_restaurant: typeRestaurant || null,
                 description,
                 adresse,
                 distance: distance ? parseFloat(distance) : null,
@@ -7890,6 +7893,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     const prixText = act.prix ? `💰 ${act.prix}` : '';
                     const avisText = act.avis ? `(${act.avis} avis)` : '';
                     const telText = act.telephone ? `📞 ${act.telephone}` : '';
+                    const typeRestoText = act.type_restaurant ? `🍽️ ${act.type_restaurant}` : '';
                     
                     html += `
                         <div data-activite-id="${act.id}" style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
@@ -7908,6 +7912,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; font-size: 0.85rem;">
                                 ${distanceText ? `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 16px;">${distanceText}</span>` : ''}
                                 ${prixText ? `<span style="background: #f3e5f5; color: #7b1fa2; padding: 4px 10px; border-radius: 16px;">${prixText}</span>` : ''}
+                                ${typeRestoText ? `<span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 16px;">${typeRestoText}</span>` : ''}
                             </div>
                             
                             ${noteStars ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #f59e0b;">${noteStars} ${avisText}</p>` : ''}
@@ -8025,11 +8030,16 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     const prixText = act.prix ? `💰 ${act.prix}` : '';
                     const avisText = act.avis ? `(${act.avis} avis)` : '';
                     const telText = act.telephone ? `📞 ${act.telephone}` : '';
+                    const typeRestoText = act.type_restaurant ? `🍽️ ${act.type_restaurant}` : '';
                     
                     html += `
                         <div data-activite-id="${act.id}" style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                                 <h5 style="margin: 0; font-size: 1rem; color: #2C5F7D; flex: 1; word-wrap: break-word;">${act.nom}</h5>
+                                <div style="display: flex; gap: 6px; margin-left: 8px;">
+                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: #4285f4; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">✏️</button>
+                                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: #ef4444; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">🗑️</button>
+                                </div>
                             </div>
                             
                             ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #666;">📍 ${act.adresse}</p>` : ''}
@@ -8039,6 +8049,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; font-size: 0.85rem;">
                                 ${distanceText ? `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 16px;">${distanceText}</span>` : ''}
                                 ${prixText ? `<span style="background: #f3e5f5; color: #7b1fa2; padding: 4px 10px; border-radius: 16px;">${prixText}</span>` : ''}
+                                ${typeRestoText ? `<span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 16px;">${typeRestoText}</span>` : ''}
                             </div>
                             
                             ${noteStars ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #f59e0b;">${noteStars} ${avisText}</p>` : ''}
