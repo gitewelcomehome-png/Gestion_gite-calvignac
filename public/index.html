@@ -7988,30 +7988,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             container.innerHTML = html;
         }
-                            ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #666;">📍 ${act.adresse}</p>` : ''}
-                            ${act.telephone ? `<p style="margin: 5px 0; font-size: 0.85rem; color: #666;">📞 ${act.telephone}</p>` : ''}
-                            
-                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
-                                ${act.google_maps_link ? `
-                                    <a href="${act.google_maps_link}" target="_blank" title="Google Maps" style="background: #4285f4; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 1rem; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                        🗺️ Itinéraire
-                                    </a>
-                                ` : ''}
-                                ${act.website ? `
-                                    <a href="${act.website}" target="_blank" title="Site web" style="background: #10b981; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 1rem; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                        🌐 Site
-                                    </a>
-                                ` : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div></div>';
-            });
-            
-            container.innerHTML = html;
-        }
         
         // Modifier une activité
         async function modifierActivite(id) {
