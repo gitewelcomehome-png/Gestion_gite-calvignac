@@ -1773,18 +1773,35 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Catégorie *</label>
-                                    <select id="activite_categorie" class="form-control">
+                                    <select id="activite_categorie" class="form-control" onchange="afficherTypeRestoSiRestaurant()">
                                         <option value="">-- Sélectionner --</option>
-                                        <option value="🍽️ Restaurant">🍽️ Restaurant</option>
-                                        <option value="🏛️ Site Touristique">🏛️ Site Touristique</option>
-                                        <option value="🛍️ Commerce">🛍️ Commerce</option>
-                                        <option value="🌳 Nature & Randonnée">🌳 Nature & Randonnée</option>
-                                        <option value="🏥 Santé & Services">🏥 Santé & Services</option>
-                                        <option value="⚽ Sport & Loisirs">⚽ Sport & Loisirs</option>
-                                        <option value="🎭 Culture">🎭 Culture</option>
-                                        <option value="🎨 Autre">🎨 Autre</option>
+                                        <option value="Restaurant">🍽️ Restaurant</option>
+                                        <option value="Café/Bar">☕ Café/Bar</option>
+                                        <option value="Musée">🏛️ Musée</option>
+                                        <option value="Château">🏰 Château</option>
+                                        <option value="Parc">🌳 Parc</option>
+                                        <option value="Hôtel">🏨 Hôtel</option>
+                                        <option value="Attraction">🎪 Attraction</option>
                                     </select>
                                 </div>
+                            </div>
+                            
+                            <!-- Champ Type de Restaurant (caché par défaut) -->
+                            <div id="typeRestoDiv" style="display: none;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Type de Restaurant</label>
+                                <select id="activite_type_resto" class="form-control">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="Restaurant traditionnel">Restaurant traditionnel</option>
+                                    <option value="Fast Food">Fast Food</option>
+                                    <option value="Burger">Burger</option>
+                                    <option value="Pizza">Pizza</option>
+                                    <option value="Asian">Cuisine asiatique</option>
+                                    <option value="Italian">Cuisine italienne</option>
+                                    <option value="Crêpes">Crêperie</option>
+                                    <option value="Steakhouse">Steakhouse</option>
+                                    <option value="Végétarien">Végétarien</option>
+                                    <option value="Gastronomique">Gastronomique</option>
+                                </select>
                             </div>
 
                             <div>
@@ -7005,6 +7022,17 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         };
         
         // Charger les activités depuis Supabase
+        // Afficher/cacher le champ type de restaurant selon la catégorie
+        function afficherTypeRestoSiRestaurant() {
+            const categorie = document.getElementById('activite_categorie').value;
+            const typeRestoDiv = document.getElementById('typeRestoDiv');
+            if (categorie === 'Restaurant') {
+                typeRestoDiv.style.display = 'block';
+            } else {
+                typeRestoDiv.style.display = 'none';
+            }
+        }
+        
         async function chargerActivites() {
             try {
                 const { data, error } = await supabase
@@ -7797,56 +7825,54 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 parCategorie[act.categorie].push(act);
             });
             
-            let html = '';
+            let html = `<h3 style="color: #2C5F7D; font-size: 1.5rem; margin-bottom: 20px; text-align: center; padding: 20px; background: #f0f4f8; border-radius: 12px;">🎯 Toutes les activités à ${gite} (${activites.length})</h3>`;
             
             Object.keys(parCategorie).sort().forEach(cat => {
                 html += `
                     <div style="margin-bottom: 30px;">
-                        <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 1.3rem; border-bottom: 2px solid var(--border); padding-bottom: 10px;">
-                            ${cat}
-                        </h3>
-                        <div style="display: grid; gap: 15px;">
+                        <h4 style="color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-bottom: 15px; font-size: 1.1rem; padding: 12px 16px; border-radius: 8px;">
+                            ${cat} (${parCategorie[cat].length})
+                        </h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                 `;
                 
                 parCategorie[cat].forEach(act => {
-                    const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) : '';
+                    const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) + ` ${act.note}/5` : '';
                     const distanceText = act.distance ? `📍 ${act.distance} km` : '';
-                    const prixText = act.prix || '';
+                    const prixText = act.prix ? `💰 ${act.prix}` : '';
+                    const avisText = act.avis ? `(${act.avis} avis)` : '';
+                    const telText = act.telephone ? `📞 ${act.telephone}` : '';
                     
                     html += `
-                        <div style="background: #f8f9fa; border-left: 4px solid var(--primary); padding: 20px; border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                                <h4 style="margin: 0; font-size: 1.1rem; color: #2C5F7D;">${act.nom}</h4>
-                                <div style="display: flex; gap: 8px;">
-                                    <button onclick="modifierActivite(${act.id})" title="Modifier" style="background: transparent; border: none; cursor: pointer; font-size: 1.4rem; padding: 4px 8px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
-                                        ✏️
-                                    </button>
-                                    <button onclick="supprimerActivite(${act.id})" title="Supprimer" style="background: transparent; border: none; cursor: pointer; font-size: 1.4rem; padding: 4px 8px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
-                                        🗑️
-                                    </button>
+                        <div style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                                <h5 style="margin: 0; font-size: 1rem; color: #2C5F7D; flex: 1; word-wrap: break-word;">${act.nom}</h5>
+                                <div style="display: flex; gap: 6px; margin-left: 8px;">
+                                    <button onclick="modifierActivite(${act.id})" title="Modifier" style="background: #4285f4; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">✏️</button>
+                                    <button onclick="supprimerActivite(${act.id})" title="Supprimer" style="background: #ef4444; color: white; border: none; cursor: pointer; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">🗑️</button>
                                 </div>
                             </div>
                             
-                            ${act.description ? `<p style="margin: 10px 0; color: #555;">${act.description}</p>` : ''}
+                            ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #666;">📍 ${act.adresse}</p>` : ''}
                             
-                            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; font-size: 0.9rem; color: #666;">
-                                ${distanceText ? `<span>${distanceText}</span>` : ''}
-                                ${noteStars ? `<span>${noteStars} ${act.note}/5 ${act.avis ? `(${act.avis} avis)` : ''}</span>` : ''}
-                                ${prixText ? `<span>💰 ${prixText}</span>` : ''}
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; font-size: 0.85rem;">
+                                ${distanceText ? `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 16px;">${distanceText}</span>` : ''}
+                                ${prixText ? `<span style="background: #f3e5f5; color: #7b1fa2; padding: 4px 10px; border-radius: 16px;">${prixText}</span>` : ''}
                             </div>
                             
-                            ${act.adresse ? `<p style="margin: 10px 0 5px 0; color: #666; font-size: 0.9rem;">📍 ${act.adresse}</p>` : ''}
-                            ${act.telephone ? `<p style="margin: 5px 0; color: #666; font-size: 0.9rem;">📞 ${act.telephone}</p>` : ''}
+                            ${noteStars ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #f59e0b;">${noteStars} ${avisText}</p>` : ''}
                             
-                            <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                            ${telText ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #666;">${telText}</p>` : ''}
+                            
+                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
                                 ${act.google_maps_link ? `
-                                    <a href="${act.google_maps_link}" target="_blank" title="Itinéraire Google Maps" style="background: #4285f4; color: white; border-radius: 8px; padding: 10px 16px; text-decoration: none; font-size: 1.2rem; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                                        🗺️
+                                    <a href="${act.google_maps_link}" target="_blank" title="Google Maps" style="background: #4285f4; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">
+                                        🗺️ Itinéraire
                                     </a>
                                 ` : ''}
                                 ${act.website ? `
-                                    <a href="${act.website}" target="_blank" title="Site web" style="background: #10b981; color: white; border-radius: 8px; padding: 10px 16px; text-decoration: none; font-size: 1.2rem; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                                        🌐
+                                    <a href="${act.website}" target="_blank" title="Site web" style="background: #10b981; color: white; border-radius: 6px; padding: 8px 12px; text-decoration: none; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                                        🌐 Site
                                     </a>
                                 ` : ''}
                             </div>
@@ -7854,7 +7880,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     `;
                 });
                 
-                html += '</div></div>';
+                html += `</div></div>`;
             });
             
             container.innerHTML = html;
