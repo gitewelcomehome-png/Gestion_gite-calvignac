@@ -1,0 +1,12 @@
+🔧 GEOCODAGE ACTIVITES - 12/21/2025, 12:25:59 PM
+============================================================
+
+🔍 Récupération des activités...
+
+🔗 Test de connexion Supabase...
+
+❌ Erreur connexion: getaddrinfo ENOTFOUND aorjoghgsyaaqkodxrpo.supabase.co
+
+📝 Conseil: Vérifiez votre connexion internet
+
+⚠️  Script arrêté - Pas de connexion Supabase

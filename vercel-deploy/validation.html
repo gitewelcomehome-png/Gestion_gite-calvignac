@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Planning Ménage - Société</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 50px rgba(0,0,0,0.3); }
+        h1 { color: #2C3E50; text-align: center; margin-bottom: 10px; font-size: 2rem; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 30px; font-size: 1rem; }
+        
+        .filter-bar { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; align-items: center; background: #f8f9fa; padding: 20px; border-radius: 12px; }
+        .filter-bar label { font-weight: 600; color: #2C3E50; }
+        .filter-bar input[type="month"] { padding: 10px 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; flex: 1; min-width: 200px; }
+        
+        .week-section { margin-bottom: 40px; }
+        .week-header { background: linear-gradient(135deg, #2C3E50 0%, #34495e 100%); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; text-align: center; font-weight: 700; font-size: 1.2rem; }
+        .week-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid #2C3E50; border-radius: 0 0 12px 12px; overflow: hidden; }
+        
+        .gite-column { background: white; }
+        .gite-header { padding: 15px; text-align: center; font-weight: 700; font-size: 1.1rem; color: white; }
+        .gite-header.trevoux { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gite-header.couzon { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        
+        .task-card { padding: 20px; border-bottom: 1px solid #ecf0f1; position: relative; transition: background 0.3s; }
+        .task-card:hover { background: #f8f9fa; }
+        .task-card:last-child { border-bottom: none; }
+        .task-card.empty { padding: 40px; text-align: center; color: #95a5a6; font-style: italic; }
+        
+        .task-card.trevoux { background: rgba(102, 126, 234, 0.03); }
+        .task-card.couzon { background: rgba(240, 147, 251, 0.03); }
+        
+        .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .task-date { font-weight: 700; font-size: 1.1rem; color: #2C3E50; }
+        .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+        .status-validated { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-pending { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status-proposed { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        
+        .task-details { margin-bottom: 15px; }
+        .detail-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.95rem; color: #555; }
+        .detail-row i { width: 20px; color: #667eea; }
+        .detail-row strong { color: #2C3E50; }
+        
+        .reservation-timeline { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #667eea; }
+        .timeline-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.9rem; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-icon { font-size: 1.1rem; }
+        
+        .actions { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1; min-width: 150px; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .btn-validate { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; }
+        .btn-propose { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; }
+        
+        .date-change-row { margin-top: 15px; padding: 15px; background: #fff9e6; border-radius: 8px; border: 1px dashed #f39c12; }
+        .date-change-row label { display: block; margin-bottom: 8px; font-weight: 600; color: #856404; font-size: 0.9rem; }
+        .date-change-row input[type="date"] { width: 100%; padding: 10px; border: 2px solid #f39c12; border-radius: 6px; font-size: 0.95rem; }
+        .date-error { color: #e74c3c; font-size: 0.85rem; margin-top: 5px; display: none; }
+        
+        .toast { position: fixed; top: 20px; right: 20px; background: #2ecc71; color: white; padding: 15px 25px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 1000; display: none; align-items: center; gap: 10px; animation: slideIn 0.3s; }
+        .toast.show { display: flex; }
+        .toast.error { background: #e74c3c; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        @media (max-width: 900px) {
+            .week-grid { grid-template-columns: 1fr; }
+            .container { padding: 20px; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+                <h1>🧹 Planning Ménage - Validation Société</h1>
+                <p class="subtitle">Gîtes de Calvignac - Trévoux & Couzon</p>
+            </div>
+            <button onclick="showRulesModal()" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);">
+                📋 Règles
+            </button>
+        </div>
+        
+        <div class="filter-bar">
+            <label for="monthFilter">📅 Sélectionner le mois :</label>
+            <input type="month" id="monthFilter">
+        </div>
+
+        <div id="tasks-container">
+            <p style="text-align:center; padding: 40px; color: #7f8c8d;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                Chargement des ménages...
+            </p>
+        </div>
+    </div>
+    
+    <!-- Modal Règles -->
+    <div id="rulesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative;">
+            <button onclick="closeRulesModal()" style="position: absolute; top: 15px; right: 15px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+            <h2 style="margin: 0 0 20px 0; color: #2c3e50;">📋 Règles de Planning Automatique</h2>
+            <div style="line-height: 1.8; color: #34495e;">
+                • <strong>Semaine (Lun-Ven) et Samedi</strong> : Ménage après-midi (12h00)<br>
+                • <strong>Dimanche</strong> : AUCUN ménage, sauf enchainement même jour → 13h00<br>
+                • <strong>Jours fériés</strong> : Ménage reporté au jour ouvré suivant (sauf enchainement)<br>
+                • <strong>Enchainement</strong> : Si départ matin + arrivée même jour avec ménage veille non fait → reporter au lendemain<br>
+                • <strong>Arrivée le jour du départ</strong> : Ménage le matin (07h00) si besoin avant l'arrivée
+            </div>
+            <button onclick="closeRulesModal()" style="margin-top: 20px; width: 100%; background: #3498db; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">Fermer</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">Action effectuée</span>
+    </div>
+
+    <script>
+        function showRulesModal() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+        
+        function closeRulesModal() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+        const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Fonction pour calculer le numéro de semaine ISO
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function parseLocalDate(dateStr) {
+            if (!dateStr) return null;
+            const [year, month, day] = dateStr.split('-').map(Number);
+            return new Date(year, month - 1, day);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            const monthStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            const filter = document.getElementById('monthFilter');
+            filter.value = monthStr;
+            
+            loadTasks(monthStr);
+            filter.addEventListener('change', (e) => loadTasks(e.target.value));
+        });
+
+        async function loadTasks(monthStr) {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '<p style="text-align:center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i></p>';
+
+            const start = `${monthStr}-01`;
+            const [y, m] = monthStr.split('-');
+            const lastDay = new Date(y, m, 0).getDate();
+            const end = `${monthStr}-${lastDay}`;
+
+            // Récupérer toutes les réservations pour calculer les dates avant/après
+            const { data: allResas } = await supabase
+                .from('reservations')
+                .select('*')
+                .order('date_debut');
+
+            // Récupérer les réservations qui finissent ce mois (uniquement futures)
+            const today = new Date().toISOString().split('T')[0];
+            const { data: resas, error } = await supabase
+                .from('reservations')
+                .select('*')
+                .gte('date_fin', today)
+                .gte('date_fin', start)
+                .lte('date_fin', end)
+                .order('date_fin');
+
+            // Récupérer les validations existantes
+            const { data: cleaningSchedules } = await supabase
+                .from('cleaning_schedule')
+                .select('*');
+            
+            const validMap = {};
+            if (cleaningSchedules) {
+                cleaningSchedules.forEach(cs => {
+                    validMap[cs.reservation_id] = cs;
+                });
+            }
+
+            if (error) {
+                container.innerHTML = `<p style="color:#e74c3c; text-align:center; padding: 40px;">❌ Erreur: ${error.message}</p>`;
+                return;
+            }
+
+            if (!resas || resas.length === 0) {
+                container.innerHTML = `<p style="text-align:center; padding: 40px; color: #7f8c8d;">📅 Aucun ménage prévu en ${monthStr}</p>`;
+                return;
+            }
+
+            // Organiser par semaine
+            const weeks = {};
+            const weekStarts = new Set();
+            
+            resas.forEach(r => {
+                const dateFin = parseLocalDate(r.date_fin);
+                let dateMenage = new Date(dateFin);
+                if (dateFin.getDay() === 0) { // Dimanche -> Lundi
+                    dateMenage.setDate(dateMenage.getDate() + 1);
+                }
+                
+                // Trouver le lundi de cette semaine
+                const dayOfWeek = dateMenage.getDay();
+                const monday = new Date(dateMenage);
+                monday.setDate(dateMenage.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+                monday.setHours(0, 0, 0, 0);
+                
+                const weekKey = monday.toISOString().split('T')[0];
+                weekStarts.add(weekKey);
+                
+                if (!weeks[weekKey]) {
+                    weeks[weekKey] = {
+                        monday: monday,
+                        trevoux: [],
+                        couzon: []
+                    };
+                }
+                
+                const validation = validMap[r.id];
+                
+                // Trouver la réservation suivante
+                const nextReservation = allResas
+                    .filter(next => next.gite === r.gite && parseLocalDate(next.date_debut) > dateFin)
+                    .sort((a, b) => parseLocalDate(a.date_debut) - parseLocalDate(b.date_debut))[0];
+                
+                const menageInfo = {
+                    reservation: r,
+                    dateMenage: dateMenage,
+                    validated: validation ? validation.validated_by_company : false,
+                    status: validation ? validation.status : 'pending',
+                    proposedDate: validation ? validation.scheduled_date : null,
+                    time_of_day: validation ? validation.time_of_day : 'afternoon',
+                    reservationEndBefore: dateFin,
+                    reservationStartAfter: nextReservation ? parseLocalDate(nextReservation.date_debut) : null
+                };
+                
+                if (r.gite.toLowerCase().includes('trévoux') || r.gite.toLowerCase().includes('trevoux')) {
+                    weeks[weekKey].trevoux.push(menageInfo);
+                } else {
+                    weeks[weekKey].couzon.push(menageInfo);
+                }
+            });
+            
+            const sortedWeeks = Array.from(weekStarts).sort();
+            let html = '';
+            
+            sortedWeeks.forEach((weekKey, index) => {
+                const week = weeks[weekKey];
+                const monday = week.monday;
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+                
+                const weekNumber = `S${getWeekNumber(monday)}`;
+                const weekDisplay = `Du ${monday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} au ${sunday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+                
+                html += `
+                    <div class="week-section">
+                        <div class="week-header">
+                            ${weekNumber} - ${weekDisplay}
+                        </div>
+                        <div class="week-grid">
+                            <div class="gite-column">
+                                <div class="gite-header trevoux">🏡 Trévoux</div>
+                                ${week.trevoux.length > 0 ? 
+                                    week.trevoux.map(m => generateTaskCard(m, allResas)).join('') :
+                                    '<div class="task-card empty">Aucun ménage prévu</div>'
+                                }
+                            </div>
+                            <div class="gite-column">
+                                <div class="gite-header couzon">⛰️ Couzon</div>
+                                ${week.couzon.length > 0 ? 
+                                    week.couzon.map(m => generateTaskCard(m, allResas)).join('') :
+                                    '<div class="task-card empty">Aucun ménage prévu</div>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function generateTaskCard(menageInfo, allResas) {
+            const { reservation, dateMenage, validated, status, proposedDate, reservationEndBefore, reservationStartAfter } = menageInfo;
+            const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
+            
+            // Proposer automatiquement une date et un moment
+            let suggestedDate = reservationEndBefore;
+            let suggestedTime = 'afternoon'; // Par défaut après-midi le jour du départ
+            
+            // Si réservation le jour même du départ, proposer le matin de l'arrivée
+            if (reservationStartAfter) {
+                const daysDiff = Math.floor((reservationStartAfter - reservationEndBefore) / (1000 * 60 * 60 * 24));
+                if (daysDiff === 0) {
+                    // Même jour : ménage le matin avant l'arrivée
+                    suggestedDate = reservationStartAfter;
+                    suggestedTime = 'morning';
+                }
+            }
+            
+            // Récupérer le moment (matin/après-midi) depuis la base ou utiliser la suggestion
+            const timeOfDay = menageInfo.time_of_day || suggestedTime;
+            const timeLabel = timeOfDay === 'morning' ? '🌅 Matin' : '☀️ Après-midi';
+            
+            // Déterminer s'il y a un conflit potentiel
+            const hasConflict = reservationStartAfter && Math.floor((reservationStartAfter - reservationEndBefore) / (1000 * 60 * 60 * 24)) <= 1;
+            
+            let statusBadge = '';
+            if (validated) {
+                statusBadge = '<span class="status-badge status-validated">✓ Validé</span>';
+            } else if (status === 'proposed') {
+                statusBadge = '<span class="status-badge status-proposed">⏳ En attente validation client</span>';
+            } else {
+                statusBadge = '<span class="status-badge status-pending">À valider</span>';
+            }
+            
+            const dateStr = displayDate.toLocaleDateString('fr-FR', { 
+                weekday: 'long', 
+                day: '2-digit', 
+                month: 'long' 
+            });
+            
+            const maxDate = reservationStartAfter ? 
+                new Date(reservationStartAfter.getTime() - 24*60*60*1000).toISOString().split('T')[0] : 
+                '';
+            
+            return `
+                <div class="task-card ${reservation.gite.toLowerCase().includes('trevoux') || reservation.gite.toLowerCase().includes('trévoux') ? 'trevoux' : 'couzon'}">
+                    <div class="task-header">
+                        <div class="task-date">📅 ${dateStr} - ${timeLabel}</div>
+                        ${statusBadge}
+                    </div>
+                    
+                    <div class="task-details">
+                        <div class="detail-row">
+                            <i class="fas fa-home"></i>
+                            <span>Gîte: <strong>${reservation.gite}</strong></span>
+                        </div>
+                    </div>
+                    
+                    <div class="reservation-timeline">
+                        <div class="timeline-item">
+                            <span class="timeline-icon">🚪</span>
+                            <span>Départ client: <strong>${reservationEndBefore.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })}</strong></span>
+                        </div>
+                        ${reservationStartAfter ? `
+                        <div class="timeline-item">
+                            <span class="timeline-icon">🔑</span>
+                            <span>Prochaine arrivée: <strong>${reservationStartAfter.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })}</strong></span>
+                        </div>
+                        ` : '<div class="timeline-item" style="color: #27ae60;">✓ Pas de réservation suivante immédiate</div>'}
+                    </div>
+                    
+                    ${hasConflict ? `
+                    <div class="conflict-warning" style="background: #fff3cd; border-left: 4px solid #ff9800; padding: 12px; margin: 15px 0; border-radius: 6px;">
+                        <strong>⚠️ Conflit détecté!</strong><br>
+                        Départ et arrivée dans les mêmes délais. Choisissez:
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button class="btn btn-quick" style="flex: 1; background: #2196F3;" 
+                                    onclick="selectQuickDate(${reservation.id}, '${reservationEndBefore.toISOString().split('T')[0]}', 'afternoon')">
+                                📅 Départ (après-midi)
+                            </button>
+                            ${reservationStartAfter ? `
+                            <button class="btn btn-quick" style="flex: 1; background: #4CAF50;" 
+                                    onclick="selectQuickDate(${reservation.id}, '${reservationStartAfter.toISOString().split('T')[0]}', 'morning')">
+                                📅 Avant arrivée (matin)
+                            </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="actions">
+                        <button class="btn btn-validate" onclick="validateCleaning(${reservation.id}, '${displayDate.toISOString().split('T')[0]}', '${reservation.gite}', '${reservationEndBefore.toISOString().split('T')[0]}')">
+                            <i class="fas fa-check"></i> Valider cette date
+                        </button>
+                    </div>
+                    
+                    <div class="date-change-row">
+                        <label for="date-${reservation.id}">💡 Proposer une autre date :</label>
+                        <input type="date" 
+                               id="date-${reservation.id}" 
+                               data-gite="${reservation.gite}"
+                               data-end="${reservationEndBefore.toISOString().split('T')[0]}"
+                               value="${displayDate.toISOString().split('T')[0]}"
+                               min="${reservationEndBefore.toISOString().split('T')[0]}"
+                               ${maxDate ? `max="${maxDate}"` : ''}
+                               onchange="checkDateValidity(${reservation.id}, '${reservationEndBefore.toISOString().split('T')[0]}', '${maxDate}')"
+                               style="margin-bottom: 10px;">
+                        <select id="time-${reservation.id}" style="width: 100%; padding: 10px; border: 2px solid #f39c12; border-radius: 6px; font-size: 0.95rem; margin-bottom: 10px;">
+                            <option value="morning" ${timeOfDay === 'morning' ? 'selected' : ''}>🌅 Matin</option>
+                            <option value="afternoon" ${timeOfDay === 'afternoon' ? 'selected' : ''}>☀️ Après-midi</option>
+                        </select>
+                        <div id="error-${reservation.id}" class="date-error"></div>
+                        <button class="btn btn-propose" style="margin-top: 10px; width: 100%;" onclick="proposeCleaning(${reservation.id}, '${reservation.gite}', '${reservationEndBefore.toISOString().split('T')[0]}')">
+                            <i class="fas fa-calendar-alt"></i> Proposer cette nouvelle date
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectQuickDate(resaId, date, time) {
+            const dateInput = document.getElementById(`date-${resaId}`);
+            const timeSelect = document.getElementById(`time-${resaId}`);
+            
+            dateInput.value = date;
+            timeSelect.value = time;
+            
+            // Proposer automatiquement cette date
+            proposeCleaning(resaId, dateInput.getAttribute('data-gite') || '', dateInput.getAttribute('data-end') || date);
+        }
+
+        function checkDateValidity(resaId, minDate, maxDate) {
+            const input = document.getElementById(`date-${resaId}`);
+            const error = document.getElementById(`error-${resaId}`);
+            const selectedDate = new Date(input.value);
+            const min = new Date(minDate);
+            const max = maxDate ? new Date(maxDate) : null;
+            
+            if (selectedDate < min) {
+                error.textContent = '⚠️ La date ne peut pas être avant le départ du client';
+                error.style.display = 'block';
+                input.style.borderColor = '#e74c3c';
+                return false;
+            } else if (max && selectedDate > max) {
+                error.textContent = '⚠️ La date doit être avant la prochaine arrivée';
+                error.style.display = 'block';
+                input.style.borderColor = '#e74c3c';
+                return false;
+            } else {
+                error.style.display = 'none';
+                input.style.borderColor = '#2ecc71';
+                return true;
+            }
+        }
+
+        async function validateCleaning(resaId, date, gite, endDate) {
+            const timeOfDay = document.getElementById(`time-${resaId}`)?.value || 'afternoon';
+            
+            const { error } = await supabase
+                .from('cleaning_schedule')
+                .upsert({
+                    reservation_id: resaId,
+                    gite: gite,
+                    scheduled_date: date,
+                    time_of_day: timeOfDay,
+                    status: 'validated',
+                    validated_by_company: true,
+                    reservation_end: endDate,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'reservation_id' });
+
+            if (error) {
+                showToast('❌ Erreur: ' + error.message, 'error');
+            } else {
+                showToast('✓ Date validée avec succès!');
+                const filter = document.getElementById('monthFilter').value;
+                loadTasks(filter);
+            }
+        }
+
+        async function proposeCleaning(resaId, gite, endDate) {
+            const dateInput = document.getElementById(`date-${resaId}`);
+            const timeOfDay = document.getElementById(`time-${resaId}`).value;
+            const newDate = dateInput.value;
+            
+            if (!newDate) {
+                showToast('⚠️ Veuillez sélectionner une date', 'error');
+                return;
+            }
+            
+            const { error } = await supabase
+                .from('cleaning_schedule')
+                .upsert({
+                    reservation_id: resaId,
+                    gite: gite,
+                    scheduled_date: newDate,
+                    proposed_date: newDate,
+                    time_of_day: timeOfDay,
+                    status: 'proposed',
+                    validated_by_company: false,
+                    reservation_end: endDate,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'reservation_id' });
+
+            if (error) {
+                showToast('❌ Erreur: ' + error.message, 'error');
+            } else {
+                showToast('✓ Nouvelle date proposée!');
+                const filter = document.getElementById('monthFilter').value;
+                loadTasks(filter);
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.className = 'toast show';
+            if (type === 'error') toast.classList.add('error');
+            setTimeout(() => toast.classList.remove('show', 'error'), 3000);
+        }
+    </script>
+</body>
+</html>
