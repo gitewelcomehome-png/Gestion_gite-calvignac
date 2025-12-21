@@ -7881,7 +7881,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     const telText = act.telephone ? `📞 ${act.telephone}` : '';
                     
                     html += `
-                        <div style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
+                        <div data-activite-id="${act.id}" style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                                 <h5 style="margin: 0; font-size: 1rem; color: #2C5F7D; flex: 1; word-wrap: break-word;">${act.nom}</h5>
                                 <div style="display: flex; gap: 6px; margin-left: 8px;">
@@ -8014,7 +8014,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     const telText = act.telephone ? `📞 ${act.telephone}` : '';
                     
                     html += `
-                        <div style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
+                        <div data-activite-id="${act.id}" style="background: white; border: 1px solid #ddd; border-left: 5px solid #667eea; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                                 <h5 style="margin: 0; font-size: 1rem; color: #2C5F7D; flex: 1; word-wrap: break-word;">${act.nom}</h5>
                             </div>
@@ -8055,6 +8055,14 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         // Modifier une activité
         async function modifierActivite(id) {
             try {
+                // Scroller jusqu'à l'activité
+                const element = document.querySelector(`[data-activite-id="${id}"]`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Attendre un peu que le scroll soit fait
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+                
                 // Récupérer l'activité à modifier
                 const { data, error } = await supabase
                     .from('activites_gites')
