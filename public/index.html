@@ -8899,6 +8899,24 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             'Attraction': 'nature'
         };
 
+        // ==================== HELPER: HTML ESCAPING ====================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Helper pour échapper les attributs onclick
+        function escapeForOnclick(text) {
+            if (!text) return '';
+            return text.replace(/'/g, '&#39;')
+                       .replace(/"/g, '&quot;')
+                       .replace(/</g, '&lt;')
+                       .replace(/>/g, '&gt;')
+                       .replace(/\\/g, '\\\\');
+        }
+
         // ==================== INITIALISATION GOOGLE MAPS ====================
         function initGoogleMap() {
             const giteInput = document.getElementById('decouvrir_gite');
@@ -9052,20 +9070,27 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 const iconEmoji = categoryIcons[category] || '📍';
                 const color = categoryColors[category] || '#999';
                 
+                // Échapper toutes les données utilisateur
+                const safeName = escapeHtml(poi.name);
+                const safeDescription = escapeHtml(poi.description);
+                const safePhone = escapeHtml(poi.phone);
+                const safeWebsite = escapeHtml(poi.website);
+                const safeNameForOnclick = escapeForOnclick(poi.name);
+                
                 const contentHTML = `
                     <div style="padding: 15px; max-width: 320px;">
                         <h3 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1rem;">
-                            ${iconEmoji} ${poi.name}
+                            ${iconEmoji} ${safeName}
                         </h3>
-                        ${poi.description ? `<p style="margin: 8px 0; color: #666; line-height: 1.5;">${poi.description}</p>` : ''}
+                        ${poi.description ? `<p style="margin: 8px 0; color: #666; line-height: 1.5;">${safeDescription}</p>` : ''}
                         <div style="margin: 10px 0; display: flex; flex-direction: column; gap: 5px;">
                             ${poi.distance_km ? `<div style="color: #555;"><strong>📍 Distance:</strong> ${poi.distance_km} km</div>` : ''}
-                            ${poi.phone ? `<div style="color: #555;"><strong>📞:</strong> ${poi.phone}</div>` : ''}
-                            ${poi.website ? `<div><a href="${poi.website}" target="_blank" style="color: #3498db; text-decoration: none;">🌐 Site web</a></div>` : ''}
+                            ${poi.phone ? `<div style="color: #555;"><strong>📞:</strong> ${safePhone}</div>` : ''}
+                            ${poi.website ? `<div><a href="${safeWebsite}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">🌐 Site web</a></div>` : ''}
                             ${poi.rating ? `<div style="color: #555;"><strong>⭐ Note:</strong> ${poi.rating}/5</div>` : ''}
                         </div>
                         <button 
-                            onclick="calculerItineraire(${poi.lat}, ${poi.lng}, '${poi.name.replace(/'/g, "\\'")}')" 
+                            onclick="calculerItineraire(${poi.lat}, ${poi.lng}, '${safeNameForOnclick}')" 
                             style="margin-top: 12px; padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; font-size: 0.95rem;">
                             🚗 Itinéraire depuis le gîte
                         </button>
@@ -9160,6 +9185,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 const iconEmoji = categoryIcons[category] || '📍';
                 const color = categoryColors[category] || '#999';
                 
+                // Échapper toutes les données utilisateur
+                const safeName = escapeHtml(poi.name);
+                const safeDescription = escapeHtml(poi.description);
+                const safePhone = escapeHtml(poi.phone);
+                const safeWebsite = escapeHtml(poi.website);
+                const safeNameForOnclick = escapeForOnclick(poi.name);
+                
                 return `
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid ${color}; transition: all 0.3s;" 
                          onmouseover="this.style.background='#e9ecef'; this.style.transform='translateX(5px)';" 
@@ -9167,22 +9199,22 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         <div style="display: flex; justify-content: space-between; align-items: start; gap: 15px; flex-wrap: wrap;">
                             <div style="flex: 1; min-width: 250px;">
                                 <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1rem;">
-                                    ${iconEmoji} ${poi.name}
+                                    ${iconEmoji} ${safeName}
                                 </h4>
-                                ${poi.description ? `<p style="margin: 5px 0; color: #666; line-height: 1.6;">${poi.description}</p>` : ''}
+                                ${poi.description ? `<p style="margin: 5px 0; color: #666; line-height: 1.6;">${safeDescription}</p>` : ''}
                                 <div style="display: flex; gap: 15px; margin-top: 12px; flex-wrap: wrap; font-size: 0.9rem; color: #555;">
                                     ${poi.distance_km ? `<span><strong>📍</strong> ${poi.distance_km} km</span>` : ''}
-                                    ${poi.phone ? `<span><strong>📞</strong> ${poi.phone}</span>` : ''}
-                                    ${poi.website ? `<a href="${poi.website}" target="_blank" style="color: #3498db; text-decoration: none;"><strong>🌐</strong> Site web</a>` : ''}
+                                    ${poi.phone ? `<span><strong>📞</strong> ${safePhone}</span>` : ''}
+                                    ${poi.website ? `<a href="${safeWebsite}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;"><strong>🌐</strong> Site web</a>` : ''}
                                     ${poi.rating ? `<span><strong>⭐</strong> ${poi.rating}/5</span>` : ''}
                                 </div>
                             </div>
                             <div style="display: flex; gap: 10px; flex-direction: column;">
-                                <button onclick="zoomOnPOI(${poi.lat}, ${poi.lng}, '${poi.name.replace(/'/g, "\\'")}')" 
+                                <button onclick="zoomOnPOI(${poi.lat}, ${poi.lng}, '${safeNameForOnclick}')" 
                                     style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-weight: 600;">
                                     🔍 Voir sur la carte
                                 </button>
-                                <button onclick="calculerItineraire(${poi.lat}, ${poi.lng}, '${poi.name.replace(/'/g, "\\'")}')" 
+                                <button onclick="calculerItineraire(${poi.lat}, ${poi.lng}, '${safeNameForOnclick}')" 
                                     style="padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-weight: 600;">
                                     🚗 Itinéraire
                                 </button>
