@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Google Maps API avec bibliothèques places et geometry -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&libraries=places,geometry"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&libraries=places,geometry&callback=initMap"></script>
     
     <style> @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;600;700&display=swap');*{margin:0;padding:0;box-sizing:border-box;}
 :root{--primary:#2C5F7D;--primary-dark:#1A3A4D;--accent:#E8A87C;--accent-light:#F5D5B8;--bg-light:#F8F9FA;--text-dark:#2C3E50;--success:#27AE60;--trevoux:#667eea;--couzon:#f093fb;--border:#E0E4E8;--warning:#F39C12;--danger:#E74C3C;--airbnb:#FF5A5F;--abritel:#3498DB;--gites:#27AE60;}
@@ -8843,6 +8843,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         }
         
         // ==================== GOOGLE MAPS - CONFIGURATION & VARIABLES ====================
+        // Callback pour le chargement asynchrone de l'API Google Maps
+        function initMap() {
+            // Cette fonction est appelée automatiquement quand l'API Google Maps est chargée
+            // L'initialisation réelle de la carte se fait via initGoogleMap() quand nécessaire
+            console.log('Google Maps API loaded');
+        }
+        
         let googleMap = null;
         let allMarkers = [];
         giteMarker = null;
