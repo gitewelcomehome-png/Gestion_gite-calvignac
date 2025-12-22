@@ -9,6 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Callback pour l'API Google Maps (doit être défini avant le chargement de l'API) -->
+    <script>
+        function initMap() {
+            // Cette fonction est appelée automatiquement quand l'API Google Maps est chargée
+            console.log('Google Maps API loaded');
+        }
+    </script>
     <!-- Google Maps API avec bibliothèques places et geometry -->
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&libraries=places,geometry&callback=initMap"></script>
     
@@ -8843,13 +8850,6 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
         }
         
         // ==================== GOOGLE MAPS - CONFIGURATION & VARIABLES ====================
-        // Callback pour le chargement asynchrone de l'API Google Maps
-        function initMap() {
-            // Cette fonction est appelée automatiquement quand l'API Google Maps est chargée
-            // L'initialisation réelle de la carte se fait via initGoogleMap() quand nécessaire
-            console.log('Google Maps API loaded');
-        }
-        
         let googleMap = null;
         let allMarkers = [];
         giteMarker = null;
