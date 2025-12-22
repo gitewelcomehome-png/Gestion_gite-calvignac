@@ -9120,7 +9120,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     directionsRenderer.setDirections(result);
                     
                     const route = result.routes[0].legs[0];
-                    const message = `🚗 Itinéraire calculé vers ${nomDestination}\n\n` +
+                    // Échapper le nom de destination pour la sécurité (même si textContent est utilisé)
+                    const safeDestination = escapeHtml(nomDestination);
+                    const message = `🚗 Itinéraire calculé vers ${safeDestination}\n\n` +
                                   `📍 Distance: ${route.distance.text}\n` +
                                   `⏱️ Durée estimée: ${route.duration.text}`;
                     
@@ -9243,7 +9245,9 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 google.maps.event.trigger(marker, 'click');
             }
             
-            showToast(`🔍 Zoom sur ${name}`, 'info');
+            // Échapper le nom pour la sécurité (même si textContent est utilisé)
+            const safeName = escapeHtml(name);
+            showToast(`🔍 Zoom sur ${safeName}`, 'info');
         }
 
         // ==================== MODAL ITINÉRAIRE ====================
