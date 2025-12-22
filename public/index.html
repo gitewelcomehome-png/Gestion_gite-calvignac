@@ -9,9 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Leaflet pour la carte interactive -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Google Maps API avec bibliothèques places et geometry -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&libraries=places,geometry"></script>
     
     <style> @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;600;700&display=swap');*{margin:0;padding:0;box-sizing:border-box;}
 :root{--primary:#2C5F7D;--primary-dark:#1A3A4D;--accent:#E8A87C;--accent-light:#F5D5B8;--bg-light:#F8F9FA;--text-dark:#2C3E50;--success:#27AE60;--trevoux:#667eea;--couzon:#f093fb;--border:#E0E4E8;--warning:#F39C12;--danger:#E74C3C;--airbnb:#FF5A5F;--abritel:#3498DB;--gites:#27AE60;}
@@ -1747,6 +1746,72 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     </div>
                 </div>
 
+                <!-- CARTE INTERACTIVE GOOGLE MAPS -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🗺️</span>
+                        <h2 class="card-title">Carte Interactive des Points d'Intérêt</h2>
+                    </div>
+                    
+                    <!-- Contrôles de la carte -->
+                    <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+                        <select id="mapCategoryFilter" class="form-control" style="width: auto; min-width: 200px;" onchange="filterMapByCategory()">
+                            <option value="all">🏷️ Toutes catégories</option>
+                            <option value="restaurant">🍽️ Restaurants</option>
+                            <option value="culture">🏛️ Culture & Patrimoine</option>
+                            <option value="nature">🌳 Nature & Activités</option>
+                            <option value="shopping">🛍️ Shopping & Services</option>
+                        </select>
+                        
+                        <button onclick="centrerCarteGite()" class="btn" style="background: #667eea; color: white; padding: 10px 20px; width: auto;">
+                            📍 Recentrer sur le gîte
+                        </button>
+                        
+                        <button onclick="afficherItineraireModal()" class="btn" style="background: #27ae60; color: white; padding: 10px 20px; width: auto;">
+                            🚗 Calculer un itinéraire
+                        </button>
+                    </div>
+                    
+                    <!-- Conteneur de la carte Google Maps -->
+                    <div id="googleMap" style="width: 100%; height: 600px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 20px;"></div>
+                    
+                    <!-- Légende -->
+                    <div style="padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <h4 style="margin-bottom: 10px; color: var(--primary);">📌 Légende</h4>
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="width: 20px; height: 20px; background: #FF5A5F; border-radius: 50%; display: inline-block;"></span>
+                                <span>Gîte</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="width: 20px; height: 20px; background: #FF8C00; border-radius: 50%; display: inline-block;"></span>
+                                <span>Restaurants</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="width: 20px; height: 20px; background: #9B59B6; border-radius: 50%; display: inline-block;"></span>
+                                <span>Culture</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="width: 20px; height: 20px; background: #27AE60; border-radius: 50%; display: inline-block;"></span>
+                                <span>Nature</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="width: 20px; height: 20px; background: #3498DB; border-radius: 50%; display: inline-block;"></span>
+                                <span>Shopping</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste des POIs synchronisée -->
+                <div class="card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <span class="card-icon">📝</span>
+                        <h2 class="card-title">Liste des Points d'Intérêt</h2>
+                    </div>
+                    <div id="poiListContainer"></div>
+                </div>
+
                 <!-- FORMULAIRE D'AJOUT MANUEL (CACHÉ PAR DÉFAUT) -->
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -2755,6 +2820,14 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             if (tabName === 'archives') updateArchivesDisplay();
             if (tabName === 'charges') updateChargesDisplay();
             if (tabName === 'menage') afficherPlanningParSemaine();
+            if (tabName === 'decouvrir') {
+                // Initialiser Google Maps si pas déjà fait
+                if (!googleMap) {
+                    setTimeout(() => {
+                        initGoogleMap();
+                    }, 100);
+                }
+            }
         }
         
         function showRulesModal() {
@@ -7148,6 +7221,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             setTimeout(() => {
                 chargerToutSurCarte();
             }, 500);
+            
+            // Recharger Google Maps avec le nouveau gîte
+            if (googleMap) {
+                ajouterMarqueurGite(gite);
+                chargerPOIsFromSupabase(gite);
+                centrerCarteGite();
+            }
         }
         
         // Fonction pour géocoder une adresse (convertir adresse → coordonnées GPS)
@@ -8761,6 +8841,491 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             `;
             document.head.appendChild(style);
         }
+        
+        // ==================== GOOGLE MAPS - CONFIGURATION & VARIABLES ====================
+        let googleMap = null;
+        let allMarkers = [];
+        let giteMarker = null;
+        let infoWindow = null;
+        let directionsService = null;
+        let directionsRenderer = null;
+
+        // Coordonnées des gîtes
+        const gitesCoordinates = {
+            'Trévoux': { lat: 45.9423, lng: 4.7681 },
+            'Couzon': { lat: 45.8456, lng: 4.8234 }
+        };
+
+        // Couleurs par catégorie
+        const categoryColors = {
+            'gite': '#FF5A5F',
+            'restaurant': '#FF8C00',
+            'Restaurant': '#FF8C00',
+            'culture': '#9B59B6',
+            'Musée': '#9B59B6',
+            'Château': '#9B59B6',
+            'nature': '#27AE60',
+            'Parc': '#27AE60',
+            'shopping': '#3498DB',
+            'Café/Bar': '#3498DB',
+            'Hôtel': '#3498DB',
+            'Attraction': '#3498DB'
+        };
+
+        // Icônes emoji par catégorie
+        const categoryIcons = {
+            'gite': '🏡',
+            'restaurant': '🍽️',
+            'Restaurant': '🍽️',
+            'culture': '🏛️',
+            'Musée': '🏛️',
+            'Château': '🏰',
+            'nature': '🌳',
+            'Parc': '🌳',
+            'shopping': '🛍️',
+            'Café/Bar': '☕',
+            'Hôtel': '🏨',
+            'Attraction': '🎪'
+        };
+
+        // Mapping des catégories Supabase vers les catégories du filtre
+        const categoryMapping = {
+            'Restaurant': 'restaurant',
+            'Musée': 'culture',
+            'Château': 'culture',
+            'Parc': 'nature',
+            'Café/Bar': 'shopping',
+            'Hôtel': 'shopping',
+            'Attraction': 'nature'
+        };
+
+        // ==================== HELPER: HTML ESCAPING ====================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Helper pour échapper les attributs onclick
+        function escapeForOnclick(text) {
+            if (!text) return '';
+            return text.replace(/'/g, '&#39;')
+                       .replace(/"/g, '&quot;')
+                       .replace(/</g, '&lt;')
+                       .replace(/>/g, '&gt;')
+                       .replace(/\\/g, '\\\\');
+        }
+
+        // ==================== INITIALISATION GOOGLE MAPS ====================
+        function initGoogleMap() {
+            const giteInput = document.getElementById('decouvrir_gite');
+            const giteActuel = giteInput ? giteInput.value : 'Trévoux';
+            const centerCoords = gitesCoordinates[giteActuel] || gitesCoordinates['Trévoux'];
+            
+            // Créer la carte
+            googleMap = new google.maps.Map(document.getElementById('googleMap'), {
+                center: centerCoords,
+                zoom: 13,
+                mapTypeControl: true,
+                mapTypeControlOptions: {
+                    style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                    position: google.maps.ControlPosition.TOP_RIGHT
+                },
+                streetViewControl: true,
+                fullscreenControl: true,
+                zoomControl: true,
+                styles: [
+                    {
+                        featureType: "poi",
+                        elementType: "labels",
+                        stylers: [{ visibility: "on" }]
+                    }
+                ]
+            });
+            
+            // Initialiser les services
+            infoWindow = new google.maps.InfoWindow();
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: googleMap,
+                suppressMarkers: false,
+                polylineOptions: {
+                    strokeColor: '#667eea',
+                    strokeWeight: 5
+                }
+            });
+            
+            // Ajouter le marqueur du gîte
+            ajouterMarqueurGite(giteActuel);
+            
+            // Charger et afficher les POIs
+            chargerPOIsFromSupabase(giteActuel);
+        }
+
+        // ==================== AJOUTER LE MARQUEUR DU GÎTE ====================
+        function ajouterMarqueurGite(nomGite) {
+            const coords = gitesCoordinates[nomGite];
+            if (!coords) return;
+            
+            // Supprimer l'ancien marqueur du gîte s'il existe
+            if (giteMarker) {
+                giteMarker.setMap(null);
+            }
+            
+            giteMarker = new google.maps.Marker({
+                position: coords,
+                map: googleMap,
+                title: `🏡 Gîte ${nomGite}`,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 14,
+                    fillColor: categoryColors.gite,
+                    fillOpacity: 1,
+                    strokeColor: '#fff',
+                    strokeWeight: 3
+                },
+                zIndex: 1000,
+                animation: google.maps.Animation.DROP
+            });
+            
+            giteMarker.addListener('click', () => {
+                infoWindow.setContent(`
+                    <div style="padding: 15px; max-width: 280px;">
+                        <h3 style="margin: 0 0 10px 0; color: ${categoryColors.gite}; font-size: 1.2rem;">
+                            🏡 Gîte ${nomGite}
+                        </h3>
+                        <p style="margin: 5px 0; color: #666;"><strong>📍 Votre point de départ</strong></p>
+                        <p style="margin: 10px 0 0 0; font-size: 0.9rem; color: #999;">
+                            Cliquez sur un point d'intérêt pour calculer l'itinéraire
+                        </p>
+                    </div>
+                `);
+                infoWindow.open(googleMap, giteMarker);
+            });
+        }
+
+        // ==================== CHARGER LES POIs DEPUIS SUPABASE ====================
+        async function chargerPOIsFromSupabase(giteActuel) {
+            // Effacer tous les anciens marqueurs POI
+            allMarkers.forEach(marker => marker.setMap(null));
+            allMarkers = [];
+            
+            try {
+                // Récupérer les données depuis Supabase
+                const { data, error } = await supabase
+                    .from('activites_gites')
+                    .select('*')
+                    .eq('gite', giteActuel)
+                    .order('type', { ascending: true });
+                
+                if (error) throw error;
+                
+                const pois = data || [];
+                
+                // Ajouter chaque POI sur la carte
+                pois.forEach(poi => {
+                    ajouterMarqueurPOI(poi, giteActuel);
+                });
+                
+                // Afficher la liste
+                afficherListePOIs(pois);
+            } catch (error) {
+                console.error('Erreur chargement POIs:', error);
+                afficherListePOIs([]);
+            }
+        }
+
+        // ==================== AJOUTER UN MARQUEUR POI ====================
+        function ajouterMarqueurPOI(poi, giteActuel) {
+            if (!poi.lat || !poi.lng) return;
+            
+            const category = poi.type || poi.categorie || 'Attraction';
+            const filterCategory = categoryMapping[category] || 'shopping';
+            
+            const marker = new google.maps.Marker({
+                position: { 
+                    lat: parseFloat(poi.lat), 
+                    lng: parseFloat(poi.lng) 
+                },
+                map: googleMap,
+                title: poi.name,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 11,
+                    fillColor: categoryColors[category] || '#999',
+                    fillOpacity: 0.95,
+                    strokeColor: '#fff',
+                    strokeWeight: 2
+                },
+                animation: google.maps.Animation.DROP
+            });
+            
+            // Stocker les données du POI dans le marqueur
+            marker.poiData = poi;
+            marker.poiCategory = filterCategory;
+            
+            // Événement click sur le marqueur
+            marker.addListener('click', () => {
+                const iconEmoji = categoryIcons[category] || '📍';
+                const color = categoryColors[category] || '#999';
+                
+                // Échapper toutes les données utilisateur
+                const safeName = escapeHtml(poi.name);
+                const safeDescription = escapeHtml(poi.description);
+                const safePhone = escapeHtml(poi.phone);
+                const safeWebsite = escapeHtml(poi.website);
+                const safeNameForOnclick = escapeForOnclick(poi.name);
+                
+                const contentHTML = `
+                    <div style="padding: 15px; max-width: 320px;">
+                        <h3 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1rem;">
+                            ${iconEmoji} ${safeName}
+                        </h3>
+                        ${poi.description ? `<p style="margin: 8px 0; color: #666; line-height: 1.5;">${safeDescription}</p>` : ''}
+                        <div style="margin: 10px 0; display: flex; flex-direction: column; gap: 5px;">
+                            ${poi.distance_km ? `<div style="color: #555;"><strong>📍 Distance:</strong> ${poi.distance_km} km</div>` : ''}
+                            ${poi.phone ? `<div style="color: #555;"><strong>📞:</strong> ${safePhone}</div>` : ''}
+                            ${poi.website ? `<div><a href="${safeWebsite}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">🌐 Site web</a></div>` : ''}
+                            ${poi.rating ? `<div style="color: #555;"><strong>⭐ Note:</strong> ${poi.rating}/5</div>` : ''}
+                        </div>
+                        <button 
+                            onclick="calculerItineraire(${poi.lat}, ${poi.lng}, '${safeNameForOnclick}')" 
+                            style="margin-top: 12px; padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; font-size: 0.95rem;">
+                            🚗 Itinéraire depuis le gîte
+                        </button>
+                    </div>
+                `;
+                
+                infoWindow.setContent(contentHTML);
+                infoWindow.open(googleMap, marker);
+            });
+            
+            allMarkers.push(marker);
+        }
+
+        // ==================== CALCULER ITINÉRAIRE ====================
+        function calculerItineraire(destLat, destLng, nomDestination) {
+            const giteInput = document.getElementById('decouvrir_gite');
+            const giteActuel = giteInput ? giteInput.value : 'Trévoux';
+            const origin = gitesCoordinates[giteActuel];
+            const destination = { lat: parseFloat(destLat), lng: parseFloat(destLng) };
+            
+            directionsService.route({
+                origin: origin,
+                destination: destination,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, (result, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
+                    
+                    const route = result.routes[0].legs[0];
+                    // Échapper le nom de destination pour la sécurité (même si textContent est utilisé)
+                    const safeDestination = escapeHtml(nomDestination);
+                    const message = `🚗 Itinéraire calculé vers ${safeDestination}\n\n` +
+                                  `📍 Distance: ${route.distance.text}\n` +
+                                  `⏱️ Durée estimée: ${route.duration.text}`;
+                    
+                    showToast(message, 'success');
+                } else {
+                    showToast('❌ Impossible de calculer l\'itinéraire: ' + status, 'error');
+                }
+            });
+        }
+
+        // ==================== CENTRER SUR LE GÎTE ====================
+        function centrerCarteGite() {
+            const giteInput = document.getElementById('decouvrir_gite');
+            const giteActuel = giteInput ? giteInput.value : 'Trévoux';
+            const coords = gitesCoordinates[giteActuel];
+            
+            if (coords && googleMap) {
+                googleMap.panTo(coords);
+                googleMap.setZoom(13);
+                
+                // Effacer l'itinéraire s'il y en a un
+                if (directionsRenderer) {
+                    directionsRenderer.setDirections({routes: []});
+                }
+                
+                showToast('📍 Carte recentrée sur le gîte', 'info');
+            }
+        }
+
+        // ==================== FILTRER PAR CATÉGORIE ====================
+        function filterMapByCategory() {
+            const filter = document.getElementById('mapCategoryFilter').value;
+            
+            allMarkers.forEach(marker => {
+                if (filter === 'all') {
+                    marker.setVisible(true);
+                } else {
+                    marker.setVisible(marker.poiCategory === filter);
+                }
+            });
+            
+            const categoryName = filter === 'all' ? 'toutes les catégories' : filter;
+            showToast(`🔍 Filtrage: ${categoryName}`, 'info');
+        }
+
+        // ==================== AFFICHER LA LISTE DES POIs ====================
+        function afficherListePOIs(pois) {
+            const container = document.getElementById('poiListContainer');
+            if (!container) return;
+            
+            if (pois.length === 0) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: #999; padding: 40px; font-size: 1.1rem;">
+                        📭 Aucun point d'intérêt enregistré pour ce gîte
+                    </p>
+                `;
+                return;
+            }
+            
+            const html = pois.map(poi => {
+                const category = poi.type || poi.categorie || 'Attraction';
+                const iconEmoji = categoryIcons[category] || '📍';
+                const color = categoryColors[category] || '#999';
+                
+                // Échapper toutes les données utilisateur
+                const safeName = escapeHtml(poi.name);
+                const safeDescription = escapeHtml(poi.description);
+                const safePhone = escapeHtml(poi.phone);
+                const safeWebsite = escapeHtml(poi.website);
+                const safeNameForOnclick = escapeForOnclick(poi.name);
+                
+                return `
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid ${color}; transition: all 0.3s;" 
+                         onmouseover="this.style.background='#e9ecef'; this.style.transform='translateX(5px)';" 
+                         onmouseout="this.style.background='#f8f9fa'; this.style.transform='translateX(0)';">
+                        <div style="display: flex; justify-content: space-between; align-items: start; gap: 15px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1rem;">
+                                    ${iconEmoji} ${safeName}
+                                </h4>
+                                ${poi.description ? `<p style="margin: 5px 0; color: #666; line-height: 1.6;">${safeDescription}</p>` : ''}
+                                <div style="display: flex; gap: 15px; margin-top: 12px; flex-wrap: wrap; font-size: 0.9rem; color: #555;">
+                                    ${poi.distance_km ? `<span><strong>📍</strong> ${poi.distance_km} km</span>` : ''}
+                                    ${poi.phone ? `<span><strong>📞</strong> ${safePhone}</span>` : ''}
+                                    ${poi.website ? `<a href="${safeWebsite}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;"><strong>🌐</strong> Site web</a>` : ''}
+                                    ${poi.rating ? `<span><strong>⭐</strong> ${poi.rating}/5</span>` : ''}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px; flex-direction: column;">
+                                <button onclick="zoomOnPOI(${poi.lat}, ${poi.lng}, '${safeNameForOnclick}')" 
+                                    style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-weight: 600;">
+                                    🔍 Voir sur la carte
+                                </button>
+                                <button onclick="calculerItineraire(${poi.lat}, ${poi.lng}, '${safeNameForOnclick}')" 
+                                    style="padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-weight: 600;">
+                                    🚗 Itinéraire
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+
+        // ==================== ZOOMER SUR UN POI ====================
+        function zoomOnPOI(lat, lng, name) {
+            const position = { lat: parseFloat(lat), lng: parseFloat(lng) };
+            googleMap.panTo(position);
+            googleMap.setZoom(16);
+            
+            // Trouver le marqueur correspondant et déclencher son click
+            const marker = allMarkers.find(m => 
+                m.getPosition().lat() === position.lat && 
+                m.getPosition().lng() === position.lng
+            );
+            
+            if (marker) {
+                google.maps.event.trigger(marker, 'click');
+            }
+            
+            // Échapper le nom pour la sécurité (même si textContent est utilisé)
+            const safeName = escapeHtml(name);
+            showToast(`🔍 Zoom sur ${safeName}`, 'info');
+        }
+
+        // ==================== MODAL ITINÉRAIRE ====================
+        function afficherItineraireModal() {
+            showToast('💡 Cliquez sur un point d\'intérêt sur la carte pour calculer l\'itinéraire !', 'info');
+        }
+
+        // ==================== TOAST NOTIFICATION ====================
+        function showToast(message, type = 'info') {
+            // Chercher un toast existant ou en créer un
+            let toast = document.getElementById('mapToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'mapToast';
+                document.body.appendChild(toast);
+            }
+            
+            const colors = {
+                'success': '#27ae60',
+                'error': '#e74c3c',
+                'info': '#3498db'
+            };
+            
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type] || colors.info};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 400px;
+                font-weight: 500;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 300);
+            }, 4000);
+        }
+
+        // Ajouter les animations CSS pour les toasts
+        const styleToast = document.createElement('style');
+        styleToast.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(styleToast);
+
+        // ==================== ÉVÉNEMENT: Changement de gîte ====================
+        // L'événement sera géré par la fonction selectGiteDecouvrir existante
+        // qui sera modifiée pour recharger la carte Google Maps
         
     </script>
 </body>
