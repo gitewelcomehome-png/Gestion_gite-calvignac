@@ -74,19 +74,25 @@ public/
 
 ### Chargement des Fichiers
 
-Le fichier `index.html` charge maintenant :
+Le fichier `index.html` devra charger les scripts dans cet ordre (lorsqu'ils seront activés) :
 
 ```html
 <!-- CSS Externes -->
 <link rel="stylesheet" href="css/main.css" />
 <link rel="stylesheet" href="css/components.css" />
 
-<!-- JavaScript (à ajouter dans le futur) -->
-<script src="js/utils/storage.js"></script>
-<script src="js/utils/calendar.js"></script>
-<script src="js/utils/helpers.js"></script>
-<script src="js/app.js"></script>
+<!-- JavaScript - Ordre d'importation important -->
+<script src="js/utils/helpers.js"></script>  <!-- D'abord les helpers -->
+<script src="js/utils/calendar.js"></script> <!-- Puis calendar -->
+<script src="js/utils/storage.js"></script>  <!-- Storage dépend de helpers -->
+<script src="js/app.js"></script>            <!-- App coordonne tout -->
+<!-- Modules optionnels -->
+<script src="js/modules/reservations.js"></script>
+<script src="js/modules/statistiques.js"></script>
+<!-- etc. -->
 ```
+
+**Note importante** : Actuellement, ces scripts ne sont PAS chargés. Le code reste dans index.html pour garantir la stabilité. Les scripts peuvent être activés progressivement lors de la migration.
 
 ### Fonctionnalités Préservées
 

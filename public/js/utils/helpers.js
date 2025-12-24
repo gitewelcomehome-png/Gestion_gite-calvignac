@@ -75,13 +75,3 @@ function createParisDate(...args) {
     const date = new Date(...args);
     return date;
 }
-
-/**
- * Invalidate cache for a specific type
- * @param {string} type - Type of cache to invalidate
- */
-function invalidateCache(type) {
-    if (window.dataCache) {
-        window.dataCache[type] = null;
-    }
-}

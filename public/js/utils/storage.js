@@ -1,6 +1,8 @@
 // Gestion Gîtes - Storage Utilities (localStorage, sessionStorage, Supabase)
 
 // Supabase Configuration
+// Note: In production, these should be environment variables
+// For now, keeping them here for compatibility with existing index.html
 const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
 
@@ -78,11 +80,24 @@ function sauvegarderUrlsIcal() {
         }
     };
     localStorage.setItem('icalUrls', JSON.stringify(configs));
-    showToast('✓ URLs iCal sauvegardées');
+    // Note: showToast is in helpers.js and will be available when scripts are loaded
+    if (typeof showToast === 'function') {
+        showToast('✓ URLs iCal sauvegardées');
+    }
 }
 
 // Global variable for iCal configs
 let ICAL_CONFIGS = getIcalConfigs();
+
+/**
+ * Invalidate cache for a specific type
+ * @param {string} type - Type of cache to invalidate
+ */
+function invalidateCache(type) {
+    if (window.dataCache) {
+        window.dataCache[type] = null;
+    }
+}
 
 /**
  * Initialize database (now just checks Supabase is ready)
