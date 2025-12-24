@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Gîte Calvignac</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- TEMPORARY UPDATE NOTIFICATION - REMOVE AFTER REVIEW -->
+    <div id="update-notification-banner" style="
+        background-color: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 12px 16px;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        color: #1976d2;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 1000;
+    ">
+        <strong>📋 Mise à jour système</strong> - 
+        Dernière modification: 2025-12-24 17:11:33 UTC | 
+        Action: Ajout bannière de notification temporaire
+        <button onclick="this.parentElement.style.display='none'" style="
+            float: right;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #1976d2;
+            padding: 0;
+            margin-left: 10px;
+        ">×</button>
+    </div>
+    <!-- END TEMPORARY NOTIFICATION -->
+    
+    <div class="container">
+        <header>
+            <h1>Gestion du Gîte de Calvignac</h1>
+            <nav>
+                <ul>
+                    <li><a href="#accueil">Accueil</a></li>
+                    <li><a href="#reservations">Réservations</a></li>
+                    <li><a href="#clients">Clients</a></li>
+                    <li><a href="#maintenance">Maintenance</a></li>
+                    <li><a href="#finances">Finances</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section id="accueil">
+                <h2>Tableau de bord</h2>
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h3>Réservations en cours</h3>
+                        <p class="metric">12</p>
+                    </div>
+                    <div class="card">
+                        <h3>Taux d'occupation</h3>
+                        <p class="metric">78%</p>
+                    </div>
+                    <div class="card">
+                        <h3>Revenus ce mois</h3>
+                        <p class="metric">€3,450</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="reservations">
+                <h2>Gestion des Réservations</h2>
+                <div class="section-content">
+                    <button class="btn-primary">Nouvelle réservation</button>
+                    <table class="reservations-table">
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>Dates</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Famille Martin</td>
+                                <td>15-22 Déc 2023</td>
+                                <td><span class="status confirmed">Confirmée</span></td>
+                                <td>
+                                    <button class="btn-small">Modifier</button>
+                                    <button class="btn-small">Annuler</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="clients">
+                <h2>Base Clients</h2>
+                <div class="section-content">
+                    <button class="btn-primary">Ajouter client</button>
+                    <div class="client-search">
+                        <input type="text" placeholder="Rechercher un client...">
+                        <button class="btn-secondary">Rechercher</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="maintenance">
+                <h2>Maintenance & Ménage</h2>
+                <div class="section-content">
+                    <div class="maintenance-grid">
+                        <div class="card">
+                            <h3>Prochaines tâches</h3>
+                            <ul>
+                                <li>Nettoyage après départ - 23 Déc</li>
+                                <li>Vérification chauffage - 25 Déc</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h3>Inventaire</h3>
+                            <p>Dernière mise à jour: 20 Déc 2023</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="finances">
+                <h2>Gestion Financière</h2>
+                <div class="section-content">
+                    <div class="finance-summary">
+                        <div class="card">
+                            <h3>Revenus 2023</h3>
+                            <p class="metric">€28,350</p>
+                        </div>
+                        <div class="card">
+                            <h3>Charges</h3>
+                            <p class="metric">€12,200</p>
+                        </div>
+                        <div class="card">
+                            <h3>Bénéfice net</h3>
+                            <p class="metric">€16,150</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 Gîte de Calvignac - Tous droits réservés</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
