@@ -460,6 +460,13 @@
                 }
             }
             if (tabName === 'decouvrir') {
+                // Pré-sélectionner Trévoux si aucun gîte n'est sélectionné
+                const giteInput = document.getElementById('decouvrir_gite');
+                if (!giteInput || !giteInput.value) {
+                    if (typeof selectGiteDecouvrir === 'function') {
+                        selectGiteDecouvrir('Trévoux');
+                    }
+                }
                 if (typeof chargerActivites === 'function') {
                     chargerActivites();
                 }
