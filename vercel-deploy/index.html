@@ -1045,6 +1045,7 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             }
             if (tabName === 'charges' && typeof updateChargesDisplay === 'function') {
                 updateChargesDisplay();
+                if (typeof initChargeForm === 'function') initChargeForm();
             }
             if (tabName === 'menage' && typeof afficherPlanningParSemaine === 'function') {
                 afficherPlanningParSemaine();
@@ -2361,26 +2362,32 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             reader.readAsText(file);
         }
         
-        // Gestionnaire formulaire charges
-        document.getElementById('chargeForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        // Gestionnaire formulaire charges - sera appelé après chargement de l'onglet
+        window.initChargeForm = function() {
+            const chargeForm = document.getElementById('chargeForm');
+            if (!chargeForm || chargeForm._initialized) return;
             
-            const charge = {
-                gite: document.getElementById('chargeGite').value,
-                nom: document.getElementById('chargeNom').value,
-                montant: parseFloat(document.getElementById('chargeMontant').value),
-                type: document.getElementById('chargeType').value,
-                date: document.getElementById('chargeDate').value || new Date().toISOString().split('T')[0],
-                notes: document.getElementById('chargeNotes').value,
-                timestamp: new Date().toISOString()
-            };
-            
-            await addCharge(charge);
-            this.reset();
-            await updateChargesDisplay();
-            await updateStats(); // Mettre à jour le graphique CA vs Charges
-            showToast('✓ Charge ajoutée');
-        });
+            chargeForm._initialized = true;
+            chargeForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const charge = {
+                    gite: document.getElementById('chargeGite').value,
+                    nom: document.getElementById('chargeNom').value,
+                    montant: parseFloat(document.getElementById('chargeMontant').value),
+                    type: document.getElementById('chargeType').value,
+                    date: document.getElementById('chargeDate').value || new Date().toISOString().split('T')[0],
+                    notes: document.getElementById('chargeNotes').value,
+                    timestamp: new Date().toISOString()
+                };
+                
+                await addCharge(charge);
+                this.reset();
+                await updateChargesDisplay();
+                await updateStats(); // Mettre à jour le graphique CA vs Charges
+                showToast('✓ Charge ajoutée');
+            });
+        };
         
         async function updateChargesDisplay() {
             const reservations = await getAllReservations();
