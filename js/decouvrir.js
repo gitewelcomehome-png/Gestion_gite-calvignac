@@ -453,10 +453,16 @@ async function chargerActivites() {
         const giteSelectionne = document.getElementById('decouvrir_gite')?.value;
         if (giteSelectionne) {
             console.log('Affichage automatique pour:', giteSelectionne);
-            afficherActivites(giteSelectionne);
+            // Petit délai pour s'assurer que le DOM est prêt
+            setTimeout(() => {
+                console.log('🎯 Appel de afficherActivites() après délai...');
+                afficherActivites(giteSelectionne);
+            }, 100);
         } else {
             console.log('Aucun gîte sélectionné, affichage de tous');
-            afficherToutesLesActivites();
+            setTimeout(() => {
+                afficherToutesLesActivites();
+            }, 100);
         }
     } catch (error) {
         console.error('Erreur chargement activités:', error);
