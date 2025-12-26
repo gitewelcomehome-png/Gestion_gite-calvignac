@@ -432,10 +432,13 @@ async function chargerActivites() {
             console.log('Activités chargées:', window.activitesParGite);
         }
         
-        // Afficher si un gîte est sélectionné
+        // Afficher si un gîte est sélectionné, sinon afficher Trévoux par défaut
         const giteSelectionne = document.getElementById('decouvrir_gite')?.value;
         if (giteSelectionne) {
             afficherActivites(giteSelectionne);
+        } else {
+            // Afficher les deux gîtes si aucun n'est sélectionné
+            afficherToutesLesActivites();
         }
     } catch (error) {
         console.error('Erreur chargement activités:', error);
@@ -511,6 +514,82 @@ function getCategoryColor(categorie) {
         'Hôtel': { badge: '#ec4899', light: '#fce7f3' }
     };
     return colors[categorie] || { badge: '#667eea', light: '#e0e7ff' };
+}
+
+// ==================== AFFICHER TOUTES LES ACTIVITÉS (TOUS GÎTES) ====================
+function afficherToutesLesActivites() {
+    const container = document.getElementById('activitesParCategorie');
+    if (!container) return;
+    
+    const toutesActivites = [
+        ...(window.activitesParGite['Trévoux'] || []),
+        ...(window.activitesParGite['Couzon'] || [])
+    ];
+    
+    if (toutesActivites.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune activité enregistrée. Cliquez sur un gîte pour commencer.</p>';
+        return;
+    }
+    
+    let html = `<h3 style="color: white; font-size: 1.6rem; margin-bottom: 24px; text-align: center; padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">✨ Toutes les activités <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${toutesActivites.length}</span></h3>`;
+    
+    // Grouper par gîte
+    ['Trévoux', 'Couzon'].forEach(gite => {
+        const activitesGite = window.activitesParGite[gite] || [];
+        if (activitesGite.length === 0) return;
+        
+        html += `
+            <div style="margin-bottom: 40px; border: 3px solid #667eea; border-radius: 16px; padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);">
+                <h4 style="color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 10px; font-size: 1.4rem; margin-bottom: 20px; text-align: center;">
+                    ${gite === 'Trévoux' ? '🏰' : '⛰️'} ${gite} <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activitesGite.length}</span>
+                </h4>
+        `;
+        
+        // Grouper par catégorie pour ce gîte
+        const parCategorie = {};
+        activitesGite.forEach(act => {
+            if (!parCategorie[act.categorie]) {
+                parCategorie[act.categorie] = [];
+            }
+            parCategorie[act.categorie].push(act);
+        });
+        
+        Object.keys(parCategorie).sort().forEach(cat => {
+            html += `
+                <div style="margin-bottom: 20px;">
+                    <h5 style="color: #667eea; margin-bottom: 12px; font-size: 1.1rem; padding: 10px 12px; background: white; border-radius: 8px; border-left: 4px solid #667eea;">
+                        ${cat} (${parCategorie[cat].length})
+                    </h5>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            `;
+            
+            parCategorie[cat].forEach(act => {
+                const colors = getCategoryColor(act.categorie);
+                const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) + ` ${act.note}/5` : '';
+                const distanceText = act.distance ? `${act.distance} km` : '';
+                
+                html += `
+                    <div data-activite-id="${act.id}" style="background: white; border: none; padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 10px 28px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'">
+                        <div style="display: inline-block; background: ${colors.badge}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px;">${act.categorie}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <h6 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #1f2937;">${act.nom}${distanceText ? ` <span style="font-size: 0.9rem; font-weight: 500; color: #6b7280;">• ${distanceText}</span>` : ''}</h6>
+                            </div>
+                        </div>
+                        ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #4b5563;"><span style="font-size: 1rem;">📍</span> ${act.adresse}</p>` : ''}
+                        ${act.description ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #6b7280; font-style: italic;">${act.description}</p>` : ''}
+                        ${noteStars ? `<p style="margin: 8px 0; font-size: 0.95rem;">${noteStars}</p>` : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+        });
+        
+        html += '</div>';
+    });
+    
+    container.innerHTML = html;
 }
 
 // ==================== AFFICHER LES ACTIVITÉS ====================
@@ -843,6 +922,7 @@ window.chargerActivites = chargerActivites;
 window.chargerToutSurCarte = chargerToutSurCarte;
 window.getCategoryColor = getCategoryColor;
 window.afficherActivites = afficherActivites;
+window.afficherToutesLesActivites = afficherToutesLesActivites;
 window.supprimerActivite = supprimerActivite;
 window.filtrerActivitesParCategorie = filtrerActivitesParCategorie;
 window.afficherToutesActivites = afficherToutesActivites;
