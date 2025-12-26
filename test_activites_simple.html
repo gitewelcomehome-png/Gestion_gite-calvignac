@@ -25,7 +25,7 @@
         const SUPABASE_URL = 'https://eaclmrwczfqqxmgpbqmo.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhY2xtcndjemZxcXhtZ3BicW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NjM4NDUsImV4cCI6MjA1MDUzOTg0NX0.oWnZf_T9VFUP13VGDzW4RaEdXHyYn1-vVPOVOlZeHbU';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
         
         function log(msg, type = 'info') {
@@ -40,7 +40,7 @@
             log('🔌 Test connexion Supabase...');
             
             try {
-                const { data, error } = await supabase.from('activites_gites').select('id').limit(1);
+                const { data, error } = await supabaseClient.from('activites_gites').select('id').limit(1);
                 
                 if (error) {
                     log(`❌ Erreur: ${error.message}`, 'error');
@@ -57,7 +57,7 @@
             log('📥 Chargement des activités...');
             
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('activites_gites')
                     .select('*')
                     .order('categorie', { ascending: true });
