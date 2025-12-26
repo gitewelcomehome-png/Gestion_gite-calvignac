@@ -180,33 +180,1693 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
         
         <!-- Navigation -->
         <div class="nav-tabs">
-            <button class="nav-tab" data-tab="gestion">⚙️ Gestion iCal</button>
-            <button class="nav-tab" data-tab="reservations">📝 Réservations</button>
-            <button class="nav-tab" data-tab="archives">📦 Archives</button>
-            <button class="nav-tab" data-tab="statistiques">📊 Statistiques</button>
-            <button class="nav-tab" data-tab="charges">💶 Charges & Rentabilité</button>
-            <button class="nav-tab" data-tab="menage">
+            <button class="nav-tab active" onclick="switchTab('reservations')">📝 Réservations</button>
+            <button class="nav-tab" onclick="switchTab('statistiques')">📊 Statistiques</button>
+            <button class="nav-tab" onclick="switchTab('charges')">💶 Charges & Rentabilité</button>
+            <button class="nav-tab" onclick="switchTab('menage')">
                 🧹 Planning Ménage
                 <span id="cleaning-notif-badge" style="display:none; background:#e74c3c; color:white; border-radius:50%; padding:2px 6px; margin-left:5px; font-size:0.8em; font-weight:bold;">0</span>
             </button>
-            <button class="nav-tab" data-tab="infos-gites">📝 Infos Pratiques</button>
-            <button class="nav-tab" data-tab="decouvrir">🗺️ À Découvrir</button>
-            <button class="nav-tab" data-tab="sauvegarde">💾 Sauvegarde</button>
+            <button class="nav-tab" onclick="switchTab('infos-gites')">📝 Infos Pratiques</button>
+            <button class="nav-tab" onclick="switchTab('decouvrir')">🗺️ À Découvrir</button>
         </div>
         
+        <!-- ONGLET GESTION iCAL -->
+        <div id="tab-gestion" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">⚙️</span>
+                    <h2 class="card-title">Gestion URLs iCal</h2>
+                </div>
+                
+                <div class="alert alert-info">
+                    <strong>🔄 Synchronisation automatique</strong><br>
+                    Les calendriers sont synchronisés automatiquement à l'ouverture de la page.
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>⚠️ Limitation RGPD</strong><br>
+                    Les fichiers iCal publics ne contiennent PAS les noms des clients. Les réservations seront importées avec "Réservation [Plateforme]".
+                </div>
+                
+                <h3 style="margin: 30px 0 15px; color: var(--trevoux);">🏰 Trévoux</h3>
+                <div class="form-group">
+                    <label>Airbnb iCal URL</label>
+                    <textarea id="icalAirbnbTrevoux" rows="2" style="font-size:0.85rem"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Abritel iCal URL</label>
+                    <textarea id="icalAbritelTrevoux" rows="2" style="font-size:0.85rem"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Gîtes de France iCal URL</label>
+                    <textarea id="icalGitesTrevoux" rows="2" style="font-size:0.85rem"></textarea>
+                </div>
+                
+                <h3 style="margin: 30px 0 15px; color: var(--couzon);">⛰️ Couzon</h3>
+                <div class="form-group">
+                    <label>Airbnb iCal URL</label>
+                    <textarea id="icalAirbnbCouzon" rows="2" style="font-size:0.85rem"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Abritel iCal URL</label>
+                    <textarea id="icalAbritelCouzon" rows="2" style="font-size:0.85rem"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Gîtes de France iCal URL</label>
+                    <textarea id="icalGitesCouzon" rows="2" style="font-size:0.85rem"></textarea>
+                </div>
+                
+                <button class="btn btn-primary" onclick="sauvegarderUrlsIcal()">
+                    <span>💾</span> Sauvegarder les URLs
+                </button>
+                
+                <button class="btn btn-sync" onclick="syncAllCalendars()" style="margin-top:10px">
+                    <span>🔄</span> Synchroniser maintenant
+                </button>
+                
+                <div id="syncProgress" class="sync-progress" style="display:none;margin-top:20px">
+                    <strong>Synchronisation en cours...</strong>
+                    <div id="syncMessages"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ONGLET RÉSERVATIONS -->
+        <div id="tab-reservations" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">📅</span>
+                    <h2 class="card-title">Planning des réservations</h2>
+                    <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="searchReservations" placeholder="🔍 Rechercher..." style="padding: 10px 15px; border-radius: 8px; border: 2px solid var(--border); width: 250px; font-size: 0.9rem; font-family: 'Work Sans', sans-serif;" oninput="filterReservations(this.value)">
+                    </div>
+                </div>
+                
+                <!-- Statut synchronisation -->
+                <div id="syncStatus" style="padding:12px;background:#e7f3ff;border-radius:8px;margin-bottom:20px;font-size:0.9rem;display:none">
+                    <span id="syncStatusIcon">🔄</span> <span id="syncStatusText">Synchronisation en cours...</span>
+                </div>
+                
+                <div id="planning-container" class="planning-container">
+                    <!-- Le planning sera généré ici par JavaScript -->
+                </div>
+            </div>
+        </div>
+         
+        <!-- ONGLET ARCHIVES --> 
+        <div id="tab-archives" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">📦</span>
+                    <h2 class="card-title">Archives</h2>
+                </div>
+                <div id="archivesSection">
+                    <p style="text-align: center; color: #999; padding: 40px;">Aucune archive</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ONGLET STATISTIQUES -->
+        <div id="tab-statistiques" class="tab-content">
+            <div class="stats-section">
+                <div class="card-header">
+                    <span class="card-icon">📊</span>
+                    <h2 class="card-title">Statistiques</h2>
+                    <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+                        <label for="yearFilterStats" style="font-weight: 600; color: var(--primary); font-size: 0.9rem;">📅 Année :</label>
+                        <select id="yearFilterStats" onchange="filterStatsByYear()" 
+                            style="width: 110px; padding: 8px; border: 2px solid var(--border); border-radius: 8px; font-size: 0.9rem; text-align: center; font-weight: 600; cursor: pointer; background: white;">
+                            <option value="">Chargement...</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="toggleHistoricalDataForm()" style="padding: 8px 16px; font-size: 0.9rem; width: auto; margin-top: 0;">
+                            📅 Gérer les données
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 📊 Compteurs par plateforme -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
+                    <div style="background: linear-gradient(135deg, #FF5A5F 0%, #FF385C 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Airbnb</div>
+                        <div id="countAirbnb" style="font-size: 2rem; font-weight: 700;">-</div>
+                        <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #3498DB 0%, #2874A6 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Abritel</div>
+                        <div id="countAbritel" style="font-size: 2rem; font-weight: 700;">-</div>
+                        <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Gîtes de France</div>
+                        <div id="countGites" style="font-size: 2rem; font-weight: 700;">-</div>
+                        <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Autres</div>
+                        <div id="countAutres" style="font-size: 2rem; font-weight: 700;">-</div>
+                        <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+                    </div>
+                </div>
+                
+                <!-- 📈 NOUVELLES STATISTIQUES UTILES -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px;">
+                    <!-- Taux d'occupation Trévoux -->
+                    <div class="card" style="padding: 20px; background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(102,126,234,0.05) 100%);">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">📊 Taux Trévoux</div>
+                        <div id="tauxTrevoux" style="font-size: 2rem; font-weight: 700; color: #667eea;">-%</div>
+                        <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">année en cours</div>
+                    </div>
+                    
+                    <!-- Taux d'occupation Couzon -->
+                    <div class="card" style="padding: 20px; background: linear-gradient(135deg, rgba(245,87,108,0.1) 0%, rgba(245,87,108,0.05) 100%);">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">📊 Taux Couzon</div>
+                        <div id="tauxCouzon" style="font-size: 2rem; font-weight: 700; color: #f5576c;">-%</div>
+                        <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">année en cours</div>
+                    </div>
+                    
+                    <!-- Prix moyen nuitée -->
+                    <div class="card" style="padding: 20px;">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">💰 Prix moyen/nuit</div>
+                        <div id="prixMoyen" style="font-size: 2rem; font-weight: 700; color: #27AE60;">- €</div>
+                        <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">toutes réservations</div>
+                    </div>
+                    
+                    <!-- Durée moyenne séjour -->
+                    <div class="card" style="padding: 20px;">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">📅 Durée moyenne</div>
+                        <div id="dureeMoyenne" style="font-size: 2rem; font-weight: 700; color: #3498DB;">- nuits</div>
+                        <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">par séjour</div>
+                    </div>
+                    
+                    <!-- Meilleur mois -->
+                    <div class="card" style="padding: 20px;">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">🏆 Meilleur mois</div>
+                        <div id="meilleurMois" style="font-size: 1.3rem; font-weight: 700; color: var(--primary);">-</div>
+                        <div id="meilleurMoisCA" style="font-size: 0.875rem; color: #27AE60; margin-top: 4px; font-weight: 600;">- €</div>
+                    </div>
+                </div>
+                
+                
+                <!-- Formulaire caché des données historiques -->
+                <div id="historicalDataForm" style="display: none; margin-bottom: 30px;">
+                    <div class="card" style="background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);">
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 15px 0; color: var(--primary);">📅 Données Historiques (Années Précédentes)</h3>
+                            <div class="alert alert-info" style="margin-bottom: 20px;">
+                                <strong>ℹ️ Info :</strong> Saisissez les chiffres d'affaires des années précédentes pour comparer avec l'année en cours dans les graphiques.
+                            </div>
+                            
+                            <!-- Champ année pour la saisie -->
+                            <div style="margin-bottom: 20px;">
+                                <label style="font-weight: 600; display: block; margin-bottom: 10px;">Année à saisir <span style="color: red;">*</span></label>
+                                <input type="number" id="historicalYear" placeholder="Ex: 2024" min="2000" max="2050" 
+                                    style="width: 150px; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-weight: 600;">
+                                <small style="color: #666; font-size: 0.85rem; margin-left: 10px;">Année pour laquelle saisir les données</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Tableau Total uniquement -->
+                        <div style="overflow-x: auto; margin-bottom: 20px;">
+                            <table style="width: 100%; border-collapse: collapse; background: white;">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, var(--primary) 0%, #667eea 100%); color: white;">
+                                        <th style="padding: 12px; text-align: left; border: 1px solid #ddd; width: 30%;">Mois</th>
+                                        <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">💰 Total CA (€)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Cadre bouton commit info -->
 
-        <!-- Conteneurs dynamiques pour chaque onglet -->
-        <div id="tab-gestion" class="tab-content"></div>
-        <div id="tab-reservations" class="tab-content"></div>
-        <div id="tab-archives" class="tab-content"></div>
-        <div id="tab-statistiques" class="tab-content"></div>
-        <div id="tab-charges" class="tab-content"></div>
-        <div id="tab-menage" class="tab-content"></div>
-        <div id="tab-infos-gites" class="tab-content"></div>
-        <div id="tab-decouvrir" class="tab-content"></div>
-        <div id="tab-sauvegarde" class="tab-content"></div>
-    </div>
-    
+                                    <tr>
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Janvier</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_jan" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Février</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_feb" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Mars</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_mar" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Avril</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_apr" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Mai</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_may" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Juin</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_jun" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Juillet</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_jul" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Août</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_aug" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Septembre</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_sep" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Octobre</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_oct" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Novembre</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_nov" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Décembre</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <input type="number" id="hist_total_dec" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button type="button" class="btn btn-success" onclick="saveHistoricalDataTotal()">
+                                💾 Sauvegarder
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadHistoricalDataTotal()">
+                                📂 Charger données existantes
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="deleteHistoricalDataTotal()">
+                                🗑️ Supprimer année
+                            </button>
+                        </div>
+                        
+                        <div id="historicalDataList" style="margin-top: 30px;">
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">📋 Années enregistrées</h4>
+                            <div id="historicalYearsList"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">Réservations totales</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTrevoux">0</div>
+                        <div class="stat-label">Trévoux</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statCouzon">0</div>
+                        <div class="stat-label">Couzon</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statCA">0 €</div>
+                        <div class="stat-label">CA Total</div>
+                    </div>
+                </div>
+                
+                <!-- Section sélection années pour comparaison -->
+                <div class="card" style="margin: 30px 0; padding: 20px; background: #f8f9fa;">
+                    <h4 style="color: var(--primary); margin-bottom: 15px;">📊 Comparer les années</h4>
+                    <div id="yearComparisonCheckboxes" style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        <!-- Les checkboxes seront générées dynamiquement -->
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="caChart"></canvas>
+                </div>
+                
+                <div class="chart-container" style="margin-top: 50px;">
+                    <canvas id="gitesChart"></canvas>
+                </div>
+                
+                <div class="chart-container" style="margin-top: 50px;">
+                    <canvas id="platformsChart"></canvas>
+                </div>
+                
+                <!-- Nouveau graphique CA vs Charges -->
+                <div class="chart-container" style="margin-top: 50px;">
+                    <canvas id="profitChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ONGLET CHARGES & RENTABILITÉ -->
+        <div id="tab-charges" class="tab-content">
+            <div class="main-grid">
+                <!-- Formulaire charges -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">💶</span>
+                        <h2 class="card-title">Ajouter une Charge</h2>
+                    </div>
+                    
+                    <form id="chargeForm">
+                        <div class="form-group">
+                            <label>Gîte concerné <span class="required">*</span></label>
+                            <select id="chargeGite">
+                                <option value="">-- Sélectionnez --</option>
+                                <option value="Trévoux">Trévoux</option>
+                                <option value="Couzon">Couzon</option>
+                                <option value="Commun">Commun (les deux)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Nom de la charge <span class="required">*</span></label>
+                            <input type="text" id="chargeNom" placeholder="Ex: Électricité, Ménage, Assurance">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Montant (€) <span class="required">*</span></label>
+                            <input type="number" id="chargeMontant" step="0.01" placeholder="150.00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Type <span class="required">*</span></label>
+                            <select id="chargeType">
+                                <option value="mensuelle">Mensuelle</option>
+                                <option value="annuelle">Annuelle</option>
+                                <option value="ponctuelle">Ponctuelle</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="chargeDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea id="chargeNotes" placeholder="Informations complémentaires..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <span>➕</span> Ajouter la charge
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Liste charges et rentabilité -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📊</span>
+                        <h2 class="card-title">Rentabilité & URSSAF</h2>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>💡 Calcul URSSAF :</strong> En tant que LMP, vous devez provisionner environ 22% de vos recettes pour l'URSSAF (cotisations sociales).
+                    </div>
+                    
+                    <div class="stats-grid" style="margin-bottom: 20px;">
+                        <div class="stat-item" style="background: linear-gradient(135deg, var(--success) 0%, #229954 100%);">
+                            <div class="stat-value" id="totalRecettes">0 €</div>
+                            <div class="stat-label">Recettes totales</div>
+                        </div>
+                        <div class="stat-item" style="background: linear-gradient(135deg, var(--danger) 0%, #C0392B 100%);">
+                            <div class="stat-value" id="totalCharges">0 €</div>
+                            <div class="stat-label">Charges totales</div>
+                        </div>
+                        <div class="stat-item" style="background: linear-gradient(135deg, var(--warning) 0%, #E67E22 100%);">
+                            <div class="stat-value" id="provisionUrssaf">0 €</div>
+                            <div class="stat-label">À provisionner URSSAF (22%)</div>
+                        </div>
+                        <div class="stat-item" style="background: linear-gradient(135deg, #3498DB 0%, #2874A6 100%);">
+                            <div class="stat-value" id="resultatNet">0 €</div>
+                            <div class="stat-label">Résultat net estimé</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-header" style="margin-top: 30px;">
+                        <span class="card-icon">📋</span>
+                        <h3 class="card-title" style="font-size: 1.3rem;">Liste des Charges</h3>
+                    </div>
+                    
+                    <div class="charges-list" id="chargesList">
+                        <p style="text-align: center; color: #999; padding: 20px;">Aucune charge enregistrée</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Règles -->
+        <div id="rulesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative;">
+                <button onclick="closeRulesModal()" style="position: absolute; top: 15px; right: 15px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+                <h2 style="margin: 0 0 20px 0; color: #2c3e50;">📋 Règles de Planning Automatique</h2>
+                <div style="line-height: 1.8; color: #34495e;">
+                    • <strong>Semaine (Lun-Ven) et Samedi</strong> : Ménage après-midi (12h00)<br>
+                    • <strong>Dimanche</strong> : AUCUN ménage, sauf enchainement même jour → 13h00<br>
+                    • <strong>Jours fériés</strong> : Ménage reporté au jour ouvré suivant (sauf enchainement)<br>
+                    • <strong>Enchainement</strong> : Si départ matin + arrivée même jour avec ménage veille non fait → reporter au lendemain<br>
+                    • <strong>Arrivée le jour du départ</strong> : Ménage le matin (07h00) si besoin avant l'arrivée
+                </div>
+                <button onclick="closeRulesModal()" class="btn" style="margin-top: 20px; width: 100%; background: #3498db; color: white;">Fermer</button>
+            </div>
+        </div>
+
+        <!-- ONGLET PLANNING MÉNAGE -->
+        <div id="tab-menage" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">🧹</span>
+                    <h2 class="card-title">Planning des Ménages</h2>
+                </div>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                    <a href="validation.html" target="_blank" class="btn btn-secondary" style="text-decoration: none; display: inline-flex;">
+                        <span>🏢</span> Page Validation Société
+                    </a>
+                    <button class="btn" onclick="showRulesModal()" style="background: #3498db; color: white;">
+                        <span>📋</span> Voir les Règles
+                    </button>
+                </div>
+                
+                <div id="menagePlanning" style="margin-top: 30px;">
+                </div>
+            </div>
+        </div>
+        
+        <!-- ONGLET INFOS PRATIQUES ULTRA-COMPLET -->
+        <div id="tab-infos-gites" class="tab-content">
+            
+            <!-- BARRE DE NAVIGATION COMPACTE -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 1.8rem;">📋</span>
+                    <h2 style="color: white; margin: 0; font-size: 1.4rem; font-weight: 700;">Infos Pratiques</h2>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <!-- Sélecteur de gîte -->
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn" onclick="selectGiteInfos('Trévoux')" id="btnTrevoux" style="background: white; color: #667eea; font-weight: 700; padding: 10px 20px; border-radius: 25px; border: none; cursor: pointer; transition: all 0.3s;">
+                            🏡 Trévoux
+                        </button>
+                        <button class="btn" onclick="selectGiteInfos('Couzon')" id="btnCouzon" style="background: rgba(255,255,255,0.2); color: white; font-weight: 700; padding: 10px 20px; border-radius: 25px; border: 2px solid white; cursor: pointer; transition: all 0.3s;">
+                            ⛰️ Couzon
+                        </button>
+                    </div>
+                    
+                    <!-- Sélecteur de langue - UN SEUL BOUTON avec vraies images -->
+                    <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.15); padding: 6px; border-radius: 20px;">
+                        <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: none; cursor: pointer; padding: 8px; border-radius: 15px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;" title="Switch to English">
+                            <img id="flagIcon" src="https://flagcdn.com/w80/fr.png" alt="FR" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                        </button>
+                    </div>
+                    
+                    <!-- Bouton effacer -->
+                    <button type="button" onclick="resetGiteInfosQuick()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 10px; border-radius: 50%; transition: all 0.3s;" title="Effacer toutes les informations">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+
+            <form id="infosGiteForm" onsubmit="sauvegarderInfosGiteComplet(event)">
+
+                <!-- ==================== SECTION 1 : INFORMATIONS DE BASE ==================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📍</span>
+                        <h2 class="card-title">Informations de Base</h2>
+                    </div>
+
+                    <div style="display: grid; gap: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="infos_adresse" class="form-control" placeholder="12 rue de la République, 01600 Trévoux">
+                                <small style="color: var(--gray); font-style: italic;">Adresse exacte avec code postal pour GPS</small>
+                            </div>
+                            <div style="display: none;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Full Address <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="infos_adresse_en" class="form-control" placeholder="12 Republic Street, 01600 Trévoux">
+                                <small style="color: var(--gray); font-style: italic;">Exact address with postal code for GPS</small>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Téléphone urgence 🇫🇷 <span style="color: #ef4444;">*</span></label>
+                                <input type="tel" id="infos_telephone" class="form-control" placeholder="06 12 34 56 78">
+                                <small style="color: var(--gray); font-style: italic;">Joignable 24h/24 pendant le séjour</small>
+                            </div>
+                            <div style="display: none;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Emergency Phone 🇬🇧 <span style="color: #ef4444;">*</span></label>
+                                <input type="tel" id="infos_telephone_en" class="form-control" placeholder="+33 6 12 34 56 78">
+                                <small style="color: var(--gray); font-style: italic;">Available 24/7 during stay</small>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Coordonnées GPS - Latitude</label>
+                                <input type="text" id="infos_gpsLat" class="form-control" placeholder="45.9423">
+                                <small style="color: var(--gray); font-style: italic;">Format décimal, ex: 45.9423</small>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Coordonnées GPS - Longitude</label>
+                                <input type="text" id="infos_gpsLon" class="form-control" placeholder="4.7681">
+                                <small style="color: var(--gray); font-style: italic;">Format décimal, ex: 4.7681</small>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Email contact 🇫🇷 <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="infos_email" class="form-control" placeholder="contact@gite-trevoux.fr">
+                            </div>
+                            <div style="display: none;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Contact Email 🇬🇧 <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="infos_email_en" class="form-control" placeholder="contact@gite-trevoux.fr">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 2 : WIFI ==================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📶</span>
+                        <h2 class="card-title">WiFi & Connectivité</h2>
+                    </div>
+
+                    <div style="display: grid; gap: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nom du réseau WiFi (SSID) <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="infos_wifiSSID" class="form-control" required placeholder="Gite_Trevoux_5G" oninput="updateQRCodeWifi()">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Mot de passe WiFi <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="infos_wifiPassword" class="form-control" required placeholder="MonMotDePasse2024" oninput="updateQRCodeWifi()">
+                            </div>
+                        </div>
+
+                        <!-- QR CODE WIFI -->
+                        <div id="qrCodeWifiSection" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 20px; border-radius: 12px; border: 2px solid #4caf50; display: none;">
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                                <div style="flex: 0 0 auto;">
+                                    <canvas id="qrCodeWifiCanvas" width="200" height="200" style="background: white; border-radius: 8px; padding: 10px;"></canvas>
+                                </div>
+                                <div style="flex: 1;">
+                                    <h3 style="color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-size: 1.5rem;">📱</span>
+                                        QR Code WiFi Généré !
+                                    </h3>
+                                    <p style="color: #555; margin-bottom: 15px;">
+                                        Tes clients peuvent scanner ce QR code avec leur smartphone pour se connecter automatiquement au WiFi, sans avoir à taper le mot de passe !
+                                    </p>
+                                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                        <button type="button" onclick="telechargerQRCodeWifi()" class="btn" style="background: #4caf50; color: white; padding: 10px 20px; display: flex; align-items: center; gap: 8px;">
+                                            <span>⬇️</span> Télécharger QR Code
+                                        </button>
+                                        <button type="button" onclick="imprimerQRCodeWifi()" class="btn" style="background: #2196f3; color: white; padding: 10px 20px; display: flex; align-items: center; gap: 8px;">
+                                            <span>🖨️</span> Imprimer
+                                        </button>
+                                    </div>
+                                    <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                                        💡 <strong>Astuce :</strong> Imprime ce QR code et affiche-le dans le logement (sur le frigo, à l'entrée, etc.)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Débit approximatif</label>
+                                <select id="infos_wifiDebit" class="form-control">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="< 10 Mbps">Faible (< 10 Mbps)</option>
+                                    <option value="10-50 Mbps">Moyen (10-50 Mbps)</option>
+                                    <option value="50-100 Mbps">Bon (50-100 Mbps)</option>
+                                    <option value="100-500 Mbps">Excellent (100-500 Mbps)</option>
+                                    <option value="> 500 Mbps">Très excellent (> 500 Mbps)</option>
+                                    <option value="> 750 Mbps">Ultra rapide (> 750 Mbps)</option>
+                                </select>
+                                <small style="color: var(--gray); font-style: italic;">Pour rassurer les télétravailleurs</small>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Localisation de la box/routeur</label>
+                                <input type="text" id="infos_wifiLocalisation" class="form-control" placeholder="Placard de l'entrée">
+                                <small style="color: var(--gray); font-style: italic;">En cas de problème</small>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Zones de meilleure réception 🇫🇷</label>
+                            <textarea id="infos_wifiZones" class="form-control" rows="3" placeholder="Excellent dans le salon et la cuisine. Signal plus faible dans la chambre du fond."></textarea>
+                        </div>
+                        
+                        <!-- CHAMPS ANGLAIS (cachés par défaut) -->
+                        <div style="display: none;">
+                            <div style="border-top: 2px dashed #ddd; padding-top: 20px; margin-top: 20px;">
+                                <h4 style="color: #667eea; margin-bottom: 15px;">🇬🇧 English Fields</h4>
+                                <div style="display: grid; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">WiFi Network Name (SSID)</label>
+                                        <input type="text" id="infos_wifiSSID_en" class="form-control" placeholder="Gite_Trevoux_5G">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">WiFi Password</label>
+                                        <input type="text" id="infos_wifiPassword_en" class="form-control" placeholder="MyPassword2024">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Internet Speed</label>
+                                        <input type="text" id="infos_wifiDebit_en" class="form-control" placeholder="Fiber 1 Gb/s">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">WiFi Router Location</label>
+                                        <input type="text" id="infos_wifiLocalisation_en" class="form-control" placeholder="Entrance closet">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Best Reception Areas</label>
+                                        <textarea id="infos_wifiZones_en" class="form-control" rows="3" placeholder="Excellent in living room and kitchen. Weaker signal in back bedroom."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 3 : ARRIVÉE ==================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🔑</span>
+                        <h2 class="card-title">Consignes d'Arrivée</h2>
+                    </div>
+
+                    <div style="display: grid; gap: 25px;">
+                        <!-- Horaires -->
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 1.2rem;">⏰ Horaires</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Heure d'arrivée <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="infos_heureArrivee" class="form-control" placeholder="À partir de 15h00">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Arrivée tardive possible ?</label>
+                                    <select id="infos_arriveeTardive" class="form-control">
+                                        <option value="">-- Sélectionner --</option>
+                                        <option value="Oui, sans supplément">Oui, sans supplément</option>
+                                        <option value="Oui, avec supplément">Oui, avec supplément</option>
+                                        <option value="Non">Non</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parking -->
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 1.2rem;">🚗 Parking</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Parking disponible ? <span style="color: #ef4444;">*</span></label>
+                                        <select id="infos_parkingDispo" class="form-control" onchange="toggleParkingInfos()">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Oui, gratuit sur place">Oui, gratuit sur place</option>
+                                            <option value="Oui, payant sur place">Oui, payant sur place</option>
+                                            <option value="Parking public à proximité">Parking public à proximité</option>
+                                            <option value="Rue uniquement">Stationnement rue uniquement</option>
+                                            <option value="Non">Non</option>
+                                        </select>
+                                    </div>
+                                    <div id="parkingPlacesDiv" style="display: none;">
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nombre de places</label>
+                                        <input type="number" id="infos_parkingPlaces" class="form-control" min="0" placeholder="1">
+                                    </div>
+                                </div>
+                                <div id="parkingDetailsDiv" style="display: none;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions parking détaillées</label>
+                                    <textarea id="infos_parkingDetails" class="form-control" rows="4" placeholder="Entrez par le portail bleu, le parking est sur votre droite. Code digicode: 1234."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accès aux clés -->
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 1.2rem;">🔑 Accès aux Clés</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Type d'accès <span style="color: #ef4444;">*</span></label>
+                                        <select id="infos_typeAcces" class="form-control">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Boîte à clés">Boîte à clés sécurisée</option>
+                                            <option value="Remise en main propre">Remise en main propre</option>
+                                            <option value="Code porte">Code porte électronique</option>
+                                            <option value="Chez voisin">Chez le voisin</option>
+                                            <option value="Autre">Autre</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Code d'accès / Emplacement <span style="color: #ef4444;">*</span></label>
+                                        <input type="text" id="infos_codeAcces" class="form-control" placeholder="Code 1234 - Boîte devant la porte">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions détaillées pour récupérer les clés <span style="color: #ef4444;">*</span></label>
+                                    <textarea id="infos_instructionsCles" class="form-control" rows="6" placeholder="1. Garez-vous sur le parking
+2. La boîte à clés est sur le mur à droite
+3. Composez le code 1234..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accès au logement -->
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 1.2rem;">🚶 Du Parking au Logement</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Étage</label>
+                                        <select id="infos_etage" class="form-control">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Rez-de-chaussée">Rez-de-chaussée</option>
+                                            <option value="1er étage">1er étage</option>
+                                            <option value="2ème étage">2ème étage</option>
+                                            <option value="3ème étage">3ème étage</option>
+                                            <option value="4ème étage et +">4ème étage et +</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Ascenseur disponible ?</label>
+                                        <select id="infos_ascenseur" class="form-control">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Oui">Oui</option>
+                                            <option value="Non">Non</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Itinéraire du parking à la porte</label>
+                                    <textarea id="infos_itineraireLogement" class="form-control" rows="4" placeholder="Depuis le parking, prenez l'escalier sur votre gauche..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Première visite -->
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 1.2rem;">🏠 Première Visite du Logement</h3>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions pour la découverte</label>
+                                <textarea id="infos_premiereVisite" class="form-control" rows="6" placeholder="À votre arrivée :
+1. LUMIÈRES : Interrupteur à droite
+2. CHAUFFAGE : Thermostat dans le salon..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 4 : LE LOGEMENT ==================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🏠</span>
+                        <h2 class="card-title">Le Logement - Guide Complet</h2>
+                    </div>
+
+                    <div style="display: grid; gap: 25px;">
+                        <!-- Chauffage -->
+                        <div style="background: #fff3e0; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #f59e0b; margin-bottom: 15px; font-size: 1.2rem;">🔥 Chauffage & Climatisation</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Type de chauffage <span style="color: #ef4444;">*</span></label>
+                                        <select id="infos_typeChauffage" class="form-control">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Électrique">Électrique</option>
+                                            <option value="Gaz">Gaz</option>
+                                            <option value="Pompe à chaleur">Pompe à chaleur</option>
+                                            <option value="Poêle à bois">Poêle à bois</option>
+                                            <option value="Radiateurs électriques">Radiateurs électriques</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Climatisation disponible ?</label>
+                                        <select id="infos_climatisation" class="form-control">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Oui, réversible">Oui, climatisation réversible</option>
+                                            <option value="Oui, clim seule">Oui, climatisation seule</option>
+                                            <option value="Non, ventilateurs">Non, ventilateurs disponibles</option>
+                                            <option value="Non">Non</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions chauffage/climatisation <span style="color: #ef4444;">*</span></label>
+                                    <textarea id="infos_instructionsChauffage" class="form-control" rows="8" placeholder="CHAUFFAGE :
+- Thermostat dans le salon
+- Température recommandée : 19-21°C..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuisine -->
+                        <div style="background: #e8f5e9; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #27AE60; margin-bottom: 15px; font-size: 1.2rem;">🍳 Cuisine</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Équipements disponibles</label>
+                                    <textarea id="infos_equipementsCuisine" class="form-control" rows="5" placeholder="- Four électrique
+- Plaques induction
+- Lave-vaisselle..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions Four</label>
+                                    <textarea id="infos_instructionsFour" class="form-control" rows="4" placeholder="Four Whirlpool :
+- Allumage : bouton de gauche..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions Plaques de Cuisson</label>
+                                    <textarea id="infos_instructionsPlaques" class="form-control" rows="4" placeholder="⚠️ INDUCTION : casseroles compatibles uniquement..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions Lave-Vaisselle</label>
+                                    <textarea id="infos_instructionsLaveVaisselle" class="form-control" rows="4" placeholder="Lave-vaisselle Siemens..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Linge -->
+                        <div style="background: #e3f2fd; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #2196F3; margin-bottom: 15px; font-size: 1.2rem;">🧺 Linge & Buanderie</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions Lave-Linge</label>
+                                    <textarea id="infos_instructionsLaveLinge" class="form-control" rows="6" placeholder="Lave-linge Samsung :
+- Lessive fournie..."></textarea>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Sèche-linge disponible ?</label>
+                                        <select id="infos_secheLinge" class="form-control">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Oui">Oui, sèche-linge</option>
+                                            <option value="Non, étendoir">Non, étendoir</option>
+                                            <option value="Non">Non</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Fer et planche à repasser</label>
+                                        <input type="text" id="infos_ferRepasser" class="form-control" placeholder="Placard de l'entrée">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Linge de maison fourni</label>
+                                    <textarea id="infos_lingeFourni" class="form-control" rows="4" placeholder="Fourni :
+- Draps (lits faits)
+- Serviettes (2 par personne)..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chambres -->
+                        <div style="background: #f3e5f5; padding: 20px; border-radius: 12px;">
+                            <h3 style="color: #9c27b0; margin-bottom: 15px; font-size: 1.2rem;">🛏️ Chambres</h3>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Configuration des chambres</label>
+                                <textarea id="infos_configurationChambres" class="form-control" rows="6" placeholder="CHAMBRE 1 : 1 lit double 160x200cm
+CHAMBRE 2 : 2 lits simples..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 5 : TRI DES DÉCHETS ==================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🗑️</span>
+                        <h2 class="card-title">Tri des Déchets</h2>
+                    </div>
+
+                    <div style="display: grid; gap: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions tri sélectif <span style="color: #ef4444;">*</span></label>
+                            <textarea id="infos_instructionsTri" class="form-control" rows="8" placeholder="🟡 BAC JAUNE : plastique, cartons...
+🟢 BAC VERT : ordures ménagères..."></textarea>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Jours de collecte</label>
+                                <textarea id="infos_joursCollecte" class="form-control" rows="3" placeholder="Lundi et Jeudi matin..."></textarea>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Déchèterie la plus proche</label>
+                                <input type="text" id="infos_decheterie" class="form-control" placeholder="123 route de Lyon, 3km">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 6 : SÉCURITÉ ==================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🔐</span>
+                        <h2 class="card-title">Sécurité & Urgences</h2>
+                    </div>
+
+                    <div style="display: grid; gap: 15px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Détecteur de fumée</label>
+                                <input type="text" id="infos_detecteurFumee" class="form-control" placeholder="Plafond du couloir">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Extincteur</label>
+                                <input type="text" id="infos_extincteur" class="form-control" placeholder="Cuisine, sous l'évier">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Coupure d'eau</label>
+                                <input type="text" id="infos_coupureEau" class="form-control" placeholder="Sous lavabo salle de bain">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Disjoncteur général</label>
+                                <input type="text" id="infos_disjoncteur" class="form-control" placeholder="Tableau entrée">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Consignes en cas d'urgence</label>
+                            <textarea id="infos_consignesUrgence" class="form-control" rows="6" placeholder="EN CAS D'INCENDIE : 18
+EN CAS DE FUITE : coupez l'eau..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 7 : DÉPART ==================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🚪</span>
+                        <h2 class="card-title">Consignes de Départ</h2>
+                    </div>
+
+                    <div style="display: grid; gap: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Heure de départ <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="infos_heureDepart" class="form-control" placeholder="Avant 10h00">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Départ tardif possible ?</label>
+                                <select id="infos_departTardif" class="form-control">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="Oui, sans supplément">Oui, sans supplément</option>
+                                    <option value="Oui, avec supplément">Oui, avec supplément</option>
+                                    <option value="Non">Non</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Check-list de départ <span style="color: #ef4444;">*</span></label>
+                            <textarea id="infos_checklistDepart" class="form-control" rows="10" placeholder="✅ VAISSELLE : Laver et ranger
+✅ POUBELLES : Descendre au local
+✅ LINGE : Déposer serviettes dans SDB..."></textarea>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Restitution des clés <span style="color: #ef4444;">*</span></label>
+                            <textarea id="infos_restitutionCles" class="form-control" rows="4" placeholder="Remettre les clés dans la boîte..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 8 : RÈGLEMENT ==================== -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📋</span>
+                        <h2 class="card-title">Règlement Intérieur</h2>
+                    </div>
+
+                    <div style="display: grid; gap: 15px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Politique tabac <span style="color: #ef4444;">*</span></label>
+                                <select id="infos_tabac" class="form-control">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="Interdit partout">Interdit partout</option>
+                                    <option value="Interdit intérieur">Interdit intérieur (extérieur OK)</option>
+                                    <option value="Autorisé extérieur">Autorisé terrasse/balcon</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Animaux acceptés ? <span style="color: #ef4444;">*</span></label>
+                                <select id="infos_animaux" class="form-control">
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="Non">Non, refusés</option>
+                                    <option value="Oui, gratuit">Oui, sans supplément</option>
+                                    <option value="Oui, payant">Oui, avec supplément</option>
+                                    <option value="Sur demande">Sur demande</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nombre max de personnes <span style="color: #ef4444;">*</span></label>
+                                <input type="number" id="infos_nbMaxPersonnes" class="form-control" min="1" placeholder="6">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Montant de la caution</label>
+                                <input type="text" id="infos_caution" class="form-control" placeholder="500€">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== TOUS LES CHAMPS ANGLAIS (cachés) ==================== -->
+                <div id="englishFieldsCard" class="card" style="display: none; border: 3px solid #3b82f6; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);">
+                    <div class="card-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <span style="font-size: 2rem;">🇬🇧</span>
+                                <div>
+                                    <h2 class="card-title" style="margin: 0; font-size: 1.5rem;">English Version</h2>
+                                    <small style="opacity: 0.9; display: block; margin-top: 5px;">All fields below will be automatically translated from French</small>
+                                </div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem;">
+                                🌍 Auto-translated
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; gap: 25px; padding: 25px;">
+                        <!-- Section 3: Arrivée (EN) -->
+                        <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #3b82f6;">
+                            <h3 style="color: #1e3a8a; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #3b82f6; padding: 8px; border-radius: 10px;">🔑</span> Arrival & Access
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Arrival Time</label>
+                                    <input type="text" id="infos_heureArrivee_en" class="form-control" placeholder="From 3:00 PM">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Late Arrival Possible?</label>
+                                    <input type="text" id="infos_arriveeTardive_en" class="form-control" placeholder="Yes, without extra charge">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Parking Available?</label>
+                                    <input type="text" id="infos_parkingDispo_en" class="form-control" placeholder="Yes, free on-site">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Number of Parking Spaces</label>
+                                    <input type="text" id="infos_parkingPlaces_en" class="form-control" placeholder="2 spaces">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Parking Instructions</label>
+                                    <textarea id="infos_parkingDetails_en" class="form-control" rows="3" placeholder="Enter through the blue gate, parking is on your right..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Type of Access</label>
+                                    <input type="text" id="infos_typeAcces_en" class="form-control" placeholder="Key box / In-person / Door code">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Access Code / Location</label>
+                                    <input type="text" id="infos_codeAcces_en" class="form-control" placeholder="Code 1234 - Box in front of the door">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Key Retrieval Instructions</label>
+                                    <textarea id="infos_instructionsCles_en" class="form-control" rows="4" placeholder="1. Park in the parking lot&#10;2. The key box is on the right wall&#10;3. Enter code 1234..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Floor</label>
+                                    <input type="text" id="infos_etage_en" class="form-control" placeholder="Ground floor / 1st floor / 2nd floor">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Elevator Available?</label>
+                                    <input type="text" id="infos_ascenseur_en" class="form-control" placeholder="Yes / No">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Route from Parking to Entrance</label>
+                                    <textarea id="infos_itineraireLogement_en" class="form-control" rows="3" placeholder="From the parking lot, take the stairs on your left..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">First Visit Instructions</label>
+                                    <textarea id="infos_premiereVisite_en" class="form-control" rows="4" placeholder="Upon arrival:&#10;1. LIGHTS: Switch on the right&#10;2. HEATING: Thermostat in the living room..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 4: Logement (EN) -->
+                        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #22c55e;">
+                            <h3 style="color: #166534; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #22c55e; padding: 8px; border-radius: 10px;">🏠</span> Accommodation & Equipment
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Heating Type</label>
+                                    <input type="text" id="infos_typeChauffage_en" class="form-control" placeholder="Electric / Gas / Heat pump">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Air Conditioning</label>
+                                    <input type="text" id="infos_climatisation_en" class="form-control" placeholder="Yes / No / Reversible AC">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Heating Instructions</label>
+                                    <textarea id="infos_instructionsChauffage_en" class="form-control" rows="4" placeholder="HEATING: Turn on the thermostat...&#10;AC: Press the snowflake button..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Kitchen Equipment</label>
+                                    <textarea id="infos_equipementsCuisine_en" class="form-control" rows="4" placeholder="- Electric oven&#10;- Induction cooktop&#10;- Dishwasher&#10;- Microwave"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Oven Instructions</label>
+                                    <textarea id="infos_instructionsFour_en" class="form-control" rows="3" placeholder="Whirlpool oven:&#10;1. Turn the mode dial...&#10;2. Set temperature..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Cooktop Instructions</label>
+                                    <textarea id="infos_instructionsPlaques_en" class="form-control" rows="3" placeholder="⚠️ INDUCTION: Compatible cookware only..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Dishwasher Instructions</label>
+                                    <textarea id="infos_instructionsLaveVaisselle_en" class="form-control" rows="3" placeholder="Siemens dishwasher:&#10;1. Add tablet...&#10;2. Select program..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Washing Machine Instructions</label>
+                                    <textarea id="infos_instructionsLaveLinge_en" class="form-control" rows="4" placeholder="Samsung washer:&#10;1. Load clothes&#10;2. Add detergent&#10;3. Select program"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Dryer</label>
+                                    <input type="text" id="infos_secheLinge_en" class="form-control" placeholder="Yes, in the laundry room / No / Drying rack available">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Iron Location</label>
+                                    <input type="text" id="infos_ferRepasser_en" class="form-control" placeholder="Entrance closet / Bedroom closet">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Provided Linens</label>
+                                    <textarea id="infos_lingeFourni_en" class="form-control" rows="3" placeholder="Provided:&#10;- Bed sheets&#10;- Towels&#10;- Kitchen towels"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Bedroom Configuration</label>
+                                    <textarea id="infos_configurationChambres_en" class="form-control" rows="4" placeholder="BEDROOM 1: 1 double bed 160x200cm&#10;BEDROOM 2: 2 single beds 90x200cm"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 5: Déchets (EN) -->
+                        <div style="background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #eab308;">
+                            <h3 style="color: #854d0e; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #eab308; padding: 8px; border-radius: 10px;">♻️</span> Waste & Recycling
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Sorting Instructions</label>
+                                    <textarea id="infos_instructionsTri_en" class="form-control" rows="5" placeholder="🟡 YELLOW BIN: Plastic, cardboard...&#10;🟢 GREEN BIN: Glass&#10;⚫ BLACK BIN: Non-recyclable waste"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Collection Days</label>
+                                    <textarea id="infos_joursCollecte_en" class="form-control" rows="2" placeholder="Monday and Thursday mornings..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Recycling Center</label>
+                                    <input type="text" id="infos_decheterie_en" class="form-control" placeholder="123 Lyon Road, 3km away">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 6: Sécurité (EN) -->
+                        <div style="background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #ef4444;">
+                            <h3 style="color: #991b1b; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #ef4444; padding: 8px; border-radius: 10px;">🚨</span> Safety & Emergencies
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Smoke Detector Location</label>
+                                    <input type="text" id="infos_detecteurFumee_en" class="form-control" placeholder="Hallway ceiling / Living room ceiling">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Fire Extinguisher Location</label>
+                                    <input type="text" id="infos_extincteur_en" class="form-control" placeholder="Kitchen, under the sink">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Water Shut-off Valve</label>
+                                    <input type="text" id="infos_coupureEau_en" class="form-control" placeholder="Under bathroom sink / Behind toilet">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Circuit Breaker / Electrical Panel</label>
+                                    <input type="text" id="infos_disjoncteur_en" class="form-control" placeholder="Entrance hallway / Utility room">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Emergency Instructions</label>
+                                    <textarea id="infos_consignesUrgence_en" class="form-control" rows="5" placeholder="IN CASE OF FIRE: 18 or 112&#10;MEDICAL EMERGENCY: 15 or 112&#10;POLICE: 17 or 112"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 7: Départ (EN) -->
+                        <div style="background: linear-gradient(135deg, #fdf4ff 0%, #f5d0fe 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #a855f7;">
+                            <h3 style="color: #6b21a8; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #a855f7; padding: 8px; border-radius: 10px;">👋</span> Departure & Check-out
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Check-out Time</label>
+                                    <input type="text" id="infos_heureDepart_en" class="form-control" placeholder="Before 10:00 AM">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Late Check-out Possible?</label>
+                                    <input type="text" id="infos_departTardif_en" class="form-control" placeholder="Yes, with extra charge / No / Upon request">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Check-out Checklist</label>
+                                    <textarea id="infos_checklistDepart_en" class="form-control" rows="8" placeholder="✅ DISHES: Wash and put away&#10;✅ TRASH: Take out all garbage&#10;✅ APPLIANCES: Turn off all appliances&#10;✅ WINDOWS: Close all windows&#10;✅ HEATING/AC: Turn off thermostat"></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Key Return Instructions</label>
+                                    <textarea id="infos_restitutionCles_en" class="form-control" rows="3" placeholder="Put the keys back in the key box and lock it..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 8: Règlement (EN) -->
+                        <div style="background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #f97316;">
+                            <h3 style="color: #9a3412; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #f97316; padding: 8px; border-radius: 10px;">📋</span> House Rules
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Smoking Policy</label>
+                                    <input type="text" id="infos_tabac_en" class="form-control" placeholder="No smoking anywhere / Outdoor only / Terrace allowed">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Pets Policy</label>
+                                    <input type="text" id="infos_animaux_en" class="form-control" placeholder="No pets / Yes, free of charge / Yes, with extra fee / Upon request">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Maximum Number of Guests</label>
+                                    <input type="text" id="infos_nbMaxPersonnes_en" class="form-control" placeholder="6 persons">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Deposit Amount</label>
+                                    <input type="text" id="infos_caution_en" class="form-control" placeholder="€500 / $500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOUTON SAUVEGARDE -->
+                <div class="card" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                    <button type="submit" class="btn" style="width: 100%; padding: 20px; background: none; border: none; color: white; font-size: 1.3rem; font-weight: 700; cursor: pointer;">
+                        💾 ENREGISTRER TOUTES LES INFORMATIONS
+                    </button>
+                </div>
+
+            </form>
+        </div>
+        
+        <!-- ONGLET À DÉCOUVRIR -->
+        <div id="tab-decouvrir" class="tab-content">
+            
+            <!-- SÉLECTEUR DE GÎTE -->
+            <div class="card" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: white;">
+                <div class="card-header" style="border-bottom: 2px solid rgba(255,255,255,0.3);">
+                    <span class="card-icon">🗺️</span>
+                    <h2 class="card-title">À Découvrir Autour des Gîtes</h2>
+                </div>
+                <div style="padding: 20px;">
+                    <p style="font-size: 1.1rem; opacity: 0.95; margin-bottom: 20px;">Activités, restaurants, sites touristiques dans un rayon de 25km • Mise à jour automatique des événements</p>
+                    <div style="display: flex; gap: 15px;">
+                        <button class="btn" style="background: white; color: #FF6B6B; font-weight: 700; padding: 15px 40px;" onclick="selectGiteDecouvrir('Trévoux')">
+                            🏰 Trévoux
+                        </button>
+                        <button class="btn" style="background: white; color: #FF6B6B; font-weight: 700; padding: 15px 40px;" onclick="selectGiteDecouvrir('Couzon')">
+                            ⛰️ Couzon
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <form id="formDecouvrir" style="display: none;">
+                <input type="hidden" id="decouvrir_gite">
+                
+                <!-- TITRE GÎTE SÉLECTIONNÉ -->
+                <div class="alert alert-info">
+                    <strong>📍 Gîte sélectionné :</strong> <span id="selectedGiteDecouvrir" style="font-weight: 700;"></span>
+                </div>
+
+                <!-- BOUTONS D'ACTION RAPIDE -->
+                <div class="card">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <button type="button" class="btn" style="background: #10b981;" onclick="rechercherAutomatique('restaurants')">
+                            🍽️ Chercher Restaurants
+                        </button>
+                        <button type="button" class="btn" style="background: #3b82f6;" onclick="rechercherAutomatique('tourist_attraction')">
+                            🏛️ Chercher Sites Touristiques
+                        </button>
+                        <button type="button" class="btn" style="background: #f59e0b;" onclick="rechercherAutomatique('shopping_mall')">
+                            🛍️ Chercher Commerces
+                        </button>
+                        <button type="button" class="btn" style="background: #8b5cf6;" onclick="rechercherAutomatique('park')">
+                            🌳 Chercher Parcs/Nature
+                        </button>
+                        <button type="button" class="btn" style="background: #ef4444;" onclick="rechercherEvenements()">
+                            📅 Événements cette semaine
+                        </button>
+                        <button type="button" class="btn" style="background: #6b7280;" onclick="afficherTout()">
+                            🗺️ Afficher Tout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ÉVÉNEMENTS DE LA SEMAINE -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📅</span>
+                        <h2 class="card-title">Événements de la Semaine</h2>
+                        <button type="button" class="btn btn-secondary" onclick="refreshEvenements()" style="margin-left: auto; width: 50px; height: 50px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;" title="Actualiser">
+                            🔄
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>📅 Semaine du :</strong> <span id="dateEvenements" style="font-weight: 700;"></span>
+                    </div>
+                    
+                    <!-- Filtre de distance moderne -->
+                    <div style="padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                        <label style="display: block; margin-bottom: 15px; font-weight: 600; color: white; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.2rem;">📍</span>
+                            <span>Distance maximale depuis le gîte</span>
+                        </label>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <input type="range" id="distanceFilter" min="0" max="50" value="50" step="5" 
+                                   style="flex: 1; height: 8px; border-radius: 10px; background: rgba(255,255,255,0.3); outline: none; -webkit-appearance: none; appearance: none; cursor: pointer;" 
+                                   oninput="updateDistanceLabel()">
+                            <div style="background: white; padding: 10px 20px; border-radius: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); min-width: 100px; text-align: center;">
+                                <span id="distanceLabel" style="font-weight: 700; color: #667eea; font-size: 1.1rem;">≤ 50 km</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <style>
+                        /* Style personnalisé pour le slider */
+                        #distanceFilter::-webkit-slider-thumb {
+                            -webkit-appearance: none;
+                            appearance: none;
+                            width: 24px;
+                            height: 24px;
+                            border-radius: 50%;
+                            background: white;
+                            cursor: pointer;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            transition: transform 0.2s;
+                        }
+                        
+                        #distanceFilter::-webkit-slider-thumb:hover {
+                            transform: scale(1.2);
+                        }
+                        
+                        #distanceFilter::-moz-range-thumb {
+                            width: 24px;
+                            height: 24px;
+                            border-radius: 50%;
+                            background: white;
+                            cursor: pointer;
+                            border: none;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            transition: transform 0.2s;
+                        }
+                        
+                        #distanceFilter::-moz-range-thumb:hover {
+                            transform: scale(1.2);
+                        }
+                        
+                        #distanceFilter::-webkit-slider-runnable-track {
+                            width: 100%;
+                            height: 8px;
+                            background: rgba(255,255,255,0.3);
+                            border-radius: 10px;
+                        }
+                        
+                        #distanceFilter::-moz-range-track {
+                            width: 100%;
+                            height: 8px;
+                            background: rgba(255,255,255,0.3);
+                            border-radius: 10px;
+                        }
+                    </style>
+                    
+                    <!-- Carte interactive Leaflet -->
+                    <div id="mapEvenements" style="height: 500px; border-radius: 12px; margin-bottom: 20px; display: none; z-index: 1;"></div>
+                    
+                    <div id="evenementsListe" style="display: grid; gap: 15px;">
+                        <p style="text-align: center; color: #999; padding: 40px;">
+                            Les événements se chargeront automatiquement...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ACTIVITÉS PERMANENTES PAR CATÉGORIE -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🎯</span>
+                        <h2 class="card-title">Activités & Points d'Intérêt</h2>
+                    </div>
+                    
+                    <!-- FILTRES PAR CATÉGORIE -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px;">
+                        <button type="button" class="btn" style="background: #27AE60;" onclick="ouvrirModalActivite(false)">
+                            ➕ Ajouter une activité
+                        </button>
+                        <button type="button" class="btn" style="background: #10b981;" onclick="filtrerActivitesParCategorie('Restaurant')">
+                            🍽️ Restaurants
+                        </button>
+                        <button type="button" class="btn" style="background: #3b82f6;" onclick="filtrerActivitesParCategorie('Musée')">
+                            🏛️ Musées & Châteaux
+                        </button>
+                        <button type="button" class="btn" style="background: #f59e0b;" onclick="filtrerActivitesParCategorie('Café')">
+                            ☕ Cafés & Bars
+                        </button>
+                        <button type="button" class="btn" style="background: #8b5cf6;" onclick="filtrerActivitesParCategorie('Parc')">
+                            🌳 Parcs & Loisirs
+                        </button>
+                        <button type="button" class="btn" style="background: #ec4899;" onclick="filtrerActivitesParCategorie('Hôtel')">
+                            🏨 Hôtels
+                        </button>
+                        <button type="button" class="btn" style="background: #6366f1;" onclick="afficherToutesActivites()">
+                            📋 Tous
+                        </button>
+                    </div>
+                    
+                    <!-- LISTE DES ACTIVITÉS -->
+                    <div id="activitesParCategorie" style="display: grid; gap: 20px;">
+                        <p style="text-align: center; color: #999; padding: 40px;">
+                            Sélectionne une catégorie ou "Tous" pour voir les activités...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FORMULAIRE D'AJOUT MANUEL (CACHÉ PAR DÉFAUT) -->
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span class="card-icon">➕</span>
+                            <h2 class="card-title">Ajouter une Activité Personnalisée</h2>
+                        </div>
+                        <button type="button" onclick="toggleFormAjout()" style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(39,174,96,0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Ajouter une activité">
+                            ➕
+                        </button>
+                    </div>
+
+                    <!-- FORMULAIRE D'AJOUT (CACHÉ PAR DÉFAUT) -->
+                    <!-- MODALE MODIFICATION/AJOUT ACTIVITÉ -->
+                    <!-- Overlay semi-transparent -->
+                    <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; cursor: pointer;" onclick="fermerModalActivite()"></div>
+                    
+                    <!-- Dialog modale -->
+                    <div id="modalActivite" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 90vw; max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                        <div style="background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white;">
+                                <h2 id="modalTitle" style="margin: 0; color: #2C5F7D; font-size: 1.4rem;">➕ Ajouter une Activité</h2>
+                                <button type="button" onclick="fermerModalActivite()" style="background: transparent; border: none; font-size: 1.8rem; cursor: pointer; color: #666; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#666'" title="Fermer">
+                                    ✖️
+                                </button>
+                            </div>
+
+                            <div style="padding: 24px; display: grid; gap: 20px;">
+                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nom de l'activité *</label>
+                                        <input type="text" id="activite_nom" class="form-control" placeholder="Restaurant Le Gourmet">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Catégorie *</label>
+                                        <select id="activite_categorie" class="form-control" onchange="afficherTypeRestoSiRestaurant()">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Restaurant">🍽️ Restaurant</option>
+                                            <option value="Café/Bar">☕ Café/Bar</option>
+                                            <option value="Musée">🏛️ Musée</option>
+                                            <option value="Château">🏰 Château</option>
+                                            <option value="Parc">🌳 Parc</option>
+                                            <option value="Hôtel">🏨 Hôtel</option>
+                                            <option value="Attraction">🎪 Attraction</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Champ Type de Restaurant (caché par défaut) -->
+                                <div id="typeRestoDiv" style="display: none;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Type de Restaurant</label>
+                                    <select id="activite_type_resto" class="form-control">
+                                        <option value="">-- Sélectionner --</option>
+                                        <option value="Restaurant traditionnel">Restaurant traditionnel</option>
+                                        <option value="Fast Food">Fast Food</option>
+                                        <option value="Burger">Burger</option>
+                                        <option value="Pizza">Pizza</option>
+                                        <option value="Asian">Cuisine asiatique</option>
+                                        <option value="Italian">Cuisine italienne</option>
+                                        <option value="Crêpes">Crêperie</option>
+                                        <option value="Steakhouse">Steakhouse</option>
+                                        <option value="Végétarien">Végétarien</option>
+                                        <option value="Gastronomique">Gastronomique</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Description</label>
+                                    <textarea id="activite_description" class="form-control" rows="3" placeholder="Excellent restaurant traditionnel français avec terrasse..."></textarea>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète *</label>
+                                        <input type="text" id="activite_adresse" class="form-control" placeholder="12 Place du Marché, 01600 Trévoux">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Distance (km)</label>
+                                        <input type="number" id="activite_distance" class="form-control" step="0.1" placeholder="2.5">
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Site web</label>
+                                        <input type="url" id="activite_website" class="form-control" placeholder="https://restaurant-exemple.fr">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Téléphone</label>
+                                        <input type="tel" id="activite_telephone" class="form-control" placeholder="04 74 00 00 00">
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Note Google (0-5)</label>
+                                        <input type="number" id="activite_note" class="form-control" step="0.1" min="0" max="5" placeholder="4.5">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nombre d'avis</label>
+                                        <input type="number" id="activite_avis" class="form-control" placeholder="127">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Gamme de prix</label>
+                                        <select id="activite_prix" class="form-control">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="€">€ (Économique)</option>
+                                            <option value="€€">€€ (Moyen)</option>
+                                            <option value="€€€">€€€ (Élevé)</option>
+                                            <option value="€€€€">€€€€ (Très élevé)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                                    <button type="button" class="btn" style="background: #e0e0e0; color: #333;" onclick="fermerModalActivite()">
+                                        ✕ Annuler
+                                    </button>
+                                    <button type="button" class="btn btn-primary" id="btnSaveActivite" onclick="ajouterActivite()">
+                                        ➕ Ajouter cette activité
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="activitesParCategorie">
+                </div>
+
+                <!-- BOUTON GÉNÉRATION GUIDE CLIENT -->
+                <div class="card" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                    <button type="button" class="btn" style="width: 100%; padding: 20px; background: none; border: none; color: white; font-size: 1.3rem; font-weight: 700; cursor: pointer;" onclick="genererGuideDecouverte()">
+                        📄 GÉNÉRER LE GUIDE "À DÉCOUVRIR" (PDF)
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- ONGLET SAUVEGARDE -->
+        <div id="tab-sauvegarde" class="tab-content">
+            <div class="main-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📤</span>
+                        <h2 class="card-title">Sauvegarder</h2>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <strong>✓ Sauvegarde automatique activée</strong><br>
+                        Vos données sont sauvegardées automatiquement.
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="exportAllData()">
+                        <span>📥</span> Télécharger Sauvegarde (.json)
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="exportToExcel()">
+                        <span>📊</span> Télécharger Excel
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📥</span>
+                        <h2 class="card-title">Restaurer</h2>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Attention !</strong><br>
+                        L'import remplacera TOUTES vos données actuelles.
+                    </div>
+                    
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importAllData(event)">
+                    <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">
+                        <span>📂</span> Importer Sauvegarde
+                    </button>
+                    
+                    <button class="btn btn-danger" onclick="clearAllData()" style="margin-top: 20px;">
+                        <span>🗑️</span> Supprimer toutes les données
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -971,7 +2631,6 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             const currentYear = new Date().getFullYear();
             
             const select = document.getElementById('yearFilterStats');
-            if (!select) return; // Élément pas encore chargé
             select.innerHTML = '';
             
             sortedYears.forEach(year => {
@@ -1028,27 +2687,12 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
-            const tabElement = document.getElementById('tab-' + tabName);
-            if (tabElement) tabElement.classList.add('active');
-            
-            // Marquer le bouton comme actif
-            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
-            
-            // Initialiser les fonctionnalités spécifiques à chaque onglet
-            if (tabName === 'statistiques') {
-                if (typeof populateYearFilter === 'function') populateYearFilter();
-                if (typeof updateAllCharts === 'function') updateAllCharts();
-            }
-            if (tabName === 'archives' && typeof updateArchivesDisplay === 'function') {
-                updateArchivesDisplay();
-            }
-            if (tabName === 'charges' && typeof updateChargesDisplay === 'function') {
-                updateChargesDisplay();
-            }
-            if (tabName === 'menage' && typeof afficherPlanningParSemaine === 'function') {
-                afficherPlanningParSemaine();
-            }
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+            if (tabName === 'statistiques') updateAllCharts();
+            if (tabName === 'archives') updateArchivesDisplay();
+            if (tabName === 'charges') updateChargesDisplay();
+            if (tabName === 'menage') afficherPlanningParSemaine();
         }
         
         function showRulesModal() {
@@ -1458,7 +3102,6 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             const active = reservations.filter(r => parseLocalDate(r.dateFin) >= today);
             
             const container = document.getElementById('planning-container');
-            if (!container) return; // Conteneur pas encore chargé
             
             if (active.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation</p>';
@@ -1922,7 +3565,6 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
         
         function generateYearComparisonCheckboxes(reservations, historicalData) {
             const container = document.getElementById('yearComparisonCheckboxes');
-            if (!container) return; // Conteneur pas encore chargé
             const allYears = new Set();
             const yearsWithReservations = new Set();
             const yearsWithTotal = new Set();
@@ -7520,55 +9162,6 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
         // L'événement sera géré par la fonction selectGiteDecouvrir existante
         // qui sera modifiée pour recharger la carte Google Maps
         
-    </script>
-    
-    <!-- Chargement dynamique des onglets -->
-    <script>
-    document.addEventListener('DOMContentLoaded', async function() {
-        const tabFiles = {
-            'tab-gestion': 'tabs/tab-gestion.html',
-            'tab-reservations': 'tabs/tab-reservations.html',
-            'tab-archives': 'tabs/tab-archives.html',
-            'tab-statistiques': 'tabs/tab-statistiques.html',
-            'tab-charges': 'tabs/tab-charges.html',
-            'tab-menage': 'tabs/tab-menage.html',
-            'tab-infos-gites': 'tabs/tab-infos-gites.html',
-            'tab-decouvrir': 'tabs/tab-decouvrir.html',
-            'tab-sauvegarde': 'tabs/tab-sauvegarde.html',
-        };
-        
-        // Charger tous les fragments d'onglets
-        const loadPromises = Object.entries(tabFiles).map(([tabId, file]) => {
-            return fetch(file)
-                .then(r => r.text())
-                .then(html => {
-                    const container = document.getElementById(tabId);
-                    if (container) container.innerHTML = html;
-                })
-                .catch(err => console.error(`Erreur chargement ${file}:`, err));
-        });
-        
-        // Une fois tous les onglets chargés
-        await Promise.all(loadPromises);
-        console.log('✅ Tous les onglets sont chargés');
-        
-        // Attacher les event listeners aux boutons
-        document.querySelectorAll('.nav-tab').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tab = btn.getAttribute('data-tab');
-                if (tab && typeof window.switchTab === 'function') {
-                    window.switchTab(tab);
-                }
-            });
-        });
-        
-        // Activer l'onglet Réservations par défaut
-        const firstTab = document.querySelector('[data-tab="reservations"]');
-        if (firstTab && typeof window.switchTab === 'function') {
-            window.switchTab('reservations');
-            firstTab.classList.add('active');
-        }
-    });
     </script>
 </body>
 </html>
