@@ -346,7 +346,8 @@
     <script>
         // Les configurations et fonctions de base sont maintenant dans js/shared-config.js et js/shared-utils.js
         // Utiliser window.supabaseClient pour accéder au client Supabase
-        const supabase = window.supabaseClient;
+        // Note: On utilise var pour éviter les conflits de scope avec d'autres scripts
+        var supabase = window.supabaseClient;
         
         // Variables globales
         let caChartInstance, gitesChartInstance, platformsChartInstance, profitChartInstance;
