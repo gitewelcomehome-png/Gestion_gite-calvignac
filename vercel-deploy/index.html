@@ -135,6 +135,7 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
     const tooltip = document.getElementById('commitInfoTooltip');
     btn.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
     btn.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+    
     // Chargement dynamique des onglets
     document.addEventListener('DOMContentLoaded', function() {
         const tabFiles = {
@@ -148,13 +149,33 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             'tab-decouvrir': 'tabs/tab-decouvrir.html',
             'tab-sauvegarde': 'tabs/tab-sauvegarde.html',
         };
-        for (const [tabId, file] of Object.entries(tabFiles)) {
-            fetch(file)
+        
+        // Charger tous les fragments d'onglets
+        const loadPromises = Object.entries(tabFiles).map(([tabId, file]) => {
+            return fetch(file)
                 .then(r => r.text())
                 .then(html => {
                     document.getElementById(tabId).innerHTML = html;
+                })
+                .catch(err => console.error(`Erreur chargement ${file}:`, err));
+        });
+        
+        // Une fois tous les onglets chargés, initialiser les event listeners
+        Promise.all(loadPromises).then(() => {
+            console.log('✅ Tous les onglets sont chargés');
+            
+            // Attacher les event listeners aux boutons
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = btn.getAttribute('data-tab');
+                    if (tab) window.switchTab(tab);
                 });
-        }
+            });
+            
+            // Activer l'onglet Réservations par défaut
+            const firstTab = document.querySelector('[data-tab="reservations"]');
+            if (firstTab) firstTab.click();
+        });
     });
     </script>
     </body>
@@ -1028,7 +1049,10 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             event.target.classList.add('active');
             if (tabName === 'statistiques') updateAllCharts();
             if (tabName === 'archives') updateArchivesDisplay();
-            if (tabName === 'charges') updateChargesDisplay();
+            if (tabName === 'charges') {
+                updateChargesDisplay();
+                initChargeForm(); // Initialiser le formulaire charges après chargement
+            }
             if (tabName === 'menage') afficherPlanningParSemaine();
         }
         
@@ -2340,26 +2364,31 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             reader.readAsText(file);
         }
         
-        // Gestionnaire formulaire charges
-        document.getElementById('chargeForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        // Gestionnaire formulaire charges (après chargement de l'onglet)
+        function initChargeForm() {
+            const chargeForm = document.getElementById('chargeForm');
+            if (!chargeForm) return; // Formulaire pas encore chargé
             
-            const charge = {
-                gite: document.getElementById('chargeGite').value,
-                nom: document.getElementById('chargeNom').value,
-                montant: parseFloat(document.getElementById('chargeMontant').value),
-                type: document.getElementById('chargeType').value,
-                date: document.getElementById('chargeDate').value || new Date().toISOString().split('T')[0],
-                notes: document.getElementById('chargeNotes').value,
-                timestamp: new Date().toISOString()
-            };
-            
-            await addCharge(charge);
-            this.reset();
-            await updateChargesDisplay();
-            await updateStats(); // Mettre à jour le graphique CA vs Charges
-            showToast('✓ Charge ajoutée');
-        });
+            chargeForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const charge = {
+                    gite: document.getElementById('chargeGite').value,
+                    nom: document.getElementById('chargeNom').value,
+                    montant: parseFloat(document.getElementById('chargeMontant').value),
+                    type: document.getElementById('chargeType').value,
+                    date: document.getElementById('chargeDate').value || new Date().toISOString().split('T')[0],
+                    notes: document.getElementById('chargeNotes').value,
+                    timestamp: new Date().toISOString()
+                };
+                
+                await addCharge(charge);
+                this.reset();
+                await updateChargesDisplay();
+                await updateStats(); // Mettre à jour le graphique CA vs Charges
+                showToast('✓ Charge ajoutée');
+            });
+        }
         
         async function updateChargesDisplay() {
             const reservations = await getAllReservations();
