@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Affichage Direct</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .activity {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .category {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            margin: 20px 0 10px 0;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        #status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #667eea;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test Affichage Direct des Activités</h1>
+    <div id="status">⏳ Chargement...</div>
+    <div id="container"></div>
+
+    <script>
+        console.log('🚀 Début du script');
+        
+        const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+        
+        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('✅ Client Supabase créé');
+
+        async function chargerEtAfficher() {
+            const status = document.getElementById('status');
+            const container = document.getElementById('container');
+            
+            try {
+                console.log('📡 Requête vers Supabase...');
+                const { data, error } = await client
+                    .from('activites_gites')
+                    .select('*')
+                    .eq('gite', 'Trévoux')
+                    .order('categorie', { ascending: true })
+                    .limit(20);
+                
+                if (error) {
+                    console.error('❌ Erreur Supabase:', error);
+                    status.innerHTML = '❌ Erreur: ' + error.message;
+                    status.style.background = '#ef4444';
+                    container.innerHTML = '<p style="color: #ef4444;">Erreur: ' + error.message + '</p>';
+                    return;
+                }
+                
+                console.log(`✅ ${data.length} activités récupérées`);
+                status.innerHTML = `✅ ${data.length} activités`;
+                status.style.background = '#10b981';
+                
+                if (data.length === 0) {
+                    container.innerHTML = '<p>⚠️ Aucune activité trouvée pour Trévoux</p>';
+                    return;
+                }
+                
+                // Grouper par catégorie
+                const parCategorie = {};
+                data.forEach(act => {
+                    if (!parCategorie[act.categorie]) {
+                        parCategorie[act.categorie] = [];
+                    }
+                    parCategorie[act.categorie].push(act);
+                });
+                
+                console.log('📊 Catégories:', Object.keys(parCategorie));
+                
+                // Afficher
+                let html = '<h2>🏰 Activités à Trévoux (20 premières)</h2>';
+                
+                Object.keys(parCategorie).sort().forEach(cat => {
+                    html += `<div class="category">${cat} (${parCategorie[cat].length})</div>`;
+                    
+                    parCategorie[cat].forEach(act => {
+                        html += `
+                            <div class="activity">
+                                <h3 style="margin: 0 0 10px 0; color: #667eea;">${act.nom}</h3>
+                                ${act.adresse ? `<p style="margin: 5px 0;">📍 ${act.adresse}</p>` : ''}
+                                ${act.description ? `<p style="margin: 5px 0; font-style: italic; color: #999;">${act.description}</p>` : ''}
+                                ${act.note ? `<p style="margin: 5px 0; color: #f59e0b;">⭐ ${act.note}/5</p>` : ''}
+                            </div>
+                        `;
+                    });
+                });
+                
+                console.log('✍️ HTML généré, injection dans le DOM...');
+                container.innerHTML = html;
+                console.log('✅ Affichage terminé !');
+                
+            } catch (e) {
+                console.error('💥 Exception:', e);
+                status.innerHTML = '💥 Exception';
+                status.style.background = '#ef4444';
+                container.innerHTML = '<p style="color: #ef4444;">Exception: ' + e.message + '</p>';
+            }
+        }
+        
+        // Lancer au chargement
+        console.log('⏳ Lancement du chargement...');
+        chargerEtAfficher();
+    </script>
+</body>
+</html>
