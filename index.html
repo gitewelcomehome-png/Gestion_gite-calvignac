@@ -459,8 +459,13 @@
                     chargerActivitesEtSorties();
                 }
             }
-            if (tabName === 'decouvrir' && typeof chargerToutSurCarte === 'function') {
-                chargerToutSurCarte();
+            if (tabName === 'decouvrir') {
+                if (typeof chargerActivites === 'function') {
+                    chargerActivites();
+                }
+                if (typeof chargerToutSurCarte === 'function') {
+                    chargerToutSurCarte();
+                }
             }
         }
         
