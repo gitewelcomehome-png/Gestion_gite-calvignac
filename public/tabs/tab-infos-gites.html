@@ -1,0 +1,59 @@
+<!-- ONGLET INFOS GÎTES (structure complète depuis index.html) -->
+<div id="tab-infos-gites" class="tab-content">
+    <!-- BARRE DE NAVIGATION COMPACTE -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="font-size: 1.8rem;">📋</span>
+            <h2 style="color: white; margin: 0; font-size: 1.4rem; font-weight: 700;">Infos Pratiques</h2>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" onclick="selectGiteInfos('Trévoux')" id="btnTrevoux" style="background: white; color: #667eea; font-weight: 700; padding: 10px 20px; border-radius: 25px; border: none; cursor: pointer; transition: all 0.3s;">
+                    🏠 Trévoux
+                </button>
+                <button class="btn" onclick="selectGiteInfos('Couzon')" id="btnCouzon" style="background: rgba(255,255,255,0.2); color: white; font-weight: 700; padding: 10px 20px; border-radius: 25px; border: 2px solid white; cursor: pointer; transition: all 0.3s;">
+                    ⛰️ Couzon
+                </button>
+            </div>
+            <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.15); padding: 6px; border-radius: 20px;">
+                <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: none; cursor: pointer; padding: 8px; border-radius: 15px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;" title="Switch to English">
+                    <img id="flagIcon" src="https://flagcdn.com/w80/fr.png" alt="FR" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                </button>
+            </div>
+            <button type="button" onclick="resetGiteInfosQuick()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 10px; border-radius: 50%; transition: all 0.3s;" title="Effacer toutes les informations">🗑️</button>
+        </div>
+    </div>
+    <form id="infosGiteForm" onsubmit="sauvegarderInfosGiteComplet(event)">
+        <!-- ...toutes les sections et cards du formulaire infos gîtes... (voir index.html pour le détail complet) -->
+    </form>
+</div>
+<div id="tab-infos-gites" class="tab-content">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="font-size: 1.8rem;">📋</span>
+            <h2 style="color: white; margin: 0; font-size: 1.4rem; font-weight: 700;">Infos Pratiques</h2>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" onclick="selectGiteInfos('Trévoux')" id="btnTrevoux" style="background: white; color: #667eea; font-weight: 700; padding: 10px 20px; border-radius: 25px; border: none; cursor: pointer; transition: all 0.3s;">
+                    🏡 Trévoux
+                </button>
+                <button class="btn" onclick="selectGiteInfos('Couzon')" id="btnCouzon" style="background: rgba(255,255,255,0.2); color: white; font-weight: 700; padding: 10px 20px; border-radius: 25px; border: 2px solid white; cursor: pointer; transition: all 0.3s;">
+                    ⛰️ Couzon
+                </button>
+            </div>
+            <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.15); padding: 6px; border-radius: 20px;">
+                <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: none; cursor: pointer; padding: 8px; border-radius: 15px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;" title="Switch to English">
+                    <img id="flagIcon" src="https://flagcdn.com/w80/fr.png" alt="FR" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                </button>
+            </div>
+            <button type="button" onclick="resetGiteInfosQuick()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 10px; border-radius: 50%; transition: all 0.3s;" title="Effacer toutes les informations">
+                🗑️
+            </button>
+        </div>
+    </div>
+    <form id="infosGiteForm" onsubmit="sauvegarderInfosGiteComplet(event)">
+        <!-- ...toutes les sections du formulaire infos gîtes... -->
+    </form>
+</div>
+</div>
