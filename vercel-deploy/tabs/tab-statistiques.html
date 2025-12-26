@@ -1,0 +1,17 @@
+<!-- Onglet Statistiques extrait de index.html -->
+<div id="tab-statistiques" class="tab-content">
+    <div class="stats-section">
+        <div class="card-header">
+            <span class="card-icon">📊</span>
+            <h2 class="card-title">Statistiques</h2>
+            <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+                <label for="yearFilterStats" style="font-weight: 600; color: var(--primary); font-size: 0.9rem;">📅 Année :</label>
+                <select id="yearFilterStats" onchange="filterStatsByYear()" style="width: 110px; padding: 8px; border: 2px solid var(--border); border-radius: 8px; font-size: 0.9rem; text-align: center; font-weight: 600; cursor: pointer; background: white;">
+                    <option value="">Chargement...</option>
+                </select>
+                <button class="btn btn-secondary" onclick="toggleHistoricalDataForm()" style="padding: 8px 16px; font-size: 0.9rem; width: auto; margin-top: 0;">📅 Gérer les données</button>
+            </div>
+        </div>
+        <!-- ...le reste du contenu statistiques à compléter si besoin... -->
+    </div>
+</div>
