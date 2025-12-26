@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Activités Rapide</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1a1a2e; color: white; }
+        .result { background: #16213e; padding: 20px; border-radius: 8px; margin: 10px 0; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        button { padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Activités - Diagnostic</h1>
+    
+    <button onclick="test1()">1️⃣ Test Supabase Connection</button>
+    <button onclick="test2()">2️⃣ Charger Activités</button>
+    <button onclick="test3()">3️⃣ Test Filtre Café</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://eaclmrwczfqqxmgpbqmo.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhY2xtcndjemZxcXhtZ3BicW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NjM4NDUsImV4cCI6MjA1MDUzOTg0NX0.oWnZf_T9VFUP13VGDzW4RaEdXHyYn1-vVPOVOlZeHbU';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
+        
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = 'result ' + type;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${msg}`;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        async function test1() {
+            document.getElementById('results').innerHTML = '';
+            log('🔌 Test connexion Supabase...');
+            
+            try {
+                const { data, error } = await supabase.from('activites_gites').select('id').limit(1);
+                
+                if (error) {
+                    log(`❌ Erreur: ${error.message}`, 'error');
+                } else {
+                    log(`✅ Connexion OK - Table activites_gites accessible`, 'success');
+                }
+            } catch (e) {
+                log(`❌ Exception: ${e.message}`, 'error');
+            }
+        }
+        
+        async function test2() {
+            document.getElementById('results').innerHTML = '';
+            log('📥 Chargement des activités...');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('activites_gites')
+                    .select('*')
+                    .order('categorie', { ascending: true });
+                
+                if (error) throw error;
+                
+                log(`✅ ${data.length} activités chargées`, 'success');
+                
+                // Grouper par gîte
+                window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
+                data.forEach(act => {
+                    if (window.activitesParGite[act.gite]) {
+                        window.activitesParGite[act.gite].push(act);
+                    }
+                });
+                
+                log(`📊 Trévoux: ${window.activitesParGite['Trévoux'].length} activités`, 'success');
+                log(`📊 Couzon: ${window.activitesParGite['Couzon'].length} activités`, 'success');
+                
+                // Compter par catégorie
+                const cats = {};
+                data.forEach(a => cats[a.categorie] = (cats[a.categorie] || 0) + 1);
+                
+                log(`<br><strong>Catégories:</strong><br>` + 
+                    Object.entries(cats).map(([c, n]) => `  • ${c}: ${n}`).join('<br>'), 
+                    'success');
+                
+            } catch (e) {
+                log(`❌ Erreur: ${e.message}`, 'error');
+            }
+        }
+        
+        async function test3() {
+            log('🔍 Test filtre "Café"...');
+            
+            if (window.activitesParGite['Trévoux'].length === 0) {
+                log('⚠️ Charge d\'abord les activités (bouton 2)', 'error');
+                return;
+            }
+            
+            const toutesActivites = [
+                ...window.activitesParGite['Trévoux'],
+                ...window.activitesParGite['Couzon']
+            ];
+            
+            const filtrees = toutesActivites.filter(act => 
+                act.categorie.toLowerCase().includes('café')
+            );
+            
+            log(`✅ ${filtrees.length} cafés trouvés`, 'success');
+            
+            if (filtrees.length > 0) {
+                log(`<br><strong>Exemples:</strong><br>` +
+                    filtrees.slice(0, 5).map(a => `  • ${a.nom} (${a.gite})`).join('<br>'),
+                    'success');
+            }
+        }
+    </script>
+</body>
+</html>
