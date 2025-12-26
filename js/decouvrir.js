@@ -763,9 +763,13 @@ async function supprimerActivite(id) {
 
 // ==================== FILTRER ACTIVITÉS PAR CATÉGORIE ====================
 async function filtrerActivitesParCategorie(motCle) {
+    console.log('🔍 Filtrage par catégorie:', motCle);
+    
     const giteInput = document.getElementById('decouvrir_gite');
     const gite = giteInput?.value;
     const container = document.getElementById('activitesParCategorie');
+    
+    console.log('📍 Gîte:', gite || 'AUCUN', '| Container:', container ? 'OK' : 'KO');
     
     // Vérifier si les activités sont chargées, sinon les charger
     if (!window.activitesParGite || 
@@ -790,10 +794,14 @@ async function filtrerActivitesParCategorie(motCle) {
         titre = `${motCle} - Tous les gîtes`;
     }
     
+    console.log(`📊 Base: ${activites.length} activités`);
+    
     // Filtrer par mot-clé dans la catégorie
     const filtrees = activites.filter(act => 
         act.categorie.toLowerCase().includes(motCle.toLowerCase())
     );
+    
+    console.log(`✅ Filtrées: ${filtrees.length} pour "${motCle}"`);
     
     if (filtrees.length === 0) {
         const lieu = gite || 'les gîtes';
@@ -806,6 +814,7 @@ async function filtrerActivitesParCategorie(motCle) {
     
     // 🗺️ Mettre à jour le filtre et la carte
     window.filtreCategorieActive = motCle;
+    console.log('🎯 Appel afficherActivitesFiltrées...');
     afficherActivitesFiltrées(filtrees, titre);
     
     // 📍 Afficher uniquement les activités filtrées sur la carte
