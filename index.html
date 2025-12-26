@@ -16,7 +16,6 @@
     <script src="js/supabase-operations.js"></script>
     <script src="js/sync-ical.js"></script>
     <script src="js/statistiques.js"></script>
-    <script src="js/sauvegarde.js"></script>
     <script src="js/menage.js"></script>
     <script src="js/decouvrir.js"></script>
     
@@ -215,7 +214,6 @@
             'tab-menage': 'tabs/tab-menage.html',
             'tab-infos-gites': 'tabs/tab-infos-gites.html',
             'tab-decouvrir': 'tabs/tab-decouvrir.html',
-            'tab-sauvegarde': 'tabs/tab-sauvegarde.html',
         };
         for (const [tabId, file] of Object.entries(tabFiles)) {
             fetch(file)
@@ -233,15 +231,9 @@
             <div style="position: absolute; top: 0; right: 0;">
                 <select onchange="handleQuickAction(this.value); this.value='';" style="padding: 12px 16px; border-radius: 10px; background: rgba(255,255,255,0.25); color: white; border: 2px solid rgba(255,255,255,0.4); font-weight: 600; cursor: pointer; font-size: 0.95rem; font-family: 'Work Sans', sans-serif; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                     <option value="" style="background: #1f2937; color: white;">⚙️ Actions</option>
-                    <option value="import" style="background: #1f2937; color: white;">📂 Importer données</option>
-                    <option value="backup" style="background: #1f2937; color: white;">💾 Sauvegarder</option>
                     <option value="archives" style="background: #1f2937; color: white;">📦 Archives</option>
-                    <option value="ical" style="background: #1f2937; color: white;">⚙️ Config iCal</option>
                 </select>
             </div>
-            
-            <!-- Input file caché pour import rapide -->
-            <input type="file" id="importFileQuick" accept=".json" style="display: none;" onchange="importAllData(event)">
             
             <h1>🏘️ Gestion Gîtes PRO</h1>
             <p class="subtitle">Trévoux & Couzon - Synchronisation iCal automatique</p>
@@ -249,7 +241,7 @@
         
         <!-- Navigation -->
         <div class="nav-tabs">
-            <button class="nav-tab" data-tab="gestion">⚙️ Gestion iCal</button>
+            <button class="nav-tab" data-tab="gestion" style="display:none;">⚙️ Gestion iCal</button>
             <button class="nav-tab" data-tab="reservations">📝 Réservations</button>
             <button class="nav-tab" data-tab="archives">📦 Archives</button>
             <button class="nav-tab" data-tab="statistiques">📊 Statistiques</button>
@@ -260,7 +252,6 @@
             </button>
             <button class="nav-tab" data-tab="infos-gites">📝 Infos Pratiques</button>
             <button class="nav-tab" data-tab="decouvrir">🗺️ À Découvrir</button>
-            <button class="nav-tab" data-tab="sauvegarde">💾 Sauvegarde</button>
         </div>
         
 
@@ -273,7 +264,6 @@
         <div id="tab-menage" class="tab-content"></div>
         <div id="tab-infos-gites" class="tab-content"></div>
         <div id="tab-decouvrir" class="tab-content"></div>
-        <div id="tab-sauvegarde" class="tab-content"></div>
     </div>
     
         </div>
@@ -5680,7 +5670,6 @@
             'tab-menage': '/tabs/tab-menage.html',
             'tab-infos-gites': '/tabs/tab-infos-gites.html',
             'tab-decouvrir': '/tabs/tab-decouvrir.html',
-            'tab-sauvegarde': '/tabs/tab-sauvegarde.html',
         };
         
         // Charger tous les fragments d'onglets
