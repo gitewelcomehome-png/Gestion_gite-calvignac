@@ -160,19 +160,8 @@ function getWeekDates(year, weekNum) {
 // ==========================================
 
 function handleQuickAction(action) {
-    switch(action) {
-        case 'import':
-            document.getElementById('importFileQuick').click();
-            break;
-        case 'backup':
-            window.switchTab('sauvegarde');
-            break;
-        case 'archives':
-            window.switchTab('archives');
-            break;
-        case 'ical':
-            window.switchTab('gestion');
-            break;
+    if (action === 'archives') {
+        window.switchTab('archives');
     }
 }
 
