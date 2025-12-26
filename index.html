@@ -18,6 +18,9 @@
     <script src="js/statistiques.js"></script>
     <script src="js/menage.js"></script>
     <script src="js/decouvrir.js"></script>
+    <script src="js/reservations.js"></script>
+    <script src="js/archives.js"></script>
+    <script src="js/charges.js"></script>
     
     <!-- Leaflet pour la carte interactive -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -403,82 +406,9 @@
         ICAL_CONFIGS = getIcalConfigs();
         
         // ==========================================
-        // 🔍 RECHERCHE RÉSERVATIONS
+        // 🔍 RECHERCHE RÉSERVATIONS - Déplacé dans js/reservations.js
         // ==========================================
-        
-        async function filterReservations(searchTerm) {
-            const reservations = await getAllReservations();
-            
-            if (!searchTerm || searchTerm.trim() === '') {
-                // Pas de recherche, afficher tout
-                updateReservationsList();
-                return;
-            }
-            
-            const term = searchTerm.toLowerCase().trim();
-            const filtered = reservations.filter(r => {
-                return (
-                    (r.nom && r.nom.toLowerCase().includes(term)) ||
-                    (r.telephone && r.telephone.includes(term)) ||
-                    (r.gite && r.gite.toLowerCase().includes(term)) ||
-                    (r.site && r.site.toLowerCase().includes(term)) ||
-                    (r.provenance && r.provenance.toLowerCase().includes(term))
-                );
-            });
-            
-            // Afficher résultats
-            displayFilteredReservations(filtered);
-        }
-        
-        function displayFilteredReservations(reservations) {
-            const container = document.getElementById('planning-container');
-            
-            if (reservations.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun résultat</p>';
-                return;
-            }
-            
-            let html = '<div class="planning-weeks"><h3 style="margin-bottom: 20px;">🔍 Résultats de recherche (' + reservations.length + ')</h3>';
-            
-            reservations.forEach(r => {
-                const platformLogo = getPlatformLogo(r.site);
-                const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 600;">✓</span>' : '';
-                const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.9rem;">📱 ${r.telephone}</span>` : '';
-                
-                const isIncomplete = !r.nom || r.nom.includes('⚠️') || r.nom.includes('À COMPLÉTER') || r.nom.includes('Client');
-                const incompleteBadge = isIncomplete ? 
-                    '<span style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 8px;">⚠️ À COMPLÉTER</span>' : 
-                    '';
-                
-                html += `
-                    <div class="week-reservation" style="margin-bottom: 15px; padding: 12px; border-radius: 12px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); ${isIncomplete ? 'border-left: 4px solid #ff6b6b;' : ''}">
-                        <div style="position: relative;">
-                            <div style="position: absolute; top: 0; right: 0; display: flex; gap: 4px;">
-                                <button onclick="openEditModal(${r.id})" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Modifier">✏️</button>
-                                <button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Page Client">📄</button>
-                                <button onclick="deleteReservationById(${r.id})" style="background: #ffebee; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Supprimer">🗑️</button>
-                            </div>
-                            
-                            <div style="font-weight: 700; font-size: 1.15rem; color: #0f172a; margin-bottom: 8px;">
-                                ${r.nom}${messageEnvoye}${incompleteBadge}
-                            </div>
-                            
-                            <div style="font-size: 1.05rem; color: #334155; margin-bottom: 8px;">
-                                📅 <strong>${formatDate(r.dateDebut)} → ${formatDate(r.dateFin)}</strong>${telephoneDisplay}<br>
-                                💰 <strong>${r.montant.toFixed(2)} €</strong> • ${platformLogo}
-                            </div>
-                            
-                            <div style="font-size: 0.9rem; color: #64748b;">
-                                🏠 ${r.gite}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-            container.innerHTML = html;
-        }
+        // Functions: filterReservations, displayFilteredReservations
         
         // ==========================================
         // 📊 STATISTIQUES - Déplacé dans js/statistiques.js
@@ -542,94 +472,16 @@
         // ==========================================
         // Functions: syncAllCalendars, syncCalendar, checkDateOverlap, updateBlockedDates
         
-        async function autoSaveJSON() {
-            const reservations = await getAllReservations();
-            const backup = {
-                version: '1.0',
-                date: new Date().toISOString(),
-                reservations: reservations
-            };
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `AutoSave_Gites_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-        
-        
-        function openEditModal(id) {
-            getAllReservations().then(reservations => {
-                const reservation = reservations.find(r => r.id === id);
-                if (!reservation) return;
-                
-                document.getElementById('editId').value = reservation.id;
-                document.getElementById('editNom').value = reservation.nom;
-                document.getElementById('editTelephone').value = reservation.telephone || '';
-                document.getElementById('editProvenance').value = reservation.provenance || '';
-                document.getElementById('editNbPersonnes').value = reservation.nbPersonnes || '';
-                document.getElementById('editMontant').value = reservation.montant;
-                document.getElementById('editAcompte').value = reservation.acompte || 0;
-                document.getElementById('editPaiement').value = reservation.paiement;
-                
-                document.getElementById('editModal').classList.add('show');
-            });
-        }
-        
-        function closeEditModal() {
-            document.getElementById('editModal').classList.remove('show');
-        }
-        
-        document.getElementById('editForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const id = parseInt(document.getElementById('editId').value);
-            const montant = parseFloat(document.getElementById('editMontant').value);
-            const acompte = parseFloat(document.getElementById('editAcompte').value) || 0;
-            
-            const updates = {
-                nom: document.getElementById('editNom').value,
-                telephone: document.getElementById('editTelephone').value,
-                provenance: document.getElementById('editProvenance').value,
-                nbPersonnes: parseInt(document.getElementById('editNbPersonnes').value) || 0,
-                montant: montant,
-                acompte: acompte,
-                restant: montant - acompte,
-                paiement: document.getElementById('editPaiement').value
-            };
-            
-            await updateReservation(id, updates);
-            await updateReservationsList();
-            await updateStats();
-            await autoSaveJSON();
-            closeEditModal();
-            showToast('✓ Réservation mise à jour');
-        });
-        
-        async function updatePaiementStatus(id, newStatus) {
-            await updateReservation(id, { paiement: newStatus });
-            await updateReservationsList();
-            await autoSaveJSON();
-            showToast('✓ Statut mis à jour');
-        }
-        
-        async function deleteReservationById(id) {
-            if (confirm('Supprimer cette réservation ?')) {
-                await deleteReservation(id);
-                await updateReservationsList();
-                await updateStats();
-                await updateArchivesDisplay();
-                await autoSaveJSON();
-                showToast('✓ Réservation supprimée');
-            }
-        }
+        // ==========================================
+        // ✏️ ÉDITION RÉSERVATIONS - Déplacé dans js/reservations.js
+        // ==========================================
+        // Functions: autoSaveJSON, openEditModal, closeEditModal, 
+        // updatePaiementStatus, deleteReservationById
         
         // ==========================================
-        // ⚠️ SECTION AFFICHAGE RÉSERVATIONS - NE PAS MODIFIER SANS APPROBATION ⚠️
+        // 📅 AFFICHAGE RÉSERVATIONS - Déplacé dans js/reservations.js
         // ==========================================
-        
-        async function updateReservationsList() {
+        // Functions: updateReservationsList, generateWeekReservations
             const reservations = await getAllReservations();
             const today = new Date();
             today.setHours(0, 0, 0, 0);
