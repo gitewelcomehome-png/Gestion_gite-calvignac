@@ -8718,22 +8718,25 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             'tab-decouvrir': '/tabs/tab-decouvrir.html',
             'tab-sauvegarde': '/tabs/tab-sauvegarde.html',
         };
-        for (const [tabId, file] of Object.entries(tabFiles)) {
-            fetch(file)
+        // Charger tous les fragments d'onglets
+        const tabLoadPromises = Object.entries(tabFiles).map(([tabId, file]) => {
+            return fetch(file)
                 .then(r => r.text())
                 .then(html => {
                     document.getElementById(tabId).innerHTML = html;
                 });
-        }
-        // Attacher les événements de clic sur les boutons onglets
-        document.querySelectorAll('.nav-tab').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tab = btn.getAttribute('data-tab');
-                if (tab) window.switchTab(tab);
-            });
         });
-        // Activer l'onglet Réservations par défaut
-        window.switchTab('reservations');
+        // Quand tous les fragments sont chargés, activer la gestion des onglets
+        Promise.all(tabLoadPromises).then(() => {
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = btn.getAttribute('data-tab');
+                    if (tab) window.switchTab(tab);
+                });
+            });
+            // Activer l'onglet Réservations par défaut
+            window.switchTab('reservations');
+        });
     });
 
     // Fonction pour gérer l'affichage des onglets (exposée en global)
@@ -8755,6 +8758,10 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                 btn.classList.add('active');
             }
         });
+        // Appeler la génération du planning uniquement pour l'onglet Réservations
+        if (tab === 'reservations' && typeof updateReservationsList === 'function') {
+            setTimeout(() => { updateReservationsList(); }, 0);
+        }
     }
     </script>
 </body>
