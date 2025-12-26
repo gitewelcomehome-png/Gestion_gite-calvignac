@@ -1,0 +1,183 @@
+<div id="tab-statistiques" class="tab-content">
+    <div class="stats-section">
+        <div class="card-header">
+            <span class="card-icon">📊</span>
+            <h2 class="card-title">Statistiques</h2>
+            <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+                <label for="yearFilterStats" style="font-weight: 600; color: var(--primary); font-size: 0.9rem;">📅 Année :</label>
+                <select id="yearFilterStats" onchange="filterStatsByYear()" style="width: 110px; padding: 8px; border: 2px solid var(--border); border-radius: 8px; font-size: 0.9rem; text-align: center; font-weight: 600; cursor: pointer; background: white;">
+                    <option value="">Chargement...</option>
+                </select>
+                <button class="btn btn-secondary" onclick="toggleHistoricalDataForm()" style="padding: 8px 16px; font-size: 0.9rem; width: auto; margin-top: 0;">📅 Gérer les données</button>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
+            <div style="background: linear-gradient(135deg, #FF5A5F 0%, #FF385C 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Airbnb</div>
+                <div id="countAirbnb" style="font-size: 2rem; font-weight: 700;">-</div>
+                <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #3498DB 0%, #2874A6 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Abritel</div>
+                <div id="countAbritel" style="font-size: 2rem; font-weight: 700;">-</div>
+                <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Gîtes de France</div>
+                <div id="countGites" style="font-size: 2rem; font-weight: 700;">-</div>
+                <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Autres</div>
+                <div id="countAutres" style="font-size: 2rem; font-weight: 700;">-</div>
+                <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px;">
+            <div class="card" style="padding: 20px; background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(102,126,234,0.05) 100%);">
+                <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">📊 Taux Trévoux</div>
+                <div id="tauxTrevoux" style="font-size: 2rem; font-weight: 700; color: #667eea;">-%</div>
+                <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">année en cours</div>
+            </div>
+            <div class="card" style="padding: 20px; background: linear-gradient(135deg, rgba(245,87,108,0.1) 0%, rgba(245,87,108,0.05) 100%);">
+                <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">📊 Taux Couzon</div>
+                <div id="tauxCouzon" style="font-size: 2rem; font-weight: 700; color: #f5576c;">-%</div>
+                <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">année en cours</div>
+            </div>
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">💰 Prix moyen/nuit</div>
+                <div id="prixMoyen" style="font-size: 2rem; font-weight: 700; color: #27AE60;">- €</div>
+                <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">toutes réservations</div>
+            </div>
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">📅 Durée moyenne</div>
+                <div id="dureeMoyenne" style="font-size: 2rem; font-weight: 700; color: #3498DB;">- nuits</div>
+                <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">par séjour</div>
+            </div>
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">🏆 Meilleur mois</div>
+                <div id="meilleurMois" style="font-size: 1.3rem; font-weight: 700; color: var(--primary);">-</div>
+                <div id="meilleurMoisCA" style="font-size: 0.875rem; color: #27AE60; margin-top: 4px; font-weight: 600;">- €</div>
+            </div>
+        </div>
+        <div id="historicalDataForm" style="display: none; margin-bottom: 30px;">
+            <div class="card" style="background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);">
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: var(--primary);">📅 Données Historiques (Années Précédentes)</h3>
+                    <div class="alert alert-info" style="margin-bottom: 20px;">
+                        <strong>ℹ️ Info :</strong> Saisissez les chiffres d'affaires des années précédentes pour comparer avec l'année en cours dans les graphiques.
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 10px;">Année à saisir <span style="color: red;">*</span></label>
+                        <input type="number" id="historicalYear" placeholder="Ex: 2024" min="2000" max="2050" style="width: 150px; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-weight: 600;">
+                        <small style="color: #666; font-size: 0.85rem; margin-left: 10px;">Année pour laquelle saisir les données</small>
+                    </div>
+                </div>
+                <div style="overflow-x: auto; margin-bottom: 20px;">
+                    <table style="width: 100%; border-collapse: collapse; background: white;">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, var(--primary) 0%, #667eea 100%); color: white;">
+                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd; width: 30%;">Mois</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">💰 Total CA (€)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Janvier</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_jan" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Février</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_feb" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Mars</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_mar" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Avril</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_apr" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Mai</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_may" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Juin</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_jun" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Juillet</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_jul" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Août</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_aug" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Septembre</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_sep" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Octobre</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_oct" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Novembre</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_nov" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Décembre</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><input type="number" id="hist_total_dec" placeholder="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: right; background: #fff9e6;"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-success" onclick="saveHistoricalDataTotal()">💾 Sauvegarder</button>
+                    <button type="button" class="btn btn-secondary" onclick="loadHistoricalDataTotal()">📂 Charger données existantes</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteHistoricalDataTotal()">🗑️ Supprimer année</button>
+                </div>
+                <div id="historicalDataList" style="margin-top: 30px;">
+                    <h4 style="color: var(--primary); margin-bottom: 15px;">📋 Années enregistrées</h4>
+                    <div id="historicalYearsList"></div>
+                </div>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Réservations totales</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statTrevoux">0</div>
+                <div class="stat-label">Trévoux</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statCouzon">0</div>
+                <div class="stat-label">Couzon</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statCA">0 €</div>
+                <div class="stat-label">CA Total</div>
+            </div>
+        </div>
+        <div class="card" style="margin: 30px 0; padding: 20px; background: #f8f9fa;">
+            <h4 style="color: var(--primary); margin-bottom: 15px;">📊 Comparer les années</h4>
+            <div id="yearComparisonCheckboxes" style="display: flex; flex-wrap: wrap; gap: 15px;"></div>
+        </div>
+        <div class="chart-container">
+            <canvas id="caChart"></canvas>
+        </div>
+        <div class="chart-container" style="margin-top: 50px;">
+            <canvas id="gitesChart"></canvas>
+        </div>
+        <div class="chart-container" style="margin-top: 50px;">
+            <canvas id="platformsChart"></canvas>
+        </div>
+        <div class="chart-container" style="margin-top: 50px;">
+            <canvas id="profitChart"></canvas>
+        </div>
+    </div>
+</div>
+</div>
