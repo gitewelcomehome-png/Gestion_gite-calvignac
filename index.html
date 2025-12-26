@@ -118,20 +118,83 @@
     <!-- Cadre bouton commit info -->
     <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
         <div style="display: inline-block; position: relative;">
-            <button id="commitInfoBtn" style="padding: 8px 16px; border-radius: 8px; background: #1976d2; color: white; border: none; cursor: pointer; font-weight: bold;">Dernier commit</button>
+            <button id="commitInfoBtn" style="padding: 8px 16px; border-radius: 8px; background: #1976d2; color: white; border: none; cursor: pointer; font-weight: bold;">
+                📝 Dernier commit
+            </button>
             <div id="commitInfoTooltip" style="display: none; position: absolute; top: 110%; left: 0; background: #fff; color: #222; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); padding: 12px; min-width: 320px; font-size: 0.95em;">
-                <strong>Commit :</strong> ef2feef<br>
-                <strong>Date :</strong> 2025-12-26 10:10:00 +0100<br>
-                <strong>Message :</strong> dernier commit<br>
-                <strong>Résumé :</strong> Ajout d'un bouton en haut de la page qui affiche la date, l'heure et le message du dernier commit au survol.
+                <div style="text-align: center; color: #999;">Chargement...</div>
             </div>
         </div>
     </div>
     <script>
     const btn = document.getElementById('commitInfoBtn');
     const tooltip = document.getElementById('commitInfoTooltip');
+    
+    // Afficher/masquer au survol
     btn.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
     btn.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+    
+    // Charger le dernier commit depuis Supabase
+    async function loadLastCommit() {
+        try {
+            // Attendre que Supabase soit chargé
+            if (typeof window.supabase === 'undefined') {
+                await new Promise(resolve => {
+                    const checkSupabase = setInterval(() => {
+                        if (typeof window.supabase !== 'undefined') {
+                            clearInterval(checkSupabase);
+                            resolve();
+                        }
+                    }, 100);
+                });
+            }
+            
+            const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            
+            const { data, error } = await supabase
+                .from('commits_log')
+                .select('*')
+                .order('commit_date', { ascending: false })
+                .limit(1);
+            
+            if (error) {
+                console.error('Erreur chargement commit:', error);
+                tooltip.innerHTML = '<div style="color: #e74c3c;">❌ Erreur de chargement</div>';
+                return;
+            }
+            
+            if (data && data.length > 0) {
+                const commit = data[0];
+                const date = new Date(commit.commit_date);
+                const dateStr = date.toLocaleString('fr-FR', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                tooltip.innerHTML = `
+                    <strong>📌 Commit :</strong> ${commit.commit_ref}<br>
+                    <strong>📅 Date :</strong> ${dateStr}<br>
+                    <strong>💬 Résumé :</strong><br>
+                    <div style="margin-top: 6px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-size: 0.9em;">
+                        ${commit.resume}
+                    </div>
+                `;
+            } else {
+                tooltip.innerHTML = '<div style="color: #999;">Aucun commit enregistré</div>';
+            }
+        } catch (err) {
+            console.error('Erreur:', err);
+            tooltip.innerHTML = '<div style="color: #e74c3c;">❌ Erreur</div>';
+        }
+    }
+    
+    // Charger au démarrage
+    loadLastCommit();
     // Chargement dynamique des onglets
     document.addEventListener('DOMContentLoaded', function() {
         const tabFiles = {
