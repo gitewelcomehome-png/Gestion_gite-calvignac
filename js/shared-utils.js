@@ -38,6 +38,7 @@ function dateToLocalString(date) {
 
 // Parser une date au format YYYY-MM-DD en heure locale
 function parseLocalDate(dateStr) {
+    if (!dateStr) return new Date(); // Retourner la date actuelle si undefined/null
     const [year, month, day] = dateStr.split('-').map(Number);
     return new Date(year, month - 1, day);
 }

@@ -2085,7 +2085,7 @@
                         <div class="charge-info">
                             <div class="charge-name">${c.nom} - ${c.gite}</div>
                             <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">
-                                ${c.type ? (c.type.charAt(0).toUpperCase() + c.type.slice(1)) : 'Autre'} | ${formatDate(c.date)}
+                                ${c.type ? (c.type.charAt(0).toUpperCase() + c.type.slice(1)) : 'Autre'} ${c.date ? '| ' + formatDate(c.date) : ''}
                                 ${c.notes ? '<br>' + c.notes : ''}
                             </div>
                         </div>
