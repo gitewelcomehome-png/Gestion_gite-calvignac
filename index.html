@@ -434,6 +434,9 @@
             if (activeBtn) activeBtn.classList.add('active');
             
             // Initialiser les fonctionnalités spécifiques à chaque onglet
+            if (tabName === 'reservations' && typeof updateReservationsList === 'function') {
+                updateReservationsList();
+            }
             if (tabName === 'statistiques') {
                 if (typeof populateYearFilter === 'function') populateYearFilter();
                 if (typeof updateAllCharts === 'function') updateAllCharts();
@@ -447,6 +450,17 @@
             }
             if (tabName === 'menage' && typeof afficherPlanningParSemaine === 'function') {
                 afficherPlanningParSemaine();
+            }
+            if (tabName === 'infos-gites') {
+                if (typeof chargerDonneesInfos === 'function') {
+                    chargerDonneesInfos();
+                }
+                if (typeof chargerActivitesEtSorties === 'function') {
+                    chargerActivitesEtSorties();
+                }
+            }
+            if (tabName === 'decouvrir' && typeof chargerToutSurCarte === 'function') {
+                chargerToutSurCarte();
             }
         }
         
