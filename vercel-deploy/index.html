@@ -223,6 +223,18 @@ h1{font-size:2.1rem;}
 </style>
 </head>
 <body>
+    <!-- Bouton commit info en haut à gauche -->
+    <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
+        <div style="display: inline-block; position: relative;">
+            <button id="commitInfoBtn" style="padding: 8px 16px; border-radius: 8px; background: #1976d2; color: white; border: none; cursor: pointer; font-weight: bold;">Dernier commit</button>
+            <div id="commitInfoTooltip" style="display: none; position: absolute; top: 110%; left: 0; background: #fff; color: #222; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); padding: 12px; min-width: 320px; font-size: 0.95em;">
+                <strong>Commit :</strong> 1c17102<br>
+                <strong>Date :</strong> 2025-12-26 15:00:00 +0100<br>
+                <strong>Message :</strong> chore: trigger vercel redeploy (comment)<br>
+                <strong>Résumé :</strong> Ajout du bouton commit et correctif onglets.<br>
+            </div>
+        </div>
+    </div>
     <div class="container">
         <header style="position: relative;">
             <!-- Menu Actions en haut à droite -->
@@ -8706,6 +8718,13 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
     </script>
     <!-- Chargement dynamique des onglets (compatible Vercel) -->
     <script>
+    // Gestion du bouton commit info
+    const btn = document.getElementById('commitInfoBtn');
+    const tooltip = document.getElementById('commitInfoTooltip');
+    btn.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
+    btn.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+    // Chargement dynamique des onglets + gestion affichage
     document.addEventListener('DOMContentLoaded', function() {
         const tabFiles = {
             'tab-gestion': '/tabs/tab-gestion.html',
@@ -8725,7 +8744,31 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     document.getElementById(tabId).innerHTML = html;
                 });
         }
+        // Activer l'onglet Réservations par défaut
+        switchTab('reservations');
     });
+
+    // Fonction pour gérer l'affichage des onglets
+    function switchTab(tab) {
+        // Onglets
+        const tabIds = [
+            'gestion', 'reservations', 'archives', 'statistiques', 'charges', 'menage', 'infos-gites', 'decouvrir', 'sauvegarde'
+        ];
+        tabIds.forEach(id => {
+            const el = document.getElementById('tab-' + id);
+            if (el) el.classList.remove('active');
+        });
+        const activeTab = document.getElementById('tab-' + tab);
+        if (activeTab) activeTab.classList.add('active');
+        // Boutons
+        document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+        const btns = document.querySelectorAll('.nav-tab');
+        btns.forEach(b => {
+            if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(`switchTab('${tab}')`)) {
+                b.classList.add('active');
+            }
+        });
+    }
     </script>
 </body>
 </html>
