@@ -434,6 +434,13 @@ async function chargerActivites() {
         if (data) {
             window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
             data.forEach(act => {
+                // Mapper les noms de colonnes pour compatibilité
+                if (act.latitude && !act.lat) act.lat = act.latitude;
+                if (act.longitude && !act.lng) act.lng = act.longitude;
+                if (act.distance_km && !act.distance) act.distance = act.distance_km;
+                if (act.type && !act.categorie) act.categorie = act.type;
+                if (act.phone && !act.telephone) act.telephone = act.phone;
+                
                 if (window.activitesParGite[act.gite]) {
                     window.activitesParGite[act.gite].push(act);
                 }
