@@ -9,7 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Leaflet pour la carte int eractive -->
+    
+    <!-- Scripts modulaires de l'application -->
+    <script src="js/shared-config.js"></script>
+    <script src="js/shared-utils.js"></script>
+    <script src="js/supabase-operations.js"></script>
+    
+    <!-- Leaflet pour la carte interactive -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
@@ -340,52 +346,17 @@
     </div>
     
     <script>
-        // ==========================================
-        // ⚠️ CONFIGURATION FUSEAU HORAIRE ⚠️
-        // ==========================================
-        // Forcer le fuseau horaire Europe/Paris pour toutes les dates
-        // Note: JavaScript utilise le fuseau local du navigateur par défaut
-        const TIMEZONE = 'Europe/Paris';
+        // Les configurations et fonctions de base sont maintenant dans js/shared-config.js et js/shared-utils.js
+        // Utiliser window.supabase pour accéder au client Supabase
+        const supabase = window.supabase;
         
-        // Fonction helper pour créer des dates en heure locale Paris
-        function createParisDate(...args) {
-            const date = new Date(...args);
-            // Les dates sont déjà en heure locale du navigateur
-            // On s'assure juste que le parsing est cohérent
-            return date;
-        }
-        
-        // Supabase pour toutes les données (plus de IndexedDB)
-        const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
-        
-        // Vérifier si supabase n'est pas déjà déclaré (évite les erreurs de double chargement)
-        var supabase;
-        if (typeof window.supabaseClient === 'undefined') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            window.supabaseClient = supabase; // Stocker globalement
-        } else {
-            supabase = window.supabaseClient;
-        }
+        // Variables globales
         let caChartInstance, gitesChartInstance, platformsChartInstance, profitChartInstance;
+        let ICAL_CONFIGS = window.DEFAULT_ICAL_CONFIGS;
         
         // ==========================================
         // ⚠️ SECTION SYNCHRONISATION iCAL - NE PAS MODIFIER SANS DEMANDE EXPLICITE ⚠️
         // ==========================================
-        
-        // URLs iCal par défaut
-        const DEFAULT_ICAL_CONFIGS = {
-            couzon: {
-                airbnb: 'https://www.airbnb.fr/calendar/ical/13366259.ics?s=d2cd55cf08b32b26b639189d5d4bf93e',
-                abritel: 'http://www.homelidays.com/icalendar/d31158afb72048aabba35b3188771598.ics',
-                gitesDeFrance: 'https://reservation.itea.fr/iCal_753fbf35431f67e8118e8757e06d2bef.ics?aicc=f26bc80e2e964f8fabb080bbbd3557c8'
-            },
-            trevoux: {
-                airbnb: 'https://www.airbnb.fr/calendar/ical/37315488.ics?s=082e23b5f091ef093d1767499f409dda',
-                abritel: 'http://www.abritel.fr/icalendar/0e7482c3c4cf4d08a5811bb27dc86e17.ics?nonTentative',
-                gitesDeFrance: 'https://reservation.itea.fr/iCal_a56598e138f4257a14f7e5c5041afdf7.ics?aicc=e9a8169fa0094d7a1f24f1b47f79c65'
-            }
-        };
         
         // Fonction pour obtenir les URLs iCal (depuis localStorage ou défaut)
         function getIcalConfigs() {
@@ -393,7 +364,7 @@
             if (stored) {
                 return JSON.parse(stored);
             }
-            return DEFAULT_ICAL_CONFIGS;
+            return window.DEFAULT_ICAL_CONFIGS;
         }
         
         // Charger les URLs dans les champs du formulaire
@@ -425,393 +396,8 @@
             showToast('✓ URLs iCal sauvegardées');
         }
         
-        // Variable globale pour les configs
-        let ICAL_CONFIGS = getIcalConfigs();
-        
-        // IndexedDB supprimée - Tout est sur Supabase maintenant
-        function initDB() {
-            console.log('✓ Supabase prêt - IndexedDB non nécessaire');
-            return Promise.resolve();
-        }
-        
-        // ==========================================
-        // 🔥 FONCTIONS RÉSERVATIONS - SUPABASE
-        // ==========================================
-        
-        async function addReservation(reservation) {
-            try {
-                // Helper pour formater les dates en YYYY-MM-DD (heure locale française)
-                function formatDateForSupabase(dateStr) {
-                    if (!dateStr) return null;
-                    
-                    // Si c'est déjà au bon format YYYY-MM-DD
-                    if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-                        return dateStr;
-                    }
-                    
-                    // Si c'est un objet Date
-                    if (dateStr instanceof Date) {
-                        return dateToLocalString(dateStr);
-                    }
-                    
-                    // Sinon essayer de parser en utilisant parseLocalDate (pas new Date!)
-                    if (typeof dateStr === 'string') {
-                        // Si format ISO complet (avec heure), extraire juste la date
-                        if (dateStr.includes('T')) {
-                            return dateStr.split('T')[0];
-                        }
-                        // Sinon parser correctement
-                        try {
-                            const parsed = parseLocalDate(dateStr);
-                            if (!isNaN(parsed.getTime())) {
-                                return dateToLocalString(parsed);
-                            }
-                        } catch (e) {
-                            console.error('Erreur parsing date:', dateStr, e);
-                        }
-                    }
-                    
-                    return null;
-                }
-                
-                const data = {
-                    gite: reservation.gite,
-                    date_debut: formatDateForSupabase(reservation.dateDebut),
-                    date_fin: formatDateForSupabase(reservation.dateFin),
-                    plateforme: reservation.site || reservation.plateforme || 'Autre',
-                    montant: parseFloat(reservation.montant) || 0,
-                    nom_client: reservation.nom || reservation.nomClient || null,
-                    telephone: reservation.telephone || null,
-                    provenance: reservation.provenance || null,
-                    nb_personnes: reservation.nbPersonnes || 0,
-                    acompte: parseFloat(reservation.acompte) || 0,
-                    restant: parseFloat(reservation.restant) || 0,
-                    paiement: reservation.paiement || 'En attente',
-                    timestamp: reservation.timestamp || new Date().toISOString(),
-                    synced_from: reservation.syncedFrom || null
-                };
-                
-                if (!data.date_debut || !data.date_fin) {
-                    throw new Error('Dates invalides');
-                }
-                
-                const result = await supabase
-                    .from('reservations')
-                    .insert(data)
-                    .select()
-                    .single();
-                
-                if (result.error) throw result.error;
-                
-                // Invalider le cache
-                invalidateCache('reservations');
-                
-                return result.data.id;
-            } catch (error) {
-                console.error('Erreur addReservation:', error);
-                throw error;
-            }
-        }
-        
-        // ==========================================
-        // 🚀 SYSTÈME DE CACHE INTELLIGENT
-        // ==========================================
-        
-        const CACHE = {
-            reservations: null,
-            reservationsTimestamp: 0,
-            charges: null,
-            chargesTimestamp: 0,
-            historicalData: null,
-            historicalTimestamp: 0,
-            TTL: 60000 // 1 minute
-        };
-        
-        function invalidateCache(type) {
-            if (type === 'reservations') {
-                CACHE.reservations = null;
-                CACHE.reservationsTimestamp = 0;
-            } else if (type === 'charges') {
-                CACHE.charges = null;
-                CACHE.chargesTimestamp = 0;
-            } else if (type === 'historical') {
-                CACHE.historicalData = null;
-                CACHE.historicalTimestamp = 0;
-            } else if (type === 'all') {
-                CACHE.reservations = null;
-                CACHE.reservationsTimestamp = 0;
-                CACHE.charges = null;
-                CACHE.chargesTimestamp = 0;
-                CACHE.historicalData = null;
-                CACHE.historicalTimestamp = 0;
-            }
-        }
-        
-        async function getAllReservations(forceRefresh) {
-            // Utiliser le cache si valide
-            if (!forceRefresh && CACHE.reservations && (Date.now() - CACHE.reservationsTimestamp < CACHE.TTL)) {
-                console.log('📦 Cache hit: reservations');
-                return CACHE.reservations;
-            }
-            
-            try {
-                console.log('🔄 Fetching reservations from Supabase...');
-                const result = await supabase
-                    .from('reservations')
-                    .select('*')
-                    .order('date_debut', { ascending: true });
-                
-                if (result.error) throw result.error;
-                
-                // Convertir snake_case en camelCase pour compatibilité
-                const reservations = (result.data || []).map(function(r) {
-                    return {
-                        id: r.id,
-                        gite: r.gite,
-                        dateDebut: r.date_debut,
-                        dateFin: r.date_fin,
-                        site: r.plateforme,
-                        montant: r.montant,
-                        nom: r.nom_client,
-                        telephone: r.telephone,
-                        provenance: r.provenance,
-                        nbPersonnes: r.nb_personnes,
-                        acompte: r.acompte,
-                        restant: r.restant,
-                        paiement: r.paiement,
-                        nuits: calculateNights(r.date_debut, r.date_fin),
-                        timestamp: r.timestamp,
-                        syncedFrom: r.synced_from
-                    };
-                });
-                
-                // Mettre en cache
-                CACHE.reservations = reservations;
-                CACHE.reservationsTimestamp = Date.now();
-                
-                return reservations;
-            } catch (error) {
-                console.error('Erreur getAllReservations:', error);
-                showToast('❌ Erreur chargement réservations', 'error');
-                return [];
-            }
-        }
-        
-        async function updateReservation(id, updates) {
-            try {
-                const data = {};
-                if (updates.gite !== undefined) data.gite = updates.gite;
-                if (updates.dateDebut !== undefined) data.date_debut = updates.dateDebut;
-                if (updates.dateFin !== undefined) data.date_fin = updates.dateFin;
-                if (updates.site !== undefined) data.plateforme = updates.site;
-                if (updates.montant !== undefined) data.montant = parseFloat(updates.montant);
-                if (updates.nom !== undefined) data.nom_client = updates.nom;
-                if (updates.telephone !== undefined) data.telephone = updates.telephone;
-                if (updates.provenance !== undefined) data.provenance = updates.provenance;
-                if (updates.nbPersonnes !== undefined) data.nb_personnes = updates.nbPersonnes;
-                if (updates.acompte !== undefined) data.acompte = parseFloat(updates.acompte);
-                if (updates.restant !== undefined) data.restant = parseFloat(updates.restant);
-                if (updates.paiement !== undefined) data.paiement = updates.paiement;
-                
-                const result = await supabase
-                    .from('reservations')
-                    .update(data)
-                    .eq('id', id);
-                
-                if (result.error) throw result.error;
-                
-                // Invalider le cache
-                invalidateCache('reservations');
-            } catch (error) {
-                console.error('Erreur updateReservation:', error);
-                throw error;
-            }
-        }
-        
-        async function deleteReservation(id) {
-            try {
-                const result = await supabase
-                    .from('reservations')
-                    .delete()
-                    .eq('id', id);
-                
-                if (result.error) throw result.error;
-                
-                // Invalider le cache
-                invalidateCache('reservations');
-            } catch (error) {
-                console.error('Erreur deleteReservation:', error);
-                throw error;
-            }
-        }
-        
-        // ==========================================
-        // 🔥 FONCTIONS CHARGES - SUPABASE
-        // ==========================================
-        
-        async function addCharge(charge) {
-            try {
-                const data = {
-                    nom: charge.nom,
-                    montant: parseFloat(charge.montant),
-                    type: charge.type,
-                    date: charge.date || null,
-                    gite: charge.gite || null
-                };
-                
-                const result = await supabase
-                    .from('charges')
-                    .insert(data)
-                    .select()
-                    .single();
-                
-                if (result.error) throw result.error;
-                
-                // Invalider le cache
-                invalidateCache('charges');
-                
-                return result.data.id;
-            } catch (error) {
-                console.error('Erreur addCharge:', error);
-                throw error;
-            }
-        }
-        
-        async function getAllCharges(forceRefresh) {
-            // Utiliser le cache si valide
-            if (!forceRefresh && CACHE.charges && (Date.now() - CACHE.chargesTimestamp < CACHE.TTL)) {
-                console.log('📦 Cache hit: charges');
-                return CACHE.charges;
-            }
-            
-            try {
-                console.log('🔄 Fetching charges from Supabase...');
-                const result = await supabase
-                    .from('charges')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (result.error) throw result.error;
-                
-                // Mettre en cache
-                CACHE.charges = result.data || [];
-                CACHE.chargesTimestamp = Date.now();
-                
-                return CACHE.charges;
-            } catch (error) {
-                console.error('Erreur getAllCharges:', error);
-                showToast('❌ Erreur chargement charges', 'error');
-                return [];
-            }
-        }
-        
-        async function deleteCharge(id) {
-            try {
-                const result = await supabase
-                    .from('charges')
-                    .delete()
-                    .eq('id', id);
-                
-                if (result.error) throw result.error;
-                
-                // Invalider le cache
-                invalidateCache('charges');
-            } catch (error) {
-                console.error('Erreur deleteCharge:', error);
-                throw error;
-            }
-        }
-        
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
-            document.getElementById('toastMessage').textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 4000);
-        }
-        
-        // Fonction pour parser les dates en heure locale (évite le décalage UTC)
-        // ==========================================
-        // 🇫🇷 GESTION DATES TIMEZONE FRANÇAIS
-        // ==========================================
-        
-        // Convertir une Date JavaScript en format YYYY-MM-DD
-        // Pour les dates iCal : elles peuvent être en UTC ou en local selon le format
-        function dateToLocalString(date) {
-            if (!date) return null;
-            if (!(date instanceof Date)) {
-                date = new Date(date);
-            }
-            if (isNaN(date.getTime())) return null;
-            
-            // Extraire l'année, mois, jour en HEURE LOCALE (pas UTC)
-            // Car les dates de réservation doivent être en heure locale française
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return year + '-' + month + '-' + day;
-        }
-        
-        function parseLocalDate(dateStr) {
-            // dateStr format: "YYYY-MM-DD"
-            const [year, month, day] = dateStr.split('-').map(Number);
-            return new Date(year, month - 1, day); // month - 1 car les mois JS commencent à 0
-        }
-        
-        function calculateNights(debut, fin) {
-            const d1 = parseLocalDate(debut);
-            const d2 = parseLocalDate(fin);
-            return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
-        }
-        
-        function formatDate(dateStr) {
-            const date = parseLocalDate(dateStr);
-            return date.toLocaleDateString('fr-FR');
-        }
-        
-        function getMonthYear(dateStr) {
-            const date = parseLocalDate(dateStr);
-            return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
-        }
-        
-        // ==========================================
-        // 🏠 HELPER POUR LES NOMS DE GÎTES
-        // ==========================================
-        
-        function isCouzon(giteName) {
-            // Accepte "Couzon", "Couzon-au-Mont-d'Or", "couzon"
-            if (!giteName) return false;
-            const normalized = giteName.toLowerCase().trim();
-            return normalized === 'couzon' || normalized === 'couzon-au-mont-d\'or' || normalized.startsWith('couzon');
-        }
-        
-        function isTrevoux(giteName) {
-            // Accepte "Trévoux", "trevoux", "Trévoux", etc.
-            if (!giteName) return false;
-            const normalized = giteName.toLowerCase().trim();
-            return normalized === 'trévoux' || normalized === 'trevoux';
-        }
-        
-        // ==========================================
-        // ⚙️ MENU ACTIONS RAPIDES
-        // ==========================================
-        
-        function handleQuickAction(action) {
-            switch(action) {
-                case 'import':
-                    document.getElementById('importFileQuick').click();
-                    break;
-                case 'backup':
-                    sauvegarderTout();
-                    break;
-                case 'archives':
-                    switchTab('archives');
-                    break;
-                case 'ical':
-                    switchTab('gestion');
-                    break;
-            }
-        }
+        // Variable globale pour les configs (charger depuis localStorage)
+        ICAL_CONFIGS = getIcalConfigs();
         
         // ==========================================
         // 🔍 RECHERCHE RÉSERVATIONS

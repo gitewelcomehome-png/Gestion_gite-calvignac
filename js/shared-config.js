@@ -1,0 +1,77 @@
+// ==========================================
+// CONFIGURATION GLOBALE ET CONSTANTES
+// ==========================================
+
+// Configuration fuseau horaire
+const TIMEZONE = 'Europe/Paris';
+
+// Configuration Supabase
+const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+
+// Initialiser Supabase (une seule fois)
+if (typeof window.supabaseClient === 'undefined') {
+    window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    window.supabaseClient = window.supabase;
+} else {
+    window.supabase = window.supabaseClient;
+}
+
+// Variables globales pour les charts
+window.caChartInstance = null;
+window.gitesChartInstance = null;
+window.platformsChartInstance = null;
+window.profitChartInstance = null;
+
+// Configuration iCal par défaut
+const DEFAULT_ICAL_CONFIGS = {
+    couzon: {
+        airbnb: 'https://www.airbnb.fr/calendar/ical/13366259.ics?s=d2cd55cf08b32b26b639189d5d4bf93e',
+        abritel: 'http://www.homelidays.com/icalendar/d31158afb72048aabba35b3188771598.ics',
+        gitesDeFrance: 'https://reservation.itea.fr/iCal_753fbf35431f67e8118e8757e06d2bef.ics?aicc=f26bc80e2e964f8fabb080bbbd3557c8'
+    },
+    trevoux: {
+        airbnb: 'https://www.airbnb.fr/calendar/ical/37315488.ics?s=082e23b5f091ef093d1767499f409dda',
+        abritel: 'http://www.abritel.fr/icalendar/0e7482c3c4cf4d08a5811bb27dc86e17.ics?nonTentative',
+        gitesDeFrance: 'https://reservation.itea.fr/iCal_a56598e138f4257a14f7e5c5041afdf7.ics?aicc=e9a8169fa0094d7a1f24f1b47f79c65'
+    }
+};
+
+// Coordonnées GPS des gîtes
+const GITES_COORDS = {
+    'Trévoux': { lat: 45.93638229370117, lng: 4.791853904724121 },
+    'Couzon': { lat: 45.84257125854492, lng: 4.831059455871582 }
+};
+
+// Système de cache intelligent
+const CACHE = {
+    reservations: null,
+    reservationsTimestamp: 0,
+    charges: null,
+    chargesTimestamp: 0,
+    historicalData: null,
+    historicalTimestamp: 0,
+    TTL: 60000 // 1 minute
+};
+
+// Fonction helper pour créer des dates en heure locale Paris
+function createParisDate(...args) {
+    const date = new Date(...args);
+    return date;
+}
+
+// Initialisation (remplace initDB)
+function initDB() {
+    console.log('✓ Supabase prêt - IndexedDB non nécessaire');
+    return Promise.resolve();
+}
+
+// Export vers window pour accessibilité globale
+window.TIMEZONE = TIMEZONE;
+window.SUPABASE_URL = SUPABASE_URL;
+window.SUPABASE_KEY = SUPABASE_KEY;
+window.DEFAULT_ICAL_CONFIGS = DEFAULT_ICAL_CONFIGS;
+window.GITES_COORDS = GITES_COORDS;
+window.CACHE = CACHE;
+window.createParisDate = createParisDate;
+window.initDB = initDB;
