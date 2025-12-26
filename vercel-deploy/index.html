@@ -1474,6 +1474,7 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             const active = reservations.filter(r => parseLocalDate(r.dateFin) >= today);
             
             const container = document.getElementById('planning-container');
+            if (!container) return; // Conteneur pas encore chargé
             
             if (active.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation</p>';
