@@ -1,0 +1,8 @@
+# Ignore temporary files
+*.tmp
+*.log
+node_modules/
+dist/
+.DS_Store
+.env
+.vscode/

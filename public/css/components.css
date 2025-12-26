@@ -1,0 +1,476 @@
+/* Gestion Gîtes - Component Styles */
+
+/* Statistics Section */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    margin-bottom: 30px;
+}
+
+.stat-item {
+    background: linear-gradient(135deg, rgba(15,23,42,0.98), rgba(30,64,175,0.98));
+    padding: 25px;
+    border-radius: 18px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 18px 40px rgba(15,23,42,0.55);
+}
+
+.stat-value {
+    font-size: 2.1rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.95;
+}
+
+.chart-container {
+    margin-top: 30px;
+    height: 350px;
+}
+
+/* Gite Sections */
+.gite-section {
+    margin-bottom: 30px;
+}
+
+.gite-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gite-header.trevoux,
+.gite-header.trevoux-header {
+    background: linear-gradient(135deg, var(--trevoux) 0%, #667eea 100%);
+}
+
+.gite-header.couzon,
+.gite-header.couzon-header {
+    background: linear-gradient(135deg, var(--couzon) 0%, #f5576c 100%);
+}
+
+.gite-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-family: 'Playfair Display', serif;
+}
+
+.gite-column {
+    background: var(--bg-light);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Planning Components */
+.planning-container {
+    width: 100%;
+    padding: 20px;
+}
+
+.planning-weeks {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.week-block {
+    background: white;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.week-header-unique {
+    background: linear-gradient(135deg, #0f172a 0%, #1f2937 40%, #111827 100%);
+    padding: 12px;
+    text-align: center;
+    color: white;
+}
+
+.week-number-big {
+    font-weight: 700;
+    font-size: 1.2rem;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 3px;
+}
+
+.week-dates-small {
+    font-size: 0.85rem;
+    opacity: 0.95;
+}
+
+.week-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 3px solid var(--primary);
+}
+
+@media (max-width: 1024px) {
+    .week-content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.gite-column-inline {
+    padding: 0;
+    border-right: 2px solid var(--border);
+}
+
+.gite-column-inline:last-child {
+    border-right: none;
+}
+
+.gite-label {
+    padding: 15px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+}
+
+.gite-label.trevoux-label {
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+}
+
+.gite-label.couzon-label {
+    background: linear-gradient(135deg, #5a67d8 0%, #4c51bf 100%);
+}
+
+.week-reservation {
+    padding: 15px;
+    border-bottom: 1px dashed rgba(148,163,184,0.6);
+}
+
+.week-reservation:last-child {
+    border-bottom: none;
+}
+
+.week-reservation.trevoux {
+    background: rgba(102,126,234,0.05);
+}
+
+.week-reservation.couzon {
+    background: rgba(240,147,251,0.05);
+}
+
+.week-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    background: rgba(248,250,252,0.7);
+}
+
+.week-reservation-name {
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 5px;
+}
+
+.week-reservation-details {
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+/* Month Groups */
+.month-group {
+    margin-bottom: 20px;
+}
+
+.month-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--primary);
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background: var(--bg-light);
+    border-radius: 8px;
+    text-transform: uppercase;
+}
+
+/* Reservation Items */
+.reservation-item {
+    background: radial-gradient(circle at top left, rgba(248,250,252,0.98), rgba(241,245,249,0.98));
+    padding: 15px;
+    border-radius: 18px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--primary);
+}
+
+.reservation-item.trevoux {
+    border-left-color: var(--trevoux);
+}
+
+.reservation-item.couzon {
+    border-left-color: var(--couzon);
+}
+
+.reservation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.reservation-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--primary);
+}
+
+.reservation-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+/* Platform Badges */
+.badge-platform {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding-inline: 10px;
+    padding-block: 4px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: radial-gradient(circle at 0% 0%, rgba(248,250,252,0.9), transparent 55%),
+                linear-gradient(135deg, #0ea5e9 0%, #22c55e 60%, #facc15 100%);
+    color: #0b1120;
+    box-shadow: 0 8px 20px rgba(15,23,42,0.35);
+    border: 1px solid rgba(15,23,42,0.4);
+}
+
+.badge-platform::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(34,197,94,1);
+    box-shadow: 0 0 0 4px rgba(34,197,94,0.35);
+}
+
+.badge-airbnb {
+    background: var(--airbnb);
+}
+
+.badge-abritel {
+    background: var(--abritel);
+}
+
+.badge-gites {
+    background: var(--gites);
+}
+
+.platform-airbnb {
+    color: var(--airbnb);
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.platform-abritel {
+    color: var(--abritel);
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.platform-gites {
+    color: var(--gites);
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+/* Charges Components */
+.charges-list {
+    margin-top: 20px;
+}
+
+.charge-item {
+    background: var(--bg-light);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.charge-info {
+    flex: 1;
+}
+
+.charge-name {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.charge-amount {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--danger);
+}
+
+/* Cleaning/Ménage Components */
+.menage-item {
+    background: #f0f8ff;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #27AE60;
+}
+
+.menage-date {
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 5px;
+}
+
+.menage-detail {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.cleaning-week-table {
+    width: 100%;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.cleaning-week-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%);
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.cleaning-week-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid #e5e7eb;
+}
+
+.cleaning-column {
+    padding: 0;
+}
+
+.cleaning-column-header {
+    padding: 15px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.cleaning-column-header.couzon {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.cleaning-item {
+    padding: 15px;
+    border-bottom: 1px solid #e5e7eb;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cleaning-item:last-child {
+    border-bottom: none;
+}
+
+.cleaning-item.empty {
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    font-style: italic;
+    background: #f9fafb;
+}
+
+.cleaning-date-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cleaning-date {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.95rem;
+}
+
+.validation-status {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.validation-status.validated {
+    background: #10b981;
+    color: white;
+}
+
+.validation-status.pending {
+    background: #f97316;
+    color: white;
+}
+
+.validation-status.notvalidated {
+    background: #ef4444;
+    color: white;
+}
+
+.cleaning-details {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.cleaning-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+@media (max-width: 900px) {
+    .cleaning-week-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Blocked Dates */
+.dates-blocked {
+    background: #FCF3CF;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #7D6608;
+}
