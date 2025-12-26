@@ -989,6 +989,8 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             const currentYear = new Date().getFullYear();
             
             const select = document.getElementById('yearFilterStats');
+            if (!select) return; // Élément pas encore chargé
+            
             select.innerHTML = '';
             
             sortedYears.forEach(year => {
@@ -1047,13 +1049,22 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
             document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             event.target.classList.add('active');
-            if (tabName === 'statistiques') updateAllCharts();
+            if (tabName === 'statistiques') {
+                populateYearFilter(); // Peupler le filtre des années
+                updateAllCharts();
+            }
             if (tabName === 'archives') updateArchivesDisplay();
             if (tabName === 'charges') {
                 updateChargesDisplay();
                 initChargeForm(); // Initialiser le formulaire charges après chargement
             }
             if (tabName === 'menage') afficherPlanningParSemaine();
+            if (tabName === 'infos-gites') {
+                // Charger les infos pratiques quand l'onglet est activé
+                if (typeof chargerInfosPratiques === 'function') {
+                    chargerInfosPratiques();
+                }
+            }
         }
         
         function showRulesModal() {
