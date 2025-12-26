@@ -180,15 +180,18 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
         
         <!-- Navigation -->
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="switchTab('reservations')">📝 Réservations</button>
-            <button class="nav-tab" onclick="switchTab('statistiques')">📊 Statistiques</button>
-            <button class="nav-tab" onclick="switchTab('charges')">💶 Charges & Rentabilité</button>
-            <button class="nav-tab" onclick="switchTab('menage')">
+            <button class="nav-tab" data-tab="gestion">⚙️ Gestion iCal</button>
+            <button class="nav-tab" data-tab="reservations">📝 Réservations</button>
+            <button class="nav-tab" data-tab="archives">📦 Archives</button>
+            <button class="nav-tab" data-tab="statistiques">📊 Statistiques</button>
+            <button class="nav-tab" data-tab="charges">💶 Charges & Rentabilité</button>
+            <button class="nav-tab" data-tab="menage">
                 🧹 Planning Ménage
                 <span id="cleaning-notif-badge" style="display:none; background:#e74c3c; color:white; border-radius:50%; padding:2px 6px; margin-left:5px; font-size:0.8em; font-weight:bold;">0</span>
             </button>
-            <button class="nav-tab" onclick="switchTab('infos-gites')">📝 Infos Pratiques</button>
-            <button class="nav-tab" onclick="switchTab('decouvrir')">🗺️ À Découvrir</button>
+            <button class="nav-tab" data-tab="infos-gites">📝 Infos Pratiques</button>
+            <button class="nav-tab" data-tab="decouvrir">🗺️ À Découvrir</button>
+            <button class="nav-tab" data-tab="sauvegarde">💾 Sauvegarde</button>
         </div>
         
 
