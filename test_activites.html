@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Activités</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #16213e;
+            padding: 30px;
+            border-radius: 12px;
+        }
+        .btn {
+            padding: 12px 24px;
+            margin: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #5568d3;
+        }
+        #resultats {
+            margin-top: 30px;
+            padding: 20px;
+            background: #0f3460;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Chargement Activités</h1>
+        
+        <div style="margin: 20px 0;">
+            <button class="btn" onclick="testInitialisation()">1️⃣ Test Initialisation</button>
+            <button class="btn" onclick="testChargement()">2️⃣ Test Chargement Supabase</button>
+            <button class="btn" onclick="testFiltreCafe()">3️⃣ Test Filtre Cafés</button>
+            <button class="btn" onclick="testFiltreRestaurant()">4️⃣ Test Filtre Restaurants</button>
+            <button class="btn" onclick="afficherTout()">📋 Afficher Tout</button>
+        </div>
+
+        <div id="resultats">
+            <p style="color: #888;">Clique sur un bouton pour commencer les tests...</p>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Configuration Supabase
+        const SUPABASE_URL = 'https://eaclmrwczfqqxmgpbqmo.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhY2xtcndjemZxcXhtZ3BicW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NjM4NDUsImV4cCI6MjA1MDUzOTg0NX0.oWnZf_T9VFUP13VGDzW4RaEdXHyYn1-vVPOVOlZeHbU';
+        
+        window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Initialiser comme dans decouvrir.js
+        if (!window.activitesParGite) {
+            window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
+        }
+        
+        function log(message, type = 'info') {
+            const resultats = document.getElementById('resultats');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            resultats.innerHTML += `\n[${timestamp}] ${icon} ${message}`;
+            resultats.scrollTop = resultats.scrollHeight;
+        }
+        
+        function testInitialisation() {
+            document.getElementById('resultats').innerHTML = '';
+            log('=== TEST INITIALISATION ===');
+            log(`window.activitesParGite existe : ${!!window.activitesParGite}`);
+            log(`Trévoux : ${window.activitesParGite['Trévoux'].length} activités`);
+            log(`Couzon : ${window.activitesParGite['Couzon'].length} activités`);
+            log('Test terminé', 'success');
+        }
+        
+        async function testChargement() {
+            document.getElementById('resultats').innerHTML = '';
+            log('=== TEST CHARGEMENT SUPABASE ===');
+            
+            try {
+                log('Connexion à Supabase...');
+                const { data, error } = await window.supabaseClient
+                    .from('activites_gites')
+                    .select('*')
+                    .order('categorie', { ascending: true });
+                
+                if (error) throw error;
+                
+                log(`✓ ${data.length} activités chargées depuis Supabase`);
+                
+                window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
+                data.forEach(act => {
+                    if (window.activitesParGite[act.gite]) {
+                        window.activitesParGite[act.gite].push(act);
+                    }
+                });
+                
+                log(`Trévoux : ${window.activitesParGite['Trévoux'].length} activités`);
+                log(`Couzon : ${window.activitesParGite['Couzon'].length} activités`);
+                
+                // Compter par catégorie
+                const categoriesTrevoux = {};
+                const categoriesCouzon = {};
+                
+                window.activitesParGite['Trévoux'].forEach(act => {
+                    categoriesTrevoux[act.categorie] = (categoriesTrevoux[act.categorie] || 0) + 1;
+                });
+                
+                window.activitesParGite['Couzon'].forEach(act => {
+                    categoriesCouzon[act.categorie] = (categoriesCouzon[act.categorie] || 0) + 1;
+                });
+                
+                log('\n📊 CATÉGORIES TRÉVOUX:');
+                Object.keys(categoriesTrevoux).forEach(cat => {
+                    log(`  • ${cat}: ${categoriesTrevoux[cat]}`);
+                });
+                
+                log('\n📊 CATÉGORIES COUZON:');
+                Object.keys(categoriesCouzon).forEach(cat => {
+                    log(`  • ${cat}: ${categoriesCouzon[cat]}`);
+                });
+                
+                log('\nTest terminé', 'success');
+                
+            } catch (error) {
+                log(`Erreur : ${error.message}`, 'error');
+            }
+        }
+        
+        function testFiltreCafe() {
+            document.getElementById('resultats').innerHTML = '';
+            log('=== TEST FILTRE CAFÉS ===');
+            
+            const motCle = 'Café';
+            const toutesActivites = [
+                ...window.activitesParGite['Trévoux'],
+                ...window.activitesParGite['Couzon']
+            ];
+            
+            log(`Total activités : ${toutesActivites.length}`);
+            log(`Recherche de "${motCle}"...`);
+            
+            const filtrees = toutesActivites.filter(act => 
+                act.categorie.toLowerCase().includes(motCle.toLowerCase())
+            );
+            
+            log(`${filtrees.length} activités trouvées`);
+            
+            if (filtrees.length > 0) {
+                log('\n📝 LISTE:');
+                filtrees.slice(0, 10).forEach(act => {
+                    log(`  • ${act.nom} (${act.gite}) - ${act.categorie}`);
+                });
+                if (filtrees.length > 10) {
+                    log(`  ... et ${filtrees.length - 10} autres`);
+                }
+            }
+            
+            log('\nTest terminé', 'success');
+        }
+        
+        function testFiltreRestaurant() {
+            document.getElementById('resultats').innerHTML = '';
+            log('=== TEST FILTRE RESTAURANTS ===');
+            
+            const motCle = 'Restaurant';
+            const toutesActivites = [
+                ...window.activitesParGite['Trévoux'],
+                ...window.activitesParGite['Couzon']
+            ];
+            
+            log(`Total activités : ${toutesActivites.length}`);
+            log(`Recherche de "${motCle}"...`);
+            
+            const filtrees = toutesActivites.filter(act => 
+                act.categorie.toLowerCase().includes(motCle.toLowerCase())
+            );
+            
+            log(`${filtrees.length} activités trouvées`);
+            
+            if (filtrees.length > 0) {
+                log('\n📝 LISTE:');
+                filtrees.slice(0, 10).forEach(act => {
+                    log(`  • ${act.nom} (${act.gite}) - ${act.categorie}`);
+                });
+                if (filtrees.length > 10) {
+                    log(`  ... et ${filtrees.length - 10} autres`);
+                }
+            }
+            
+            log('\nTest terminé', 'success');
+        }
+        
+        function afficherTout() {
+            document.getElementById('resultats').innerHTML = '';
+            log('=== AFFICHER TOUT ===');
+            
+            const toutesActivites = [
+                ...window.activitesParGite['Trévoux'],
+                ...window.activitesParGite['Couzon']
+            ];
+            
+            log(`Total : ${toutesActivites.length} activités\n`);
+            
+            // Grouper par catégorie
+            const parCategorie = {};
+            toutesActivites.forEach(act => {
+                if (!parCategorie[act.categorie]) {
+                    parCategorie[act.categorie] = [];
+                }
+                parCategorie[act.categorie].push(act);
+            });
+            
+            Object.keys(parCategorie).sort().forEach(cat => {
+                log(`\n${cat} (${parCategorie[cat].length})`);
+                parCategorie[cat].slice(0, 3).forEach(act => {
+                    log(`  • ${act.nom} - ${act.gite}`);
+                });
+                if (parCategorie[cat].length > 3) {
+                    log(`  ... et ${parCategorie[cat].length - 3} autres`);
+                }
+            });
+            
+            log('\nTest terminé', 'success');
+        }
+        
+        // Auto-initialisation
+        log('🚀 Page de test chargée');
+        log('Clique sur "Test Chargement Supabase" pour commencer');
+    </script>
+</body>
+</html>
