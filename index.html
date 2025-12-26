@@ -1524,9 +1524,12 @@
                 });
                 // Pour les données historiques, on ne peut pas compter les réservations individuelles
                 totalReservations = '-';
-                document.getElementById('statTotal').textContent = totalReservations;
-                document.getElementById('statTrevoux').textContent = '-';
-                document.getElementById('statCouzon').textContent = '-';
+                const statTotalEl = document.getElementById('statTotal');
+                const statTrevouxEl = document.getElementById('statTrevoux');
+                const statCouzonEl = document.getElementById('statCouzon');
+                if (statTotalEl) statTotalEl.textContent = totalReservations;
+                if (statTrevouxEl) statTrevouxEl.textContent = '-';
+                if (statCouzonEl) statCouzonEl.textContent = '-';
             } else {
                 // Utiliser les réservations automatiques
                 console.log('✓ Utilisation des réservations automatiques pour', selectedYear);
@@ -1544,16 +1547,20 @@
                 
                 totalReservations = trevoux.length + couzon.length;
                 
-                document.getElementById('statTotal').textContent = totalReservations;
-                document.getElementById('statTrevoux').textContent = trevoux.length;
-                document.getElementById('statCouzon').textContent = couzon.length;
+                const statTotalEl = document.getElementById('statTotal');
+                const statTrevouxEl = document.getElementById('statTrevoux');
+                const statCouzonEl = document.getElementById('statCouzon');
+                if (statTotalEl) statTotalEl.textContent = totalReservations;
+                if (statTrevouxEl) statTrevouxEl.textContent = trevoux.length;
+                if (statCouzonEl) statCouzonEl.textContent = couzon.length;
                 
                 // Mettre à jour les compteurs par plateforme et statistiques avancées
                 updatePlatformCounters(filteredReservations);
                 updateAdvancedStats(filteredReservations);
             }
             
-            document.getElementById('statCA').textContent = caTotal.toFixed(0) + ' €';
+            const statCAEl = document.getElementById('statCA');
+            if (statCAEl) statCAEl.textContent = caTotal.toFixed(0) + ' €';
             
             // Générer les checkboxes de comparaison d'années
             generateYearComparisonCheckboxes(reservations, historicalData);
