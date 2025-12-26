@@ -902,3 +902,299 @@ window.rechercherEvenements = rechercherEvenements;
 window.clearAllData = clearAllData;
 window.saveInfosGiteToSupabase = saveInfosGiteToSupabase;
 window.loadInfosGiteFromSupabase = loadInfosGiteFromSupabase;
+
+// ==========================================
+// 🎯 GESTION INFOS PRATIQUES FORMULAIRE
+// ==========================================
+
+// Variable globale pour le gîte actuellement sélectionné
+let currentGiteInfos = 'Trévoux';
+const DB_KEY_INFOS = 'gites_infos_pratiques_complet';
+
+// Sélection du gîte
+window.selectGiteInfos = async function(gite) {
+    // Sauvegarder les données actuelles
+    sauvegarderDonneesInfos();
+    
+    // Changer le gîte
+    currentGiteInfos = gite;
+    
+    // Mettre à jour l'UI des boutons
+    const btnTrevoux = document.getElementById('btnTrevoux');
+    const btnCouzon = document.getElementById('btnCouzon');
+    if (btnTrevoux) {
+        btnTrevoux.style.background = gite === 'Trévoux' ? 'white' : 'rgba(255,255,255,0.2)';
+        btnTrevoux.style.color = gite === 'Trévoux' ? '#667eea' : 'white';
+    }
+    if (btnCouzon) {
+        btnCouzon.style.background = gite === 'Couzon' ? 'white' : 'rgba(255,255,255,0.2)';
+        btnCouzon.style.color = gite === 'Couzon' ? '#667eea' : 'white';
+    }
+    
+    // Charger les données du nouveau gîte
+    await chargerDonneesInfos();
+    
+    if (typeof showNotification === 'function') {
+        showNotification(`Gîte ${gite} sélectionné`, 'success');
+    }
+};
+
+function sauvegarderDonneesInfos() {
+    const formData = {
+        // Section 1: Base (FR)
+        adresse: document.getElementById('infos_adresse')?.value || '',
+        telephone: document.getElementById('infos_telephone')?.value || '',
+        gpsLat: document.getElementById('infos_gpsLat')?.value || '',
+        gpsLon: document.getElementById('infos_gpsLon')?.value || '',
+        email: document.getElementById('infos_email')?.value || '',
+        // Section 1: Base (EN)
+        adresse_en: document.getElementById('infos_adresse_en')?.value || '',
+        telephone_en: document.getElementById('infos_telephone_en')?.value || '',
+        email_en: document.getElementById('infos_email_en')?.value || '',
+        
+        // Section 2: WiFi (FR)
+        wifiSSID: document.getElementById('infos_wifiSSID')?.value || '',
+        wifiPassword: document.getElementById('infos_wifiPassword')?.value || '',
+        wifiDebit: document.getElementById('infos_wifiDebit')?.value || '',
+        wifiLocalisation: document.getElementById('infos_wifiLocalisation')?.value || '',
+        wifiZones: document.getElementById('infos_wifiZones')?.value || '',
+        // Section 2: WiFi (EN)
+        wifiSSID_en: document.getElementById('infos_wifiSSID_en')?.value || '',
+        wifiPassword_en: document.getElementById('infos_wifiPassword_en')?.value || '',
+        wifiDebit_en: document.getElementById('infos_wifiDebit_en')?.value || '',
+        wifiLocalisation_en: document.getElementById('infos_wifiLocalisation_en')?.value || '',
+        wifiZones_en: document.getElementById('infos_wifiZones_en')?.value || '',
+        
+        // Section 3: Arrivée (FR)
+        heureArrivee: document.getElementById('infos_heureArrivee')?.value || '',
+        arriveeTardive: document.getElementById('infos_arriveeTardive')?.value || '',
+        parkingDispo: document.getElementById('infos_parkingDispo')?.value || '',
+        parkingPlaces: document.getElementById('infos_parkingPlaces')?.value || '',
+        parkingDetails: document.getElementById('infos_parkingDetails')?.value || '',
+        typeAcces: document.getElementById('infos_typeAcces')?.value || '',
+        codeAcces: document.getElementById('infos_codeAcces')?.value || '',
+        instructionsCles: document.getElementById('infos_instructionsCles')?.value || '',
+        etage: document.getElementById('infos_etage')?.value || '',
+        ascenseur: document.getElementById('infos_ascenseur')?.value || '',
+        itineraireLogement: document.getElementById('infos_itineraireLogement')?.value || '',
+        premiereVisite: document.getElementById('infos_premiereVisite')?.value || '',
+        // Section 3: Arrivée (EN)
+        heureArrivee_en: document.getElementById('infos_heureArrivee_en')?.value || '',
+        arriveeTardive_en: document.getElementById('infos_arriveeTardive_en')?.value || '',
+        parkingDispo_en: document.getElementById('infos_parkingDispo_en')?.value || '',
+        parkingPlaces_en: document.getElementById('infos_parkingPlaces_en')?.value || '',
+        parkingDetails_en: document.getElementById('infos_parkingDetails_en')?.value || '',
+        typeAcces_en: document.getElementById('infos_typeAcces_en')?.value || '',
+        codeAcces_en: document.getElementById('infos_codeAcces_en')?.value || '',
+        instructionsCles_en: document.getElementById('infos_instructionsCles_en')?.value || '',
+        etage_en: document.getElementById('infos_etage_en')?.value || '',
+        ascenseur_en: document.getElementById('infos_ascenseur_en')?.value || '',
+        itineraireLogement_en: document.getElementById('infos_itineraireLogement_en')?.value || '',
+        premiereVisite_en: document.getElementById('infos_premiereVisite_en')?.value || '',
+        
+        // Section 4: Logement (FR)
+        typeChauffage: document.getElementById('infos_typeChauffage')?.value || '',
+        climatisation: document.getElementById('infos_climatisation')?.value || '',
+        instructionsChauffage: document.getElementById('infos_instructionsChauffage')?.value || '',
+        equipementsCuisine: document.getElementById('infos_equipementsCuisine')?.value || '',
+        instructionsFour: document.getElementById('infos_instructionsFour')?.value || '',
+        instructionsPlaques: document.getElementById('infos_instructionsPlaques')?.value || '',
+        instructionsLaveVaisselle: document.getElementById('infos_instructionsLaveVaisselle')?.value || '',
+        instructionsLaveLinge: document.getElementById('infos_instructionsLaveLinge')?.value || '',
+        secheLinge: document.getElementById('infos_secheLinge')?.value || '',
+        ferRepasser: document.getElementById('infos_ferRepasser')?.value || '',
+        lingeFourni: document.getElementById('infos_lingeFourni')?.value || '',
+        configurationChambres: document.getElementById('infos_configurationChambres')?.value || '',
+        // Section 4: Logement (EN)
+        typeChauffage_en: document.getElementById('infos_typeChauffage_en')?.value || '',
+        climatisation_en: document.getElementById('infos_climatisation_en')?.value || '',
+        instructionsChauffage_en: document.getElementById('infos_instructionsChauffage_en')?.value || '',
+        equipementsCuisine_en: document.getElementById('infos_equipementsCuisine_en')?.value || '',
+        instructionsFour_en: document.getElementById('infos_instructionsFour_en')?.value || '',
+        instructionsPlaques_en: document.getElementById('infos_instructionsPlaques_en')?.value || '',
+        instructionsLaveVaisselle_en: document.getElementById('infos_instructionsLaveVaisselle_en')?.value || '',
+        instructionsLaveLinge_en: document.getElementById('infos_instructionsLaveLinge_en')?.value || '',
+        secheLinge_en: document.getElementById('infos_secheLinge_en')?.value || '',
+        ferRepasser_en: document.getElementById('infos_ferRepasser_en')?.value || '',
+        lingeFourni_en: document.getElementById('infos_lingeFourni_en')?.value || '',
+        configurationChambres_en: document.getElementById('infos_configurationChambres_en')?.value || '',
+        
+        // Section 5: Déchets (FR)
+        instructionsTri: document.getElementById('infos_instructionsTri')?.value || '',
+        joursCollecte: document.getElementById('infos_joursCollecte')?.value || '',
+        decheterie: document.getElementById('infos_decheterie')?.value || '',
+        // Section 5: Déchets (EN)
+        instructionsTri_en: document.getElementById('infos_instructionsTri_en')?.value || '',
+        joursCollecte_en: document.getElementById('infos_joursCollecte_en')?.value || '',
+        decheterie_en: document.getElementById('infos_decheterie_en')?.value || '',
+        
+        // Section 6: Sécurité (FR)
+        detecteurFumee: document.getElementById('infos_detecteurFumee')?.value || '',
+        extincteur: document.getElementById('infos_extincteur')?.value || '',
+        coupureEau: document.getElementById('infos_coupureEau')?.value || '',
+        disjoncteur: document.getElementById('infos_disjoncteur')?.value || '',
+        consignesUrgence: document.getElementById('infos_consignesUrgence')?.value || '',
+        // Section 6: Sécurité (EN)
+        detecteurFumee_en: document.getElementById('infos_detecteurFumee_en')?.value || '',
+        extincteur_en: document.getElementById('infos_extincteur_en')?.value || '',
+        coupureEau_en: document.getElementById('infos_coupureEau_en')?.value || '',
+        disjoncteur_en: document.getElementById('infos_disjoncteur_en')?.value || '',
+        consignesUrgence_en: document.getElementById('infos_consignesUrgence_en')?.value || '',
+        
+        // Section 7: Départ (FR)
+        heureDepart: document.getElementById('infos_heureDepart')?.value || '',
+        departTardif: document.getElementById('infos_departTardif')?.value || '',
+        checklistDepart: document.getElementById('infos_checklistDepart')?.value || '',
+        restitutionCles: document.getElementById('infos_restitutionCles')?.value || '',
+        // Section 7: Départ (EN)
+        heureDepart_en: document.getElementById('infos_heureDepart_en')?.value || '',
+        departTardif_en: document.getElementById('infos_departTardif_en')?.value || '',
+        checklistDepart_en: document.getElementById('infos_checklistDepart_en')?.value || '',
+        restitutionCles_en: document.getElementById('infos_restitutionCles_en')?.value || '',
+        
+        // Section 8: Règlement (FR)
+        tabac: document.getElementById('infos_tabac')?.value || '',
+        animaux: document.getElementById('infos_animaux')?.value || '',
+        nbMaxPersonnes: document.getElementById('infos_nbMaxPersonnes')?.value || '',
+        caution: document.getElementById('infos_caution')?.value || '',
+        // Section 8: Règlement (EN)
+        tabac_en: document.getElementById('infos_tabac_en')?.value || '',
+        animaux_en: document.getElementById('infos_animaux_en')?.value || '',
+        nbMaxPersonnes_en: document.getElementById('infos_nbMaxPersonnes_en')?.value || '',
+        caution_en: document.getElementById('infos_caution_en')?.value || '',
+        
+        dateModification: new Date().toISOString()
+    };
+    
+    // Sauvegarder dans localStorage (backup local)
+    const allData = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
+    allData[currentGiteInfos] = formData;
+    localStorage.setItem(DB_KEY_INFOS, JSON.stringify(allData));
+    
+    // Sauvegarder en base de données Supabase (async)
+    saveInfosGiteToSupabase(currentGiteInfos, formData);
+    
+    if (typeof updateProgressInfos === 'function') {
+        updateProgressInfos();
+    }
+}
+
+async function chargerDonneesInfos() {
+    // Essayer de charger depuis Supabase d'abord
+    const dataFromSupabase = await loadInfosGiteFromSupabase(currentGiteInfos);
+    
+    let data;
+    if (dataFromSupabase) {
+        // Données depuis Supabase
+        data = dataFromSupabase;
+        
+        // Mettre à jour le localStorage aussi
+        const allData = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
+        allData[currentGiteInfos] = data;
+        localStorage.setItem(DB_KEY_INFOS, JSON.stringify(allData));
+    } else {
+        // Fallback sur localStorage
+        const allData = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
+        data = allData[currentGiteInfos] || {};
+    }
+    
+    // Remplir tous les champs
+    Object.keys(data).forEach(key => {
+        const element = document.getElementById('infos_' + key);
+        if (element) {
+            element.value = data[key] || '';
+        }
+    });
+    
+    // Mettre à jour les champs conditionnels
+    if (typeof toggleParkingInfos === 'function') {
+        toggleParkingInfos();
+    }
+    if (typeof updateProgressInfos === 'function') {
+        updateProgressInfos();
+    }
+    
+    // Générer le QR code WiFi si les données sont présentes
+    setTimeout(() => {
+        if (typeof updateQRCodeWifi === 'function') {
+            updateQRCodeWifi();
+        }
+    }, 100);
+}
+
+window.toggleParkingInfos = function() {
+    const parking = document.getElementById('infos_parkingDispo')?.value || '';
+    const showFields = parking && parking !== 'Non';
+    const placesDiv = document.getElementById('parkingPlacesDiv');
+    const detailsDiv = document.getElementById('parkingDetailsDiv');
+    if (placesDiv) placesDiv.style.display = showFields ? 'block' : 'none';
+    if (detailsDiv) detailsDiv.style.display = showFields ? 'block' : 'none';
+};
+
+function updateProgressInfos() {
+    const fields = document.querySelectorAll('#infosGiteForm [required]');
+    let filled = 0;
+    fields.forEach(field => {
+        if (field.value && field.value.trim()) filled++;
+    });
+    const percent = fields.length > 0 ? (filled / fields.length) * 100 : 0;
+    const progressBar = document.getElementById('progressBarInfos');
+    const progressText = document.getElementById('progressText');
+    if (progressBar) progressBar.style.width = percent + '%';
+    if (progressText) progressText.textContent = Math.round(percent) + '%';
+}
+
+window.sauvegarderInfosGiteComplet = function(event) {
+    if (event) event.preventDefault();
+    sauvegarderDonneesInfos();
+    if (typeof showNotification === 'function') {
+        showNotification('✓ Informations sauvegardées pour ' + currentGiteInfos, 'success');
+    }
+};
+
+window.resetGiteInfosQuick = async function() {
+    if (!confirm(`⚠️ ATTENTION !\n\nVoulez-vous vraiment effacer TOUTES les informations du gîte ${currentGiteInfos} ?\n\n✓ Ceci supprimera :\n- Adresse et coordonnées\n- Informations WiFi\n- Instructions d'arrivée\n- Équipements\n- Toutes les autres données\n\n❌ Cette action est IRRÉVERSIBLE !\n\nCliquez sur OK pour confirmer la suppression.`)) {
+        return;
+    }
+    
+    // Supprimer de localStorage
+    const data = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
+    delete data[currentGiteInfos];
+    localStorage.setItem(DB_KEY_INFOS, JSON.stringify(data));
+    
+    // Supprimer de Supabase
+    try {
+        await supabase
+            .from('infos_gites')
+            .delete()
+            .eq('gite', currentGiteInfos.toLowerCase());
+        
+        if (typeof showNotification === 'function') {
+            showNotification(`✓ Toutes les données de ${currentGiteInfos} ont été effacées`, 'success');
+        }
+        
+        // Vider tous les champs du formulaire
+        const form = document.getElementById('infosGiteForm');
+        if (form) {
+            const inputs = form.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.value = '';
+            });
+        }
+        
+        // Recharger les champs vides
+        await chargerDonneesInfos();
+    } catch (error) {
+        console.error('Erreur suppression:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('❌ Erreur lors de la suppression', 'error');
+        }
+    }
+};
+
+
+// Exports supplémentaires
+window.sauvegarderDonneesInfos = sauvegarderDonneesInfos;
+window.chargerDonneesInfos = chargerDonneesInfos;
+window.updateProgressInfos = updateProgressInfos;
+window.currentGiteInfos = 'Trévoux';
