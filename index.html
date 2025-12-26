@@ -2402,6 +2402,18 @@
         function afficherCarteEvenements(evenements) {
             const mapContainer = document.getElementById('mapEvenements');
             
+            // Si aucun événement n'est fourni, utiliser les activités chargées
+            if (!evenements) {
+                const gite = document.getElementById('decouvrir_gite')?.value;
+                if (gite && window.activitesParGite && window.activitesParGite[gite]) {
+                    evenements = window.activitesParGite[gite];
+                    console.log(`📍 Utilisation des activités de ${gite}: ${evenements.length}`);
+                } else {
+                    console.warn('⚠️ Aucun événement fourni et aucun gîte sélectionné');
+                    evenements = [];
+                }
+            }
+            
             // Filtrer les points avec des coordonnées valides
             let evenementsValides = evenements.filter(e => {
                 const isValid = e.lat && e.lng && !isNaN(e.lat) && !isNaN(e.lng) && 
@@ -2413,11 +2425,11 @@
             });
             
             // 🔍 Appliquer le filtre de catégorie s'il est actif
-            if (filtreCategorieActive) {
+            if (window.filtreCategorieActive) {
                 evenementsValides = evenementsValides.filter(e => 
-                    e.categorie && e.categorie.toLowerCase().includes(filtreCategorieActive.toLowerCase())
+                    e.categorie && e.categorie.toLowerCase().includes(window.filtreCategorieActive.toLowerCase())
                 );
-                console.log(`📌 Carte filtrée: ${evenementsValides.length} points pour "${filtreCategorieActive}"`);
+                console.log(`📌 Carte filtrée: ${evenementsValides.length} points pour "${window.filtreCategorieActive}"`);
             }
             
             if (evenementsValides.length === 0) {
