@@ -1,2 +1,150 @@
-<!-- Onglet À Découvrir extrait de index.html -->
-<!-- ...contenu complet à découvrir à compléter... -->
+<!-- Onglet À Découvrir extrait de l'index.html original -->
+<div id="tab-decouvrir" class="tab-content">
+    <!-- SÉLECTEUR DE GÎTE -->
+    <div class="card" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: white;">
+        <div class="card-header" style="border-bottom: 2px solid rgba(255,255,255,0.3);">
+            <span class="card-icon">🗺️</span>
+            <h2 class="card-title">À Découvrir Autour des Gîtes</h2>
+        </div>
+        <div style="padding: 20px;">
+            <p style="font-size: 1.1rem; opacity: 0.95; margin-bottom: 20px;">Activités, restaurants, sites touristiques dans un rayon de 25km • Mise à jour automatique des événements</p>
+            <div style="display: flex; gap: 15px;">
+                <button class="btn" style="background: white; color: #FF6B6B; font-weight: 700; padding: 15px 40px;" onclick="selectGiteDecouvrir('Trévoux')">
+                    🏰 Trévoux
+                </button>
+                <button class="btn" style="background: white; color: #FF6B6B; font-weight: 700; padding: 15px 40px;" onclick="selectGiteDecouvrir('Couzon')">
+                    ⛰️ Couzon
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="formDecouvrir" style="display: none;">
+        <input type="hidden" id="decouvrir_gite">
+        <!-- TITRE GÎTE SÉLECTIONNÉ -->
+        <div class="alert alert-info">
+            <strong>📍 Gîte sélectionné :</strong> <span id="selectedGiteDecouvrir" style="font-weight: 700;"></span>
+        </div>
+
+        <!-- BOUTONS D'ACTION RAPIDE -->
+        <div class="card">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <button type="button" class="btn" style="background: #10b981;" onclick="rechercherAutomatique('restaurants')">
+                    🍽️ Chercher Restaurants
+                </button>
+                <button type="button" class="btn" style="background: #3b82f6;" onclick="rechercherAutomatique('tourist_attraction')">
+                    🏛️ Chercher Sites Touristiques
+                </button>
+                <button type="button" class="btn" style="background: #f59e0b;" onclick="rechercherAutomatique('shopping_mall')">
+                    🛍️ Chercher Commerces
+                </button>
+                <button type="button" class="btn" style="background: #8b5cf6;" onclick="rechercherAutomatique('park')">
+                    🌳 Chercher Parcs/Nature
+                </button>
+                <button type="button" class="btn" style="background: #ef4444;" onclick="rechercherEvenements()">
+                    📅 Événements cette semaine
+                </button>
+                <button type="button" class="btn" style="background: #6b7280;" onclick="afficherTout()">
+                    🗺️ Afficher Tout
+                </button>
+            </div>
+        </div>
+
+        <!-- ÉVÉNEMENTS DE LA SEMAINE -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📅</span>
+                <h2 class="card-title">Événements de la Semaine</h2>
+                <button type="button" class="btn btn-secondary" onclick="refreshEvenements()" style="margin-left: auto; width: 50px; height: 50px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;" title="Actualiser">
+                    🔄
+                </button>
+            </div>
+            <div class="alert alert-info">
+                <strong>📅 Semaine du :</strong> <span id="dateEvenements" style="font-weight: 700;"></span>
+            </div>
+            <!-- Filtre de distance moderne -->
+            <div style="padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                <label style="display: block; margin-bottom: 15px; font-weight: 600; color: white; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.2rem;">📍</span>
+                    <span>Distance maximale depuis le gîte</span>
+                </label>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <input type="range" id="distanceFilter" min="0" max="50" value="50" step="5" 
+                           style="flex: 1; height: 8px; border-radius: 10px; background: rgba(255,255,255,0.3); outline: none; -webkit-appearance: none; appearance: none; cursor: pointer;" 
+                           oninput="updateDistanceLabel()">
+                    <div style="background: white; padding: 10px 20px; border-radius: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); min-width: 100px; text-align: center;">
+                        <span id="distanceLabel" style="font-weight: 700; color: #667eea; font-size: 1.1rem;">≤ 50 km</span>
+                    </div>
+                </div>
+            </div>
+            <div id="mapEvenements" style="height: 500px; border-radius: 12px; margin-bottom: 20px; display: none; z-index: 1;"></div>
+            <div id="evenementsListe" style="display: grid; gap: 15px;">
+                <p style="text-align: center; color: #999; padding: 40px;">
+                    Les événements se chargeront automatiquement...
+                </p>
+            </div>
+        </div>
+
+        <!-- ACTIVITÉS PERMANENTES PAR CATÉGORIE -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">🎯</span>
+                <h2 class="card-title">Activités & Points d'Intérêt</h2>
+            </div>
+            <!-- FILTRES PAR CATÉGORIE -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px;">
+                <button type="button" class="btn" style="background: #27AE60;" onclick="ouvrirModalActivite(false)">
+                    ➕ Ajouter une activité
+                </button>
+                <button type="button" class="btn" style="background: #10b981;" onclick="filtrerActivitesParCategorie('Restaurant')">
+                    🍽️ Restaurants
+                </button>
+                <button type="button" class="btn" style="background: #3b82f6;" onclick="filtrerActivitesParCategorie('Musée')">
+                    🏛️ Musées & Châteaux
+                </button>
+                <button type="button" class="btn" style="background: #f59e0b;" onclick="filtrerActivitesParCategorie('Café')">
+                    ☕ Cafés & Bars
+                </button>
+                <button type="button" class="btn" style="background: #8b5cf6;" onclick="filtrerActivitesParCategorie('Parc')">
+                    🌳 Parcs & Loisirs
+                </button>
+                <button type="button" class="btn" style="background: #ec4899;" onclick="filtrerActivitesParCategorie('Hôtel')">
+                    🏨 Hôtels
+                </button>
+                <button type="button" class="btn" style="background: #6366f1;" onclick="afficherToutesActivites()">
+                    📋 Tous
+                </button>
+            </div>
+            <!-- LISTE DES ACTIVITÉS -->
+            <div id="activitesParCategorie" style="display: grid; gap: 20px;">
+                <p style="text-align: center; color: #999; padding: 40px;">
+                    Sélectionne une catégorie ou "Tous" pour voir les activités...
+                </p>
+            </div>
+        </div>
+
+        <!-- FORMULAIRE D'AJOUT MANUEL (CACHÉ PAR DÉFAUT) -->
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span class="card-icon">➕</span>
+                    <h2 class="card-title">Ajouter une Activité Personnalisée</h2>
+                </div>
+                <button type="button" onclick="toggleFormAjout()" style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(39,174,96,0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Ajouter une activité">
+                    ➕
+                </button>
+            </div>
+            <div style="padding: 24px; display: grid; gap: 20px;">
+                <!-- ...formulaire d'ajout d'activité... -->
+            </div>
+            <div id="activitesParCategorie">
+            </div>
+            <!-- BOUTON GÉNÉRATION GUIDE CLIENT -->
+            <div class="card" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                <button type="button" class="btn" style="width: 100%; padding: 20px; background: none; border: none; color: white; font-size: 1.3rem; font-weight: 700; cursor: pointer;" onclick="genererGuideDecouverte()">
+                    📄 GÉNÉRER LE GUIDE "À DÉCOUVRIR" (PDF)
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
