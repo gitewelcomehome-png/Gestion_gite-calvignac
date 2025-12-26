@@ -11,6 +11,11 @@ let infoWindow = null;
 let directionsService = null;
 let directionsRenderer = null;
 
+// Initialisation des activités par gîte (important pour les filtres)
+if (!window.activitesParGite) {
+    window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
+}
+
 // Coordonnées des gîtes
 const gitesCoordinates = {
     'Trévoux': { lat: 45.9423, lng: 4.7681 },
@@ -714,10 +719,17 @@ async function supprimerActivite(id) {
 }
 
 // ==================== FILTRER ACTIVITÉS PAR CATÉGORIE ====================
-function filtrerActivitesParCategorie(motCle) {
+async function filtrerActivitesParCategorie(motCle) {
     const giteInput = document.getElementById('decouvrir_gite');
     const gite = giteInput?.value;
     const container = document.getElementById('activitesParCategorie');
+    
+    // Vérifier si les activités sont chargées, sinon les charger
+    if (!window.activitesParGite || 
+        (window.activitesParGite['Trévoux'].length === 0 && window.activitesParGite['Couzon'].length === 0)) {
+        showNotification('⏳ Chargement des activités...', 'info');
+        await chargerActivites();
+    }
     
     let activites = [];
     let titre = '';
@@ -742,7 +754,10 @@ function filtrerActivitesParCategorie(motCle) {
     
     if (filtrees.length === 0) {
         const lieu = gite || 'les gîtes';
-        container.innerHTML = `<p style="text-align: center; color: #999; padding: 40px;">Aucune activité "${motCle}" trouvée pour ${lieu}</p>`;
+        container.innerHTML = `<p style="text-align: center; color: #999; padding: 40px;">Aucune activité "${motCle}" trouvée pour ${lieu}. 
+        <br><br><button onclick="chargerActivites()" class="btn" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">
+        🔄 Recharger les activités
+        </button></p>`;
         return;
     }
     
@@ -755,9 +770,17 @@ function filtrerActivitesParCategorie(motCle) {
 }
 
 // ==================== AFFICHER TOUTES LES ACTIVITÉS ====================
-function afficherToutesActivites() {
+async function afficherToutesActivites() {
     const giteInput = document.getElementById('decouvrir_gite');
     const gite = giteInput?.value;
+    
+    // Vérifier si les activités sont chargées, sinon les charger
+    if (!window.activitesParGite || 
+        (window.activitesParGite['Trévoux'].length === 0 && window.activitesParGite['Couzon'].length === 0)) {
+        showNotification('⏳ Chargement des activités...', 'info');
+        await chargerActivites();
+        return; // chargerActivites() appelera déjà afficherToutesLesActivites()
+    }
     
     let activites = [];
     let titre = '';
