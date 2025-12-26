@@ -365,12 +365,20 @@
         // Charger les URLs dans les champs du formulaire
         function chargerUrlsIcal() {
             const configs = getIcalConfigs();
-            document.getElementById('icalAirbnbCouzon').value = configs.couzon.airbnb;
-            document.getElementById('icalAbritelCouzon').value = configs.couzon.abritel;
-            document.getElementById('icalGitesCouzon').value = configs.couzon.gitesDeFrance;
-            document.getElementById('icalAirbnbTrevoux').value = configs.trevoux.airbnb;
-            document.getElementById('icalAbritelTrevoux').value = configs.trevoux.abritel;
-            document.getElementById('icalGitesTrevoux').value = configs.trevoux.gitesDeFrance;
+            // Vérifier que les éléments existent avant de les modifier
+            const airbnbCouzon = document.getElementById('icalAirbnbCouzon');
+            const abritelCouzon = document.getElementById('icalAbritelCouzon');
+            const gitesCouzon = document.getElementById('icalGitesCouzon');
+            const airbnbTrevoux = document.getElementById('icalAirbnbTrevoux');
+            const abritelTrevoux = document.getElementById('icalAbritelTrevoux');
+            const gitesTrevoux = document.getElementById('icalGitesTrevoux');
+            
+            if (airbnbCouzon) airbnbCouzon.value = configs.couzon.airbnb;
+            if (abritelCouzon) abritelCouzon.value = configs.couzon.abritel;
+            if (gitesCouzon) gitesCouzon.value = configs.couzon.gitesDeFrance;
+            if (airbnbTrevoux) airbnbTrevoux.value = configs.trevoux.airbnb;
+            if (abritelTrevoux) abritelTrevoux.value = configs.trevoux.abritel;
+            if (gitesTrevoux) gitesTrevoux.value = configs.trevoux.gitesDeFrance;
         }
         
         // Sauvegarder les URLs depuis le formulaire
