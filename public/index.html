@@ -14,10 +14,12 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <style> @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;600;700&display=swap');*{margin:0;padding:0;box-sizing:border-box;}
-:root{--primary:#2C5F7D;--primary-dark:#1A3A4D;--accent:#E8A87C;--accent-light:#F5D5B8;--bg-light:#F8F9FA;--text-dark:#2C3E50;--success:#27AE60;--trevoux:#667eea;--couzon:#f093fb;--border:#E0E4E8;--warning:#F39C12;--danger:#E74C3C;--airbnb:#FF5A5F;--abritel:#3498DB;--gites:#27AE60;}
 body{font-family:'Work Sans',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;color:var(--text-dark);}
 .container{max-width:1600px;margin:0 auto;}
 header{text-align:center;margin-bottom:40px;color:white;}
+</style>
+</head>
+<body>
 h1{font-family:'Playfair Display',serif;font-size:3rem;margin-bottom:10px;text-shadow:2px 2px 4px rgba(0,0,0,0.2);}
 .subtitle{font-size:1.1rem;opacity:0.95;font-weight:300;}
 .nav-tabs{display:flex;gap:10px;margin-bottom:30px;flex-wrap:wrap;justify-content:center;}
@@ -105,123 +107,17 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
 .cleaning-column-header{padding:15px;text-align:center;font-weight:700;font-size:1rem;color:white;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);}
 .cleaning-column-header.couzon{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);}
 .cleaning-item{padding:15px;border-bottom:1px solid #e5e7eb;min-height:80px;display:flex;flex-direction:column;gap:8px;}
-.cleaning-item:last-child{border-bottom:none;}
-.cleaning-item.empty{justify-content:center;align-items:center;color:#999;font-style:italic;background:#f9fafb;}
-.cleaning-date-row{display:flex;justify-content:space-between;align-items:center;}
-.cleaning-date{font-weight:600;color:#0f172a;font-size:0.95rem;}
-.validation-status{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:bold;}
-.validation-status.validated{background:#10b981;color:white;}
-.validation-status.pending{background:#f97316;color:white;}
-.validation-status.notvalidated{background:#ef4444;color:white;}
-.cleaning-details{font-size:0.85rem;color:#6b7280;}
-.cleaning-actions{display:flex;gap:8px;margin-top:5px;}
-.btn-small{padding:6px 12px;font-size:0.8rem;border-radius:6px;border:none;cursor:pointer;font-weight:600;background:#f3f4f6;color:#374151;}
-.btn-small:hover{background:#e5e7eb;}
-@media (max-width:900px){.cleaning-week-body{grid-template-columns:1fr;}}
-.reservation-item{background:var(--bg-light);padding:15px;border-radius:10px;margin-bottom:10px;border-left:4px solid var(--primary);}
-.reservation-item.trevoux{border-left-color:var(--trevoux);}
-.reservation-item.couzon{border-left-color:var(--couzon);}
-.reservation-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.reservation-name{font-weight:600;font-size:1.1rem;color:var(--primary);}
-.reservation-actions{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
-.badge-platform{padding:4px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;color:white;}
-.badge-airbnb{background:var(--airbnb);}
-.badge-abritel{background:var(--abritel);}
-.badge-gites{background:var(--gites);}
-.toast{position:fixed;top:30px;right:30px;background:var(--success);color:white;padding:20px 30px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);display:none;align-items:center;gap:15px;z-index:1000;animation:slideIn 0.3s ease;max-width:400px;}
-@keyframes slideIn{from{transform:translateX(400px);opacity:0;}
-to{transform:translateX(0);opacity:1;}
-}
-.toast.show{display:flex;}
-.required{color:#E74C3C;}
-.alert{padding:15px 20px;border-radius:10px;margin-bottom:20px;font-weight:500;}
-.alert-info{background:#D6EAF8;color:#1F618D;border-left:4px solid #3498DB;}
-.alert-warning{background:#FCF3CF;color:#7D6608;border-left:4px solid var(--warning);}
-.alert-success{background:#D5F4E6;color:#0E6655;border-left:4px solid var(--success);}
-.dates-blocked{background:#FCF3CF;padding:10px 15px;border-radius:8px;margin-top:10px;font-size:0.9rem;color:#7D6608;}
-select.inline-edit{padding:5px 10px;font-size:0.9rem;width:auto;min-width:150px;}
-input.inline-edit{padding:5px 10px;font-size:0.9rem;width:auto;min-width:100px;}
-.sync-progress{margin-top:20px;padding:15px;background:var(--bg-light);border-radius:10px;display:none;}
-.sync-progress.show{display:block;}
-.progress-item{padding:8px 0;font-size:0.95rem;}
-.progress-item.success{color:var(--success);}
-.progress-item.error{color:var(--danger);}
-.spinner{display:inline-block;width:16px;height:16px;border:3px solid rgba(0,0,0,0.1);border-radius:50%;border-top-color:var(--primary);animation:spin 1s ease-in-out infinite;}
-@keyframes spin{to{transform:rotate(360deg);}
-}
-.modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);animation:fadeIn 0.3s ease;}
-.modal.show{display:flex;align-items:center;justify-content:center;}
-.modal-content{background:white;padding:30px;border-radius:20px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;animation:slideUp 0.3s ease;}
-@keyframes fadeIn{from{opacity:0;}
-to{opacity:1;}
-}
-@keyframes slideUp{from{transform:translateY(50px);opacity:0;}
-to{transform:translateY(0);opacity:1;}
-}
-body{font-family:'Work Sans',sans-serif;background:radial-gradient(circle at 0% 0%,rgba(255,255,255,0.08),transparent 55%),radial-gradient(circle at 100% 0%,rgba(232,168,124,0.18),transparent 55%),linear-gradient(135deg,#111827 0%,#1f2937 45%,#020617 100%);min-height:100vh;padding:32px 16px;color:var(--text-dark);}
-.container{max-width:1500px;margin:0 auto;}
-header{text-align:center;margin-bottom:32px;color:#e5e7eb;}
-h1{font-size:2.6rem;letter-spacing:0.04em;}
-.subtitle{font-size:1rem;opacity:0.9;}
-.nav-tabs{background:rgba(15,23,42,0.65);border-radius:999px;padding:6px;border:1px solid rgba(148,163,184,0.45);box-shadow:0 18px 45px rgba(15,23,42,0.55);}
-.nav-tab{position:relative;padding:10px 18px;border-radius:999px;font-size:0.9rem;letter-spacing:0.02em;text-transform:uppercase;background:transparent;color:#e5e7eb;border:none;box-shadow:none;}
-.nav-tab::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at top left,rgba(148,163,184,0.2),transparent 65%);opacity:0;transition:opacity 0.25s ease;z-index:-1;}
-.nav-tab:hover::before{opacity:1;}
-.nav-tab.active{background:linear-gradient(135deg,#38bdf8 0%,#6366f1 45%,#ec4899 100%);color:white;box-shadow:0 10px 30px rgba(56,189,248,0.35);transform:translateY(-1px);}
-.tab-content{opacity:0;transform:translateY(6px);transition:opacity 0.3s ease,transform 0.3s ease;}
-.tab-content.active{opacity:1;transform:translateY(0);}
-.card,.stats-section{background:radial-gradient(circle at top left,rgba(255,255,255,0.98),rgba(248,250,252,0.98));border-radius:24px;padding:28px 28px 26px;box-shadow:0 22px 60px rgba(15,23,42,0.32),0 0 0 1px rgba(148,163,184,0.35);border:none;position:relative;overflow:hidden;}
-.card::after,.stats-section::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 0% 0%,rgba(56,189,248,0.08),transparent 55%),radial-gradient(circle at 100% 100%,rgba(236,72,153,0.05),transparent 55%);opacity:0.9;pointer-events:none;z-index:-1;}
-.card-header{border-bottom:1px solid rgba(148,163,184,0.45);padding-bottom:16px;margin-bottom:18px;}
-.card-icon{font-size:2.1rem;}
-.card-title{font-size:1.5rem;color:#0f172a;}
-.form-group label{color:#0f172a;font-size:0.9rem;}
-input,select,textarea{border-radius:12px;border:1px solid rgba(148,163,184,0.75);background:rgba(255,255,255,0.9);transition:border-color 0.2s ease,box-shadow 0.2s ease,background 0.2s ease;}
-input:focus,select:focus,textarea:focus{border-color:#38bdf8;box-shadow:0 0 0 1px rgba(56,189,248,0.6);background:#ffffff;}
-.btn{border-radius:999px;font-size:0.95rem;padding:11px 18px;letter-spacing:0.03em;text-transform:uppercase;box-shadow:0 12px 30px rgba(15,23,42,0.28);}
-.btn-primary{background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 45%,#ec4899 100%);}
-.btn-secondary{background:linear-gradient(135deg,#f97316 0%,#f59e0b 40%,#facc15 100%);color:#111827;}
-.btn-sync{background:linear-gradient(135deg,#22c55e 0%,#16a34a 45%,#15803d 100%);}
-.btn-menage{background:linear-gradient(135deg,#22c55e 0%,#14b8a6 45%,#0ea5e9 100%);}
-.btn-danger{background:linear-gradient(135deg,#ef4444 0%,#b91c1c 55%);}
-.btn-warning{background:linear-gradient(135deg,#facc15 0%,#eab308 55%);color:#111827;}
-.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 16px 38px rgba(15,23,42,0.4);}
-.stats-grid{gap:18px;}
-.stat-item{border-radius:18px;background:linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,64,175,0.98));box-shadow:0 18px 40px rgba(15,23,42,0.55);}
-.stat-value{font-size:2.1rem;}
-.stat-label{font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;}
-.gite-label.trevoux-label{background:linear-gradient(135deg,#4a5568 0%,#2d3748 100%);}
-.gite-label.couzon-label{background:linear-gradient(135deg,#5a67d8 0%,#4c51bf 100%);}
-.week-block{border-radius:22px;}
-.week-header-unique{background:linear-gradient(135deg,#0f172a 0%,#1f2937 40%,#111827 100%);}
-.week-empty{background:rgba(248,250,252,0.7);color:#6b7280;}
-.week-reservation{border-bottom:1px dashed rgba(148,163,184,0.6);}
-.week-reservation:last-child{border-bottom:none;}
-.week-reservation-name{color:#0f172a;}
-.week-reservation-details{color:#4b5563;}
-.reservation-item{background:radial-gradient(circle at top left,rgba(248,250,252,0.98),rgba(241,245,249,0.98));border-radius:18px;border-left-width:4px;}
-.badge-platform{border-radius:999px;}
-.alert{border-radius:14px;border:1px solid rgba(148,163,184,0.4);}
-.toast{border-radius:18px;box-shadow:0 18px 40px rgba(15,23,42,0.6);}
-.modal-content{border-radius:22px;box-shadow:0 26px 60px rgba(15,23,42,0.7);}
-@media (max-width:900px){body{padding:18px 10px 26px;}
-h1{font-size:2.1rem;}
-.card,.stats-section{padding:22px 18px 20px;}
-.nav-tabs{border-radius:18px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;}
-}
-.card-header{display:flex;align-items:center;gap:12px;}
-.card-header .card-title{flex:1;}
-.card-icon{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;margin-right:4px;font-size:1.6rem;background:radial-gradient(circle at 0% 0%,rgba(248,250,252,0.9),transparent 55%),linear-gradient(135deg,#0ea5e9 0%,#6366f1 40%,#ec4899 100%);color:#0b1120;box-shadow:0 10px 25px rgba(15,23,42,0.35),0 0 0 1px rgba(15,23,42,0.55);}
-.card-icon::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at 30% 0%,rgba(255,255,255,0.8),transparent 55%);opacity:0.5;pointer-events:none;}
-.card-icon{position:relative;overflow:hidden;}
-.platform-airbnb{color:var(--airbnb);font-weight:600;font-size:0.9em;}
-.platform-abritel{color:var(--abritel);font-weight:600;font-size:0.9em;}
-.platform-gites{color:var(--gites);font-weight:600;font-size:0.9em;}
-.badge-platform{display:inline-flex;align-items:center;gap:6px;padding-inline:10px;padding-block:4px;border-radius:999px;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;background:radial-gradient(circle at 0% 0%,rgba(248,250,252,0.9),transparent 55%),linear-gradient(135deg,#0ea5e9 0%,#22c55e 60%,#facc15 100%);color:#0b1120;box-shadow:0 8px 20px rgba(15,23,42,0.35);border:1px solid rgba(15,23,42,0.4);}
-.badge-platform::before{content:"";width:8px;height:8px;border-radius:999px;background:rgba(34,197,94,1);box-shadow:0 0 0 4px rgba(34,197,94,0.35);}
-</style>
-</head>
+    </head>
 <body>
+    <div id="tab-gestion" class="tab-content"></div>
+    <div id="tab-reservations" class="tab-content"></div>
+    <div id="tab-archives" class="tab-content"></div>
+    <div id="tab-statistiques" class="tab-content"></div>
+    <div id="tab-charges" class="tab-content"></div>
+    <div id="tab-menage" class="tab-content"></div>
+    <div id="tab-infos-gites" class="tab-content"></div>
+    <div id="tab-decouvrir" class="tab-content"></div>
+    <div id="tab-sauvegarde" class="tab-content"></div>
     <!-- Cadre bouton commit info -->
     <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
         <div style="display: inline-block; position: relative;">
@@ -235,11 +131,33 @@ h1{font-size:2.1rem;}
         </div>
     </div>
     <script>
-        const btn = document.getElementById('commitInfoBtn');
-        const tooltip = document.getElementById('commitInfoTooltip');
-        btn.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
-        btn.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+    const btn = document.getElementById('commitInfoBtn');
+    const tooltip = document.getElementById('commitInfoTooltip');
+    btn.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
+    btn.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+    // Chargement dynamique des onglets
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabFiles = {
+            'tab-gestion': 'tabs/tab-gestion.html',
+            'tab-reservations': 'tabs/tab-reservations.html',
+            'tab-archives': 'tabs/tab-archives.html',
+            'tab-statistiques': 'tabs/tab-statistiques.html',
+            'tab-charges': 'tabs/tab-charges.html',
+            'tab-menage': 'tabs/tab-menage.html',
+            'tab-infos-gites': 'tabs/tab-infos-gites.html',
+            'tab-decouvrir': 'tabs/tab-decouvrir.html',
+            'tab-sauvegarde': 'tabs/tab-sauvegarde.html',
+        };
+        for (const [tabId, file] of Object.entries(tabFiles)) {
+            fetch(file)
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById(tabId).innerHTML = html;
+                });
+        }
+    });
     </script>
+    </body>
     <div class="container">
         <header style="position: relative;">
             <!-- Menu Actions en haut à droite -->
@@ -479,23 +397,7 @@ h1{font-size:2.1rem;}
                                 </thead>
                                 <tbody>
                                     <!-- Cadre bouton commit info -->
-                                    <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
-                                        <div style="display: inline-block; position: relative;">
-                                            <button id="commitInfoBtn" style="padding: 8px 16px; border-radius: 8px; background: #1976d2; color: white; border: none; cursor: pointer; font-weight: bold;">Dernier commit</button>
-                                            <div id="commitInfoTooltip" style="display: none; position: absolute; top: 110%; left: 0; background: #fff; color: #222; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); padding: 12px; min-width: 320px; font-size: 0.95em;">
-                                                <strong>Commit :</strong> e1b285f<br>
-                                                <strong>Date :</strong> 2025-12-26 09:59:26 +0100<br>
-                                                <strong>Message :</strong> rollback<br>
-                                                <strong>Résumé :</strong> Ajout d'un bouton en haut de la page qui affiche la date, l'heure et le message du dernier commit au survol.<br>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <script>
-                                        const btn = document.getElementById('commitInfoBtn');
-                                        const tooltip = document.getElementById('commitInfoTooltip');
-                                        btn.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
-                                        btn.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
-                                    </script>
+
                                     <tr>
                                         <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">Janvier</td>
                                         <td style="padding: 10px; border: 1px solid #ddd;">
