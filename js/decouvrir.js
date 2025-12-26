@@ -456,7 +456,16 @@ async function chargerActivites() {
             // Petit délai pour s'assurer que le DOM est prêt
             setTimeout(() => {
                 console.log('🎯 Appel de afficherActivites() après délai...');
-                afficherActivites(giteSelectionne);
+                const container = document.getElementById('activitesParCategorie');
+                console.log('📦 Container trouvé ?', container ? 'OUI ✅' : 'NON ❌');
+                if (container) {
+                    console.log('📦 Container innerHTML avant:', container.innerHTML.substring(0, 100));
+                }
+                try {
+                    afficherActivites(giteSelectionne);
+                } catch (e) {
+                    console.error('💥 ERREUR dans afficherActivites():', e);
+                }
             }, 100);
         } else {
             console.log('Aucun gîte sélectionné, affichage de tous');
