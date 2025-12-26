@@ -615,11 +615,19 @@ function afficherToutesLesActivites() {
 
 // ==================== AFFICHER LES ACTIVITÉS ====================
 function afficherActivites(gite) {
-    const activites = window.activitesParGite[gite] || [];
     const container = document.getElementById('activitesParCategorie');
     
+    // Vérifier que le container existe
+    if (!container) {
+        console.error('❌ Element #activitesParCategorie introuvable !');
+        return;
+    }
+    
+    const activites = window.activitesParGite[gite] || [];
+    console.log(`📊 Affichage de ${activites.length} activités pour ${gite}`);
+    
     if (activites.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune activité enregistrée pour ce gîte</p>';
+        container.innerHTML = '<div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%); border-radius: 16px; border: 2px dashed #ef4444;"><div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div><p style="color: #ef4444; font-size: 1.2rem; font-weight: 600;">Aucune activité enregistrée pour ce gîte</p></div>';
         return;
     }
     
@@ -631,6 +639,8 @@ function afficherActivites(gite) {
         }
         parCategorie[act.categorie].push(act);
     });
+    
+    console.log(`📂 ${Object.keys(parCategorie).length} catégories trouvées:`, Object.keys(parCategorie));
     
     let html = `<h3 style="color: white; font-size: 1.6rem; margin-bottom: 24px; text-align: center; padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">✨ Toutes les activités à ${gite} <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activites.length}</span></h3>`;
     
@@ -656,7 +666,7 @@ function afficherActivites(gite) {
                 <div data-activite-id="${act.id}" style="background: white; border: none; padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease; position: relative;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 10px 28px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'">
                     <!-- Badge catégorie -->
                     <div style="display: inline-block; background: ${colors.badge}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                        ${act.categorie}
+                        ${cat}
                     </div>
                     
                     <!-- Titre et boutons -->
@@ -708,7 +718,9 @@ function afficherActivites(gite) {
         html += `</div></div>`;
     });
     
+    console.log('✍️ Injection HTML dans le DOM...');
     container.innerHTML = html;
+    console.log('✅ Affichage terminé !');
 }
 
 // ==================== SUPPRIMER UNE ACTIVITÉ ====================
