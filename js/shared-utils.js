@@ -162,6 +162,8 @@ function getWeekDates(year, weekNum) {
 function handleQuickAction(action) {
     if (action === 'archives') {
         window.switchTab('archives');
+    } else if (action === 'ical') {
+        window.switchTab('gestion');
     }
 }
 
