@@ -2418,11 +2418,13 @@
             let evenementsValides = evenements.filter(e => {
                 const isValid = e.lat && e.lng && !isNaN(e.lat) && !isNaN(e.lng) && 
                                isFinite(e.lat) && isFinite(e.lng);
-                if (!isValid) {
-                    console.warn('⚠️ Coordonnées invalides pour:', e.nom || e.titre, e.lat, e.lng);
-                }
                 return isValid;
             });
+            
+            const nbInvalides = evenements.length - evenementsValides.length;
+            if (nbInvalides > 0) {
+                console.log(`ℹ️ ${nbInvalides} activité(s) sans coordonnées GPS (non affichées sur la carte)`);
+            }
             
             // 🔍 Appliquer le filtre de catégorie s'il est actif
             if (window.filtreCategorieActive) {
