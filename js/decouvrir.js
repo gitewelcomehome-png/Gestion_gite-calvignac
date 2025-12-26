@@ -420,6 +420,10 @@ function afficherItineraireModal() {
 // ==================== CHARGER LES ACTIVITÉS ====================
 async function chargerActivites() {
     try {
+        // Mettre à jour le compteur
+        const counter = document.getElementById('activitesCounter');
+        if (counter) counter.innerHTML = '⏳ Chargement...';
+
         const { data, error } = await window.supabaseClient
             .from('activites_gites')
             .select('*')
@@ -435,18 +439,30 @@ async function chargerActivites() {
                 }
             });
             console.log('Activités chargées:', window.activitesParGite);
+            
+            // Mettre à jour le compteur
+            const totalTrevoux = window.activitesParGite['Trévoux'].length;
+            const totalCouzon = window.activitesParGite['Couzon'].length;
+            const total = totalTrevoux + totalCouzon;
+            if (counter) {
+                counter.innerHTML = `✅ ${total} activités (🏰 ${totalTrevoux} • ⛰️ ${totalCouzon})`;
+            }
         }
         
-        // Afficher si un gîte est sélectionné, sinon afficher Trévoux par défaut
+        // Afficher automatiquement les activités du gîte sélectionné
         const giteSelectionne = document.getElementById('decouvrir_gite')?.value;
         if (giteSelectionne) {
+            console.log('Affichage automatique pour:', giteSelectionne);
             afficherActivites(giteSelectionne);
         } else {
-            // Afficher les deux gîtes si aucun n'est sélectionné
+            console.log('Aucun gîte sélectionné, affichage de tous');
             afficherToutesLesActivites();
         }
     } catch (error) {
         console.error('Erreur chargement activités:', error);
+        const counter = document.getElementById('activitesCounter');
+        if (counter) counter.innerHTML = '❌ Erreur';
+        showNotification('❌ Erreur lors du chargement des activités', 'error');
     }
 }
 

@@ -140,9 +140,15 @@
 
                 <!-- ACTIVITÉS PERMANENTES PAR CATÉGORIE -->
                 <div class="card">
-                    <div class="card-header">
-                        <span class="card-icon">🎯</span>
-                        <h2 class="card-title">Activités & Points d'Intérêt</h2>
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span class="card-icon">🎯</span>
+                            <h2 class="card-title">Activités & Points d'Intérêt</h2>
+                        </div>
+                        <!-- Compteur d'activités en temps réel -->
+                        <div id="activitesCounter" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
+                            ⏳ Chargement...
+                        </div>
                     </div>
                     
                     <!-- FILTRES PAR CATÉGORIE -->
@@ -171,10 +177,15 @@
                     </div>
                     
                     <!-- LISTE DES ACTIVITÉS -->
-                    <div id="activitesParCategorie" style="display: grid; gap: 20px;">
-                        <p style="text-align: center; color: #999; padding: 40px;">
-                            Sélectionne une catégorie ou "Tous" pour voir les activités...
-                        </p>
+                    <div id="activitesParCategorie" style="display: grid; gap: 20px; min-height: 200px;">
+                        <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); border-radius: 16px; border: 2px dashed #667eea;">
+                            <div style="font-size: 3rem; margin-bottom: 20px;">🔄</div>
+                            <p style="color: #667eea; font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;">Chargement des activités...</p>
+                            <p style="color: #999; font-size: 0.95rem;">Cliquez sur "📋 Tous" ou une catégorie pour afficher</p>
+                            <button onclick="afficherActivites(document.getElementById('decouvrir_gite')?.value || 'Trévoux');" style="margin-top: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
+                                🔄 Afficher maintenant
+                            </button>
+                        </div>
                     </div>
                 </div>
 
