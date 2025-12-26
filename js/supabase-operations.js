@@ -65,7 +65,7 @@ async function addReservation(reservation) {
             throw new Error('Dates invalides');
         }
         
-        const result = await window.supabase
+        const result = await window.supabaseClient
             .from('reservations')
             .insert(data)
             .select()
@@ -92,7 +92,7 @@ async function getAllReservations(forceRefresh) {
     
     try {
         console.log('🔄 Fetching reservations from Supabase...');
-        const result = await window.supabase
+        const result = await window.supabaseClient
             .from('reservations')
             .select('*')
             .order('date_debut', { ascending: true });
@@ -149,7 +149,7 @@ async function updateReservation(id, updates) {
         if (updates.restant !== undefined) data.restant = parseFloat(updates.restant);
         if (updates.paiement !== undefined) data.paiement = updates.paiement;
         
-        const result = await window.supabase
+        const result = await window.supabaseClient
             .from('reservations')
             .update(data)
             .eq('id', id);
@@ -166,7 +166,7 @@ async function updateReservation(id, updates) {
 
 async function deleteReservation(id) {
     try {
-        const result = await window.supabase
+        const result = await window.supabaseClient
             .from('reservations')
             .delete()
             .eq('id', id);
@@ -195,7 +195,7 @@ async function addCharge(charge) {
             gite: charge.gite || null
         };
         
-        const result = await window.supabase
+        const result = await window.supabaseClient
             .from('charges')
             .insert(data)
             .select()
@@ -222,7 +222,7 @@ async function getAllCharges(forceRefresh) {
     
     try {
         console.log('🔄 Fetching charges from Supabase...');
-        const result = await window.supabase
+        const result = await window.supabaseClient
             .from('charges')
             .select('*')
             .order('created_at', { ascending: false });
@@ -243,7 +243,7 @@ async function getAllCharges(forceRefresh) {
 
 async function deleteCharge(id) {
     try {
-        const result = await window.supabase
+        const result = await window.supabaseClient
             .from('charges')
             .delete()
             .eq('id', id);
@@ -264,7 +264,7 @@ async function deleteCharge(id) {
 
 async function getHistoricalData(year, gite) {
     try {
-        const { data, error } = await window.supabase
+        const { data, error } = await window.supabaseClient
             .from('historical_data')
             .select('*')
             .eq('year', year)
@@ -281,7 +281,7 @@ async function getHistoricalData(year, gite) {
 
 async function getAllHistoricalData() {
     try {
-        const { data, error } = await window.supabase
+        const { data, error } = await window.supabaseClient
             .from('historical_data')
             .select('*')
             .order('year', { ascending: false });
@@ -296,7 +296,7 @@ async function getAllHistoricalData() {
 
 async function deleteHistoricalDataById(id) {
     try {
-        const { error } = await window.supabase
+        const { error } = await window.supabaseClient
             .from('historical_data')
             .delete()
             .eq('id', id);
