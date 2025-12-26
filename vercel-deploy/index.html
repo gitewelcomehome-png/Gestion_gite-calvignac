@@ -254,6 +254,17 @@ h1{font-size:2.1rem;}
             <button class="nav-tab" onclick="switchTab('infos-gites')">📝 Infos Pratiques</button>
             <button class="nav-tab" onclick="switchTab('decouvrir')">🗺️ À Découvrir</button>
         </div>
+
+        <!-- Conteneurs dynamiques pour chaque onglet -->
+        <div id="tab-gestion" class="tab-content"></div>
+        <div id="tab-reservations" class="tab-content"></div>
+        <div id="tab-archives" class="tab-content"></div>
+        <div id="tab-statistiques" class="tab-content"></div>
+        <div id="tab-charges" class="tab-content"></div>
+        <div id="tab-menage" class="tab-content"></div>
+        <div id="tab-infos-gites" class="tab-content"></div>
+        <div id="tab-decouvrir" class="tab-content"></div>
+        <div id="tab-sauvegarde" class="tab-content"></div>
         
         <!-- ONGLET GESTION iCAL -->
         <div id="tab-gestion" class="tab-content">
@@ -8691,6 +8702,29 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             document.head.appendChild(style);
         }
         
+    </script>
+    <!-- Chargement dynamique des onglets (compatible Vercel) -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabFiles = {
+            'tab-gestion': '/tabs/tab-gestion.html',
+            'tab-reservations': '/tabs/tab-reservations.html',
+            'tab-archives': '/tabs/tab-archives.html',
+            'tab-statistiques': '/tabs/tab-statistiques.html',
+            'tab-charges': '/tabs/tab-charges.html',
+            'tab-menage': '/tabs/tab-menage.html',
+            'tab-infos-gites': '/tabs/tab-infos-gites.html',
+            'tab-decouvrir': '/tabs/tab-decouvrir.html',
+            'tab-sauvegarde': '/tabs/tab-sauvegarde.html',
+        };
+        for (const [tabId, file] of Object.entries(tabFiles)) {
+            fetch(file)
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById(tabId).innerHTML = html;
+                });
+        }
+    });
     </script>
 </body>
 </html>
