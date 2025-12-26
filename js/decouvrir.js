@@ -715,14 +715,25 @@ async function supprimerActivite(id) {
 
 // ==================== FILTRER ACTIVITÉS PAR CATÉGORIE ====================
 function filtrerActivitesParCategorie(motCle) {
-    const gite = document.getElementById('decouvrir_gite')?.value;
-    if (!gite) {
-        showNotification('⚠️ Sélectionne d\'abord un gîte', 'warning');
-        return;
-    }
-    
-    const activites = window.activitesParGite[gite] || [];
+    const giteInput = document.getElementById('decouvrir_gite');
+    const gite = giteInput?.value;
     const container = document.getElementById('activitesParCategorie');
+    
+    let activites = [];
+    let titre = '';
+    
+    // Si un gîte est sélectionné, filtrer uniquement celui-ci
+    if (gite) {
+        activites = window.activitesParGite[gite] || [];
+        titre = `${motCle} à ${gite}`;
+    } else {
+        // Sinon, chercher dans les deux gîtes
+        activites = [
+            ...(window.activitesParGite['Trévoux'] || []),
+            ...(window.activitesParGite['Couzon'] || [])
+        ];
+        titre = `${motCle} - Tous les gîtes`;
+    }
     
     // Filtrer par mot-clé dans la catégorie
     const filtrees = activites.filter(act => 
@@ -730,13 +741,14 @@ function filtrerActivitesParCategorie(motCle) {
     );
     
     if (filtrees.length === 0) {
-        container.innerHTML = `<p style="text-align: center; color: #999; padding: 40px;">Aucune activité "${motCle}" trouvée pour ${gite}</p>`;
+        const lieu = gite || 'les gîtes';
+        container.innerHTML = `<p style="text-align: center; color: #999; padding: 40px;">Aucune activité "${motCle}" trouvée pour ${lieu}</p>`;
         return;
     }
     
     // 🗺️ Mettre à jour le filtre et la carte
     window.filtreCategorieActive = motCle;
-    afficherActivitesFiltrées(filtrees, `${motCle} à ${gite}`);
+    afficherActivitesFiltrées(filtrees, titre);
     
     // 📍 Afficher uniquement les activités filtrées sur la carte
     afficherCarteEvenements();
@@ -744,17 +756,28 @@ function filtrerActivitesParCategorie(motCle) {
 
 // ==================== AFFICHER TOUTES LES ACTIVITÉS ====================
 function afficherToutesActivites() {
-    const gite = document.getElementById('decouvrir_gite')?.value;
-    if (!gite) {
-        showNotification('⚠️ Sélectionne d\'abord un gîte', 'warning');
-        return;
-    }
+    const giteInput = document.getElementById('decouvrir_gite');
+    const gite = giteInput?.value;
     
-    const activites = window.activitesParGite[gite] || [];
+    let activites = [];
+    let titre = '';
+    
+    // Si un gîte est sélectionné, afficher uniquement celui-ci
+    if (gite) {
+        activites = window.activitesParGite[gite] || [];
+        titre = `Toutes les activités à ${gite}`;
+    } else {
+        // Sinon, afficher les deux gîtes
+        activites = [
+            ...(window.activitesParGite['Trévoux'] || []),
+            ...(window.activitesParGite['Couzon'] || [])
+        ];
+        titre = 'Toutes les activités - Tous les gîtes';
+    }
     
     // 🗺️ Réinitialiser le filtre et afficher toutes les activités
     window.filtreCategorieActive = null;
-    afficherActivitesFiltrées(activites, `Toutes les activités à ${gite}`);
+    afficherActivitesFiltrées(activites, titre);
     
     // 📍 Afficher tous les marqueurs sur la carte
     afficherCarteEvenements();
