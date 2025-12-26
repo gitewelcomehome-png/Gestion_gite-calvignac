@@ -435,16 +435,29 @@ async function chargerActivites() {
             window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
             data.forEach(act => {
                 // Mapper les noms de colonnes pour compatibilité
-                if (act.latitude && !act.lat) act.lat = act.latitude;
-                if (act.longitude && !act.lng) act.lng = act.longitude;
-                if (act.distance_km && !act.distance) act.distance = act.distance_km;
-                if (act.type && !act.categorie) act.categorie = act.type;
-                if (act.phone && !act.telephone) act.telephone = act.phone;
+                if (act.latitude !== undefined && act.lat === undefined) act.lat = act.latitude;
+                if (act.longitude !== undefined && act.lng === undefined) act.lng = act.longitude;
+                if (act.distance_km !== undefined && act.distance === undefined) act.distance = act.distance_km;
+                if (act.type !== undefined && act.categorie === undefined) act.categorie = act.type;
+                if (act.phone !== undefined && act.telephone === undefined) act.telephone = act.phone;
                 
                 if (window.activitesParGite[act.gite]) {
                     window.activitesParGite[act.gite].push(act);
                 }
             });
+            
+            // Log pour debug
+            const premiereTrevoux = window.activitesParGite['Trévoux'][0];
+            if (premiereTrevoux) {
+                console.log('🔍 Exemple activité Trévoux:', {
+                    nom: premiereTrevoux.nom,
+                    lat: premiereTrevoux.lat,
+                    lng: premiereTrevoux.lng,
+                    latitude: premiereTrevoux.latitude,
+                    longitude: premiereTrevoux.longitude
+                });
+            }
+            
             console.log('Activités chargées:', window.activitesParGite);
             
             // Mettre à jour le compteur

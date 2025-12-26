@@ -2570,6 +2570,13 @@
             rechercherEvenements();
         }
         
+        // Mettre à jour le label de distance pour la carte
+        function updateDistanceLabelCarte() {
+            const distance = document.getElementById('distanceFilterCarte')?.value || 25;
+            const label = document.getElementById('distanceLabelCarte');
+            if (label) label.textContent = `≤ ${distance} km`;
+        }
+        
         // Afficher tous les points sur la carte
         function afficherTout() {
             if (window.allEvenements && window.allEvenements.length > 0) {
