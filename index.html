@@ -1492,7 +1492,7 @@
                             📅 ${formatDate(r.dateDebut)} → ${formatDate(r.dateFin)} (${r.nuits} nuits)
                         </div>
                         <div style="margin-top: 8px; font-size: 0.9rem;">
-                            💰 ${r.montant.toFixed(2)} € | Statut: ${r.paiement}
+                            💰 ${r.montant ? r.montant.toFixed(2) : '0.00'} € | Statut: ${r.paiement}
                         </div>
                     </div>
                 `;
@@ -2078,12 +2078,12 @@
                         <div class="charge-info">
                             <div class="charge-name">${c.nom} - ${c.gite}</div>
                             <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">
-                                ${c.type.charAt(0).toUpperCase() + c.type.slice(1)} | ${formatDate(c.date)}
+                                ${c.type ? (c.type.charAt(0).toUpperCase() + c.type.slice(1)) : 'Autre'} | ${formatDate(c.date)}
                                 ${c.notes ? '<br>' + c.notes : ''}
                             </div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 15px;">
-                            <div class="charge-amount">${c.montant.toFixed(2)} €</div>
+                            <div class="charge-amount">${c.montant ? c.montant.toFixed(2) : '0.00'} €</div>
                             <button class="btn btn-danger btn-small" onclick="deleteChargeById(${c.id})">🗑️</button>
                         </div>
                     </div>
