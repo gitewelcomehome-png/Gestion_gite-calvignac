@@ -1945,6 +1945,8 @@ input::placeholder,textarea::placeholder{color:#94a3b8;font-style:italic;}
         
         function generateYearComparisonCheckboxes(reservations, historicalData) {
             const container = document.getElementById('yearComparisonCheckboxes');
+            if (!container) return; // Conteneur pas encore chargé
+            
             const allYears = new Set();
             const yearsWithReservations = new Set();
             const yearsWithTotal = new Set();
