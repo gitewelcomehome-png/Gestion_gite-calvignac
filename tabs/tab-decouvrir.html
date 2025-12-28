@@ -74,7 +74,7 @@
                                     <button 
                                         class="btn-filtre-cat" 
                                         data-categorie="tous"
-                                        onclick="filtrerCarteParcategorie('tous')"
+                                        onclick="filtrerCarteParcategorie('tous'); return false;"
                                         style="
                                             width: 100%;
                                             padding: 8px 12px;
@@ -96,7 +96,7 @@
                                     <button 
                                         class="btn-filtre-cat" 
                                         data-categorie="Restaurant"
-                                        onclick="filtrerCarteParcategorie('Restaurant')"
+                                        onclick="filtrerCarteParcategorie('Restaurant'); return false;"
                                         style="
                                             width: 100%;
                                             padding: 8px 12px;
@@ -118,7 +118,7 @@
                                     <button 
                                         class="btn-filtre-cat" 
                                         data-categorie="Musée"
-                                        onclick="filtrerCarteParcategorie('Musée')"
+                                        onclick="filtrerCarteParcategorie('Musée'); return false;"
                                         style="
                                             width: 100%;
                                             padding: 8px 12px;
@@ -140,7 +140,7 @@
                                     <button 
                                         class="btn-filtre-cat" 
                                         data-categorie="Parc"
-                                        onclick="filtrerCarteParcategorie('Parc')"
+                                        onclick="filtrerCarteParcategorie('Parc'); return false;"
                                         style="
                                             width: 100%;
                                             padding: 8px 12px;
@@ -162,7 +162,7 @@
                                     <button 
                                         class="btn-filtre-cat" 
                                         data-categorie="Bar"
-                                        onclick="filtrerCarteParcategorie('Bar')"
+                                        onclick="filtrerCarteParcategorie('Bar'); return false;"
                                         style="
                                             width: 100%;
                                             padding: 8px 12px;
@@ -184,7 +184,7 @@
                                     <button 
                                         class="btn-filtre-cat" 
                                         data-categorie="Santé"
-                                        onclick="filtrerCarteParcategorie('Santé')"
+                                        onclick="filtrerCarteParcategorie('Santé'); return false;"
                                         style="
                                             width: 100%;
                                             padding: 8px 12px;
@@ -206,7 +206,7 @@
                                     <button 
                                         class="btn-filtre-cat" 
                                         data-categorie="Alimentation"
-                                        onclick="filtrerCarteParcategorie('Alimentation')"
+                                        onclick="filtrerCarteParcategorie('Alimentation'); return false;"
                                         style="
                                             width: 100%;
                                             padding: 8px 12px;
@@ -240,7 +240,7 @@
                                     max="50" 
                                     value="50" 
                                     style="flex: 1; height: 6px; cursor: pointer;"
-                                    onchange="updateDistanceLabelCarte()"
+                                    oninput="updateDistanceLabelCarte()"
                                 />
                                 <span id="distanceLabelCarte" style="
                                     color: white;
@@ -256,7 +256,7 @@
                             
                             <!-- Bouton actualiser -->
                             <button 
-                                onclick="chargerToutSurCarte()"
+                                onclick="chargerToutSurCarte(); return false;"
                                 style="
                                     width: 100%;
                                     padding: 10px;
