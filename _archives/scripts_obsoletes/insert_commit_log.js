@@ -1,74 +1,57 @@
-// Script Node.js pour insérer un commit dans Supabase
-// Usage: node insert_commit_log.js <ref> <resume>
-// Exemple: node insert_commit_log.js abc1234 "Ajout de nouvelles fonctionnalités"
+#!/usr/bin/env node
 
-const https = require('https');
+/**
+ * Script d'insertion du dernier commit Git dans Supabase
+ * Appelé automatiquement par log_commit.sh après chaque commit
+ */
 
-const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+const { createClient } = require('@supabase/supabase-js');
+const { execSync } = require('child_process');
 
-async function insertCommitLog(commit_ref, resume) {
-    const data = JSON.stringify({
-        commit_ref: commit_ref,
-        commit_date: new Date().toISOString(),
-        resume: resume
-    });
+// Configuration Supabase
+const SUPABASE_URL = 'https://eaclmrwczfqqxmgpbqmo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhY2xtcndjemZxcXhtZ3BicW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NjM4NDUsImV4cCI6MjA1MDUzOTg0NX0.oWnZf_T9VFUP13VGDzW4RaEdXHyYn1-vVPOVOlZeHbU';
 
-    const url = new URL('/rest/v1/commits_log', SUPABASE_URL);
-    
-    const options = {
-        hostname: url.hostname,
-        path: url.pathname,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Prefer': 'return=representation'
-        }
-    };
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    return new Promise((resolve, reject) => {
-        const req = https.request(options, (res) => {
-            let body = '';
-            res.on('data', (chunk) => body += chunk);
-            res.on('end', () => {
-                if (res.statusCode >= 200 && res.statusCode < 300) {
-                    console.log('✅ Commit enregistré dans Supabase');
-                    console.log('   Ref:', commit_ref);
-                    console.log('   Résumé:', resume);
-                    resolve(body);
-                } else {
-                    console.error('❌ Erreur Supabase:', res.statusCode, body);
-                    reject(new Error(`HTTP ${res.statusCode}: ${body}`));
+async function insertLastCommit() {
+    try {
+        // Récupérer les infos du dernier commit
+        const commitRef = execSync('git log -1 --format=%h').toString().trim();
+        const commitDate = execSync('git log -1 --format=%ai').toString().trim();
+        const resume = execSync('git log -1 --format=%s').toString().trim();
+        const author = execSync('git log -1 --format=%an').toString().trim();
+        
+        console.log('📝 Commit à enregistrer:');
+        console.log(`  Ref: ${commitRef}`);
+        console.log(`  Date: ${commitDate}`);
+        console.log(`  Auteur: ${author}`);
+        console.log(`  Résumé: ${resume}`);
+        
+        // Insérer dans Supabase
+        const { data, error } = await supabase
+            .from('commits_log')
+            .insert([
+                {
+                    commit_ref: commitRef,
+                    commit_date: commitDate,
+                    resume: resume,
+                    author: author
                 }
-            });
-        });
-
-        req.on('error', (err) => {
-            console.error('❌ Erreur réseau:', err.message);
-            reject(err);
-        });
-
-        req.write(data);
-        req.end();
-    });
-}
-
-// Utilisation : node insert_commit_log.js <ref> <resume>
-if (require.main === module) {
-    const [,, ref, ...resumeArr] = process.argv;
-    if (!ref || resumeArr.length === 0) {
-        console.error('Usage: node insert_commit_log.js <ref> <resume>');
-        console.error('Exemple: node insert_commit_log.js abc1234 "Correction de bugs"');
+            ]);
+        
+        if (error) {
+            console.error('❌ Erreur insertion Supabase:', error.message);
+            process.exit(1);
+        }
+        
+        console.log('✅ Commit enregistré dans Supabase');
+        process.exit(0);
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error.message);
         process.exit(1);
     }
-    const resume = resumeArr.join(' ');
-    insertCommitLog(ref, resume).catch((err) => {
-        console.error('Échec:', err.message);
-        process.exit(1);
-    });
 }
 
-module.exports = { insertCommitLog };
-
+insertLastCommit();

@@ -189,6 +189,26 @@ async function chargerPOIsFromSupabase(giteActuel) {
         
         const pois = data || [];
         
+        // Mapper les noms de colonnes pour compatibilité
+        pois.forEach(poi => {
+            if (poi.latitude !== undefined && poi.lat === undefined) poi.lat = poi.latitude;
+            if (poi.longitude !== undefined && poi.lng === undefined) poi.lng = poi.longitude;
+            if (poi.distance !== undefined && poi.distance_km === undefined) poi.distance_km = poi.distance;
+            if (poi.categorie !== undefined && poi.type === undefined) poi.type = poi.categorie;
+            if (poi.telephone !== undefined && poi.phone === undefined) poi.phone = poi.telephone;
+            if (poi.nom !== undefined && poi.name === undefined) poi.name = poi.nom;
+        });
+        
+        console.log(`✅ ${pois.length} POIs chargés pour ${giteActuel}`);
+        if (pois.length > 0) {
+            console.log('🔍 Premier POI:', {
+                nom: pois[0].nom,
+                lat: pois[0].lat,
+                lng: pois[0].lng,
+                categorie: pois[0].categorie
+            });
+        }
+        
         // Ajouter chaque POI sur la carte
         pois.forEach(poi => {
             ajouterMarqueurPOI(poi, giteActuel);
@@ -434,12 +454,13 @@ async function chargerActivites() {
         if (data) {
             window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
             data.forEach(act => {
-                // Mapper les noms de colonnes pour compatibilité
+                // Mapper les noms de colonnes pour compatibilité (DB utilise categorie, distance, telephone)
                 if (act.latitude !== undefined && act.lat === undefined) act.lat = act.latitude;
                 if (act.longitude !== undefined && act.lng === undefined) act.lng = act.longitude;
-                if (act.distance_km !== undefined && act.distance === undefined) act.distance = act.distance_km;
-                if (act.type !== undefined && act.categorie === undefined) act.categorie = act.type;
-                if (act.phone !== undefined && act.telephone === undefined) act.telephone = act.phone;
+                if (act.distance !== undefined && act.distance_km === undefined) act.distance_km = act.distance;
+                if (act.categorie !== undefined && act.type === undefined) act.type = act.categorie;
+                if (act.telephone !== undefined && act.phone === undefined) act.phone = act.telephone;
+                if (act.nom !== undefined && act.name === undefined) act.name = act.nom;
                 
                 if (window.activitesParGite[act.gite]) {
                     window.activitesParGite[act.gite].push(act);
@@ -504,60 +525,71 @@ async function chargerActivites() {
 // ==================== CHARGER TOUT SUR LA CARTE ====================
 async function chargerToutSurCarte() {
     const gite = document.getElementById('decouvrir_gite').value;
-    if (!gite) return;
+    if (!gite) {
+        showNotification('⚠️ Veuillez sélectionner un gîte', 'warning');
+        return;
+    }
     
     showNotification('🗺️ Chargement de la carte...', 'info');
     
     // 1. Charger UNIQUEMENT les événements
     await rechercherEvenements();
     
-    // 2. Charger les activités Supabase SÉPARÉMENT pour la carte
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('activites_gites')
-            .select('*')
-            .eq('gite', gite);
-        
-        console.log('📊 Activités chargées:', data ? data.length : 0);
-        
-        if (!error && data && data.length > 0) {
-            // Créer tableau séparé pour les activités (pas mélangé avec événements)
-            window.allActivites = data.map(act => ({
-                titre: act.nom,
-                nom: act.nom,
-                date: null,
-                lieu: act.adresse,
-                adresse: act.adresse,
-                description: act.description,
-                lien: act.website,
-                icone: '📍',
-                distance: act.distance || 0,
-                lat: parseFloat(act.latitude),
-                lng: parseFloat(act.longitude),
-                note: act.note,
-                categorie: act.categorie,
-                isActivite: true  // Marqueur pour différencier des événements
-            })).filter(a => a.lat && a.lng);  // Garder seulement ceux avec coordonnées
-            
-            console.log('✅ Activités chargées pour carte:', window.allActivites.length);
+    // 2. Récupérer les activités déjà chargées pour ce gîte
+    const activitesGite = window.activitesParGite[gite] || [];
+    console.log(`📊 Activités ${gite} disponibles:`, activitesGite.length);
+    
+    // Mapper les activités pour la carte avec coordonnées valides
+    window.allActivites = activitesGite
+        .filter(act => act.lat && act.lng && !isNaN(act.lat) && !isNaN(act.lng))
+        .map(act => ({
+            titre: act.nom,
+            nom: act.nom,
+            date: null,
+            lieu: act.adresse,
+            adresse: act.adresse,
+            description: act.description,
+            lien: act.website,
+            icone: '📍',
+            distance: act.distance || 0,
+            lat: parseFloat(act.lat),
+            lng: parseFloat(act.lng),
+            note: act.note,
+            categorie: act.categorie,
+            telephone: act.telephone,
+            isActivite: true
+        }));
+    
+    console.log(`✅ ${window.allActivites.length} activités avec coordonnées valides pour la carte`);
+    
+    if (window.allActivites.length === 0) {
+        showNotification('⚠️ Aucune activité avec coordonnées valides', 'warning');
+        // Afficher quand même les événements s'il y en a
+        if (window.allEvenements && window.allEvenements.length > 0) {
+            afficherCarteEvenements(window.allEvenements);
         }
-    } catch (error) {
-        console.error('Erreur chargement activités:', error);
+        return;
     }
     
-    // 3. Afficher activités dans la section dédiée
-    afficherActivites(gite);
+    // 3. Réinitialiser le filtre de distance à 50km pour tout voir
+    const distanceFilter = document.getElementById('distanceFilter');
+    if (distanceFilter) {
+        distanceFilter.value = 50;
+        updateDistanceLabel();
+    }
     
-    // Réinitialiser le filtre de distance à 50km pour tout voir
-    document.getElementById('distanceFilter').value = 50;
-    updateDistanceLabel();
+    // 4. Afficher TOUT sur la carte (événements + activités)
+    const toutSurCarte = [
+        ...(window.allEvenements || []),
+        ...(window.allActivites || [])
+    ];
     
-    // Afficher TOUT sur la carte (événements + activités)
-    const toutSurCarte = [...window.allEvenements, ...(window.allActivites || [])];
+    console.log(`🗺️ Affichage sur carte: ${toutSurCarte.length} points (${window.allEvenements?.length || 0} événements + ${window.allActivites?.length || 0} activités)`);
+    
     afficherCarteEvenements(toutSurCarte);
     filtrerEvenements();
     
-    showNotification(`✓ Carte et activités chargées`, 'success');
+    showNotification(`✓ ${window.allActivites.length} activités + ${window.allEvenements?.length || 0} événements chargés`, 'success');
 }
 
 // ==================== OBTENIR COULEUR CATÉGORIE ====================
