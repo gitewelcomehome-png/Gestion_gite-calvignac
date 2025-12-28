@@ -1,0 +1,2887 @@
+🔍 Analyse complète des coordonnées...
+
+✅ 875 activités récupérées
+
+
+📊 ANALYSE DES DOUBLONS (> 3 activités au même endroit)
+
+⚠️ 118 positions problématiques détectées
+
+
+================================================================================
+🔴 DOUBLON 1: 43 activités aux coordonnées 45.9394,4.7728
+📍 Google Maps: https://www.google.com/maps?q=45.9394,4.7728
+================================================================================
+   1. Zoo du Parc de la Tête d'Or (Trévoux)
+      Adresse: Parc Tête d'Or, 69006 Lyon
+      ID: 51
+   2. Parc des Oiseaux - Villars-les-Dombes (Trévoux)
+      Adresse: RD 1083, 01330 Villars-les-Dombes
+      ID: 55
+   3. Touroparc Zoo (Trévoux)
+      Adresse: 400 Rue du Parc, 71570 Romanèche-Thorins
+      ID: 56
+   4. Parc Animalier Château de Moidière (Trévoux)
+      Adresse: Bonnefamille, 38090
+      ID: 58
+   5. Pharmacie de Trévoux (Trévoux)
+      Adresse: Centre-ville, 01600 Trévoux
+      ID: 97
+   6. Médiévales de Trévoux (Trévoux)
+      Adresse: Château de Trévoux, 01600
+      ID: 102
+   7. Pâtisserie Chocolaterie Cormorèche (Trévoux)
+      Adresse: Centre-ville, 01600 Trévoux
+      ID: 2
+   8. Park-Events Vénissieux (Trévoux)
+      Adresse: Vénissieux, 69200
+      ID: 76
+   9. Actua Organisation (Trévoux)
+      Adresse: Lyon région
+      ID: 78
+   10. Musée Gallo-Romain Fourvière (Trévoux)
+      Adresse: Lyon 5ème, 69005
+      ID: 68
+   ... et 33 autres activités
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 2: 14 activités aux coordonnées 45.9725,4.7995
+📍 Google Maps: https://www.google.com/maps?q=45.9725,4.7995
+================================================================================
+   1. Pont de la Saône (Trévoux)
+      Adresse: 2 Rue du Pont, Trévoux
+      ID: 439
+   2. Restaurant Le Pont Romain (Trévoux)
+      Adresse: 3 Avenue de la Monnaie, Trévoux
+      ID: 109
+   3. Restaurant Le Pont Romain (Trévoux)
+      Adresse: 3 Avenue de la Monnaie, Trévoux
+      ID: 163
+   4. Bar du Pont (Trévoux)
+      Adresse: 1 Rue du Pont, Trévoux
+      ID: 337
+   5. Café du Pont Romain (Trévoux)
+      Adresse: 3 Avenue de la Monnaie, Trévoux
+      ID: 362
+   6. Château de Trévoux (Trévoux)
+      Adresse: Route du Château, Trévoux
+      ID: 424
+   7. Hôtel du Pont (Trévoux)
+      Adresse: 1 Rue du Pont, Trévoux
+      ID: 525
+   8. Restaurant Le Pont Romain (Trévoux)
+      Adresse: 3 Avenue de la Monnaie, Trévoux
+      ID: 546
+   9. Château de Trévoux (Trévoux)
+      Adresse: Route du Château, Trévoux
+      ID: 599
+   10. Restaurant Le Pont Romain (Trévoux)
+      Adresse: 3 Avenue de la Monnaie, Trévoux
+      ID: 610
+   ... et 4 autres activités
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 3: 14 activités aux coordonnées 45.8280,4.8120
+📍 Google Maps: https://www.google.com/maps?q=45.828,4.812
+================================================================================
+   1. Hôtel du Château (Couzon)
+      Adresse: 29 Rue du Château, Couzon
+      ID: 872
+   2. Le Restaurant du Château (Couzon)
+      Adresse: 29 Rue du Château, Couzon
+      ID: 252
+   3. Le Restaurant du Château (Couzon)
+      Adresse: 29 Rue du Château, Couzon
+      ID: 304
+   4. Café du Château (Couzon)
+      Adresse: 3 Chemin du Château, Couzon
+      ID: 342
+   5. Hôtel du Château (Couzon)
+      Adresse: 29 Rue du Château, Couzon
+      ID: 539
+   6. Le Restaurant du Château (Couzon)
+      Adresse: 29 Rue du Château, Couzon
+      ID: 408
+   7. Château de Couzon (Couzon)
+      Adresse: 1 Chemin du Château, Couzon
+      ID: 447
+   8. Piscine de Couzon (Couzon)
+      Adresse: 35 Boulevard de la République, Couzon
+      ID: 512
+   9. Parc du Château (Couzon)
+      Adresse: 1 Chemin du Château, Couzon
+      ID: 519
+   10. Parc du Château (Couzon)
+      Adresse: 1 Chemin du Château, Couzon
+      ID: 852
+   ... et 4 autres activités
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 4: 12 activités aux coordonnées 45.9765,4.8070
+📍 Google Maps: https://www.google.com/maps?q=45.9765,4.807
+================================================================================
+   1. Restaurant Le Cloître (Trévoux)
+      Adresse: 16 Rue du Cloître, Trévoux
+      ID: 122
+   2. Restaurant Le Cloître (Trévoux)
+      Adresse: 16 Rue du Cloître, Trévoux
+      ID: 176
+   3. Café Historique (Trévoux)
+      Adresse: 16 Rue du Cloître, Trévoux
+      ID: 330
+   4. Cloître de Trévoux (Trévoux)
+      Adresse: 16 Rue du Cloître, Trévoux
+      ID: 438
+   5. Bowling Trévollien (Trévoux)
+      Adresse: 16 Rue du Bowling, Trévoux
+      ID: 504
+   6. Hôtel du Cloître (Trévoux)
+      Adresse: 16 Rue du Cloître, Trévoux
+      ID: 506
+   7. Restaurant Le Cloître (Trévoux)
+      Adresse: 16 Rue du Cloître, Trévoux
+      ID: 559
+   8. Restaurant Le Cloître (Trévoux)
+      Adresse: 16 Rue du Cloître, Trévoux
+      ID: 623
+   9. Cloître de Trévoux (Trévoux)
+      Adresse: 16 Rue du Cloître, Trévoux
+      ID: 719
+   10. Café Historique (Trévoux)
+      Adresse: 16 Rue du Cloître, Trévoux
+      ID: 786
+   ... et 2 autres activités
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 5: 12 activités aux coordonnées 45.8245,4.8156
+📍 Google Maps: https://www.google.com/maps?q=45.8245,4.8156
+================================================================================
+   1. La Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 214
+   2. La Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 266
+   3. Café de la Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 344
+   4. La Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 370
+   5. Restaurant La Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 427
+   6. Parc de la Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 509
+   7. Hôtel La Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 514
+   8. Restaurant La Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 602
+   9. La Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 661
+   10. Hôtel La Montagne (Couzon)
+      Adresse: Route du Mont, Couzon
+      ID: 847
+   ... et 2 autres activités
+
+================================================================================
+🔴 DOUBLON 6: 10 activités aux coordonnées 45.9744,4.8030
+📍 Google Maps: https://www.google.com/maps?q=45.9744,4.803
+================================================================================
+   1. La Maison du Tourisme (Trévoux)
+      Adresse: 15 Place de la Liberté, Trévoux
+      ID: 107
+   2. La Maison du Tourisme (Trévoux)
+      Adresse: 15 Place de la Liberté, Trévoux
+      ID: 161
+   3. Bar Politique (Trévoux)
+      Adresse: 23 Place de la Liberté, Trévoux
+      ID: 333
+   4. Musée Local (Trévoux)
+      Adresse: Rue de la Mairie, Trévoux
+      ID: 425
+   5. Maison du Tourisme (Trévoux)
+      Adresse: 15 Place de la Liberté, Trévoux
+      ID: 477
+   6. La Maison du Tourisme (Trévoux)
+      Adresse: 15 Place de la Liberté, Trévoux
+      ID: 544
+   7. Musée Local (Trévoux)
+      Adresse: Rue de la Mairie, Trévoux
+      ID: 600
+   8. La Maison du Tourisme (Trévoux)
+      Adresse: 15 Place de la Liberté, Trévoux
+      ID: 608
+   9. Maison du Tourisme (Trévoux)
+      Adresse: 15 Place de la Liberté, Trévoux
+      ID: 758
+   10. Bar Politique (Trévoux)
+      Adresse: 23 Place de la Liberté, Trévoux
+      ID: 789
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 7: 10 activités aux coordonnées 45.9768,4.8062
+📍 Google Maps: https://www.google.com/maps?q=45.9768,4.8062
+================================================================================
+   1. L'Auberge Trévollienne (Trévoux)
+      Adresse: 22 Rue Nationale, Trévoux
+      ID: 110
+   2. L'Auberge Trévollienne (Trévoux)
+      Adresse: 22 Rue Nationale, Trévoux
+      ID: 164
+   3. Café Artistique (Trévoux)
+      Adresse: 22 Rue Nationale, Trévoux
+      ID: 366
+   4. Galerie d'Art Contemporain (Trévoux)
+      Adresse: 22 Rue Nationale, Trévoux
+      ID: 441
+   5. Skate Park (Trévoux)
+      Adresse: 22 Place du Sport, Trévoux
+      ID: 507
+   6. L'Auberge Trévollienne (Trévoux)
+      Adresse: 22 Rue Nationale, Trévoux
+      ID: 547
+   7. L'Auberge Trévollienne (Trévoux)
+      Adresse: 22 Rue Nationale, Trévoux
+      ID: 611
+   8. Galerie d'Art Contemporain (Trévoux)
+      Adresse: 22 Rue Nationale, Trévoux
+      ID: 722
+   9. Café Artistique (Trévoux)
+      Adresse: 22 Rue Nationale, Trévoux
+      ID: 822
+   10. Skate Park (Trévoux)
+      Adresse: 22 Place du Sport, Trévoux
+      ID: 840
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 8: 10 activités aux coordonnées 45.9780,4.8080
+📍 Google Maps: https://www.google.com/maps?q=45.978,4.808
+================================================================================
+   1. Restaurant du Château (Trévoux)
+      Adresse: 1 Rue du Château, Trévoux
+      ID: 114
+   2. Restaurant du Château (Trévoux)
+      Adresse: 1 Rue du Château, Trévoux
+      ID: 168
+   3. Café du Château (Trévoux)
+      Adresse: 2 Place du Château, Trévoux
+      ID: 322
+   4. Château de Trévoux (Trévoux)
+      Adresse: 1 Rue du Château, Trévoux
+      ID: 433
+   5. Parc du Château (Trévoux)
+      Adresse: 1 Rue du Château, Trévoux
+      ID: 495
+   6. Restaurant du Château (Trévoux)
+      Adresse: 1 Rue du Château, Trévoux
+      ID: 551
+   7. Restaurant du Château (Trévoux)
+      Adresse: 1 Rue du Château, Trévoux
+      ID: 615
+   8. Château de Trévoux (Trévoux)
+      Adresse: 1 Rue du Château, Trévoux
+      ID: 714
+   9. Café du Château (Trévoux)
+      Adresse: 2 Place du Château, Trévoux
+      ID: 778
+   10. Parc du Château (Trévoux)
+      Adresse: 1 Rue du Château, Trévoux
+      ID: 828
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 9: 10 activités aux coordonnées 45.9710,4.7980
+📍 Google Maps: https://www.google.com/maps?q=45.971,4.798
+================================================================================
+   1. Le Moulin à Vent (Trévoux)
+      Adresse: 7 Route de Neuville, Trévoux
+      ID: 117
+   2. Le Moulin à Vent (Trévoux)
+      Adresse: 7 Route de Neuville, Trévoux
+      ID: 171
+   3. Abbaye Bénédictine (Trévoux)
+      Adresse: 18 Chemin de l'Abbaye, Trévoux
+      ID: 442
+   4. Tennis Club (Trévoux)
+      Adresse: 18 Chemin du Tennis, Trévoux
+      ID: 497
+   5. Fitness Club (Trévoux)
+      Adresse: 29 Route de Neuville, Trévoux
+      ID: 536
+   6. Le Moulin à Vent (Trévoux)
+      Adresse: 7 Route de Neuville, Trévoux
+      ID: 554
+   7. Le Moulin à Vent (Trévoux)
+      Adresse: 7 Route de Neuville, Trévoux
+      ID: 618
+   8. Abbaye Bénédictine (Trévoux)
+      Adresse: 18 Chemin de l'Abbaye, Trévoux
+      ID: 723
+   9. Tennis Club (Trévoux)
+      Adresse: 18 Chemin du Tennis, Trévoux
+      ID: 830
+   10. Fitness Club (Trévoux)
+      Adresse: 29 Route de Neuville, Trévoux
+      ID: 869
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 10: 10 activités aux coordonnées 45.9752,4.8045
+📍 Google Maps: https://www.google.com/maps?q=45.9752,4.8045
+================================================================================
+   1. Auberge de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 124
+   2. Auberge de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 178
+   3. Bar de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 325
+   4. Maison de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 444
+   5. Hôtel de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 500
+   6. Auberge de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 561
+   7. Auberge de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 625
+   8. Maison de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 725
+   9. Bar de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 781
+   10. Hôtel de la Monnaie (Trévoux)
+      Adresse: 20 Rue de la Monnaie, Trévoux
+      ID: 833
+
+================================================================================
+🔴 DOUBLON 11: 10 activités aux coordonnées 45.9695,4.8010
+📍 Google Maps: https://www.google.com/maps?q=45.9695,4.801
+================================================================================
+   1. Chez Renée (Trévoux)
+      Adresse: 29 Route de Belleville, Trévoux
+      ID: 137
+   2. Chez Renée (Trévoux)
+      Adresse: 29 Route de Belleville, Trévoux
+      ID: 191
+   3. Jardins Botaniques (Trévoux)
+      Adresse: 30 Chemin des Jardins, Trévoux
+      ID: 461
+   4. Jardin Public (Trévoux)
+      Adresse: 30 Chemin des Jardins, Trévoux
+      ID: 494
+   5. Camping Trévoux (Trévoux)
+      Adresse: 28 Route de Belleville, Trévoux
+      ID: 528
+   6. Chez Renée (Trévoux)
+      Adresse: 29 Route de Belleville, Trévoux
+      ID: 574
+   7. Chez Renée (Trévoux)
+      Adresse: 29 Route de Belleville, Trévoux
+      ID: 638
+   8. Jardins Botaniques (Trévoux)
+      Adresse: 30 Chemin des Jardins, Trévoux
+      ID: 742
+   9. Jardin Public (Trévoux)
+      Adresse: 30 Chemin des Jardins, Trévoux
+      ID: 827
+   10. Camping Trévoux (Trévoux)
+      Adresse: 28 Route de Belleville, Trévoux
+      ID: 861
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 12: 10 activités aux coordonnées 45.8215,4.8130
+📍 Google Maps: https://www.google.com/maps?q=45.8215,4.813
+================================================================================
+   1. L'Auberge Couzienne (Couzon)
+      Adresse: 22 Rue de l'Église, Couzon
+      ID: 217
+   2. L'Auberge Couzienne (Couzon)
+      Adresse: 22 Rue de l'Église, Couzon
+      ID: 373
+   3. L'Auberge Couzienne (Couzon)
+      Adresse: 22 Rue de l'Église, Couzon
+      ID: 269
+   4. Café Historique (Couzon)
+      Adresse: 22 Rue de l'Église, Couzon
+      ID: 346
+   5. Église de Couzon (Couzon)
+      Adresse: 3 Place de l'Église, Couzon
+      ID: 448
+   6. Hôtel de Couzon (Couzon)
+      Adresse: 22 Rue de l'Église, Couzon
+      ID: 513
+   7. L'Auberge Couzienne (Couzon)
+      Adresse: 22 Rue de l'Église, Couzon
+      ID: 664
+   8. Église de Couzon (Couzon)
+      Adresse: 3 Place de l'Église, Couzon
+      ID: 729
+   9. Hôtel de Couzon (Couzon)
+      Adresse: 22 Rue de l'Église, Couzon
+      ID: 846
+   10. Café Historique (Couzon)
+      Adresse: 22 Rue de l'Église, Couzon
+      ID: 802
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 13: 10 activités aux coordonnées 45.8270,4.8160
+📍 Google Maps: https://www.google.com/maps?q=45.827,4.816
+================================================================================
+   1. Restaurant La Fontaine (Couzon)
+      Adresse: 16 Place de la Fontaine, Couzon
+      ID: 226
+   2. Restaurant La Fontaine (Couzon)
+      Adresse: 16 Place de la Fontaine, Couzon
+      ID: 278
+   3. Bar à Vin Couzonais (Couzon)
+      Adresse: 16 Place de la Fontaine, Couzon
+      ID: 343
+   4. Restaurant La Fontaine (Couzon)
+      Adresse: 16 Place de la Fontaine, Couzon
+      ID: 382
+   5. Fontaine Historique (Couzon)
+      Adresse: 7 Place de la Fontaine, Couzon
+      ID: 454
+   6. Terrain de Tennis (Couzon)
+      Adresse: 15 Chemin du Tennis, Couzon
+      ID: 518
+   7. Restaurant La Fontaine (Couzon)
+      Adresse: 16 Place de la Fontaine, Couzon
+      ID: 673
+   8. Fontaine Historique (Couzon)
+      Adresse: 7 Place de la Fontaine, Couzon
+      ID: 735
+   9. Bar à Vin Couzonais (Couzon)
+      Adresse: 16 Place de la Fontaine, Couzon
+      ID: 799
+   10. Terrain de Tennis (Couzon)
+      Adresse: 15 Chemin du Tennis, Couzon
+      ID: 851
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 14: 10 activités aux coordonnées 45.8290,4.8150
+📍 Google Maps: https://www.google.com/maps?q=45.829,4.815
+================================================================================
+   1. Restaurant Les Vignes (Couzon)
+      Adresse: 35 Chemin des Vignes, Couzon
+      ID: 229
+   2. Restaurant Les Vignes (Couzon)
+      Adresse: 35 Chemin des Vignes, Couzon
+      ID: 281
+   3. Bar Discothèque (Couzon)
+      Adresse: 35 Chemin des Vignes, Couzon
+      ID: 359
+   4. Restaurant Les Vignes (Couzon)
+      Adresse: 35 Chemin des Vignes, Couzon
+      ID: 385
+   5. Musée d'Ethnographie (Couzon)
+      Adresse: 29 Rue de la Culture, Couzon
+      ID: 492
+   6. Hôtel des Vignes (Couzon)
+      Adresse: 35 Chemin des Vignes, Couzon
+      ID: 523
+   7. Restaurant Les Vignes (Couzon)
+      Adresse: 35 Chemin des Vignes, Couzon
+      ID: 676
+   8. Musée d'Ethnographie (Couzon)
+      Adresse: 29 Rue de la Culture, Couzon
+      ID: 773
+   9. Hôtel des Vignes (Couzon)
+      Adresse: 35 Chemin des Vignes, Couzon
+      ID: 856
+   10. Bar Discothèque (Couzon)
+      Adresse: 35 Chemin des Vignes, Couzon
+      ID: 815
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 15: 10 activités aux coordonnées 45.8200,4.8110
+📍 Google Maps: https://www.google.com/maps?q=45.82,4.811
+================================================================================
+   1. Restaurant Le Pont Fleuri (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 232
+   2. Restaurant Le Pont Fleuri (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 284
+   3. Bar du Pont Fleuri (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 347
+   4. Restaurant Le Pont Fleuri (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 388
+   5. Vieux Pont en Pierre (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 456
+   6. Hôtel de l'Écluse (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 517
+   7. Restaurant Le Pont Fleuri (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 679
+   8. Vieux Pont en Pierre (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 737
+   9. Hôtel de l'Écluse (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 850
+   10. Bar du Pont Fleuri (Couzon)
+      Adresse: 2 Rue du Pont, Couzon
+      ID: 803
+
+================================================================================
+🔴 DOUBLON 16: 8 activités aux coordonnées 45.9730,4.8005
+📍 Google Maps: https://www.google.com/maps?q=45.973,4.8005
+================================================================================
+   1. Le Petit Bistrot (Trévoux)
+      Adresse: 11 Rue des Augustins, Trévoux
+      ID: 126
+   2. Le Petit Bistrot (Trévoux)
+      Adresse: 11 Rue des Augustins, Trévoux
+      ID: 180
+   3. Café Le Coin (Trévoux)
+      Adresse: 5 Rue des Augustins, Trévoux
+      ID: 320
+   4. Théâtre Antique (Trévoux)
+      Adresse: 7 Boulevard de la Scène, Trévoux
+      ID: 445
+   5. Le Petit Bistrot (Trévoux)
+      Adresse: 11 Rue des Augustins, Trévoux
+      ID: 563
+   6. Le Petit Bistrot (Trévoux)
+      Adresse: 11 Rue des Augustins, Trévoux
+      ID: 627
+   7. Théâtre Antique (Trévoux)
+      Adresse: 7 Boulevard de la Scène, Trévoux
+      ID: 726
+   8. Café Le Coin (Trévoux)
+      Adresse: 5 Rue des Augustins, Trévoux
+      ID: 776
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 17: 8 activités aux coordonnées 45.9755,4.8040
+📍 Google Maps: https://www.google.com/maps?q=45.9755,4.804
+================================================================================
+   1. Restaurant Les Halles (Trévoux)
+      Adresse: 17 Rue des Halles, Trévoux
+      ID: 138
+   2. Restaurant Les Halles (Trévoux)
+      Adresse: 17 Rue des Halles, Trévoux
+      ID: 192
+   3. Bar des Halles (Trévoux)
+      Adresse: 17 Rue des Halles, Trévoux
+      ID: 331
+   4. Musée de la Calligraphie (Trévoux)
+      Adresse: 23 Rue de la Plume, Trévoux
+      ID: 479
+   5. Restaurant Les Halles (Trévoux)
+      Adresse: 17 Rue des Halles, Trévoux
+      ID: 575
+   6. Restaurant Les Halles (Trévoux)
+      Adresse: 17 Rue des Halles, Trévoux
+      ID: 639
+   7. Musée de la Calligraphie (Trévoux)
+      Adresse: 23 Rue de la Plume, Trévoux
+      ID: 760
+   8. Bar des Halles (Trévoux)
+      Adresse: 17 Rue des Halles, Trévoux
+      ID: 787
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 18: 8 activités aux coordonnées 45.9720,4.7970
+📍 Google Maps: https://www.google.com/maps?q=45.972,4.797
+================================================================================
+   1. Restaurant de la Gare (Trévoux)
+      Adresse: 15 Avenue de la Gare, Trévoux
+      ID: 142
+   2. Restaurant de la Gare (Trévoux)
+      Adresse: 15 Avenue de la Gare, Trévoux
+      ID: 196
+   3. Bar de la Gare (Trévoux)
+      Adresse: 15 Avenue de la Gare, Trévoux
+      ID: 319
+   4. Café de la Gare (Trévoux)
+      Adresse: 19 Avenue de la Gare, Trévoux
+      ID: 336
+   5. Restaurant de la Gare (Trévoux)
+      Adresse: 15 Avenue de la Gare, Trévoux
+      ID: 579
+   6. Restaurant de la Gare (Trévoux)
+      Adresse: 15 Avenue de la Gare, Trévoux
+      ID: 643
+   7. Bar de la Gare (Trévoux)
+      Adresse: 15 Avenue de la Gare, Trévoux
+      ID: 775
+   8. Café de la Gare (Trévoux)
+      Adresse: 19 Avenue de la Gare, Trévoux
+      ID: 792
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 19: 8 activités aux coordonnées 45.9710,4.8020
+📍 Google Maps: https://www.google.com/maps?q=45.971,4.802
+================================================================================
+   1. Le Petit Restaurant (Trévoux)
+      Adresse: 6 Rue de l'Ermitage, Trévoux
+      ID: 143
+   2. Le Petit Restaurant (Trévoux)
+      Adresse: 6 Rue de l'Ermitage, Trévoux
+      ID: 197
+   3. Café du Silence (Trévoux)
+      Adresse: 9 Rue de l'Ermitage, Trévoux
+      ID: 368
+   4. Hôtel du Ciel (Trévoux)
+      Adresse: 3 Chemin du Ciel, Trévoux
+      ID: 537
+   5. Le Petit Restaurant (Trévoux)
+      Adresse: 6 Rue de l'Ermitage, Trévoux
+      ID: 580
+   6. Le Petit Restaurant (Trévoux)
+      Adresse: 6 Rue de l'Ermitage, Trévoux
+      ID: 644
+   7. Café du Silence (Trévoux)
+      Adresse: 9 Rue de l'Ermitage, Trévoux
+      ID: 824
+   8. Hôtel du Ciel (Trévoux)
+      Adresse: 3 Chemin du Ciel, Trévoux
+      ID: 870
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 20: 8 activités aux coordonnées 45.9735,4.8015
+📍 Google Maps: https://www.google.com/maps?q=45.9735,4.8015
+================================================================================
+   1. Café Bistrot (Trévoux)
+      Adresse: 7 Rue Carnot, Trévoux
+      ID: 332
+   2. Le Coin Gourmand (Trévoux)
+      Adresse: 14 Rue Carnot, Trévoux
+      ID: 123
+   3. Le Coin Gourmand (Trévoux)
+      Adresse: 14 Rue Carnot, Trévoux
+      ID: 177
+   4. Aire de Jeux Enfants (Trévoux)
+      Adresse: 14 Rue Carnot, Trévoux
+      ID: 496
+   5. Le Coin Gourmand (Trévoux)
+      Adresse: 14 Rue Carnot, Trévoux
+      ID: 560
+   6. Le Coin Gourmand (Trévoux)
+      Adresse: 14 Rue Carnot, Trévoux
+      ID: 624
+   7. Café Bistrot (Trévoux)
+      Adresse: 7 Rue Carnot, Trévoux
+      ID: 788
+   8. Aire de Jeux Enfants (Trévoux)
+      Adresse: 14 Rue Carnot, Trévoux
+      ID: 829
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 21: 8 activités aux coordonnées 45.8285,4.8170
+📍 Google Maps: https://www.google.com/maps?q=45.8285,4.817
+================================================================================
+   1. Terrain de Golf (Couzon)
+      Adresse: 32 Chemin de l'Escapade, Couzon
+      ID: 866
+   2. Bar Élégant (Trévoux)
+      Adresse: 32 Chemin de l'Escapade, Couzon
+      ID: 363
+   3. Bar Élégant (Trévoux)
+      Adresse: 32 Chemin de l'Escapade, Couzon
+      ID: 819
+   4. Restaurant L'Escapade (Couzon)
+      Adresse: 32 Chemin de l'Escapade, Couzon
+      ID: 236
+   5. Restaurant L'Escapade (Couzon)
+      Adresse: 32 Chemin de l'Escapade, Couzon
+      ID: 288
+   6. Restaurant L'Escapade (Couzon)
+      Adresse: 32 Chemin de l'Escapade, Couzon
+      ID: 392
+   7. Terrain de Golf (Couzon)
+      Adresse: 32 Chemin de l'Escapade, Couzon
+      ID: 533
+   8. Restaurant L'Escapade (Couzon)
+      Adresse: 32 Chemin de l'Escapade, Couzon
+      ID: 683
+
+================================================================================
+🔴 DOUBLON 22: 8 activités aux coordonnées 45.8210,4.8140
+📍 Google Maps: https://www.google.com/maps?q=45.821,4.814
+================================================================================
+   1. Parc de la Paix (Couzon)
+      Adresse: 4 Place de la Mairie, Couzon
+      ID: 871
+   2. Le Coin Gourmand (Couzon)
+      Adresse: 4 Place de la Mairie, Couzon
+      ID: 235
+   3. Le Coin Gourmand (Couzon)
+      Adresse: 4 Place de la Mairie, Couzon
+      ID: 287
+   4. Bar de la Paix (Couzon)
+      Adresse: 4 Place de la Mairie, Couzon
+      ID: 353
+   5. Le Coin Gourmand (Couzon)
+      Adresse: 4 Place de la Mairie, Couzon
+      ID: 391
+   6. Parc de la Paix (Couzon)
+      Adresse: 4 Place de la Mairie, Couzon
+      ID: 538
+   7. Le Coin Gourmand (Couzon)
+      Adresse: 4 Place de la Mairie, Couzon
+      ID: 682
+   8. Bar de la Paix (Couzon)
+      Adresse: 4 Place de la Mairie, Couzon
+      ID: 809
+
+================================================================================
+🔴 DOUBLON 23: 8 activités aux coordonnées 45.9756,4.8045
+📍 Google Maps: https://www.google.com/maps?q=45.9756,4.8045
+================================================================================
+   1. Chez Pierre (Trévoux)
+      Adresse: 8 Rue de Bourgogne, Trévoux
+      ID: 108
+   2. Chez Pierre (Trévoux)
+      Adresse: 8 Rue de Bourgogne, Trévoux
+      ID: 162
+   3. Bar à Vin Trévollien (Trévoux)
+      Adresse: 12 Rue de Bourgogne, Trévoux
+      ID: 321
+   4. Musée de l'Imprimerie (Trévoux)
+      Adresse: 12 Rue de Bourgogne, Trévoux
+      ID: 436
+   5. Chez Pierre (Trévoux)
+      Adresse: 8 Rue de Bourgogne, Trévoux
+      ID: 545
+   6. Chez Pierre (Trévoux)
+      Adresse: 8 Rue de Bourgogne, Trévoux
+      ID: 609
+   7. Musée de l'Imprimerie (Trévoux)
+      Adresse: 12 Rue de Bourgogne, Trévoux
+      ID: 717
+   8. Bar à Vin Trévollien (Trévoux)
+      Adresse: 12 Rue de Bourgogne, Trévoux
+      ID: 777
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 24: 8 activités aux coordonnées 45.9750,4.8010
+📍 Google Maps: https://www.google.com/maps?q=45.975,4.801
+================================================================================
+   1. Le Bistro Local (Trévoux)
+      Adresse: 5 Quai Saint-Vincent, Trévoux
+      ID: 112
+   2. Le Bistro Local (Trévoux)
+      Adresse: 5 Quai Saint-Vincent, Trévoux
+      ID: 166
+   3. Bar de Saône (Trévoux)
+      Adresse: 3 Quai Saint-Vincent, Trévoux
+      ID: 327
+   4. Hôtel de Saône (Trévoux)
+      Adresse: 3 Quai Saint-Vincent, Trévoux
+      ID: 502
+   5. Le Bistro Local (Trévoux)
+      Adresse: 5 Quai Saint-Vincent, Trévoux
+      ID: 549
+   6. Le Bistro Local (Trévoux)
+      Adresse: 5 Quai Saint-Vincent, Trévoux
+      ID: 613
+   7. Bar de Saône (Trévoux)
+      Adresse: 3 Quai Saint-Vincent, Trévoux
+      ID: 783
+   8. Hôtel de Saône (Trévoux)
+      Adresse: 3 Quai Saint-Vincent, Trévoux
+      ID: 835
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 25: 8 activités aux coordonnées 45.9720,4.8050
+📍 Google Maps: https://www.google.com/maps?q=45.972,4.805
+================================================================================
+   1. La Côte Gourmande (Trévoux)
+      Adresse: 35 Chemin de la Côte, Trévoux
+      ID: 113
+   2. La Côte Gourmande (Trévoux)
+      Adresse: 35 Chemin de la Côte, Trévoux
+      ID: 167
+   3. Café de la Côte (Trévoux)
+      Adresse: 35 Chemin de la Côte, Trévoux
+      ID: 334
+   4. Parc de la Côte (Trévoux)
+      Adresse: 35 Chemin de la Côte, Trévoux
+      ID: 493
+   5. La Côte Gourmande (Trévoux)
+      Adresse: 35 Chemin de la Côte, Trévoux
+      ID: 550
+   6. La Côte Gourmande (Trévoux)
+      Adresse: 35 Chemin de la Côte, Trévoux
+      ID: 614
+   7. Café de la Côte (Trévoux)
+      Adresse: 35 Chemin de la Côte, Trévoux
+      ID: 790
+   8. Parc de la Côte (Trévoux)
+      Adresse: 35 Chemin de la Côte, Trévoux
+      ID: 826
+
+================================================================================
+🔴 DOUBLON 26: 8 activités aux coordonnées 45.9770,4.8055
+📍 Google Maps: https://www.google.com/maps?q=45.977,4.8055
+================================================================================
+   1. Auberge de la Soie (Trévoux)
+      Adresse: 25 Grande Rue, Trévoux
+      ID: 118
+   2. Auberge de la Soie (Trévoux)
+      Adresse: 25 Grande Rue, Trévoux
+      ID: 172
+   3. Café de la Soie (Trévoux)
+      Adresse: 25 Grande Rue, Trévoux
+      ID: 326
+   4. Archives Départementales (Trévoux)
+      Adresse: 25 Rue des Archives, Trévoux
+      ID: 443
+   5. Auberge de la Soie (Trévoux)
+      Adresse: 25 Grande Rue, Trévoux
+      ID: 555
+   6. Auberge de la Soie (Trévoux)
+      Adresse: 25 Grande Rue, Trévoux
+      ID: 619
+   7. Archives Départementales (Trévoux)
+      Adresse: 25 Rue des Archives, Trévoux
+      ID: 724
+   8. Café de la Soie (Trévoux)
+      Adresse: 25 Grande Rue, Trévoux
+      ID: 782
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 27: 8 activités aux coordonnées 45.9745,4.8050
+📍 Google Maps: https://www.google.com/maps?q=45.9745,4.805
+================================================================================
+   1. Restaurant Au Fil de l'Eau (Trévoux)
+      Adresse: 38 Quai des Alpes, Trévoux
+      ID: 128
+   2. Restaurant Au Fil de l'Eau (Trévoux)
+      Adresse: 38 Quai des Alpes, Trévoux
+      ID: 182
+   3. Bar de la Saône (Trévoux)
+      Adresse: 26 Quai Saint-Vincent, Trévoux
+      ID: 361
+   4. Quai de Saône (Trévoux)
+      Adresse: 26 Quai Saint-Vincent, Trévoux
+      ID: 470
+   5. Restaurant Au Fil de l'Eau (Trévoux)
+      Adresse: 38 Quai des Alpes, Trévoux
+      ID: 565
+   6. Restaurant Au Fil de l'Eau (Trévoux)
+      Adresse: 38 Quai des Alpes, Trévoux
+      ID: 629
+   7. Quai de Saône (Trévoux)
+      Adresse: 26 Quai Saint-Vincent, Trévoux
+      ID: 751
+   8. Bar de la Saône (Trévoux)
+      Adresse: 26 Quai Saint-Vincent, Trévoux
+      ID: 817
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 28: 8 activités aux coordonnées 45.9740,4.8010
+📍 Google Maps: https://www.google.com/maps?q=45.974,4.801
+================================================================================
+   1. Chez Yves (Trévoux)
+      Adresse: 19 Rue de la Paix, Trévoux
+      ID: 132
+   2. Chez Yves (Trévoux)
+      Adresse: 19 Rue de la Paix, Trévoux
+      ID: 186
+   3. Café de la Paix (Trévoux)
+      Adresse: 18 Rue de la Paix, Trévoux
+      ID: 324
+   4. Ancien Collège des Jésuites (Trévoux)
+      Adresse: 6 Rue des Jésuites, Trévoux
+      ID: 437
+   5. Chez Yves (Trévoux)
+      Adresse: 19 Rue de la Paix, Trévoux
+      ID: 569
+   6. Chez Yves (Trévoux)
+      Adresse: 19 Rue de la Paix, Trévoux
+      ID: 633
+   7. Ancien Collège des Jésuites (Trévoux)
+      Adresse: 6 Rue des Jésuites, Trévoux
+      ID: 718
+   8. Café de la Paix (Trévoux)
+      Adresse: 18 Rue de la Paix, Trévoux
+      ID: 780
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 29: 8 activités aux coordonnées 45.9735,4.8020
+📍 Google Maps: https://www.google.com/maps?q=45.9735,4.802
+================================================================================
+   1. Le Petit Coin (Trévoux)
+      Adresse: 13 Rue du Prieuré, Trévoux
+      ID: 136
+   2. Le Petit Coin (Trévoux)
+      Adresse: 13 Rue du Prieuré, Trévoux
+      ID: 190
+   3. Bar Lounge (Trévoux)
+      Adresse: 11 Rue du Prieuré, Trévoux
+      ID: 329
+   4. Hôtel Vintage (Trévoux)
+      Adresse: 11 Rue du Prieuré, Trévoux
+      ID: 529
+   5. Le Petit Coin (Trévoux)
+      Adresse: 13 Rue du Prieuré, Trévoux
+      ID: 573
+   6. Le Petit Coin (Trévoux)
+      Adresse: 13 Rue du Prieuré, Trévoux
+      ID: 637
+   7. Bar Lounge (Trévoux)
+      Adresse: 11 Rue du Prieuré, Trévoux
+      ID: 785
+   8. Hôtel Vintage (Trévoux)
+      Adresse: 11 Rue du Prieuré, Trévoux
+      ID: 862
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 30: 8 activités aux coordonnées 45.9730,4.8040
+📍 Google Maps: https://www.google.com/maps?q=45.973,4.804
+================================================================================
+   1. La Petite Maison (Trévoux)
+      Adresse: 8 Rue de l'École, Trévoux
+      ID: 147
+   2. La Petite Maison (Trévoux)
+      Adresse: 8 Rue de l'École, Trévoux
+      ID: 201
+   3. Musée de la Reliure (Trévoux)
+      Adresse: 9 Rue de la Reliure, Trévoux
+      ID: 458
+   4. Parc Floral (Trévoux)
+      Adresse: 12 Chemin du Fleur, Trévoux
+      ID: 503
+   5. La Petite Maison (Trévoux)
+      Adresse: 8 Rue de l'École, Trévoux
+      ID: 584
+   6. La Petite Maison (Trévoux)
+      Adresse: 8 Rue de l'École, Trévoux
+      ID: 648
+   7. Musée de la Reliure (Trévoux)
+      Adresse: 9 Rue de la Reliure, Trévoux
+      ID: 739
+   8. Parc Floral (Trévoux)
+      Adresse: 12 Chemin du Fleur, Trévoux
+      ID: 836
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 31: 8 activités aux coordonnées 45.9760,4.7980
+📍 Google Maps: https://www.google.com/maps?q=45.976,4.798
+================================================================================
+   1. Restaurant L'Étoile (Trévoux)
+      Adresse: 36 Boulevard Victor Hugo, Trévoux
+      ID: 148
+   2. Restaurant L'Étoile (Trévoux)
+      Adresse: 36 Boulevard Victor Hugo, Trévoux
+      ID: 202
+   3. Piscine Municipale (Trévoux)
+      Adresse: 27 Avenue de la Piscine, Trévoux
+      ID: 498
+   4. Parc des Loisirs (Trévoux)
+      Adresse: 36 Boulevard Victor Hugo, Trévoux
+      ID: 535
+   5. Restaurant L'Étoile (Trévoux)
+      Adresse: 36 Boulevard Victor Hugo, Trévoux
+      ID: 585
+   6. Restaurant L'Étoile (Trévoux)
+      Adresse: 36 Boulevard Victor Hugo, Trévoux
+      ID: 649
+   7. Parc des Loisirs (Trévoux)
+      Adresse: 36 Boulevard Victor Hugo, Trévoux
+      ID: 868
+   8. Piscine Municipale (Trévoux)
+      Adresse: 27 Avenue de la Piscine, Trévoux
+      ID: 831
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 32: 8 activités aux coordonnées 45.8260,4.8170
+📍 Google Maps: https://www.google.com/maps?q=45.826,4.817
+================================================================================
+   1. Restaurant de la Vallée (Couzon)
+      Adresse: 8 Chemin de la Vallée, Couzon
+      ID: 216
+   2. Restaurant de la Vallée (Couzon)
+      Adresse: 8 Chemin de la Vallée, Couzon
+      ID: 268
+   3. Café de la Vallée (Couzon)
+      Adresse: 8 Chemin de la Vallée, Couzon
+      ID: 340
+   4. Restaurant de la Vallée (Couzon)
+      Adresse: 8 Chemin de la Vallée, Couzon
+      ID: 372
+   5. Hôtel de la Vallée (Couzon)
+      Adresse: 8 Chemin de la Vallée, Couzon
+      ID: 515
+   6. Restaurant de la Vallée (Couzon)
+      Adresse: 8 Chemin de la Vallée, Couzon
+      ID: 663
+   7. Hôtel de la Vallée (Couzon)
+      Adresse: 8 Chemin de la Vallée, Couzon
+      ID: 848
+   8. Café de la Vallée (Couzon)
+      Adresse: 8 Chemin de la Vallée, Couzon
+      ID: 796
+
+================================================================================
+🔴 DOUBLON 33: 8 activités aux coordonnées 45.8240,4.8150
+📍 Google Maps: https://www.google.com/maps?q=45.824,4.815
+================================================================================
+   1. Le Petit Coin de Couzon (Couzon)
+      Adresse: 5 Place du Village, Couzon
+      ID: 218
+   2. Le Petit Coin de Couzon (Couzon)
+      Adresse: 5 Place du Village, Couzon
+      ID: 270
+   3. Café Central (Couzon)
+      Adresse: 5 Place du Village, Couzon
+      ID: 338
+   4. Le Petit Coin de Couzon (Couzon)
+      Adresse: 5 Place du Village, Couzon
+      ID: 374
+   5. Parc du Village (Couzon)
+      Adresse: 5 Place du Village, Couzon
+      ID: 508
+   6. Le Petit Coin de Couzon (Couzon)
+      Adresse: 5 Place du Village, Couzon
+      ID: 665
+   7. Café Central (Couzon)
+      Adresse: 5 Place du Village, Couzon
+      ID: 794
+   8. Parc du Village (Couzon)
+      Adresse: 5 Place du Village, Couzon
+      ID: 841
+
+================================================================================
+🔴 DOUBLON 34: 8 activités aux coordonnées 45.8220,4.8160
+📍 Google Maps: https://www.google.com/maps?q=45.822,4.816
+================================================================================
+   1. Chez Brigitte (Couzon)
+      Adresse: 7 Rue des Tilleuls, Couzon
+      ID: 220
+   2. Chez Brigitte (Couzon)
+      Adresse: 7 Rue des Tilleuls, Couzon
+      ID: 272
+   3. Bar Sportif (Couzon)
+      Adresse: 7 Rue des Tilleuls, Couzon
+      ID: 351
+   4. Chez Brigitte (Couzon)
+      Adresse: 7 Rue des Tilleuls, Couzon
+      ID: 376
+   5. Jardin d'Enfants (Couzon)
+      Adresse: 7 Rue des Tilleuls, Couzon
+      ID: 510
+   6. Chez Brigitte (Couzon)
+      Adresse: 7 Rue des Tilleuls, Couzon
+      ID: 667
+   7. Bar Sportif (Couzon)
+      Adresse: 7 Rue des Tilleuls, Couzon
+      ID: 807
+   8. Jardin d'Enfants (Couzon)
+      Adresse: 7 Rue des Tilleuls, Couzon
+      ID: 843
+
+================================================================================
+🔴 DOUBLON 35: 8 activités aux coordonnées 45.8255,4.8150
+📍 Google Maps: https://www.google.com/maps?q=45.8255,4.815
+================================================================================
+   1. Chez Alain (Couzon)
+      Adresse: 14 Rue des Fleurs, Couzon
+      ID: 233
+   2. Chez Alain (Couzon)
+      Adresse: 14 Rue des Fleurs, Couzon
+      ID: 285
+   3. Café Traditionnel (Couzon)
+      Adresse: 14 Rue des Fleurs, Couzon
+      ID: 360
+   4. Galerie d'Art Couzonaise (Couzon)
+      Adresse: 15 Rue de l'Art, Couzon
+      ID: 453
+   5. Chez Alain (Couzon)
+      Adresse: 14 Rue des Fleurs, Couzon
+      ID: 680
+   6. Galerie d'Art Couzonaise (Couzon)
+      Adresse: 15 Rue de l'Art, Couzon
+      ID: 734
+   7. Chez Alain (Couzon)
+      Adresse: 14 Rue des Fleurs, Couzon
+      ID: 389
+   8. Café Traditionnel (Couzon)
+      Adresse: 14 Rue des Fleurs, Couzon
+      ID: 816
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 36: 8 activités aux coordonnées 45.8240,4.8130
+📍 Google Maps: https://www.google.com/maps?q=45.824,4.813
+================================================================================
+   1. Chez Thérèse (Couzon)
+      Adresse: 10 Rue Nationale, Couzon
+      ID: 237
+   2. Chez Thérèse (Couzon)
+      Adresse: 10 Rue Nationale, Couzon
+      ID: 289
+   3. Bar à Bière (Couzon)
+      Adresse: 10 Rue Nationale, Couzon
+      ID: 357
+   4. Chez Thérèse (Couzon)
+      Adresse: 10 Rue Nationale, Couzon
+      ID: 393
+   5. Mairie Historique (Couzon)
+      Adresse: 10 Place de la Mairie, Couzon
+      ID: 451
+   6. Chez Thérèse (Couzon)
+      Adresse: 10 Rue Nationale, Couzon
+      ID: 684
+   7. Mairie Historique (Couzon)
+      Adresse: 10 Place de la Mairie, Couzon
+      ID: 732
+   8. Bar à Bière (Couzon)
+      Adresse: 10 Rue Nationale, Couzon
+      ID: 813
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 37: 8 activités aux coordonnées 45.8250,4.8140
+📍 Google Maps: https://www.google.com/maps?q=45.825,4.814
+================================================================================
+   1. Restaurant Le Rendez-Vous (Couzon)
+      Adresse: 13 Rue de Verdun, Couzon
+      ID: 239
+   2. Restaurant Le Rendez-Vous (Couzon)
+      Adresse: 13 Rue de Verdun, Couzon
+      ID: 291
+   3. Café du Marché (Couzon)
+      Adresse: 13 Rue de Verdun, Couzon
+      ID: 348
+   4. Restaurant Le Rendez-Vous (Couzon)
+      Adresse: 13 Rue de Verdun, Couzon
+      ID: 395
+   5. Hôtel Central (Couzon)
+      Adresse: 13 Rue de Verdun, Couzon
+      ID: 516
+   6. Hôtel Central (Couzon)
+      Adresse: 13 Rue de Verdun, Couzon
+      ID: 849
+   7. Restaurant Le Rendez-Vous (Couzon)
+      Adresse: 13 Rue de Verdun, Couzon
+      ID: 686
+   8. Café du Marché (Couzon)
+      Adresse: 13 Rue de Verdun, Couzon
+      ID: 804
+
+================================================================================
+🔴 DOUBLON 38: 6 activités aux coordonnées 45.9690,4.8000
+📍 Google Maps: https://www.google.com/maps?q=45.969,4.8
+================================================================================
+   1. Restaurant Au Clair de Lune (Trévoux)
+      Adresse: 32 Chemin de Lamartine, Trévoux
+      ID: 144
+   2. Restaurant Au Clair de Lune (Trévoux)
+      Adresse: 32 Chemin de Lamartine, Trévoux
+      ID: 198
+   3. Parcours de Santé (Trévoux)
+      Adresse: 32 Chemin de Lamartine, Trévoux
+      ID: 526
+   4. Restaurant Au Clair de Lune (Trévoux)
+      Adresse: 32 Chemin de Lamartine, Trévoux
+      ID: 581
+   5. Restaurant Au Clair de Lune (Trévoux)
+      Adresse: 32 Chemin de Lamartine, Trévoux
+      ID: 645
+   6. Parcours de Santé (Trévoux)
+      Adresse: 32 Chemin de Lamartine, Trévoux
+      ID: 859
+
+================================================================================
+🔴 DOUBLON 39: 6 activités aux coordonnées 45.8260,4.8190
+📍 Google Maps: https://www.google.com/maps?q=45.826,4.819
+================================================================================
+   1. Parc de Loisirs (Couzon)
+      Adresse: 25 Boulevard de la Paix, Couzon
+      ID: 857
+   2. Le Restaurant de Couzon (Couzon)
+      Adresse: 25 Boulevard de la Paix, Couzon
+      ID: 224
+   3. Le Restaurant de Couzon (Couzon)
+      Adresse: 25 Boulevard de la Paix, Couzon
+      ID: 276
+   4. Le Restaurant de Couzon (Couzon)
+      Adresse: 25 Boulevard de la Paix, Couzon
+      ID: 380
+   5. Parc de Loisirs (Couzon)
+      Adresse: 25 Boulevard de la Paix, Couzon
+      ID: 524
+   6. Le Restaurant de Couzon (Couzon)
+      Adresse: 25 Boulevard de la Paix, Couzon
+      ID: 671
+
+================================================================================
+🔴 DOUBLON 40: 6 activités aux coordonnées 45.9775,4.8035
+📍 Google Maps: https://www.google.com/maps?q=45.9775,4.8035
+================================================================================
+   1. Chez Claudine (Trévoux)
+      Adresse: 6 Place Saint-Michel, Trévoux
+      ID: 127
+   2. Chez Claudine (Trévoux)
+      Adresse: 6 Place Saint-Michel, Trévoux
+      ID: 181
+   3. Bar de la Joie (Trévoux)
+      Adresse: 6 Place Saint-Michel, Trévoux
+      ID: 367
+   4. Chez Claudine (Trévoux)
+      Adresse: 6 Place Saint-Michel, Trévoux
+      ID: 564
+   5. Chez Claudine (Trévoux)
+      Adresse: 6 Place Saint-Michel, Trévoux
+      ID: 628
+   6. Bar de la Joie (Trévoux)
+      Adresse: 6 Place Saint-Michel, Trévoux
+      ID: 823
+
+================================================================================
+🔴 DOUBLON 41: 6 activités aux coordonnées 45.8310,4.8160
+📍 Google Maps: https://www.google.com/maps?q=45.831,4.816
+================================================================================
+   1. Hôtel Gastronomique (Couzon)
+      Adresse: 41 Avenue Royale, Couzon
+      ID: 863
+   2. Restaurant Gastronomique (Couzon)
+      Adresse: 41 Avenue Royale, Couzon
+      ID: 263
+   3. Restaurant Gastronomique (Couzon)
+      Adresse: 41 Avenue Royale, Couzon
+      ID: 315
+   4. Restaurant Gastronomique (Couzon)
+      Adresse: 41 Avenue Royale, Couzon
+      ID: 419
+   5. Hôtel Gastronomique (Couzon)
+      Adresse: 41 Avenue Royale, Couzon
+      ID: 530
+   6. Restaurant Gastronomique (Couzon)
+      Adresse: 41 Avenue Royale, Couzon
+      ID: 710
+
+================================================================================
+🔴 DOUBLON 42: 6 activités aux coordonnées 45.8295,4.8145
+📍 Google Maps: https://www.google.com/maps?q=45.8295,4.8145
+================================================================================
+   1. Parc Aventure (Couzon)
+      Adresse: 38 Boulevard de la République, Couzon
+      ID: 864
+   2. La Table de Couzon (Couzon)
+      Adresse: 38 Boulevard de la République, Couzon
+      ID: 248
+   3. La Table de Couzon (Couzon)
+      Adresse: 38 Boulevard de la République, Couzon
+      ID: 300
+   4. La Table de Couzon (Couzon)
+      Adresse: 38 Boulevard de la République, Couzon
+      ID: 404
+   5. Parc Aventure (Couzon)
+      Adresse: 38 Boulevard de la République, Couzon
+      ID: 531
+   6. La Table de Couzon (Couzon)
+      Adresse: 38 Boulevard de la République, Couzon
+      ID: 695
+
+================================================================================
+🔴 DOUBLON 43: 6 activités aux coordonnées 45.8245,4.8125
+📍 Google Maps: https://www.google.com/maps?q=45.8245,4.8125
+================================================================================
+   1. Hôtel des Métiers (Couzon)
+      Adresse: 12 Rue de l'Accueil, Couzon
+      ID: 865
+   2. Restaurant Au Bon Accueil (Couzon)
+      Adresse: 12 Rue de l'Accueil, Couzon
+      ID: 249
+   3. Restaurant Au Bon Accueil (Couzon)
+      Adresse: 12 Rue de l'Accueil, Couzon
+      ID: 301
+   4. Restaurant Au Bon Accueil (Couzon)
+      Adresse: 12 Rue de l'Accueil, Couzon
+      ID: 405
+   5. Hôtel des Métiers (Couzon)
+      Adresse: 12 Rue de l'Accueil, Couzon
+      ID: 532
+   6. Restaurant Au Bon Accueil (Couzon)
+      Adresse: 12 Rue de l'Accueil, Couzon
+      ID: 696
+
+================================================================================
+🔴 DOUBLON 44: 6 activités aux coordonnées 45.8270,4.8200
+📍 Google Maps: https://www.google.com/maps?q=45.827,4.82
+================================================================================
+   1. Hôtel du Terroir (Couzon)
+      Adresse: 27 Boulevard des Carrières, Couzon
+      ID: 867
+   2. La Bonne Table (Couzon)
+      Adresse: 27 Boulevard des Carrières, Couzon
+      ID: 238
+   3. La Bonne Table (Couzon)
+      Adresse: 27 Boulevard des Carrières, Couzon
+      ID: 290
+   4. La Bonne Table (Couzon)
+      Adresse: 27 Boulevard des Carrières, Couzon
+      ID: 394
+   5. Hôtel du Terroir (Couzon)
+      Adresse: 27 Boulevard des Carrières, Couzon
+      ID: 534
+   6. La Bonne Table (Couzon)
+      Adresse: 27 Boulevard des Carrières, Couzon
+      ID: 685
+
+================================================================================
+🔴 DOUBLON 45: 6 activités aux coordonnées 45.8270,4.8210
+📍 Google Maps: https://www.google.com/maps?q=45.827,4.821
+================================================================================
+   1. Équitation Couzon (Couzon)
+      Adresse: 26 Chemin de l'Oasis, Couzon
+      ID: 874
+   2. Restaurant L'Oasis (Couzon)
+      Adresse: 26 Chemin de l'Oasis, Couzon
+      ID: 251
+   3. Restaurant L'Oasis (Couzon)
+      Adresse: 26 Chemin de l'Oasis, Couzon
+      ID: 303
+   4. Restaurant L'Oasis (Couzon)
+      Adresse: 26 Chemin de l'Oasis, Couzon
+      ID: 407
+   5. Équitation Couzon (Couzon)
+      Adresse: 26 Chemin de l'Oasis, Couzon
+      ID: 541
+   6. Restaurant L'Oasis (Couzon)
+      Adresse: 26 Chemin de l'Oasis, Couzon
+      ID: 698
+
+================================================================================
+🔴 DOUBLON 46: 6 activités aux coordonnées 45.8255,4.8165
+📍 Google Maps: https://www.google.com/maps?q=45.8255,4.8165
+================================================================================
+   1. Hôtel de la Cheminée (Couzon)
+      Adresse: 23 Place de la Cheminée, Couzon
+      ID: 875
+   2. Restaurant La Cheminée (Couzon)
+      Adresse: 23 Place de la Cheminée, Couzon
+      ID: 254
+   3. Restaurant La Cheminée (Couzon)
+      Adresse: 23 Place de la Cheminée, Couzon
+      ID: 306
+   4. Restaurant La Cheminée (Couzon)
+      Adresse: 23 Place de la Cheminée, Couzon
+      ID: 410
+   5. Hôtel de la Cheminée (Couzon)
+      Adresse: 23 Place de la Cheminée, Couzon
+      ID: 542
+   6. Restaurant La Cheminée (Couzon)
+      Adresse: 23 Place de la Cheminée, Couzon
+      ID: 701
+
+================================================================================
+🔴 DOUBLON 47: 6 activités aux coordonnées 45.9731,4.8008
+📍 Google Maps: https://www.google.com/maps?q=45.9731,4.8008
+================================================================================
+   1. Le Vieux Moulin (Trévoux)
+      Adresse: 42 Rue de la Côte, Trévoux
+      ID: 106
+   2. Le Vieux Moulin (Trévoux)
+      Adresse: 42 Rue de la Côte, Trévoux
+      ID: 160
+   3. Restaurant Le Vieux Moulin (Trévoux)
+      Adresse: 42 Rue de la Côte, Trévoux
+      ID: 422
+   4. Le Vieux Moulin (Trévoux)
+      Adresse: 42 Rue de la Côte, Trévoux
+      ID: 543
+   5. Restaurant Le Vieux Moulin (Trévoux)
+      Adresse: 42 Rue de la Côte, Trévoux
+      ID: 597
+   6. Le Vieux Moulin (Trévoux)
+      Adresse: 42 Rue de la Côte, Trévoux
+      ID: 607
+
+================================================================================
+🔴 DOUBLON 48: 6 activités aux coordonnées 45.9740,4.8025
+📍 Google Maps: https://www.google.com/maps?q=45.974,4.8025
+================================================================================
+   1. Restaurant Les Trois Ponts (Trévoux)
+      Adresse: 42 Rue de la Soie, Trévoux
+      ID: 119
+   2. Restaurant Les Trois Ponts (Trévoux)
+      Adresse: 42 Rue de la Soie, Trévoux
+      ID: 173
+   3. Fontaine Saint-Michel (Trévoux)
+      Adresse: 6 Place de la Fontaine, Trévoux
+      ID: 481
+   4. Restaurant Les Trois Ponts (Trévoux)
+      Adresse: 42 Rue de la Soie, Trévoux
+      ID: 556
+   5. Restaurant Les Trois Ponts (Trévoux)
+      Adresse: 42 Rue de la Soie, Trévoux
+      ID: 620
+   6. Fontaine Saint-Michel (Trévoux)
+      Adresse: 6 Place de la Fontaine, Trévoux
+      ID: 762
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 49: 6 activités aux coordonnées 45.9780,4.7970
+📍 Google Maps: https://www.google.com/maps?q=45.978,4.797
+================================================================================
+   1. Restaurant Gastronomique La Presqu'île (Trévoux)
+      Adresse: 45 Boulevard Gambetta, Trévoux
+      ID: 125
+   2. Restaurant Gastronomique La Presqu'île (Trévoux)
+      Adresse: 45 Boulevard Gambetta, Trévoux
+      ID: 179
+   3. Hôtel Trévoux Palace (Trévoux)
+      Adresse: 25 Boulevard Gambetta, Trévoux
+      ID: 499
+   4. Restaurant Gastronomique La Presqu'île (Trévoux)
+      Adresse: 45 Boulevard Gambetta, Trévoux
+      ID: 562
+   5. Restaurant Gastronomique La Presqu'île (Trévoux)
+      Adresse: 45 Boulevard Gambetta, Trévoux
+      ID: 626
+   6. Hôtel Trévoux Palace (Trévoux)
+      Adresse: 25 Boulevard Gambetta, Trévoux
+      ID: 832
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 50: 6 activités aux coordonnées 45.9770,4.8045
+📍 Google Maps: https://www.google.com/maps?q=45.977,4.8045
+================================================================================
+   1. Restaurant La Renaissance (Trévoux)
+      Adresse: 41 Rue de la République, Trévoux
+      ID: 131
+   2. Restaurant La Renaissance (Trévoux)
+      Adresse: 41 Rue de la République, Trévoux
+      ID: 185
+   3. Café de la République (Trévoux)
+      Adresse: 41 Rue de la République, Trévoux
+      ID: 364
+   4. Restaurant La Renaissance (Trévoux)
+      Adresse: 41 Rue de la République, Trévoux
+      ID: 568
+   5. Restaurant La Renaissance (Trévoux)
+      Adresse: 41 Rue de la République, Trévoux
+      ID: 632
+   6. Café de la République (Trévoux)
+      Adresse: 41 Rue de la République, Trévoux
+      ID: 820
+
+================================================================================
+🔴 DOUBLON 51: 6 activités aux coordonnées 45.9752,4.8030
+📍 Google Maps: https://www.google.com/maps?q=45.9752,4.803
+================================================================================
+   1. Restaurant Le Kiosque (Trévoux)
+      Adresse: 4 Place du Marché, Trévoux
+      ID: 133
+   2. Restaurant Le Kiosque (Trévoux)
+      Adresse: 4 Place du Marché, Trévoux
+      ID: 187
+   3. Café du Marché (Trévoux)
+      Adresse: 10 Place du Marché, Trévoux
+      ID: 318
+   4. Restaurant Le Kiosque (Trévoux)
+      Adresse: 4 Place du Marché, Trévoux
+      ID: 570
+   5. Restaurant Le Kiosque (Trévoux)
+      Adresse: 4 Place du Marché, Trévoux
+      ID: 634
+   6. Café du Marché (Trévoux)
+      Adresse: 10 Place du Marché, Trévoux
+      ID: 774
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 52: 6 activités aux coordonnées 45.9760,4.8055
+📍 Google Maps: https://www.google.com/maps?q=45.976,4.8055
+================================================================================
+   1. Restaurant Au Coin du Feu (Trévoux)
+      Adresse: 23 Rue de Lorraine, Trévoux
+      ID: 135
+   2. Restaurant Au Coin du Feu (Trévoux)
+      Adresse: 23 Rue de Lorraine, Trévoux
+      ID: 189
+   3. Bar Moderne (Trévoux)
+      Adresse: 13 Rue de Lorraine, Trévoux
+      ID: 369
+   4. Restaurant Au Coin du Feu (Trévoux)
+      Adresse: 23 Rue de Lorraine, Trévoux
+      ID: 572
+   5. Restaurant Au Coin du Feu (Trévoux)
+      Adresse: 23 Rue de Lorraine, Trévoux
+      ID: 636
+   6. Bar Moderne (Trévoux)
+      Adresse: 13 Rue de Lorraine, Trévoux
+      ID: 825
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 53: 6 activités aux coordonnées 45.9770,4.8020
+📍 Google Maps: https://www.google.com/maps?q=45.977,4.802
+================================================================================
+   1. Restaurant Le Commerce (Trévoux)
+      Adresse: 34 Rue du Commerce, Trévoux
+      ID: 146
+   2. Restaurant Le Commerce (Trévoux)
+      Adresse: 34 Rue du Commerce, Trévoux
+      ID: 200
+   3. Galerie Marchande Historique (Trévoux)
+      Adresse: 13 Rue du Commerce, Trévoux
+      ID: 467
+   4. Restaurant Le Commerce (Trévoux)
+      Adresse: 34 Rue du Commerce, Trévoux
+      ID: 583
+   5. Restaurant Le Commerce (Trévoux)
+      Adresse: 34 Rue du Commerce, Trévoux
+      ID: 647
+   6. Galerie Marchande Historique (Trévoux)
+      Adresse: 13 Rue du Commerce, Trévoux
+      ID: 748
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 54: 6 activités aux coordonnées 45.9755,4.8015
+📍 Google Maps: https://www.google.com/maps?q=45.9755,4.8015
+================================================================================
+   1. Chez Daniel (Trévoux)
+      Adresse: 12 Rue Voltaire, Trévoux
+      ID: 149
+   2. Chez Daniel (Trévoux)
+      Adresse: 12 Rue Voltaire, Trévoux
+      ID: 203
+   3. Bar Sportif (Trévoux)
+      Adresse: 14 Rue Voltaire, Trévoux
+      ID: 335
+   4. Chez Daniel (Trévoux)
+      Adresse: 12 Rue Voltaire, Trévoux
+      ID: 586
+   5. Chez Daniel (Trévoux)
+      Adresse: 12 Rue Voltaire, Trévoux
+      ID: 650
+   6. Bar Sportif (Trévoux)
+      Adresse: 14 Rue Voltaire, Trévoux
+      ID: 791
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 55: 6 activités aux coordonnées 45.9735,4.8030
+📍 Google Maps: https://www.google.com/maps?q=45.9735,4.803
+================================================================================
+   1. Le Restaurant Populaire (Trévoux)
+      Adresse: 9 Rue de la Joie, Trévoux
+      ID: 155
+   2. Le Restaurant Populaire (Trévoux)
+      Adresse: 9 Rue de la Joie, Trévoux
+      ID: 209
+   3. Passage Couvert Ancien (Trévoux)
+      Adresse: 20 Rue du Passage, Trévoux
+      ID: 489
+   4. Le Restaurant Populaire (Trévoux)
+      Adresse: 9 Rue de la Joie, Trévoux
+      ID: 592
+   5. Le Restaurant Populaire (Trévoux)
+      Adresse: 9 Rue de la Joie, Trévoux
+      ID: 656
+   6. Passage Couvert Ancien (Trévoux)
+      Adresse: 20 Rue du Passage, Trévoux
+      ID: 770
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 56: 6 activités aux coordonnées 45.9750,4.8020
+📍 Google Maps: https://www.google.com/maps?q=45.975,4.802
+================================================================================
+   1. Bar Cigar (Trévoux)
+      Adresse: 28 Place de la Statue, Trévoux
+      ID: 365
+   2. Musée de Trévoux (Trévoux)
+      Adresse: 5 Rue du Musée, Trévoux
+      ID: 432
+   3. Statue Monumentale (Trévoux)
+      Adresse: 28 Place de la Statue, Trévoux
+      ID: 487
+   4. Musée de Trévoux (Trévoux)
+      Adresse: 5 Rue du Musée, Trévoux
+      ID: 713
+   5. Statue Monumentale (Trévoux)
+      Adresse: 28 Place de la Statue, Trévoux
+      ID: 768
+   6. Bar Cigar (Trévoux)
+      Adresse: 28 Place de la Statue, Trévoux
+      ID: 821
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 57: 6 activités aux coordonnées 45.8241,4.8342
+📍 Google Maps: https://www.google.com/maps?q=45.8241,4.8342
+================================================================================
+   1. Bar Restaurant L'Écluse (Couzon)
+      Adresse: 1 Place Liberté, 69270 Couzon-au-Mont-d'Or
+      ID: 30
+   2. Hôtel de la Gare (Couzon)
+      Adresse: 26 Rue Gabriel Péri, 69270 Couzon-au-Mont-d'Or
+      ID: 29
+   3. Le Cabestan (Couzon)
+      Adresse: 14 rue de la République, 69270 Couzon-au-Mont-d'Or
+      ID: 28
+   4. Mont d'Or - Randonnées (Couzon)
+      Adresse: Départ Couzon-au-Mont-d'Or, 69270
+      ID: 39
+   5. Carrières de Pierre Jaune (Couzon)
+      Adresse: Sentier des Carrières, 69270 Couzon-au-Mont-d'Or
+      ID: 40
+   6. Bords de Saône - Chemin de Halage (Couzon)
+      Adresse: Quai de la Saône, 69270 Couzon-au-Mont-d'Or
+      ID: 42
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 58: 6 activités aux coordonnées 45.8270,4.8180
+📍 Google Maps: https://www.google.com/maps?q=45.827,4.818
+================================================================================
+   1. Restaurant Le Relais (Couzon)
+      Adresse: 12 Avenue du Relais, Couzon
+      ID: 219
+   2. Restaurant Le Relais (Couzon)
+      Adresse: 12 Avenue du Relais, Couzon
+      ID: 271
+   3. Bar Lounge Couzon (Couzon)
+      Adresse: 12 Avenue du Relais, Couzon
+      ID: 341
+   4. Restaurant Le Relais (Couzon)
+      Adresse: 12 Avenue du Relais, Couzon
+      ID: 375
+   5. Restaurant Le Relais (Couzon)
+      Adresse: 12 Avenue du Relais, Couzon
+      ID: 666
+   6. Bar Lounge Couzon (Couzon)
+      Adresse: 12 Avenue du Relais, Couzon
+      ID: 797
+
+================================================================================
+🔴 DOUBLON 59: 6 activités aux coordonnées 45.8280,4.8140
+📍 Google Maps: https://www.google.com/maps?q=45.828,4.814
+================================================================================
+   1. La Table Gourmande (Couzon)
+      Adresse: 30 Rue du Parc, Couzon
+      ID: 221
+   2. La Table Gourmande (Couzon)
+      Adresse: 30 Rue du Parc, Couzon
+      ID: 273
+   3. La Table Gourmande (Couzon)
+      Adresse: 30 Rue du Parc, Couzon
+      ID: 377
+   4. Terrain de Football (Couzon)
+      Adresse: 30 Rue du Parc, Couzon
+      ID: 511
+   5. La Table Gourmande (Couzon)
+      Adresse: 30 Rue du Parc, Couzon
+      ID: 668
+   6. Terrain de Football (Couzon)
+      Adresse: 30 Rue du Parc, Couzon
+      ID: 844
+
+================================================================================
+🔴 DOUBLON 60: 6 activités aux coordonnées 45.8235,4.8135
+📍 Google Maps: https://www.google.com/maps?q=45.8235,4.8135
+================================================================================
+   1. L'Assiette Locale (Couzon)
+      Adresse: 11 Rue de Bourgogne, Couzon
+      ID: 225
+   2. L'Assiette Locale (Couzon)
+      Adresse: 11 Rue de Bourgogne, Couzon
+      ID: 277
+   3. Bar Tabac Couzon (Couzon)
+      Adresse: 11 Rue de Bourgogne, Couzon
+      ID: 345
+   4. L'Assiette Locale (Couzon)
+      Adresse: 11 Rue de Bourgogne, Couzon
+      ID: 381
+   5. L'Assiette Locale (Couzon)
+      Adresse: 11 Rue de Bourgogne, Couzon
+      ID: 672
+   6. Bar Tabac Couzon (Couzon)
+      Adresse: 11 Rue de Bourgogne, Couzon
+      ID: 801
+
+================================================================================
+🔴 DOUBLON 61: 6 activités aux coordonnées 45.8225,4.8145
+📍 Google Maps: https://www.google.com/maps?q=45.8225,4.8145
+================================================================================
+   1. Chez Vincent (Couzon)
+      Adresse: 9 Rue des Peupliers, Couzon
+      ID: 227
+   2. Chez Vincent (Couzon)
+      Adresse: 9 Rue des Peupliers, Couzon
+      ID: 279
+   3. Café du Silence (Couzon)
+      Adresse: 9 Rue des Peupliers, Couzon
+      ID: 352
+   4. Chez Vincent (Couzon)
+      Adresse: 9 Rue des Peupliers, Couzon
+      ID: 383
+   5. Chez Vincent (Couzon)
+      Adresse: 9 Rue des Peupliers, Couzon
+      ID: 674
+   6. Café du Silence (Couzon)
+      Adresse: 9 Rue des Peupliers, Couzon
+      ID: 808
+
+================================================================================
+🔴 DOUBLON 62: 6 activités aux coordonnées 45.8240,4.8180
+📍 Google Maps: https://www.google.com/maps?q=45.824,4.818
+================================================================================
+   1. Le Petit Bistrot de Couzon (Couzon)
+      Adresse: 21 Rue de la Gare, Couzon
+      ID: 228
+   2. Le Petit Bistrot de Couzon (Couzon)
+      Adresse: 21 Rue de la Gare, Couzon
+      ID: 280
+   3. Café de la Gare (Couzon)
+      Adresse: 21 Rue de la Gare, Couzon
+      ID: 356
+   4. Le Petit Bistrot de Couzon (Couzon)
+      Adresse: 21 Rue de la Gare, Couzon
+      ID: 384
+   5. Le Petit Bistrot de Couzon (Couzon)
+      Adresse: 21 Rue de la Gare, Couzon
+      ID: 675
+   6. Café de la Gare (Couzon)
+      Adresse: 21 Rue de la Gare, Couzon
+      ID: 812
+
+================================================================================
+🔴 DOUBLON 63: 6 activités aux coordonnées 45.8215,4.8170
+📍 Google Maps: https://www.google.com/maps?q=45.8215,4.817
+================================================================================
+   1. Chez Monique (Couzon)
+      Adresse: 6 Rue Saint-Martin, Couzon
+      ID: 230
+   2. Chez Monique (Couzon)
+      Adresse: 6 Rue Saint-Martin, Couzon
+      ID: 282
+   3. Bar de l'Église (Couzon)
+      Adresse: 6 Rue Saint-Martin, Couzon
+      ID: 339
+   4. Chez Monique (Couzon)
+      Adresse: 6 Rue Saint-Martin, Couzon
+      ID: 386
+   5. Chez Monique (Couzon)
+      Adresse: 6 Rue Saint-Martin, Couzon
+      ID: 677
+   6. Bar de l'Église (Couzon)
+      Adresse: 6 Rue Saint-Martin, Couzon
+      ID: 795
+
+================================================================================
+🔴 DOUBLON 64: 6 activités aux coordonnées 45.8275,4.8135
+📍 Google Maps: https://www.google.com/maps?q=45.8275,4.8135
+================================================================================
+   1. La Maison du Bien Manger (Couzon)
+      Adresse: 28 Avenue Gambetta, Couzon
+      ID: 231
+   2. La Maison du Bien Manger (Couzon)
+      Adresse: 28 Avenue Gambetta, Couzon
+      ID: 283
+   3. La Maison du Bien Manger (Couzon)
+      Adresse: 28 Avenue Gambetta, Couzon
+      ID: 387
+   4. Musée des Métiers Anciens (Couzon)
+      Adresse: 22 Rue des Métiers, Couzon
+      ID: 473
+   5. La Maison du Bien Manger (Couzon)
+      Adresse: 28 Avenue Gambetta, Couzon
+      ID: 678
+   6. Musée des Métiers Anciens (Couzon)
+      Adresse: 22 Rue des Métiers, Couzon
+      ID: 754
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 65: 6 activités aux coordonnées 45.8230,4.8190
+📍 Google Maps: https://www.google.com/maps?q=45.823,4.819
+================================================================================
+   1. Restaurant Au Cœur de Couzon (Couzon)
+      Adresse: 20 Rue du Cœur, Couzon
+      ID: 234
+   2. Restaurant Au Cœur de Couzon (Couzon)
+      Adresse: 20 Rue du Cœur, Couzon
+      ID: 286
+   3. Café de Couzon (Couzon)
+      Adresse: 20 Rue du Cœur, Couzon
+      ID: 350
+   4. Restaurant Au Cœur de Couzon (Couzon)
+      Adresse: 20 Rue du Cœur, Couzon
+      ID: 390
+   5. Restaurant Au Cœur de Couzon (Couzon)
+      Adresse: 20 Rue du Cœur, Couzon
+      ID: 681
+   6. Café de Couzon (Couzon)
+      Adresse: 20 Rue du Cœur, Couzon
+      ID: 806
+
+================================================================================
+🔴 DOUBLON 66: 6 activités aux coordonnées 45.8220,4.8180
+📍 Google Maps: https://www.google.com/maps?q=45.822,4.818
+================================================================================
+   1. Chez Robert (Couzon)
+      Adresse: 19 Rue du Silence, Couzon
+      ID: 240
+   2. Chez Robert (Couzon)
+      Adresse: 19 Rue du Silence, Couzon
+      ID: 292
+   3. Bar Vintage (Couzon)
+      Adresse: 18 Rue du Silence, Couzon
+      ID: 355
+   4. Chez Robert (Couzon)
+      Adresse: 19 Rue du Silence, Couzon
+      ID: 396
+   5. Chez Robert (Couzon)
+      Adresse: 19 Rue du Silence, Couzon
+      ID: 687
+   6. Bar Vintage (Couzon)
+      Adresse: 18 Rue du Silence, Couzon
+      ID: 811
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 67: 6 activités aux coordonnées 45.8300,4.8160
+📍 Google Maps: https://www.google.com/maps?q=45.83,4.816
+================================================================================
+   1. Restaurant La Nouvelle Époque (Couzon)
+      Adresse: 40 Avenue Victor Hugo, Couzon
+      ID: 241
+   2. Restaurant La Nouvelle Époque (Couzon)
+      Adresse: 40 Avenue Victor Hugo, Couzon
+      ID: 293
+   3. Restaurant La Nouvelle Époque (Couzon)
+      Adresse: 40 Avenue Victor Hugo, Couzon
+      ID: 397
+   4. Hôtel La Nouvelle Époque (Couzon)
+      Adresse: 40 Avenue Victor Hugo, Couzon
+      ID: 521
+   5. Restaurant La Nouvelle Époque (Couzon)
+      Adresse: 40 Avenue Victor Hugo, Couzon
+      ID: 688
+   6. Hôtel La Nouvelle Époque (Couzon)
+      Adresse: 40 Avenue Victor Hugo, Couzon
+      ID: 854
+
+================================================================================
+🔴 DOUBLON 68: 6 activités aux coordonnées 45.8200,4.8160
+📍 Google Maps: https://www.google.com/maps?q=45.82,4.816
+================================================================================
+   1. Le Petit Resto de Couzon (Couzon)
+      Adresse: 1 Rue de la Paix, Couzon
+      ID: 242
+   2. Le Petit Resto de Couzon (Couzon)
+      Adresse: 1 Rue de la Paix, Couzon
+      ID: 294
+   3. Café de la Fontaine (Couzon)
+      Adresse: 1 Rue de la Paix, Couzon
+      ID: 354
+   4. Le Petit Resto de Couzon (Couzon)
+      Adresse: 1 Rue de la Paix, Couzon
+      ID: 398
+   5. Le Petit Resto de Couzon (Couzon)
+      Adresse: 1 Rue de la Paix, Couzon
+      ID: 689
+   6. Café de la Fontaine (Couzon)
+      Adresse: 1 Rue de la Paix, Couzon
+      ID: 810
+
+================================================================================
+🔴 DOUBLON 69: 6 activités aux coordonnées 45.8260,4.8125
+📍 Google Maps: https://www.google.com/maps?q=45.826,4.8125
+================================================================================
+   1. Restaurant Chez Nous (Couzon)
+      Adresse: 24 Rue de Juillet, Couzon
+      ID: 243
+   2. Restaurant Chez Nous (Couzon)
+      Adresse: 24 Rue de Juillet, Couzon
+      ID: 295
+   3. Restaurant Chez Nous (Couzon)
+      Adresse: 24 Rue de Juillet, Couzon
+      ID: 399
+   4. Bowling Couzon (Couzon)
+      Adresse: 24 Rue de Juillet, Couzon
+      ID: 522
+   5. Restaurant Chez Nous (Couzon)
+      Adresse: 24 Rue de Juillet, Couzon
+      ID: 690
+   6. Bowling Couzon (Couzon)
+      Adresse: 24 Rue de Juillet, Couzon
+      ID: 855
+
+================================================================================
+🔴 DOUBLON 70: 6 activités aux coordonnées 45.8235,4.8160
+📍 Google Maps: https://www.google.com/maps?q=45.8235,4.816
+================================================================================
+   1. Chez Jeannine (Couzon)
+      Adresse: 8 Rue Molière, Couzon
+      ID: 244
+   2. Chez Jeannine (Couzon)
+      Adresse: 8 Rue Molière, Couzon
+      ID: 296
+   3. Café Cozy (Couzon)
+      Adresse: 8 Rue Molière, Couzon
+      ID: 358
+   4. Chez Jeannine (Couzon)
+      Adresse: 8 Rue Molière, Couzon
+      ID: 400
+   5. Chez Jeannine (Couzon)
+      Adresse: 8 Rue Molière, Couzon
+      ID: 691
+   6. Café Cozy (Couzon)
+      Adresse: 8 Rue Molière, Couzon
+      ID: 814
+
+================================================================================
+🔴 DOUBLON 71: 6 activités aux coordonnées 45.8255,4.8180
+📍 Google Maps: https://www.google.com/maps?q=45.8255,4.818
+================================================================================
+   1. Restaurant Le Succès (Couzon)
+      Adresse: 15 Rue du Succès, Couzon
+      ID: 246
+   2. Restaurant Le Succès (Couzon)
+      Adresse: 15 Rue du Succès, Couzon
+      ID: 298
+   3. Bar Terrasse (Couzon)
+      Adresse: 15 Avenue Gambetta, Couzon
+      ID: 349
+   4. Restaurant Le Succès (Couzon)
+      Adresse: 15 Rue du Succès, Couzon
+      ID: 402
+   5. Restaurant Le Succès (Couzon)
+      Adresse: 15 Rue du Succès, Couzon
+      ID: 693
+   6. Bar Terrasse (Couzon)
+      Adresse: 15 Avenue Gambetta, Couzon
+      ID: 805
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 72: 6 activités aux coordonnées 45.8210,4.8150
+📍 Google Maps: https://www.google.com/maps?q=45.821,4.815
+================================================================================
+   1. Chez Geneviève (Couzon)
+      Adresse: 6 Rue des Châtaigniers, Couzon
+      ID: 247
+   2. Chez Geneviève (Couzon)
+      Adresse: 6 Rue des Châtaigniers, Couzon
+      ID: 299
+   3. Chez Geneviève (Couzon)
+      Adresse: 6 Rue des Châtaigniers, Couzon
+      ID: 403
+   4. Monument aux Morts (Couzon)
+      Adresse: 5 Place du Souvenir, Couzon
+      ID: 450
+   5. Chez Geneviève (Couzon)
+      Adresse: 6 Rue des Châtaigniers, Couzon
+      ID: 694
+   6. Monument aux Morts (Couzon)
+      Adresse: 5 Place du Souvenir, Couzon
+      ID: 731
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 73: 6 activités aux coordonnées 45.8240,4.8160
+📍 Google Maps: https://www.google.com/maps?q=45.824,4.816
+================================================================================
+   1. Au Petit Couzon (Couzon)
+      Adresse: 11 Rue de la Joie, Couzon
+      ID: 255
+   2. Au Petit Couzon (Couzon)
+      Adresse: 11 Rue de la Joie, Couzon
+      ID: 307
+   3. Au Petit Couzon (Couzon)
+      Adresse: 11 Rue de la Joie, Couzon
+      ID: 411
+   4. Pharmacie Centrale (Couzon)
+      Adresse: Rue Principale, Couzon
+      ID: 430
+   5. Pharmacie Centrale (Couzon)
+      Adresse: Rue Principale, Couzon
+      ID: 605
+   6. Au Petit Couzon (Couzon)
+      Adresse: 11 Rue de la Joie, Couzon
+      ID: 702
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 74: 6 activités aux coordonnées 45.8210,4.8120
+📍 Google Maps: https://www.google.com/maps?q=45.821,4.812
+================================================================================
+   1. Chez Claudette (Couzon)
+      Adresse: 4 Rue de la Chapelle, Couzon
+      ID: 264
+   2. Chez Claudette (Couzon)
+      Adresse: 4 Rue de la Chapelle, Couzon
+      ID: 316
+   3. Chez Claudette (Couzon)
+      Adresse: 4 Rue de la Chapelle, Couzon
+      ID: 420
+   4. Cours d'Eau Pittoresque (Couzon)
+      Adresse: 10 Chemin de l'Eau, Couzon
+      ID: 485
+   5. Chez Claudette (Couzon)
+      Adresse: 4 Rue de la Chapelle, Couzon
+      ID: 711
+   6. Cours d'Eau Pittoresque (Couzon)
+      Adresse: 10 Chemin de l'Eau, Couzon
+      ID: 766
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 75: 5 activités aux coordonnées 45.9865,4.7266
+📍 Google Maps: https://www.google.com/maps?q=45.9865,4.7266
+================================================================================
+   1. Musée Paul-Dini Villefranche (Trévoux)
+      Adresse: Villefranche-sur-Saône, 69400
+      ID: 70
+   2. Pizza Paolo Villefranche (Trévoux)
+      Adresse: Villefranche-sur-Saône, 69400
+      ID: 12
+   3. La Chapelle Villefranche (Trévoux)
+      Adresse: Villefranche-sur-Saône, 69400
+      ID: 13
+   4. Villefranche-sur-Saône (Trévoux)
+      Adresse: Villefranche-sur-Saône, 69400
+      ID: 27
+   5. Le Rive Gauche (Trévoux)
+      Adresse: Villefranche-sur-Saône, 69400
+      ID: 14
+
+================================================================================
+🔴 DOUBLON 76: 5 activités aux coordonnées 45.9748,4.8032
+📍 Google Maps: https://www.google.com/maps?q=45.9748,4.8032
+================================================================================
+   1. Chez Antoine (Trévoux)
+      Adresse: 9 Rue du Palais de Justice, Trévoux
+      ID: 121
+   2. Chez Antoine (Trévoux)
+      Adresse: 9 Rue du Palais de Justice, Trévoux
+      ID: 175
+   3. Chez Antoine (Trévoux)
+      Adresse: 9 Rue du Palais de Justice, Trévoux
+      ID: 558
+   4. Chez Antoine (Trévoux)
+      Adresse: 9 Rue du Palais de Justice, Trévoux
+      ID: 622
+   5. Palais de Justice de Trévoux (Trévoux)
+      Adresse: 8 Rue du Palais de Justice, Trévoux
+      ID: 716
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 77: 5 activités aux coordonnées 45.9765,4.8050
+📍 Google Maps: https://www.google.com/maps?q=45.9765,4.805
+================================================================================
+   1. Café de la Basilique (Trévoux)
+      Adresse: 4 Place de la Basilique, Trévoux
+      ID: 328
+   2. Hôtel de la Basilique (Trévoux)
+      Adresse: 4 Place de la Basilique, Trévoux
+      ID: 527
+   3. Basilique Notre-Dame (Trévoux)
+      Adresse: 3 Place de la Basilique, Trévoux
+      ID: 715
+   4. Café de la Basilique (Trévoux)
+      Adresse: 4 Place de la Basilique, Trévoux
+      ID: 784
+   5. Hôtel de la Basilique (Trévoux)
+      Adresse: 4 Place de la Basilique, Trévoux
+      ID: 860
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 78: 4 activités aux coordonnées 45.7640,4.8340
+📍 Google Maps: https://www.google.com/maps?q=45.764,4.834
+================================================================================
+   1. Play In Park Lyon (Couzon)
+      Adresse: Lyon région
+      ID: 95
+   2. iFLY Lyon (Couzon)
+      Adresse: Lyon région
+      ID: 89
+   3. Lyon Centre Historique UNESCO (Couzon)
+      Adresse: Lyon Centre, 69000
+      ID: 48
+   4. Actua Organisation (Couzon)
+      Adresse: Lyon région
+      ID: 79
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 79: 4 activités aux coordonnées 45.9765,4.8030
+📍 Google Maps: https://www.google.com/maps?q=45.9765,4.803
+================================================================================
+   1. Restaurant Les Arcades (Trévoux)
+      Adresse: 39 Rue des Arcades, Trévoux
+      ID: 140
+   2. Restaurant Les Arcades (Trévoux)
+      Adresse: 39 Rue des Arcades, Trévoux
+      ID: 194
+   3. Restaurant Les Arcades (Trévoux)
+      Adresse: 39 Rue des Arcades, Trévoux
+      ID: 577
+   4. Restaurant Les Arcades (Trévoux)
+      Adresse: 39 Rue des Arcades, Trévoux
+      ID: 641
+
+================================================================================
+🔴 DOUBLON 80: 4 activités aux coordonnées 45.9775,4.8050
+📍 Google Maps: https://www.google.com/maps?q=45.9775,4.805
+================================================================================
+   1. Chez Gérard (Trévoux)
+      Adresse: 11 Place de la Paix, Trévoux
+      ID: 141
+   2. Chez Gérard (Trévoux)
+      Adresse: 11 Place de la Paix, Trévoux
+      ID: 195
+   3. Chez Gérard (Trévoux)
+      Adresse: 11 Place de la Paix, Trévoux
+      ID: 578
+   4. Chez Gérard (Trévoux)
+      Adresse: 11 Place de la Paix, Trévoux
+      ID: 642
+
+================================================================================
+🔴 DOUBLON 81: 4 activités aux coordonnées 45.8250,4.8170
+📍 Google Maps: https://www.google.com/maps?q=45.825,4.817
+================================================================================
+   1. Chez Fabienne (Couzon)
+      Adresse: 18 Rue de la Source, Couzon
+      ID: 275
+   2. Chez Fabienne (Couzon)
+      Adresse: 18 Rue de la Source, Couzon
+      ID: 223
+   3. Chez Fabienne (Couzon)
+      Adresse: 18 Rue de la Source, Couzon
+      ID: 379
+   4. Chez Fabienne (Couzon)
+      Adresse: 18 Rue de la Source, Couzon
+      ID: 670
+
+================================================================================
+🔴 DOUBLON 82: 4 activités aux coordonnées 45.8230,4.8140
+📍 Google Maps: https://www.google.com/maps?q=45.823,4.814
+================================================================================
+   1. Chez Marcel (Couzon)
+      Adresse: 15 Rue Centrale, Couzon
+      ID: 267
+   2. Chez Marcel (Couzon)
+      Adresse: 15 Rue Centrale, Couzon
+      ID: 215
+   3. Chez Marcel (Couzon)
+      Adresse: 15 Rue Centrale, Couzon
+      ID: 371
+   4. Chez Marcel (Couzon)
+      Adresse: 15 Rue Centrale, Couzon
+      ID: 662
+
+================================================================================
+🔴 DOUBLON 83: 4 activités aux coordonnées 45.8220,4.8170
+📍 Google Maps: https://www.google.com/maps?q=45.822,4.817
+================================================================================
+   1. Aire de Jeux (Couzon)
+      Adresse: 11 Chemin du Moulin, Couzon
+      ID: 873
+   2. Ancien Moulin à Eau (Couzon)
+      Adresse: 11 Chemin du Moulin, Couzon
+      ID: 464
+   3. Aire de Jeux (Couzon)
+      Adresse: 11 Chemin du Moulin, Couzon
+      ID: 540
+   4. Ancien Moulin à Eau (Couzon)
+      Adresse: 11 Chemin du Moulin, Couzon
+      ID: 745
+
+================================================================================
+🔴 DOUBLON 84: 4 activités aux coordonnées 45.8225,4.8135
+📍 Google Maps: https://www.google.com/maps?q=45.8225,4.8135
+================================================================================
+   1. Chez Séverine (Couzon)
+      Adresse: 7 Rue de l'Épine, Couzon
+      ID: 253
+   2. Chez Séverine (Couzon)
+      Adresse: 7 Rue de l'Épine, Couzon
+      ID: 305
+   3. Chez Séverine (Couzon)
+      Adresse: 7 Rue de l'Épine, Couzon
+      ID: 409
+   4. Chez Séverine (Couzon)
+      Adresse: 7 Rue de l'Épine, Couzon
+      ID: 700
+
+================================================================================
+🔴 DOUBLON 85: 4 activités aux coordonnées 45.8250,4.8333
+📍 Google Maps: https://www.google.com/maps?q=45.825,4.8333
+================================================================================
+   1. Village de Couzon (Couzon)
+      Adresse: Centre village, 69270 Couzon-au-Mont-d'Or
+      ID: 44
+   2. Pharmacie de Couzon (Couzon)
+      Adresse: 4 Rue Claudius Moiroux, 69270 Couzon-au-Mont-d'Or
+      ID: 98
+   3. Voie Bleue - Vélo Saône (Couzon)
+      Adresse: Bords de Saône, 69270 Couzon
+      ID: 100
+   4. Île Barbe (Couzon)
+      Adresse: Lyon 9ème, 69009
+      ID: 47
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 86: 4 activités aux coordonnées 45.9748,4.8025
+📍 Google Maps: https://www.google.com/maps?q=45.9748,4.8025
+================================================================================
+   1. La Pizzeria du Centre (Trévoux)
+      Adresse: 27 Rue du Centre, Trévoux
+      ID: 139
+   2. La Pizzeria du Centre (Trévoux)
+      Adresse: 27 Rue du Centre, Trévoux
+      ID: 193
+   3. La Pizzeria du Centre (Trévoux)
+      Adresse: 27 Rue du Centre, Trévoux
+      ID: 576
+   4. La Pizzeria du Centre (Trévoux)
+      Adresse: 27 Rue du Centre, Trévoux
+      ID: 640
+
+================================================================================
+🔴 DOUBLON 87: 4 activités aux coordonnées 45.9742,4.8035
+📍 Google Maps: https://www.google.com/maps?q=45.9742,4.8035
+================================================================================
+   1. Chez Marie (Trévoux)
+      Adresse: 18 Rue de l'Hôtel de Ville, Trévoux
+      ID: 115
+   2. Chez Marie (Trévoux)
+      Adresse: 18 Rue de l'Hôtel de Ville, Trévoux
+      ID: 169
+   3. Chez Marie (Trévoux)
+      Adresse: 18 Rue de l'Hôtel de Ville, Trévoux
+      ID: 552
+   4. Chez Marie (Trévoux)
+      Adresse: 18 Rue de l'Hôtel de Ville, Trévoux
+      ID: 616
+
+================================================================================
+🔴 DOUBLON 88: 4 activités aux coordonnées 45.9760,4.8040
+📍 Google Maps: https://www.google.com/maps?q=45.976,4.804
+================================================================================
+   1. Les Saveurs de Trévoux (Trévoux)
+      Adresse: 12 Rue de Juillet, Trévoux
+      ID: 116
+   2. Les Saveurs de Trévoux (Trévoux)
+      Adresse: 12 Rue de Juillet, Trévoux
+      ID: 170
+   3. Les Saveurs de Trévoux (Trévoux)
+      Adresse: 12 Rue de Juillet, Trévoux
+      ID: 553
+   4. Les Saveurs de Trévoux (Trévoux)
+      Adresse: 12 Rue de Juillet, Trévoux
+      ID: 617
+
+================================================================================
+🔴 DOUBLON 89: 4 activités aux coordonnées 45.9755,4.8060
+📍 Google Maps: https://www.google.com/maps?q=45.9755,4.806
+================================================================================
+   1. La Belle Époque (Trévoux)
+      Adresse: 31 Rue Bichat, Trévoux
+      ID: 120
+   2. La Belle Époque (Trévoux)
+      Adresse: 31 Rue Bichat, Trévoux
+      ID: 174
+   3. La Belle Époque (Trévoux)
+      Adresse: 31 Rue Bichat, Trévoux
+      ID: 557
+   4. La Belle Époque (Trévoux)
+      Adresse: 31 Rue Bichat, Trévoux
+      ID: 621
+
+================================================================================
+🔴 DOUBLON 90: 4 activités aux coordonnées 45.9760,4.8020
+📍 Google Maps: https://www.google.com/maps?q=45.976,4.802
+================================================================================
+   1. La Table du Chanoine (Trévoux)
+      Adresse: 2 Rue du Chanoine Guilbert, Trévoux
+      ID: 129
+   2. La Table du Chanoine (Trévoux)
+      Adresse: 2 Rue du Chanoine Guilbert, Trévoux
+      ID: 183
+   3. La Table du Chanoine (Trévoux)
+      Adresse: 2 Rue du Chanoine Guilbert, Trévoux
+      ID: 566
+   4. La Table du Chanoine (Trévoux)
+      Adresse: 2 Rue du Chanoine Guilbert, Trévoux
+      ID: 630
+
+================================================================================
+🔴 DOUBLON 91: 4 activités aux coordonnées 45.9715,4.8030
+📍 Google Maps: https://www.google.com/maps?q=45.9715,4.803
+================================================================================
+   1. Le Restaurant de l'Écluse (Trévoux)
+      Adresse: 28 Chemin de l'Écluse, Trévoux
+      ID: 130
+   2. Le Restaurant de l'Écluse (Trévoux)
+      Adresse: 28 Chemin de l'Écluse, Trévoux
+      ID: 184
+   3. Le Restaurant de l'Écluse (Trévoux)
+      Adresse: 28 Chemin de l'Écluse, Trévoux
+      ID: 567
+   4. Le Restaurant de l'Écluse (Trévoux)
+      Adresse: 28 Chemin de l'Écluse, Trévoux
+      ID: 631
+
+================================================================================
+🔴 DOUBLON 92: 4 activités aux coordonnées 45.9705,4.7990
+📍 Google Maps: https://www.google.com/maps?q=45.9705,4.799
+================================================================================
+   1. La Maison Blanche (Trévoux)
+      Adresse: 33 Chemin des Carrières, Trévoux
+      ID: 134
+   2. La Maison Blanche (Trévoux)
+      Adresse: 33 Chemin des Carrières, Trévoux
+      ID: 188
+   3. La Maison Blanche (Trévoux)
+      Adresse: 33 Chemin des Carrières, Trévoux
+      ID: 571
+   4. La Maison Blanche (Trévoux)
+      Adresse: 33 Chemin des Carrières, Trévoux
+      ID: 635
+
+================================================================================
+🔴 DOUBLON 93: 4 activités aux coordonnées 45.9745,4.8035
+📍 Google Maps: https://www.google.com/maps?q=45.9745,4.8035
+================================================================================
+   1. Chez Louise (Trévoux)
+      Adresse: 20 Rue Molière, Trévoux
+      ID: 145
+   2. Chez Louise (Trévoux)
+      Adresse: 20 Rue Molière, Trévoux
+      ID: 199
+   3. Chez Louise (Trévoux)
+      Adresse: 20 Rue Molière, Trévoux
+      ID: 582
+   4. Chez Louise (Trévoux)
+      Adresse: 20 Rue Molière, Trévoux
+      ID: 646
+
+================================================================================
+🔴 DOUBLON 94: 4 activités aux coordonnées 45.9775,4.8065
+📍 Google Maps: https://www.google.com/maps?q=45.9775,4.8065
+================================================================================
+   1. Restaurant Le Détour (Trévoux)
+      Adresse: 44 Rue du Détour, Trévoux
+      ID: 150
+   2. Restaurant Le Détour (Trévoux)
+      Adresse: 44 Rue du Détour, Trévoux
+      ID: 204
+   3. Restaurant Le Détour (Trévoux)
+      Adresse: 44 Rue du Détour, Trévoux
+      ID: 587
+   4. Restaurant Le Détour (Trévoux)
+      Adresse: 44 Rue du Détour, Trévoux
+      ID: 651
+
+================================================================================
+🔴 DOUBLON 95: 4 activités aux coordonnées 45.9740,4.8005
+📍 Google Maps: https://www.google.com/maps?q=45.974,4.8005
+================================================================================
+   1. Le Coin de Table (Trévoux)
+      Adresse: 10 Rue des Violettes, Trévoux
+      ID: 151
+   2. Le Coin de Table (Trévoux)
+      Adresse: 10 Rue des Violettes, Trévoux
+      ID: 205
+   3. Le Coin de Table (Trévoux)
+      Adresse: 10 Rue des Violettes, Trévoux
+      ID: 588
+   4. Le Coin de Table (Trévoux)
+      Adresse: 10 Rue des Violettes, Trévoux
+      ID: 652
+
+================================================================================
+🔴 DOUBLON 96: 4 activités aux coordonnées 45.9780,4.7995
+📍 Google Maps: https://www.google.com/maps?q=45.978,4.7995
+================================================================================
+   1. Restaurant Du Succès (Trévoux)
+      Adresse: 37 Avenue du Succès, Trévoux
+      ID: 152
+   2. Restaurant Du Succès (Trévoux)
+      Adresse: 37 Avenue du Succès, Trévoux
+      ID: 206
+   3. Restaurant Du Succès (Trévoux)
+      Adresse: 37 Avenue du Succès, Trévoux
+      ID: 589
+   4. Restaurant Du Succès (Trévoux)
+      Adresse: 37 Avenue du Succès, Trévoux
+      ID: 653
+
+================================================================================
+🔴 DOUBLON 97: 4 activités aux coordonnées 45.9720,4.8015
+📍 Google Maps: https://www.google.com/maps?q=45.972,4.8015
+================================================================================
+   1. Chez Sophie (Trévoux)
+      Adresse: 7 Rue Pasteur, Trévoux
+      ID: 153
+   2. Chez Sophie (Trévoux)
+      Adresse: 7 Rue Pasteur, Trévoux
+      ID: 207
+   3. Chez Sophie (Trévoux)
+      Adresse: 7 Rue Pasteur, Trévoux
+      ID: 590
+   4. Chez Sophie (Trévoux)
+      Adresse: 7 Rue Pasteur, Trévoux
+      ID: 654
+
+================================================================================
+🔴 DOUBLON 98: 4 activités aux coordonnées 45.9765,4.8045
+📍 Google Maps: https://www.google.com/maps?q=45.9765,4.8045
+================================================================================
+   1. Restaurant La Fontaine (Trévoux)
+      Adresse: 21 Place de la Fontaine, Trévoux
+      ID: 154
+   2. Restaurant La Fontaine (Trévoux)
+      Adresse: 21 Place de la Fontaine, Trévoux
+      ID: 208
+   3. Restaurant La Fontaine (Trévoux)
+      Adresse: 21 Place de la Fontaine, Trévoux
+      ID: 591
+   4. Restaurant La Fontaine (Trévoux)
+      Adresse: 21 Place de la Fontaine, Trévoux
+      ID: 655
+
+================================================================================
+🔴 DOUBLON 99: 4 activités aux coordonnées 45.9710,4.8040
+📍 Google Maps: https://www.google.com/maps?q=45.971,4.804
+================================================================================
+   1. Restaurant L'Escale (Trévoux)
+      Adresse: 30 Quai de l'Écluse, Trévoux
+      ID: 156
+   2. Restaurant L'Escale (Trévoux)
+      Adresse: 30 Quai de l'Écluse, Trévoux
+      ID: 210
+   3. Restaurant L'Escale (Trévoux)
+      Adresse: 30 Quai de l'Écluse, Trévoux
+      ID: 593
+   4. Restaurant L'Escale (Trévoux)
+      Adresse: 30 Quai de l'Écluse, Trévoux
+      ID: 657
+
+================================================================================
+🔴 DOUBLON 100: 4 activités aux coordonnées 45.9740,4.8060
+📍 Google Maps: https://www.google.com/maps?q=45.974,4.806
+================================================================================
+   1. Chez Michèle (Trévoux)
+      Adresse: 26 Rue de la Chapelle, Trévoux
+      ID: 157
+   2. Chez Michèle (Trévoux)
+      Adresse: 26 Rue de la Chapelle, Trévoux
+      ID: 211
+   3. Chez Michèle (Trévoux)
+      Adresse: 26 Rue de la Chapelle, Trévoux
+      ID: 594
+   4. Chez Michèle (Trévoux)
+      Adresse: 26 Rue de la Chapelle, Trévoux
+      ID: 658
+
+================================================================================
+🔴 DOUBLON 101: 4 activités aux coordonnées 45.9770,4.8010
+📍 Google Maps: https://www.google.com/maps?q=45.977,4.801
+================================================================================
+   1. Restaurant Au Rendez-Vous (Trévoux)
+      Adresse: 43 Rue du Rendez-Vous, Trévoux
+      ID: 158
+   2. Restaurant Au Rendez-Vous (Trévoux)
+      Adresse: 43 Rue du Rendez-Vous, Trévoux
+      ID: 212
+   3. Restaurant Au Rendez-Vous (Trévoux)
+      Adresse: 43 Rue du Rendez-Vous, Trévoux
+      ID: 595
+   4. Restaurant Au Rendez-Vous (Trévoux)
+      Adresse: 43 Rue du Rendez-Vous, Trévoux
+      ID: 659
+
+================================================================================
+🔴 DOUBLON 102: 4 activités aux coordonnées 45.9700,4.8030
+📍 Google Maps: https://www.google.com/maps?q=45.97,4.803
+================================================================================
+   1. La Bonne Table (Trévoux)
+      Adresse: 13 Chemin de la Bonne Table, Trévoux
+      ID: 159
+   2. La Bonne Table (Trévoux)
+      Adresse: 13 Chemin de la Bonne Table, Trévoux
+      ID: 213
+   3. La Bonne Table (Trévoux)
+      Adresse: 13 Chemin de la Bonne Table, Trévoux
+      ID: 596
+   4. La Bonne Table (Trévoux)
+      Adresse: 13 Chemin de la Bonne Table, Trévoux
+      ID: 660
+
+================================================================================
+🔴 DOUBLON 103: 4 activités aux coordonnées 45.9738,4.8020
+📍 Google Maps: https://www.google.com/maps?q=45.9738,4.802
+================================================================================
+   1. Table Ronde (Trévoux)
+      Adresse: 10 Rue du Marché, Trévoux
+      ID: 165
+   2. Table Ronde (Trévoux)
+      Adresse: 10 Rue du Marché, Trévoux
+      ID: 548
+   3. Table Ronde (Trévoux)
+      Adresse: 10 Rue du Marché, Trévoux
+      ID: 612
+   4. Table Ronde (Trévoux)
+      Adresse: 10 Rue du Marché, Trévoux
+      ID: 111
+
+================================================================================
+🔴 DOUBLON 104: 4 activités aux coordonnées 45.9745,4.8020
+📍 Google Maps: https://www.google.com/maps?q=45.9745,4.802
+================================================================================
+   1. Bar Tabac Central (Trévoux)
+      Adresse: 8 Rue Nationale, Trévoux
+      ID: 323
+   2. Hôtel Central (Trévoux)
+      Adresse: 10 Rue Nationale, Trévoux
+      ID: 501
+   3. Hôtel Central (Trévoux)
+      Adresse: 10 Rue Nationale, Trévoux
+      ID: 834
+   4. Bar Tabac Central (Trévoux)
+      Adresse: 8 Rue Nationale, Trévoux
+      ID: 779
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 105: 4 activités aux coordonnées 45.9760,4.8050
+📍 Google Maps: https://www.google.com/maps?q=45.976,4.805
+================================================================================
+   1. Maison Renaissance (Trévoux)
+      Adresse: 14 Rue de la Renaissance, Trévoux
+      ID: 460
+   2. Hôtel Renaissance (Trévoux)
+      Adresse: 14 Rue de la Renaissance, Trévoux
+      ID: 505
+   3. Maison Renaissance (Trévoux)
+      Adresse: 14 Rue de la Renaissance, Trévoux
+      ID: 741
+   4. Hôtel Renaissance (Trévoux)
+      Adresse: 14 Rue de la Renaissance, Trévoux
+      ID: 838
+
+================================================================================
+🔴 DOUBLON 106: 4 activités aux coordonnées 45.9934,4.7272
+📍 Google Maps: https://www.google.com/maps?q=45.9934,4.7272
+================================================================================
+   1. L'Embarcadère Villefranche (Couzon)
+      Adresse: Bords de Saône, 69400 Villefranche-sur-Saône
+      ID: 32
+   2. Le Bistronome en Beaujolais (Couzon)
+      Adresse: 144 rue d'Anse, 69400 Villefranche-sur-Saône
+      ID: 33
+   3. Brasserie du Théâtre Villefranche (Couzon)
+      Adresse: Centre-ville, 69400 Villefranche-sur-Saône
+      ID: 34
+   4. Musée Paul-Dini Villefranche (Couzon)
+      Adresse: Villefranche-sur-Saône, 69400
+      ID: 71
+
+   ⚠️ PROBLÈME: Les adresses sont différentes mais partagent les mêmes coordonnées!
+
+================================================================================
+🔴 DOUBLON 107: 4 activités aux coordonnées 45.8205,4.8120
+📍 Google Maps: https://www.google.com/maps?q=45.8205,4.812
+================================================================================
+   1. Restaurant Au Ciel Bleu (Couzon)
+      Adresse: 3 Chemin du Ciel, Couzon
+      ID: 222
+   2. Restaurant Au Ciel Bleu (Couzon)
+      Adresse: 3 Chemin du Ciel, Couzon
+      ID: 274
+   3. Restaurant Au Ciel Bleu (Couzon)
+      Adresse: 3 Chemin du Ciel, Couzon
+      ID: 378
+   4. Restaurant Au Ciel Bleu (Couzon)
+      Adresse: 3 Chemin du Ciel, Couzon
+      ID: 669
+
+================================================================================
+🔴 DOUBLON 108: 4 activités aux coordonnées 45.8280,4.8165
+📍 Google Maps: https://www.google.com/maps?q=45.828,4.8165
+================================================================================
+   1. L'Étape Gourmande (Couzon)
+      Adresse: 31 Chemin de l'Étape, Couzon
+      ID: 245
+   2. L'Étape Gourmande (Couzon)
+      Adresse: 31 Chemin de l'Étape, Couzon
+      ID: 297
+   3. L'Étape Gourmande (Couzon)
+      Adresse: 31 Chemin de l'Étape, Couzon
+      ID: 401
+   4. L'Étape Gourmande (Couzon)
+      Adresse: 31 Chemin de l'Étape, Couzon
+      ID: 692
+
+================================================================================
+🔴 DOUBLON 109: 4 activités aux coordonnées 45.8265,4.8155
+📍 Google Maps: https://www.google.com/maps?q=45.8265,4.8155
+================================================================================
+   1. Chez Christiane (Couzon)
+      Adresse: 17 Rue de Provence, Couzon
+      ID: 250
+   2. Chez Christiane (Couzon)
+      Adresse: 17 Rue de Provence, Couzon
+      ID: 302
+   3. Chez Christiane (Couzon)
+      Adresse: 17 Rue de Provence, Couzon
+      ID: 406
+   4. Chez Christiane (Couzon)
+      Adresse: 17 Rue de Provence, Couzon
+      ID: 697
+
+================================================================================
+🔴 DOUBLON 110: 4 activités aux coordonnées 45.8305,4.8175
+📍 Google Maps: https://www.google.com/maps?q=45.8305,4.8175
+================================================================================
+   1. Restaurant Nouvelle Cuisine (Couzon)
+      Adresse: 39 Avenue du Progrès, Couzon
+      ID: 256
+   2. Restaurant Nouvelle Cuisine (Couzon)
+      Adresse: 39 Avenue du Progrès, Couzon
+      ID: 308
+   3. Restaurant Nouvelle Cuisine (Couzon)
+      Adresse: 39 Avenue du Progrès, Couzon
+      ID: 412
+   4. Restaurant Nouvelle Cuisine (Couzon)
+      Adresse: 39 Avenue du Progrès, Couzon
+      ID: 703
+
+================================================================================
+🔴 DOUBLON 111: 4 activités aux coordonnées 45.8205,4.8130
+📍 Google Maps: https://www.google.com/maps?q=45.8205,4.813
+================================================================================
+   1. Chez Fabrice (Couzon)
+      Adresse: 5 Rue des Roses, Couzon
+      ID: 257
+   2. Chez Fabrice (Couzon)
+      Adresse: 5 Rue des Roses, Couzon
+      ID: 309
+   3. Chez Fabrice (Couzon)
+      Adresse: 5 Rue des Roses, Couzon
+      ID: 413
+   4. Chez Fabrice (Couzon)
+      Adresse: 5 Rue des Roses, Couzon
+      ID: 704
+
+================================================================================
+🔴 DOUBLON 112: 4 activités aux coordonnées 45.8290,4.8185
+📍 Google Maps: https://www.google.com/maps?q=45.829,4.8185
+================================================================================
+   1. La Maison Gourmande (Couzon)
+      Adresse: 34 Chemin de la Maison, Couzon
+      ID: 258
+   2. La Maison Gourmande (Couzon)
+      Adresse: 34 Chemin de la Maison, Couzon
+      ID: 310
+   3. La Maison Gourmande (Couzon)
+      Adresse: 34 Chemin de la Maison, Couzon
+      ID: 414
+   4. La Maison Gourmande (Couzon)
+      Adresse: 34 Chemin de la Maison, Couzon
+      ID: 705
+
+================================================================================
+🔴 DOUBLON 113: 4 activités aux coordonnées 45.8230,4.8150
+📍 Google Maps: https://www.google.com/maps?q=45.823,4.815
+================================================================================
+   1. Restaurant Le Ciel (Couzon)
+      Adresse: 9 Rue du Ciel, Couzon
+      ID: 259
+   2. Restaurant Le Ciel (Couzon)
+      Adresse: 9 Rue du Ciel, Couzon
+      ID: 311
+   3. Restaurant Le Ciel (Couzon)
+      Adresse: 9 Rue du Ciel, Couzon
+      ID: 415
+   4. Restaurant Le Ciel (Couzon)
+      Adresse: 9 Rue du Ciel, Couzon
+      ID: 706
+
+================================================================================
+🔴 DOUBLON 114: 4 activités aux coordonnées 45.8270,4.8170
+📍 Google Maps: https://www.google.com/maps?q=45.827,4.817
+================================================================================
+   1. Chez Isabelle (Couzon)
+      Adresse: 18 Rue de la Liberté, Couzon
+      ID: 260
+   2. Chez Isabelle (Couzon)
+      Adresse: 18 Rue de la Liberté, Couzon
+      ID: 312
+   3. Chez Isabelle (Couzon)
+      Adresse: 18 Rue de la Liberté, Couzon
+      ID: 416
+   4. Chez Isabelle (Couzon)
+      Adresse: 18 Rue de la Liberté, Couzon
+      ID: 707
+
+================================================================================
+🔴 DOUBLON 115: 4 activités aux coordonnées 45.8290,4.8135
+📍 Google Maps: https://www.google.com/maps?q=45.829,4.8135
+================================================================================
+   1. Restaurant Au Coin du Feu (Couzon)
+      Adresse: 37 Boulevard de l'Industrie, Couzon
+      ID: 261
+   2. Restaurant Au Coin du Feu (Couzon)
+      Adresse: 37 Boulevard de l'Industrie, Couzon
+      ID: 313
+   3. Restaurant Au Coin du Feu (Couzon)
+      Adresse: 37 Boulevard de l'Industrie, Couzon
+      ID: 417
+   4. Restaurant Au Coin du Feu (Couzon)
+      Adresse: 37 Boulevard de l'Industrie, Couzon
+      ID: 708
+
+================================================================================
+🔴 DOUBLON 116: 4 activités aux coordonnées 45.8200,4.8170
+📍 Google Maps: https://www.google.com/maps?q=45.82,4.817
+================================================================================
+   1. Le Coin de Bouche (Couzon)
+      Adresse: 3 Rue de la Mouche, Couzon
+      ID: 262
+   2. Le Coin de Bouche (Couzon)
+      Adresse: 3 Rue de la Mouche, Couzon
+      ID: 314
+   3. Le Coin de Bouche (Couzon)
+      Adresse: 3 Rue de la Mouche, Couzon
+      ID: 418
+   4. Le Coin de Bouche (Couzon)
+      Adresse: 3 Rue de la Mouche, Couzon
+      ID: 709
+
+================================================================================
+🔴 DOUBLON 117: 4 activités aux coordonnées 45.8285,4.8195
+📍 Google Maps: https://www.google.com/maps?q=45.8285,4.8195
+================================================================================
+   1. La Table du Terroir (Couzon)
+      Adresse: 36 Chemin du Terroir, Couzon
+      ID: 265
+   2. La Table du Terroir (Couzon)
+      Adresse: 36 Chemin du Terroir, Couzon
+      ID: 317
+   3. La Table du Terroir (Couzon)
+      Adresse: 36 Chemin du Terroir, Couzon
+      ID: 421
+   4. La Table du Terroir (Couzon)
+      Adresse: 36 Chemin du Terroir, Couzon
+      ID: 712
+
+================================================================================
+🔴 DOUBLON 118: 4 activités aux coordonnées 45.8260,4.8180
+📍 Google Maps: https://www.google.com/maps?q=45.826,4.818
+================================================================================
+   1. Aire de Pique-Nique (Couzon)
+      Adresse: 16 Chemin du Silence, Couzon
+      ID: 853
+   2. Jardin du Silence (Couzon)
+      Adresse: 16 Chemin du Silence, Couzon
+      ID: 472
+   3. Aire de Pique-Nique (Couzon)
+      Adresse: 16 Chemin du Silence, Couzon
+      ID: 520
+   4. Jardin du Silence (Couzon)
+      Adresse: 16 Chemin du Silence, Couzon
+      ID: 753
+
+================================================================================
+
+✅ Analyse terminée!
+
+Total: 772 activités avec coordonnées dupliquées

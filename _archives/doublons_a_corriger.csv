@@ -1,0 +1,773 @@
+id,nom,gite,adresse,latitude_actuelle,longitude_actuelle,nombre_doublons,latitude_correcte,longitude_correcte,statut
+51,"Zoo du Parc de la Tête d'Or",Trévoux,"Parc Tête d'Or, 69006 Lyon",45.9394,4.7728,43,,,A_CORRIGER
+55,"Parc des Oiseaux - Villars-les-Dombes",Trévoux,"RD 1083, 01330 Villars-les-Dombes",45.9394,4.7728,43,,,A_CORRIGER
+56,"Touroparc Zoo",Trévoux,"400 Rue du Parc, 71570 Romanèche-Thorins",45.9394,4.7728,43,,,A_CORRIGER
+58,"Parc Animalier Château de Moidière",Trévoux,"Bonnefamille, 38090",45.9394,4.7728,43,,,A_CORRIGER
+97,"Pharmacie de Trévoux",Trévoux,"Centre-ville, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+102,"Médiévales de Trévoux",Trévoux,"Château de Trévoux, 01600",45.9394,4.7728,43,,,A_CORRIGER
+2,"Pâtisserie Chocolaterie Cormorèche",Trévoux,"Centre-ville, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+76,"Park-Events Vénissieux",Trévoux,"Vénissieux, 69200",45.9394,4.7728,43,,,A_CORRIGER
+78,"Actua Organisation",Trévoux,"Lyon région",45.9394,4.7728,43,,,A_CORRIGER
+68,"Musée Gallo-Romain Fourvière",Trévoux,"Lyon 5ème, 69005",45.9394,4.7728,43,,,A_CORRIGER
+83,"Vanciaventure Accrobranche",Trévoux,"Vancia, 01140",45.9394,4.7728,43,,,A_CORRIGER
+86,"Walibi Rhône-Alpes",Trévoux,"Les Avenières, 38630",45.9394,4.7728,43,,,A_CORRIGER
+88,"iFLY Lyon",Trévoux,"Lyon région",45.9394,4.7728,43,,,A_CORRIGER
+90,"Trampoline Park Lyon",Trévoux,"Saint-Priest, 69800",45.9394,4.7728,43,,,A_CORRIGER
+94,"Play In Park Lyon",Trévoux,"Lyon région",45.9394,4.7728,43,,,A_CORRIGER
+96,"Pharmacie des Orfèvres",Trévoux,"Centre-ville, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+105,"Cinéma La Passerelle",Trévoux,"Quai de la Saône, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+16,"Château-Fort de Trévoux",Trévoux,"Montée du Château, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+17,"Parlement de Dombes",Trévoux,"Place de la Terrasse, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+18,"Église Saint-Symphorien",Trévoux,"Place de l'Église, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+20,"L'Imaginarium",Trévoux,"Centre historique, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+21,"Rue[s] des Arts",Trévoux,"Centre historique, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+22,"Marché de la Création",Trévoux,"Allée des tilleuls, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+23,"Pérouges - Plus Beaux Villages de France",Trévoux,"Pérouges, 01800",45.9394,4.7728,43,,,A_CORRIGER
+99,"Voie Bleue - Vélo Saône",Trévoux,"Bords de Saône, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+24,"Ars-sur-Formans - Basilique du Curé d'Ars",Trévoux,"Ars-sur-Formans, 01480",45.9394,4.7728,43,,,A_CORRIGER
+103,"Fête Nationale Trévoux",Trévoux,"Centre-ville, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+104,"Marché de Noël Trévoux",Trévoux,"Centre-ville, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+9,"L'Embarcadère Villefranche",Trévoux,"Bords de Saône, 69400 Villefranche-sur-Saône",45.9394,4.7728,43,,,A_CORRIGER
+25,"Neuville-sur-Saône",Trévoux,"Neuville-sur-Saône, 69250",45.9394,4.7728,43,,,A_CORRIGER
+53,"Espace Zoologique Saint-Martin-la-Plaine",Trévoux,"Saint-Martin-la-Plaine, 42800",45.9394,4.7728,43,,,A_CORRIGER
+64,"Musée Lumière",Trévoux,"Lyon 8ème, 69008",45.9394,4.7728,43,,,A_CORRIGER
+66,"Musée d'Histoire de Lyon - Gadagne",Trévoux,"Vieux Lyon, 69005",45.9394,4.7728,43,,,A_CORRIGER
+60,"Musée des Confluences",Trévoux,"86 Quai Perrache, 69002 Lyon",45.9394,4.7728,43,,,A_CORRIGER
+81,"Plan d'Eau de Anse",Trévoux,"Anse, 69480",45.9394,4.7728,43,,,A_CORRIGER
+85,"AccroDombes",Trévoux,"Dombes, 01",45.9394,4.7728,43,,,A_CORRIGER
+92,"Bump Games Saint-Priest",Trévoux,"Saint-Priest, 69800",45.9394,4.7728,43,,,A_CORRIGER
+101,"InZeboat - Bateaux sans permis",Trévoux,"Port de Trévoux, 01600",45.9394,4.7728,43,,,A_CORRIGER
+435,"Palais de Justice de Trévoux",Trévoux,"8 Rue du Palais de Justice, Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+459,"Ancienne Prison",Trévoux,"4 Rue de la Prison, Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+740,"Ancienne Prison",Trévoux,"4 Rue de la Prison, Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+434,"Basilique Notre-Dame",Trévoux,"3 Place de la Basilique, Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+3,"Yunus Boulangerie",Trévoux,"Centre-ville, 01600 Trévoux",45.9394,4.7728,43,,,A_CORRIGER
+126,"Le Petit Bistrot",Trévoux,"11 Rue des Augustins, Trévoux",45.973,4.8005,8,,,A_CORRIGER
+180,"Le Petit Bistrot",Trévoux,"11 Rue des Augustins, Trévoux",45.973,4.8005,8,,,A_CORRIGER
+320,"Café Le Coin",Trévoux,"5 Rue des Augustins, Trévoux",45.973,4.8005,8,,,A_CORRIGER
+445,"Théâtre Antique",Trévoux,"7 Boulevard de la Scène, Trévoux",45.973,4.8005,8,,,A_CORRIGER
+563,"Le Petit Bistrot",Trévoux,"11 Rue des Augustins, Trévoux",45.973,4.8005,8,,,A_CORRIGER
+627,"Le Petit Bistrot",Trévoux,"11 Rue des Augustins, Trévoux",45.973,4.8005,8,,,A_CORRIGER
+726,"Théâtre Antique",Trévoux,"7 Boulevard de la Scène, Trévoux",45.973,4.8005,8,,,A_CORRIGER
+776,"Café Le Coin",Trévoux,"5 Rue des Augustins, Trévoux",45.973,4.8005,8,,,A_CORRIGER
+95,"Play In Park Lyon",Couzon,"Lyon région",45.764,4.834,4,,,A_CORRIGER
+89,"iFLY Lyon",Couzon,"Lyon région",45.764,4.834,4,,,A_CORRIGER
+48,"Lyon Centre Historique UNESCO",Couzon,"Lyon Centre, 69000",45.764,4.834,4,,,A_CORRIGER
+79,"Actua Organisation",Couzon,"Lyon région",45.764,4.834,4,,,A_CORRIGER
+138,"Restaurant Les Halles",Trévoux,"17 Rue des Halles, Trévoux",45.9755,4.804,8,,,A_CORRIGER
+192,"Restaurant Les Halles",Trévoux,"17 Rue des Halles, Trévoux",45.9755,4.804,8,,,A_CORRIGER
+331,"Bar des Halles",Trévoux,"17 Rue des Halles, Trévoux",45.9755,4.804,8,,,A_CORRIGER
+479,"Musée de la Calligraphie",Trévoux,"23 Rue de la Plume, Trévoux",45.9755,4.804,8,,,A_CORRIGER
+575,"Restaurant Les Halles",Trévoux,"17 Rue des Halles, Trévoux",45.9755,4.804,8,,,A_CORRIGER
+639,"Restaurant Les Halles",Trévoux,"17 Rue des Halles, Trévoux",45.9755,4.804,8,,,A_CORRIGER
+760,"Musée de la Calligraphie",Trévoux,"23 Rue de la Plume, Trévoux",45.9755,4.804,8,,,A_CORRIGER
+787,"Bar des Halles",Trévoux,"17 Rue des Halles, Trévoux",45.9755,4.804,8,,,A_CORRIGER
+140,"Restaurant Les Arcades",Trévoux,"39 Rue des Arcades, Trévoux",45.9765,4.803,4,,,A_CORRIGER
+194,"Restaurant Les Arcades",Trévoux,"39 Rue des Arcades, Trévoux",45.9765,4.803,4,,,A_CORRIGER
+577,"Restaurant Les Arcades",Trévoux,"39 Rue des Arcades, Trévoux",45.9765,4.803,4,,,A_CORRIGER
+641,"Restaurant Les Arcades",Trévoux,"39 Rue des Arcades, Trévoux",45.9765,4.803,4,,,A_CORRIGER
+141,"Chez Gérard",Trévoux,"11 Place de la Paix, Trévoux",45.9775,4.805,4,,,A_CORRIGER
+195,"Chez Gérard",Trévoux,"11 Place de la Paix, Trévoux",45.9775,4.805,4,,,A_CORRIGER
+578,"Chez Gérard",Trévoux,"11 Place de la Paix, Trévoux",45.9775,4.805,4,,,A_CORRIGER
+642,"Chez Gérard",Trévoux,"11 Place de la Paix, Trévoux",45.9775,4.805,4,,,A_CORRIGER
+142,"Restaurant de la Gare",Trévoux,"15 Avenue de la Gare, Trévoux",45.972,4.797,8,,,A_CORRIGER
+196,"Restaurant de la Gare",Trévoux,"15 Avenue de la Gare, Trévoux",45.972,4.797,8,,,A_CORRIGER
+319,"Bar de la Gare",Trévoux,"15 Avenue de la Gare, Trévoux",45.972,4.797,8,,,A_CORRIGER
+336,"Café de la Gare",Trévoux,"19 Avenue de la Gare, Trévoux",45.972,4.797,8,,,A_CORRIGER
+579,"Restaurant de la Gare",Trévoux,"15 Avenue de la Gare, Trévoux",45.972,4.797,8,,,A_CORRIGER
+643,"Restaurant de la Gare",Trévoux,"15 Avenue de la Gare, Trévoux",45.972,4.797,8,,,A_CORRIGER
+775,"Bar de la Gare",Trévoux,"15 Avenue de la Gare, Trévoux",45.972,4.797,8,,,A_CORRIGER
+792,"Café de la Gare",Trévoux,"19 Avenue de la Gare, Trévoux",45.972,4.797,8,,,A_CORRIGER
+143,"Le Petit Restaurant",Trévoux,"6 Rue de l'Ermitage, Trévoux",45.971,4.802,8,,,A_CORRIGER
+197,"Le Petit Restaurant",Trévoux,"6 Rue de l'Ermitage, Trévoux",45.971,4.802,8,,,A_CORRIGER
+368,"Café du Silence",Trévoux,"9 Rue de l'Ermitage, Trévoux",45.971,4.802,8,,,A_CORRIGER
+537,"Hôtel du Ciel",Trévoux,"3 Chemin du Ciel, Trévoux",45.971,4.802,8,,,A_CORRIGER
+580,"Le Petit Restaurant",Trévoux,"6 Rue de l'Ermitage, Trévoux",45.971,4.802,8,,,A_CORRIGER
+644,"Le Petit Restaurant",Trévoux,"6 Rue de l'Ermitage, Trévoux",45.971,4.802,8,,,A_CORRIGER
+824,"Café du Silence",Trévoux,"9 Rue de l'Ermitage, Trévoux",45.971,4.802,8,,,A_CORRIGER
+870,"Hôtel du Ciel",Trévoux,"3 Chemin du Ciel, Trévoux",45.971,4.802,8,,,A_CORRIGER
+144,"Restaurant Au Clair de Lune",Trévoux,"32 Chemin de Lamartine, Trévoux",45.969,4.8,6,,,A_CORRIGER
+198,"Restaurant Au Clair de Lune",Trévoux,"32 Chemin de Lamartine, Trévoux",45.969,4.8,6,,,A_CORRIGER
+526,"Parcours de Santé",Trévoux,"32 Chemin de Lamartine, Trévoux",45.969,4.8,6,,,A_CORRIGER
+581,"Restaurant Au Clair de Lune",Trévoux,"32 Chemin de Lamartine, Trévoux",45.969,4.8,6,,,A_CORRIGER
+645,"Restaurant Au Clair de Lune",Trévoux,"32 Chemin de Lamartine, Trévoux",45.969,4.8,6,,,A_CORRIGER
+859,"Parcours de Santé",Trévoux,"32 Chemin de Lamartine, Trévoux",45.969,4.8,6,,,A_CORRIGER
+857,"Parc de Loisirs",Couzon,"25 Boulevard de la Paix, Couzon",45.826,4.819,6,,,A_CORRIGER
+224,"Le Restaurant de Couzon",Couzon,"25 Boulevard de la Paix, Couzon",45.826,4.819,6,,,A_CORRIGER
+276,"Le Restaurant de Couzon",Couzon,"25 Boulevard de la Paix, Couzon",45.826,4.819,6,,,A_CORRIGER
+380,"Le Restaurant de Couzon",Couzon,"25 Boulevard de la Paix, Couzon",45.826,4.819,6,,,A_CORRIGER
+524,"Parc de Loisirs",Couzon,"25 Boulevard de la Paix, Couzon",45.826,4.819,6,,,A_CORRIGER
+671,"Le Restaurant de Couzon",Couzon,"25 Boulevard de la Paix, Couzon",45.826,4.819,6,,,A_CORRIGER
+70,"Musée Paul-Dini Villefranche",Trévoux,"Villefranche-sur-Saône, 69400",45.9864749,4.726611,5,,,A_CORRIGER
+12,"Pizza Paolo Villefranche",Trévoux,"Villefranche-sur-Saône, 69400",45.9864749,4.726611,5,,,A_CORRIGER
+13,"La Chapelle Villefranche",Trévoux,"Villefranche-sur-Saône, 69400",45.9864749,4.726611,5,,,A_CORRIGER
+27,"Villefranche-sur-Saône",Trévoux,"Villefranche-sur-Saône, 69400",45.9864749,4.726611,5,,,A_CORRIGER
+14,"Le Rive Gauche",Trévoux,"Villefranche-sur-Saône, 69400",45.9864749,4.726611,5,,,A_CORRIGER
+127,"Chez Claudine",Trévoux,"6 Place Saint-Michel, Trévoux",45.9775,4.8035,6,,,A_CORRIGER
+181,"Chez Claudine",Trévoux,"6 Place Saint-Michel, Trévoux",45.9775,4.8035,6,,,A_CORRIGER
+367,"Bar de la Joie",Trévoux,"6 Place Saint-Michel, Trévoux",45.9775,4.8035,6,,,A_CORRIGER
+564,"Chez Claudine",Trévoux,"6 Place Saint-Michel, Trévoux",45.9775,4.8035,6,,,A_CORRIGER
+628,"Chez Claudine",Trévoux,"6 Place Saint-Michel, Trévoux",45.9775,4.8035,6,,,A_CORRIGER
+823,"Bar de la Joie",Trévoux,"6 Place Saint-Michel, Trévoux",45.9775,4.8035,6,,,A_CORRIGER
+107,"La Maison du Tourisme",Trévoux,"15 Place de la Liberté, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+161,"La Maison du Tourisme",Trévoux,"15 Place de la Liberté, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+333,"Bar Politique",Trévoux,"23 Place de la Liberté, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+425,"Musée Local",Trévoux,"Rue de la Mairie, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+477,"Maison du Tourisme",Trévoux,"15 Place de la Liberté, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+544,"La Maison du Tourisme",Trévoux,"15 Place de la Liberté, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+600,"Musée Local",Trévoux,"Rue de la Mairie, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+608,"La Maison du Tourisme",Trévoux,"15 Place de la Liberté, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+758,"Maison du Tourisme",Trévoux,"15 Place de la Liberté, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+789,"Bar Politique",Trévoux,"23 Place de la Liberté, Trévoux",45.9744,4.803,10,,,A_CORRIGER
+332,"Café Bistrot",Trévoux,"7 Rue Carnot, Trévoux",45.9735,4.8015,8,,,A_CORRIGER
+123,"Le Coin Gourmand",Trévoux,"14 Rue Carnot, Trévoux",45.9735,4.8015,8,,,A_CORRIGER
+177,"Le Coin Gourmand",Trévoux,"14 Rue Carnot, Trévoux",45.9735,4.8015,8,,,A_CORRIGER
+496,"Aire de Jeux Enfants",Trévoux,"14 Rue Carnot, Trévoux",45.9735,4.8015,8,,,A_CORRIGER
+560,"Le Coin Gourmand",Trévoux,"14 Rue Carnot, Trévoux",45.9735,4.8015,8,,,A_CORRIGER
+624,"Le Coin Gourmand",Trévoux,"14 Rue Carnot, Trévoux",45.9735,4.8015,8,,,A_CORRIGER
+788,"Café Bistrot",Trévoux,"7 Rue Carnot, Trévoux",45.9735,4.8015,8,,,A_CORRIGER
+829,"Aire de Jeux Enfants",Trévoux,"14 Rue Carnot, Trévoux",45.9735,4.8015,8,,,A_CORRIGER
+439,"Pont de la Saône",Trévoux,"2 Rue du Pont, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+109,"Restaurant Le Pont Romain",Trévoux,"3 Avenue de la Monnaie, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+163,"Restaurant Le Pont Romain",Trévoux,"3 Avenue de la Monnaie, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+337,"Bar du Pont",Trévoux,"1 Rue du Pont, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+362,"Café du Pont Romain",Trévoux,"3 Avenue de la Monnaie, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+424,"Château de Trévoux",Trévoux,"Route du Château, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+525,"Hôtel du Pont",Trévoux,"1 Rue du Pont, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+546,"Restaurant Le Pont Romain",Trévoux,"3 Avenue de la Monnaie, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+599,"Château de Trévoux",Trévoux,"Route du Château, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+610,"Restaurant Le Pont Romain",Trévoux,"3 Avenue de la Monnaie, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+720,"Pont de la Saône",Trévoux,"2 Rue du Pont, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+793,"Bar du Pont",Trévoux,"1 Rue du Pont, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+818,"Café du Pont Romain",Trévoux,"3 Avenue de la Monnaie, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+858,"Hôtel du Pont",Trévoux,"1 Rue du Pont, Trévoux",45.9725,4.7995,14,,,A_CORRIGER
+275,"Chez Fabienne",Couzon,"18 Rue de la Source, Couzon",45.825,4.817,4,,,A_CORRIGER
+223,"Chez Fabienne",Couzon,"18 Rue de la Source, Couzon",45.825,4.817,4,,,A_CORRIGER
+379,"Chez Fabienne",Couzon,"18 Rue de la Source, Couzon",45.825,4.817,4,,,A_CORRIGER
+670,"Chez Fabienne",Couzon,"18 Rue de la Source, Couzon",45.825,4.817,4,,,A_CORRIGER
+863,"Hôtel Gastronomique",Couzon,"41 Avenue Royale, Couzon",45.831,4.816,6,,,A_CORRIGER
+263,"Restaurant Gastronomique",Couzon,"41 Avenue Royale, Couzon",45.831,4.816,6,,,A_CORRIGER
+315,"Restaurant Gastronomique",Couzon,"41 Avenue Royale, Couzon",45.831,4.816,6,,,A_CORRIGER
+419,"Restaurant Gastronomique",Couzon,"41 Avenue Royale, Couzon",45.831,4.816,6,,,A_CORRIGER
+530,"Hôtel Gastronomique",Couzon,"41 Avenue Royale, Couzon",45.831,4.816,6,,,A_CORRIGER
+710,"Restaurant Gastronomique",Couzon,"41 Avenue Royale, Couzon",45.831,4.816,6,,,A_CORRIGER
+864,"Parc Aventure",Couzon,"38 Boulevard de la République, Couzon",45.8295,4.8145,6,,,A_CORRIGER
+248,"La Table de Couzon",Couzon,"38 Boulevard de la République, Couzon",45.8295,4.8145,6,,,A_CORRIGER
+300,"La Table de Couzon",Couzon,"38 Boulevard de la République, Couzon",45.8295,4.8145,6,,,A_CORRIGER
+404,"La Table de Couzon",Couzon,"38 Boulevard de la République, Couzon",45.8295,4.8145,6,,,A_CORRIGER
+531,"Parc Aventure",Couzon,"38 Boulevard de la République, Couzon",45.8295,4.8145,6,,,A_CORRIGER
+695,"La Table de Couzon",Couzon,"38 Boulevard de la République, Couzon",45.8295,4.8145,6,,,A_CORRIGER
+865,"Hôtel des Métiers",Couzon,"12 Rue de l'Accueil, Couzon",45.8245,4.8125,6,,,A_CORRIGER
+249,"Restaurant Au Bon Accueil",Couzon,"12 Rue de l'Accueil, Couzon",45.8245,4.8125,6,,,A_CORRIGER
+301,"Restaurant Au Bon Accueil",Couzon,"12 Rue de l'Accueil, Couzon",45.8245,4.8125,6,,,A_CORRIGER
+405,"Restaurant Au Bon Accueil",Couzon,"12 Rue de l'Accueil, Couzon",45.8245,4.8125,6,,,A_CORRIGER
+532,"Hôtel des Métiers",Couzon,"12 Rue de l'Accueil, Couzon",45.8245,4.8125,6,,,A_CORRIGER
+696,"Restaurant Au Bon Accueil",Couzon,"12 Rue de l'Accueil, Couzon",45.8245,4.8125,6,,,A_CORRIGER
+866,"Terrain de Golf",Couzon,"32 Chemin de l'Escapade, Couzon",45.8285,4.817,8,,,A_CORRIGER
+363,"Bar Élégant",Trévoux,"32 Chemin de l'Escapade, Couzon",45.8285,4.817,8,,,A_CORRIGER
+819,"Bar Élégant",Trévoux,"32 Chemin de l'Escapade, Couzon",45.8285,4.817,8,,,A_CORRIGER
+236,"Restaurant L'Escapade",Couzon,"32 Chemin de l'Escapade, Couzon",45.8285,4.817,8,,,A_CORRIGER
+288,"Restaurant L'Escapade",Couzon,"32 Chemin de l'Escapade, Couzon",45.8285,4.817,8,,,A_CORRIGER
+392,"Restaurant L'Escapade",Couzon,"32 Chemin de l'Escapade, Couzon",45.8285,4.817,8,,,A_CORRIGER
+533,"Terrain de Golf",Couzon,"32 Chemin de l'Escapade, Couzon",45.8285,4.817,8,,,A_CORRIGER
+683,"Restaurant L'Escapade",Couzon,"32 Chemin de l'Escapade, Couzon",45.8285,4.817,8,,,A_CORRIGER
+867,"Hôtel du Terroir",Couzon,"27 Boulevard des Carrières, Couzon",45.827,4.82,6,,,A_CORRIGER
+238,"La Bonne Table",Couzon,"27 Boulevard des Carrières, Couzon",45.827,4.82,6,,,A_CORRIGER
+290,"La Bonne Table",Couzon,"27 Boulevard des Carrières, Couzon",45.827,4.82,6,,,A_CORRIGER
+394,"La Bonne Table",Couzon,"27 Boulevard des Carrières, Couzon",45.827,4.82,6,,,A_CORRIGER
+534,"Hôtel du Terroir",Couzon,"27 Boulevard des Carrières, Couzon",45.827,4.82,6,,,A_CORRIGER
+685,"La Bonne Table",Couzon,"27 Boulevard des Carrières, Couzon",45.827,4.82,6,,,A_CORRIGER
+871,"Parc de la Paix",Couzon,"4 Place de la Mairie, Couzon",45.821,4.814,8,,,A_CORRIGER
+235,"Le Coin Gourmand",Couzon,"4 Place de la Mairie, Couzon",45.821,4.814,8,,,A_CORRIGER
+287,"Le Coin Gourmand",Couzon,"4 Place de la Mairie, Couzon",45.821,4.814,8,,,A_CORRIGER
+353,"Bar de la Paix",Couzon,"4 Place de la Mairie, Couzon",45.821,4.814,8,,,A_CORRIGER
+391,"Le Coin Gourmand",Couzon,"4 Place de la Mairie, Couzon",45.821,4.814,8,,,A_CORRIGER
+538,"Parc de la Paix",Couzon,"4 Place de la Mairie, Couzon",45.821,4.814,8,,,A_CORRIGER
+682,"Le Coin Gourmand",Couzon,"4 Place de la Mairie, Couzon",45.821,4.814,8,,,A_CORRIGER
+809,"Bar de la Paix",Couzon,"4 Place de la Mairie, Couzon",45.821,4.814,8,,,A_CORRIGER
+872,"Hôtel du Château",Couzon,"29 Rue du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+252,"Le Restaurant du Château",Couzon,"29 Rue du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+304,"Le Restaurant du Château",Couzon,"29 Rue du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+342,"Café du Château",Couzon,"3 Chemin du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+539,"Hôtel du Château",Couzon,"29 Rue du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+408,"Le Restaurant du Château",Couzon,"29 Rue du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+447,"Château de Couzon",Couzon,"1 Chemin du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+512,"Piscine de Couzon",Couzon,"35 Boulevard de la République, Couzon",45.828,4.812,14,,,A_CORRIGER
+519,"Parc du Château",Couzon,"1 Chemin du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+852,"Parc du Château",Couzon,"1 Chemin du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+699,"Le Restaurant du Château",Couzon,"29 Rue du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+728,"Château de Couzon",Couzon,"1 Chemin du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+845,"Piscine de Couzon",Couzon,"35 Boulevard de la République, Couzon",45.828,4.812,14,,,A_CORRIGER
+798,"Café du Château",Couzon,"3 Chemin du Château, Couzon",45.828,4.812,14,,,A_CORRIGER
+267,"Chez Marcel",Couzon,"15 Rue Centrale, Couzon",45.823,4.814,4,,,A_CORRIGER
+215,"Chez Marcel",Couzon,"15 Rue Centrale, Couzon",45.823,4.814,4,,,A_CORRIGER
+371,"Chez Marcel",Couzon,"15 Rue Centrale, Couzon",45.823,4.814,4,,,A_CORRIGER
+662,"Chez Marcel",Couzon,"15 Rue Centrale, Couzon",45.823,4.814,4,,,A_CORRIGER
+873,"Aire de Jeux",Couzon,"11 Chemin du Moulin, Couzon",45.822,4.817,4,,,A_CORRIGER
+464,"Ancien Moulin à Eau",Couzon,"11 Chemin du Moulin, Couzon",45.822,4.817,4,,,A_CORRIGER
+540,"Aire de Jeux",Couzon,"11 Chemin du Moulin, Couzon",45.822,4.817,4,,,A_CORRIGER
+745,"Ancien Moulin à Eau",Couzon,"11 Chemin du Moulin, Couzon",45.822,4.817,4,,,A_CORRIGER
+874,"Équitation Couzon",Couzon,"26 Chemin de l'Oasis, Couzon",45.827,4.821,6,,,A_CORRIGER
+251,"Restaurant L'Oasis",Couzon,"26 Chemin de l'Oasis, Couzon",45.827,4.821,6,,,A_CORRIGER
+303,"Restaurant L'Oasis",Couzon,"26 Chemin de l'Oasis, Couzon",45.827,4.821,6,,,A_CORRIGER
+407,"Restaurant L'Oasis",Couzon,"26 Chemin de l'Oasis, Couzon",45.827,4.821,6,,,A_CORRIGER
+541,"Équitation Couzon",Couzon,"26 Chemin de l'Oasis, Couzon",45.827,4.821,6,,,A_CORRIGER
+698,"Restaurant L'Oasis",Couzon,"26 Chemin de l'Oasis, Couzon",45.827,4.821,6,,,A_CORRIGER
+875,"Hôtel de la Cheminée",Couzon,"23 Place de la Cheminée, Couzon",45.8255,4.8165,6,,,A_CORRIGER
+254,"Restaurant La Cheminée",Couzon,"23 Place de la Cheminée, Couzon",45.8255,4.8165,6,,,A_CORRIGER
+306,"Restaurant La Cheminée",Couzon,"23 Place de la Cheminée, Couzon",45.8255,4.8165,6,,,A_CORRIGER
+410,"Restaurant La Cheminée",Couzon,"23 Place de la Cheminée, Couzon",45.8255,4.8165,6,,,A_CORRIGER
+542,"Hôtel de la Cheminée",Couzon,"23 Place de la Cheminée, Couzon",45.8255,4.8165,6,,,A_CORRIGER
+701,"Restaurant La Cheminée",Couzon,"23 Place de la Cheminée, Couzon",45.8255,4.8165,6,,,A_CORRIGER
+253,"Chez Séverine",Couzon,"7 Rue de l'Épine, Couzon",45.8225,4.8135,4,,,A_CORRIGER
+305,"Chez Séverine",Couzon,"7 Rue de l'Épine, Couzon",45.8225,4.8135,4,,,A_CORRIGER
+409,"Chez Séverine",Couzon,"7 Rue de l'Épine, Couzon",45.8225,4.8135,4,,,A_CORRIGER
+700,"Chez Séverine",Couzon,"7 Rue de l'Épine, Couzon",45.8225,4.8135,4,,,A_CORRIGER
+44,"Village de Couzon",Couzon,"Centre village, 69270 Couzon-au-Mont-d'Or",45.825,4.8333,4,,,A_CORRIGER
+98,"Pharmacie de Couzon",Couzon,"4 Rue Claudius Moiroux, 69270 Couzon-au-Mont-d'Or",45.825,4.8333,4,,,A_CORRIGER
+100,"Voie Bleue - Vélo Saône",Couzon,"Bords de Saône, 69270 Couzon",45.825,4.8333,4,,,A_CORRIGER
+47,"Île Barbe",Couzon,"Lyon 9ème, 69009",45.825,4.8333,4,,,A_CORRIGER
+139,"La Pizzeria du Centre",Trévoux,"27 Rue du Centre, Trévoux",45.9748,4.8025,4,,,A_CORRIGER
+193,"La Pizzeria du Centre",Trévoux,"27 Rue du Centre, Trévoux",45.9748,4.8025,4,,,A_CORRIGER
+576,"La Pizzeria du Centre",Trévoux,"27 Rue du Centre, Trévoux",45.9748,4.8025,4,,,A_CORRIGER
+640,"La Pizzeria du Centre",Trévoux,"27 Rue du Centre, Trévoux",45.9748,4.8025,4,,,A_CORRIGER
+106,"Le Vieux Moulin",Trévoux,"42 Rue de la Côte, Trévoux",45.97315,4.8008,6,,,A_CORRIGER
+160,"Le Vieux Moulin",Trévoux,"42 Rue de la Côte, Trévoux",45.97315,4.8008,6,,,A_CORRIGER
+422,"Restaurant Le Vieux Moulin",Trévoux,"42 Rue de la Côte, Trévoux",45.97315,4.8008,6,,,A_CORRIGER
+543,"Le Vieux Moulin",Trévoux,"42 Rue de la Côte, Trévoux",45.97315,4.8008,6,,,A_CORRIGER
+597,"Restaurant Le Vieux Moulin",Trévoux,"42 Rue de la Côte, Trévoux",45.97315,4.8008,6,,,A_CORRIGER
+607,"Le Vieux Moulin",Trévoux,"42 Rue de la Côte, Trévoux",45.97315,4.8008,6,,,A_CORRIGER
+108,"Chez Pierre",Trévoux,"8 Rue de Bourgogne, Trévoux",45.9756,4.8045,8,,,A_CORRIGER
+162,"Chez Pierre",Trévoux,"8 Rue de Bourgogne, Trévoux",45.9756,4.8045,8,,,A_CORRIGER
+321,"Bar à Vin Trévollien",Trévoux,"12 Rue de Bourgogne, Trévoux",45.9756,4.8045,8,,,A_CORRIGER
+436,"Musée de l'Imprimerie",Trévoux,"12 Rue de Bourgogne, Trévoux",45.9756,4.8045,8,,,A_CORRIGER
+545,"Chez Pierre",Trévoux,"8 Rue de Bourgogne, Trévoux",45.9756,4.8045,8,,,A_CORRIGER
+609,"Chez Pierre",Trévoux,"8 Rue de Bourgogne, Trévoux",45.9756,4.8045,8,,,A_CORRIGER
+717,"Musée de l'Imprimerie",Trévoux,"12 Rue de Bourgogne, Trévoux",45.9756,4.8045,8,,,A_CORRIGER
+777,"Bar à Vin Trévollien",Trévoux,"12 Rue de Bourgogne, Trévoux",45.9756,4.8045,8,,,A_CORRIGER
+110,"L'Auberge Trévollienne",Trévoux,"22 Rue Nationale, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+164,"L'Auberge Trévollienne",Trévoux,"22 Rue Nationale, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+366,"Café Artistique",Trévoux,"22 Rue Nationale, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+441,"Galerie d'Art Contemporain",Trévoux,"22 Rue Nationale, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+507,"Skate Park",Trévoux,"22 Place du Sport, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+547,"L'Auberge Trévollienne",Trévoux,"22 Rue Nationale, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+611,"L'Auberge Trévollienne",Trévoux,"22 Rue Nationale, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+722,"Galerie d'Art Contemporain",Trévoux,"22 Rue Nationale, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+822,"Café Artistique",Trévoux,"22 Rue Nationale, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+840,"Skate Park",Trévoux,"22 Place du Sport, Trévoux",45.9768,4.8062,10,,,A_CORRIGER
+112,"Le Bistro Local",Trévoux,"5 Quai Saint-Vincent, Trévoux",45.975,4.801,8,,,A_CORRIGER
+166,"Le Bistro Local",Trévoux,"5 Quai Saint-Vincent, Trévoux",45.975,4.801,8,,,A_CORRIGER
+327,"Bar de Saône",Trévoux,"3 Quai Saint-Vincent, Trévoux",45.975,4.801,8,,,A_CORRIGER
+502,"Hôtel de Saône",Trévoux,"3 Quai Saint-Vincent, Trévoux",45.975,4.801,8,,,A_CORRIGER
+549,"Le Bistro Local",Trévoux,"5 Quai Saint-Vincent, Trévoux",45.975,4.801,8,,,A_CORRIGER
+613,"Le Bistro Local",Trévoux,"5 Quai Saint-Vincent, Trévoux",45.975,4.801,8,,,A_CORRIGER
+783,"Bar de Saône",Trévoux,"3 Quai Saint-Vincent, Trévoux",45.975,4.801,8,,,A_CORRIGER
+835,"Hôtel de Saône",Trévoux,"3 Quai Saint-Vincent, Trévoux",45.975,4.801,8,,,A_CORRIGER
+113,"La Côte Gourmande",Trévoux,"35 Chemin de la Côte, Trévoux",45.972,4.805,8,,,A_CORRIGER
+167,"La Côte Gourmande",Trévoux,"35 Chemin de la Côte, Trévoux",45.972,4.805,8,,,A_CORRIGER
+334,"Café de la Côte",Trévoux,"35 Chemin de la Côte, Trévoux",45.972,4.805,8,,,A_CORRIGER
+493,"Parc de la Côte",Trévoux,"35 Chemin de la Côte, Trévoux",45.972,4.805,8,,,A_CORRIGER
+550,"La Côte Gourmande",Trévoux,"35 Chemin de la Côte, Trévoux",45.972,4.805,8,,,A_CORRIGER
+614,"La Côte Gourmande",Trévoux,"35 Chemin de la Côte, Trévoux",45.972,4.805,8,,,A_CORRIGER
+790,"Café de la Côte",Trévoux,"35 Chemin de la Côte, Trévoux",45.972,4.805,8,,,A_CORRIGER
+826,"Parc de la Côte",Trévoux,"35 Chemin de la Côte, Trévoux",45.972,4.805,8,,,A_CORRIGER
+114,"Restaurant du Château",Trévoux,"1 Rue du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+168,"Restaurant du Château",Trévoux,"1 Rue du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+322,"Café du Château",Trévoux,"2 Place du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+433,"Château de Trévoux",Trévoux,"1 Rue du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+495,"Parc du Château",Trévoux,"1 Rue du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+551,"Restaurant du Château",Trévoux,"1 Rue du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+615,"Restaurant du Château",Trévoux,"1 Rue du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+714,"Château de Trévoux",Trévoux,"1 Rue du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+778,"Café du Château",Trévoux,"2 Place du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+828,"Parc du Château",Trévoux,"1 Rue du Château, Trévoux",45.978,4.808,10,,,A_CORRIGER
+115,"Chez Marie",Trévoux,"18 Rue de l'Hôtel de Ville, Trévoux",45.9742,4.8035,4,,,A_CORRIGER
+169,"Chez Marie",Trévoux,"18 Rue de l'Hôtel de Ville, Trévoux",45.9742,4.8035,4,,,A_CORRIGER
+552,"Chez Marie",Trévoux,"18 Rue de l'Hôtel de Ville, Trévoux",45.9742,4.8035,4,,,A_CORRIGER
+616,"Chez Marie",Trévoux,"18 Rue de l'Hôtel de Ville, Trévoux",45.9742,4.8035,4,,,A_CORRIGER
+116,"Les Saveurs de Trévoux",Trévoux,"12 Rue de Juillet, Trévoux",45.976,4.804,4,,,A_CORRIGER
+170,"Les Saveurs de Trévoux",Trévoux,"12 Rue de Juillet, Trévoux",45.976,4.804,4,,,A_CORRIGER
+553,"Les Saveurs de Trévoux",Trévoux,"12 Rue de Juillet, Trévoux",45.976,4.804,4,,,A_CORRIGER
+617,"Les Saveurs de Trévoux",Trévoux,"12 Rue de Juillet, Trévoux",45.976,4.804,4,,,A_CORRIGER
+117,"Le Moulin à Vent",Trévoux,"7 Route de Neuville, Trévoux",45.971,4.798,10,,,A_CORRIGER
+171,"Le Moulin à Vent",Trévoux,"7 Route de Neuville, Trévoux",45.971,4.798,10,,,A_CORRIGER
+442,"Abbaye Bénédictine",Trévoux,"18 Chemin de l'Abbaye, Trévoux",45.971,4.798,10,,,A_CORRIGER
+497,"Tennis Club",Trévoux,"18 Chemin du Tennis, Trévoux",45.971,4.798,10,,,A_CORRIGER
+536,"Fitness Club",Trévoux,"29 Route de Neuville, Trévoux",45.971,4.798,10,,,A_CORRIGER
+554,"Le Moulin à Vent",Trévoux,"7 Route de Neuville, Trévoux",45.971,4.798,10,,,A_CORRIGER
+618,"Le Moulin à Vent",Trévoux,"7 Route de Neuville, Trévoux",45.971,4.798,10,,,A_CORRIGER
+723,"Abbaye Bénédictine",Trévoux,"18 Chemin de l'Abbaye, Trévoux",45.971,4.798,10,,,A_CORRIGER
+830,"Tennis Club",Trévoux,"18 Chemin du Tennis, Trévoux",45.971,4.798,10,,,A_CORRIGER
+869,"Fitness Club",Trévoux,"29 Route de Neuville, Trévoux",45.971,4.798,10,,,A_CORRIGER
+118,"Auberge de la Soie",Trévoux,"25 Grande Rue, Trévoux",45.977,4.8055,8,,,A_CORRIGER
+172,"Auberge de la Soie",Trévoux,"25 Grande Rue, Trévoux",45.977,4.8055,8,,,A_CORRIGER
+326,"Café de la Soie",Trévoux,"25 Grande Rue, Trévoux",45.977,4.8055,8,,,A_CORRIGER
+443,"Archives Départementales",Trévoux,"25 Rue des Archives, Trévoux",45.977,4.8055,8,,,A_CORRIGER
+555,"Auberge de la Soie",Trévoux,"25 Grande Rue, Trévoux",45.977,4.8055,8,,,A_CORRIGER
+619,"Auberge de la Soie",Trévoux,"25 Grande Rue, Trévoux",45.977,4.8055,8,,,A_CORRIGER
+724,"Archives Départementales",Trévoux,"25 Rue des Archives, Trévoux",45.977,4.8055,8,,,A_CORRIGER
+782,"Café de la Soie",Trévoux,"25 Grande Rue, Trévoux",45.977,4.8055,8,,,A_CORRIGER
+119,"Restaurant Les Trois Ponts",Trévoux,"42 Rue de la Soie, Trévoux",45.974,4.8025,6,,,A_CORRIGER
+173,"Restaurant Les Trois Ponts",Trévoux,"42 Rue de la Soie, Trévoux",45.974,4.8025,6,,,A_CORRIGER
+481,"Fontaine Saint-Michel",Trévoux,"6 Place de la Fontaine, Trévoux",45.974,4.8025,6,,,A_CORRIGER
+556,"Restaurant Les Trois Ponts",Trévoux,"42 Rue de la Soie, Trévoux",45.974,4.8025,6,,,A_CORRIGER
+620,"Restaurant Les Trois Ponts",Trévoux,"42 Rue de la Soie, Trévoux",45.974,4.8025,6,,,A_CORRIGER
+762,"Fontaine Saint-Michel",Trévoux,"6 Place de la Fontaine, Trévoux",45.974,4.8025,6,,,A_CORRIGER
+120,"La Belle Époque",Trévoux,"31 Rue Bichat, Trévoux",45.9755,4.806,4,,,A_CORRIGER
+174,"La Belle Époque",Trévoux,"31 Rue Bichat, Trévoux",45.9755,4.806,4,,,A_CORRIGER
+557,"La Belle Époque",Trévoux,"31 Rue Bichat, Trévoux",45.9755,4.806,4,,,A_CORRIGER
+621,"La Belle Époque",Trévoux,"31 Rue Bichat, Trévoux",45.9755,4.806,4,,,A_CORRIGER
+121,"Chez Antoine",Trévoux,"9 Rue du Palais de Justice, Trévoux",45.9748,4.8032,5,,,A_CORRIGER
+175,"Chez Antoine",Trévoux,"9 Rue du Palais de Justice, Trévoux",45.9748,4.8032,5,,,A_CORRIGER
+558,"Chez Antoine",Trévoux,"9 Rue du Palais de Justice, Trévoux",45.9748,4.8032,5,,,A_CORRIGER
+622,"Chez Antoine",Trévoux,"9 Rue du Palais de Justice, Trévoux",45.9748,4.8032,5,,,A_CORRIGER
+716,"Palais de Justice de Trévoux",Trévoux,"8 Rue du Palais de Justice, Trévoux",45.9748,4.8032,5,,,A_CORRIGER
+122,"Restaurant Le Cloître",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+176,"Restaurant Le Cloître",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+330,"Café Historique",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+438,"Cloître de Trévoux",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+504,"Bowling Trévollien",Trévoux,"16 Rue du Bowling, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+506,"Hôtel du Cloître",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+559,"Restaurant Le Cloître",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+623,"Restaurant Le Cloître",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+719,"Cloître de Trévoux",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+786,"Café Historique",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+837,"Bowling Trévollien",Trévoux,"16 Rue du Bowling, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+839,"Hôtel du Cloître",Trévoux,"16 Rue du Cloître, Trévoux",45.9765,4.807,12,,,A_CORRIGER
+124,"Auberge de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+178,"Auberge de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+325,"Bar de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+444,"Maison de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+500,"Hôtel de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+561,"Auberge de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+625,"Auberge de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+725,"Maison de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+781,"Bar de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+833,"Hôtel de la Monnaie",Trévoux,"20 Rue de la Monnaie, Trévoux",45.9752,4.8045,10,,,A_CORRIGER
+125,"Restaurant Gastronomique La Presqu'île",Trévoux,"45 Boulevard Gambetta, Trévoux",45.978,4.797,6,,,A_CORRIGER
+179,"Restaurant Gastronomique La Presqu'île",Trévoux,"45 Boulevard Gambetta, Trévoux",45.978,4.797,6,,,A_CORRIGER
+499,"Hôtel Trévoux Palace",Trévoux,"25 Boulevard Gambetta, Trévoux",45.978,4.797,6,,,A_CORRIGER
+562,"Restaurant Gastronomique La Presqu'île",Trévoux,"45 Boulevard Gambetta, Trévoux",45.978,4.797,6,,,A_CORRIGER
+626,"Restaurant Gastronomique La Presqu'île",Trévoux,"45 Boulevard Gambetta, Trévoux",45.978,4.797,6,,,A_CORRIGER
+832,"Hôtel Trévoux Palace",Trévoux,"25 Boulevard Gambetta, Trévoux",45.978,4.797,6,,,A_CORRIGER
+128,"Restaurant Au Fil de l'Eau",Trévoux,"38 Quai des Alpes, Trévoux",45.9745,4.805,8,,,A_CORRIGER
+182,"Restaurant Au Fil de l'Eau",Trévoux,"38 Quai des Alpes, Trévoux",45.9745,4.805,8,,,A_CORRIGER
+361,"Bar de la Saône",Trévoux,"26 Quai Saint-Vincent, Trévoux",45.9745,4.805,8,,,A_CORRIGER
+470,"Quai de Saône",Trévoux,"26 Quai Saint-Vincent, Trévoux",45.9745,4.805,8,,,A_CORRIGER
+565,"Restaurant Au Fil de l'Eau",Trévoux,"38 Quai des Alpes, Trévoux",45.9745,4.805,8,,,A_CORRIGER
+629,"Restaurant Au Fil de l'Eau",Trévoux,"38 Quai des Alpes, Trévoux",45.9745,4.805,8,,,A_CORRIGER
+751,"Quai de Saône",Trévoux,"26 Quai Saint-Vincent, Trévoux",45.9745,4.805,8,,,A_CORRIGER
+817,"Bar de la Saône",Trévoux,"26 Quai Saint-Vincent, Trévoux",45.9745,4.805,8,,,A_CORRIGER
+129,"La Table du Chanoine",Trévoux,"2 Rue du Chanoine Guilbert, Trévoux",45.976,4.802,4,,,A_CORRIGER
+183,"La Table du Chanoine",Trévoux,"2 Rue du Chanoine Guilbert, Trévoux",45.976,4.802,4,,,A_CORRIGER
+566,"La Table du Chanoine",Trévoux,"2 Rue du Chanoine Guilbert, Trévoux",45.976,4.802,4,,,A_CORRIGER
+630,"La Table du Chanoine",Trévoux,"2 Rue du Chanoine Guilbert, Trévoux",45.976,4.802,4,,,A_CORRIGER
+130,"Le Restaurant de l'Écluse",Trévoux,"28 Chemin de l'Écluse, Trévoux",45.9715,4.803,4,,,A_CORRIGER
+184,"Le Restaurant de l'Écluse",Trévoux,"28 Chemin de l'Écluse, Trévoux",45.9715,4.803,4,,,A_CORRIGER
+567,"Le Restaurant de l'Écluse",Trévoux,"28 Chemin de l'Écluse, Trévoux",45.9715,4.803,4,,,A_CORRIGER
+631,"Le Restaurant de l'Écluse",Trévoux,"28 Chemin de l'Écluse, Trévoux",45.9715,4.803,4,,,A_CORRIGER
+131,"Restaurant La Renaissance",Trévoux,"41 Rue de la République, Trévoux",45.977,4.8045,6,,,A_CORRIGER
+185,"Restaurant La Renaissance",Trévoux,"41 Rue de la République, Trévoux",45.977,4.8045,6,,,A_CORRIGER
+364,"Café de la République",Trévoux,"41 Rue de la République, Trévoux",45.977,4.8045,6,,,A_CORRIGER
+568,"Restaurant La Renaissance",Trévoux,"41 Rue de la République, Trévoux",45.977,4.8045,6,,,A_CORRIGER
+632,"Restaurant La Renaissance",Trévoux,"41 Rue de la République, Trévoux",45.977,4.8045,6,,,A_CORRIGER
+820,"Café de la République",Trévoux,"41 Rue de la République, Trévoux",45.977,4.8045,6,,,A_CORRIGER
+132,"Chez Yves",Trévoux,"19 Rue de la Paix, Trévoux",45.974,4.801,8,,,A_CORRIGER
+186,"Chez Yves",Trévoux,"19 Rue de la Paix, Trévoux",45.974,4.801,8,,,A_CORRIGER
+324,"Café de la Paix",Trévoux,"18 Rue de la Paix, Trévoux",45.974,4.801,8,,,A_CORRIGER
+437,"Ancien Collège des Jésuites",Trévoux,"6 Rue des Jésuites, Trévoux",45.974,4.801,8,,,A_CORRIGER
+569,"Chez Yves",Trévoux,"19 Rue de la Paix, Trévoux",45.974,4.801,8,,,A_CORRIGER
+633,"Chez Yves",Trévoux,"19 Rue de la Paix, Trévoux",45.974,4.801,8,,,A_CORRIGER
+718,"Ancien Collège des Jésuites",Trévoux,"6 Rue des Jésuites, Trévoux",45.974,4.801,8,,,A_CORRIGER
+780,"Café de la Paix",Trévoux,"18 Rue de la Paix, Trévoux",45.974,4.801,8,,,A_CORRIGER
+133,"Restaurant Le Kiosque",Trévoux,"4 Place du Marché, Trévoux",45.9752,4.803,6,,,A_CORRIGER
+187,"Restaurant Le Kiosque",Trévoux,"4 Place du Marché, Trévoux",45.9752,4.803,6,,,A_CORRIGER
+318,"Café du Marché",Trévoux,"10 Place du Marché, Trévoux",45.9752,4.803,6,,,A_CORRIGER
+570,"Restaurant Le Kiosque",Trévoux,"4 Place du Marché, Trévoux",45.9752,4.803,6,,,A_CORRIGER
+634,"Restaurant Le Kiosque",Trévoux,"4 Place du Marché, Trévoux",45.9752,4.803,6,,,A_CORRIGER
+774,"Café du Marché",Trévoux,"10 Place du Marché, Trévoux",45.9752,4.803,6,,,A_CORRIGER
+134,"La Maison Blanche",Trévoux,"33 Chemin des Carrières, Trévoux",45.9705,4.799,4,,,A_CORRIGER
+188,"La Maison Blanche",Trévoux,"33 Chemin des Carrières, Trévoux",45.9705,4.799,4,,,A_CORRIGER
+571,"La Maison Blanche",Trévoux,"33 Chemin des Carrières, Trévoux",45.9705,4.799,4,,,A_CORRIGER
+635,"La Maison Blanche",Trévoux,"33 Chemin des Carrières, Trévoux",45.9705,4.799,4,,,A_CORRIGER
+135,"Restaurant Au Coin du Feu",Trévoux,"23 Rue de Lorraine, Trévoux",45.976,4.8055,6,,,A_CORRIGER
+189,"Restaurant Au Coin du Feu",Trévoux,"23 Rue de Lorraine, Trévoux",45.976,4.8055,6,,,A_CORRIGER
+369,"Bar Moderne",Trévoux,"13 Rue de Lorraine, Trévoux",45.976,4.8055,6,,,A_CORRIGER
+572,"Restaurant Au Coin du Feu",Trévoux,"23 Rue de Lorraine, Trévoux",45.976,4.8055,6,,,A_CORRIGER
+636,"Restaurant Au Coin du Feu",Trévoux,"23 Rue de Lorraine, Trévoux",45.976,4.8055,6,,,A_CORRIGER
+825,"Bar Moderne",Trévoux,"13 Rue de Lorraine, Trévoux",45.976,4.8055,6,,,A_CORRIGER
+136,"Le Petit Coin",Trévoux,"13 Rue du Prieuré, Trévoux",45.9735,4.802,8,,,A_CORRIGER
+190,"Le Petit Coin",Trévoux,"13 Rue du Prieuré, Trévoux",45.9735,4.802,8,,,A_CORRIGER
+329,"Bar Lounge",Trévoux,"11 Rue du Prieuré, Trévoux",45.9735,4.802,8,,,A_CORRIGER
+529,"Hôtel Vintage",Trévoux,"11 Rue du Prieuré, Trévoux",45.9735,4.802,8,,,A_CORRIGER
+573,"Le Petit Coin",Trévoux,"13 Rue du Prieuré, Trévoux",45.9735,4.802,8,,,A_CORRIGER
+637,"Le Petit Coin",Trévoux,"13 Rue du Prieuré, Trévoux",45.9735,4.802,8,,,A_CORRIGER
+785,"Bar Lounge",Trévoux,"11 Rue du Prieuré, Trévoux",45.9735,4.802,8,,,A_CORRIGER
+862,"Hôtel Vintage",Trévoux,"11 Rue du Prieuré, Trévoux",45.9735,4.802,8,,,A_CORRIGER
+137,"Chez Renée",Trévoux,"29 Route de Belleville, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+191,"Chez Renée",Trévoux,"29 Route de Belleville, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+461,"Jardins Botaniques",Trévoux,"30 Chemin des Jardins, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+494,"Jardin Public",Trévoux,"30 Chemin des Jardins, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+528,"Camping Trévoux",Trévoux,"28 Route de Belleville, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+574,"Chez Renée",Trévoux,"29 Route de Belleville, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+638,"Chez Renée",Trévoux,"29 Route de Belleville, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+742,"Jardins Botaniques",Trévoux,"30 Chemin des Jardins, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+827,"Jardin Public",Trévoux,"30 Chemin des Jardins, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+861,"Camping Trévoux",Trévoux,"28 Route de Belleville, Trévoux",45.9695,4.801,10,,,A_CORRIGER
+145,"Chez Louise",Trévoux,"20 Rue Molière, Trévoux",45.9745,4.8035,4,,,A_CORRIGER
+199,"Chez Louise",Trévoux,"20 Rue Molière, Trévoux",45.9745,4.8035,4,,,A_CORRIGER
+582,"Chez Louise",Trévoux,"20 Rue Molière, Trévoux",45.9745,4.8035,4,,,A_CORRIGER
+646,"Chez Louise",Trévoux,"20 Rue Molière, Trévoux",45.9745,4.8035,4,,,A_CORRIGER
+146,"Restaurant Le Commerce",Trévoux,"34 Rue du Commerce, Trévoux",45.977,4.802,6,,,A_CORRIGER
+200,"Restaurant Le Commerce",Trévoux,"34 Rue du Commerce, Trévoux",45.977,4.802,6,,,A_CORRIGER
+467,"Galerie Marchande Historique",Trévoux,"13 Rue du Commerce, Trévoux",45.977,4.802,6,,,A_CORRIGER
+583,"Restaurant Le Commerce",Trévoux,"34 Rue du Commerce, Trévoux",45.977,4.802,6,,,A_CORRIGER
+647,"Restaurant Le Commerce",Trévoux,"34 Rue du Commerce, Trévoux",45.977,4.802,6,,,A_CORRIGER
+748,"Galerie Marchande Historique",Trévoux,"13 Rue du Commerce, Trévoux",45.977,4.802,6,,,A_CORRIGER
+147,"La Petite Maison",Trévoux,"8 Rue de l'École, Trévoux",45.973,4.804,8,,,A_CORRIGER
+201,"La Petite Maison",Trévoux,"8 Rue de l'École, Trévoux",45.973,4.804,8,,,A_CORRIGER
+458,"Musée de la Reliure",Trévoux,"9 Rue de la Reliure, Trévoux",45.973,4.804,8,,,A_CORRIGER
+503,"Parc Floral",Trévoux,"12 Chemin du Fleur, Trévoux",45.973,4.804,8,,,A_CORRIGER
+584,"La Petite Maison",Trévoux,"8 Rue de l'École, Trévoux",45.973,4.804,8,,,A_CORRIGER
+648,"La Petite Maison",Trévoux,"8 Rue de l'École, Trévoux",45.973,4.804,8,,,A_CORRIGER
+739,"Musée de la Reliure",Trévoux,"9 Rue de la Reliure, Trévoux",45.973,4.804,8,,,A_CORRIGER
+836,"Parc Floral",Trévoux,"12 Chemin du Fleur, Trévoux",45.973,4.804,8,,,A_CORRIGER
+148,"Restaurant L'Étoile",Trévoux,"36 Boulevard Victor Hugo, Trévoux",45.976,4.798,8,,,A_CORRIGER
+202,"Restaurant L'Étoile",Trévoux,"36 Boulevard Victor Hugo, Trévoux",45.976,4.798,8,,,A_CORRIGER
+498,"Piscine Municipale",Trévoux,"27 Avenue de la Piscine, Trévoux",45.976,4.798,8,,,A_CORRIGER
+535,"Parc des Loisirs",Trévoux,"36 Boulevard Victor Hugo, Trévoux",45.976,4.798,8,,,A_CORRIGER
+585,"Restaurant L'Étoile",Trévoux,"36 Boulevard Victor Hugo, Trévoux",45.976,4.798,8,,,A_CORRIGER
+649,"Restaurant L'Étoile",Trévoux,"36 Boulevard Victor Hugo, Trévoux",45.976,4.798,8,,,A_CORRIGER
+868,"Parc des Loisirs",Trévoux,"36 Boulevard Victor Hugo, Trévoux",45.976,4.798,8,,,A_CORRIGER
+831,"Piscine Municipale",Trévoux,"27 Avenue de la Piscine, Trévoux",45.976,4.798,8,,,A_CORRIGER
+149,"Chez Daniel",Trévoux,"12 Rue Voltaire, Trévoux",45.9755,4.8015,6,,,A_CORRIGER
+203,"Chez Daniel",Trévoux,"12 Rue Voltaire, Trévoux",45.9755,4.8015,6,,,A_CORRIGER
+335,"Bar Sportif",Trévoux,"14 Rue Voltaire, Trévoux",45.9755,4.8015,6,,,A_CORRIGER
+586,"Chez Daniel",Trévoux,"12 Rue Voltaire, Trévoux",45.9755,4.8015,6,,,A_CORRIGER
+650,"Chez Daniel",Trévoux,"12 Rue Voltaire, Trévoux",45.9755,4.8015,6,,,A_CORRIGER
+791,"Bar Sportif",Trévoux,"14 Rue Voltaire, Trévoux",45.9755,4.8015,6,,,A_CORRIGER
+150,"Restaurant Le Détour",Trévoux,"44 Rue du Détour, Trévoux",45.9775,4.8065,4,,,A_CORRIGER
+204,"Restaurant Le Détour",Trévoux,"44 Rue du Détour, Trévoux",45.9775,4.8065,4,,,A_CORRIGER
+587,"Restaurant Le Détour",Trévoux,"44 Rue du Détour, Trévoux",45.9775,4.8065,4,,,A_CORRIGER
+651,"Restaurant Le Détour",Trévoux,"44 Rue du Détour, Trévoux",45.9775,4.8065,4,,,A_CORRIGER
+151,"Le Coin de Table",Trévoux,"10 Rue des Violettes, Trévoux",45.974,4.8005,4,,,A_CORRIGER
+205,"Le Coin de Table",Trévoux,"10 Rue des Violettes, Trévoux",45.974,4.8005,4,,,A_CORRIGER
+588,"Le Coin de Table",Trévoux,"10 Rue des Violettes, Trévoux",45.974,4.8005,4,,,A_CORRIGER
+652,"Le Coin de Table",Trévoux,"10 Rue des Violettes, Trévoux",45.974,4.8005,4,,,A_CORRIGER
+152,"Restaurant Du Succès",Trévoux,"37 Avenue du Succès, Trévoux",45.978,4.7995,4,,,A_CORRIGER
+206,"Restaurant Du Succès",Trévoux,"37 Avenue du Succès, Trévoux",45.978,4.7995,4,,,A_CORRIGER
+589,"Restaurant Du Succès",Trévoux,"37 Avenue du Succès, Trévoux",45.978,4.7995,4,,,A_CORRIGER
+653,"Restaurant Du Succès",Trévoux,"37 Avenue du Succès, Trévoux",45.978,4.7995,4,,,A_CORRIGER
+153,"Chez Sophie",Trévoux,"7 Rue Pasteur, Trévoux",45.972,4.8015,4,,,A_CORRIGER
+207,"Chez Sophie",Trévoux,"7 Rue Pasteur, Trévoux",45.972,4.8015,4,,,A_CORRIGER
+590,"Chez Sophie",Trévoux,"7 Rue Pasteur, Trévoux",45.972,4.8015,4,,,A_CORRIGER
+654,"Chez Sophie",Trévoux,"7 Rue Pasteur, Trévoux",45.972,4.8015,4,,,A_CORRIGER
+154,"Restaurant La Fontaine",Trévoux,"21 Place de la Fontaine, Trévoux",45.9765,4.8045,4,,,A_CORRIGER
+208,"Restaurant La Fontaine",Trévoux,"21 Place de la Fontaine, Trévoux",45.9765,4.8045,4,,,A_CORRIGER
+591,"Restaurant La Fontaine",Trévoux,"21 Place de la Fontaine, Trévoux",45.9765,4.8045,4,,,A_CORRIGER
+655,"Restaurant La Fontaine",Trévoux,"21 Place de la Fontaine, Trévoux",45.9765,4.8045,4,,,A_CORRIGER
+155,"Le Restaurant Populaire",Trévoux,"9 Rue de la Joie, Trévoux",45.9735,4.803,6,,,A_CORRIGER
+209,"Le Restaurant Populaire",Trévoux,"9 Rue de la Joie, Trévoux",45.9735,4.803,6,,,A_CORRIGER
+489,"Passage Couvert Ancien",Trévoux,"20 Rue du Passage, Trévoux",45.9735,4.803,6,,,A_CORRIGER
+592,"Le Restaurant Populaire",Trévoux,"9 Rue de la Joie, Trévoux",45.9735,4.803,6,,,A_CORRIGER
+656,"Le Restaurant Populaire",Trévoux,"9 Rue de la Joie, Trévoux",45.9735,4.803,6,,,A_CORRIGER
+770,"Passage Couvert Ancien",Trévoux,"20 Rue du Passage, Trévoux",45.9735,4.803,6,,,A_CORRIGER
+156,"Restaurant L'Escale",Trévoux,"30 Quai de l'Écluse, Trévoux",45.971,4.804,4,,,A_CORRIGER
+210,"Restaurant L'Escale",Trévoux,"30 Quai de l'Écluse, Trévoux",45.971,4.804,4,,,A_CORRIGER
+593,"Restaurant L'Escale",Trévoux,"30 Quai de l'Écluse, Trévoux",45.971,4.804,4,,,A_CORRIGER
+657,"Restaurant L'Escale",Trévoux,"30 Quai de l'Écluse, Trévoux",45.971,4.804,4,,,A_CORRIGER
+157,"Chez Michèle",Trévoux,"26 Rue de la Chapelle, Trévoux",45.974,4.806,4,,,A_CORRIGER
+211,"Chez Michèle",Trévoux,"26 Rue de la Chapelle, Trévoux",45.974,4.806,4,,,A_CORRIGER
+594,"Chez Michèle",Trévoux,"26 Rue de la Chapelle, Trévoux",45.974,4.806,4,,,A_CORRIGER
+658,"Chez Michèle",Trévoux,"26 Rue de la Chapelle, Trévoux",45.974,4.806,4,,,A_CORRIGER
+158,"Restaurant Au Rendez-Vous",Trévoux,"43 Rue du Rendez-Vous, Trévoux",45.977,4.801,4,,,A_CORRIGER
+212,"Restaurant Au Rendez-Vous",Trévoux,"43 Rue du Rendez-Vous, Trévoux",45.977,4.801,4,,,A_CORRIGER
+595,"Restaurant Au Rendez-Vous",Trévoux,"43 Rue du Rendez-Vous, Trévoux",45.977,4.801,4,,,A_CORRIGER
+659,"Restaurant Au Rendez-Vous",Trévoux,"43 Rue du Rendez-Vous, Trévoux",45.977,4.801,4,,,A_CORRIGER
+159,"La Bonne Table",Trévoux,"13 Chemin de la Bonne Table, Trévoux",45.97,4.803,4,,,A_CORRIGER
+213,"La Bonne Table",Trévoux,"13 Chemin de la Bonne Table, Trévoux",45.97,4.803,4,,,A_CORRIGER
+596,"La Bonne Table",Trévoux,"13 Chemin de la Bonne Table, Trévoux",45.97,4.803,4,,,A_CORRIGER
+660,"La Bonne Table",Trévoux,"13 Chemin de la Bonne Table, Trévoux",45.97,4.803,4,,,A_CORRIGER
+165,"Table Ronde",Trévoux,"10 Rue du Marché, Trévoux",45.9738,4.802,4,,,A_CORRIGER
+548,"Table Ronde",Trévoux,"10 Rue du Marché, Trévoux",45.9738,4.802,4,,,A_CORRIGER
+612,"Table Ronde",Trévoux,"10 Rue du Marché, Trévoux",45.9738,4.802,4,,,A_CORRIGER
+111,"Table Ronde",Trévoux,"10 Rue du Marché, Trévoux",45.9738,4.802,4,,,A_CORRIGER
+323,"Bar Tabac Central",Trévoux,"8 Rue Nationale, Trévoux",45.9745,4.802,4,,,A_CORRIGER
+501,"Hôtel Central",Trévoux,"10 Rue Nationale, Trévoux",45.9745,4.802,4,,,A_CORRIGER
+834,"Hôtel Central",Trévoux,"10 Rue Nationale, Trévoux",45.9745,4.802,4,,,A_CORRIGER
+779,"Bar Tabac Central",Trévoux,"8 Rue Nationale, Trévoux",45.9745,4.802,4,,,A_CORRIGER
+328,"Café de la Basilique",Trévoux,"4 Place de la Basilique, Trévoux",45.9765,4.805,5,,,A_CORRIGER
+527,"Hôtel de la Basilique",Trévoux,"4 Place de la Basilique, Trévoux",45.9765,4.805,5,,,A_CORRIGER
+715,"Basilique Notre-Dame",Trévoux,"3 Place de la Basilique, Trévoux",45.9765,4.805,5,,,A_CORRIGER
+784,"Café de la Basilique",Trévoux,"4 Place de la Basilique, Trévoux",45.9765,4.805,5,,,A_CORRIGER
+860,"Hôtel de la Basilique",Trévoux,"4 Place de la Basilique, Trévoux",45.9765,4.805,5,,,A_CORRIGER
+365,"Bar Cigar",Trévoux,"28 Place de la Statue, Trévoux",45.975,4.802,6,,,A_CORRIGER
+432,"Musée de Trévoux",Trévoux,"5 Rue du Musée, Trévoux",45.975,4.802,6,,,A_CORRIGER
+487,"Statue Monumentale",Trévoux,"28 Place de la Statue, Trévoux",45.975,4.802,6,,,A_CORRIGER
+713,"Musée de Trévoux",Trévoux,"5 Rue du Musée, Trévoux",45.975,4.802,6,,,A_CORRIGER
+768,"Statue Monumentale",Trévoux,"28 Place de la Statue, Trévoux",45.975,4.802,6,,,A_CORRIGER
+821,"Bar Cigar",Trévoux,"28 Place de la Statue, Trévoux",45.975,4.802,6,,,A_CORRIGER
+460,"Maison Renaissance",Trévoux,"14 Rue de la Renaissance, Trévoux",45.976,4.805,4,,,A_CORRIGER
+505,"Hôtel Renaissance",Trévoux,"14 Rue de la Renaissance, Trévoux",45.976,4.805,4,,,A_CORRIGER
+741,"Maison Renaissance",Trévoux,"14 Rue de la Renaissance, Trévoux",45.976,4.805,4,,,A_CORRIGER
+838,"Hôtel Renaissance",Trévoux,"14 Rue de la Renaissance, Trévoux",45.976,4.805,4,,,A_CORRIGER
+30,"Bar Restaurant L'Écluse",Couzon,"1 Place Liberté, 69270 Couzon-au-Mont-d'Or",45.8241,4.8342,6,,,A_CORRIGER
+29,"Hôtel de la Gare",Couzon,"26 Rue Gabriel Péri, 69270 Couzon-au-Mont-d'Or",45.8241,4.8342,6,,,A_CORRIGER
+28,"Le Cabestan",Couzon,"14 rue de la République, 69270 Couzon-au-Mont-d'Or",45.8241,4.8342,6,,,A_CORRIGER
+39,"Mont d'Or - Randonnées",Couzon,"Départ Couzon-au-Mont-d'Or, 69270",45.8241,4.8342,6,,,A_CORRIGER
+40,"Carrières de Pierre Jaune",Couzon,"Sentier des Carrières, 69270 Couzon-au-Mont-d'Or",45.8241,4.8342,6,,,A_CORRIGER
+42,"Bords de Saône - Chemin de Halage",Couzon,"Quai de la Saône, 69270 Couzon-au-Mont-d'Or",45.8241,4.8342,6,,,A_CORRIGER
+32,"L'Embarcadère Villefranche",Couzon,"Bords de Saône, 69400 Villefranche-sur-Saône",45.9934,4.7272,4,,,A_CORRIGER
+33,"Le Bistronome en Beaujolais",Couzon,"144 rue d'Anse, 69400 Villefranche-sur-Saône",45.9934,4.7272,4,,,A_CORRIGER
+34,"Brasserie du Théâtre Villefranche",Couzon,"Centre-ville, 69400 Villefranche-sur-Saône",45.9934,4.7272,4,,,A_CORRIGER
+71,"Musée Paul-Dini Villefranche",Couzon,"Villefranche-sur-Saône, 69400",45.9934,4.7272,4,,,A_CORRIGER
+214,"La Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+266,"La Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+344,"Café de la Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+370,"La Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+427,"Restaurant La Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+509,"Parc de la Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+514,"Hôtel La Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+602,"Restaurant La Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+661,"La Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+847,"Hôtel La Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+800,"Café de la Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+842,"Parc de la Montagne",Couzon,"Route du Mont, Couzon",45.8245,4.8156,12,,,A_CORRIGER
+216,"Restaurant de la Vallée",Couzon,"8 Chemin de la Vallée, Couzon",45.826,4.817,8,,,A_CORRIGER
+268,"Restaurant de la Vallée",Couzon,"8 Chemin de la Vallée, Couzon",45.826,4.817,8,,,A_CORRIGER
+340,"Café de la Vallée",Couzon,"8 Chemin de la Vallée, Couzon",45.826,4.817,8,,,A_CORRIGER
+372,"Restaurant de la Vallée",Couzon,"8 Chemin de la Vallée, Couzon",45.826,4.817,8,,,A_CORRIGER
+515,"Hôtel de la Vallée",Couzon,"8 Chemin de la Vallée, Couzon",45.826,4.817,8,,,A_CORRIGER
+663,"Restaurant de la Vallée",Couzon,"8 Chemin de la Vallée, Couzon",45.826,4.817,8,,,A_CORRIGER
+848,"Hôtel de la Vallée",Couzon,"8 Chemin de la Vallée, Couzon",45.826,4.817,8,,,A_CORRIGER
+796,"Café de la Vallée",Couzon,"8 Chemin de la Vallée, Couzon",45.826,4.817,8,,,A_CORRIGER
+217,"L'Auberge Couzienne",Couzon,"22 Rue de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+373,"L'Auberge Couzienne",Couzon,"22 Rue de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+269,"L'Auberge Couzienne",Couzon,"22 Rue de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+346,"Café Historique",Couzon,"22 Rue de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+448,"Église de Couzon",Couzon,"3 Place de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+513,"Hôtel de Couzon",Couzon,"22 Rue de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+664,"L'Auberge Couzienne",Couzon,"22 Rue de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+729,"Église de Couzon",Couzon,"3 Place de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+846,"Hôtel de Couzon",Couzon,"22 Rue de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+802,"Café Historique",Couzon,"22 Rue de l'Église, Couzon",45.8215,4.813,10,,,A_CORRIGER
+218,"Le Petit Coin de Couzon",Couzon,"5 Place du Village, Couzon",45.824,4.815,8,,,A_CORRIGER
+270,"Le Petit Coin de Couzon",Couzon,"5 Place du Village, Couzon",45.824,4.815,8,,,A_CORRIGER
+338,"Café Central",Couzon,"5 Place du Village, Couzon",45.824,4.815,8,,,A_CORRIGER
+374,"Le Petit Coin de Couzon",Couzon,"5 Place du Village, Couzon",45.824,4.815,8,,,A_CORRIGER
+508,"Parc du Village",Couzon,"5 Place du Village, Couzon",45.824,4.815,8,,,A_CORRIGER
+665,"Le Petit Coin de Couzon",Couzon,"5 Place du Village, Couzon",45.824,4.815,8,,,A_CORRIGER
+794,"Café Central",Couzon,"5 Place du Village, Couzon",45.824,4.815,8,,,A_CORRIGER
+841,"Parc du Village",Couzon,"5 Place du Village, Couzon",45.824,4.815,8,,,A_CORRIGER
+219,"Restaurant Le Relais",Couzon,"12 Avenue du Relais, Couzon",45.827,4.818,6,,,A_CORRIGER
+271,"Restaurant Le Relais",Couzon,"12 Avenue du Relais, Couzon",45.827,4.818,6,,,A_CORRIGER
+341,"Bar Lounge Couzon",Couzon,"12 Avenue du Relais, Couzon",45.827,4.818,6,,,A_CORRIGER
+375,"Restaurant Le Relais",Couzon,"12 Avenue du Relais, Couzon",45.827,4.818,6,,,A_CORRIGER
+666,"Restaurant Le Relais",Couzon,"12 Avenue du Relais, Couzon",45.827,4.818,6,,,A_CORRIGER
+797,"Bar Lounge Couzon",Couzon,"12 Avenue du Relais, Couzon",45.827,4.818,6,,,A_CORRIGER
+220,"Chez Brigitte",Couzon,"7 Rue des Tilleuls, Couzon",45.822,4.816,8,,,A_CORRIGER
+272,"Chez Brigitte",Couzon,"7 Rue des Tilleuls, Couzon",45.822,4.816,8,,,A_CORRIGER
+351,"Bar Sportif",Couzon,"7 Rue des Tilleuls, Couzon",45.822,4.816,8,,,A_CORRIGER
+376,"Chez Brigitte",Couzon,"7 Rue des Tilleuls, Couzon",45.822,4.816,8,,,A_CORRIGER
+510,"Jardin d'Enfants",Couzon,"7 Rue des Tilleuls, Couzon",45.822,4.816,8,,,A_CORRIGER
+667,"Chez Brigitte",Couzon,"7 Rue des Tilleuls, Couzon",45.822,4.816,8,,,A_CORRIGER
+807,"Bar Sportif",Couzon,"7 Rue des Tilleuls, Couzon",45.822,4.816,8,,,A_CORRIGER
+843,"Jardin d'Enfants",Couzon,"7 Rue des Tilleuls, Couzon",45.822,4.816,8,,,A_CORRIGER
+221,"La Table Gourmande",Couzon,"30 Rue du Parc, Couzon",45.828,4.814,6,,,A_CORRIGER
+273,"La Table Gourmande",Couzon,"30 Rue du Parc, Couzon",45.828,4.814,6,,,A_CORRIGER
+377,"La Table Gourmande",Couzon,"30 Rue du Parc, Couzon",45.828,4.814,6,,,A_CORRIGER
+511,"Terrain de Football",Couzon,"30 Rue du Parc, Couzon",45.828,4.814,6,,,A_CORRIGER
+668,"La Table Gourmande",Couzon,"30 Rue du Parc, Couzon",45.828,4.814,6,,,A_CORRIGER
+844,"Terrain de Football",Couzon,"30 Rue du Parc, Couzon",45.828,4.814,6,,,A_CORRIGER
+222,"Restaurant Au Ciel Bleu",Couzon,"3 Chemin du Ciel, Couzon",45.8205,4.812,4,,,A_CORRIGER
+274,"Restaurant Au Ciel Bleu",Couzon,"3 Chemin du Ciel, Couzon",45.8205,4.812,4,,,A_CORRIGER
+378,"Restaurant Au Ciel Bleu",Couzon,"3 Chemin du Ciel, Couzon",45.8205,4.812,4,,,A_CORRIGER
+669,"Restaurant Au Ciel Bleu",Couzon,"3 Chemin du Ciel, Couzon",45.8205,4.812,4,,,A_CORRIGER
+225,"L'Assiette Locale",Couzon,"11 Rue de Bourgogne, Couzon",45.8235,4.8135,6,,,A_CORRIGER
+277,"L'Assiette Locale",Couzon,"11 Rue de Bourgogne, Couzon",45.8235,4.8135,6,,,A_CORRIGER
+345,"Bar Tabac Couzon",Couzon,"11 Rue de Bourgogne, Couzon",45.8235,4.8135,6,,,A_CORRIGER
+381,"L'Assiette Locale",Couzon,"11 Rue de Bourgogne, Couzon",45.8235,4.8135,6,,,A_CORRIGER
+672,"L'Assiette Locale",Couzon,"11 Rue de Bourgogne, Couzon",45.8235,4.8135,6,,,A_CORRIGER
+801,"Bar Tabac Couzon",Couzon,"11 Rue de Bourgogne, Couzon",45.8235,4.8135,6,,,A_CORRIGER
+226,"Restaurant La Fontaine",Couzon,"16 Place de la Fontaine, Couzon",45.827,4.816,10,,,A_CORRIGER
+278,"Restaurant La Fontaine",Couzon,"16 Place de la Fontaine, Couzon",45.827,4.816,10,,,A_CORRIGER
+343,"Bar à Vin Couzonais",Couzon,"16 Place de la Fontaine, Couzon",45.827,4.816,10,,,A_CORRIGER
+382,"Restaurant La Fontaine",Couzon,"16 Place de la Fontaine, Couzon",45.827,4.816,10,,,A_CORRIGER
+454,"Fontaine Historique",Couzon,"7 Place de la Fontaine, Couzon",45.827,4.816,10,,,A_CORRIGER
+518,"Terrain de Tennis",Couzon,"15 Chemin du Tennis, Couzon",45.827,4.816,10,,,A_CORRIGER
+673,"Restaurant La Fontaine",Couzon,"16 Place de la Fontaine, Couzon",45.827,4.816,10,,,A_CORRIGER
+735,"Fontaine Historique",Couzon,"7 Place de la Fontaine, Couzon",45.827,4.816,10,,,A_CORRIGER
+799,"Bar à Vin Couzonais",Couzon,"16 Place de la Fontaine, Couzon",45.827,4.816,10,,,A_CORRIGER
+851,"Terrain de Tennis",Couzon,"15 Chemin du Tennis, Couzon",45.827,4.816,10,,,A_CORRIGER
+227,"Chez Vincent",Couzon,"9 Rue des Peupliers, Couzon",45.8225,4.8145,6,,,A_CORRIGER
+279,"Chez Vincent",Couzon,"9 Rue des Peupliers, Couzon",45.8225,4.8145,6,,,A_CORRIGER
+352,"Café du Silence",Couzon,"9 Rue des Peupliers, Couzon",45.8225,4.8145,6,,,A_CORRIGER
+383,"Chez Vincent",Couzon,"9 Rue des Peupliers, Couzon",45.8225,4.8145,6,,,A_CORRIGER
+674,"Chez Vincent",Couzon,"9 Rue des Peupliers, Couzon",45.8225,4.8145,6,,,A_CORRIGER
+808,"Café du Silence",Couzon,"9 Rue des Peupliers, Couzon",45.8225,4.8145,6,,,A_CORRIGER
+228,"Le Petit Bistrot de Couzon",Couzon,"21 Rue de la Gare, Couzon",45.824,4.818,6,,,A_CORRIGER
+280,"Le Petit Bistrot de Couzon",Couzon,"21 Rue de la Gare, Couzon",45.824,4.818,6,,,A_CORRIGER
+356,"Café de la Gare",Couzon,"21 Rue de la Gare, Couzon",45.824,4.818,6,,,A_CORRIGER
+384,"Le Petit Bistrot de Couzon",Couzon,"21 Rue de la Gare, Couzon",45.824,4.818,6,,,A_CORRIGER
+675,"Le Petit Bistrot de Couzon",Couzon,"21 Rue de la Gare, Couzon",45.824,4.818,6,,,A_CORRIGER
+812,"Café de la Gare",Couzon,"21 Rue de la Gare, Couzon",45.824,4.818,6,,,A_CORRIGER
+229,"Restaurant Les Vignes",Couzon,"35 Chemin des Vignes, Couzon",45.829,4.815,10,,,A_CORRIGER
+281,"Restaurant Les Vignes",Couzon,"35 Chemin des Vignes, Couzon",45.829,4.815,10,,,A_CORRIGER
+359,"Bar Discothèque",Couzon,"35 Chemin des Vignes, Couzon",45.829,4.815,10,,,A_CORRIGER
+385,"Restaurant Les Vignes",Couzon,"35 Chemin des Vignes, Couzon",45.829,4.815,10,,,A_CORRIGER
+492,"Musée d'Ethnographie",Couzon,"29 Rue de la Culture, Couzon",45.829,4.815,10,,,A_CORRIGER
+523,"Hôtel des Vignes",Couzon,"35 Chemin des Vignes, Couzon",45.829,4.815,10,,,A_CORRIGER
+676,"Restaurant Les Vignes",Couzon,"35 Chemin des Vignes, Couzon",45.829,4.815,10,,,A_CORRIGER
+773,"Musée d'Ethnographie",Couzon,"29 Rue de la Culture, Couzon",45.829,4.815,10,,,A_CORRIGER
+856,"Hôtel des Vignes",Couzon,"35 Chemin des Vignes, Couzon",45.829,4.815,10,,,A_CORRIGER
+815,"Bar Discothèque",Couzon,"35 Chemin des Vignes, Couzon",45.829,4.815,10,,,A_CORRIGER
+230,"Chez Monique",Couzon,"6 Rue Saint-Martin, Couzon",45.8215,4.817,6,,,A_CORRIGER
+282,"Chez Monique",Couzon,"6 Rue Saint-Martin, Couzon",45.8215,4.817,6,,,A_CORRIGER
+339,"Bar de l'Église",Couzon,"6 Rue Saint-Martin, Couzon",45.8215,4.817,6,,,A_CORRIGER
+386,"Chez Monique",Couzon,"6 Rue Saint-Martin, Couzon",45.8215,4.817,6,,,A_CORRIGER
+677,"Chez Monique",Couzon,"6 Rue Saint-Martin, Couzon",45.8215,4.817,6,,,A_CORRIGER
+795,"Bar de l'Église",Couzon,"6 Rue Saint-Martin, Couzon",45.8215,4.817,6,,,A_CORRIGER
+231,"La Maison du Bien Manger",Couzon,"28 Avenue Gambetta, Couzon",45.8275,4.8135,6,,,A_CORRIGER
+283,"La Maison du Bien Manger",Couzon,"28 Avenue Gambetta, Couzon",45.8275,4.8135,6,,,A_CORRIGER
+387,"La Maison du Bien Manger",Couzon,"28 Avenue Gambetta, Couzon",45.8275,4.8135,6,,,A_CORRIGER
+473,"Musée des Métiers Anciens",Couzon,"22 Rue des Métiers, Couzon",45.8275,4.8135,6,,,A_CORRIGER
+678,"La Maison du Bien Manger",Couzon,"28 Avenue Gambetta, Couzon",45.8275,4.8135,6,,,A_CORRIGER
+754,"Musée des Métiers Anciens",Couzon,"22 Rue des Métiers, Couzon",45.8275,4.8135,6,,,A_CORRIGER
+232,"Restaurant Le Pont Fleuri",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+284,"Restaurant Le Pont Fleuri",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+347,"Bar du Pont Fleuri",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+388,"Restaurant Le Pont Fleuri",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+456,"Vieux Pont en Pierre",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+517,"Hôtel de l'Écluse",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+679,"Restaurant Le Pont Fleuri",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+737,"Vieux Pont en Pierre",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+850,"Hôtel de l'Écluse",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+803,"Bar du Pont Fleuri",Couzon,"2 Rue du Pont, Couzon",45.82,4.811,10,,,A_CORRIGER
+233,"Chez Alain",Couzon,"14 Rue des Fleurs, Couzon",45.8255,4.815,8,,,A_CORRIGER
+285,"Chez Alain",Couzon,"14 Rue des Fleurs, Couzon",45.8255,4.815,8,,,A_CORRIGER
+360,"Café Traditionnel",Couzon,"14 Rue des Fleurs, Couzon",45.8255,4.815,8,,,A_CORRIGER
+453,"Galerie d'Art Couzonaise",Couzon,"15 Rue de l'Art, Couzon",45.8255,4.815,8,,,A_CORRIGER
+680,"Chez Alain",Couzon,"14 Rue des Fleurs, Couzon",45.8255,4.815,8,,,A_CORRIGER
+734,"Galerie d'Art Couzonaise",Couzon,"15 Rue de l'Art, Couzon",45.8255,4.815,8,,,A_CORRIGER
+389,"Chez Alain",Couzon,"14 Rue des Fleurs, Couzon",45.8255,4.815,8,,,A_CORRIGER
+816,"Café Traditionnel",Couzon,"14 Rue des Fleurs, Couzon",45.8255,4.815,8,,,A_CORRIGER
+234,"Restaurant Au Cœur de Couzon",Couzon,"20 Rue du Cœur, Couzon",45.823,4.819,6,,,A_CORRIGER
+286,"Restaurant Au Cœur de Couzon",Couzon,"20 Rue du Cœur, Couzon",45.823,4.819,6,,,A_CORRIGER
+350,"Café de Couzon",Couzon,"20 Rue du Cœur, Couzon",45.823,4.819,6,,,A_CORRIGER
+390,"Restaurant Au Cœur de Couzon",Couzon,"20 Rue du Cœur, Couzon",45.823,4.819,6,,,A_CORRIGER
+681,"Restaurant Au Cœur de Couzon",Couzon,"20 Rue du Cœur, Couzon",45.823,4.819,6,,,A_CORRIGER
+806,"Café de Couzon",Couzon,"20 Rue du Cœur, Couzon",45.823,4.819,6,,,A_CORRIGER
+237,"Chez Thérèse",Couzon,"10 Rue Nationale, Couzon",45.824,4.813,8,,,A_CORRIGER
+289,"Chez Thérèse",Couzon,"10 Rue Nationale, Couzon",45.824,4.813,8,,,A_CORRIGER
+357,"Bar à Bière",Couzon,"10 Rue Nationale, Couzon",45.824,4.813,8,,,A_CORRIGER
+393,"Chez Thérèse",Couzon,"10 Rue Nationale, Couzon",45.824,4.813,8,,,A_CORRIGER
+451,"Mairie Historique",Couzon,"10 Place de la Mairie, Couzon",45.824,4.813,8,,,A_CORRIGER
+684,"Chez Thérèse",Couzon,"10 Rue Nationale, Couzon",45.824,4.813,8,,,A_CORRIGER
+732,"Mairie Historique",Couzon,"10 Place de la Mairie, Couzon",45.824,4.813,8,,,A_CORRIGER
+813,"Bar à Bière",Couzon,"10 Rue Nationale, Couzon",45.824,4.813,8,,,A_CORRIGER
+239,"Restaurant Le Rendez-Vous",Couzon,"13 Rue de Verdun, Couzon",45.825,4.814,8,,,A_CORRIGER
+291,"Restaurant Le Rendez-Vous",Couzon,"13 Rue de Verdun, Couzon",45.825,4.814,8,,,A_CORRIGER
+348,"Café du Marché",Couzon,"13 Rue de Verdun, Couzon",45.825,4.814,8,,,A_CORRIGER
+395,"Restaurant Le Rendez-Vous",Couzon,"13 Rue de Verdun, Couzon",45.825,4.814,8,,,A_CORRIGER
+516,"Hôtel Central",Couzon,"13 Rue de Verdun, Couzon",45.825,4.814,8,,,A_CORRIGER
+849,"Hôtel Central",Couzon,"13 Rue de Verdun, Couzon",45.825,4.814,8,,,A_CORRIGER
+686,"Restaurant Le Rendez-Vous",Couzon,"13 Rue de Verdun, Couzon",45.825,4.814,8,,,A_CORRIGER
+804,"Café du Marché",Couzon,"13 Rue de Verdun, Couzon",45.825,4.814,8,,,A_CORRIGER
+240,"Chez Robert",Couzon,"19 Rue du Silence, Couzon",45.822,4.818,6,,,A_CORRIGER
+292,"Chez Robert",Couzon,"19 Rue du Silence, Couzon",45.822,4.818,6,,,A_CORRIGER
+355,"Bar Vintage",Couzon,"18 Rue du Silence, Couzon",45.822,4.818,6,,,A_CORRIGER
+396,"Chez Robert",Couzon,"19 Rue du Silence, Couzon",45.822,4.818,6,,,A_CORRIGER
+687,"Chez Robert",Couzon,"19 Rue du Silence, Couzon",45.822,4.818,6,,,A_CORRIGER
+811,"Bar Vintage",Couzon,"18 Rue du Silence, Couzon",45.822,4.818,6,,,A_CORRIGER
+241,"Restaurant La Nouvelle Époque",Couzon,"40 Avenue Victor Hugo, Couzon",45.83,4.816,6,,,A_CORRIGER
+293,"Restaurant La Nouvelle Époque",Couzon,"40 Avenue Victor Hugo, Couzon",45.83,4.816,6,,,A_CORRIGER
+397,"Restaurant La Nouvelle Époque",Couzon,"40 Avenue Victor Hugo, Couzon",45.83,4.816,6,,,A_CORRIGER
+521,"Hôtel La Nouvelle Époque",Couzon,"40 Avenue Victor Hugo, Couzon",45.83,4.816,6,,,A_CORRIGER
+688,"Restaurant La Nouvelle Époque",Couzon,"40 Avenue Victor Hugo, Couzon",45.83,4.816,6,,,A_CORRIGER
+854,"Hôtel La Nouvelle Époque",Couzon,"40 Avenue Victor Hugo, Couzon",45.83,4.816,6,,,A_CORRIGER
+242,"Le Petit Resto de Couzon",Couzon,"1 Rue de la Paix, Couzon",45.82,4.816,6,,,A_CORRIGER
+294,"Le Petit Resto de Couzon",Couzon,"1 Rue de la Paix, Couzon",45.82,4.816,6,,,A_CORRIGER
+354,"Café de la Fontaine",Couzon,"1 Rue de la Paix, Couzon",45.82,4.816,6,,,A_CORRIGER
+398,"Le Petit Resto de Couzon",Couzon,"1 Rue de la Paix, Couzon",45.82,4.816,6,,,A_CORRIGER
+689,"Le Petit Resto de Couzon",Couzon,"1 Rue de la Paix, Couzon",45.82,4.816,6,,,A_CORRIGER
+810,"Café de la Fontaine",Couzon,"1 Rue de la Paix, Couzon",45.82,4.816,6,,,A_CORRIGER
+243,"Restaurant Chez Nous",Couzon,"24 Rue de Juillet, Couzon",45.826,4.8125,6,,,A_CORRIGER
+295,"Restaurant Chez Nous",Couzon,"24 Rue de Juillet, Couzon",45.826,4.8125,6,,,A_CORRIGER
+399,"Restaurant Chez Nous",Couzon,"24 Rue de Juillet, Couzon",45.826,4.8125,6,,,A_CORRIGER
+522,"Bowling Couzon",Couzon,"24 Rue de Juillet, Couzon",45.826,4.8125,6,,,A_CORRIGER
+690,"Restaurant Chez Nous",Couzon,"24 Rue de Juillet, Couzon",45.826,4.8125,6,,,A_CORRIGER
+855,"Bowling Couzon",Couzon,"24 Rue de Juillet, Couzon",45.826,4.8125,6,,,A_CORRIGER
+244,"Chez Jeannine",Couzon,"8 Rue Molière, Couzon",45.8235,4.816,6,,,A_CORRIGER
+296,"Chez Jeannine",Couzon,"8 Rue Molière, Couzon",45.8235,4.816,6,,,A_CORRIGER
+358,"Café Cozy",Couzon,"8 Rue Molière, Couzon",45.8235,4.816,6,,,A_CORRIGER
+400,"Chez Jeannine",Couzon,"8 Rue Molière, Couzon",45.8235,4.816,6,,,A_CORRIGER
+691,"Chez Jeannine",Couzon,"8 Rue Molière, Couzon",45.8235,4.816,6,,,A_CORRIGER
+814,"Café Cozy",Couzon,"8 Rue Molière, Couzon",45.8235,4.816,6,,,A_CORRIGER
+245,"L'Étape Gourmande",Couzon,"31 Chemin de l'Étape, Couzon",45.828,4.8165,4,,,A_CORRIGER
+297,"L'Étape Gourmande",Couzon,"31 Chemin de l'Étape, Couzon",45.828,4.8165,4,,,A_CORRIGER
+401,"L'Étape Gourmande",Couzon,"31 Chemin de l'Étape, Couzon",45.828,4.8165,4,,,A_CORRIGER
+692,"L'Étape Gourmande",Couzon,"31 Chemin de l'Étape, Couzon",45.828,4.8165,4,,,A_CORRIGER
+246,"Restaurant Le Succès",Couzon,"15 Rue du Succès, Couzon",45.8255,4.818,6,,,A_CORRIGER
+298,"Restaurant Le Succès",Couzon,"15 Rue du Succès, Couzon",45.8255,4.818,6,,,A_CORRIGER
+349,"Bar Terrasse",Couzon,"15 Avenue Gambetta, Couzon",45.8255,4.818,6,,,A_CORRIGER
+402,"Restaurant Le Succès",Couzon,"15 Rue du Succès, Couzon",45.8255,4.818,6,,,A_CORRIGER
+693,"Restaurant Le Succès",Couzon,"15 Rue du Succès, Couzon",45.8255,4.818,6,,,A_CORRIGER
+805,"Bar Terrasse",Couzon,"15 Avenue Gambetta, Couzon",45.8255,4.818,6,,,A_CORRIGER
+247,"Chez Geneviève",Couzon,"6 Rue des Châtaigniers, Couzon",45.821,4.815,6,,,A_CORRIGER
+299,"Chez Geneviève",Couzon,"6 Rue des Châtaigniers, Couzon",45.821,4.815,6,,,A_CORRIGER
+403,"Chez Geneviève",Couzon,"6 Rue des Châtaigniers, Couzon",45.821,4.815,6,,,A_CORRIGER
+450,"Monument aux Morts",Couzon,"5 Place du Souvenir, Couzon",45.821,4.815,6,,,A_CORRIGER
+694,"Chez Geneviève",Couzon,"6 Rue des Châtaigniers, Couzon",45.821,4.815,6,,,A_CORRIGER
+731,"Monument aux Morts",Couzon,"5 Place du Souvenir, Couzon",45.821,4.815,6,,,A_CORRIGER
+250,"Chez Christiane",Couzon,"17 Rue de Provence, Couzon",45.8265,4.8155,4,,,A_CORRIGER
+302,"Chez Christiane",Couzon,"17 Rue de Provence, Couzon",45.8265,4.8155,4,,,A_CORRIGER
+406,"Chez Christiane",Couzon,"17 Rue de Provence, Couzon",45.8265,4.8155,4,,,A_CORRIGER
+697,"Chez Christiane",Couzon,"17 Rue de Provence, Couzon",45.8265,4.8155,4,,,A_CORRIGER
+255,"Au Petit Couzon",Couzon,"11 Rue de la Joie, Couzon",45.824,4.816,6,,,A_CORRIGER
+307,"Au Petit Couzon",Couzon,"11 Rue de la Joie, Couzon",45.824,4.816,6,,,A_CORRIGER
+411,"Au Petit Couzon",Couzon,"11 Rue de la Joie, Couzon",45.824,4.816,6,,,A_CORRIGER
+430,"Pharmacie Centrale",Couzon,"Rue Principale, Couzon",45.824,4.816,6,,,A_CORRIGER
+605,"Pharmacie Centrale",Couzon,"Rue Principale, Couzon",45.824,4.816,6,,,A_CORRIGER
+702,"Au Petit Couzon",Couzon,"11 Rue de la Joie, Couzon",45.824,4.816,6,,,A_CORRIGER
+256,"Restaurant Nouvelle Cuisine",Couzon,"39 Avenue du Progrès, Couzon",45.8305,4.8175,4,,,A_CORRIGER
+308,"Restaurant Nouvelle Cuisine",Couzon,"39 Avenue du Progrès, Couzon",45.8305,4.8175,4,,,A_CORRIGER
+412,"Restaurant Nouvelle Cuisine",Couzon,"39 Avenue du Progrès, Couzon",45.8305,4.8175,4,,,A_CORRIGER
+703,"Restaurant Nouvelle Cuisine",Couzon,"39 Avenue du Progrès, Couzon",45.8305,4.8175,4,,,A_CORRIGER
+257,"Chez Fabrice",Couzon,"5 Rue des Roses, Couzon",45.8205,4.813,4,,,A_CORRIGER
+309,"Chez Fabrice",Couzon,"5 Rue des Roses, Couzon",45.8205,4.813,4,,,A_CORRIGER
+413,"Chez Fabrice",Couzon,"5 Rue des Roses, Couzon",45.8205,4.813,4,,,A_CORRIGER
+704,"Chez Fabrice",Couzon,"5 Rue des Roses, Couzon",45.8205,4.813,4,,,A_CORRIGER
+258,"La Maison Gourmande",Couzon,"34 Chemin de la Maison, Couzon",45.829,4.8185,4,,,A_CORRIGER
+310,"La Maison Gourmande",Couzon,"34 Chemin de la Maison, Couzon",45.829,4.8185,4,,,A_CORRIGER
+414,"La Maison Gourmande",Couzon,"34 Chemin de la Maison, Couzon",45.829,4.8185,4,,,A_CORRIGER
+705,"La Maison Gourmande",Couzon,"34 Chemin de la Maison, Couzon",45.829,4.8185,4,,,A_CORRIGER
+259,"Restaurant Le Ciel",Couzon,"9 Rue du Ciel, Couzon",45.823,4.815,4,,,A_CORRIGER
+311,"Restaurant Le Ciel",Couzon,"9 Rue du Ciel, Couzon",45.823,4.815,4,,,A_CORRIGER
+415,"Restaurant Le Ciel",Couzon,"9 Rue du Ciel, Couzon",45.823,4.815,4,,,A_CORRIGER
+706,"Restaurant Le Ciel",Couzon,"9 Rue du Ciel, Couzon",45.823,4.815,4,,,A_CORRIGER
+260,"Chez Isabelle",Couzon,"18 Rue de la Liberté, Couzon",45.827,4.817,4,,,A_CORRIGER
+312,"Chez Isabelle",Couzon,"18 Rue de la Liberté, Couzon",45.827,4.817,4,,,A_CORRIGER
+416,"Chez Isabelle",Couzon,"18 Rue de la Liberté, Couzon",45.827,4.817,4,,,A_CORRIGER
+707,"Chez Isabelle",Couzon,"18 Rue de la Liberté, Couzon",45.827,4.817,4,,,A_CORRIGER
+261,"Restaurant Au Coin du Feu",Couzon,"37 Boulevard de l'Industrie, Couzon",45.829,4.8135,4,,,A_CORRIGER
+313,"Restaurant Au Coin du Feu",Couzon,"37 Boulevard de l'Industrie, Couzon",45.829,4.8135,4,,,A_CORRIGER
+417,"Restaurant Au Coin du Feu",Couzon,"37 Boulevard de l'Industrie, Couzon",45.829,4.8135,4,,,A_CORRIGER
+708,"Restaurant Au Coin du Feu",Couzon,"37 Boulevard de l'Industrie, Couzon",45.829,4.8135,4,,,A_CORRIGER
+262,"Le Coin de Bouche",Couzon,"3 Rue de la Mouche, Couzon",45.82,4.817,4,,,A_CORRIGER
+314,"Le Coin de Bouche",Couzon,"3 Rue de la Mouche, Couzon",45.82,4.817,4,,,A_CORRIGER
+418,"Le Coin de Bouche",Couzon,"3 Rue de la Mouche, Couzon",45.82,4.817,4,,,A_CORRIGER
+709,"Le Coin de Bouche",Couzon,"3 Rue de la Mouche, Couzon",45.82,4.817,4,,,A_CORRIGER
+264,"Chez Claudette",Couzon,"4 Rue de la Chapelle, Couzon",45.821,4.812,6,,,A_CORRIGER
+316,"Chez Claudette",Couzon,"4 Rue de la Chapelle, Couzon",45.821,4.812,6,,,A_CORRIGER
+420,"Chez Claudette",Couzon,"4 Rue de la Chapelle, Couzon",45.821,4.812,6,,,A_CORRIGER
+485,"Cours d'Eau Pittoresque",Couzon,"10 Chemin de l'Eau, Couzon",45.821,4.812,6,,,A_CORRIGER
+711,"Chez Claudette",Couzon,"4 Rue de la Chapelle, Couzon",45.821,4.812,6,,,A_CORRIGER
+766,"Cours d'Eau Pittoresque",Couzon,"10 Chemin de l'Eau, Couzon",45.821,4.812,6,,,A_CORRIGER
+265,"La Table du Terroir",Couzon,"36 Chemin du Terroir, Couzon",45.8285,4.8195,4,,,A_CORRIGER
+317,"La Table du Terroir",Couzon,"36 Chemin du Terroir, Couzon",45.8285,4.8195,4,,,A_CORRIGER
+421,"La Table du Terroir",Couzon,"36 Chemin du Terroir, Couzon",45.8285,4.8195,4,,,A_CORRIGER
+712,"La Table du Terroir",Couzon,"36 Chemin du Terroir, Couzon",45.8285,4.8195,4,,,A_CORRIGER
+853,"Aire de Pique-Nique",Couzon,"16 Chemin du Silence, Couzon",45.826,4.818,4,,,A_CORRIGER
+472,"Jardin du Silence",Couzon,"16 Chemin du Silence, Couzon",45.826,4.818,4,,,A_CORRIGER
+520,"Aire de Pique-Nique",Couzon,"16 Chemin du Silence, Couzon",45.826,4.818,4,,,A_CORRIGER
+753,"Jardin du Silence",Couzon,"16 Chemin du Silence, Couzon",45.826,4.818,4,,,A_CORRIGER
