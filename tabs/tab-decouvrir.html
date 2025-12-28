@@ -26,31 +26,7 @@
                     <strong>📍 Gîte sélectionné :</strong> <span id="selectedGiteDecouvrir" style="font-weight: 700;"></span>
                 </div>
 
-                <!-- BOUTONS D'ACTION RAPIDE -->
-                <div class="card">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                        <button type="button" class="btn" style="background: #10b981;" onclick="rechercherAutomatique('restaurants')">
-                            🍽️ Chercher Restaurants
-                        </button>
-                        <button type="button" class="btn" style="background: #3b82f6;" onclick="rechercherAutomatique('tourist_attraction')">
-                            🏛️ Chercher Sites Touristiques
-                        </button>
-                        <button type="button" class="btn" style="background: #f59e0b;" onclick="rechercherAutomatique('shopping_mall')">
-                            🛍️ Chercher Commerces
-                        </button>
-                        <button type="button" class="btn" style="background: #8b5cf6;" onclick="rechercherAutomatique('park')">
-                            🌳 Chercher Parcs/Nature
-                        </button>
-                        <button type="button" class="btn" style="background: #ef4444;" onclick="rechercherEvenements()">
-                            📅 Événements cette semaine
-                        </button>
-                        <button type="button" class="btn" style="background: #6b7280;" onclick="afficherTout()">
-                            🗺️ Afficher Tout
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ÉVÉNEMENTS DE LA SEMAINE -->
+                <!-- CARTE AVEC FILTRES -->
                 <div class="card">
                     <div class="card-header">
                         <span class="card-icon">📅</span>
@@ -66,107 +42,197 @@
                     
 
                     
-                    <style>
-                        /* Style personnalisé pour le slider */
-                        #distanceFilter::-webkit-slider-thumb {
-                            -webkit-appearance: none;
-                            appearance: none;
-                            width: 24px;
-                            height: 24px;
-                            border-radius: 50%;
-                            background: white;
-                            cursor: pointer;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                            transition: transform 0.2s;
-                        }
-                        
-                        #distanceFilter::-webkit-slider-thumb:hover {
-                            transform: scale(1.2);
-                        }
-                        
-                        #distanceFilter::-moz-range-thumb {
-                            width: 24px;
-                            height: 24px;
-                            border-radius: 50%;
-                            background: white;
-                            cursor: pointer;
-                            border: none;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                            transition: transform 0.2s;
-                        }
-                        
-                        #distanceFilter::-moz-range-thumb:hover {
-                            transform: scale(1.2);
-                        }
-                        
-                        #distanceFilter::-webkit-slider-runnable-track {
-                            width: 100%;
-                            height: 8px;
-                            background: rgba(255,255,255,0.3);
-                            border-radius: 10px;
-                        }
-                        
-                        #distanceFilter::-moz-range-track {
-                            width: 100%;
-                            height: 8px;
-                            background: rgba(255,255,255,0.3);
-                            border-radius: 10px;
-                        }
-                    </style>
-                    
                     <!-- Carte interactive avec filtres -->
-                    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 20px; margin-bottom: 20px;">
+                    <div class="card">
+                    <div style="display: grid; grid-template-columns: 1fr 250px; gap: 20px; margin-bottom: 20px;">
                         <!-- Carte à gauche -->
                         <div id="mapEvenements" style="height: 600px; border-radius: 12px; display: none; z-index: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"></div>
                         
                         <!-- Filtres à droite -->
                         <div style="
                             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            padding: 20px;
+                            padding: 15px;
                             border-radius: 12px;
                             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
                             height: fit-content;
                         ">
                             <h3 style="
                                 color: white;
-                                margin: 0 0 15px 0;
-                                font-size: 1.1rem;
+                                margin: 0 0 12px 0;
+                                font-size: 1rem;
                                 display: flex;
                                 align-items: center;
                                 gap: 8px;
                             ">🗺️ Filtres</h3>
                             
-                            <!-- Filtre par catégorie -->
+                            <!-- Filtre par catégorie avec boutons -->
                             <div style="margin-bottom: 15px;">
-                                <label style="color: white; font-weight: 600; display: block; margin-bottom: 10px; font-size: 0.9rem;">
+                                <label style="color: white; font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.85rem;">
                                     📂 Catégorie
                                 </label>
-                                <select 
-                                    id="categorieFilterCarte"
-                                    style="
-                                        width: 100%;
-                                        padding: 10px;
-                                        border-radius: 8px;
-                                        border: none;
-                                        font-size: 0.9rem;
-                                        cursor: pointer;
-                                    "
-                                    onchange="filtrerCarteParcategorie()"
-                                >
-                                    <option value="tous">Tous</option>
-                                    <option value="Restaurant">🍽️ Restaurants</option>
-                                    <option value="🎭 Culture">🏛️ Musées & Culture</option>
-                                    <option value="⚽ Sport & Loisirs">🎮 Sport & Loisirs</option>
-                                    <option value="Café">☕ Cafés & Bars</option>
-                                    <option value="Parc">🌳 Parcs & Nature</option>
-                                </select>
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    <button 
+                                        class="btn-filtre-cat" 
+                                        data-categorie="tous"
+                                        onclick="filtrerCarteParcategorie('tous')"
+                                        style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            background: rgba(255,255,255,0.9);
+                                            color: #667eea;
+                                            border: 2px solid transparent;
+                                            border-radius: 6px;
+                                            cursor: pointer;
+                                            font-weight: 600;
+                                            font-size: 0.8rem;
+                                            transition: all 0.2s;
+                                            text-align: left;
+                                        "
+                                        onmouseover="this.style.background='white'; this.style.borderColor='white'"
+                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.9)'; this.style.borderColor='transparent'"
+                                    >
+                                        📋 Tous
+                                    </button>
+                                    <button 
+                                        class="btn-filtre-cat" 
+                                        data-categorie="Restaurant"
+                                        onclick="filtrerCarteParcategorie('Restaurant')"
+                                        style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            background: rgba(255,255,255,0.2);
+                                            color: white;
+                                            border: 2px solid transparent;
+                                            border-radius: 6px;
+                                            cursor: pointer;
+                                            font-weight: 600;
+                                            font-size: 0.8rem;
+                                            transition: all 0.2s;
+                                            text-align: left;
+                                        "
+                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
+                                    >
+                                        🍽️ Restaurants
+                                    </button>
+                                    <button 
+                                        class="btn-filtre-cat" 
+                                        data-categorie="Musée"
+                                        onclick="filtrerCarteParcategorie('Musée')"
+                                        style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            background: rgba(255,255,255,0.2);
+                                            color: white;
+                                            border: 2px solid transparent;
+                                            border-radius: 6px;
+                                            cursor: pointer;
+                                            font-weight: 600;
+                                            font-size: 0.8rem;
+                                            transition: all 0.2s;
+                                            text-align: left;
+                                        "
+                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
+                                    >
+                                        🏛️ Musées
+                                    </button>
+                                    <button 
+                                        class="btn-filtre-cat" 
+                                        data-categorie="Parc"
+                                        onclick="filtrerCarteParcategorie('Parc')"
+                                        style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            background: rgba(255,255,255,0.2);
+                                            color: white;
+                                            border: 2px solid transparent;
+                                            border-radius: 6px;
+                                            cursor: pointer;
+                                            font-weight: 600;
+                                            font-size: 0.8rem;
+                                            transition: all 0.2s;
+                                            text-align: left;
+                                        "
+                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
+                                    >
+                                        🌳 Parcs
+                                    </button>
+                                    <button 
+                                        class="btn-filtre-cat" 
+                                        data-categorie="Bar"
+                                        onclick="filtrerCarteParcategorie('Bar')"
+                                        style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            background: rgba(255,255,255,0.2);
+                                            color: white;
+                                            border: 2px solid transparent;
+                                            border-radius: 6px;
+                                            cursor: pointer;
+                                            font-weight: 600;
+                                            font-size: 0.8rem;
+                                            transition: all 0.2s;
+                                            text-align: left;
+                                        "
+                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
+                                    >
+                                        ☕ Bars
+                                    </button>
+                                    <button 
+                                        class="btn-filtre-cat" 
+                                        data-categorie="Santé"
+                                        onclick="filtrerCarteParcategorie('Santé')"
+                                        style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            background: rgba(255,255,255,0.2);
+                                            color: white;
+                                            border: 2px solid transparent;
+                                            border-radius: 6px;
+                                            cursor: pointer;
+                                            font-weight: 600;
+                                            font-size: 0.8rem;
+                                            transition: all 0.2s;
+                                            text-align: left;
+                                        "
+                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
+                                    >
+                                        💊 Santé
+                                    </button>
+                                    <button 
+                                        class="btn-filtre-cat" 
+                                        data-categorie="Alimentation"
+                                        onclick="filtrerCarteParcategorie('Alimentation')"
+                                        style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            background: rgba(255,255,255,0.2);
+                                            color: white;
+                                            border: 2px solid transparent;
+                                            border-radius: 6px;
+                                            cursor: pointer;
+                                            font-weight: 600;
+                                            font-size: 0.8rem;
+                                            transition: all 0.2s;
+                                            text-align: left;
+                                        "
+                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
+                                    >
+                                        🥖 Alimentation
+                                    </button>
+                                </div>
                             </div>
                             
                             <!-- Filtre distance -->
-                            <label style="color: white; font-weight: 600; display: block; margin-bottom: 10px; font-size: 0.9rem;">
+                            <label style="color: white; font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.85rem;">
                                 📍 Distance max
                             </label>
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
                                 <input 
                                     type="range" 
                                     id="distanceSliderCarte" 
@@ -179,12 +245,12 @@
                                 <span id="distanceLabelCarte" style="
                                     color: white;
                                     font-weight: 700;
-                                    min-width: 65px;
+                                    min-width: 55px;
                                     text-align: right;
                                     background: rgba(255,255,255,0.2);
-                                    padding: 6px 12px;
-                                    border-radius: 15px;
-                                    font-size: 0.9rem;
+                                    padding: 4px 10px;
+                                    border-radius: 12px;
+                                    font-size: 0.8rem;
                                 ">≤ 50 km</span>
                             </div>
                             
@@ -193,14 +259,14 @@
                                 onclick="chargerToutSurCarte()"
                                 style="
                                     width: 100%;
-                                    padding: 12px;
+                                    padding: 10px;
                                     background: rgba(255,255,255,0.9);
                                     color: #667eea;
                                     border: none;
                                     border-radius: 8px;
                                     cursor: pointer;
                                     font-weight: 600;
-                                    font-size: 0.95rem;
+                                    font-size: 0.85rem;
                                     transition: all 0.3s;
                                 "
                                 onmouseover="this.style.background='white'"
@@ -209,6 +275,21 @@
                                 🔄 Actualiser
                             </button>
                         </div>
+                    </div>
+                    </div>
+
+                <!-- ÉVÉNEMENTS DE LA SEMAINE -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📅</span>
+                        <h2 class="card-title">Événements de la Semaine</h2>
+                        <button type="button" class="btn btn-secondary" onclick="refreshEvenements()" style="margin-left: auto; width: 50px; height: 50px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;" title="Actualiser">
+                            🔄
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>📅 Semaine du :</strong> <span id="dateEvenements" style="font-weight: 700;"></span>
                     </div>
                     
                     <div id="evenementsListe" style="display: grid; gap: 15px;">

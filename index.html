@@ -2456,10 +2456,16 @@
                 try {
                     console.log('🗺️ Création de la carte...');
                     
-                    // Créer la carte Leaflet
+                    // Créer la carte Leaflet avec zoom activé
                     mapInstance = L.map('mapEvenements', {
                         center: [46.2276, 2.2137],
-                        zoom: 6
+                        zoom: 6,
+                        zoomControl: true,
+                        scrollWheelZoom: true,
+                        doubleClickZoom: true,
+                        boxZoom: true,
+                        keyboard: true,
+                        dragging: true
                     });
                     
                     // Ajouter les tuiles OpenStreetMap
@@ -2589,11 +2595,27 @@
         }
         
         // Filtrer la carte par catégorie
-        function filtrerCarteParcategorie() {
-            const select = document.getElementById('categorieFilterCarte');
-            if (!select) return;
+        function filtrerCarteParcategorie(categorie) {
+            // Si pas de catégorie fournie, utiliser "tous"
+            if (!categorie) categorie = 'tous';
             
-            const categorie = select.value;
+            // Mettre à jour les boutons actifs
+            const boutons = document.querySelectorAll('.btn-filtre-cat');
+            boutons.forEach(btn => {
+                const btnCat = btn.getAttribute('data-categorie');
+                if (btnCat === categorie) {
+                    btn.style.background = 'rgba(255,255,255,0.9)';
+                    btn.style.color = '#667eea';
+                    btn.style.borderColor = 'white';
+                    btn.classList.add('active');
+                } else {
+                    btn.style.background = 'rgba(255,255,255,0.2)';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = 'transparent';
+                    btn.classList.remove('active');
+                }
+            });
+            
             const giteInput = document.getElementById('decouvrir_gite');
             const gite = giteInput ? giteInput.value : 'Trévoux';
             
