@@ -1959,8 +1959,35 @@
         // Sélectionner un gîte pour "À Découvrir"
         function selectGiteDecouvrir(gite) {
             document.getElementById('decouvrir_gite').value = gite;
-            document.getElementById('selectedGiteDecouvrir').textContent = gite;
             document.getElementById('formDecouvrir').style.display = 'block';
+            
+            // Mettre à jour les styles des boutons de sélection de gîte
+            const boutonTrevoux = document.querySelector('[onclick*="selectGiteDecouvrir(\'Trévoux\')"]');
+            const boutonCouzon = document.querySelector('[onclick*="selectGiteDecouvrir(\'Couzon\')"]');
+            
+            if (gite === 'Trévoux') {
+                if (boutonTrevoux) {
+                    boutonTrevoux.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    boutonTrevoux.style.color = 'white';
+                }
+                if (boutonCouzon) {
+                    boutonCouzon.style.background = 'white';
+                    boutonCouzon.style.color = '#FF6B6B';
+                }
+            } else {
+                if (boutonCouzon) {
+                    boutonCouzon.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    boutonCouzon.style.color = 'white';
+                }
+                if (boutonTrevoux) {
+                    boutonTrevoux.style.background = 'white';
+                    boutonTrevoux.style.color = '#FF6B6B';
+                }
+            }
+            
+            // Masquer le message de gîte sélectionné
+            const alertInfo = document.querySelector('#formDecouvrir .alert.alert-info');
+            if (alertInfo) alertInfo.style.display = 'none';
             
             // Charger et afficher les activités
             chargerActivites();
