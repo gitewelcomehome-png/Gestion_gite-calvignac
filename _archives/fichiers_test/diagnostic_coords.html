@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnostic Coordonnées</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .activite { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+        .error { color: red; }
+        .ok { color: green; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnostic des coordonnées</h1>
+    <div id="results"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ3MTM5MzcsImV4cCI6MjA1MDI4OTkzN30.hG5v5Frc2mJZ10tGNXnA8FmtuzfWj4K8qoX0MXoZgW0';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function diagnostic() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>⏳ Chargement...</p>';
+
+            const { data, error } = await supabase
+                .from('activites_gites')
+                .select('*')
+                .limit(50);
+
+            if (error) {
+                results.innerHTML = `<p class="error">❌ Erreur: ${error.message}</p>`;
+                return;
+            }
+
+            let html = `<p class="ok">✅ ${data.length} activités chargées</p>`;
+            
+            // Analyser les coordonnées
+            const coordsMap = {};
+            const invalides = [];
+            
+            data.forEach((act, i) => {
+                const lat = act.latitude || act.lat;
+                const lng = act.longitude || act.lng;
+                
+                if (!lat || !lng) {
+                    invalides.push(act.nom);
+                } else {
+                    const key = `${lat},${lng}`;
+                    if (!coordsMap[key]) coordsMap[key] = [];
+                    coordsMap[key].push(act.nom);
+                }
+
+                if (i < 10) {
+                    html += `<div class="activite">
+                        <strong>${act.nom}</strong> (${act.gite})<br>
+                        latitude: ${act.latitude}<br>
+                        longitude: ${act.longitude}<br>
+                        lat: ${act.lat || 'undefined'}<br>
+                        lng: ${act.lng || 'undefined'}<br>
+                        categorie/type: ${act.categorie || act.type}
+                    </div>`;
+                }
+            });
+
+            // Trouver les coordonnées dupliquées
+            html += '<h2>📊 Analyse des coordonnées</h2>';
+            html += `<p>Activités sans coordonnées: ${invalides.length}</p>`;
+            
+            const duplicates = Object.entries(coordsMap).filter(([k, v]) => v.length > 10);
+            if (duplicates.length > 0) {
+                html += '<h3 class="warning">⚠️ Coordonnées en double (plus de 10 activités au même endroit):</h3>';
+                duplicates.forEach(([coords, noms]) => {
+                    html += `<p class="warning">${coords}: ${noms.length} activités<br>
+                    <small>${noms.slice(0, 5).join(', ')}${noms.length > 5 ? '...' : ''}</small></p>`;
+                });
+            }
+
+            results.innerHTML = html;
+        }
+
+        diagnostic();
+    </script>
+</body>
+</html>
