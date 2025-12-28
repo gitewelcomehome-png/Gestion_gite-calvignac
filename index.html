@@ -2619,6 +2619,18 @@
             const distance = document.getElementById('distanceSliderCarte')?.value || 50;
             const label = document.getElementById('distanceLabelCarte');
             if (label) label.textContent = `≤ ${distance} km`;
+            
+            // Filtrer les activités affichées sur la carte par distance
+            if (window.allActivites && window.allActivites.length > 0) {
+                const distanceMax = parseFloat(distance);
+                const activitesFiltrees = window.allActivites.filter(act => {
+                    const actDistance = parseFloat(act.distance) || 0;
+                    return actDistance <= distanceMax;
+                });
+                
+                console.log(`🔍 Filtrage par distance: ${activitesFiltrees.length}/${window.allActivites.length} activités ≤ ${distanceMax} km`);
+                afficherCarteEvenements(activitesFiltrees);
+            }
         }
         
         // Filtrer la carte par catégorie
