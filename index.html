@@ -2295,7 +2295,12 @@
         
         // Fonction pour filtrer les événements selon la distance
         function filtrerEvenements() {
-            const maxDistance = parseInt(document.getElementById('distanceFilter').value);
+            const distanceFilter = document.getElementById('distanceFilter');
+            if (!distanceFilter) {
+                console.log('⚠️ Élément distanceFilter non trouvé, affichage de tous les événements');
+                return;
+            }
+            const maxDistance = parseInt(distanceFilter.value);
             const evenementsFiltres = window.allEvenements.filter(e => e.distance <= maxDistance);
             
             const evenementsDiv = document.getElementById('evenementsListe');

@@ -532,10 +532,12 @@ async function chargerToutSurCarte() {
     
     showNotification('🗺️ Chargement de la carte...', 'info');
     
-    // 1. Charger UNIQUEMENT les événements
-    await rechercherEvenements();
+    // S'assurer que les activités sont chargées
+    if (!window.activitesParGite || Object.keys(window.activitesParGite).length === 0) {
+        await chargerActivites();
+    }
     
-    // 2. Récupérer les activités déjà chargées pour ce gîte
+    // Récupérer les activités déjà chargées pour ce gîte
     const activitesGite = window.activitesParGite[gite] || [];
     console.log(`📊 Activités ${gite} disponibles:`, activitesGite.length);
     
@@ -564,32 +566,12 @@ async function chargerToutSurCarte() {
     
     if (window.allActivites.length === 0) {
         showNotification('⚠️ Aucune activité avec coordonnées valides', 'warning');
-        // Afficher quand même les événements s'il y en a
-        if (window.allEvenements && window.allEvenements.length > 0) {
-            afficherCarteEvenements(window.allEvenements);
-        }
         return;
     }
     
-    // 3. Réinitialiser le filtre de distance à 50km pour tout voir
-    const distanceFilter = document.getElementById('distanceFilter');
-    if (distanceFilter) {
-        distanceFilter.value = 50;
-        updateDistanceLabel();
-    }
-    
-    // 4. Afficher TOUT sur la carte (événements + activités)
-    const toutSurCarte = [
-        ...(window.allEvenements || []),
-        ...(window.allActivites || [])
-    ];
-    
-    console.log(`🗺️ Affichage sur carte: ${toutSurCarte.length} points (${window.allEvenements?.length || 0} événements + ${window.allActivites?.length || 0} activités)`);
-    
-    afficherCarteEvenements(toutSurCarte);
-    filtrerEvenements();
-    
-    showNotification(`✓ ${window.allActivites.length} activités + ${window.allEvenements?.length || 0} événements chargés`, 'success');
+    // Afficher toutes les activités sur la carte
+    afficherCarteEvenements(window.allActivites);
+    showNotification(`✓ ${window.allActivites.length} activités affichées sur la carte`, 'success');
 }
 
 // ==================== OBTENIR COULEUR CATÉGORIE ====================
