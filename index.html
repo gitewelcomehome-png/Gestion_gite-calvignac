@@ -546,6 +546,11 @@
             if (modal) modal.style.display = 'none';
         }
         
+        function ouvrirPageValidation() {
+            // Ouvrir validation.html dans un nouvel onglet
+            window.open('validation.html', '_blank');
+        }
+        
         function autoSetDateFin() {
             const dateDebut = document.getElementById('dateDebut').value;
             if (dateDebut) {
