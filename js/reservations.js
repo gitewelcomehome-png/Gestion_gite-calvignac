@@ -8,8 +8,6 @@
 // ==========================================
 
 async function forceRefreshReservations() {
-    console.log('🔄 Actualisation forcée des réservations...');
-    
     // Afficher un indicateur de chargement
     const btn = event?.target || document.querySelector('button[onclick*="forceRefreshReservations"]');
     const originalText = btn ? btn.innerHTML : '';
@@ -20,16 +18,12 @@ async function forceRefreshReservations() {
     
     try {
         // Lancer synchronisation iCal en arrière-plan
-        console.log('📡 Lancement synchronisation iCal...');
         if (typeof syncAllCalendars === 'function') {
             syncAllCalendars().catch(err => console.error('Erreur sync iCal:', err));
         }
         
-        console.log('🗑️ Invalidation du cache...');
         invalidateCache('all');
-        console.log('📥 Rechargement des réservations...');
         await updateReservationsList();
-        console.log('✅ Actualisation terminée');
         showToast('Données actualisées + Sync iCal lancée', 'success');
     } catch (error) {
         console.error('❌ Erreur actualisation:', error);
@@ -169,14 +163,11 @@ async function deleteReservationById(id) {
 // ==========================================
 
 async function updateReservationsList() {
-    console.log('🔄 updateReservationsList: Début');
     const reservations = await getAllReservations();
-    console.log(`📊 Réservations récupérées: ${reservations.length}`);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     // Récupérer les validations de la société de ménage
-    console.log('🧹 Récupération cleaning_schedule...');
     const { data: cleaningSchedules } = await supabase
         .from('cleaning_schedule')
         .select('*');
@@ -283,12 +274,26 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
     let html = '';
     weekReservations.forEach(r => {
         const platformLogo = getPlatformLogo(r.site);
-        const dateMenage = calculerDateMenage(r, toutesReservations);
-        const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 600;">✓</span>' : '';
-        const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.9rem;">📱 ${r.telephone}</span>` : '';
         
         // Récupérer l'état de validation du ménage
         const validation = validationMap[r.id];
+        
+        // Utiliser la date de ménage depuis cleaning_schedule si elle existe, sinon calculer
+        let dateMenage;
+        if (validation?.scheduled_date) {
+            // Utiliser la date enregistrée
+            const [year, month, day] = validation.scheduled_date.split('-');
+            const menageDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            const joursComplets = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+            const timeOfDay = validation.time_of_day === 'morning' ? '07h00' : '12h00';
+            dateMenage = `${joursComplets[menageDate.getDay()]} ${formatDateShort(menageDate)} à ${timeOfDay}`;
+        } else {
+            // Calculer la date théorique
+            dateMenage = calculerDateMenage(r, toutesReservations);
+        }
+        
+        const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 600;">✓</span>' : '';
+        const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.9rem;">📱 ${r.telephone}</span>` : '';
         
         // Moment de la journée depuis cleaning_schedule
         let timeLabel = '';
