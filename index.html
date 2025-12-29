@@ -2760,25 +2760,18 @@
                 coords = await geocodeAddress(adresse, gite);
             }
             
-            // Créer le lien Google Maps
-            const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
-            
+            // Adapter aux colonnes existantes dans la table
             const activite = {
                 gite,
                 nom,
-                categorie,
-                type_restaurant: typeRestaurant || null,
-                description,
+                type: categorie,  // La table utilise 'type' pas 'categorie'
                 adresse,
-                distance: distance ? parseFloat(distance) : null,
+                distance_km: distance ? parseFloat(distance) : null,  // 'distance_km' pas 'distance'
                 website,
-                telephone,
-                note: note ? parseFloat(note) : null,
-                avis: avis ? parseInt(avis) : null,
-                prix: prixValue || null,
-                google_maps_link: googleMapsLink,
+                phone: telephone,  // 'phone' pas 'telephone'
                 latitude: coords.lat,
                 longitude: coords.lng
+                // Note: description, note, avis, prix, google_maps_link n'existent pas dans la table
             };
             
             try {
