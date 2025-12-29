@@ -463,6 +463,20 @@
                 // Générer HTML
                 const sortedWeeks = Object.keys(weeks).sort();
                 
+                // Compter ménages refusés pour notification
+                let nbRefused = 0;
+                Object.values(weeks).forEach(week => {
+                    nbRefused += week.trevoux.filter(m => m.status === 'refused').length;
+                    nbRefused += week.couzon.filter(m => m.status === 'refused').length;
+                });
+                
+                // Mettre à jour le titre de l'onglet
+                if (nbRefused > 0) {
+                    document.title = `(❌${nbRefused}) Validation Ménage`;
+                } else {
+                    document.title = 'Validation Ménage';
+                }
+                
                 if (sortedWeeks.length === 0) {
                     container.innerHTML = `
                         <div class="week-card">
@@ -474,16 +488,6 @@
                         </div>
                     `;
                     return;
-                }
-
-                // Compter ménages refusés pour notification
-                const nbRefused = menageData.filter(m => m.status === 'refused').length;
-                
-                // Mettre à jour le titre de l'onglet
-                if (nbRefused > 0) {
-                    document.title = `(❌${nbRefused}) Validation Ménage`;
-                } else {
-                    document.title = 'Validation Ménage';
                 }
 
                 let html = '';
