@@ -2370,11 +2370,14 @@
         // Fonction pour filtrer les événements selon la distance
         function filtrerEvenements() {
             const distanceFilter = document.getElementById('distanceFilter');
+            let maxDistance = 50; // Distance par défaut si pas de slider
+            
             if (!distanceFilter) {
-                console.log('⚠️ Élément distanceFilter non trouvé, affichage de tous les événements');
-                return;
+                console.log('⚠️ Élément distanceFilter non trouvé, affichage de tous les événements (≤50km)');
+            } else {
+                maxDistance = parseInt(distanceFilter.value);
             }
-            const maxDistance = parseInt(distanceFilter.value);
+            
             const evenementsFiltres = window.allEvenements.filter(e => e.distance <= maxDistance);
             
             const evenementsDiv = document.getElementById('evenementsListe');
