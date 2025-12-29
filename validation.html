@@ -453,8 +453,21 @@
 
         function displayNotifications(menages) {
             const banner = document.getElementById('notificationsBanner');
-            const refused = menages.filter(m => m.status === 'refused');
-            const validated = menages.filter(m => m.status === 'validated' && m.validated);
+            
+            // Calculer la date limite (dans 2 semaines)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const twoWeeksLater = new Date(today);
+            twoWeeksLater.setDate(today.getDate() + 14);
+            
+            // Filtrer les notifications des 2 prochaines semaines uniquement
+            const menagesDeuxSemaines = menages.filter(m => {
+                const menageDate = m.scheduledDate;
+                return menageDate >= today && menageDate <= twoWeeksLater;
+            });
+            
+            const refused = menagesDeuxSemaines.filter(m => m.status === 'refused');
+            const validated = menagesDeuxSemaines.filter(m => m.status === 'validated' && m.validated);
             
             const notifications = [...refused, ...validated];
             
@@ -465,7 +478,7 @@
             
             let html = '<div class="notifications-banner">';
             html += '<div class="banner-header">';
-            html += '<span>🔔 Notifications</span>';
+            html += '<span>🔔 Notifications (2 prochaines semaines)</span>';
             if (refused.length > 0) {
                 html += `<span class="notification-count">${refused.length}</span>`;
             }
