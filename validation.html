@@ -659,14 +659,25 @@
             }
             
             try {
+                // Récupérer les infos de la réservation pour le gite
+                const { data: reservation, error: resError } = await supabaseClient
+                    .from('reservations')
+                    .select('gite, date_fin, date_debut')
+                    .eq('id', reservationId)
+                    .single();
+                
+                if (resError) throw resError;
+                
                 const { error } = await supabaseClient
                     .from('cleaning_schedule')
                     .upsert({
                         reservation_id: reservationId,
+                        gite: reservation.gite,
                         scheduled_date: scheduledDate,
                         time_of_day: timeOfDay,
                         status: 'validated',
-                        validated_by_company: true
+                        validated_by_company: true,
+                        reservation_end: reservation.date_fin
                     }, { onConflict: 'reservation_id' });
                 
                 if (error) throw error;
@@ -690,15 +701,26 @@
             }
             
             try {
+                // Récupérer les infos de la réservation pour le gite
+                const { data: reservation, error: resError } = await supabaseClient
+                    .from('reservations')
+                    .select('gite, date_fin, date_debut')
+                    .eq('id', reservationId)
+                    .single();
+                
+                if (resError) throw resError;
+                
                 const { error } = await supabaseClient
                     .from('cleaning_schedule')
                     .upsert({
                         reservation_id: reservationId,
+                        gite: reservation.gite,
                         proposed_date: scheduledDate,
                         scheduled_date: scheduledDate,
                         time_of_day: timeOfDay,
                         status: 'modified',
-                        validated_by_company: false
+                        validated_by_company: false,
+                        reservation_end: reservation.date_fin
                     }, { onConflict: 'reservation_id' });
                 
                 if (error) throw error;
