@@ -692,6 +692,7 @@
                         time_of_day: timeOfDay,
                         status: 'validated',
                         validated_by_company: true,
+                        proposed_date: null,
                         reservation_end: reservation.date_fin
                     }, { onConflict: 'reservation_id' });
                 
