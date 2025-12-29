@@ -108,7 +108,8 @@ async function updateAdvancedStats(reservations) {
         });
         console.log('Meilleur mois - Données historiques utilisées');
     } else {
-        reservations.forEach(r => {
+        // Filtrer les réservations par l'année sélectionnée
+        reservations.filter(r => parseLocalDate(r.dateDebut).getFullYear() === selectedYear).forEach(r => {
             const date = parseLocalDate(r.dateDebut);
             const monthIndex = date.getMonth();
             moisCA[monthIndex] += r.montant;
