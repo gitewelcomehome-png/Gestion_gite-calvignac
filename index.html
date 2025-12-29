@@ -2493,6 +2493,9 @@
                 }
             }
             
+            // Filtrer les événements (ne garder que les activités permanentes, pas les événements)
+            evenements = evenements.filter(e => !e.type || e.type !== 'evenement');
+            
             // Filtrer les points avec des coordonnées valides
             let evenementsValides = evenements.filter(e => {
                 const isValid = e.lat && e.lng && !isNaN(e.lat) && !isNaN(e.lng) && 
