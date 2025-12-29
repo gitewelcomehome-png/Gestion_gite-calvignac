@@ -249,7 +249,6 @@
         <div class="nav-tabs">
             <button class="nav-tab" data-tab="gestion" style="display:none;">⚙️ Gestion iCal</button>
             <button class="nav-tab" data-tab="reservations">📝 Réservations</button>
-            <button class="nav-tab" data-tab="archives">📦 Archives</button>
             <button class="nav-tab" data-tab="statistiques">📊 Statistiques</button>
             <button class="nav-tab" data-tab="charges">💶 Charges & Rentabilité</button>
             <button class="nav-tab" data-tab="menage">
@@ -478,6 +477,15 @@
         // ==========================================
         // Functions: exportToExcel, exportAllData, importAllData, sauvegarderTout
         
+        // Gestion du menu Actions
+        function handleQuickAction(action) {
+            if (action === 'ical') {
+                switchTab('gestion');
+            } else if (action === 'archives') {
+                switchTab('archives');
+            }
+        }
+        
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
@@ -494,6 +502,7 @@
             }
             if (tabName === 'statistiques') {
                 if (typeof populateYearFilter === 'function') populateYearFilter();
+                if (typeof displayHistoricalYearsList === 'function') displayHistoricalYearsList();
                 if (typeof updateAllCharts === 'function') updateAllCharts();
             }
             if (tabName === 'archives' && typeof updateArchivesDisplay === 'function') {

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Check Status</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Vérification statuts ménages</h1>
+    <div id="result"></div>
+    <script>
+        const supabaseUrl = 'https://pnrwrqwvxkfvvqmhmkxj.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBucndycXd2eGtmdnZxbWhta3hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI3MTM1MDYsImV4cCI6MjA0ODI4OTUwNn0.rS8d-1okyQWcVIVTmf0OPL-rEkjQOr5zOuD-Rj71Gag';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        async function checkStatus() {
+            // Récupérer les réservations du 31/12/2025 au 02/01/2026
+            const { data: reservations, error: resError } = await supabase
+                .from('reservations')
+                .select('*')
+                .gte('date_arrivee', '2025-12-31')
+                .lte('date_arrivee', '2026-01-02');
+            
+            if (resError) {
+                document.getElementById('result').innerHTML = 'Erreur: ' + resError.message;
+                return;
+            }
+            
+            // Récupérer les ménages associés
+            const { data: cleanings, error: cleanError } = await supabase
+                .from('cleaning_schedule')
+                .select('*')
+                .in('reservation_id', reservations.map(r => r.id));
+            
+            if (cleanError) {
+                document.getElementById('result').innerHTML = 'Erreur: ' + cleanError.message;
+                return;
+            }
+            
+            let html = '<table border="1" cellpadding="8"><tr><th>Nom</th><th>Site</th><th>Arrivée</th><th>Résa ID</th><th>Ménage ID</th><th>Status</th><th>Date prévue</th><th>Time of day</th></tr>';
+            
+            reservations.forEach(resa => {
+                const cleaning = cleanings.find(c => c.reservation_id === resa.id);
+                html += `<tr>
+                    <td>${resa.nom_client}</td>
+                    <td>${resa.site}</td>
+                    <td>${resa.date_arrivee}</td>
+                    <td>${resa.id}</td>
+                    <td>${cleaning?.id || 'N/A'}</td>
+                    <td style="font-weight: bold; color: ${cleaning?.status === 'validated' ? 'green' : cleaning?.status === 'refused' ? 'red' : 'orange'}">${cleaning?.status || 'N/A'}</td>
+                    <td>${cleaning?.scheduled_date || 'N/A'}</td>
+                    <td>${cleaning?.time_of_day || 'N/A'}</td>
+                </tr>`;
+            });
+            
+            html += '</table>';
+            document.getElementById('result').innerHTML = html;
+            console.log('Reservations:', reservations);
+            console.log('Cleanings:', cleanings);
+        }
+        
+        checkStatus();
+    </script>
+</body>
+</html>
