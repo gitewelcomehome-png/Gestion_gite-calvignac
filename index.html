@@ -1266,7 +1266,13 @@
                 
                 const cleaningMap = {};
                 if (cleanings) {
-                    cleanings.forEach(c => cleaningMap[c.reservation_id] = c);
+                    console.log('🔍 Cleanings récupérés:', cleanings);
+                    cleanings.forEach(c => {
+                        if (c.status === 'pending_validation') {
+                            console.log('⏰ Proposition en attente pour résa', c.reservation_id, ':', c);
+                        }
+                        cleaningMap[c.reservation_id] = c;
+                    });
                 }
                 
                 // Filtrer futures réservations (6 mois)
@@ -1338,6 +1344,15 @@
                         status: cleaning?.status || 'pending',
                         nextArrivee: nextResa ? parseDateMenage(nextResa.date_debut || nextResa.dateDebut) : null
                     });
+                    
+                    if (cleaning?.status === 'pending_validation') {
+                        console.log('✨ Ménage en attente validation ajouté:', {
+                            nom: resa.nom,
+                            gite: resa.gite,
+                            date: dateMenage,
+                            status: cleaning.status
+                        });
+                    }
                 }
                 
                 // Organiser par semaine
