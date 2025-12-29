@@ -14,6 +14,7 @@
     <script src="js/shared-config.js"></script>
     <script src="js/shared-utils.js"></script>
     <script src="js/supabase-operations.js"></script>
+    <script src="js/dashboard.js"></script>
     <script src="js/sync-ical.js"></script>
     <script src="js/statistiques.js"></script>
     <script src="js/menage.js"></script>
@@ -211,6 +212,7 @@
     // Chargement dynamique des onglets
     document.addEventListener('DOMContentLoaded', function() {
         const tabFiles = {
+            'tab-dashboard': 'tabs/tab-dashboard.html',
             'tab-gestion': 'tabs/tab-gestion.html',
             'tab-reservations': 'tabs/tab-reservations.html',
             'tab-archives': 'tabs/tab-archives.html',
@@ -247,6 +249,7 @@
         
         <!-- Navigation -->
         <div class="nav-tabs">
+            <button class="nav-tab" data-tab="dashboard">📊 Tableau de Bord</button>
             <button class="nav-tab" data-tab="gestion" style="display:none;">⚙️ Gestion iCal</button>
             <button class="nav-tab" data-tab="reservations">📝 Réservations</button>
             <button class="nav-tab" data-tab="statistiques">📊 Statistiques</button>
@@ -261,6 +264,7 @@
         
 
         <!-- Conteneurs dynamiques pour chaque onglet -->
+        <div id="tab-dashboard" class="tab-content"></div>
         <div id="tab-gestion" class="tab-content"></div>
         <div id="tab-reservations" class="tab-content"></div>
         <div id="tab-archives" class="tab-content"></div>
@@ -497,6 +501,9 @@
             if (activeBtn) activeBtn.classList.add('active');
             
             // Initialiser les fonctionnalités spécifiques à chaque onglet
+            if (tabName === 'dashboard' && typeof refreshDashboard === 'function') {
+                refreshDashboard();
+            }
             if (tabName === 'reservations' && typeof updateReservationsList === 'function') {
                 updateReservationsList();
             }
@@ -4220,10 +4227,10 @@
             });
         });
         
-        // Activer l'onglet Réservations par défaut
-        const firstTab = document.querySelector('[data-tab="reservations"]');
+        // Activer l'onglet Dashboard par défaut
+        const firstTab = document.querySelector('[data-tab="dashboard"]');
         if (firstTab && typeof window.switchTab === 'function') {
-            window.switchTab('reservations');
+            window.switchTab('dashboard');
             firstTab.classList.add('active');
         }
     });
