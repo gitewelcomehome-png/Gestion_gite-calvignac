@@ -20,6 +20,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Supprimer le trigger s'il existe déjà, puis le recréer
+DROP TRIGGER IF EXISTS update_todos_updated_at ON todos;
 CREATE TRIGGER update_todos_updated_at
     BEFORE UPDATE ON todos
     FOR EACH ROW
