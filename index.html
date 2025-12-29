@@ -1929,6 +1929,8 @@
             document.getElementById('activite_categorie').value = '';
             document.getElementById('activite_description').value = '';
             document.getElementById('activite_adresse').value = '';
+            document.getElementById('activite_latitude').value = '';
+            document.getElementById('activite_longitude').value = '';
             document.getElementById('activite_distance').value = '';
             document.getElementById('activite_note').value = '';
             document.getElementById('activite_avis').value = '';
@@ -1938,6 +1940,29 @@
             document.getElementById('activite_type_resto').value = '';
             document.getElementById('typeRestoDiv').style.display = 'none';
             delete window.activiteEnCoursDeModification;
+        }
+        
+        // Obtenir les coordonnées GPS depuis l'adresse
+        async function obtenirCoordonnees() {
+            const adresse = document.getElementById('activite_adresse').value.trim();
+            
+            if (!adresse) {
+                showNotification('⚠️ Veuillez d\'abord entrer une adresse', 'warning');
+                return;
+            }
+            
+            showNotification('📍 Récupération des coordonnées GPS...', 'info');
+            
+            const gite = document.getElementById('decouvrir_gite').value;
+            const coords = await geocodeAddress(adresse, gite);
+            
+            if (coords && coords.lat && coords.lng) {
+                document.getElementById('activite_latitude').value = coords.lat;
+                document.getElementById('activite_longitude').value = coords.lng;
+                showNotification(`✓ Coordonnées trouvées : ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, 'success');
+            } else {
+                showNotification('❌ Impossible de trouver les coordonnées pour cette adresse', 'error');
+            }
         }
         
         // Charger les activités depuis Supabase
@@ -2714,15 +2739,26 @@
             const avis = document.getElementById('activite_avis').value;
             const prixValue = document.getElementById('activite_prix').value;
             const typeRestaurant = document.getElementById('activite_type_resto').value.trim();
+            const latitudeManuelle = document.getElementById('activite_latitude').value;
+            const longitudeManuelle = document.getElementById('activite_longitude').value;
             
             if (!gite || !nom || !categorie || !adresse) {
                 showNotification('⚠️ Remplissez les champs obligatoires (nom, catégorie, adresse)', 'warning');
                 return;
             }
             
-            // Géocoder l'adresse pour obtenir les coordonnées GPS
-            showNotification('📍 Géocodage de l\'adresse...', 'info');
-            const coords = await geocodeAddress(adresse, gite);
+            // Utiliser les coordonnées manuelles si fournies, sinon géocoder
+            let coords;
+            if (latitudeManuelle && longitudeManuelle) {
+                coords = {
+                    lat: parseFloat(latitudeManuelle),
+                    lng: parseFloat(longitudeManuelle)
+                };
+                showNotification('📍 Utilisation des coordonnées manuelles', 'info');
+            } else {
+                showNotification('📍 Géocodage de l\'adresse...', 'info');
+                coords = await geocodeAddress(adresse, gite);
+            }
             
             // Créer le lien Google Maps
             const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
