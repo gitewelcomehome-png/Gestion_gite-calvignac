@@ -476,6 +476,16 @@
                     return;
                 }
 
+                // Compter ménages refusés pour notification
+                const nbRefused = menageData.filter(m => m.status === 'refused').length;
+                
+                // Mettre à jour le titre de l'onglet
+                if (nbRefused > 0) {
+                    document.title = `(❌${nbRefused}) Validation Ménage`;
+                } else {
+                    document.title = 'Validation Ménage';
+                }
+
                 let html = '';
                 sortedWeeks.forEach(weekKey => {
                     const week = weeks[weekKey];
