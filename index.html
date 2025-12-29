@@ -1392,14 +1392,65 @@
                 const sorted = Object.keys(weeks).sort();
                 let html = '';
                 
-                // Compter propositions en attente pour notification
-                const nbPropositionsEnAttente = menages.filter(m => m.status === 'pending_validation').length;
+                // Afficher propositions en attente dans un bandeau
+                const propositionsEnAttente = menages.filter(m => m.status === 'pending_validation');
                 
                 // Mettre à jour le titre de l'onglet
-                if (nbPropositionsEnAttente > 0) {
-                    document.title = `(🔔${nbPropositionsEnAttente}) Gestion Gîte`;
+                if (propositionsEnAttente.length > 0) {
+                    document.title = `(🔔${propositionsEnAttente.length}) Gestion Gîte`;
                 } else {
                     document.title = 'Gestion Gîte';
+                }
+                
+                // Générer le bandeau des propositions
+                if (propositionsEnAttente.length > 0) {
+                    html += `
+                        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                <span style="font-size: 2rem;">⏰</span>
+                                <h3 style="margin: 0; color: #856404;">Propositions en attente de validation (${propositionsEnAttente.length})</h3>
+                            </div>
+                    `;
+                    
+                    propositionsEnAttente.forEach(m => {
+                        const dateDepartStr = parseDateMenage(m.reservation.date_fin || m.reservation.dateFin)?.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) || '';
+                        const momentIcon = m.moment === 'morning' ? '🌅 Matin' : '🌇 Après-midi';
+                        
+                        html += `
+                            <div style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 6px; border: 2px solid #ffc107;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <div style="font-weight: 700; font-size: 1.1rem; color: #333; margin-bottom: 5px;">
+                                            ${m.reservation.gite} - ${m.reservation.nom}
+                                        </div>
+                                        <div style="color: #666;">
+                                            📅 ${m.dateMenage.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })} ${momentIcon}
+                                        </div>
+                                        <div style="color: #666; font-size: 0.9rem;">
+                                            🚪 Départ: ${dateDepartStr}
+                                            ${m.nextArrivee ? `| 🔑 Entrée suivante: ${m.nextArrivee.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}` : ''}
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="btn btn-success" onclick="approuverProposition(${m.reservation.id})" style="white-space: nowrap;">
+                                            ✓ Approuver
+                                        </button>
+                                        <button class="btn btn-danger" onclick="afficherRefusForm(${m.reservation.id})" style="white-space: nowrap;">
+                                            ✗ Refuser
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="refus-form-${m.reservation.id}" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                                    <textarea id="refus-reason-${m.reservation.id}" placeholder="Raison du refus..." style="width: 100%; min-height: 60px; margin-bottom: 10px; padding: 8px; border: 2px solid #ddd; border-radius: 6px;"></textarea>
+                                    <button class="btn btn-danger" onclick="refuserProposition(${m.reservation.id})">
+                                        Envoyer le refus
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div>`;
                 }
                 
                 sorted.forEach(key => {
