@@ -343,6 +343,61 @@
         <span style="font-size: 1.5rem;">✓</span>
         <span id="toastMessage"></span>
     </div>
+
+    <!-- Modal Règles Ménage -->
+    <div id="rulesModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+                <span class="card-icon">📋</span>
+                <h2 class="card-title">Règles de Gestion du Planning Ménage</h2>
+            </div>
+            
+            <div style="padding: 20px;">
+                <h3 style="color: #3498db; margin-bottom: 15px;">🎯 Priorités</h3>
+                <ul style="line-height: 1.8; margin-bottom: 20px;">
+                    <li><strong>Priorité 1 :</strong> Ménages entre réservations (même jour)</li>
+                    <li><strong>Priorité 2 :</strong> Ménages de fin de période (départ sans nouvelle réservation)</li>
+                    <li><strong>Priorité 3 :</strong> Ménages d'entretien hebdomadaire si disponible</li>
+                </ul>
+
+                <h3 style="color: #e74c3c; margin-bottom: 15px;">⚠️ Contraintes</h3>
+                <ul style="line-height: 1.8; margin-bottom: 20px;">
+                    <li>Pas de ménage les dimanches (sauf urgence)</li>
+                    <li>Pas de ménage les jours fériés</li>
+                    <li>Temps minimum entre ménages : 2h</li>
+                    <li>Maximum 3 ménages par jour pour la société</li>
+                </ul>
+
+                <h3 style="color: #27ae60; margin-bottom: 15px;">✅ Validation Société</h3>
+                <ul style="line-height: 1.8; margin-bottom: 20px;">
+                    <li>La société de ménage doit valider chaque ménage dans les 24h</li>
+                    <li>En cas de refus, le ménage est marqué en rouge (à replanifier)</li>
+                    <li>Les ménages validés apparaissent en vert</li>
+                    <li>Les ménages en attente sont en orange</li>
+                </ul>
+
+                <h3 style="color: #9b59b6; margin-bottom: 15px;">⏰ Horaires</h3>
+                <ul style="line-height: 1.8; margin-bottom: 20px;">
+                    <li><strong>Matin :</strong> 8h - 12h (pour les départs matinaux)</li>
+                    <li><strong>Après-midi :</strong> 14h - 18h (cas général)</li>
+                    <li>Temps estimé par ménage : 2h</li>
+                </ul>
+
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
+                    <p style="margin: 0; color: #555;">
+                        <strong>💡 Note :</strong> Ces règles sont appliquées automatiquement lors de la génération du planning. 
+                        La société de ménage peut proposer des modifications via la page de validation.
+                    </p>
+                </div>
+
+                <div style="display: flex; justify-content: center; margin-top: 20px;">
+                    <button type="button" class="btn btn-primary" onclick="closeRulesModal()">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <script>
         // Les configurations et fonctions de base sont maintenant dans js/shared-config.js et js/shared-utils.js
