@@ -1373,12 +1373,15 @@
                         'juil': 6, 'août': 7, 'sept': 8, 'oct': 9, 'nov': 10, 'déc': 11
                     };
                     
-                    dateMenage = new Date(dateFin);
-                    dateMenage.setMonth(moisMap[mois]);
-                    dateMenage.setDate(parseInt(jour));
+                    const moisIndex = moisMap[mois];
+                    const jourInt = parseInt(jour);
                     
+                    // Créer la date avec l'année actuelle d'abord
+                    dateMenage = new Date(dateFin.getFullYear(), moisIndex, jourInt);
+                    
+                    // Si la date est avant la date de fin, c'est l'année suivante
                     if (dateMenage < dateFin) {
-                        dateMenage.setFullYear(dateMenage.getFullYear() + 1);
+                        dateMenage = new Date(dateFin.getFullYear() + 1, moisIndex, jourInt);
                     }
                     
                     calculatedTimeOfDay = (heure.startsWith('07') || heure.startsWith('08')) ? 'morning' : 'afternoon';
