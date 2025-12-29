@@ -615,16 +615,25 @@
                     allMenages.push(...week.couzon);
                 });
                 
-                // Compter ménages refusés pour notification
-                let nbRefused = 0;
+                // Compter nouveaux ménages (pending) et modifications en attente (pending_validation)
+                let nbNew = 0;
+                let nbModified = 0;
                 Object.values(weeks).forEach(week => {
-                    nbRefused += week.trevoux.filter(m => m.status === 'refused').length;
-                    nbRefused += week.couzon.filter(m => m.status === 'refused').length;
+                    nbNew += week.trevoux.filter(m => m.status === 'pending').length;
+                    nbNew += week.couzon.filter(m => m.status === 'pending').length;
+                    nbModified += week.trevoux.filter(m => m.status === 'pending_validation').length;
+                    nbModified += week.couzon.filter(m => m.status === 'pending_validation').length;
                 });
                 
-                // Mettre à jour le titre de l'onglet
-                if (nbRefused > 0) {
-                    document.title = `(❌${nbRefused}) Validation Ménage`;
+                // Mettre à jour le titre de l'onglet avec compteurs
+                const totalNotifications = nbNew + nbModified;
+                if (totalNotifications > 0) {
+                    let title = '(';
+                    if (nbNew > 0) title += `🆕${nbNew}`;
+                    if (nbNew > 0 && nbModified > 0) title += ' ';
+                    if (nbModified > 0) title += `✏️${nbModified}`;
+                    title += ') Validation Ménage';
+                    document.title = title;
                 } else {
                     document.title = 'Validation Ménage';
                 }
