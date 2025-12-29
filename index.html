@@ -1471,7 +1471,7 @@
                                 </button>
                             </div>
                             <div id="refus-form-${m.reservation.id}" style="display: none; margin-top: 10px;">
-                                <textarea id="refus-reason-${m.reservation.id}" placeholder="Raison du refus..." style="width: 100%; min-height: 60px; margin-bottom: 10px;"></textarea>
+                                <textarea id="refus-reason-${m.reservation.id}" placeholder="Raison du refus..." style="width: 100%; min-height: 60px; margin-bottom: 10px; padding: 8px; border: 2px solid #ddd; border-radius: 6px;"></textarea>
                                 <button class="btn btn-danger" onclick="refuserProposition(${m.reservation.id})">
                                     Envoyer le refus
                                 </button>
@@ -1498,9 +1498,13 @@
         }
         
         function afficherRefusForm(resaId) {
+            console.log('🔍 Affichage formulaire refus pour résa:', resaId);
             const form = document.getElementById(`refus-form-${resaId}`);
             if (form) {
                 form.style.display = 'block';
+                console.log('✅ Formulaire affiché');
+            } else {
+                console.error('❌ Formulaire refus-form-' + resaId + ' non trouvé dans le DOM');
             }
         }
         
