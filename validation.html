@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validation Planning Ménage - Société</title>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -256,6 +260,13 @@
     </div>
 
     <script>
+        // Configuration Supabase
+        const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
         // Fonction pour afficher un toast
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -271,44 +282,62 @@
             }, 3000);
         }
 
-        // Charger le planning depuis localStorage
-        function loadPlanning() {
+        // Charger le planning depuis Supabase
+        async function loadPlanning() {
             const container = document.getElementById('planningContainer');
             
-            // Récupérer les réservations
-            const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-            
-            if (reservations.length === 0) {
-                container.innerHTML = `
-                    <div class="card">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📭</div>
-                            <h2>Aucune réservation</h2>
-                            <p>Le planning de ménage apparaîtra ici dès qu'il y aura des réservations.</p>
+            try {
+                // Récupérer les réservations depuis Supabase
+                const { data: reservations, error } = await supabaseClient
+                    .from('reservations')
+                    .select('*')
+                    .order('date_debut', { ascending: true });
+                
+                if (error) {
+                    console.error('Erreur chargement réservations:', error);
+                    container.innerHTML = `
+                        <div class="card">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">❌</div>
+                                <h2>Erreur de chargement</h2>
+                                <p>${error.message}</p>
+                            </div>
                         </div>
-                    </div>
-                `;
-                return;
-            }
-
-            // Générer le planning de ménage
-            const menages = generateCleaningSchedule(reservations);
+                    `;
+                    return;
+                }
             
-            if (menages.length === 0) {
-                container.innerHTML = `
-                    <div class="card">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">✨</div>
-                            <h2>Aucun ménage à planifier</h2>
-                            <p>Tous les ménages sont à jour.</p>
+                if (!reservations || reservations.length === 0) {
+                    container.innerHTML = `
+                        <div class="card">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📭</div>
+                                <h2>Aucune réservation</h2>
+                                <p>Le planning de ménage apparaîtra ici dès qu'il y aura des réservations.</p>
+                            </div>
                         </div>
-                    </div>
-                `;
-                return;
-            }
+                    `;
+                    return;
+                }
 
-            // Grouper par semaine
-            const menagesParSemaine = groupByWeek(menages);
+                // Générer le planning de ménage
+                const menages = generateCleaningSchedule(reservations);
+            
+                if (menages.length === 0) {
+                    container.innerHTML = `
+                        <div class="card">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">✨</div>
+                                <h2>Aucun ménage à planifier</h2>
+                                <p>Tous les ménages sont à jour.</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Grouper par semaine
+                const menagesParSemaine = groupByWeek(menages);
             
             let html = '';
             Object.keys(menagesParSemaine).sort().forEach(weekKey => {
@@ -325,6 +354,18 @@
             });
             
             container.innerHTML = html;
+            } catch (error) {
+                console.error('Erreur globale:', error);
+                container.innerHTML = `
+                    <div class="card">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">❌</div>
+                            <h2>Erreur</h2>
+                            <p>${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         // Générer le planning de ménage
@@ -334,33 +375,28 @@
             today.setHours(0, 0, 0, 0);
 
             reservations.forEach(res => {
-                const dateFin = parseDate(res.dateFin);
+                // Convertir les dates au format Supabase (YYYY-MM-DD) en objets Date
+                const dateFin = new Date(res.date_fin);
                 
                 // Ne pas inclure les ménages passés
                 if (dateFin < today) return;
 
                 const menageDate = new Date(dateFin);
-                const status = res.cleaningStatus || 'attente';
-                const comments = res.cleaningComments || '';
+                const status = res.cleaning_status || 'attente';
+                const comments = res.cleaning_comments || '';
 
                 menages.push({
                     id: res.id,
                     date: menageDate,
                     gite: res.gite,
                     nomClient: res.nom,
-                    timeOfDay: res.cleaningTime || 'afternoon',
+                    timeOfDay: res.cleaning_time || 'afternoon',
                     status: status,
                     comments: comments
                 });
             });
 
             return menages.sort((a, b) => a.date - b.date);
-        }
-
-        // Parser une date locale
-        function parseDate(dateStr) {
-            const [day, month, year] = dateStr.split('/');
-            return new Date(year, month - 1, day);
         }
 
         // Grouper par semaine
@@ -513,15 +549,24 @@
             }
         }
 
-        // Mettre à jour le statut d'un ménage
-        function updateMenageStatus(id, status, comments) {
-            const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-            const index = reservations.findIndex(r => r.id === id);
-            
-            if (index !== -1) {
-                reservations[index].cleaningStatus = status;
-                reservations[index].cleaningComments = comments;
-                localStorage.setItem('reservations', JSON.stringify(reservations));
+        // Mettre à jour le statut d'un ménage dans Supabase
+        async function updateMenageStatus(id, status, comments) {
+            try {
+                const { error } = await supabaseClient
+                    .from('reservations')
+                    .update({
+                        cleaning_status: status,
+                        cleaning_comments: comments
+                    })
+                    .eq('id', id);
+                
+                if (error) {
+                    console.error('Erreur mise à jour:', error);
+                    showToast('❌ Erreur de mise à jour', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast('❌ Erreur', 'error');
             }
         }
 
