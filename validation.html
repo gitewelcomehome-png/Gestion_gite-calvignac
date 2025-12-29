@@ -519,45 +519,51 @@
             const dateInputId = `date-${reservation.id}`;
             const morningId = `morning-${reservation.id}`;
             const afternoonId = `afternoon-${reservation.id}`;
+            const formId = `form-${reservation.id}`;
 
             return `
                 <div class="menage-item ${validated ? 'validated' : status}">
                     ${statusBadge}
                     <div class="menage-date">
                         📅 ${scheduledDate.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
+                        ${timeOfDay === 'morning' ? '🌅 Matin' : '🌇 Après-midi'}
                     </div>
                     <div class="menage-client">👤 ${reservation.nom}</div>
                     <div class="menage-period">📍 ${periodText}</div>
                     
                     ${!validated ? `
-                        <div class="date-selector">
-                            <label>Choisir une date :</label>
-                            <input 
-                                type="date" 
-                                id="${dateInputId}"
-                                value="${scheduledDate.toISOString().split('T')[0]}"
-                                min="${minDate}"
-                                ${maxDate ? `max="${maxDate}"` : ''}
-                            />
-                        </div>
-                        
-                        <div class="time-selector">
-                            <button 
-                                type="button" 
-                                class="time-btn ${timeOfDay === 'morning' ? 'selected' : ''}" 
-                                id="${morningId}"
-                                onclick="selectTime(${reservation.id}, 'morning')"
-                            >
-                                🌅 Matin
-                            </button>
-                            <button 
-                                type="button" 
-                                class="time-btn ${timeOfDay === 'afternoon' ? 'selected' : ''}"
-                                id="${afternoonId}"
-                                onclick="selectTime(${reservation.id}, 'afternoon')"
-                            >
-                                🌇 Après-midi
-                            </button>
+                        <div id="${formId}" style="display: none;">
+                            <div class="date-selector">
+                                <label>Choisir une date :</label>
+                                <input 
+                                    type="date" 
+                                    id="${dateInputId}"
+                                    value="${scheduledDate.toISOString().split('T')[0]}"
+                                    min="${minDate}"
+                                    ${maxDate ? `max="${maxDate}"` : ''}
+                                    onchange="checkDateForMorning(${reservation.id}, '${minDate}')"
+                                    data-departure-date="${minDate}"
+                                />
+                            </div>
+                            
+                            <div class="time-selector">
+                                <button 
+                                    type="button" 
+                                    class="time-btn ${timeOfDay === 'morning' ? 'selected' : ''}" 
+                                    id="${morningId}"
+                                    onclick="selectTime(${reservation.id}, 'morning')"
+                                >
+                                    🌅 Matin
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="time-btn ${timeOfDay === 'afternoon' ? 'selected' : ''}"
+                                    id="${afternoonId}"
+                                    onclick="selectTime(${reservation.id}, 'afternoon')"
+                                >
+                                    🌇 Après-midi
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="actions">
@@ -565,8 +571,8 @@
                                 ✓ Valider
                             </button>
                             ${status === 'pending' ? `
-                                <button class="btn btn-propose" onclick="proposeMenage(${reservation.id})">
-                                    📝 Proposer
+                                <button class="btn btn-propose" onclick="showProposeForm(${reservation.id})">
+                                    📝 Proposer autre date
                                 </button>
                             ` : ''}
                         </div>
@@ -582,6 +588,38 @@
         }
 
         let selectedTimes = {};
+        
+        function showProposeForm(reservationId) {
+            const form = document.getElementById(`form-${reservationId}`);
+            if (form) {
+                form.style.display = 'block';
+                // Vérifier si on peut proposer le matin
+                const dateInput = document.getElementById(`date-${reservationId}`);
+                checkDateForMorning(reservationId, dateInput.dataset.departureDate);
+            }
+        }
+
+        function checkDateForMorning(reservationId, departureDate) {
+            const dateInput = document.getElementById(`date-${reservationId}`);
+            const morningBtn = document.getElementById(`morning-${reservationId}`);
+            const selectedDate = dateInput.value;
+            
+            // Si la date sélectionnée = date de départ, bloquer le matin
+            if (selectedDate === departureDate) {
+                morningBtn.disabled = true;
+                morningBtn.style.opacity = '0.5';
+                morningBtn.style.cursor = 'not-allowed';
+                morningBtn.title = 'Matin impossible le jour du départ';
+                
+                // Forcer l'après-midi
+                selectTime(reservationId, 'afternoon');
+            } else {
+                morningBtn.disabled = false;
+                morningBtn.style.opacity = '1';
+                morningBtn.style.cursor = 'pointer';
+                morningBtn.title = '';
+            }
+        }
         
         function selectTime(reservationId, timeOfDay) {
             selectedTimes[reservationId] = timeOfDay;
@@ -600,8 +638,20 @@
 
         async function validateMenage(reservationId) {
             const dateInput = document.getElementById(`date-${reservationId}`);
-            const scheduledDate = dateInput.value;
-            const timeOfDay = selectedTimes[reservationId] || 'afternoon';
+            
+            // Si le formulaire est caché, utiliser les valeurs actuelles
+            const form = document.getElementById(`form-${reservationId}`);
+            let scheduledDate, timeOfDay;
+            
+            if (form && form.style.display === 'none') {
+                // Valider la proposition actuelle
+                scheduledDate = dateInput.value;
+                timeOfDay = selectedTimes[reservationId] || 'afternoon';
+            } else {
+                // Utiliser les valeurs du formulaire
+                scheduledDate = dateInput.value;
+                timeOfDay = selectedTimes[reservationId] || 'afternoon';
+            }
             
             if (!scheduledDate) {
                 showToast('Veuillez sélectionner une date', 'error');
