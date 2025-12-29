@@ -755,20 +755,27 @@
                 
                 if (resError) throw resError;
                 
-                const { error } = await supabaseClient
-                    .from('cleaning_schedule')
-                    .upsert({
-                        reservation_id: reservationId,
-                        gite: reservation.gite,
-                        proposed_date: scheduledDate,
-                        scheduled_date: scheduledDate,
-                        time_of_day: timeOfDay,
-                        status: 'pending_client_validation',
-                        validated_by_company: false,
-                        reservation_end: reservation.date_fin
-                    }, { onConflict: 'reservation_id' });
+                const dataToPropose = {
+                    reservation_id: reservationId,
+                    gite: reservation.gite,
+                    scheduled_date: scheduledDate,
+                    time_of_day: timeOfDay,
+                    status: 'pending_client_validation',
+                    validated_by_company: false
+                };
                 
-                if (error) throw error;
+                console.log('📤 Données à proposer:', dataToPropose);
+                
+                const { data, error } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .upsert(dataToPropose, { onConflict: 'reservation_id' });
+                
+                if (error) {
+                    console.error('❌ Erreur Supabase:', error);
+                    throw error;
+                }
+                
+                console.log('✅ Proposition envoyée:', data);
                 
                 showToast('📝 Proposition envoyée !', 'success');
                 await loadPlanning();
