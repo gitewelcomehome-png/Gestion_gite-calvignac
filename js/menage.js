@@ -407,20 +407,35 @@ async function afficherPlanningParSemaine() {
     
     relevant.forEach(r => {
         const dateFin = parseLocalDate(r.dateFin);
-        
-        // Utiliser la date de cleaning_schedule si disponible (date calculée par genererPlanningMenage)
         const validation = validationMap[r.id];
-        let dateMenage;
         
-        if (validation && validation.scheduled_date) {
-            // Utiliser la date sauvegardée dans cleaning_schedule
-            dateMenage = new Date(validation.scheduled_date);
-        } else {
-            // Par défaut : jour du départ ou lendemain si dimanche
+        // Calculer la date avec les règles métier
+        const dateMenageFormatted = calculerDateMenage(r, relevant);
+        
+        // Parser le résultat "Lundi 23 déc. à 12h00"
+        const match = dateMenageFormatted.match(/(\w+) (\d+) (\w+)\. à (\d+h\d+)/);
+        let dateMenage;
+        let calculatedTimeOfDay;
+        
+        if (match) {
+            const [_, jourNom, jour, mois, heure] = match;
+            const moisMap = {
+                'janv': 0, 'févr': 1, 'mars': 2, 'avr': 3, 'mai': 4, 'juin': 5,
+                'juil': 6, 'août': 7, 'sept': 8, 'oct': 9, 'nov': 10, 'déc': 11
+            };
+            
             dateMenage = new Date(dateFin);
-            if (dateFin.getDay() === 0) { // Dimanche
-                dateMenage.setDate(dateMenage.getDate() + 1);
+            dateMenage.setMonth(moisMap[mois]);
+            dateMenage.setDate(parseInt(jour));
+            
+            if (dateMenage < dateFin) {
+                dateMenage.setFullYear(dateMenage.getFullYear() + 1);
             }
+            
+            calculatedTimeOfDay = (heure.startsWith('07') || heure.startsWith('08')) ? 'morning' : 'afternoon';
+        } else {
+            dateMenage = new Date(dateFin);
+            calculatedTimeOfDay = 'afternoon';
         }
         
         // Trouver le lundi de cette semaine
@@ -440,13 +455,31 @@ async function afficherPlanningParSemaine() {
             };
         }
         
+        // Sauvegarder si pas encore fait ou si status pending
+        if (!validation || validation.status === 'pending') {
+            const nextRes = reservations
+                .filter(next => next.gite === r.gite && parseLocalDate(next.date_debut) > dateFin)
+                .sort((a, b) => parseLocalDate(a.date_debut) - parseLocalDate(b.date_debut))[0];
+            
+            window.supabaseClient.from('cleaning_schedule').upsert({
+                reservation_id: r.id,
+                gite: r.gite,
+                scheduled_date: dateMenage.toISOString().split('T')[0],
+                time_of_day: calculatedTimeOfDay,
+                status: 'pending',
+                validated_by_company: false,
+                reservation_end: dateFin.toISOString().split('T')[0],
+                reservation_start_after: nextRes ? parseLocalDate(nextRes.date_debut).toISOString().split('T')[0] : null
+            }, { onConflict: 'reservation_id' }).then(() => {}).catch(err => console.error('Erreur upsert:', err));
+        }
+        
         const menageInfo = {
             reservation: r,
             dateMenage: dateMenage,
             validated: validation ? validation.validated_by_company : false,
             proposedDate: validation ? validation.proposed_date : null,
             status: validation ? validation.status : 'pending',
-            timeOfDay: validation ? validation.time_of_day : 'afternoon',
+            timeOfDay: validation ? validation.time_of_day : calculatedTimeOfDay,
             reservationEndBefore: dateFin,
             reservationStartAfter: null // À calculer
         };
