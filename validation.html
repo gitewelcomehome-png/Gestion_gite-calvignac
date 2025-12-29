@@ -587,9 +587,12 @@
                             </div>
                         </div>
                         
-                        <div class="actions">
+                        <div class="actions" id="actions-${reservation.id}">
+                            <button class="btn btn-validate" onclick="validateMenage(${reservation.id})" id="btn-validate-${reservation.id}">
+                                ✓ Valider
+                            </button>
                             <button class="btn btn-propose" onclick="showProposeForm(${reservation.id})">
-                                📝 Proposer une date
+                                📝 Modifier la date
                             </button>
                         </div>
                     ` : `
@@ -607,8 +610,15 @@
         
         function showProposeForm(reservationId) {
             const form = document.getElementById(`form-${reservationId}`);
+            const btnValidate = document.getElementById(`btn-validate-${reservationId}`);
+            const btnPropose = document.querySelector(`#actions-${reservationId} .btn-propose`);
+            
             if (form) {
                 form.style.display = 'block';
+                // Cacher le bouton Valider, changer le texte du bouton Modifier
+                if (btnValidate) btnValidate.style.display = 'none';
+                if (btnPropose) btnPropose.textContent = '📝 Proposer cette date';
+                
                 // Vérifier si on peut proposer le matin
                 const dateInput = document.getElementById(`date-${reservationId}`);
                 checkDateForMorning(reservationId, dateInput.dataset.departureDate);
