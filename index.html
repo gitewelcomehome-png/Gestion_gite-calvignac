@@ -1434,6 +1434,8 @@
             
             const momentIcon = m.moment === 'morning' ? '🌅 Matin' : '🌇 Après-midi';
             
+            const dateDepartStr = parseDateMenage(m.reservation.date_fin || m.reservation.dateFin)?.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) || 'Date inconnue';
+            
             return `
                 <div class="menage-card ${statusClass}">
                     <div class="menage-date-main">
@@ -1441,7 +1443,7 @@
                         ${momentIcon}
                     </div>
                     <div class="menage-info-row">
-                        <span>🚪 Départ: ${parseDateMenage(m.reservation.date_fin).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
+                        <span>🚪 Départ: ${dateDepartStr}</span>
                         ${m.nextArrivee ? `<span>🔑 Arrivée: ${m.nextArrivee.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>` : ''}
                     </div>
                     ${statusBadge}
