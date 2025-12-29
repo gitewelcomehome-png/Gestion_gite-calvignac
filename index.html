@@ -1942,6 +1942,26 @@
             delete window.activiteEnCoursDeModification;
         }
         
+        // Coordonnées des gîtes
+        const GITES_COORDS = {
+            'Trévoux': { lat: 45.9406, lng: 4.7715 },
+            'Couzon': { lat: 45.8383, lng: 4.8286 }
+        };
+        
+        // Calculer la distance entre deux points GPS (formule de Haversine)
+        function calculerDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Rayon de la Terre en km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+            return Math.round(distance * 100) / 100; // Arrondi à 2 décimales
+        }
+        
         // Obtenir les coordonnées GPS depuis l'adresse
         async function obtenirCoordonnees() {
             const adresse = document.getElementById('activite_adresse').value.trim();
@@ -1959,7 +1979,12 @@
             if (coords && coords.lat && coords.lng) {
                 document.getElementById('activite_latitude').value = coords.lat;
                 document.getElementById('activite_longitude').value = coords.lng;
-                showNotification(`✓ Coordonnées trouvées : ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, 'success');
+                
+                // Calculer et afficher les distances pour les deux gîtes
+                const distTrevoux = calculerDistance(GITES_COORDS['Trévoux'].lat, GITES_COORDS['Trévoux'].lng, coords.lat, coords.lng);
+                const distCouzon = calculerDistance(GITES_COORDS['Couzon'].lat, GITES_COORDS['Couzon'].lng, coords.lat, coords.lng);
+                
+                showNotification(`✓ Coordonnées trouvées : ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}\n📏 Distance Trévoux: ${distTrevoux}km | Couzon: ${distCouzon}km`, 'success');
             } else {
                 showNotification('❌ Impossible de trouver les coordonnées pour cette adresse', 'error');
             }
@@ -2760,18 +2785,16 @@
                 coords = await geocodeAddress(adresse, gite);
             }
             
-            // Adapter aux colonnes existantes dans la table
-            const activite = {
-                gite,
+            // Préparer les données de base (sans gite ni distance)
+            const activiteBase = {
                 nom,
                 type: categorie,  // La table utilise 'type' pas 'categorie'
                 adresse,
-                distance_km: distance ? parseFloat(distance) : null,  // 'distance_km' pas 'distance'
                 website,
                 phone: telephone,  // 'phone' pas 'telephone'
                 latitude: coords.lat,
                 longitude: coords.lng
-                // Note: description, note, avis, prix, google_maps_link n'existent pas dans la table
+                // Note: distance_km n'existe pas dans la table actuelle
             };
             
             try {
@@ -2779,7 +2802,7 @@
                 if (window.activiteEnCoursDeModification) {
                     const { data, error } = await supabase
                         .from('activites_gites')
-                        .update(activite)
+                        .update({ ...activiteBase, gite })
                         .eq('id', window.activiteEnCoursDeModification)
                         .select();
                     
@@ -2797,17 +2820,31 @@
                     await chargerActivites();
                     
                 } else {
-                    // Mode AJOUT normal
-                    activite.created_at = new Date().toISOString();
+                    // Mode AJOUT : Créer l'activité dans les DEUX gîtes avec distance calculée
+                    const activites = [];
+                    
+                    // Pour chaque gîte, calculer la distance et créer une entrée
+                    for (const [nomGite, coordsGite] of Object.entries(GITES_COORDS)) {
+                        const distanceCalculee = calculerDistance(
+                            coordsGite.lat, coordsGite.lng,
+                            coords.lat, coords.lng
+                        );
+                        
+                        activites.push({
+                            ...activiteBase,
+                            gite: nomGite
+                            // Distance calculée: ${distanceCalculee}km mais colonne n'existe pas
+                        });
+                    }
                     
                     const { data, error } = await supabase
                         .from('activites_gites')
-                        .insert([activite])
+                        .insert(activites)
                         .select();
                     
                     if (error) throw error;
                     
-                    showNotification('✓ Activité ajoutée avec succès !', 'success');
+                    showNotification(`✓ Activité ajoutée dans Trévoux et Couzon !`, 'success');
                     
                     // Fermer la modale après ajout
                     fermerModalActivite();
