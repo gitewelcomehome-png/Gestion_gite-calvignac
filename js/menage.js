@@ -199,6 +199,9 @@ function formatDateShort(date) {
  * Génère le planning de ménage complet pour les 2 prochains mois
  */
 async function genererPlanningMenage() {
+    // Charger d'abord les propositions en attente
+    await chargerPropositionsEnAttente();
+    
     const reservations = await getAllReservations();
     
     // Filtrer mois en cours + prochain
@@ -511,6 +514,143 @@ function generateCleaningItemHTML(menageInfo) {
 }
 
 /**
+ * Charge et affiche les propositions de dates en attente de validation
+ */
+async function chargerPropositionsEnAttente() {
+    try {
+        const { data: propositions, error } = await supabaseClient
+            .from('cleaning_schedule')
+            .select(`
+                *,
+                reservations (
+                    id,
+                    nom,
+                    gite,
+                    date_debut,
+                    date_fin
+                )
+            `)
+            .eq('status', 'pending_validation')
+            .order('scheduled_date', { ascending: true });
+        
+        if (error) throw error;
+        
+        const container = document.getElementById('propositionsEnAttente');
+        if (!container) return;
+        
+        if (!propositions || propositions.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+        
+        let html = `
+            <div class="card" style="background: #fff3cd; border-left: 4px solid #f39c12;">
+                <div class="card-header" style="background: transparent;">
+                    <span class="card-icon">⏰</span>
+                    <h3 class="card-title">Propositions en attente de validation (${propositions.length})</h3>
+                </div>
+                <div class="propositions-list">
+        `;
+        
+        propositions.forEach(prop => {
+            const scheduledDate = new Date(prop.scheduled_date);
+            const reservationEnd = new Date(prop.reservations.date_fin);
+            const timeDisplay = prop.time_of_day === 'morning' ? '🌅 Matin' : '🌇 Après-midi';
+            
+            html += `
+                <div class="proposition-item" style="background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">
+                                🏠 ${prop.gite} - ${prop.reservations.nom}
+                            </div>
+                            <div style="color: #666; font-size: 0.9rem;">
+                                Date proposée par l'entreprise: 
+                                <strong>${scheduledDate.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })} ${timeDisplay}</strong>
+                            </div>
+                            <div style="color: #999; font-size: 0.85rem; margin-top: 3px;">
+                                (Départ le ${reservationEnd.toLocaleDateString('fr-FR')})
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn" onclick="validerProposition(${prop.id})" style="background: #27ae60; color: white;">
+                                ✓ Valider
+                            </button>
+                            <button class="btn" onclick="refuserProposition(${prop.id})" style="background: #e74c3c; color: white;">
+                                ✗ Refuser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Erreur chargement propositions:', error);
+    }
+}
+
+/**
+ * Valide une proposition de date faite par l'entreprise
+ */
+async function validerProposition(cleaningId) {
+    if (!confirm('Valider cette proposition de date ?')) return;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('cleaning_schedule')
+            .update({
+                status: 'validated',
+                validated_by_company: true,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', cleaningId);
+        
+        if (error) throw error;
+        
+        showToast('✓ Proposition validée !', 'success');
+        await chargerPropositionsEnAttente();
+        await genererPlanningMenage();
+    } catch (error) {
+        console.error('Erreur validation:', error);
+        showToast('❌ Erreur: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Refuse une proposition et remet en statut pending
+ */
+async function refuserProposition(cleaningId) {
+    if (!confirm('Refuser cette proposition ? Le ménage repassera en attente.')) return;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('cleaning_schedule')
+            .update({
+                status: 'pending',
+                proposed_date: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', cleaningId);
+        
+        if (error) throw error;
+        
+        showToast('✓ Proposition refusée, statut remis en attente', 'info');
+        await chargerPropositionsEnAttente();
+        await genererPlanningMenage();
+    } catch (error) {
+        console.error('Erreur refus:', error);
+        showToast('❌ Erreur: ' + error.message, 'error');
+    }
+}
+
+/**
  * Télécharge le planning ménage en Excel
  */
 function telechargerPlanningMenage() {
@@ -534,3 +674,6 @@ window.genererPlanningMenage = genererPlanningMenage;
 window.afficherPlanningParSemaine = afficherPlanningParSemaine;
 window.generateCleaningItemHTML = generateCleaningItemHTML;
 window.telechargerPlanningMenage = telechargerPlanningMenage;
+window.chargerPropositionsEnAttente = chargerPropositionsEnAttente;
+window.validerProposition = validerProposition;
+window.refuserProposition = refuserProposition;

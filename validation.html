@@ -246,6 +246,17 @@
             color: #856404;
         }
 
+        .status-waiting {
+            background: #d1ecf1;
+            color: #0c5460;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         .status-validated {
             background: #d4edda;
             color: #155724;
@@ -505,6 +516,8 @@
             
             const statusBadge = validated ? 
                 '<span class="status-badge status-validated">✓ Validé</span>' :
+                status === 'pending_validation' ?
+                '<span class="status-badge status-waiting">⏰ En attente de validation</span>' :
                 status === 'modified' ?
                 '<span class="status-badge status-modified">📝 Modifié</span>' :
                 '<span class="status-badge status-pending">⏳ En attente</span>';
@@ -567,9 +580,11 @@
                         </div>
                         
                         <div class="actions">
-                            <button class="btn btn-validate" onclick="validateMenage(${reservation.id})">
-                                ✓ Valider
-                            </button>
+                            ${status !== 'pending_validation' ? `
+                                <button class="btn btn-validate" onclick="validateMenage(${reservation.id})">
+                                    ✓ Valider
+                                </button>
+                            ` : ''}
                             ${status === 'pending' ? `
                                 <button class="btn btn-propose" onclick="showProposeForm(${reservation.id})">
                                     📝 Proposer autre date
@@ -718,7 +733,7 @@
                         proposed_date: scheduledDate,
                         scheduled_date: scheduledDate,
                         time_of_day: timeOfDay,
-                        status: 'modified',
+                        status: 'pending_validation',
                         validated_by_company: false,
                         reservation_end: reservation.date_fin
                     }, { onConflict: 'reservation_id' });
