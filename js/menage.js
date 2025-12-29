@@ -405,8 +405,9 @@ async function afficherPlanningParSemaine() {
     const weeks = {};
     const weekStarts = new Set();
     
-    relevant.forEach(r => {
-        const dateFin = parseLocalDate(r.dateFin);
+    // Transformer en for..of pour utiliser await
+    for (const r of relevant) {
+        const dateFin = parseLocalDate(r.date_fin);
         const validation = validationMap[r.id];
         
         // Calculer la date avec les règles métier
@@ -458,19 +459,23 @@ async function afficherPlanningParSemaine() {
         // Sauvegarder si pas encore fait ou si status pending
         if (!validation || validation.status === 'pending') {
             const nextRes = reservations
-                .filter(next => next.gite === r.gite && parseLocalDate(next.date_debut) > dateFin)
+                .filter(next => next.gite === r.gite && parseLocalDate(next.date_fin) > dateFin)
                 .sort((a, b) => parseLocalDate(a.date_debut) - parseLocalDate(b.date_debut))[0];
             
-            window.supabaseClient.from('cleaning_schedule').upsert({
-                reservation_id: r.id,
-                gite: r.gite,
-                scheduled_date: dateMenage.toISOString().split('T')[0],
-                time_of_day: calculatedTimeOfDay,
-                status: 'pending',
-                validated_by_company: false,
-                reservation_end: dateFin.toISOString().split('T')[0],
-                reservation_start_after: nextRes ? parseLocalDate(nextRes.date_debut).toISOString().split('T')[0] : null
-            }, { onConflict: 'reservation_id' }).then(() => {}).catch(err => console.error('Erreur upsert:', err));
+            try {
+                await window.supabaseClient.from('cleaning_schedule').upsert({
+                    reservation_id: r.id,
+                    gite: r.gite,
+                    scheduled_date: dateMenage.toISOString().split('T')[0],
+                    time_of_day: calculatedTimeOfDay,
+                    status: 'pending',
+                    validated_by_company: false,
+                    reservation_end: dateFin.toISOString().split('T')[0],
+                    reservation_start_after: nextRes ? parseLocalDate(nextRes.date_fin).toISOString().split('T')[0] : null
+                }, { onConflict: 'reservation_id' });
+            } catch (err) {
+                console.error('Erreur upsert:', err);
+            }
         }
         
         const menageInfo = {
@@ -486,11 +491,11 @@ async function afficherPlanningParSemaine() {
         
         // Chercher la réservation suivante pour ce gîte
         const nextReservation = reservations
-            .filter(next => next.gite === r.gite && parseLocalDate(next.dateDebut) > dateFin)
-            .sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut))[0];
+            .filter(next => next.gite === r.gite && parseLocalDate(next.date_debut) > dateFin)
+            .sort((a, b) => parseLocalDate(a.date_debut) - parseLocalDate(b.date_debut))[0];
         
         if (nextReservation) {
-            menageInfo.reservationStartAfter = parseLocalDate(nextReservation.dateDebut);
+            menageInfo.reservationStartAfter = parseLocalDate(nextReservation.date_debut);
         }
         
         // Ajouter dans la bonne colonne
@@ -499,7 +504,7 @@ async function afficherPlanningParSemaine() {
         } else {
             weeks[weekKey].couzon.push(menageInfo);
         }
-    });
+    }
     
     // Trier les semaines
     const sortedWeeks = Array.from(weekStarts).sort();
