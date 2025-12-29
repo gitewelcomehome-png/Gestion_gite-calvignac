@@ -1300,15 +1300,24 @@
                             .sort((a, b) => parseDateMenage(a.date_debut || a.dateDebut) - parseDateMenage(b.date_debut || b.dateDebut))[0];
                         
                         // Sauvegarder automatiquement dans BD
+                        const scheduledDateStr = `${dateMenage.getFullYear()}-${String(dateMenage.getMonth() + 1).padStart(2, '0')}-${String(dateMenage.getDate()).padStart(2, '0')}`;
+                        const resaEndDate = parseDateMenage(resa.date_fin || resa.dateFin);
+                        const resaEndDateStr = `${resaEndDate.getFullYear()}-${String(resaEndDate.getMonth() + 1).padStart(2, '0')}-${String(resaEndDate.getDate()).padStart(2, '0')}`;
+                        let nextResaStartStr = null;
+                        if (nextResa) {
+                            const nextResaStart = parseDateMenage(nextResa.date_debut || nextResa.dateDebut);
+                            nextResaStartStr = `${nextResaStart.getFullYear()}-${String(nextResaStart.getMonth() + 1).padStart(2, '0')}-${String(nextResaStart.getDate()).padStart(2, '0')}`;
+                        }
+                        
                         await supabase.from('cleaning_schedule').upsert({
                             reservation_id: resa.id,
                             gite: resa.gite,
-                            scheduled_date: dateMenage.toISOString().split('T')[0],
+                            scheduled_date: scheduledDateStr,
                             time_of_day: moment,
                             status: 'pending',
                             validated_by_company: false,
-                            reservation_end: parseDateMenage(resa.date_fin || resa.dateFin).toISOString().split('T')[0],
-                            reservation_start_after: nextResa ? parseDateMenage(nextResa.date_debut || nextResa.dateDebut).toISOString().split('T')[0] : null
+                            reservation_end: resaEndDateStr,
+                            reservation_start_after: nextResaStartStr
                         }, { onConflict: 'reservation_id' });
                     } else {
                         // Utiliser la date enregistrée
@@ -1597,15 +1606,23 @@
                         .sort((a, b) => parseLocalDate(a.dateDebut || a.date_debut) - parseLocalDate(b.dateDebut || b.date_debut))[0];
                     
                     try {
+                        const scheduledDateStr = `${dateMenage.getFullYear()}-${String(dateMenage.getMonth() + 1).padStart(2, '0')}-${String(dateMenage.getDate()).padStart(2, '0')}`;
+                        const dateFinStr = `${dateFin.getFullYear()}-${String(dateFin.getMonth() + 1).padStart(2, '0')}-${String(dateFin.getDate()).padStart(2, '0')}`;
+                        let nextResStartStr = null;
+                        if (nextRes) {
+                            const nextResStart = parseLocalDate(nextRes.dateFin || nextRes.date_fin);
+                            nextResStartStr = `${nextResStart.getFullYear()}-${String(nextResStart.getMonth() + 1).padStart(2, '0')}-${String(nextResStart.getDate()).padStart(2, '0')}`;
+                        }
+                        
                         await supabase.from('cleaning_schedule').upsert({
                             reservation_id: r.id,
                             gite: r.gite,
-                            scheduled_date: dateMenage.toISOString().split('T')[0],
+                            scheduled_date: scheduledDateStr,
                             time_of_day: calculatedTimeOfDay,
                             status: 'pending',
                             validated_by_company: false,
-                            reservation_end: dateFin.toISOString().split('T')[0],
-                            reservation_start_after: nextRes ? parseLocalDate(nextRes.dateFin || nextRes.date_fin).toISOString().split('T')[0] : null
+                            reservation_end: dateFinStr,
+                            reservation_start_after: nextResStartStr
                         }, { onConflict: 'reservation_id' });
                     } catch (err) {
                         console.error('Erreur upsert:', err);
