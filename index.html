@@ -1526,7 +1526,15 @@
         }
         
         async function refuserProposition(resaId) {
-            const reason = document.getElementById(`refus-reason-${resaId}`).value.trim();
+            const reasonElement = document.getElementById(`refus-reason-${resaId}`);
+            
+            if (!reasonElement) {
+                console.error('❌ Élément refus-reason non trouvé pour résa', resaId);
+                showToast('Erreur: formulaire non trouvé', 'error');
+                return;
+            }
+            
+            const reason = reasonElement.value.trim();
             
             if (!reason) {
                 showToast('Veuillez indiquer une raison', 'error');
