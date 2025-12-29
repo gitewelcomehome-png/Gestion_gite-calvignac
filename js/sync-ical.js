@@ -52,43 +52,31 @@ async function syncAllCalendars() {
     try {
         addMessage('Synchronisation Couzon...', 'info');
         for (const [platform, url] of Object.entries(window.ICAL_CONFIGS.couzon)) {
-            if (!url) {
-                console.log(`⚠️ ${platform} Couzon: URL vide, ignoré`);
-                continue;
-            }
+            if (!url) continue;
             try {
-                console.log(`🔄 Début sync ${platform} Couzon:`, url);
                 addMessage(`  • ${platform}...`, 'info');
                 const result = await syncCalendar('Couzon', platform, url);
                 totalAdded += result.added;
                 totalSkipped += result.skipped;
                 addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées`, 'success');
-                console.log(`✅ ${platform} Couzon terminé:`, result);
             } catch (error) {
                 totalErrors++;
-                console.error(`❌ Erreur ${platform} Couzon:`, error);
-                addMessage(`  ✗ ${platform}: ${error.message || 'Erreur inconnue'}`, 'error');
+                addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
             }
         }
         
         addMessage('Synchronisation Trévoux...', 'info');
         for (const [platform, url] of Object.entries(window.ICAL_CONFIGS.trevoux)) {
-            if (!url) {
-                console.log(`⚠️ ${platform} Trévoux: URL vide, ignoré`);
-                continue;
-            }
+            if (!url) continue;
             try {
-                console.log(`🔄 Début sync ${platform} Trévoux:`, url);
                 addMessage(`  • ${platform}...`, 'info');
                 const result = await syncCalendar('Trévoux', platform, url);
                 totalAdded += result.added;
                 totalSkipped += result.skipped;
                 addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées`, 'success');
-                console.log(`✅ ${platform} Trévoux terminé:`, result);
             } catch (error) {
                 totalErrors++;
-                console.error(`❌ Erreur ${platform} Trévoux:`, error);
-                addMessage(`  ✗ ${platform}: ${error.message || 'Erreur inconnue'}`, 'error');
+                addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
             }
         }
         
@@ -153,21 +141,15 @@ async function syncAllCalendars() {
  * @returns {Promise<{added: number, skipped: number}>} - Résultat de la synchronisation
  */
 async function syncCalendar(gite, platform, url) {
-    console.log(`📥 syncCalendar appelé: gite=${gite}, platform=${platform}, url=${url}`);
-    
     // Utiliser corsproxy.io au lieu de allorigins (plus fiable)
     const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
     
     try {
-        console.log(`🌐 Fetch via proxy: ${proxyUrl}`);
         const response = await fetch(proxyUrl);
-        console.log(`📡 Response status: ${response.status} ${response.statusText}`);
         const text = await response.text();
-        console.log(`📝 iCal data length: ${text.length} chars`);
         const jcalData = ICAL.parse(text);
         const comp = new ICAL.Component(jcalData);
         const vevents = comp.getAllSubcomponents('vevent');
-        console.log(`📅 Nombre d'événements trouvés: ${vevents.length}`);
         
         let added = 0;
         let skipped = 0;
