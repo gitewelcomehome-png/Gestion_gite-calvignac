@@ -1,0 +1,234 @@
+
+🔍 AUDIT COMPLET DE LA BASE DE DONNÉES
+
+================================================================================
+
+📊 160 activités à vérifier
+
+⏱️  Temps estimé: 4 minutes
+
+================================================================================
+
+[1/160] (0%) Aquarium de Lyon (Couzon)
+   ✅ OK (écart: 0.71 km)
+[2/160] (1%) Aquarium du Grand Lyon (Couzon)
+   ✅ OK (écart: 1.00 km)
+[3/160] (1%) Bar de l'Église (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[4/160] (2%) Bar de l'Église (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[5/160] (3%) Basilique Notre-Dame de Fourvière (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[6/160] (3%) Bouchons Lyonnais Vieux-Lyon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[7/160] (4%) Boulangerie du Village (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[8/160] (4%) Boulangerie Le Pétrin (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[9/160] (5%) Brasserie de Neuville (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[10/160] (6%) Brasserie du Théâtre Villefranche (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[11/160] (6%) Carrefour Market Neuville (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[12/160] (7%) Château de Couzon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[13/160] (8%) Château de Couzon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[14/160] (8%) Église de Couzon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[15/160] (9%) Église de Couzon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[16/160] (9%) Espace Zoologique Saint-Martin-la-Plaine (Couzon)
+   ✅ OK (écart: 0.01 km)
+[17/160] (10%) Fourvière - Basilique et Site (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[18/160] (11%) iFLY Lyon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[19/160] (11%) Institut Lumière (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[20/160] (12%) L'Embarcadère Villefranche (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[21/160] (13%) La Petite Auberge (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[22/160] (13%) Le Bistronome en Beaujolais (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[23/160] (14%) Le P'tit Bouchon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[24/160] (14%) Les Terrasses de l'Abbaye (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[25/160] (15%) Lyon Centre Historique UNESCO (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[26/160] (16%) Monoprix Fontaines (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[27/160] (16%) Musée d'Ethnographie (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[28/160] (17%) Musée d'Ethnographie (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[29/160] (18%) Musée d'Histoire de Lyon - Gadagne (Couzon)
+   ✅ OK (écart: 0.90 km)
+[30/160] (18%) Musée de l'Histoire Locale (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[31/160] (19%) Musée de l'Histoire Locale (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[32/160] (19%) Musée de l'Imprimerie (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[33/160] (20%) Musée de la Sculpture (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[34/160] (21%) Musée de la Sculpture (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[35/160] (21%) Musée de la Vie Rurale (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[36/160] (22%) Musée de la Vie Rurale (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[37/160] (23%) Musée des Beaux-Arts de Lyon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[38/160] (23%) Musée des Confluences (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[39/160] (24%) Musée des Confluences (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[40/160] (24%) Musée des Métiers Anciens (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[41/160] (25%) Musée des Métiers Anciens (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[42/160] (26%) Musée du Terroir (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[43/160] (26%) Musée du Terroir (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[44/160] (27%) Musée Gallo-Romain Fourvière (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[45/160] (28%) Musée Local de Couzon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[46/160] (28%) Musée Local de Couzon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[47/160] (29%) Musée Lumière (Couzon)
+   ⚠️  Coordonnées imprécises (2.0 km)
+[48/160] (29%) Musée Paul-Dini Villefranche (Couzon)
+   ✅ OK (écart: 0.00 km)
+[49/160] (30%) Parc Animalier Château de Moidière (Couzon)
+   ✅ OK (écart: 0.00 km)
+[50/160] (31%) Parc Aventure (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[51/160] (31%) Parc Aventure (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[52/160] (32%) Parc de la Montagne (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[53/160] (33%) Parc de la Montagne (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[54/160] (33%) Parc de la Paix (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[55/160] (34%) Parc de la Paix (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[56/160] (34%) Parc de la Tête d'Or (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[57/160] (35%) Parc de la Tête d'Or Lyon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[58/160] (36%) Parc de Loisirs (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[59/160] (36%) Parc de Loisirs (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[60/160] (37%) Parc du Village (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[61/160] (38%) Parc du Village (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[62/160] (38%) Paul Bocuse - L'Auberge du Pont de Collonges (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[63/160] (39%) Pharmacie de Couzon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[64/160] (39%) Pharmacie de Neuville (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[65/160] (40%) Pharmacie Saint-Roch (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[66/160] (41%) Play In Park Lyon (Couzon)
+   ✅ OK (écart: 0.00 km)
+[67/160] (41%) Touroparc Zoo (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[68/160] (42%) Trampoline Park Lyon (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[69/160] (43%) Vanciaventure Accrobranche (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[70/160] (43%) Voie Bleue - Vélo Saône (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[71/160] (44%) Walibi Rhône-Alpes (Couzon)
+   ⚠️  COORDONNÉES INCORRECTES
+      Actuelles: 45.68, 5.36
+      Trouvées:  45.6218964, 5.5699253
+      Distance:  17.5 km
+[72/160] (44%) Zoo du Parc de la Tête d'Or (Couzon)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[73/160] (45%) Abbaye d'Ambronay (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[74/160] (46%) AccroDombes (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[75/160] (46%) AccroDombes (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[76/160] (47%) Aquarium du Grand Lyon (Trévoux)
+   ✅ OK (écart: 0.44 km)
+[77/160] (48%) Ars-sur-Formans - Basilique du Curé d'Ars (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[78/160] (48%) Base Nautique Plan d'Eau d'Anse (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[79/160] (49%) Basilique d'Ars-sur-Formans (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[80/160] (49%) Basilique Notre-Dame (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[81/160] (50%) Basilique Notre-Dame (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[82/160] (51%) Boulangerie Cormorèche (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[83/160] (51%) Brasserie du Théâtre (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[84/160] (52%) Brasserie du Théâtre Villefranche (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[85/160] (53%) Carrefour Market Trévoux (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[86/160] (53%) Carrefour Villefranche (Trévoux)
+   ⚠️  COORDONNÉES INCORRECTES
+      Actuelles: 45.9943, 4.7145
+      Trouvées:  45.8580882, 4.7121005
+      Distance:  15.1 km
+[87/160] (54%) Château de Trévoux (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[88/160] (54%) Château de Trévoux (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[89/160] (55%) Château de Trévoux (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[90/160] (56%) Château de Trévoux (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[91/160] (56%) Château-Fort de Trévoux (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[92/160] (57%) Cinéma La Passerelle (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[93/160] (57%) Cloître de Trévoux (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[94/160] (58%) Cloître de Trévoux (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[95/160] (59%) Église Saint-Symphorien (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[96/160] (59%) Espace Zoologique Saint-Martin-la-Plaine (Trévoux)
+   ✅ OK (écart: 0.00 km)
+[97/160] (60%) Golf de Mionnay (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[98/160] (61%) iFLY Lyon (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[99/160] (61%) Intermarché Trévoux (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[100/160] (62%) InZeBoat - Location bateaux sans permis (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[101/160] (63%) Juliénas (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[102/160] (63%) L'Embarcadère (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[103/160] (64%) L'Embarcadère Villefranche (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[104/160] (64%) La Chapelle Villefranche (Trévoux)
+   ✅ OK (écart: 0.00 km)
+[105/160] (65%) La Ferme du Poulet (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[106/160] (66%) La Taverne de Maître Kanter (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[107/160] (66%) Le Bistronome en Beaujolais (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[108/160] (67%) Le Bistronome en Beaujolais (Trévoux)
+   ❌ NON TROUVÉ - Lieu probablement fictif
+[109/160] (68%) Le Comptoir (Trévoux)

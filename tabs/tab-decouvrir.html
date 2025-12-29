@@ -421,10 +421,24 @@
                                     <textarea id="activite_description" class="form-control" rows="3" placeholder="Excellent restaurant traditionnel français avec terrasse..."></textarea>
                                 </div>
 
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète *</label>
+                                    <div style="display: flex; gap: 10px;">
+                                        <input type="text" id="activite_adresse" class="form-control" placeholder="12 Place du Marché, 01600 Trévoux" style="flex: 1;">
+                                        <button type="button" onclick="obtenirCoordonnees()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0 20px; cursor: pointer; font-weight: 600; white-space: nowrap; box-shadow: 0 2px 8px rgba(102,126,234,0.3);" title="Récupérer les coordonnées GPS">
+                                            📍 GPS
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                     <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète *</label>
-                                        <input type="text" id="activite_adresse" class="form-control" placeholder="12 Place du Marché, 01600 Trévoux">
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Latitude</label>
+                                        <input type="number" id="activite_latitude" class="form-control" step="0.000001" placeholder="45.9431600" readonly style="background: #f5f5f5;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Longitude</label>
+                                        <input type="number" id="activite_longitude" class="form-control" step="0.000001" placeholder="4.7747858" readonly style="background: #f5f5f5;">
                                     </div>
                                     <div>
                                         <label style="display: block; margin-bottom: 8px; font-weight: 600;">Distance (km)</label>
