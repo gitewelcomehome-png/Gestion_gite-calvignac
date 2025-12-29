@@ -228,32 +228,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Filtre distance -->
-                            <label style="color: white; font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.85rem;">
-                                📍 Distance max
-                            </label>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
-                                <input 
-                                    type="range" 
-                                    id="distanceSliderCarte" 
-                                    min="1" 
-                                    max="50" 
-                                    value="50" 
-                                    style="flex: 1; height: 6px; cursor: pointer;"
-                                    oninput="updateDistanceLabelCarte()"
-                                />
-                                <span id="distanceLabelCarte" style="
-                                    color: white;
-                                    font-weight: 700;
-                                    min-width: 55px;
-                                    text-align: right;
-                                    background: rgba(255,255,255,0.2);
-                                    padding: 4px 10px;
-                                    border-radius: 12px;
-                                    font-size: 0.8rem;
-                                ">≤ 50 km</span>
-                            </div>
-                            
                             <!-- Bouton actualiser -->
                             <button 
                                 onclick="chargerToutSurCarte(); return false;"
@@ -350,20 +324,7 @@
                     </div>
                 </div>
 
-                <!-- FORMULAIRE D'AJOUT MANUEL (CACHÉ PAR DÉFAUT) -->
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span class="card-icon">➕</span>
-                            <h2 class="card-title">Ajouter une Activité Personnalisée</h2>
-                        </div>
-                        <button type="button" onclick="toggleFormAjout()" style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(39,174,96,0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Ajouter une activité">
-                            ➕
-                        </button>
-                    </div>
-
-                    <!-- FORMULAIRE D'AJOUT (CACHÉ PAR DÉFAUT) -->
-                    <!-- MODALE MODIFICATION/AJOUT ACTIVITÉ -->
+                <!-- MODALE MODIFICATION/AJOUT ACTIVITÉ -->
                     <!-- Overlay semi-transparent -->
                     <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; cursor: pointer;" onclick="fermerModalActivite()"></div>
                     
