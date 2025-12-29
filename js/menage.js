@@ -396,7 +396,14 @@ async function afficherPlanningParSemaine() {
     const twoMonthsLater = new Date(now);
     twoMonthsLater.setMonth(now.getMonth() + 12);
     
-    const relevant = reservations.filter(r => {
+    // Adapter les réservations de snake_case à camelCase pour calculerDateMenage()
+    const reservationsAdapted = reservations.map(r => ({
+        ...r,
+        dateFin: r.date_fin,
+        dateDebut: r.date_debut
+    }));
+    
+    const relevant = reservationsAdapted.filter(r => {
         const dateFin = parseLocalDate(r.dateFin);
         return dateFin >= now && dateFin <= twoMonthsLater;
     });
