@@ -1193,6 +1193,77 @@ window.resetGiteInfosQuick = async function() {
 };
 
 
+// ==========================================
+// 🌍 GESTION MULTILANGUE (FR/EN)
+// ==========================================
+
+// Variable pour suivre la langue actuelle
+let currentLang = 'fr';
+let translationDone = false;
+
+// Fonction pour basculer entre FR et EN
+window.toggleLanguage = function() {
+    const newLang = currentLang === 'fr' ? 'en' : 'fr';
+    console.log('🌍 Toggle language from', currentLang, 'to', newLang);
+    
+    const btn = document.getElementById('btnToggleLang');
+    
+    // Liste de tous les champs à basculer
+    const fieldsToSwitch = [
+        'adresse', 'telephone', 'email',
+        'wifiSSID', 'wifiPassword', 'wifiDebit', 'wifiLocalisation', 'wifiZones',
+        'heureArrivee', 'arriveeTardive', 'parkingDispo', 'parkingPlaces', 'parkingDetails',
+        'typeAcces', 'codeAcces', 'instructionsCles', 'etage', 'ascenseur',
+        'itineraireLogement', 'premiereVisite',
+        'typeChauffage', 'climatisation', 'instructionsChauffage',
+        'equipementsCuisine', 'instructionsFour', 'instructionsPlaques',
+        'instructionsLaveVaisselle', 'instructionsLaveLinge', 'secheLinge',
+        'ferRepasser', 'lingeFourni', 'configurationChambres',
+        'instructionsTri', 'joursCollecte', 'decheterie',
+        'detecteurFumee', 'extincteur', 'coupureEau', 'disjoncteur', 'consignesUrgence',
+        'heureDepart', 'departTardif', 'checklistDepart', 'restitutionCles',
+        'supermarche', 'boulangerie', 'pharmacie', 'medecin', 'hopital', 'restaurants',
+        'transportsCommuns', 'tourisme', 'activites', 'activitesEnfants', 'randonnees', 'plages',
+        'reglesAnimaux', 'reglesFumeur', 'reglesCalme', 'reglesEvenements', 'autresRegles',
+        'autresInfos', 'contactsLocaux', 'recommandations', 'messageClient'
+    ];
+    
+    // SWAP des valeurs entre les champs FR et EN
+    fieldsToSwitch.forEach(field => {
+        const frField = document.getElementById(`infos_${field}`);
+        const enField = document.getElementById(`infos_${field}_en`);
+        
+        if (frField && enField) {
+            const temp = frField.value;
+            frField.value = enField.value;
+            enField.value = temp;
+        }
+    });
+    
+    // Mettre à jour la langue actuelle
+    currentLang = newLang;
+    
+    // Mettre à jour le bouton
+    const flagIcon = document.getElementById('flagIcon');
+    if (btn && flagIcon) {
+        if (currentLang === 'fr') {
+            flagIcon.src = 'https://flagcdn.com/w80/fr.png';
+            flagIcon.alt = 'FR';
+            btn.title = 'Switch to English';
+            if (typeof showNotification === 'function') {
+                showNotification('🇫🇷 Mode français activé', 'info');
+            }
+        } else {
+            flagIcon.src = 'https://flagcdn.com/w80/gb.png';
+            flagIcon.alt = 'EN';
+            btn.title = 'Passer en français';
+            if (typeof showNotification === 'function') {
+                showNotification('🇬🇧 English mode activated', 'info');
+            }
+        }
+    }
+};
+
 // Exports supplémentaires
 window.sauvegarderDonneesInfos = sauvegarderDonneesInfos;
 window.chargerDonneesInfos = chargerDonneesInfos;
