@@ -1,9 +1,25 @@
-            <div class="card">
+            <!-- Réservations archivées -->
+            <div class="card" style="margin-bottom: 30px;">
                 <div class="card-header">
                     <span class="card-icon">📦</span>
-                    <h2 class="card-title">Archives</h2>
+                    <h2 class="card-title">Réservations Archivées</h2>
                 </div>
                 <div id="archivesSection">
                     <p style="text-align: center; color: #999; padding: 40px;">Aucune archive</p>
+                </div>
+            </div>
+
+            <!-- Tâches archivées -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">✅</span>
+                    <h2 class="card-title">Tâches Terminées</h2>
+                    <button onclick="clearArchivedTodos()" 
+                            style="background: rgba(231, 76, 60, 0.1); border: 1px solid #E74C3C; color: #E74C3C; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">
+                        🗑️ Vider l'archive
+                    </button>
+                </div>
+                <div id="archivedTodosSection" style="padding: 20px;">
+                    <p style="text-align: center; color: #999; padding: 40px;">Aucune tâche archivée</p>
                 </div>
             </div>

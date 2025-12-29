@@ -512,8 +512,9 @@
                 if (typeof displayHistoricalYearsList === 'function') displayHistoricalYearsList();
                 if (typeof updateStats === 'function') updateStats();
             }
-            if (tabName === 'archives' && typeof updateArchivesDisplay === 'function') {
-                updateArchivesDisplay();
+            if (tabName === 'archives') {
+                if (typeof updateArchivesDisplay === 'function') updateArchivesDisplay();
+                if (typeof updateArchivedTodos === 'function') updateArchivedTodos();
             }
             if (tabName === 'charges' && typeof updateChargesDisplay === 'function') {
                 updateChargesDisplay();

@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS todos (
     description TEXT,
     gite VARCHAR(50), -- 'Trévoux', 'Couzon', ou NULL pour les deux
     completed BOOLEAN DEFAULT FALSE,
+    archived_at TIMESTAMP WITH TIME ZONE, -- Date d'archivage (NULL = actif)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -27,4 +28,5 @@ CREATE TRIGGER update_todos_updated_at
 -- Index pour optimiser les requêtes
 CREATE INDEX IF NOT EXISTS idx_todos_category ON todos(category);
 CREATE INDEX IF NOT EXISTS idx_todos_completed ON todos(completed);
+CREATE INDEX IF NOT EXISTS idx_todos_archived ON todos(archived_at);
 CREATE INDEX IF NOT EXISTS idx_todos_gite ON todos(gite);

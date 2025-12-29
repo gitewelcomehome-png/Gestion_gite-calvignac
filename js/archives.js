@@ -43,6 +43,113 @@ async function updateArchivesDisplay() {
     section.innerHTML = html;
 }
 
+// ==========================================
+// ✅ AFFICHAGE DES TODOS ARCHIVÉS
+// ==========================================
+
+async function updateArchivedTodos() {
+    const { data: todos } = await supabase
+        .from('todos')
+        .select('*')
+        .not('archived_at', 'is', null)
+        .order('archived_at', { ascending: false });
+    
+    const section = document.getElementById('archivedTodosSection');
+    
+    if (!todos || todos.length === 0) {
+        section.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune tâche archivée</p>';
+        return;
+    }
+    
+    // Grouper par catégorie
+    const byCategory = {
+        'reservations': { label: '📋 Actions Réservations', color: '#667eea', items: [] },
+        'travaux': { label: '🔧 Travaux & Maintenance', color: '#F39C12', items: [] },
+        'achats': { label: '🛒 Achats & Courses', color: '#27AE60', items: [] }
+    };
+    
+    todos.forEach(todo => {
+        if (byCategory[todo.category]) {
+            byCategory[todo.category].items.push(todo);
+        }
+    });
+    
+    let html = '';
+    
+    Object.entries(byCategory).forEach(([category, group]) => {
+        if (group.items.length === 0) return;
+        
+        html += `
+            <div style="margin-bottom: 30px;">
+                <h4 style="color: ${group.color}; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    ${group.label}
+                    <span style="background: ${group.color}; color: white; padding: 2px 10px; border-radius: 12px; font-size: 0.8rem;">${group.items.length}</span>
+                </h4>
+        `;
+        
+        group.items.forEach(todo => {
+            const archivedDate = new Date(todo.archived_at);
+            html += `
+                <div style="border-left: 4px solid ${group.color}; padding: 15px; margin-bottom: 10px; background: #f8f9fa; border-radius: 8px; opacity: 0.8;">
+                    <div style="display: flex; justify-content: between; align-items: start; gap: 15px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; text-decoration: line-through; color: #666;">${todo.title}</div>
+                            ${todo.description ? `<div style="font-size: 0.85rem; color: #888; margin-top: 4px;">${todo.description}</div>` : ''}
+                            ${todo.gite ? `<span style="background: ${todo.gite === 'Trévoux' ? '#667eea' : '#f093fb'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; display: inline-block; margin-top: 6px;">${todo.gite}</span>` : ''}
+                            <div style="font-size: 0.75rem; color: #999; margin-top: 8px;">
+                                ✅ Terminé le ${formatDate(archivedDate)}
+                            </div>
+                        </div>
+                        <button onclick="restoreTodo(${todo.id})" 
+                                style="background: #3498DB; border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; white-space: nowrap;"
+                                title="Restaurer">
+                            ↶ Restaurer
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+    });
+    
+    section.innerHTML = html;
+}
+
+async function restoreTodo(id) {
+    const { error } = await supabase
+        .from('todos')
+        .update({ completed: false, archived_at: null })
+        .eq('id', id);
+    
+    if (error) {
+        console.error('Erreur restauration todo:', error);
+        alert('Erreur lors de la restauration');
+        return;
+    }
+    
+    await updateArchivedTodos();
+}
+
+async function clearArchivedTodos() {
+    if (!confirm('Supprimer définitivement toutes les tâches archivées ?\n\nCette action est irréversible.')) {
+        return;
+    }
+    
+    const { error } = await supabase
+        .from('todos')
+        .delete()
+        .not('archived_at', 'is', null);
+    
+    if (error) {
+        console.error('Erreur suppression todos archivés:', error);
+        alert('Erreur lors de la suppression');
+        return;
+    }
+    
+    await updateArchivedTodos();
+}
+
 function getPlatformBadgeClass(platform) {
     const normalized = platform.toLowerCase();
     if (normalized.includes('airbnb')) return 'airbnb';

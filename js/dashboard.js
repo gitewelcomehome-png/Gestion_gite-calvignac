@@ -139,11 +139,12 @@ async function updateDashboardStats() {
     
     const cleaningsCount = cleanings ? cleanings.length : 0;
     
-    // Actions en attente (todos non complétés)
+    // Actions en attente (todos non complétés et non archivés)
     const { data: todos } = await supabase
         .from('todos')
         .select('*')
-        .eq('completed', false);
+        .eq('completed', false)
+        .is('archived_at', null);
     
     const pendingCount = todos ? todos.length : 0;
     
@@ -299,6 +300,7 @@ async function updateTodoList(category) {
         .from('todos')
         .select('*')
         .eq('category', category)
+        .is('archived_at', null) // Seulement les tâches non archivées
         .order('created_at', { ascending: true });
     
     const container = document.getElementById(`todo-${category}`);
@@ -366,9 +368,14 @@ async function addTodoItem(category) {
 }
 
 async function toggleTodo(id, completed) {
+    // Si coché, archiver la tâche au lieu de simplement marquer comme complétée
+    const updateData = completed ? 
+        { completed: true, archived_at: new Date().toISOString() } : 
+        { completed: false, archived_at: null };
+    
     const { error } = await supabase
         .from('todos')
-        .update({ completed: completed })
+        .update(updateData)
         .eq('id', id);
     
     if (error) {
@@ -376,6 +383,11 @@ async function toggleTodo(id, completed) {
         return;
     }
     
+    // Recharger la liste correspondante
+    const todo = await supabase.from('todos').select('category').eq('id', id).single();
+    if (todo.data) {
+        await updateTodoList(todo.data.category);
+    }
     await updateDashboardStats(); // Mettre à jour le compteur
 }
 
