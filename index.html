@@ -2252,7 +2252,176 @@
             const dateRangeStr = `${startOfWeek.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} au ${endOfWeek.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
             document.getElementById('dateEvenements').textContent = dateRangeStr;
             
-            // Événements avec coordonnées pour la carte
+            // Fonction pour générer les événements de la semaine en cours
+            function genererEvenementsSemaine(gite) {
+                const evenements = [];
+                const joursSemaine = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+                
+                // Événements récurrents selon le gîte
+                if (gite === 'Trévoux') {
+                    // Marché de Trévoux - tous les samedis
+                    const samedi = new Date(startOfWeek);
+                    samedi.setDate(startOfWeek.getDate() + 5); // Samedi
+                    evenements.push({
+                        titre: 'Marché de Trévoux',
+                        date: `Samedi ${samedi.getDate()}/${samedi.getMonth() + 1} - 8h à 13h`,
+                        dateDebut: samedi,
+                        dateFin: new Date(samedi.getTime() + 5 * 60 * 60 * 1000), // +5h
+                        lieu: 'Place de la Terrasse, Trévoux',
+                        description: 'Marché hebdomadaire avec produits locaux, fromages, fruits et légumes frais',
+                        lien: 'https://www.ville-trevoux.fr',
+                        icone: '🛒',
+                        distance: 0.5,
+                        lat: 45.9394,
+                        lng: 4.7728,
+                        type: 'evenement'
+                    });
+                    
+                    // Visite du Château - mercredi au dimanche
+                    for (let i = 3; i <= 6; i++) { // Mercredi à samedi
+                        const jour = new Date(startOfWeek);
+                        jour.setDate(startOfWeek.getDate() + i - 1);
+                        if (i === 3) { // Ajouter seulement une fois
+                            evenements.push({
+                                titre: 'Visite du Château-Fort',
+                                date: `Mercredi au dimanche - 14h à 18h`,
+                                dateDebut: jour,
+                                dateFin: endOfWeek,
+                                lieu: 'Montée du Château, Trévoux',
+                                description: 'Monument Historique classé en 1913. Découvrez l\'histoire du Parlement de Dombes',
+                                lien: 'https://www.ain-tourisme.com',
+                                icone: '🏰',
+                                distance: 1,
+                                lat: 45.9404,
+                                lng: 4.7738,
+                                type: 'evenement'
+                            });
+                        }
+                    }
+                    
+                    // Concert à l'église - vendredi soir
+                    const vendredi = new Date(startOfWeek);
+                    vendredi.setDate(startOfWeek.getDate() + 4);
+                    evenements.push({
+                        titre: 'Concert à l\'Église Saint-Symphorien',
+                        date: `Vendredi ${vendredi.getDate()}/${vendredi.getMonth() + 1} - 20h30`,
+                        dateDebut: vendredi,
+                        dateFin: new Date(vendredi.getTime() + 2 * 60 * 60 * 1000),
+                        lieu: 'Église Saint-Symphorien, Trévoux',
+                        description: 'Concert de musique classique avec l\'ensemble Les Cordes de l\'Ain',
+                        lien: 'https://www.ville-trevoux.fr/culture',
+                        icone: '🎵',
+                        distance: 0.8,
+                        lat: 45.9410,
+                        lng: 4.7745,
+                        type: 'evenement'
+                    });
+                    
+                    // Atelier créatif - mercredi après-midi
+                    const mercredi = new Date(startOfWeek);
+                    mercredi.setDate(startOfWeek.getDate() + 2);
+                    evenements.push({
+                        titre: 'Atelier Créatif Enfants',
+                        date: `Mercredi ${mercredi.getDate()}/${mercredi.getMonth() + 1} - 14h à 16h`,
+                        dateDebut: mercredi,
+                        dateFin: new Date(mercredi.getTime() + 2 * 60 * 60 * 1000),
+                        lieu: 'Médiathèque de Trévoux',
+                        description: 'Atelier de création manuelle pour les 6-12 ans. Inscription gratuite.',
+                        lien: 'https://www.mediatheque-trevoux.fr',
+                        icone: '🎨',
+                        distance: 0.6,
+                        lat: 45.9398,
+                        lng: 4.7720,
+                        type: 'evenement'
+                    });
+                    
+                } else if (gite === 'Couzon') {
+                    // Marché de Couzon - tous les dimanches
+                    const dimanche = new Date(startOfWeek);
+                    dimanche.setDate(startOfWeek.getDate() + 6);
+                    evenements.push({
+                        titre: 'Marché de Couzon',
+                        date: `Dimanche ${dimanche.getDate()}/${dimanche.getMonth() + 1} - 8h à 13h`,
+                        dateDebut: dimanche,
+                        dateFin: new Date(dimanche.getTime() + 5 * 60 * 60 * 1000),
+                        lieu: 'Place du village, Couzon',
+                        description: 'Marché local avec producteurs de la région',
+                        lien: 'https://www.couzon-au-mont-dor.fr',
+                        icone: '🛒',
+                        distance: 0.3,
+                        lat: 45.8452,
+                        lng: 4.8375,
+                        type: 'evenement'
+                    });
+                    
+                    // Randonnée guidée - samedi matin
+                    const samedi = new Date(startOfWeek);
+                    samedi.setDate(startOfWeek.getDate() + 5);
+                    evenements.push({
+                        titre: 'Randonnée Guidée Mont d\'Or',
+                        date: `Samedi ${samedi.getDate()}/${samedi.getMonth() + 1} - 9h`,
+                        dateDebut: samedi,
+                        dateFin: new Date(samedi.getTime() + 3 * 60 * 60 * 1000),
+                        lieu: 'Départ parking Mont d\'Or, Couzon',
+                        description: 'Randonnée de 3h avec guide pour découvrir la faune et la flore locale',
+                        lien: 'https://www.monts-dor.com',
+                        icone: '🥾',
+                        distance: 0.5,
+                        lat: 45.8442,
+                        lng: 4.8365,
+                        type: 'evenement'
+                    });
+                    
+                    // Yoga en plein air - mercredi et vendredi
+                    const mercredi = new Date(startOfWeek);
+                    mercredi.setDate(startOfWeek.getDate() + 2);
+                    evenements.push({
+                        titre: 'Yoga en Plein Air',
+                        date: `Mercredi ${mercredi.getDate()}/${mercredi.getMonth() + 1} - 18h30`,
+                        dateDebut: mercredi,
+                        dateFin: new Date(mercredi.getTime() + 1.5 * 60 * 60 * 1000),
+                        lieu: 'Parc de Couzon',
+                        description: 'Séance de yoga tous niveaux en extérieur. Apportez votre tapis.',
+                        lien: 'https://www.couzon-au-mont-dor.fr/yoga',
+                        icone: '🧘',
+                        distance: 0.4,
+                        lat: 45.8445,
+                        lng: 4.8370,
+                        type: 'evenement'
+                    });
+                    
+                    // Dégustation de vins - jeudi soir
+                    const jeudi = new Date(startOfWeek);
+                    jeudi.setDate(startOfWeek.getDate() + 3);
+                    evenements.push({
+                        titre: 'Dégustation Vins Locaux',
+                        date: `Jeudi ${jeudi.getDate()}/${jeudi.getMonth() + 1} - 19h`,
+                        dateDebut: jeudi,
+                        dateFin: new Date(jeudi.getTime() + 2 * 60 * 60 * 1000),
+                        lieu: 'Cave du Mont d\'Or, Couzon',
+                        description: 'Découverte des vins de la région avec un sommelier. Réservation conseillée.',
+                        lien: 'https://www.cave-montdor.fr',
+                        icone: '🍷',
+                        distance: 0.7,
+                        lat: 45.8448,
+                        lng: 4.8372,
+                        type: 'evenement'
+                    });
+                }
+                
+                return evenements;
+            }
+            
+            // Générer les événements de la semaine en cours
+            window.allEvenements = genererEvenementsSemaine(gite);
+            
+            if (window.allEvenements.length === 0) {
+                evenementsDiv.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun événement trouvé pour ce gîte</p>';
+                showNotification('⚠️ Aucun événement trouvé', 'warning');
+                mapDiv.style.display = 'none';
+                return;
+            }
+            /*
             const evenementsParGite = {
                 'Trévoux': [
                     {
