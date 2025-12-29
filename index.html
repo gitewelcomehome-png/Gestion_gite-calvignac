@@ -1437,6 +1437,12 @@
         }
         
         function genererMenageCard(m) {
+            console.log('🎴 Génération carte pour:', { 
+                reservationId: m.reservation.id, 
+                nom: m.reservation.nom, 
+                status: m.status 
+            });
+            
             const statusClass = m.validated ? 'validated' : m.status === 'pending_validation' ? 'pending-validation' : '';
             const statusBadge = m.validated ? 
                 '<span class="menage-status status-validated">✓ Validé</span>' :
