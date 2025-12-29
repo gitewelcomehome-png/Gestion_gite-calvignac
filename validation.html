@@ -454,7 +454,7 @@
         function displayNotifications(menages) {
             const banner = document.getElementById('notificationsBanner');
             const refused = menages.filter(m => m.status === 'refused');
-            const validated = menages.filter(m => m.status === 'validated' && m.validated_by_company);
+            const validated = menages.filter(m => m.status === 'validated' && m.validated);
             
             const notifications = [...refused, ...validated];
             
@@ -471,13 +471,13 @@
             }
             html += '</div>';
             
-            notifications.forEach(menage => {
-                const isRefused = menage.status === 'refused';
+            notifications.forEach(menageInfo => {
+                const isRefused = menageInfo.status === 'refused';
                 const icon = isRefused ? '❌' : '✅';
                 const statusClass = isRefused ? 'refused' : 'validated';
                 const statusText = isRefused ? 'Refusé par le propriétaire' : 'Validé par le propriétaire';
                 
-                const menageDate = new Date(menage.scheduled_date);
+                const menageDate = menageInfo.scheduledDate;
                 const day = menageDate.getDate();
                 const month = menageDate.getMonth() + 1;
                 const year = menageDate.getFullYear();
@@ -488,12 +488,12 @@
                 html += '<div class="notification-content">';
                 html += `<div class="notification-title">${statusText}</div>`;
                 html += `<div class="notification-details">`;
-                html += `<strong>${menage.gite}</strong> - ${menage.nom || 'Client'} - `;
+                html += `<strong>${menageInfo.reservation.gite}</strong> - ${menageInfo.reservation.nom || 'Client'} - `;
                 html += `Ménage du ${dateFormatted}`;
                 html += `</div>`;
                 
-                if (isRefused && menage.notes) {
-                    html += `<div class="notification-reason">💬 Raison : ${menage.notes}</div>`;
+                if (isRefused && menageInfo.cleaning?.notes) {
+                    html += `<div class="notification-reason">💬 Raison : ${menageInfo.cleaning.notes}</div>`;
                 }
                 
                 html += '</div>';
@@ -607,6 +607,13 @@
 
                 // Générer HTML
                 const sortedWeeks = Object.keys(weeks).sort();
+                
+                // Collecter tous les ménages pour les notifications
+                const allMenages = [];
+                Object.values(weeks).forEach(week => {
+                    allMenages.push(...week.trevoux);
+                    allMenages.push(...week.couzon);
+                });
                 
                 // Compter ménages refusés pour notification
                 let nbRefused = 0;
