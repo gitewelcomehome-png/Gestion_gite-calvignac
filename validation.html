@@ -628,15 +628,22 @@
                     allMenages.push(...week.couzon);
                 });
                 
-                // Compter nouveaux ménages (pending) et modifications en attente (pending_validation)
-                let nbNew = 0;
-                let nbModified = 0;
-                Object.values(weeks).forEach(week => {
-                    nbNew += week.trevoux.filter(m => m.status === 'pending').length;
-                    nbNew += week.couzon.filter(m => m.status === 'pending').length;
-                    nbModified += week.trevoux.filter(m => m.status === 'pending_validation').length;
-                    nbModified += week.couzon.filter(m => m.status === 'pending_validation').length;
+                // Calculer la date limite (dans 2 semaines)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const twoWeeksLater = new Date(today);
+                twoWeeksLater.setDate(today.getDate() + 14);
+                
+                // Filtrer les ménages des 2 prochaines semaines uniquement
+                const menagesDeuxSemaines = allMenages.filter(m => {
+                    const menageDate = m.scheduledDate;
+                    return menageDate >= today && menageDate <= twoWeeksLater;
                 });
+                
+                // Compter nouveaux ménages (pending) et modifications en attente (pending_validation)
+                // uniquement pour les 2 prochaines semaines
+                const nbNew = menagesDeuxSemaines.filter(m => m.status === 'pending').length;
+                const nbModified = menagesDeuxSemaines.filter(m => m.status === 'pending_validation').length;
                 
                 // Mettre à jour le titre de l'onglet avec compteurs
                 const totalNotifications = nbNew + nbModified;
