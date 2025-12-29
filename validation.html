@@ -401,7 +401,10 @@
                     // Trouver le cleaning_schedule correspondant
                     const cleaning = cleaningSchedules?.find(c => c.reservation_id === res.id);
                     
-                    const scheduledDate = cleaning?.scheduled_date ? new Date(cleaning.scheduled_date) : dateFin;
+                    // Si pas de cleaning_schedule, ne pas afficher (sera créé par le planning principal)
+                    if (!cleaning) return;
+                    
+                    const scheduledDate = new Date(cleaning.scheduled_date);
                     
                     // Trouver le lundi de la semaine
                     const dayOfWeek = scheduledDate.getDay();
