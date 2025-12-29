@@ -1255,18 +1255,14 @@
          * Affiche le planning par semaine avec les 2 gîtes
          */
         async function afficherPlanningMenageNew() {
-            console.log('🧹 Début afficherPlanningMenageNew');
             try {
                 // Récupérer toutes les réservations
                 const reservations = await getAllReservations();
-                console.log('📋 Réservations récupérées:', reservations.length);
                 
                 // Récupérer cleaning_schedule
                 const { data: cleanings } = await supabase
                     .from('cleaning_schedule')
                     .select('*');
-                
-                console.log('🧹 Cleaning schedule:', cleanings ? cleanings.length : 0);
                 
                 const cleaningMap = {};
                 if (cleanings) {
@@ -1279,23 +1275,11 @@
                 const limit = new Date(now);
                 limit.setMonth(limit.getMonth() + 6);
                 
-                console.log('🔍 Période de filtrage:', now.toISOString().split('T')[0], 'à', limit.toISOString().split('T')[0]);
-                console.log('🔍 Exemple réservation:', reservations[0]);
-                
                 const futures = reservations.filter(r => {
                     const fin = parseDateMenage(r.date_fin || r.dateFin);
-                    if (!fin) {
-                        console.warn('⚠️ Date fin invalide pour réservation:', r.id, r.date_fin);
-                        return false;
-                    }
-                    const isFuture = fin >= now && fin <= limit;
-                    if (isFuture) {
-                        console.log('✅ Réservation future:', r.id, 'fin:', fin.toISOString().split('T')[0]);
-                    }
-                    return isFuture;
+                    if (!fin) return false;
+                    return fin >= now && fin <= limit;
                 });
-                
-                console.log('📅 Réservations futures:', futures.length);
                 
                 // Calculer pour chaque réservation
                 const menages = [];
@@ -1409,14 +1393,8 @@
                     `;
                 });
                 
-                console.log('📊 Semaines générées:', sorted.length);
-                console.log('🎨 HTML généré');
-                
                 document.getElementById('menagePlanningWeeks').innerHTML = html;
-                console.log('✅ HTML injecté dans le DOM');
-                
                 await chargerPropositionsEnAttente();
-                console.log('✅ Propositions chargées');
                 
             } catch (err) {
                 console.error('❌ Erreur affichage planning:', err);
@@ -1435,7 +1413,12 @@
             const momentIcon = m.moment === 'morning' ? '🌅 Matin' : '🌇 Après-midi';
             
             const dateDepartStr = parseDateMenage(m.reservation.date_fin || m.reservation.dateFin)?.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) || 'Date inconnue';
-            const dateEntreeStr = parseDateMenage(m.reservation.date_debut || m.reservation.dateDebut)?.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) || '';
+            
+            // Formater la date du ménage pour le calendrier (éviter décalage UTC)
+            const year = m.dateMenage.getFullYear();
+            const month = String(m.dateMenage.getMonth() + 1).padStart(2, '0');
+            const day = String(m.dateMenage.getDate()).padStart(2, '0');
+            const dateMenageISO = `${year}-${month}-${day}`;
             
             return `
                 <div class="menage-card ${statusClass}">
@@ -1444,9 +1427,8 @@
                         ${momentIcon}
                     </div>
                     <div class="menage-info-row">
-                        ${dateEntreeStr ? `<span>🔑 Entrée: ${dateEntreeStr}</span>` : ''}
                         <span>🚪 Départ: ${dateDepartStr}</span>
-                        ${m.nextArrivee ? `<span>🔑 Arrivée suivante: ${m.nextArrivee.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>` : ''}
+                        ${m.nextArrivee ? `<span>🔑 Entrée suivante: ${m.nextArrivee.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>` : ''}
                     </div>
                     ${statusBadge}
                     
@@ -1456,7 +1438,7 @@
                                 <input 
                                     type="date" 
                                     id="date-${m.reservation.id}" 
-                                    value="${m.dateMenage.toISOString().split('T')[0]}"
+                                    value="${dateMenageISO}"
                                     onchange="modifierMenageAuto(${m.reservation.id})"
                                 >
                                 <select id="moment-${m.reservation.id}" onchange="modifierMenageAuto(${m.reservation.id})">
