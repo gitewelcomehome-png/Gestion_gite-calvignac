@@ -9,7 +9,7 @@
 
 async function forceRefreshReservations() {
     console.log('🔄 Actualisation forcée des réservations...');
-    clearAllCaches();
+    invalidateCache('all');
     await updateReservationsList();
     showToast('Données actualisées', 'success');
 }
