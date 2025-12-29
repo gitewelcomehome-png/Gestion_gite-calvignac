@@ -630,9 +630,12 @@
             
             if (form) {
                 form.style.display = 'block';
-                // Cacher le bouton Valider, changer le texte du bouton Modifier
+                // Cacher le bouton Valider, changer le texte et l'action du bouton Modifier
                 if (btnValidate) btnValidate.style.display = 'none';
-                if (btnPropose) btnPropose.textContent = '📝 Proposer cette date';
+                if (btnPropose) {
+                    btnPropose.textContent = '📝 Proposer cette date';
+                    btnPropose.onclick = () => proposeMenage(reservationId);
+                }
                 
                 // Vérifier si on peut proposer le matin
                 const dateInput = document.getElementById(`date-${reservationId}`);
@@ -762,7 +765,6 @@
                         time_of_day: timeOfDay,
                         status: 'pending_client_validation',
                         validated_by_company: false,
-                        refusal_reason: null,
                         reservation_end: reservation.date_fin
                     }, { onConflict: 'reservation_id' });
                 

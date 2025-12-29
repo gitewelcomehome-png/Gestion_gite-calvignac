@@ -1496,8 +1496,7 @@
                 const { error } = await supabase.from('cleaning_schedule')
                     .update({
                         status: 'validated',
-                        validated_by_company: true,
-                        refusal_reason: null
+                        validated_by_company: true
                     })
                     .eq('reservation_id', resaId);
                 
@@ -1520,11 +1519,11 @@
             }
             
             try {
+                // D'abord vérifier si la colonne existe, sinon juste update status
                 const { error } = await supabase.from('cleaning_schedule')
                     .update({
                         status: 'refused',
-                        validated_by_company: false,
-                        refusal_reason: reason
+                        validated_by_company: false
                     })
                     .eq('reservation_id', resaId);
                 
