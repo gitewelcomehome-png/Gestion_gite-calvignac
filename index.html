@@ -1542,12 +1542,23 @@
             const newMoment = document.getElementById(`moment-${resaId}`).value;
             
             try {
-                await supabase.from('cleaning_schedule').upsert({
+                const dataToUpdate = {
                     reservation_id: resaId,
                     scheduled_date: newDate,
                     time_of_day: newMoment,
                     status: 'pending'
-                }, { onConflict: 'reservation_id' });
+                };
+                
+                console.log('Tentative upsert:', dataToUpdate);
+                
+                const { data, error } = await supabase.from('cleaning_schedule').upsert(dataToUpdate, { onConflict: 'reservation_id' });
+                
+                if (error) {
+                    console.error('Erreur Supabase:', error);
+                    throw error;
+                }
+                
+                console.log('Upsert réussi:', data);
                 
                 showToast('✓ Enregistré', 'success');
                 await afficherPlanningMenageNew();
