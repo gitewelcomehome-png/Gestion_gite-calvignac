@@ -529,12 +529,14 @@
                 '<span class="status-badge status-modified">📝 Modifié</span>' :
                 '<span class="status-badge status-pending">⏳ En attente</span>';
             
-            const minDate = dateFin.toISOString().split('T')[0];
-            const maxDate = nextReservationDate ? nextReservationDate.toISOString().split('T')[0] : null;
+            // Formater dates sans décalage UTC
+            const minDate = `${dateFin.getFullYear()}-${String(dateFin.getMonth() + 1).padStart(2, '0')}-${String(dateFin.getDate()).padStart(2, '0')}`;
+            const maxDate = nextReservationDate ? `${nextReservationDate.getFullYear()}-${String(nextReservationDate.getMonth() + 1).padStart(2, '0')}-${String(nextReservationDate.getDate()).padStart(2, '0')}` : null;
+            const scheduledDateISO = `${scheduledDate.getFullYear()}-${String(scheduledDate.getMonth() + 1).padStart(2, '0')}-${String(scheduledDate.getDate()).padStart(2, '0')}`;
             
             const periodText = nextReservationDate ?
-                `Entre le ${dateFin.toLocaleDateString('fr-FR')} et le ${nextReservationDate.toLocaleDateString('fr-FR')}` :
-                `À partir du ${dateFin.toLocaleDateString('fr-FR')}`;
+                `🚪 Départ: ${dateFin.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} | 🔑 Entrée suivante: ${nextReservationDate.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}` :
+                `🚪 Départ: ${dateFin.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}`;
 
             const dateInputId = `date-${reservation.id}`;
             const morningId = `morning-${reservation.id}`;
@@ -558,7 +560,7 @@
                                 <input 
                                     type="date" 
                                     id="${dateInputId}"
-                                    value="${scheduledDate.toISOString().split('T')[0]}"
+                                    value="${scheduledDateISO}"
                                     min="${minDate}"
                                     ${maxDate ? `max="${maxDate}"` : ''}
                                     onchange="checkDateForMorning(${reservation.id}, '${minDate}')"
