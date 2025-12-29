@@ -1362,8 +1362,8 @@
                 const dateMenageFormatted = calculerDateMenage(r, relevant);
                 console.log(`Résa ${r.id} - ${r.gite} - Départ ${r.dateFin} (${dateFin.toLocaleDateString('fr-FR')}) → Ménage: ${dateMenageFormatted}`);
                 
-                // Parser le résultat "Lundi 23 déc. à 12h00"
-                const match = dateMenageFormatted.match(/(\w+) (\d+) (\w+)\. à (\d+h\d+)/);
+                // Parser le résultat "Lundi 23 déc. à 12h00" (avec accents possibles)
+                const match = dateMenageFormatted.match(/(\w+) (\d+) ([a-zéû]+)\. à (\d+h\d+)/i);
                 let dateMenage;
                 let calculatedTimeOfDay;
                 
