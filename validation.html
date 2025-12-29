@@ -588,14 +588,9 @@
                         </div>
                         
                         <div class="actions">
-                            ${status !== 'pending_validation' ? `
-                                <button class="btn btn-validate" onclick="validateMenage(${reservation.id})">
-                                    ✓ Valider
-                                </button>
-                                <button class="btn btn-propose" onclick="showProposeForm(${reservation.id})">
-                                    📝 Proposer autre date
-                                </button>
-                            ` : ''}
+                            <button class="btn btn-propose" onclick="showProposeForm(${reservation.id})">
+                                📝 Proposer une date
+                            </button>
                         </div>
                     ` : `
                         <div class="actions">
