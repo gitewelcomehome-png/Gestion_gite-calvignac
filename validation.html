@@ -528,7 +528,7 @@
             
             const statusBadge = validated ? 
                 '<span class="status-badge status-validated">✓ Validé par le client</span>' :
-                status === 'pending_client_validation' ?
+                status === 'pending_validation' ?
                 '<span class="status-badge status-waiting">⏰ En attente validation client</span>' :
                 status === 'refused' ?
                 '<span class="status-badge status-refused">✗ Refusé</span>' :
@@ -567,7 +567,7 @@
                         </div>
                     ` : ''}
                     
-                    ${!validated && status !== 'pending_client_validation' ? `
+                    ${!validated && status !== 'pending_validation' ? `
                         <div id="${formId}" style="display: none;">
                             <div class="date-selector">
                                 <label>Choisir une date :</label>
@@ -760,7 +760,7 @@
                     gite: reservation.gite,
                     scheduled_date: scheduledDate,
                     time_of_day: timeOfDay,
-                    status: 'pending_client_validation',
+                    status: 'pending_validation',
                     validated_by_company: false
                 };
                 

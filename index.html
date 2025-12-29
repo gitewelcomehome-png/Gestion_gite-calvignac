@@ -1412,10 +1412,10 @@
         }
         
         function genererMenageCard(m) {
-            const statusClass = m.validated ? 'validated' : m.status === 'pending_client_validation' ? 'pending-validation' : '';
+            const statusClass = m.validated ? 'validated' : m.status === 'pending_validation' ? 'pending-validation' : '';
             const statusBadge = m.validated ? 
                 '<span class="menage-status status-validated">✓ Validé</span>' :
-                m.status === 'pending_client_validation' ?
+                m.status === 'pending_validation' ?
                 '<span class="menage-status status-waiting">⏰ En attente validation client</span>' :
                 '<span class="menage-status status-pending">⏳ À valider</span>';
             
@@ -1444,7 +1444,7 @@
                         ${m.nextArrivee ? `<span>🔑 Entrée suivante: ${m.nextArrivee.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>` : ''}
                     </div>
                     
-                    ${m.status === 'pending_client_validation' ? `
+                    ${m.status === 'pending_validation' ? `
                         <div class="menage-proposition">
                             <p><strong>📩 Proposition société de ménage :</strong></p>
                             <div class="proposition-actions">
