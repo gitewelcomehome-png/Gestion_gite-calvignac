@@ -2788,13 +2788,16 @@
             // Préparer les données de base (sans gite ni distance)
             const activiteBase = {
                 nom,
-                type: categorie,  // La table utilise 'type' pas 'categorie'
+                categorie,
+                description,
                 adresse,
                 website,
-                phone: telephone,  // 'phone' pas 'telephone'
+                telephone,
+                note: note ? parseFloat(note) : null,
+                avis: avis ? parseInt(avis) : null,
+                prix: prixValue || null,
                 latitude: coords.lat,
                 longitude: coords.lng
-                // Note: distance_km n'existe pas dans la table actuelle
             };
             
             try {
@@ -2833,7 +2836,7 @@
                         activites.push({
                             ...activiteBase,
                             gite: nomGite,
-                            distance_km: distanceCalculee
+                            distance: distanceCalculee
                         });
                     }
                     
