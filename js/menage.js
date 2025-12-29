@@ -15,7 +15,7 @@
  * @returns {string} - Date formatée "Lundi 23 déc. à 12h00"
  */
 function calculerDateMenage(reservation, toutesReservations) {
-    const departDate = parseLocalDate(reservation.dateFin);
+    const departDate = parseLocalDate(reservation.dateFin || reservation.date_fin);
     const departDay = departDate.getDay(); // 0=dimanche, 6=samedi
     
     let menageDate = new Date(departDate);
@@ -25,7 +25,7 @@ function calculerDateMenage(reservation, toutesReservations) {
     const arriveeMemejour = toutesReservations.find(r => 
         r.gite === reservation.gite && 
         r.id !== reservation.id &&
-        parseLocalDate(r.dateDebut).toDateString() === departDate.toDateString()
+        parseLocalDate(r.dateDebut || r.date_debut).toDateString() === departDate.toDateString()
     );
     
     // RÈGLE 1: Dimanche - Reporter au lundi (sauf enchainement)
@@ -40,7 +40,7 @@ function calculerDateMenage(reservation, toutesReservations) {
             const arriveeLundi = toutesReservations.find(r => 
                 r.gite === reservation.gite && 
                 r.id !== reservation.id &&
-                parseLocalDate(r.dateDebut).toDateString() === menageDate.toDateString()
+                parseLocalDate(r.dateDebut || r.date_debut).toDateString() === menageDate.toDateString()
             );
             
             heure = arriveeLundi ? '07h00' : '12h00';
@@ -59,8 +59,8 @@ function calculerDateMenage(reservation, toutesReservations) {
             const resaSamediOuDimanche = toutesReservations.find(r =>
                 r.gite === reservation.gite &&
                 r.id !== reservation.id &&
-                (parseLocalDate(r.dateDebut).toDateString() === samediDate.toDateString() ||
-                 parseLocalDate(r.dateDebut).toDateString() === dimancheDate.toDateString())
+                (parseLocalDate(r.dateDebut || r.date_debut).toDateString() === samediDate.toDateString() ||
+                 parseLocalDate(r.dateDebut || r.date_debut).toDateString() === dimancheDate.toDateString())
             );
             
             if (resaSamediOuDimanche) {
@@ -73,7 +73,7 @@ function calculerDateMenage(reservation, toutesReservations) {
                 const arriveeLundi = toutesReservations.find(r => 
                     r.gite === reservation.gite && 
                     r.id !== reservation.id &&
-                    parseLocalDate(r.dateDebut).toDateString() === menageDate.toDateString()
+                    parseLocalDate(r.dateDebut || r.date_debut).toDateString() === menageDate.toDateString()
                 );
                 
                 heure = arriveeLundi ? '07h00' : '12h00';
@@ -98,7 +98,7 @@ function calculerDateMenage(reservation, toutesReservations) {
             const resaAvantVendredi = toutesReservations.find(r =>
                 r.gite === reservation.gite &&
                 r.id !== reservation.id &&
-                (parseLocalDate(r.dateDebut) < vendrediDate)
+                (parseLocalDate(r.dateDebut || r.date_debut) < vendrediDate)
             );
             
             if (resaAvantVendredi) {
@@ -111,7 +111,7 @@ function calculerDateMenage(reservation, toutesReservations) {
                 const arriveeVendredi = toutesReservations.find(r =>
                     r.gite === reservation.gite &&
                     r.id !== reservation.id &&
-                    parseLocalDate(r.dateDebut).toDateString() === menageDate.toDateString()
+                    parseLocalDate(r.dateDebut || r.date_debut).toDateString() === menageDate.toDateString()
                 );
                 
                 heure = arriveeVendredi ? '07h00' : '12h00';
