@@ -302,6 +302,17 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         }
         let statusBadge = '';
         if (validation) {
+            // Log pour debug
+            if (r.nom?.includes('2/01') || r.id === 163) {
+                console.log('🔍 Debug validation résa Couzon 2/01:', {
+                    id: r.id,
+                    nom: r.nom,
+                    status: validation.status,
+                    validated_by_company: validation.validated_by_company,
+                    scheduled_date: validation.scheduled_date
+                });
+            }
+            
             if (validation.status === 'validated') {
                 // VERT = Validé
                 statusBadge = '<span class="validation-status validated" title="Validé par société" style="margin-left: 8px;">✓</span>';
