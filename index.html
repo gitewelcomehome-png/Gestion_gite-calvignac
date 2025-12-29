@@ -4187,6 +4187,20 @@
         await Promise.all(loadPromises);
         console.log('✅ Tous les onglets sont chargés');
         
+        // Synchronisation automatique au démarrage (si pas déjà faite récemment)
+        const lastSync = localStorage.getItem('lastAutoSync');
+        const now = Date.now();
+        const SYNC_INTERVAL = 3600000; // 1 heure
+        
+        if (!lastSync || (now - parseInt(lastSync)) > SYNC_INTERVAL) {
+            console.log('🔄 Synchronisation automatique au démarrage...');
+            localStorage.setItem('lastAutoSync', now.toString());
+            // Lancer en arrière-plan sans bloquer l'UI
+            syncAllCalendars().catch(err => console.error('Erreur sync auto:', err));
+        } else {
+            console.log('⏭️ Sync auto ignorée (dernière sync récente)');
+        }
+        
         // Attacher les event listeners aux boutons
         document.querySelectorAll('.nav-tab').forEach(btn => {
             btn.addEventListener('click', function() {

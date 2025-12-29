@@ -19,12 +19,18 @@ async function forceRefreshReservations() {
     }
     
     try {
+        // Lancer synchronisation iCal en arrière-plan
+        console.log('📡 Lancement synchronisation iCal...');
+        if (typeof syncAllCalendars === 'function') {
+            syncAllCalendars().catch(err => console.error('Erreur sync iCal:', err));
+        }
+        
         console.log('🗑️ Invalidation du cache...');
         invalidateCache('all');
         console.log('📥 Rechargement des réservations...');
         await updateReservationsList();
         console.log('✅ Actualisation terminée');
-        showToast('Données actualisées', 'success');
+        showToast('Données actualisées + Sync iCal lancée', 'success');
     } catch (error) {
         console.error('❌ Erreur actualisation:', error);
         showToast('Erreur lors de l\'actualisation', 'error');
