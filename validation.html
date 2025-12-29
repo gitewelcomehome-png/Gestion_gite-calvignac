@@ -466,10 +466,8 @@
                 return menageDate >= today && menageDate <= twoWeeksLater;
             });
             
-            const refused = menagesDeuxSemaines.filter(m => m.status === 'refused');
-            const validated = menagesDeuxSemaines.filter(m => m.status === 'validated' && m.validated);
-            
-            const notifications = [...refused, ...validated];
+            // Afficher UNIQUEMENT les refusés (à corriger)
+            const notifications = menagesDeuxSemaines.filter(m => m.status === 'refused');
             
             if (notifications.length === 0) {
                 banner.style.display = 'none';
@@ -478,34 +476,27 @@
             
             let html = '<div class="notifications-banner">';
             html += '<div class="banner-header">';
-            html += '<span>🔔 Notifications (2 prochaines semaines)</span>';
-            if (refused.length > 0) {
-                html += `<span class="notification-count">${refused.length}</span>`;
-            }
+            html += '<span>🔔 Refus à corriger (2 prochaines semaines)</span>';
+            html += `<span class="notification-count">${notifications.length}</span>`;
             html += '</div>';
             
             notifications.forEach(menageInfo => {
-                const isRefused = menageInfo.status === 'refused';
-                const icon = isRefused ? '❌' : '✅';
-                const statusClass = isRefused ? 'refused' : 'validated';
-                const statusText = isRefused ? 'Refusé par le propriétaire' : 'Validé par le propriétaire';
-                
                 const menageDate = menageInfo.scheduledDate;
                 const day = menageDate.getDate();
                 const month = menageDate.getMonth() + 1;
                 const year = menageDate.getFullYear();
                 const dateFormatted = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
                 
-                html += `<div class="notification-item ${statusClass}">`;
-                html += `<span class="notification-icon">${icon}</span>`;
+                html += `<div class="notification-item refused">`;
+                html += `<span class="notification-icon">❌</span>`;
                 html += '<div class="notification-content">';
-                html += `<div class="notification-title">${statusText}</div>`;
+                html += `<div class="notification-title">Refusé par le propriétaire</div>`;
                 html += `<div class="notification-details">`;
                 html += `<strong>${menageInfo.reservation.gite}</strong> - ${menageInfo.reservation.nom || 'Client'} - `;
                 html += `Ménage du ${dateFormatted}`;
                 html += `</div>`;
                 
-                if (isRefused && menageInfo.cleaning?.notes) {
+                if (menageInfo.cleaning?.notes) {
                     html += `<div class="notification-reason">💬 Raison : ${menageInfo.cleaning.notes}</div>`;
                 }
                 
