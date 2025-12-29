@@ -309,9 +309,98 @@
             margin-bottom: 20px;
         }
 
+        .notifications-banner {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .notification-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .notification-item.refused {
+            background: #fff5f5;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .notification-item.validated {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .notification-details {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .notification-reason {
+            background: rgba(0,0,0,0.05);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-style: italic;
+            color: #555;
+        }
+
+        .notification-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .banner-header {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-count {
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
         @media (max-width: 768px) {
             .gites-container {
                 grid-template-columns: 1fr;
+            }
+            .notification-item {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
@@ -322,6 +411,8 @@
             <h1>🧹 Validation des Ménages</h1>
             <p>Entreprise de ménage - Valider ou proposer d'autres dates</p>
         </div>
+
+        <div id="notificationsBanner" style="display: none;"></div>
 
         <div id="planningContainer">
             <div class="week-card">
@@ -358,6 +449,60 @@
             setTimeout(() => {
                 toast.style.display = 'none';
             }, 3000);
+        }
+
+        function displayNotifications(menages) {
+            const banner = document.getElementById('notificationsBanner');
+            const refused = menages.filter(m => m.status === 'refused');
+            const validated = menages.filter(m => m.status === 'validated' && m.validated_by_company);
+            
+            const notifications = [...refused, ...validated];
+            
+            if (notifications.length === 0) {
+                banner.style.display = 'none';
+                return;
+            }
+            
+            let html = '<div class="notifications-banner">';
+            html += '<div class="banner-header">';
+            html += '<span>🔔 Notifications</span>';
+            if (refused.length > 0) {
+                html += `<span class="notification-count">${refused.length}</span>`;
+            }
+            html += '</div>';
+            
+            notifications.forEach(menage => {
+                const isRefused = menage.status === 'refused';
+                const icon = isRefused ? '❌' : '✅';
+                const statusClass = isRefused ? 'refused' : 'validated';
+                const statusText = isRefused ? 'Refusé par le propriétaire' : 'Validé par le propriétaire';
+                
+                const menageDate = new Date(menage.scheduled_date);
+                const day = menageDate.getDate();
+                const month = menageDate.getMonth() + 1;
+                const year = menageDate.getFullYear();
+                const dateFormatted = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+                
+                html += `<div class="notification-item ${statusClass}">`;
+                html += `<span class="notification-icon">${icon}</span>`;
+                html += '<div class="notification-content">';
+                html += `<div class="notification-title">${statusText}</div>`;
+                html += `<div class="notification-details">`;
+                html += `<strong>${menage.gite}</strong> - ${menage.nom || 'Client'} - `;
+                html += `Ménage du ${dateFormatted}`;
+                html += `</div>`;
+                
+                if (isRefused && menage.notes) {
+                    html += `<div class="notification-reason">💬 Raison : ${menage.notes}</div>`;
+                }
+                
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            html += '</div>';
+            banner.innerHTML = html;
+            banner.style.display = 'block';
         }
 
         function parseLocalDate(dateStr) {
@@ -476,6 +621,9 @@
                 } else {
                     document.title = 'Validation Ménage';
                 }
+
+                // Afficher les notifications
+                displayNotifications(allMenages);
                 
                 if (sortedWeeks.length === 0) {
                     container.innerHTML = `
