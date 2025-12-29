@@ -210,6 +210,11 @@ async function updateAllCharts(filteredReservations = null) {
     const reservations = filteredReservations || await getAllReservations();
     const historicalData = await getAllHistoricalData();
     
+    // Générer les checkboxes de comparaison si la fonction existe (définie dans index.html)
+    if (typeof generateYearComparisonCheckboxes === 'function') {
+        generateYearComparisonCheckboxes(reservations, historicalData);
+    }
+    
     let reservationsForStats = reservations;
     if (!filteredReservations) {
         const selectedYear = parseInt(document.getElementById('yearFilterStats')?.value || new Date().getFullYear());
