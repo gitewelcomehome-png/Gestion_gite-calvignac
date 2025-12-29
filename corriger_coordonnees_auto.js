@@ -113,8 +113,8 @@ async function corrigerToutesLesCoordonnees() {
     
     stats.total = doublons.length;
     console.log(`📊 ${stats.total} activités à corriger\n`);
-    console.log('⏰ Temps estimé: ${Math.ceil(stats.total * 1.2 / 60)} minutes\n');
-    console.log('${'='.repeat(80)}\n`);
+    console.log(`⏰ Temps estimé: ${Math.ceil(stats.total * 1.2 / 60)} minutes\n`);
+    console.log(`${'='.repeat(80)}\n`);
     
     // Corriger chaque activité
     for (let i = 0; i < doublons.length; i++) {
@@ -165,7 +165,7 @@ async function corrigerToutesLesCoordonnees() {
     }
     
     // Afficher les statistiques finales
-    console.log('${'='.repeat(80)}');
+    console.log(`${'='.repeat(80)}`);
     console.log('\n🎉 CORRECTION TERMINÉE !\n');
     console.log('📊 STATISTIQUES:');
     console.log(`   Total traité:      ${stats.total}`);
