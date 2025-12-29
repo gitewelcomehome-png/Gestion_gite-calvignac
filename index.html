@@ -1287,9 +1287,9 @@
                 for (const resa of futures) {
                     const cleaning = cleaningMap[resa.id];
                     
-                    // Si pas de cleaning ou status pending, recalculer
+                    // Si pas de cleaning, créer automatiquement
                     let dateMenage, moment;
-                    if (!cleaning || cleaning.status === 'pending') {
+                    if (!cleaning) {
                         const calc = calculerMenageNew(resa, futures);
                         dateMenage = calc.date;
                         moment = calc.moment;
@@ -1320,7 +1320,7 @@
                             reservation_start_after: nextResaStartStr
                         }, { onConflict: 'reservation_id' });
                     } else {
-                        // Utiliser la date enregistrée
+                        // Utiliser la date enregistrée (qu'elle soit pending, validated, etc.)
                         dateMenage = parseDateMenage(cleaning.scheduled_date);
                         moment = cleaning.time_of_day;
                     }
