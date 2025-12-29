@@ -1360,6 +1360,7 @@
                 
                 // Calculer la date avec les règles métier
                 const dateMenageFormatted = calculerDateMenage(r, relevant);
+                console.log(`Résa ${r.id} - ${r.gite} - Départ ${r.dateFin} (${dateFin.toLocaleDateString('fr-FR')}) → Ménage: ${dateMenageFormatted}`);
                 
                 // Parser le résultat "Lundi 23 déc. à 12h00"
                 const match = dateMenageFormatted.match(/(\w+) (\d+) (\w+)\. à (\d+h\d+)/);
