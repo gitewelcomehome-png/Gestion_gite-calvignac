@@ -466,6 +466,11 @@
                     if (typeof selectGiteDecouvrir === 'function') {
                         selectGiteDecouvrir('Trévoux');
                     }
+                } else {
+                    // Si un gîte est déjà sélectionné, charger les événements
+                    if (typeof rechercherEvenements === 'function') {
+                        setTimeout(() => rechercherEvenements(), 100);
+                    }
                 }
                 if (typeof chargerActivites === 'function') {
                     chargerActivites();
@@ -2038,6 +2043,11 @@
             
             // Charger et afficher les activités
             chargerActivites();
+            
+            // Charger automatiquement les événements de la semaine
+            setTimeout(() => {
+                rechercherEvenements();
+            }, 100);
             
             // Charger automatiquement les événements et afficher TOUT sur la carte
             setTimeout(() => {
