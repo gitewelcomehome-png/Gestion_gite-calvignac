@@ -4,7 +4,18 @@
 // Fonctions de recherche, affichage, modification et suppression des réservations
 
 // ==========================================
-// 🔍 RECHERCHE RÉSERVATIONS
+// � ACTUALISATION FORCÉE
+// ==========================================
+
+async function forceRefreshReservations() {
+    console.log('🔄 Actualisation forcée des réservations...');
+    clearAllCaches();
+    await updateReservationsList();
+    showToast('Données actualisées', 'success');
+}
+
+// ==========================================
+// �🔍 RECHERCHE RÉSERVATIONS
 // ==========================================
 
 async function filterReservations(searchTerm) {
