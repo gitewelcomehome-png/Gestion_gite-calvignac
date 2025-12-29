@@ -1542,8 +1542,17 @@
             const newMoment = document.getElementById(`moment-${resaId}`).value;
             
             try {
+                // Récupérer le gite de la réservation
+                const reservations = await getAllReservations();
+                const reservation = reservations.find(r => r.id === resaId);
+                
+                if (!reservation) {
+                    throw new Error('Réservation non trouvée');
+                }
+                
                 const dataToUpdate = {
                     reservation_id: resaId,
+                    gite: reservation.gite,
                     scheduled_date: newDate,
                     time_of_day: newMoment,
                     status: 'pending'
