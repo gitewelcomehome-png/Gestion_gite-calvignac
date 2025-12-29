@@ -273,31 +273,41 @@ async function genererPlanningMenage() {
         return;
     }
     
-    // Sauvegarder les dates calculées dans cleaning_schedule
+    // Sauvegarder les dates calculées dans cleaning_schedule (uniquement si inexistant ou pending)
     for (const p of planning) {
         const reservation = relevant.find(r => r.nom === p.clientName && r.gite === p.gite);
         if (!reservation) continue;
         
-        const timeOfDay = p.heure.startsWith('07') || p.heure.startsWith('08') ? 'morning' : 'afternoon';
-        
-        // Chercher la prochaine réservation
-        const nextRes = relevant
-            .filter(r => r.gite === p.gite && parseLocalDate(r.dateDebut) >= p.departDate)
-            .sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut))[0];
-        
         try {
-            await window.supabaseClient
+            // Vérifier si l'enregistrement existe déjà
+            const { data: existing } = await window.supabaseClient
                 .from('cleaning_schedule')
-                .upsert({
-                    reservation_id: reservation.id,
-                    gite: p.gite,
-                    scheduled_date: p.date.toISOString().split('T')[0],
-                    time_of_day: timeOfDay,
-                    status: 'pending',
-                    validated_by_company: false,
-                    reservation_end: p.departDate.toISOString().split('T')[0],
-                    reservation_start_after: nextRes ? parseLocalDate(nextRes.dateDebut).toISOString().split('T')[0] : null
-                }, { onConflict: 'reservation_id' });
+                .select('status, validated_by_company')
+                .eq('reservation_id', reservation.id)
+                .single();
+            
+            // Ne mettre à jour que si inexistant ou statut 'pending' (ne pas écraser les validations/propositions)
+            if (!existing || existing.status === 'pending') {
+                const timeOfDay = p.heure.startsWith('07') || p.heure.startsWith('08') ? 'morning' : 'afternoon';
+                
+                // Chercher la prochaine réservation
+                const nextRes = relevant
+                    .filter(r => r.gite === p.gite && parseLocalDate(r.dateDebut) >= p.departDate)
+                    .sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut))[0];
+                
+                await window.supabaseClient
+                    .from('cleaning_schedule')
+                    .upsert({
+                        reservation_id: reservation.id,
+                        gite: p.gite,
+                        scheduled_date: p.date.toISOString().split('T')[0],
+                        time_of_day: timeOfDay,
+                        status: 'pending',
+                        validated_by_company: false,
+                        reservation_end: p.departDate.toISOString().split('T')[0],
+                        reservation_start_after: nextRes ? parseLocalDate(nextRes.dateDebut).toISOString().split('T')[0] : null
+                    }, { onConflict: 'reservation_id' });
+            }
         } catch (error) {
             console.error('Erreur sauvegarde cleaning_schedule:', error);
         }
