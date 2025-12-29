@@ -416,7 +416,7 @@
                     // Trouver la prochaine réservation pour définir la période disponible
                     // Filtrer, trier par date et prendre la plus proche
                     const nextRes = reservations
-                        .filter(r => r.gite === res.gite && new Date(r.date_debut) > dateFin)
+                        .filter(r => r.gite === res.gite && new Date(r.date_debut) >= dateFin)
                         .sort((a, b) => new Date(a.date_debut) - new Date(b.date_debut))[0];
                     
                     const menageInfo = {
