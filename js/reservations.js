@@ -9,9 +9,31 @@
 
 async function forceRefreshReservations() {
     console.log('🔄 Actualisation forcée des réservations...');
-    invalidateCache('all');
-    await updateReservationsList();
-    showToast('Données actualisées', 'success');
+    
+    // Afficher un indicateur de chargement
+    const btn = event?.target || document.querySelector('button[onclick*="forceRefreshReservations"]');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Actualisation...';
+    }
+    
+    try {
+        console.log('🗑️ Invalidation du cache...');
+        invalidateCache('all');
+        console.log('📥 Rechargement des réservations...');
+        await updateReservationsList();
+        console.log('✅ Actualisation terminée');
+        showToast('Données actualisées', 'success');
+    } catch (error) {
+        console.error('❌ Erreur actualisation:', error);
+        showToast('Erreur lors de l\'actualisation', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
 }
 
 // ==========================================
@@ -141,11 +163,14 @@ async function deleteReservationById(id) {
 // ==========================================
 
 async function updateReservationsList() {
+    console.log('🔄 updateReservationsList: Début');
     const reservations = await getAllReservations();
+    console.log(`📊 Réservations récupérées: ${reservations.length}`);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     // Récupérer les validations de la société de ménage
+    console.log('🧹 Récupération cleaning_schedule...');
     const { data: cleaningSchedules } = await supabase
         .from('cleaning_schedule')
         .select('*');
