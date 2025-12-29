@@ -1942,11 +1942,8 @@
             delete window.activiteEnCoursDeModification;
         }
         
-        // Coordonnées des gîtes
-        const GITES_COORDS = {
-            'Trévoux': { lat: 45.9406, lng: 4.7715 },
-            'Couzon': { lat: 45.8383, lng: 4.8286 }
-        };
+        // Utiliser GITES_COORDS depuis shared-config.js (window.GITES_COORDS)
+        // Pas besoin de redéclarer ici
         
         // Calculer la distance entre deux points GPS (formule de Haversine)
         function calculerDistance(lat1, lon1, lat2, lon2) {
@@ -1981,8 +1978,8 @@
                 document.getElementById('activite_longitude').value = coords.lng;
                 
                 // Calculer et afficher les distances pour les deux gîtes
-                const distTrevoux = calculerDistance(GITES_COORDS['Trévoux'].lat, GITES_COORDS['Trévoux'].lng, coords.lat, coords.lng);
-                const distCouzon = calculerDistance(GITES_COORDS['Couzon'].lat, GITES_COORDS['Couzon'].lng, coords.lat, coords.lng);
+                const distTrevoux = calculerDistance(window.GITES_COORDS['Trévoux'].lat, window.GITES_COORDS['Trévoux'].lng, coords.lat, coords.lng);
+                const distCouzon = calculerDistance(window.GITES_COORDS['Couzon'].lat, window.GITES_COORDS['Couzon'].lng, coords.lat, coords.lng);
                 
                 showNotification(`✓ Coordonnées trouvées : ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}\n📏 Distance Trévoux: ${distTrevoux}km | Couzon: ${distCouzon}km`, 'success');
             } else {
@@ -2827,7 +2824,7 @@
                     const activites = [];
                     
                     // Pour chaque gîte, calculer la distance et créer une entrée
-                    for (const [nomGite, coordsGite] of Object.entries(GITES_COORDS)) {
+                    for (const [nomGite, coordsGite] of Object.entries(window.GITES_COORDS)) {
                         const distanceCalculee = calculerDistance(
                             coordsGite.lat, coordsGite.lng,
                             coords.lat, coords.lng
