@@ -1546,8 +1546,7 @@
                     reservation_id: resaId,
                     scheduled_date: newDate,
                     time_of_day: newMoment,
-                    status: 'pending',
-                    updated_at: new Date().toISOString()
+                    status: 'pending'
                 }, { onConflict: 'reservation_id' });
                 
                 showToast('✓ Enregistré', 'success');
