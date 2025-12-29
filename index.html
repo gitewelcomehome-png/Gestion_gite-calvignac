@@ -1164,7 +1164,11 @@
          * Calcule la date et l'heure du ménage selon les règles métier
          */
         function calculerMenageNew(reservation, toutesReservations) {
-            const dateFin = parseDateMenage(reservation.date_fin);
+            const dateFin = parseDateMenage(reservation.date_fin || reservation.dateFin);
+            if (!dateFin) {
+                console.error('❌ Date fin invalide:', reservation);
+                return { date: new Date(), moment: 'afternoon' };
+            }
             const jour = dateFin.getDay(); // 0=dimanche, 6=samedi
             
             let dateMenage = new Date(dateFin);
@@ -1174,7 +1178,7 @@
             const enchainement = toutesReservations.some(r => 
                 r.gite === reservation.gite &&
                 r.id !== reservation.id &&
-                parseDateMenage(r.date_debut).toDateString() === dateFin.toDateString()
+                parseDateMenage(r.date_debut || r.dateDebut)?.toDateString() === dateFin.toDateString()
             );
             
             // RÈGLE DIMANCHE (0)
@@ -1199,8 +1203,8 @@
                     const resaWeekend = toutesReservations.some(r =>
                         r.gite === reservation.gite &&
                         r.id !== reservation.id &&
-                        (parseDateMenage(r.date_debut).toDateString() === samedi.toDateString() ||
-                         parseDateMenage(r.date_debut).toDateString() === dimanche.toDateString())
+                        (parseDateMenage(r.date_debut || r.dateDebut)?.toDateString() === samedi.toDateString() ||
+                         parseDateMenage(r.date_debut || r.dateDebut)?.toDateString() === dimanche.toDateString())
                     );
                     
                     if (!resaWeekend) {
@@ -1216,11 +1220,12 @@
                     const vendredi = new Date(dateFin);
                     vendredi.setDate(vendredi.getDate() + (jour === 3 ? 2 : 1));
                     
-                    const resaAvantVendredi = toutesReservations.some(r =>
-                        r.gite === reservation.gite &&
-                        r.id !== reservation.id &&
-                        parseDateMenage(r.date_debut) < vendredi
-                    );
+                    const resaAvantVendredi = toutesReservations.some(r => {
+                        const dateDebut = parseDateMenage(r.date_debut || r.dateDebut);
+                        return r.gite === reservation.gite &&
+                            r.id !== reservation.id &&
+                            dateDebut && dateDebut < vendredi;
+                    });
                     
                     if (!resaAvantVendredi) {
                         // Pas de résa avant vendredi → vendredi
@@ -1307,8 +1312,8 @@
                         
                         // Trouver prochaine résa pour ce gîte
                         const nextResa = futures
-                            .filter(r => r.gite === resa.gite && parseDateMenage(r.date_debut) > parseDateMenage(resa.date_fin))
-                            .sort((a, b) => parseDateMenage(a.date_debut) - parseDateMenage(b.date_debut))[0];
+                            .filter(r => r.gite === resa.gite && parseDateMenage(r.date_debut || r.dateDebut) > parseDateMenage(resa.date_fin || resa.dateFin))
+                            .sort((a, b) => parseDateMenage(a.date_debut || a.dateDebut) - parseDateMenage(b.date_debut || b.dateDebut))[0];
                         
                         // Sauvegarder automatiquement dans BD
                         await supabase.from('cleaning_schedule').upsert({
@@ -1318,8 +1323,8 @@
                             time_of_day: moment,
                             status: 'pending',
                             validated_by_company: false,
-                            reservation_end: parseDateMenage(resa.date_fin).toISOString().split('T')[0],
-                            reservation_start_after: nextResa ? parseDateMenage(nextResa.date_debut).toISOString().split('T')[0] : null
+                            reservation_end: parseDateMenage(resa.date_fin || resa.dateFin).toISOString().split('T')[0],
+                            reservation_start_after: nextResa ? parseDateMenage(nextResa.date_debut || nextResa.dateDebut).toISOString().split('T')[0] : null
                         }, { onConflict: 'reservation_id' });
                     } else {
                         // Utiliser la date enregistrée
@@ -1329,8 +1334,8 @@
                     
                     // Trouver prochaine arrivée
                     const nextResa = futures
-                        .filter(r => r.gite === resa.gite && parseDateMenage(r.date_debut) > parseDateMenage(resa.date_fin))
-                        .sort((a, b) => parseDateMenage(a.date_debut) - parseDateMenage(b.date_debut))[0];
+                        .filter(r => r.gite === resa.gite && parseDateMenage(r.date_debut || r.dateDebut) > parseDateMenage(resa.date_fin || resa.dateFin))
+                        .sort((a, b) => parseDateMenage(a.date_debut || a.dateDebut) - parseDateMenage(b.date_debut || b.dateDebut))[0];
                     
                     menages.push({
                         reservation: resa,
