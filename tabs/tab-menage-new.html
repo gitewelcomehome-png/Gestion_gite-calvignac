@@ -1,0 +1,551 @@
+<!-- 🧹 ONGLET PLANNING MÉNAGE -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-icon">🧹</span>
+        <h2 class="card-title">Planning des Ménages</h2>
+    </div>
+    
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; margin-bottom: 20px;">
+        <button class="btn btn-secondary" onclick="ouvrirPageValidation()" style="display: inline-flex;">
+            <span>🏢</span> Page Validation Société
+        </button>
+        <button class="btn" onclick="showRulesModal()" style="background: #3498db; color: white;">
+            <span>📋</span> Voir les Règles
+        </button>
+    </div>
+    
+    <!-- Section propositions en attente -->
+    <div id="propositionsEnAttente"></div>
+    
+    <!-- Planning par semaine -->
+    <div id="menagePlanningWeeks"></div>
+</div>
+
+<style>
+.week-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.week-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.week-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.week-dates {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #e0e0e0;
+}
+
+.gite-column {
+    background: white;
+    padding: 20px;
+}
+
+.gite-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid;
+}
+
+.gite-header.trevoux {
+    color: #667eea;
+    border-color: #667eea;
+}
+
+.gite-header.couzon {
+    color: #f093fb;
+    border-color: #f093fb;
+}
+
+.menage-card {
+    background: #f8f9fa;
+    border-left: 4px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.menage-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.menage-card.validated {
+    border-left-color: #27ae60;
+    background: #e8f5e9;
+}
+
+.menage-card.pending-validation {
+    border-left-color: #f39c12;
+    background: #fff3cd;
+}
+
+.menage-date-main {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.menage-info-row {
+    display: flex;
+    gap: 15px;
+    margin: 8px 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.menage-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.status-validated {
+    background: #27ae60;
+    color: white;
+}
+
+.status-pending {
+    background: #95a5a6;
+    color: white;
+}
+
+.status-waiting {
+    background: #f39c12;
+    color: white;
+}
+
+.menage-modifier {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.modifier-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.modifier-form input[type="date"] {
+    flex: 1;
+    min-width: 150px;
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.modifier-form select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.modifier-form button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-save {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #229954;
+}
+
+.empty-column {
+    text-align: center;
+    padding: 40px;
+    color: #95a5a6;
+    font-style: italic;
+}
+</style>
+
+<script>
+// ==========================================
+// 📅 RÈGLES DE CALCUL MÉNAGE
+// ==========================================
+
+/**
+ * Parse une date DD/MM/YYYY en objet Date
+ */
+function parseDate(dateStr) {
+    if (!dateStr) return null;
+    if (dateStr instanceof Date) return dateStr;
+    
+    // Format ISO YYYY-MM-DD
+    if (dateStr.includes('-')) {
+        const [y, m, d] = dateStr.split('-');
+        return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+    }
+    
+    // Format français DD/MM/YYYY
+    const [d, m, y] = dateStr.split('/');
+    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+}
+
+/**
+ * Calcule le numéro de semaine
+ */
+function getWeekNum(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+/**
+ * Vérifie si c'est un jour férié
+ */
+function estJourFerie(date) {
+    const y = date.getFullYear();
+    const m = date.getMonth() + 1;
+    const d = date.getDate();
+    
+    const feries = [
+        `${y}-01-01`, `${y}-05-01`, `${y}-05-08`, `${y}-07-14`,
+        `${y}-08-15`, `${y}-11-01`, `${y}-11-11`, `${y}-12-25`
+    ];
+    
+    const key = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    return feries.includes(key);
+}
+
+/**
+ * Calcule la date et l'heure du ménage selon les règles
+ */
+function calculerMenage(reservation, toutesReservations) {
+    const dateFin = parseDate(reservation.date_fin);
+    const jour = dateFin.getDay(); // 0=dimanche, 6=samedi
+    
+    let dateMenage = new Date(dateFin);
+    let moment = 'afternoon'; // Par défaut
+    
+    // Trouver enchainement (arrivée le jour du départ)
+    const enchainement = toutesReservations.some(r => 
+        r.gite === reservation.gite &&
+        r.id !== reservation.id &&
+        parseDate(r.date_debut).toDateString() === dateFin.toDateString()
+    );
+    
+    // RÈGLE DIMANCHE
+    if (jour === 0) {
+        if (enchainement) {
+            // Enchainement dimanche → 13h même jour
+            moment = 'afternoon';
+        } else {
+            // Pas d'enchainement → lundi
+            dateMenage.setDate(dateMenage.getDate() + 1);
+            moment = 'afternoon';
+        }
+    }
+    // RÈGLE SAMEDI
+    else if (jour === 6) {
+        if (!enchainement) {
+            // Vérifier si résa samedi ou dimanche
+            const samedi = new Date(dateFin);
+            const dimanche = new Date(dateFin);
+            dimanche.setDate(dimanche.getDate() + 1);
+            
+            const resaWeekend = toutesReservations.some(r =>
+                r.gite === reservation.gite &&
+                r.id !== reservation.id &&
+                (parseDate(r.date_debut).toDateString() === samedi.toDateString() ||
+                 parseDate(r.date_debut).toDateString() === dimanche.toDateString())
+            );
+            
+            if (!resaWeekend) {
+                // Pas de résa weekend → lundi
+                dateMenage.setDate(dateMenage.getDate() + 2);
+            }
+        }
+        moment = 'afternoon';
+    }
+    // RÈGLE MERCREDI/JEUDI
+    else if (jour === 3 || jour === 4) {
+        if (!enchainement) {
+            const vendredi = new Date(dateFin);
+            vendredi.setDate(vendredi.getDate() + (jour === 3 ? 2 : 1));
+            
+            const resaAvantVendredi = toutesReservations.some(r =>
+                r.gite === reservation.gite &&
+                r.id !== reservation.id &&
+                parseDate(r.date_debut) < vendredi
+            );
+            
+            if (!resaAvantVendredi) {
+                // Pas de résa avant vendredi → vendredi
+                dateMenage = vendredi;
+            }
+        }
+        moment = 'afternoon';
+    }
+    // AUTRES JOURS
+    else {
+        moment = 'afternoon';
+    }
+    
+    // Reporter si jour férié
+    while (estJourFerie(dateMenage) && !enchainement) {
+        dateMenage.setDate(dateMenage.getDate() + 1);
+        if (dateMenage.getDay() === 0) {
+            dateMenage.setDate(dateMenage.getDate() + 1);
+        }
+    }
+    
+    return { date: dateMenage, moment };
+}
+
+// ==========================================
+// 🎨 AFFICHAGE PLANNING
+// ==========================================
+
+async function afficherPlanningMenageNew() {
+    try {
+        // Récupérer réservations
+        const reservations = await getAllReservations();
+        
+        // Récupérer cleaning_schedule
+        const { data: cleanings } = await supabase
+            .from('cleaning_schedule')
+            .select('*');
+        
+        const cleaningMap = {};
+        if (cleanings) {
+            cleanings.forEach(c => cleaningMap[c.reservation_id] = c);
+        }
+        
+        // Filtrer futures réservations
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const limit = new Date(now);
+        limit.setMonth(limit.getMonth() + 6);
+        
+        const futures = reservations.filter(r => {
+            const fin = parseDate(r.date_fin);
+            return fin >= now && fin <= limit;
+        });
+        
+        // Calculer pour chaque réservation
+        const menages = [];
+        
+        for (const resa of futures) {
+            const cleaning = cleaningMap[resa.id];
+            
+            // Si pas de cleaning ou status pending, calculer
+            let dateMenage, moment;
+            if (!cleaning || cleaning.status === 'pending') {
+                const calc = calculerMenage(resa, futures);
+                dateMenage = calc.date;
+                moment = calc.moment;
+                
+                // Sauvegarder dans BD
+                const nextResa = futures
+                    .filter(r => r.gite === resa.gite && parseDate(r.date_debut) > parseDate(resa.date_fin))
+                    .sort((a, b) => parseDate(a.date_debut) - parseDate(b.date_debut))[0];
+                
+                await supabase.from('cleaning_schedule').upsert({
+                    reservation_id: resa.id,
+                    gite: resa.gite,
+                    scheduled_date: dateMenage.toISOString().split('T')[0],
+                    time_of_day: moment,
+                    status: 'pending',
+                    validated_by_company: false,
+                    reservation_end: parseDate(resa.date_fin).toISOString().split('T')[0],
+                    reservation_start_after: nextResa ? parseDate(nextResa.date_debut).toISOString().split('T')[0] : null
+                }, { onConflict: 'reservation_id' });
+            } else {
+                dateMenage = parseDate(cleaning.scheduled_date);
+                moment = cleaning.time_of_day;
+            }
+            
+            // Trouver prochaine résa
+            const nextResa = futures
+                .filter(r => r.gite === resa.gite && parseDate(r.date_debut) > parseDate(resa.date_fin))
+                .sort((a, b) => parseDate(a.date_debut) - parseDate(b.date_debut))[0];
+            
+            menages.push({
+                reservation: resa,
+                dateMenage,
+                moment,
+                validated: cleaning?.validated_by_company || false,
+                status: cleaning?.status || 'pending',
+                nextArrivee: nextResa ? parseDate(nextResa.date_debut) : null
+            });
+        }
+        
+        // Organiser par semaine
+        const weeks = {};
+        
+        menages.forEach(m => {
+            const monday = new Date(m.dateMenage);
+            const day = monday.getDay();
+            monday.setDate(monday.getDate() - (day === 0 ? 6 : day - 1));
+            monday.setHours(0, 0, 0, 0);
+            
+            const key = monday.toISOString().split('T')[0];
+            
+            if (!weeks[key]) {
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+                
+                weeks[key] = {
+                    monday,
+                    sunday,
+                    weekNum: getWeekNum(monday),
+                    trevoux: [],
+                    couzon: []
+                };
+            }
+            
+            if (m.reservation.gite.toLowerCase().includes('trévoux')) {
+                weeks[key].trevoux.push(m);
+            } else {
+                weeks[key].couzon.push(m);
+            }
+        });
+        
+        // Générer HTML
+        const sorted = Object.keys(weeks).sort();
+        let html = '';
+        
+        sorted.forEach(key => {
+            const w = weeks[key];
+            html += `
+                <div class="week-card">
+                    <div class="week-header">
+                        <div class="week-title">Semaine ${w.weekNum}</div>
+                        <div class="week-dates">
+                            ${w.monday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} - 
+                            ${w.sunday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                        </div>
+                    </div>
+                    <div class="week-grid">
+                        <div class="gite-column">
+                            <div class="gite-header trevoux">🏡 Trévoux</div>
+                            ${w.trevoux.length > 0 ? w.trevoux.map(genererMenageCard).join('') : '<div class="empty-column">Aucun ménage</div>'}
+                        </div>
+                        <div class="gite-column">
+                            <div class="gite-header couzon">⛰️ Couzon</div>
+                            ${w.couzon.length > 0 ? w.couzon.map(genererMenageCard).join('') : '<div class="empty-column">Aucun ménage</div>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        document.getElementById('menagePlanningWeeks').innerHTML = html;
+        await chargerPropositionsEnAttente();
+        
+    } catch (err) {
+        console.error('Erreur affichage planning:', err);
+        showToast('Erreur chargement planning', 'error');
+    }
+}
+
+function genererMenageCard(m) {
+    const statusClass = m.validated ? 'validated' : m.status === 'pending_validation' ? 'pending-validation' : '';
+    const statusBadge = m.validated ? 
+        '<span class="menage-status status-validated">✓ Validé</span>' :
+        m.status === 'pending_validation' ?
+        '<span class="menage-status status-waiting">⏰ En attente</span>' :
+        '<span class="menage-status status-pending">⏳ À valider</span>';
+    
+    const momentIcon = m.moment === 'morning' ? '🌅 Matin' : '🌇 Après-midi';
+    
+    return `
+        <div class="menage-card ${statusClass}">
+            <div class="menage-date-main">
+                📅 ${m.dateMenage.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
+                ${momentIcon}
+            </div>
+            <div class="menage-info-row">
+                <span>🚪 Départ: ${parseDate(m.reservation.date_fin).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
+                ${m.nextArrivee ? `<span>🔑 Arrivée: ${m.nextArrivee.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>` : ''}
+            </div>
+            ${statusBadge}
+            
+            ${!m.validated && m.status !== 'pending_validation' ? `
+                <div class="menage-modifier">
+                    <div class="modifier-form">
+                        <input 
+                            type="date" 
+                            id="date-${m.reservation.id}" 
+                            value="${m.dateMenage.toISOString().split('T')[0]}"
+                            onchange="modifierMenageAuto(${m.reservation.id})"
+                        >
+                        <select id="moment-${m.reservation.id}" onchange="modifierMenageAuto(${m.reservation.id})">
+                            <option value="morning" ${m.moment === 'morning' ? 'selected' : ''}>🌅 Matin</option>
+                            <option value="afternoon" ${m.moment === 'afternoon' ? 'selected' : ''}>🌇 Après-midi</option>
+                        </select>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+async function modifierMenageAuto(resaId) {
+    const newDate = document.getElementById(`date-${resaId}`).value;
+    const newMoment = document.getElementById(`moment-${resaId}`).value;
+    
+    try {
+        await supabase.from('cleaning_schedule').upsert({
+            reservation_id: resaId,
+            scheduled_date: newDate,
+            time_of_day: newMoment,
+            status: 'pending',
+            updated_at: new Date().toISOString()
+        }, { onConflict: 'reservation_id' });
+        
+        showToast('✓ Enregistré', 'success');
+        await afficherPlanningMenageNew();
+    } catch (err) {
+        console.error('Erreur modification:', err);
+        showToast('Erreur enregistrement', 'error');
+    }
+}
+
+// Charger au démarrage
+if (typeof window !== 'undefined') {
+    window.afficherPlanningMenageNew = afficherPlanningMenageNew;
+    window.modifierMenageAuto = modifierMenageAuto;
+}
+</script>
