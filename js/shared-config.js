@@ -50,7 +50,7 @@ const CACHE = {
     chargesTimestamp: 0,
     historicalData: null,
     historicalTimestamp: 0,
-    TTL: 60000 // 1 minute
+    TTL: 30000 // 30 secondes (réduit pour voir les nouvelles réservations plus vite)
 };
 
 // Fonction helper pour créer des dates en heure locale Paris

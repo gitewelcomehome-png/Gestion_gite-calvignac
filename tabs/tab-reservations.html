@@ -3,6 +3,9 @@
                     <span class="card-icon">📅</span>
                     <h2 class="card-title">Planning des réservations</h2>
                     <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+                        <button onclick="forceRefreshReservations()" style="background: #e3f2fd; border: none; border-radius: 8px; padding: 10px 15px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 5px;" title="Actualiser les données">
+                            🔄 Actualiser
+                        </button>
                         <input type="text" id="searchReservations" placeholder="🔍 Rechercher..." style="padding: 10px 15px; border-radius: 8px; border: 2px solid var(--border); width: 250px; font-size: 0.9rem; font-family: 'Work Sans', sans-serif;" oninput="filterReservations(this.value)">
                     </div>
                 </div>
