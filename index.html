@@ -1336,7 +1336,7 @@
                         moment,
                         validated: cleaning?.validated_by_company || false,
                         status: cleaning?.status || 'pending',
-                        nextArrivee: nextResa ? parseDateMenage(nextResa.date_debut) : null
+                        nextArrivee: nextResa ? parseDateMenage(nextResa.date_debut || nextResa.dateDebut) : null
                     });
                 }
                 
@@ -1444,22 +1444,20 @@
                         ${m.nextArrivee ? `<span>🔑 Entrée suivante: ${m.nextArrivee.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>` : ''}
                     </div>
                     
-                    ${!m.validated && m.status !== 'pending_validation' ? `
-                        <div class="menage-modifier">
-                            <div class="modifier-form">
-                                <input 
-                                    type="date" 
-                                    id="date-${m.reservation.id}" 
-                                    value="${dateMenageISO}"
-                                    onchange="modifierMenageAuto(${m.reservation.id})"
-                                >
-                                <select id="moment-${m.reservation.id}" onchange="modifierMenageAuto(${m.reservation.id})">
-                                    <option value="morning" ${m.moment === 'morning' ? 'selected' : ''}>🌅 Matin</option>
-                                    <option value="afternoon" ${m.moment === 'afternoon' ? 'selected' : ''}>🌇 Après-midi</option>
-                                </select>
-                            </div>
+                    <div class="menage-modifier">
+                        <div class="modifier-form">
+                            <input 
+                                type="date" 
+                                id="date-${m.reservation.id}" 
+                                value="${dateMenageISO}"
+                                onchange="modifierMenageAuto(${m.reservation.id})"
+                            >
+                            <select id="moment-${m.reservation.id}" onchange="modifierMenageAuto(${m.reservation.id})">
+                                <option value="morning" ${m.moment === 'morning' ? 'selected' : ''}>🌅 Matin</option>
+                                <option value="afternoon" ${m.moment === 'afternoon' ? 'selected' : ''}>🌇 Après-midi</option>
+                            </select>
                         </div>
-                    ` : ''}
+                    </div>
                 </div>
             `;
         }
