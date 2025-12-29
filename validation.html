@@ -535,7 +535,7 @@
                 '<span class="status-badge status-pending">⏳ En attente</span>';
             
             // Récupérer raison du refus si elle existe
-            const refusalReason = cleaning?.refusal_reason;
+            const refusalReason = cleaning?.notes && status === 'refused' ? cleaning.notes : null;
             
             // Formater dates sans décalage UTC
             const minDate = `${dateFin.getFullYear()}-${String(dateFin.getMonth() + 1).padStart(2, '0')}-${String(dateFin.getDate()).padStart(2, '0')}`;

@@ -1546,7 +1546,8 @@
                 const { error } = await supabase.from('cleaning_schedule')
                     .update({
                         status: 'refused',
-                        validated_by_company: false
+                        validated_by_company: false,
+                        notes: reason
                     })
                     .eq('reservation_id', resaId);
                 
