@@ -1392,6 +1392,16 @@
                 const sorted = Object.keys(weeks).sort();
                 let html = '';
                 
+                // Compter propositions en attente pour notification
+                const nbPropositionsEnAttente = menages.filter(m => m.status === 'pending_validation').length;
+                
+                // Mettre à jour le titre de l'onglet
+                if (nbPropositionsEnAttente > 0) {
+                    document.title = `(🔔${nbPropositionsEnAttente}) Gestion Gîte`;
+                } else {
+                    document.title = 'Gestion Gîte';
+                }
+                
                 sorted.forEach(key => {
                     const w = weeks[key];
                     html += `
@@ -1500,11 +1510,27 @@
         function afficherRefusForm(resaId) {
             console.log('🔍 Affichage formulaire refus pour résa:', resaId);
             const form = document.getElementById(`refus-form-${resaId}`);
+            const btnRefuser = event?.target;
+            
             if (form) {
                 form.style.display = 'block';
+                // Scroll jusqu'au formulaire
+                form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                // Focus sur le textarea
+                const textarea = document.getElementById(`refus-reason-${resaId}`);
+                if (textarea) {
+                    setTimeout(() => textarea.focus(), 300);
+                }
                 console.log('✅ Formulaire affiché');
+                
+                // Cacher le bouton refuser pour éviter double clic
+                if (btnRefuser) {
+                    btnRefuser.style.display = 'none';
+                }
             } else {
                 console.error('❌ Formulaire refus-form-' + resaId + ' non trouvé dans le DOM');
+                // Vérifier si l'élément existe vraiment
+                console.log('IDs disponibles:', Array.from(document.querySelectorAll('[id^="refus-form-"]')).map(el => el.id));
             }
         }
         
