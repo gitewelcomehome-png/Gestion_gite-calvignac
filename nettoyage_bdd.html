@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nettoyage BDD - Cleaning Schedule</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #c0392b;
+        }
+        .btn-info {
+            background: #3498db;
+        }
+        .btn-info:hover {
+            background: #2980b9;
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-success:hover {
+            background: #229954;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            color: #856404;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            color: #721c24;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #667eea;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .status-pending { color: #f39c12; }
+        .status-validated { color: #27ae60; }
+        .status-refused { color: #e74c3c; }
+        .status-pending_validation { color: #3498db; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Nettoyage Base de Données - Cleaning Schedule</h1>
+        
+        <div class="warning">
+            ⚠️ <strong>Attention :</strong> Cette page permet de nettoyer les données de la table cleaning_schedule. 
+            Utilisez avec précaution.
+        </div>
+        
+        <div>
+            <button class="btn btn-info" onclick="analyserBDD()">📊 Analyser la BDD</button>
+            <button class="btn btn-success" onclick="nettoyerDoublons()">🧹 Nettoyer les doublons</button>
+            <button class="btn" onclick="supprimerOrphelines()">🗑️ Supprimer entrées orphelines</button>
+            <button class="btn" onclick="resetTout()">⚠️ RESET COMPLET</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            let className = '';
+            
+            if (type === 'success') className = 'success';
+            else if (type === 'error') className = 'error';
+            else if (type === 'warning') className = 'warning';
+            
+            results.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        async function analyserBDD() {
+            document.getElementById('results').innerHTML = '';
+            log('🔍 Analyse de la base de données...');
+            
+            try {
+                // Récupérer toutes les réservations
+                const { data: reservations, error: resError } = await supabaseClient
+                    .from('reservations')
+                    .select('id, nom, gite, date_debut, date_fin')
+                    .order('date_debut');
+                
+                if (resError) throw resError;
+                
+                log(`✅ ${reservations.length} réservations trouvées`, 'success');
+                
+                // Récupérer tous les cleanings
+                const { data: cleanings, error: cleanError } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .select('*')
+                    .order('scheduled_date');
+                
+                if (cleanError) throw cleanError;
+                
+                log(`✅ ${cleanings.length} entrées de ménage trouvées`, 'success');
+                
+                // Analyser les doublons
+                const resIds = new Map();
+                const doublons = [];
+                
+                cleanings.forEach(c => {
+                    if (resIds.has(c.reservation_id)) {
+                        doublons.push(c);
+                    } else {
+                        resIds.set(c.reservation_id, c);
+                    }
+                });
+                
+                if (doublons.length > 0) {
+                    log(`⚠️ ${doublons.length} doublons détectés !`, 'warning');
+                    console.log('Doublons:', doublons);
+                } else {
+                    log('✅ Aucun doublon détecté', 'success');
+                }
+                
+                // Analyser les orphelines
+                const reservationIds = new Set(reservations.map(r => r.id));
+                const orphelines = cleanings.filter(c => !reservationIds.has(c.reservation_id));
+                
+                if (orphelines.length > 0) {
+                    log(`⚠️ ${orphelines.length} entrées orphelines (réservations supprimées)`, 'warning');
+                    console.log('Orphelines:', orphelines);
+                } else {
+                    log('✅ Aucune entrée orpheline', 'success');
+                }
+                
+                // Créer un tableau récapitulatif
+                let html = '<table>';
+                html += '<thead><tr><th>ID</th><th>Réservation</th><th>Gîte</th><th>Date</th><th>Status</th><th>Validé</th></tr></thead>';
+                html += '<tbody>';
+                
+                cleanings.forEach(c => {
+                    const res = reservations.find(r => r.id === c.reservation_id);
+                    const isOrpheline = !res;
+                    const isDuplic = doublons.some(d => d.id === c.id);
+                    
+                    let rowClass = '';
+                    if (isOrpheline) rowClass = 'style="background: #ffcccc;"';
+                    else if (isDuplic) rowClass = 'style="background: #fff3cd;"';
+                    
+                    html += `<tr ${rowClass}>`;
+                    html += `<td>${c.id}</td>`;
+                    html += `<td>${c.reservation_id} ${isOrpheline ? '❌ ORPHELINE' : ''} ${isDuplic ? '⚠️ DOUBLON' : ''}</td>`;
+                    html += `<td>${c.gite}</td>`;
+                    html += `<td>${c.scheduled_date}</td>`;
+                    html += `<td class="status-${c.status}">${c.status}</td>`;
+                    html += `<td>${c.validated_by_company ? '✅' : '❌'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('results').innerHTML += html;
+                
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function nettoyerDoublons() {
+            if (!confirm('Voulez-vous vraiment supprimer les doublons ? Cette action est irréversible.')) {
+                return;
+            }
+            
+            document.getElementById('results').innerHTML = '';
+            log('🧹 Nettoyage des doublons...');
+            
+            try {
+                const { data: cleanings, error } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .select('*')
+                    .order('created_at');
+                
+                if (error) throw error;
+                
+                const seen = new Map();
+                const toDelete = [];
+                
+                cleanings.forEach(c => {
+                    if (seen.has(c.reservation_id)) {
+                        toDelete.push(c.id);
+                        log(`🗑️ Marqué pour suppression: ID ${c.id} (doublon de résa ${c.reservation_id})`);
+                    } else {
+                        seen.set(c.reservation_id, c);
+                    }
+                });
+                
+                if (toDelete.length === 0) {
+                    log('✅ Aucun doublon à supprimer', 'success');
+                    return;
+                }
+                
+                // Supprimer les doublons
+                for (const id of toDelete) {
+                    const { error: delError } = await supabaseClient
+                        .from('cleaning_schedule')
+                        .delete()
+                        .eq('id', id);
+                    
+                    if (delError) {
+                        log(`❌ Erreur suppression ID ${id}: ${delError.message}`, 'error');
+                    } else {
+                        log(`✅ Supprimé ID ${id}`);
+                    }
+                }
+                
+                log(`✅ Nettoyage terminé: ${toDelete.length} doublons supprimés`, 'success');
+                
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function supprimerOrphelines() {
+            if (!confirm('Voulez-vous vraiment supprimer les entrées orphelines ? Cette action est irréversible.')) {
+                return;
+            }
+            
+            document.getElementById('results').innerHTML = '';
+            log('🗑️ Suppression des entrées orphelines...');
+            
+            try {
+                // Récupérer les IDs des réservations valides
+                const { data: reservations, error: resError } = await supabaseClient
+                    .from('reservations')
+                    .select('id');
+                
+                if (resError) throw resError;
+                
+                const validIds = new Set(reservations.map(r => r.id));
+                
+                // Récupérer tous les cleanings
+                const { data: cleanings, error: cleanError } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .select('*');
+                
+                if (cleanError) throw cleanError;
+                
+                const orphelines = cleanings.filter(c => !validIds.has(c.reservation_id));
+                
+                if (orphelines.length === 0) {
+                    log('✅ Aucune entrée orpheline à supprimer', 'success');
+                    return;
+                }
+                
+                log(`⚠️ ${orphelines.length} entrées orphelines trouvées`, 'warning');
+                
+                for (const orpheline of orphelines) {
+                    const { error: delError } = await supabaseClient
+                        .from('cleaning_schedule')
+                        .delete()
+                        .eq('id', orpheline.id);
+                    
+                    if (delError) {
+                        log(`❌ Erreur suppression ID ${orpheline.id}: ${delError.message}`, 'error');
+                    } else {
+                        log(`✅ Supprimé orpheline ID ${orpheline.id} (résa ${orpheline.reservation_id})`);
+                    }
+                }
+                
+                log(`✅ Nettoyage terminé: ${orphelines.length} entrées orphelines supprimées`, 'success');
+                
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function resetTout() {
+            if (!confirm('⚠️ ATTENTION ! Voulez-vous vraiment SUPPRIMER TOUTES les entrées de cleaning_schedule ? Cette action est IRRÉVERSIBLE !')) {
+                return;
+            }
+            
+            if (!confirm('Êtes-vous VRAIMENT sûr ? Toutes les données de ménage seront perdues !')) {
+                return;
+            }
+            
+            document.getElementById('results').innerHTML = '';
+            log('⚠️ RESET COMPLET en cours...', 'warning');
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .delete()
+                    .neq('id', 0); // Supprime tout
+                
+                if (error) throw error;
+                
+                log('✅ Toutes les entrées ont été supprimées !', 'success');
+                log('ℹ️ Rechargez l\'application principale pour recalculer les ménages', 'info');
+                
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
