@@ -1194,6 +1194,209 @@ window.resetGiteInfosQuick = async function() {
 
 
 // ==========================================
+// 📱 GÉNÉRATION QR CODE WIFI
+// ==========================================
+
+window.updateQRCodeWifi = function() {
+    console.log('🔄 updateQRCodeWifi appelée');
+    
+    const ssid = document.getElementById('infos_wifiSSID')?.value || '';
+    const password = document.getElementById('infos_wifiPassword')?.value || '';
+    const section = document.getElementById('qrCodeWifiSection');
+    const canvas = document.getElementById('qrCodeWifiCanvas');
+    
+    console.log('SSID:', ssid, 'Password:', password);
+    
+    if (!section || !canvas) {
+        console.error('❌ Éléments QR code non trouvés');
+        return;
+    }
+    
+    // Afficher la section seulement si SSID et password sont remplis
+    if (ssid && password) {
+        section.style.display = 'block';
+        
+        // Format du QR code WiFi selon la spécification
+        const wifiString = `WIFI:T:WPA;S:${ssid};P:${password};;`;
+        console.log('📶 Génération QR code pour:', wifiString);
+        
+        // Générer directement avec l'API
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            console.log('✅ QR code généré avec succès');
+        };
+        
+        img.onerror = function(e) {
+            console.error('❌ Erreur chargement QR code:', e);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ff0000';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Erreur de', canvas.width/2, canvas.height/2 - 6);
+            ctx.fillText('génération', canvas.width/2, canvas.height/2 + 6);
+        };
+        
+        const encodedText = encodeURIComponent(wifiString);
+        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedText}`;
+        
+    } else {
+        console.log('ℹ️ SSID ou password manquant, masquage de la section');
+        section.style.display = 'none';
+    }
+};
+
+window.telechargerQRCodeWifi = function() {
+    const canvas = document.getElementById('qrCodeWifiCanvas');
+    const ssid = document.getElementById('infos_wifiSSID')?.value || 'wifi';
+    
+    if (!canvas) {
+        if (typeof showNotification === 'function') {
+            showNotification('❌ Canvas non trouvé', 'error');
+        }
+        return;
+    }
+    
+    // Créer un canvas plus grand pour meilleure qualité
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 600;
+    tempCanvas.height = 700;
+    const ctx = tempCanvas.getContext('2d');
+    
+    // Fond blanc
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+    
+    // Titre
+    ctx.fillStyle = '#2C5F7D';
+    ctx.font = 'bold 40px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('WiFi Gratuit', tempCanvas.width / 2, 60);
+    
+    // SSID
+    ctx.font = '28px Arial';
+    ctx.fillStyle = '#555';
+    ctx.fillText(`Réseau: ${ssid}`, tempCanvas.width / 2, 110);
+    
+    // QR Code (centré et agrandi)
+    ctx.drawImage(canvas, 50, 140, 500, 500);
+    
+    // Instructions
+    ctx.font = '20px Arial';
+    ctx.fillStyle = '#666';
+    ctx.fillText('Scannez avec votre smartphone', tempCanvas.width / 2, 670);
+    
+    // Télécharger
+    tempCanvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `QR-WiFi-${ssid}.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+        if (typeof showNotification === 'function') {
+            showNotification('✓ QR Code téléchargé !', 'success');
+        }
+    });
+};
+
+window.imprimerQRCodeWifi = function() {
+    const canvas = document.getElementById('qrCodeWifiCanvas');
+    const ssid = document.getElementById('infos_wifiSSID')?.value || 'wifi';
+    const password = document.getElementById('infos_wifiPassword')?.value || '';
+    
+    if (!canvas) {
+        if (typeof showNotification === 'function') {
+            showNotification('❌ Canvas non trouvé', 'error');
+        }
+        return;
+    }
+    
+    // Créer une fenêtre d'impression
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>QR Code WiFi - ${ssid}</title>
+            <style>
+                @page {
+                    size: A4;
+                    margin: 2cm;
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    border: 3px solid #2C5F7D;
+                    padding: 30px;
+                    border-radius: 20px;
+                }
+                h1 {
+                    color: #2C5F7D;
+                    font-size: 48px;
+                    margin-bottom: 10px;
+                }
+                .ssid {
+                    font-size: 32px;
+                    color: #555;
+                    margin-bottom: 30px;
+                    font-weight: bold;
+                }
+                .qr-code {
+                    margin: 30px 0;
+                }
+                .instructions {
+                    font-size: 24px;
+                    color: #666;
+                    margin-top: 20px;
+                }
+                .password {
+                    font-size: 18px;
+                    color: #999;
+                    margin-top: 20px;
+                    font-style: italic;
+                }
+                @media print {
+                    body {
+                        print-color-adjust: exact;
+                        -webkit-print-color-adjust: exact;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>📶 WiFi Gratuit</h1>
+                <div class="ssid">Réseau: ${ssid}</div>
+                <div class="qr-code">
+                    <img src="${canvas.toDataURL()}" style="width: 400px; height: 400px;">
+                </div>
+                <div class="instructions">
+                    📱 Scannez ce QR code avec votre smartphone<br>
+                    pour vous connecter automatiquement
+                </div>
+                <div class="password">
+                    Mot de passe (si besoin): ${password}
+                </div>
+            </div>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 250);
+};
+
+// ==========================================
 // 🌍 GESTION MULTILANGUE (FR/EN)
 // ==========================================
 
