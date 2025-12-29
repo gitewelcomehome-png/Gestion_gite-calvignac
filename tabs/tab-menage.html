@@ -1,21 +1,198 @@
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-icon">🧹</span>
-                    <h2 class="card-title">Planning des Ménages</h2>
-                </div>
-                
-                <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-                    <button class="btn btn-secondary" onclick="ouvrirPageValidation()" style="display: inline-flex;">
-                        <span>🏢</span> Page Validation Société
-                    </button>
-                    <button class="btn" onclick="showRulesModal()" style="background: #3498db; color: white;">
-                        <span>📋</span> Voir les Règles
-                    </button>
-                </div>
-                
-                <!-- Section propositions en attente -->
-                <div id="propositionsEnAttente" style="margin-top: 20px;"></div>
-                
-                <div id="menagePlanning" style="margin-top: 30px;">
-                </div>
-            </div>
+<!-- 🧹 ONGLET PLANNING MÉNAGE -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-icon">🧹</span>
+        <h2 class="card-title">Planning des Ménages</h2>
+    </div>
+    
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; margin-bottom: 20px;">
+        <button class="btn btn-secondary" onclick="ouvrirPageValidation()" style="display: inline-flex;">
+            <span>🏢</span> Page Validation Société
+        </button>
+        <button class="btn" onclick="showRulesModal()" style="background: #3498db; color: white;">
+            <span>📋</span> Voir les Règles
+        </button>
+    </div>
+    
+    <!-- Section propositions en attente -->
+    <div id="propositionsEnAttente"></div>
+    
+    <!-- Planning par semaine -->
+    <div id="menagePlanningWeeks"></div>
+</div>
+
+<style>
+.week-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.week-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.week-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.week-dates {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #e0e0e0;
+}
+
+.gite-column {
+    background: white;
+    padding: 20px;
+}
+
+.gite-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid;
+}
+
+.gite-header.trevoux {
+    color: #667eea;
+    border-color: #667eea;
+}
+
+.gite-header.couzon {
+    color: #f093fb;
+    border-color: #f093fb;
+}
+
+.menage-card {
+    background: #f8f9fa;
+    border-left: 4px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.menage-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.menage-card.validated {
+    border-left-color: #27ae60;
+    background: #e8f5e9;
+}
+
+.menage-card.pending-validation {
+    border-left-color: #f39c12;
+    background: #fff3cd;
+}
+
+.menage-date-main {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.menage-info-row {
+    display: flex;
+    gap: 15px;
+    margin: 8px 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.menage-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.status-validated {
+    background: #27ae60;
+    color: white;
+}
+
+.status-pending {
+    background: #95a5a6;
+    color: white;
+}
+
+.status-waiting {
+    background: #f39c12;
+    color: white;
+}
+
+.menage-modifier {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.modifier-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.modifier-form input[type="date"] {
+    flex: 1;
+    min-width: 150px;
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.modifier-form select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.modifier-form button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-save {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #229954;
+}
+
+.empty-column {
+    text-align: center;
+    padding: 40px;
+    color: #95a5a6;
+    font-style: italic;
+}
+</style>

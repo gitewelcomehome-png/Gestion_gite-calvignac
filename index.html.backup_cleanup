@@ -1464,6 +1464,178 @@
         // ==========================================
         
         async function exportPlanningMenageMois() {
+            const monthInput = document.getElementById('menageExportMonth').value;
+            if (!monthInput) {
+                showToast('Sélectionnez un mois à exporter', 'error');
+                return;
+            }
+
+            const [yearStr, monthStr] = monthInput.split('-');
+            const targetYear = parseInt(yearStr, 10);
+                
+                // Jours fériés fixes
+                const feriesFixes = [
+                    `${year}-01-01`, // Nouvel An
+                    `${year}-05-01`, // Fête du travail
+                    `${year}-05-08`, // Victoire 1945
+                    `${year}-07-14`, // Fête nationale
+                    `${year}-08-15`, // Assomption
+                    `${year}-11-01`, // Toussaint
+                    `${year}-11-11`, // Armistice 1918
+                    `${year}-12-25`, // Noël
+                ];
+                
+                const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                if (feriesFixes.includes(dateKey)) return true;
+                
+                // Pâques et jours mobiles (formule de Meeus/Jones/Butcher)
+                const a = year % 19;
+                const b = Math.floor(year / 100);
+                const c = year % 100;
+                const d = Math.floor(b / 4);
+                const e = b % 4;
+                const f = Math.floor((b + 8) / 25);
+                const g = Math.floor((b - f + 1) / 3);
+                const h = (19 * a + b - d - g + 15) % 30;
+                const i = Math.floor(c / 4);
+                const k = c % 4;
+                const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                const paquesMois = Math.floor((h + l - 7 * m + 114) / 31);
+                const paquesJour = ((h + l - 7 * m + 114) % 31) + 1;
+                
+                const paques = new Date(year, paquesMois - 1, paquesJour);
+                const lundiPaques = new Date(paques);
+                lundiPaques.setDate(lundiPaques.getDate() + 1);
+                const ascension = new Date(paques);
+                ascension.setDate(ascension.getDate() + 39);
+                const lundiPentecote = new Date(paques);
+                lundiPentecote.setDate(lundiPentecote.getDate() + 50);
+                
+                const dateStr = date.toDateString();
+                if (dateStr === lundiPaques.toDateString()) return true;
+                if (dateStr === ascension.toDateString()) return true;
+                if (dateStr === lundiPentecote.toDateString()) return true;
+                
+                return false;
+            }
+            
+            // Filtrer mois en cours + prochain
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+            const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+            
+            const relevant = reservations.filter(r => {
+                const date = parseLocalDate(r.dateFin);
+                const month = date.getMonth();
+                const year = date.getFullYear();
+                return (year === currentYear && month === currentMonth) || 
+                       (year === nextYear && month === nextMonth);
+            });
+            
+            relevant.sort((a, b) => parseLocalDate(a.dateFin) - parseLocalDate(b.dateFin));
+            
+            const planning = [];
+            const menagesPrevus = {}; // Pour suivre les ménages déjà prévus par gîte/date
+            
+            relevant.forEach(r => {
+                const departDate = parseLocalDate(r.dateFin);
+                
+                // Utiliser la fonction calculerDateMenage pour garantir la cohérence
+                const dateMenageFormatted = calculerDateMenage(r, relevant);
+                
+                // Parser le résultat pour extraire la date et l'heure
+                // Format: "Lundi 23 déc. à 12h00"
+                const match = dateMenageFormatted.match(/(\w+) (\d+) (\w+)\. à (\d+h\d+)/);
+                if (!match) return;
+                
+                const [_, jourNom, jour, mois, heure] = match;
+                
+                // Reconstruire la date du ménage
+                const moisMap = {
+                    'janv': 0, 'févr': 1, 'mars': 2, 'avr': 3, 'mai': 4, 'juin': 5,
+                    'juil': 6, 'août': 7, 'sept': 8, 'oct': 9, 'nov': 10, 'déc': 11
+                };
+                
+                const menageDate = new Date(departDate);
+                menageDate.setMonth(moisMap[mois]);
+                menageDate.setDate(parseInt(jour));
+                
+                // Si le mois du ménage est < mois du départ, c'est l'année suivante
+                if (menageDate < departDate) {
+                    menageDate.setFullYear(menageDate.getFullYear() + 1);
+                }
+                
+                // Vérifier enchainement
+                const arriveeMemejour = relevant.find(resa => 
+                    resa.gite === r.gite && 
+                    resa.id !== r.id &&
+                    parseLocalDate(resa.dateDebut).toDateString() === departDate.toDateString()
+                );
+                
+                planning.push({
+                    date: menageDate,
+                    heure: heure,
+                    gite: r.gite,
+                    clientName: r.nom,
+                    departDate: departDate,
+                    enchainement: arriveeMemejour ? true : false
+                });
+            });
+            
+            if (planning.length === 0) {
+                showToast('Aucun ménage à planifier', 'error');
+                return;
+            }
+            
+            // Afficher
+            const menageDiv = document.getElementById('menagePlanning');
+            let html = '<div class="card" style="margin-top: 20px;"><h3 style="margin-bottom: 20px;">Planning généré (mois en cours + prochain)</h3>';
+            
+            planning.forEach(p => {
+                const enchainementBadge = p.enchainement ? ' <span style="background: #f39c12; color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem;">⚡ Enchainement</span>' : '';
+                html += `
+                    <div class="menage-item">
+                        <div class="menage-date">
+                            📅 ${p.date.toLocaleDateString('fr-FR')} - ${['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'][p.date.getDay()]}
+                            à ${p.heure}${enchainementBadge}
+                        </div>
+                        <div class="menage-detail">
+                            🏘️ <strong>${p.gite}</strong> - Client: ${p.clientName} (départ le ${p.departDate.toLocaleDateString('fr-FR')})
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-success" onclick="telechargerPlanningMenage()" style="max-width: 400px;">
+                        <span>📥</span> Télécharger le planning Excel
+                    </button>
+                </div>
+            </div>`;
+            menageDiv.innerHTML = html;
+            
+            // Préparer les données Excel mais ne pas télécharger automatiquement
+            window.planningMenageData = planning.map(p => ({
+                '📅 Date': p.date.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }),
+                '⏰ Heure': p.heure,
+                '🏠 Gîte': p.gite,
+                '👤 Client': p.clientName,
+                '🚪 Départ': p.departDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' }),
+                '⚡ Enchainement': p.enchainement ? 'OUI' : 'Non'
+            }));
+            
+            showToast(`✓ Planning généré ! ${planning.length} ménages planifiés`);
+            
+            // Afficher le planning par semaine avec colonnes
+            await afficherPlanningMenageNew();
+        }
+        
+        // Fonction pour calculer le numéro de semaine ISO (S1 = première semaine de l'année)
         function getWeekNumber(date) {
             const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
             const dayNum = d.getUTCDay() || 7;
