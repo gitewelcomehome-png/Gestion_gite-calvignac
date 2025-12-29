@@ -247,16 +247,25 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         
         // Récupérer l'état de validation du ménage
         const validation = validationMap[r.id];
+        
+        // Moment de la journée depuis cleaning_schedule
+        let timeLabel = '';
+        if (validation?.time_of_day) {
+            timeLabel = validation.time_of_day === 'morning' ? ' 🌅' : ' 🌆';
+        }
         let statusBadge = '';
         if (validation) {
-            if (validation.validated_by_company) {
+            if (validation.status === 'validated') {
                 // VERT = Validé
                 statusBadge = '<span class="validation-status validated" title="Validé par société" style="margin-left: 8px;">✓</span>';
-            } else if (validation.status === 'proposed') {
-                // ORANGE = En attente de validation
-                statusBadge = '<span class="validation-status pending" title="En attente validation" style="margin-left: 8px;">⏳</span>';
+            } else if (validation.status === 'pending_validation') {
+                // ORANGE = En attente de validation client
+                statusBadge = '<span class="validation-status pending" title="En attente validation client" style="margin-left: 8px;">⏳</span>';
+            } else if (validation.status === 'refused') {
+                // ROUGE FONCE = Refusé
+                statusBadge = '<span class="validation-status refused" title="Refusé par client" style="margin-left: 8px;">❌</span>';
             } else {
-                // ROUGE = À valider
+                // ROUGE = À valider (status = 'pending')
                 statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
             }
         } else {
@@ -286,7 +295,7 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
                 <!-- Pied : Ménage avec pastille à gauche, Plateforme à droite -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
                     <div style="font-size: 0.85rem; color: #64748b; display: flex; align-items: center;">
-                        🧹 ${dateMenage}${statusBadge}
+                        🧹 ${dateMenage}${timeLabel}${statusBadge}
                     </div>
                     <div>
                         ${platformLogo}
