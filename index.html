@@ -1431,15 +1431,18 @@
             
             return `
                 <div class="menage-card ${statusClass}">
+                    ${statusBadge}
                     <div class="menage-date-main">
                         📅 ${m.dateMenage.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
                         ${momentIcon}
                     </div>
                     <div class="menage-info-row">
+                        <span>👤 ${m.reservation.nom}</span>
+                    </div>
+                    <div class="menage-info-row">
                         <span>🚪 Départ: ${dateDepartStr}</span>
                         ${m.nextArrivee ? `<span>🔑 Entrée suivante: ${m.nextArrivee.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>` : ''}
                     </div>
-                    ${statusBadge}
                     
                     ${!m.validated && m.status !== 'pending_validation' ? `
                         <div class="menage-modifier">
