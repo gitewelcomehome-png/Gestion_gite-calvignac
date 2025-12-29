@@ -612,18 +612,10 @@ function generateCleaningItemHTML(menageInfo) {
  */
 async function chargerPropositionsEnAttente() {
     try {
+        // Récupérer les propositions
         const { data: propositions, error } = await supabaseClient
             .from('cleaning_schedule')
-            .select(`
-                *,
-                reservations (
-                    id,
-                    nom,
-                    gite,
-                    date_debut,
-                    date_fin
-                )
-            `)
+            .select('*')
             .eq('status', 'pending_validation')
             .order('scheduled_date', { ascending: true });
         
@@ -637,6 +629,11 @@ async function chargerPropositionsEnAttente() {
             return;
         }
         
+        // Récupérer toutes les réservations pour obtenir les noms
+        const reservations = await getAllReservations();
+        const resaMap = {};
+        reservations.forEach(r => resaMap[r.id] = r);
+        
         let html = `
             <div class="card" style="background: #fff3cd; border-left: 4px solid #f39c12;">
                 <div class="card-header" style="background: transparent;">
@@ -647,8 +644,11 @@ async function chargerPropositionsEnAttente() {
         `;
         
         propositions.forEach(prop => {
+            const reservation = resaMap[prop.reservation_id];
+            if (!reservation) return;
+            
             const scheduledDate = new Date(prop.scheduled_date);
-            const reservationEnd = new Date(prop.reservations.date_fin);
+            const reservationEnd = new Date(reservation.date_fin);
             const timeDisplay = prop.time_of_day === 'morning' ? '🌅 Matin' : '🌇 Après-midi';
             
             html += `
@@ -656,7 +656,7 @@ async function chargerPropositionsEnAttente() {
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                         <div>
                             <div style="font-weight: 600; margin-bottom: 5px;">
-                                🏠 ${prop.gite} - ${prop.reservations.nom}
+                                🏠 ${prop.gite} - ${reservation.nom}
                             </div>
                             <div style="color: #666; font-size: 0.9rem;">
                                 Date proposée par l'entreprise: 
