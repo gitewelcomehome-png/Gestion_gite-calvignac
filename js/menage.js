@@ -397,10 +397,20 @@ async function afficherPlanningParSemaine() {
     
     relevant.forEach(r => {
         const dateFin = parseLocalDate(r.dateFin);
-        // Date ménage = généralement le jour du départ ou lendemain si dimanche
-        let dateMenage = new Date(dateFin);
-        if (dateFin.getDay() === 0) { // Dimanche
-            dateMenage.setDate(dateMenage.getDate() + 1);
+        
+        // Utiliser la date de cleaning_schedule si disponible (date calculée par genererPlanningMenage)
+        const validation = validationMap[r.id];
+        let dateMenage;
+        
+        if (validation && validation.scheduled_date) {
+            // Utiliser la date sauvegardée dans cleaning_schedule
+            dateMenage = new Date(validation.scheduled_date);
+        } else {
+            // Par défaut : jour du départ ou lendemain si dimanche
+            dateMenage = new Date(dateFin);
+            if (dateFin.getDay() === 0) { // Dimanche
+                dateMenage.setDate(dateMenage.getDate() + 1);
+            }
         }
         
         // Trouver le lundi de cette semaine
@@ -420,7 +430,6 @@ async function afficherPlanningParSemaine() {
             };
         }
         
-        const validation = validationMap[r.id];
         const menageInfo = {
             reservation: r,
             dateMenage: dateMenage,
