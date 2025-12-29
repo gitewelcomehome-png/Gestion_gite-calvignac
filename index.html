@@ -1412,11 +1412,11 @@
         }
         
         function genererMenageCard(m) {
-            const statusClass = m.validated ? 'validated' : m.status === 'pending_validation' ? 'pending-validation' : '';
+            const statusClass = m.validated ? 'validated' : m.status === 'pending_client_validation' ? 'pending-validation' : '';
             const statusBadge = m.validated ? 
                 '<span class="menage-status status-validated">✓ Validé</span>' :
-                m.status === 'pending_validation' ?
-                '<span class="menage-status status-waiting">⏰ En attente</span>' :
+                m.status === 'pending_client_validation' ?
+                '<span class="menage-status status-waiting">⏰ En attente validation client</span>' :
                 '<span class="menage-status status-pending">⏳ À valider</span>';
             
             const momentIcon = m.moment === 'morning' ? '🌅 Matin' : '🌇 Après-midi';
@@ -1444,22 +1444,98 @@
                         ${m.nextArrivee ? `<span>🔑 Entrée suivante: ${m.nextArrivee.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>` : ''}
                     </div>
                     
-                    <div class="menage-modifier">
-                        <div class="modifier-form">
-                            <input 
-                                type="date" 
-                                id="date-${m.reservation.id}" 
-                                value="${dateMenageISO}"
-                                onchange="modifierMenageAuto(${m.reservation.id})"
-                            >
-                            <select id="moment-${m.reservation.id}" onchange="modifierMenageAuto(${m.reservation.id})">
-                                <option value="morning" ${m.moment === 'morning' ? 'selected' : ''}>🌅 Matin</option>
-                                <option value="afternoon" ${m.moment === 'afternoon' ? 'selected' : ''}>🌇 Après-midi</option>
-                            </select>
+                    ${m.status === 'pending_client_validation' ? `
+                        <div class="menage-proposition">
+                            <p><strong>📩 Proposition société de ménage :</strong></p>
+                            <div class="proposition-actions">
+                                <button class="btn btn-success" onclick="approuverProposition(${m.reservation.id})">
+                                    ✓ Approuver
+                                </button>
+                                <button class="btn btn-danger" onclick="afficherRefusForm(${m.reservation.id})">
+                                    ✗ Refuser
+                                </button>
+                            </div>
+                            <div id="refus-form-${m.reservation.id}" style="display: none; margin-top: 10px;">
+                                <textarea id="refus-reason-${m.reservation.id}" placeholder="Raison du refus..." style="width: 100%; min-height: 60px; margin-bottom: 10px;"></textarea>
+                                <button class="btn btn-danger" onclick="refuserProposition(${m.reservation.id})">
+                                    Envoyer le refus
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    ` : `
+                        <div class="menage-modifier">
+                            <div class="modifier-form">
+                                <input 
+                                    type="date" 
+                                    id="date-${m.reservation.id}" 
+                                    value="${dateMenageISO}"
+                                    onchange="modifierMenageAuto(${m.reservation.id})"
+                                >
+                                <select id="moment-${m.reservation.id}" onchange="modifierMenageAuto(${m.reservation.id})">
+                                    <option value="morning" ${m.moment === 'morning' ? 'selected' : ''}>🌅 Matin</option>
+                                    <option value="afternoon" ${m.moment === 'afternoon' ? 'selected' : ''}>🌇 Après-midi</option>
+                                </select>
+                            </div>
+                        </div>
+                    `}
                 </div>
             `;
+        }
+        
+        function afficherRefusForm(resaId) {
+            const form = document.getElementById(`refus-form-${resaId}`);
+            if (form) {
+                form.style.display = 'block';
+            }
+        }
+        
+        async function approuverProposition(resaId) {
+            if (!confirm('Approuver cette proposition de la société de ménage ?')) return;
+            
+            try {
+                const { error } = await supabase.from('cleaning_schedule')
+                    .update({
+                        status: 'validated',
+                        validated_by_company: true,
+                        refusal_reason: null
+                    })
+                    .eq('reservation_id', resaId);
+                
+                if (error) throw error;
+                
+                showToast('✓ Proposition approuvée !', 'success');
+                await afficherPlanningMenageNew();
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur: ' + error.message, 'error');
+            }
+        }
+        
+        async function refuserProposition(resaId) {
+            const reason = document.getElementById(`refus-reason-${resaId}`).value.trim();
+            
+            if (!reason) {
+                showToast('Veuillez indiquer une raison', 'error');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase.from('cleaning_schedule')
+                    .update({
+                        status: 'refused',
+                        validated_by_company: false,
+                        refusal_reason: reason
+                    })
+                    .eq('reservation_id', resaId);
+                
+                if (error) throw error;
+                
+                showToast('✗ Proposition refusée', 'info');
+                await afficherPlanningMenageNew();
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur: ' + error.message, 'error');
+            }
         }
         
         async function modifierMenageAuto(resaId) {
