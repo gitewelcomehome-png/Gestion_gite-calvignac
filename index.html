@@ -1274,9 +1274,20 @@
                 const limit = new Date(now);
                 limit.setMonth(limit.getMonth() + 6);
                 
+                console.log('🔍 Période de filtrage:', now.toISOString().split('T')[0], 'à', limit.toISOString().split('T')[0]);
+                console.log('🔍 Exemple réservation:', reservations[0]);
+                
                 const futures = reservations.filter(r => {
-                    const fin = parseDateMenage(r.date_fin);
-                    return fin >= now && fin <= limit;
+                    const fin = parseDateMenage(r.date_fin || r.dateFin);
+                    if (!fin) {
+                        console.warn('⚠️ Date fin invalide pour réservation:', r.id, r.date_fin);
+                        return false;
+                    }
+                    const isFuture = fin >= now && fin <= limit;
+                    if (isFuture) {
+                        console.log('✅ Réservation future:', r.id, 'fin:', fin.toISOString().split('T')[0]);
+                    }
+                    return isFuture;
                 });
                 
                 console.log('📅 Réservations futures:', futures.length);
