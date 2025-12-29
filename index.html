@@ -1250,14 +1250,18 @@
          * Affiche le planning par semaine avec les 2 gîtes
          */
         async function afficherPlanningMenageNew() {
+            console.log('🧹 Début afficherPlanningMenageNew');
             try {
                 // Récupérer toutes les réservations
                 const reservations = await getAllReservations();
+                console.log('📋 Réservations récupérées:', reservations.length);
                 
                 // Récupérer cleaning_schedule
                 const { data: cleanings } = await supabase
                     .from('cleaning_schedule')
                     .select('*');
+                
+                console.log('🧹 Cleaning schedule:', cleanings ? cleanings.length : 0);
                 
                 const cleaningMap = {};
                 if (cleanings) {
@@ -1274,6 +1278,8 @@
                     const fin = parseDateMenage(r.date_fin);
                     return fin >= now && fin <= limit;
                 });
+                
+                console.log('📅 Réservations futures:', futures.length);
                 
                 // Calculer pour chaque réservation
                 const menages = [];
@@ -1387,11 +1393,17 @@
                     `;
                 });
                 
+                console.log('📊 Semaines générées:', sorted.length);
+                console.log('🎨 HTML généré');
+                
                 document.getElementById('menagePlanningWeeks').innerHTML = html;
+                console.log('✅ HTML injecté dans le DOM');
+                
                 await chargerPropositionsEnAttente();
+                console.log('✅ Propositions chargées');
                 
             } catch (err) {
-                console.error('Erreur affichage planning:', err);
+                console.error('❌ Erreur affichage planning:', err);
                 showToast('Erreur chargement planning', 'error');
             }
         }
