@@ -230,7 +230,11 @@ async function updateAllCharts(filteredReservations = null) {
     const checkboxes = document.querySelectorAll('#yearComparisonCheckboxes input[type="checkbox"]:checked');
     const selectedYears = Array.from(checkboxes).map(cb => parseInt(cb.value)).sort();
     
+    console.log('📊 Années sélectionnées:', selectedYears);
+    console.log('📊 Données historiques disponibles:', historicalData.map(d => `${d.year} (${d.gite})`));
+    
     if (selectedYears.length === 0) {
+        console.log('⚠️ Aucune année sélectionnée, destruction des graphiques');
         if (window.caChartInstance) window.caChartInstance.destroy();
         return;
     }
@@ -263,7 +267,7 @@ async function updateAllCharts(filteredReservations = null) {
                 dataByYear[year].total[idx] = value;
             });
         } else {
-            console.log(`📊 Graphique ${year}: Utilisation des réservations`);
+            console.log(`📊 Graphique ${year}: Utilisation des réservations (${reservations.filter(r => parseLocalDate(r.dateDebut).getFullYear() === year).length} trouvées)`);
             reservations.filter(r => parseLocalDate(r.dateDebut).getFullYear() === year).forEach(r => {
                 const month = parseLocalDate(r.dateDebut).getMonth();
                 const giteNormalized = r.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -280,6 +284,8 @@ async function updateAllCharts(filteredReservations = null) {
     const datasets = [];
     selectedYears.forEach((year, idx) => {
         const color = colors[idx % colors.length];
+        const total = dataByYear[year].total.reduce((sum, val) => sum + val, 0);
+        console.log(`📊 Dataset ${year}: Total CA = ${total.toFixed(2)} €, Données:`, dataByYear[year].total);
         datasets.push({
             label: `${year} - Total`,
             data: dataByYear[year].total,
