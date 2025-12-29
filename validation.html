@@ -628,9 +628,7 @@
                     allMenages.push(...week.couzon);
                 });
                 
-                // Calculer la date limite (dans 2 semaines)
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                // Calculer la date limite (dans 2 semaines) - réutilisation de today déjà déclaré
                 const twoWeeksLater = new Date(today);
                 twoWeeksLater.setDate(today.getDate() + 14);
                 
