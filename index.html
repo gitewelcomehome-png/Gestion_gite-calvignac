@@ -24,7 +24,6 @@
     <script src="js/charges.js"></script>
     <script src="js/infos-gites.js"></script>
     <script src="js/fiche-client.js"></script>
-    <script src="js/recurrent-actions.js"></script>
     <script src="js/messagerie.js"></script>
     
     <!-- Leaflet pour la carte interactive -->
@@ -224,7 +223,6 @@
             'tab-infos-gites': 'tabs/tab-infos-gites.html',
             'tab-decouvrir': 'tabs/tab-decouvrir.html',
             'tab-messagerie': 'tabs/tab-messagerie.html',
-            'tab-recurrent': 'tabs/tab-recurrent.html',
         };
         for (const [tabId, file] of Object.entries(tabFiles)) {
             fetch(file)
@@ -265,7 +263,6 @@
             <button class="nav-tab" data-tab="infos-gites">📝 Infos Pratiques</button>
             <button class="nav-tab" data-tab="decouvrir">🗺️ À Découvrir</button>
             <button class="nav-tab" data-tab="messagerie">📧 Messagerie</button>
-            <button class="nav-tab" data-tab="recurrent">🔁 Actions Récurrentes</button>
         </div>
         
 
@@ -275,7 +272,6 @@
         <div id="tab-reservations" class="tab-content"></div>
         <div id="tab-archives" class="tab-content"></div>
         <div id="tab-messagerie" class="tab-content"></div>
-        <div id="tab-recurrent" class="tab-content"></div>
         <div id="tab-statistiques" class="tab-content"></div>
         <div id="tab-charges" class="tab-content"></div>
         <div id="tab-menage" class="tab-content"></div>
@@ -541,9 +537,6 @@
             }
             if (tabName === 'messagerie' && typeof loadEmails === 'function') {
                 loadEmails();
-            }
-            if (tabName === 'recurrent' && typeof loadRecurrentActions === 'function') {
-                loadRecurrentActions();
             }
             if (tabName === 'decouvrir') {
                 // Pré-sélectionner Trévoux si aucun gîte n'est sélectionné

@@ -547,9 +547,9 @@ async function toggleTodo(id, completed) {
     }
     
     // Recharger la liste correspondante
-    const todo = await supabase.from('todos').select('category').eq('id', id).single();
-    if (todo.data) {
-        await updateTodoList(todo.data.category);
+    const { data: todoData } = await supabase.from('todos').select('category').eq('id', id).single();
+    if (todoData) {
+        await updateTodoList(todoData.category);
     }
     await updateDashboardStats(); // Mettre à jour le compteur
 }
@@ -594,3 +594,11 @@ async function refreshDashboard() {
     await updateDashboardMenages();
     await updateTodoLists();
 }
+
+// Exposer les fonctions dans le scope global pour les appels depuis HTML
+window.addTodoItem = addTodoItem;
+window.toggleTodo = toggleTodo;
+window.deleteTodo = deleteTodo;
+window.openEditReservation = openEditReservation;
+window.openFicheClient = openFicheClient;
+window.refreshDashboard = refreshDashboard;
