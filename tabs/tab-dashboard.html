@@ -1,31 +1,23 @@
 <div class="tab-container">
     <!-- En-tête avec semaine actuelle -->
-    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; margin-bottom: 30px;">
+    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 24px; margin-bottom: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h2 style="margin: 0; font-size: 2rem;">📊 Tableau de Bord</h2>
-                <p id="dashboard-week-info" style="margin: 10px 0 0 0; font-size: 1.1rem; opacity: 0.95;">Semaine en cours</p>
+                <h2 style="margin: 0; font-size: 1.5rem;">📊 Tableau de Bord</h2>
+                <p id="dashboard-week-info" style="margin: 4px 0 0 0; font-size: 0.9rem; opacity: 0.9;">Semaine en cours</p>
             </div>
             <div style="text-align: right;">
-                <div id="dashboard-date" style="font-size: 1.3rem; font-weight: 600;">29 décembre 2025</div>
-                <div id="dashboard-week-number" style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">Semaine 52</div>
+                <div id="dashboard-date" style="font-size: 1rem; font-weight: 600;">29 décembre 2025</div>
+                <div id="dashboard-week-number" style="font-size: 0.8rem; opacity: 0.85; margin-top: 2px;">Semaine 52</div>
             </div>
         </div>
     </div>
 
     <!-- Alertes / Notifications importantes -->
-    <div id="dashboard-alerts" style="margin-bottom: 30px;"></div>
+    <div id="dashboard-alerts" style="margin-bottom: 20px;"></div>
 
-    <!-- Résumé financier de la semaine -->
-    <div class="stats-grid" style="margin-bottom: 30px;">
-        <div class="stat-item" style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%); color: white;">
-            <div class="stat-value" id="dashboard-ca-week">0 €</div>
-            <div class="stat-label" style="color: rgba(255,255,255,0.9);">CA cette semaine</div>
-        </div>
-        <div class="stat-item" style="background: linear-gradient(135deg, #3498DB 0%, #2E86C1 100%); color: white;">
-            <div class="stat-value" id="dashboard-occupation">0%</div>
-            <div class="stat-label" style="color: rgba(255,255,255,0.9);">Taux d'occupation</div>
-        </div>
+    <!-- Résumé rapide -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
         <div class="stat-item" style="background: linear-gradient(135deg, #F39C12 0%, #D68910 100%); color: white;">
             <div class="stat-value" id="dashboard-cleanings">0</div>
             <div class="stat-label" style="color: rgba(255,255,255,0.9);">Ménages à faire</div>
