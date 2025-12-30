@@ -53,7 +53,7 @@
                     <h3 class="card-title" style="color: white;">Actions Réservations <span id="todo-count-reservations" style="background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;">0</span></h3>
                     <button onclick="addTodoItem('reservations')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2rem;">+</button>
                 </div>
-                <div id="todo-reservations" style="padding: 15px; max-height: 250px; overflow-y: auto;">
+                <div id="todo-reservations" style="padding: 10px; max-height: 250px; overflow-y: auto;">
                     <!-- Todos dynamiques -->
                 </div>
             </div>
@@ -65,7 +65,7 @@
                     <h3 class="card-title" style="color: white;">Travaux & Maintenance <span id="todo-count-travaux" style="background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;">0</span></h3>
                     <button onclick="addTodoItem('travaux')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2rem;">+</button>
                 </div>
-                <div id="todo-travaux" style="padding: 15px; max-height: 250px; overflow-y: auto;">
+                <div id="todo-travaux" style="padding: 10px; max-height: 250px; overflow-y: auto;">
                     <!-- Todos dynamiques -->
                 </div>
             </div>
@@ -77,10 +77,88 @@
                     <h3 class="card-title" style="color: white;">Achats & Courses <span id="todo-count-achats" style="background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;">0</span></h3>
                     <button onclick="addTodoItem('achats')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2rem;">+</button>
                 </div>
-                <div id="todo-achats" style="padding: 15px; max-height: 250px; overflow-y: auto;">
+                <div id="todo-achats" style="padding: 10px; max-height: 250px; overflow-y: auto;">
                     <!-- Todos dynamiques -->
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Tâche -->
+<div id="addTodoModal" class="modal">
+    <div class="modal-content">
+        <div class="card-header">
+            <span class="card-icon">📝</span>
+            <h2 class="card-title">Nouvelle Tâche</h2>
+        </div>
+        
+        <form id="addTodoForm">
+            <input type="hidden" id="todoCategory">
+            
+            <div class="form-group">
+                <label>Titre <span class="required">*</span></label>
+                <input type="text" id="todoTitle" placeholder="Ex: Réparer robinet" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="todoDescription" rows="3" placeholder="Détails supplémentaires..."></textarea>
+            </div>
+            
+            <div id="giteSelectGroup" class="form-group" style="display: none;">
+                <label>Gîte concerné</label>
+                <select id="todoGite">
+                    <option value="">Non spécifié</option>
+                    <option value="Trévoux">Trévoux</option>
+                    <option value="Couzon">Couzon</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="todoRecurrent" style="width: 18px; height: 18px;">
+                    <span>🔁 Tâche récurrente</span>
+                </label>
+            </div>
+            
+            <div id="recurrentOptions" style="display: none; margin-left: 26px; margin-top: 10px;">
+                <div class="form-group">
+                    <label>Fréquence</label>
+                    <select id="todoFrequency">
+                        <option value="weekly">Hebdomadaire</option>
+                        <option value="biweekly">Bimensuelle (2 semaines)</option>
+                        <option value="monthly">Mensuelle</option>
+                    </select>
+                </div>
+                
+                <div id="weeklyOptions" class="form-group">
+                    <label>Jour de la semaine</label>
+                    <select id="todoWeekday">
+                        <option value="1">Lundi</option>
+                        <option value="2">Mardi</option>
+                        <option value="3">Mercredi</option>
+                        <option value="4">Jeudi</option>
+                        <option value="5">Vendredi</option>
+                        <option value="6">Samedi</option>
+                        <option value="0">Dimanche</option>
+                    </select>
+                </div>
+                
+                <div id="monthlyOptions" class="form-group" style="display: none;">
+                    <label>Jour du mois</label>
+                    <input type="number" id="todoDayOfMonth" min="1" max="31" value="1">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary">
+                    <span>✓</span> Créer
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddTodoModal()">
+                    Annuler
+                </button>
+            </div>
+        </form>
     </div>
 </div>
