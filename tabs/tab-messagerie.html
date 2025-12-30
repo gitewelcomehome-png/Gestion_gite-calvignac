@@ -1,0 +1,140 @@
+<div class="content-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div>
+        <h2 style="margin: 0; color: #2c3e50;">📧 Messagerie</h2>
+        <p style="margin: 8px 0 0 0; color: #7f8c8d;">Gérez vos emails et utilisez des templates de réponse</p>
+    </div>
+</div>
+
+<!-- Statistiques -->
+<div id="emailStats" style="margin-bottom: 24px;"></div>
+
+<!-- Onglets -->
+<div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 2px solid #ddd;">
+    <button id="tabEmails" onclick="switchMessagerieTab('emails')" style="padding: 12px 24px; border: none; background: #3498DB; color: white; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 600;">
+        📬 Emails
+    </button>
+    <button id="tabTemplates" onclick="switchMessagerieTab('templates')" style="padding: 12px 24px; border: none; background: white; color: #666; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 600;">
+        📝 Templates
+    </button>
+</div>
+
+<!-- Section Emails -->
+<div id="emailsSection" style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0;">Boîte de réception</h3>
+        <div style="display: flex; gap: 8px;">
+            <select id="emailFilter" onchange="filterEmails()" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px;">
+                <option value="all">Tous</option>
+                <option value="unread">Non lus</option>
+                <option value="read">Lus</option>
+                <option value="replied">Répondus</option>
+            </select>
+            <button onclick="loadEmails()" class="btn" style="background: #27AE60; color: white; padding: 8px 16px; border: none; border-radius: 6px;">🔄 Actualiser</button>
+        </div>
+    </div>
+    <div id="emailsContainer">
+        <p style="text-align: center; color: #999; padding: 40px;">Chargement...</p>
+    </div>
+</div>
+
+<!-- Section Templates -->
+<div id="templatesSection" style="display: none; background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0;">Templates de réponse</h3>
+        <button onclick="addTemplate()" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            ➕ Nouveau Template
+        </button>
+    </div>
+    <div id="templatesContainer">
+        <p style="text-align: center; color: #999; padding: 40px;">Chargement...</p>
+    </div>
+</div>
+
+<!-- Info box -->
+<div style="margin-top: 24px; padding: 16px; background: #E3F2FD; border-left: 4px solid #3498DB; border-radius: 8px;">
+    <h4 style="margin: 0 0 8px 0; color: #3498DB;">💡 Fonctionnalités</h4>
+    <ul style="margin: 0; padding-left: 20px; color: #666;">
+        <li><strong>Emails :</strong> Visualisez tous vos messages reçus et envoyés</li>
+        <li><strong>Réponse rapide :</strong> Utilisez les templates pour répondre en un clic</li>
+        <li><strong>Variables :</strong> Personnalisez vos messages avec {{client_name}}, {{gite}}, etc.</li>
+        <li><strong>Historique :</strong> Tous vos échanges sont sauvegardés et liés aux réservations</li>
+    </ul>
+</div>
+
+<!-- Modal Email -->
+<div id="emailModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 32px; border-radius: 12px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px;">
+            <div>
+                <h3 id="emailModalSubject" style="margin: 0 0 8px 0;"></h3>
+                <div style="color: #666; font-size: 0.9rem;">
+                    <strong>De:</strong> <span id="emailModalFrom"></span> | 
+                    <strong>Date:</strong> <span id="emailModalDate"></span>
+                </div>
+            </div>
+            <button onclick="closeEmailModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+        </div>
+        <div id="emailModalBody" style="line-height: 1.6; color: #333;"></div>
+    </div>
+</div>
+
+<!-- Modal Réponse -->
+<div id="replyModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 32px; border-radius: 12px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="margin: 0;">✍️ Répondre</h3>
+            <button onclick="closeReplyModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Template de réponse</label>
+            <div style="display: flex; gap: 8px;">
+                <select id="templateSelect" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <option value="">-- Choisir un template --</option>
+                </select>
+                <button onclick="applyTemplate()" class="btn" style="background: #3498DB; color: white; padding: 10px 20px; border: none; border-radius: 6px;">Appliquer</button>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Sujet</label>
+            <input type="text" id="replySubject" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" placeholder="Re: ...">
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Message</label>
+            <textarea id="replyBody" rows="10" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; resize: vertical;" placeholder="Votre réponse..."></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button onclick="closeReplyModal()" class="btn" style="background: #95A5A6; color: white; padding: 10px 20px; border: none; border-radius: 6px;">Annuler</button>
+            <button onclick="sendReply()" class="btn" style="background: #27AE60; color: white; padding: 10px 20px; border: none; border-radius: 6px;">📤 Envoyer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchMessagerieTab(tab) {
+    // Mettre à jour les boutons
+    document.getElementById('tabEmails').style.background = tab === 'emails' ? '#3498DB' : 'white';
+    document.getElementById('tabEmails').style.color = tab === 'emails' ? 'white' : '#666';
+    document.getElementById('tabTemplates').style.background = tab === 'templates' ? '#3498DB' : 'white';
+    document.getElementById('tabTemplates').style.color = tab === 'templates' ? 'white' : '#666';
+    
+    // Afficher la section correspondante
+    document.getElementById('emailsSection').style.display = tab === 'emails' ? 'block' : 'none';
+    document.getElementById('templatesSection').style.display = tab === 'templates' ? 'block' : 'none';
+    
+    // Charger les données
+    if (tab === 'emails') {
+        loadEmails();
+    } else {
+        loadTemplates();
+    }
+}
+
+// Charger les emails au démarrage
+if (typeof loadEmails === 'function') {
+    loadEmails();
+}
+</script>
