@@ -113,28 +113,3 @@
     </div>
 </div>
 
-<script>
-function switchMessagerieTab(tab) {
-    // Mettre à jour les boutons
-    document.getElementById('tabEmails').style.background = tab === 'emails' ? '#3498DB' : 'white';
-    document.getElementById('tabEmails').style.color = tab === 'emails' ? 'white' : '#666';
-    document.getElementById('tabTemplates').style.background = tab === 'templates' ? '#3498DB' : 'white';
-    document.getElementById('tabTemplates').style.color = tab === 'templates' ? 'white' : '#666';
-    
-    // Afficher la section correspondante
-    document.getElementById('emailsSection').style.display = tab === 'emails' ? 'block' : 'none';
-    document.getElementById('templatesSection').style.display = tab === 'templates' ? 'block' : 'none';
-    
-    // Charger les données
-    if (tab === 'emails') {
-        loadEmails();
-    } else {
-        loadTemplates();
-    }
-}
-
-// Charger les emails au démarrage
-if (typeof loadEmails === 'function') {
-    loadEmails();
-}
-</script>
