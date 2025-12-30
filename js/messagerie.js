@@ -2,6 +2,35 @@
 // 📧 GESTION DES EMAILS ET TEMPLATES
 // ==========================================
 
+function switchMessagerieTab(tab) {
+    // Mettre à jour les boutons
+    const emailBtn = document.getElementById('tabEmails');
+    const templatesBtn = document.getElementById('tabTemplates');
+    
+    if (emailBtn) {
+        emailBtn.style.background = tab === 'emails' ? '#3498DB' : 'white';
+        emailBtn.style.color = tab === 'emails' ? 'white' : '#666';
+    }
+    if (templatesBtn) {
+        templatesBtn.style.background = tab === 'templates' ? '#3498DB' : 'white';
+        templatesBtn.style.color = tab === 'templates' ? 'white' : '#666';
+    }
+    
+    // Afficher la section correspondante
+    const emailsSection = document.getElementById('emailsSection');
+    const templatesSection = document.getElementById('templatesSection');
+    
+    if (emailsSection) emailsSection.style.display = tab === 'emails' ? 'block' : 'none';
+    if (templatesSection) templatesSection.style.display = tab === 'templates' ? 'block' : 'none';
+    
+    // Charger les données
+    if (tab === 'emails') {
+        loadEmails();
+    } else {
+        loadTemplates();
+    }
+}
+
 async function loadEmails() {
     const { data, error } = await supabase
         .from('emails')

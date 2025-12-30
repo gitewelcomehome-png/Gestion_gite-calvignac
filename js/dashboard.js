@@ -29,10 +29,13 @@ function updateDashboardHeader() {
     const onejan = new Date(today.getFullYear(), 0, 1);
     const weekNumber = Math.ceil((((today - onejan) / 86400000) + onejan.getDay() + 1) / 7);
     
-    document.getElementById('dashboard-date').textContent = formatDateFromObj(today);
-    document.getElementById('dashboard-week-number').textContent = `Semaine ${weekNumber}`;
-    document.getElementById('dashboard-week-info').textContent = 
-        `Du ${formatDateFromObj(weekStart)} au ${formatDateFromObj(weekEnd)}`;
+    const dateEl = document.getElementById('dashboard-date');
+    const weekNumEl = document.getElementById('dashboard-week-number');
+    const weekInfoEl = document.getElementById('dashboard-week-info');
+    
+    if (dateEl) dateEl.textContent = formatDateFromObj(today);
+    if (weekNumEl) weekNumEl.textContent = `Semaine ${weekNumber}`;
+    if (weekInfoEl) weekInfoEl.textContent = `Du ${formatDateFromObj(weekStart)} au ${formatDateFromObj(weekEnd)}`;
 }
 
 // ==========================================
@@ -355,15 +358,24 @@ async function updateTodoList(category) {
     todos.forEach(todo => {
         const checked = todo.completed ? 'checked' : '';
         const textStyle = todo.completed ? 'text-decoration: line-through; opacity: 0.6;' : '';
+        const recurrentBadge = todo.is_recurrent ? '<span style="background: #9B59B6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 6px;">🔁 Récurrent</span>' : '';
+        const frequencyLabel = todo.is_recurrent && todo.frequency ? 
+            (todo.frequency === 'weekly' ? 'Hebdo' : todo.frequency === 'biweekly' ? 'Bi-hebdo' : 'Mensuel') : '';
         
         html += `
             <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee; align-items: start;">
                 <input type="checkbox" ${checked} onchange="toggleTodo(${todo.id}, this.checked)" 
                        style="width: 18px; height: 18px; cursor: pointer; margin-top: 2px;">
                 <div style="flex: 1; ${textStyle}">
-                    <div style="font-weight: 500;">${todo.title}</div>
+                    <div style="font-weight: 500;">
+                        ${todo.title}
+                        ${recurrentBadge}
+                    </div>
                     ${todo.description ? `<div style="font-size: 0.85rem; color: #666; margin-top: 4px;">${todo.description}</div>` : ''}
-                    ${todo.gite ? `<span style="background: ${todo.gite === 'Trévoux' ? '#667eea' : '#f093fb'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; display: inline-block; margin-top: 4px;">${todo.gite}</span>` : ''}
+                    <div style="display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;">
+                        ${todo.gite ? `<span style="background: ${todo.gite === 'Trévoux' ? '#667eea' : '#f093fb'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">${todo.gite}</span>` : ''}
+                        ${todo.is_recurrent && frequencyLabel ? `<span style="background: #E8DAEF; color: #7D3C98; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">${frequencyLabel}</span>` : ''}
+                    </div>
                 </div>
                 <button onclick="deleteTodo(${todo.id})" 
                         style="background: none; border: none; color: #E74C3C; cursor: pointer; font-size: 1.2rem; padding: 0;"
@@ -388,6 +400,34 @@ async function addTodoItem(category) {
         if (choice === '2') gite = 'Couzon';
     }
     
+    // Demander si la tâche est récurrente
+    const isRecurrentChoice = confirm('Cette tâche doit-elle se répéter automatiquement ?');
+    let frequency = null;
+    let frequencyDetail = null;
+    let nextOccurrence = null;
+    
+    if (isRecurrentChoice) {
+        const freqChoice = prompt('Fréquence :\n1 = Chaque semaine\n2 = Toutes les 2 semaines\n3 = Chaque mois');
+        if (freqChoice === '1') {
+            frequency = 'weekly';
+            const day = prompt('Quel jour de la semaine ?\n1=Lundi, 2=Mardi, 3=Mercredi, 4=Jeudi, 5=Vendredi, 6=Samedi, 7=Dimanche');
+            if (day) {
+                frequencyDetail = { day_of_week: parseInt(day) };
+                nextOccurrence = calculateNextOccurrence('weekly', frequencyDetail);
+            }
+        } else if (freqChoice === '2') {
+            frequency = 'biweekly';
+            nextOccurrence = calculateNextOccurrence('biweekly', null);
+        } else if (freqChoice === '3') {
+            frequency = 'monthly';
+            const day = prompt('Quel jour du mois ? (1-31)');
+            if (day) {
+                frequencyDetail = { day_of_month: parseInt(day) };
+                nextOccurrence = calculateNextOccurrence('monthly', frequencyDetail);
+            }
+        }
+    }
+    
     const { error } = await supabase
         .from('todos')
         .insert({
@@ -395,7 +435,11 @@ async function addTodoItem(category) {
             title: title,
             description: description || null,
             gite: gite,
-            completed: false
+            completed: false,
+            is_recurrent: isRecurrentChoice,
+            frequency: frequency,
+            frequency_detail: frequencyDetail,
+            next_occurrence: nextOccurrence
         });
     
     if (error) {
@@ -408,11 +452,89 @@ async function addTodoItem(category) {
     await updateDashboardStats(); // Mettre à jour le compteur
 }
 
+function calculateNextOccurrence(frequency, frequencyDetail) {
+    const now = new Date();
+    const next = new Date(now);
+    
+    switch (frequency) {
+        case 'weekly':
+            const targetDay = frequencyDetail?.day_of_week || 1;
+            const currentDay = next.getDay() || 7; // Dimanche = 0 -> 7
+            const daysUntilTarget = (targetDay - currentDay + 7) % 7 || 7;
+            next.setDate(next.getDate() + daysUntilTarget);
+            break;
+        case 'biweekly':
+            next.setDate(next.getDate() + 14);
+            break;
+        case 'monthly':
+            const dayOfMonth = frequencyDetail?.day_of_month || 1;
+            next.setMonth(next.getMonth() + 1);
+            next.setDate(dayOfMonth);
+            break;
+    }
+    
+    return next.toISOString();
+}
+
 async function toggleTodo(id, completed) {
-    // Si coché, archiver la tâche au lieu de simplement marquer comme complétée
-    const updateData = completed ? 
-        { completed: true, archived_at: new Date().toISOString() } : 
-        { completed: false, archived_at: null };
+    // Récupérer la tâche pour vérifier si elle est récurrente
+    const { data: todo, error: fetchError } = await supabase
+        .from('todos')
+        .select('*')
+        .eq('id', id)
+        .single();
+    
+    if (fetchError || !todo) {
+        console.error('Erreur récupération todo:', fetchError);
+        return;
+    }
+    
+    // Si cochée et récurrente, créer une nouvelle occurrence et archiver l'actuelle
+    if (completed && todo.is_recurrent) {
+        // Calculer la prochaine occurrence
+        const nextOccurrence = calculateNextOccurrence(todo.frequency, todo.frequency_detail);
+        
+        // Créer la nouvelle occurrence
+        const { error: insertError } = await supabase
+            .from('todos')
+            .insert({
+                category: todo.category,
+                title: todo.title,
+                description: todo.description,
+                gite: todo.gite,
+                completed: false,
+                is_recurrent: true,
+                frequency: todo.frequency,
+                frequency_detail: todo.frequency_detail,
+                next_occurrence: nextOccurrence,
+                archived_at: null
+            });
+        
+        if (insertError) {
+            console.error('Erreur création nouvelle occurrence:', insertError);
+        }
+        
+        // Archiver l'ancienne
+        await supabase
+            .from('todos')
+            .update({ 
+                completed: true, 
+                archived_at: new Date().toISOString(),
+                last_generated: new Date().toISOString()
+            })
+            .eq('id', id);
+    } else {
+        // Si coché (non récurrente), archiver la tâche
+        // Si décoché, restaurer
+        const updateData = completed ? 
+            { completed: true, archived_at: new Date().toISOString() } : 
+            { completed: false, archived_at: null };
+        
+        await supabase
+            .from('todos')
+            .update(updateData)
+            .eq('id', id);
+    }
     
     const { error } = await supabase
         .from('todos')
