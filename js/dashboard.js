@@ -42,25 +42,10 @@ function updateDashboardHeader() {
 async function updateDashboardAlerts() {
     const alerts = [];
     
-    // Vérifier les paiements en attente
+    // Récupérer les réservations
     const reservations = await getAllReservations();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const unpaidReservations = reservations.filter(r => {
-        const arrival = parseLocalDate(r.dateDebut);
-        const daysUntilArrival = Math.ceil((arrival - today) / (1000 * 60 * 60 * 24));
-        return r.paiement !== 'Soldé' && daysUntilArrival <= 7 && daysUntilArrival >= 0;
-    });
-    
-    if (unpaidReservations.length > 0) {
-        alerts.push({
-            type: 'warning',
-            icon: '💰',
-            message: `${unpaidReservations.length} paiement(s) en attente pour arrivées cette semaine`,
-            action: () => switchTab('reservations')
-        });
-    }
     
     // Vérifier les fiches clients à envoyer (J-3)
     const sendReminderReservations = reservations.filter(r => {
@@ -330,7 +315,7 @@ async function updateDashboardMenages() {
                 <div>
                     <strong style="color: ${giteColor};">${c.gite}</strong>
                     <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
-                        📅 ${formatDate(new Date(c.scheduled_date))} ${timeIcon}
+                        📅 ${formatDateFromObj(new Date(c.scheduled_date))} ${timeIcon}
                     </div>
                 </div>
                 <span style="font-size: 1.5rem; color: ${color};" title="${c.status}">${icon}</span>
@@ -463,6 +448,16 @@ async function deleteTodo(id) {
     // Recharger toutes les listes
     await updateTodoLists();
     await updateDashboardStats();
+}
+
+// Helper pour ouvrir l'édition d'une réservation
+function openEditReservation(id) {
+    window.openEditModal(id);
+}
+
+// Helper pour ouvrir la fiche client
+function openFicheClient(id) {
+    window.openClientSheet(id);
 }
 
 // ==========================================
