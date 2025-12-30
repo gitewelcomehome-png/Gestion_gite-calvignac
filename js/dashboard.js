@@ -579,7 +579,11 @@ function openEditReservation(id) {
 
 // Helper pour ouvrir la fiche client
 function openFicheClient(id) {
-    window.openClientSheet(id);
+    if (typeof aperçuFicheClient === 'function') {
+        aperçuFicheClient(id);
+    } else {
+        console.error('Function aperçuFicheClient not found');
+    }
 }
 
 // ==========================================
