@@ -341,27 +341,29 @@ async function updateTodoList(category) {
     todos.forEach(todo => {
         const checked = todo.completed ? 'checked' : '';
         const textStyle = todo.completed ? 'text-decoration: line-through; opacity: 0.6;' : '';
-        const recurrentBadge = todo.is_recurrent ? '<span style="background: #9B59B6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 6px;">🔁 Récurrent</span>' : '';
+        const recurrentBadge = todo.is_recurrent ? '<span style="background: #9B59B6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px;">🔁 Récurrent</span>' : '';
         const frequencyLabel = todo.is_recurrent && todo.frequency ? 
             (todo.frequency === 'weekly' ? 'Hebdo' : todo.frequency === 'biweekly' ? 'Bi-hebdo' : 'Mensuel') : '';
         
         html += `
-            <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee; align-items: start;">
+            <div style="display: flex; gap: 12px; padding: 14px; margin-bottom: 8px; background: ${todo.completed ? '#f8f9fa' : 'white'}; border-radius: 8px; border: 1px solid #e9ecef; align-items: start; transition: all 0.2s;">
                 <input type="checkbox" ${checked} onchange="toggleTodo(${todo.id}, this.checked)" 
-                       style="width: 18px; height: 18px; cursor: pointer; margin-top: 2px;">
+                       style="width: 20px; height: 20px; cursor: pointer; margin-top: 3px; flex-shrink: 0;">
                 <div style="flex: 1; ${textStyle}">
-                    <div style="font-weight: 500;">
+                    <div style="font-weight: 500; font-size: 0.95rem; margin-bottom: 6px; line-height: 1.4;">
                         ${todo.title}
                         ${recurrentBadge}
                     </div>
-                    ${todo.description ? `<div style="font-size: 0.85rem; color: #666; margin-top: 4px;">${todo.description}</div>` : ''}
-                    <div style="display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;">
-                        ${todo.gite ? `<span style="background: ${todo.gite === 'Trévoux' ? '#667eea' : '#f093fb'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">${todo.gite}</span>` : ''}
-                        ${todo.is_recurrent && frequencyLabel ? `<span style="background: #E8DAEF; color: #7D3C98; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">${frequencyLabel}</span>` : ''}
+                    ${todo.description ? `<div style="font-size: 0.85rem; color: #6c757d; margin-bottom: 8px; line-height: 1.5;">${todo.description}</div>` : ''}
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        ${todo.gite ? `<span style="background: ${todo.gite === 'Trévoux' ? '#667eea' : '#f093fb'}; color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${todo.gite}</span>` : ''}
+                        ${todo.is_recurrent && frequencyLabel ? `<span style="background: #E8DAEF; color: #7D3C98; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${frequencyLabel}</span>` : ''}
                     </div>
                 </div>
                 <button onclick="deleteTodo(${todo.id})" 
-                        style="background: none; border: none; color: #E74C3C; cursor: pointer; font-size: 1.2rem; padding: 0;"
+                        style="background: #fee; border: 1px solid #fcc; color: #E74C3C; cursor: pointer; font-size: 1.3rem; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; transition: all 0.2s; line-height: 1;"
+                        onmouseover="this.style.background='#E74C3C'; this.style.color='white';"
+                        onmouseout="this.style.background='#fee'; this.style.color='#E74C3C';"
                         title="Supprimer">×</button>
             </div>
         `;
@@ -371,68 +373,118 @@ async function updateTodoList(category) {
 }
 
 async function addTodoItem(category) {
-    const title = prompt('Titre de la tâche :');
-    if (!title) return;
+    // Afficher le modal
+    const modal = document.getElementById('addTodoModal');
+    const form = document.getElementById('addTodoForm');
+    const categoryInput = document.getElementById('todoCategory');
+    const giteGroup = document.getElementById('giteSelectGroup');
     
-    const description = prompt('Description (optionnel) :');
+    // Configurer le modal selon la catégorie
+    categoryInput.value = category;
     
-    let gite = null;
+    // Afficher le sélecteur de gîte uniquement pour "travaux"
     if (category === 'travaux') {
-        const choice = prompt('Gîte concerné ?\n1 = Trévoux\n2 = Couzon\n(vide pour les deux)');
-        if (choice === '1') gite = 'Trévoux';
-        if (choice === '2') gite = 'Couzon';
+        giteGroup.style.display = 'block';
+    } else {
+        giteGroup.style.display = 'none';
     }
     
-    // Demander si la tâche est récurrente
-    const isRecurrentChoice = confirm('Cette tâche doit-elle se répéter automatiquement ?');
-    let frequency = null;
-    let frequencyDetail = null;
-    let nextOccurrence = null;
+    // Réinitialiser le formulaire
+    form.reset();
+    document.getElementById('recurrentOptions').style.display = 'none';
     
-    if (isRecurrentChoice) {
-        const freqChoice = prompt('Fréquence :\n1 = Chaque semaine\n2 = Toutes les 2 semaines\n3 = Chaque mois');
-        if (freqChoice === '1') {
-            frequency = 'weekly';
-            const day = prompt('Quel jour de la semaine ?\n1=Lundi, 2=Mardi, 3=Mercredi, 4=Jeudi, 5=Vendredi, 6=Samedi, 7=Dimanche');
-            if (day) {
-                frequencyDetail = { day_of_week: parseInt(day) };
-                nextOccurrence = calculateNextOccurrence('weekly', frequencyDetail);
-            }
-        } else if (freqChoice === '2') {
-            frequency = 'biweekly';
-            nextOccurrence = calculateNextOccurrence('biweekly', null);
-        } else if (freqChoice === '3') {
-            frequency = 'monthly';
-            const day = prompt('Quel jour du mois ? (1-31)');
-            if (day) {
-                frequencyDetail = { day_of_month: parseInt(day) };
-                nextOccurrence = calculateNextOccurrence('monthly', frequencyDetail);
-            }
-        }
-    }
+    modal.style.display = 'block';
+}
+
+function closeAddTodoModal() {
+    document.getElementById('addTodoModal').style.display = 'none';
+    document.getElementById('addTodoForm').reset();
+}
+
+// Gestion du formulaire d'ajout de tâche
+function initializeTodoModal() {
+    const recurrentCheckbox = document.getElementById('todoRecurrent');
+    const recurrentOptions = document.getElementById('recurrentOptions');
+    const frequencySelect = document.getElementById('todoFrequency');
+    const weeklyOptions = document.getElementById('weeklyOptions');
+    const monthlyOptions = document.getElementById('monthlyOptions');
     
-    const { error } = await supabase
-        .from('todos')
-        .insert({
-            category: category,
-            title: title,
-            description: description || null,
-            gite: gite,
-            completed: false,
-            is_recurrent: isRecurrentChoice,
-            frequency: frequency,
-            frequency_detail: frequencyDetail,
-            next_occurrence: nextOccurrence
+    // Afficher/masquer les options récurrentes
+    if (recurrentCheckbox) {
+        recurrentCheckbox.addEventListener('change', function() {
+            recurrentOptions.style.display = this.checked ? 'block' : 'none';
         });
-    
-    if (error) {
-        console.error('Erreur création todo:', error);
-        alert('Erreur lors de la création de la tâche');
-        return;
     }
     
-    await updateTodoList(category);
-    await updateDashboardStats(); // Mettre à jour le compteur
+    // Afficher/masquer les options selon la fréquence
+    if (frequencySelect) {
+        frequencySelect.addEventListener('change', function() {
+            if (this.value === 'monthly') {
+                weeklyOptions.style.display = 'none';
+                monthlyOptions.style.display = 'block';
+            } else {
+                weeklyOptions.style.display = 'block';
+                monthlyOptions.style.display = 'none';
+            }
+        });
+    }
+    
+    // Soumission du formulaire
+    const addTodoForm = document.getElementById('addTodoForm');
+    if (addTodoForm) {
+        addTodoForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const category = document.getElementById('todoCategory').value;
+            const title = document.getElementById('todoTitle').value;
+            const description = document.getElementById('todoDescription').value;
+            const gite = document.getElementById('todoGite').value || null;
+            const isRecurrent = document.getElementById('todoRecurrent').checked;
+            
+            let frequency = null;
+            let frequencyDetail = null;
+            let nextOccurrence = null;
+            
+            if (isRecurrent) {
+                frequency = document.getElementById('todoFrequency').value;
+                
+                if (frequency === 'weekly' || frequency === 'biweekly') {
+                    const dayOfWeek = parseInt(document.getElementById('todoWeekday').value);
+                    frequencyDetail = { day_of_week: dayOfWeek };
+                } else if (frequency === 'monthly') {
+                    const dayOfMonth = parseInt(document.getElementById('todoDayOfMonth').value);
+                    frequencyDetail = { day_of_month: dayOfMonth };
+                }
+                
+                nextOccurrence = calculateNextOccurrence(frequency, frequencyDetail);
+            }
+            
+            const { error } = await supabase
+                .from('todos')
+                .insert({
+                    category: category,
+                    title: title,
+                    description: description || null,
+                    gite: gite,
+                    completed: false,
+                    is_recurrent: isRecurrent,
+                    frequency: frequency,
+                    frequency_detail: frequencyDetail,
+                    next_occurrence: nextOccurrence
+                });
+            
+            if (error) {
+                console.error('Erreur création todo:', error);
+                alert('Erreur lors de la création de la tâche');
+                return;
+            }
+            
+            // Fermer le modal et rafraîchir
+            closeAddTodoModal();
+            await updateTodoList(category);
+            await updateDashboardStats();
+        });
+    }
 }
 
 function calculateNextOccurrence(frequency, frequencyDetail) {
@@ -442,12 +494,15 @@ function calculateNextOccurrence(frequency, frequencyDetail) {
     switch (frequency) {
         case 'weekly':
             const targetDay = frequencyDetail?.day_of_week || 1;
-            const currentDay = next.getDay() || 7; // Dimanche = 0 -> 7
+            const currentDay = next.getDay() || 7;
             const daysUntilTarget = (targetDay - currentDay + 7) % 7 || 7;
             next.setDate(next.getDate() + daysUntilTarget);
             break;
         case 'biweekly':
-            next.setDate(next.getDate() + 14);
+            const biweeklyTargetDay = frequencyDetail?.day_of_week || 1;
+            const biweeklyCurrentDay = next.getDay() || 7;
+            const biweeklyDaysUntilTarget = (biweeklyTargetDay - biweeklyCurrentDay + 7) % 7 || 7;
+            next.setDate(next.getDate() + biweeklyDaysUntilTarget + 14);
             break;
         case 'monthly':
             const dayOfMonth = frequencyDetail?.day_of_month || 1;
@@ -589,3 +644,9 @@ window.deleteTodo = deleteTodo;
 window.openEditReservation = openEditReservation;
 window.openFicheClient = openFicheClient;
 window.refreshDashboard = refreshDashboard;
+window.closeAddTodoModal = closeAddTodoModal;
+
+// Initialiser le modal au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTodoModal();
+});
