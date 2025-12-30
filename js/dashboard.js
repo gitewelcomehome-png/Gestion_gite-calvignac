@@ -4,7 +4,18 @@
  */
 
 // ==========================================
-// 📅 INFORMATIONS SEMAINE
+// �️ UTILITAIRES DATE
+// ==========================================
+
+function formatDateFromObj(dateObj) {
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = dateObj.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
+// ==========================================
+// �📅 INFORMATIONS SEMAINE
 // ==========================================
 
 function updateDashboardHeader() {
@@ -18,10 +29,10 @@ function updateDashboardHeader() {
     const onejan = new Date(today.getFullYear(), 0, 1);
     const weekNumber = Math.ceil((((today - onejan) / 86400000) + onejan.getDay() + 1) / 7);
     
-    document.getElementById('dashboard-date').textContent = formatDate(today);
+    document.getElementById('dashboard-date').textContent = formatDateFromObj(today);
     document.getElementById('dashboard-week-number').textContent = `Semaine ${weekNumber}`;
     document.getElementById('dashboard-week-info').textContent = 
-        `Du ${formatDate(weekStart)} au ${formatDate(weekEnd)}`;
+        `Du ${formatDateFromObj(weekStart)} au ${formatDateFromObj(weekEnd)}`;
 }
 
 // ==========================================
@@ -48,6 +59,22 @@ async function updateDashboardAlerts() {
             icon: '💰',
             message: `${unpaidReservations.length} paiement(s) en attente pour arrivées cette semaine`,
             action: () => switchTab('reservations')
+        });
+    }
+    
+    // Vérifier les fiches clients à envoyer (J-3)
+    const sendReminderReservations = reservations.filter(r => {
+        const arrival = parseLocalDate(r.dateDebut);
+        const daysUntilArrival = Math.ceil((arrival - today) / (1000 * 60 * 60 * 24));
+        return daysUntilArrival === 3;
+    });
+    
+    if (sendReminderReservations.length > 0) {
+        alerts.push({
+            type: 'info',
+            icon: '📄',
+            message: `${sendReminderReservations.length} fiche(s) client à envoyer (J-3)`,
+            action: () => switchTab('dashboard')
         });
     }
     
@@ -86,6 +113,17 @@ async function updateDashboardAlerts() {
         `;
     });
     container.innerHTML = html;
+}
+
+// ==========================================
+// 🛠️ FONCTIONS HELPERS POUR ACTIONS
+// ==========================================
+
+function openEditReservation(id) {
+    // Fonction définie dans index.html
+    if (typeof window.openEditModal === 'function') {
+        window.openEditModal(id);
+    }
 }
 
 // ==========================================
@@ -198,23 +236,41 @@ async function updateDashboardReservations() {
         const paiementIcon = r.paiement === 'Soldé' ? '✅' : r.paiement === 'Acompte reçu' ? '⏳' : '❌';
         const paiementColor = r.paiement === 'Soldé' ? '#27AE60' : r.paiement === 'Acompte reçu' ? '#F39C12' : '#E74C3C';
         
+        // Calculer jours avant arrivée
+        const daysUntilArrival = Math.ceil((arrival - today) / (1000 * 60 * 60 * 24));
+        const shouldSendReminder = daysUntilArrival === 3;
+        
         html += `
-            <div style="border-left: 4px solid ${giteColor}; padding: 15px; margin-bottom: 10px; background: #f8f9fa; border-radius: 8px;">
+            <div style="border-left: 4px solid ${giteColor}; padding: 15px; margin-bottom: 10px; background: ${shouldSendReminder ? '#FFF9E6' : '#f8f9fa'}; border-radius: 8px; position: relative;">
+                ${shouldSendReminder ? '<div style="position: absolute; top: 10px; right: 10px; background: #F39C12; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">⏰ J-3 : Envoyer fiche</div>' : ''}
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                    <div>
+                    <div style="flex: 1;">
                         <strong style="font-size: 1.1rem; color: ${giteColor};">${r.nom}</strong>
                         <div style="color: #666; font-size: 0.9rem; margin-top: 4px;">
                             <span style="background: ${badgeColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 8px;">${badge}</span>
-                            ${formatDate(arrival)} → ${formatDate(departure)} (${r.nuits} nuits)
+                            ${formatDateFromObj(arrival)} → ${formatDateFromObj(departure)} (${r.nuits} nuits)
+                        </div>
+                        <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #666; margin-top: 6px;">
+                            <span>🏠 ${r.gite}</span>
+                            <span>💰 ${r.montant.toFixed(0)} €</span>
+                            <span>👥 ${r.nb_personnes || '-'} pers.</span>
+                            ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'};">📅 J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
                         </div>
                     </div>
-                    <span style="font-size: 1.5rem;" title="${r.paiement}">${paiementIcon}</span>
+                    <span style="font-size: 1.5rem; margin-left: 10px;" title="${r.paiement}">${paiementIcon}</span>
                 </div>
-                <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #666;">
-                    <span>🏠 ${r.gite}</span>
-                    <span>💰 ${r.montant.toFixed(0)} €</span>
-                    <span>👥 ${r.nb_personnes || '-'} pers.</span>
+                ${isArrival ? `
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; display: flex; gap: 8px;">
+                    <button onclick="openFicheClient(${r.id})" 
+                            style="flex: 1; background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        📄 Fiche Client
+                    </button>
+                    <button onclick="openEditReservation(${r.id})" 
+                            style="background: #3498DB; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                        ✏️
+                    </button>
                 </div>
+                ` : ''}
             </div>
         `;
     });
