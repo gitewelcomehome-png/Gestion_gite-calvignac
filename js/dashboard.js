@@ -402,32 +402,36 @@ function closeAddTodoModal() {
 }
 
 // Gestion du formulaire d'ajout de tâche
+let todoModalInitialized = false;
+
 function initializeTodoModal() {
+    // Ne pas réinitialiser si déjà fait
+    if (todoModalInitialized) return;
+    
     const recurrentCheckbox = document.getElementById('todoRecurrent');
     const recurrentOptions = document.getElementById('recurrentOptions');
     const frequencySelect = document.getElementById('todoFrequency');
     const weeklyOptions = document.getElementById('weeklyOptions');
     const monthlyOptions = document.getElementById('monthlyOptions');
     
+    // Vérifier que les éléments existent
+    if (!recurrentCheckbox || !frequencySelect) return;
+    
     // Afficher/masquer les options récurrentes
-    if (recurrentCheckbox) {
-        recurrentCheckbox.addEventListener('change', function() {
-            recurrentOptions.style.display = this.checked ? 'block' : 'none';
-        });
-    }
+    recurrentCheckbox.addEventListener('change', function() {
+        recurrentOptions.style.display = this.checked ? 'block' : 'none';
+    });
     
     // Afficher/masquer les options selon la fréquence
-    if (frequencySelect) {
-        frequencySelect.addEventListener('change', function() {
-            if (this.value === 'monthly') {
-                weeklyOptions.style.display = 'none';
-                monthlyOptions.style.display = 'block';
-            } else {
-                weeklyOptions.style.display = 'block';
-                monthlyOptions.style.display = 'none';
-            }
-        });
-    }
+    frequencySelect.addEventListener('change', function() {
+        if (this.value === 'monthly') {
+            weeklyOptions.style.display = 'none';
+            monthlyOptions.style.display = 'block';
+        } else {
+            weeklyOptions.style.display = 'block';
+            monthlyOptions.style.display = 'none';
+        }
+    });
     
     // Soumission du formulaire
     const addTodoForm = document.getElementById('addTodoForm');
@@ -485,6 +489,9 @@ function initializeTodoModal() {
             await updateDashboardStats();
         });
     }
+    
+    // Marquer comme initialisé
+    todoModalInitialized = true;
 }
 
 function calculateNextOccurrence(frequency, frequencyDetail) {
@@ -635,6 +642,9 @@ async function refreshDashboard() {
     await updateDashboardReservations();
     await updateDashboardMenages();
     await updateTodoLists();
+    
+    // Initialiser le modal si pas déjà fait
+    initializeTodoModal();
 }
 
 // Exposer les fonctions dans le scope global pour les appels depuis HTML
@@ -645,8 +655,3 @@ window.openEditReservation = openEditReservation;
 window.openFicheClient = openFicheClient;
 window.refreshDashboard = refreshDashboard;
 window.closeAddTodoModal = closeAddTodoModal;
-
-// Initialiser le modal au chargement
-document.addEventListener('DOMContentLoaded', function() {
-    initializeTodoModal();
-});
