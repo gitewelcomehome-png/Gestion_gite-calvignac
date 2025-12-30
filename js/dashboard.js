@@ -119,7 +119,6 @@ function openEditReservation(id) {
 // ==========================================
 
 async function updateDashboardStats() {
-    const reservations = await getAllReservations();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -128,35 +127,7 @@ async function updateDashboardStats() {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
     
-    // Réservations de la semaine (qui arrivent ou partent cette semaine)
-    const weekReservations = reservations.filter(r => {
-        const arrival = parseLocalDate(r.dateDebut);
-        const departure = parseLocalDate(r.dateFin);
-        return (arrival >= weekStart && arrival <= weekEnd) || 
-               (departure >= weekStart && departure <= weekEnd) ||
-               (arrival <= weekStart && departure >= weekEnd);
-    });
-    
-    // CA de la semaine (arrivées)
-    const weekArrivals = reservations.filter(r => {
-        const arrival = parseLocalDate(r.dateDebut);
-        return arrival >= weekStart && arrival <= weekEnd;
-    });
-    const caWeek = weekArrivals.reduce((sum, r) => sum + r.montant, 0);
-    
-    // Taux d'occupation (jours occupés / jours disponibles pour 2 gîtes)
-    let occupiedDays = 0;
-    weekReservations.forEach(r => {
-        const arrival = parseLocalDate(r.dateDebut);
-        const departure = parseLocalDate(r.dateFin);
-        const start = arrival < weekStart ? weekStart : arrival;
-        const end = departure > weekEnd ? weekEnd : departure;
-        occupiedDays += Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-    });
-    const totalDays = 7 * 2; // 7 jours, 2 gîtes
-    const occupationRate = ((occupiedDays / totalDays) * 100).toFixed(0);
-    
-    // Ménages à faire
+    // Compteur ménages à faire cette semaine
     const { data: cleanings } = await supabase
         .from('cleaning_schedule')
         .select('*')
@@ -165,20 +136,29 @@ async function updateDashboardStats() {
     
     const cleaningsCount = cleanings ? cleanings.length : 0;
     
-    // Actions en attente (todos non complétés et non archivés)
+    // Compteurs todos par catégorie (non archivés, non complétés)
     const { data: todos } = await supabase
         .from('todos')
         .select('*')
         .eq('completed', false)
         .is('archived_at', null);
     
-    const pendingCount = todos ? todos.length : 0;
+    const reservationsTodos = todos ? todos.filter(t => t.category === 'reservations').length : 0;
+    const travauxTodos = todos ? todos.filter(t => t.category === 'travaux').length : 0;
+    const achatsTodos = todos ? todos.filter(t => t.category === 'achats').length : 0;
     
-    // Mettre à jour l'affichage
-    document.getElementById('dashboard-ca-week').textContent = caWeek.toFixed(0) + ' €';
-    document.getElementById('dashboard-occupation').textContent = occupationRate + '%';
-    document.getElementById('dashboard-cleanings').textContent = cleaningsCount;
-    document.getElementById('dashboard-pending').textContent = pendingCount;
+    // Mettre à jour les compteurs dans les titres
+    const cleaningsEl = document.getElementById('dashboard-cleanings');
+    if (cleaningsEl) cleaningsEl.textContent = cleaningsCount;
+    
+    const reservationsEl = document.getElementById('todo-count-reservations');
+    if (reservationsEl) reservationsEl.textContent = reservationsTodos;
+    
+    const travauxEl = document.getElementById('todo-count-travaux');
+    if (travauxEl) travauxEl.textContent = travauxTodos;
+    
+    const achatsEl = document.getElementById('todo-count-achats');
+    if (achatsEl) achatsEl.textContent = achatsTodos;
 }
 
 // ==========================================
@@ -337,6 +317,9 @@ async function updateTodoLists() {
     await updateTodoList('reservations');
     await updateTodoList('travaux');
     await updateTodoList('achats');
+    
+    // Mettre à jour les compteurs après modification des todos
+    await updateDashboardStats();
 }
 
 async function updateTodoList(category) {
