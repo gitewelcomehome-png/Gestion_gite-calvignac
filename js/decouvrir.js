@@ -199,9 +199,7 @@ async function chargerPOIsFromSupabase(giteActuel) {
             if (poi.nom !== undefined && poi.name === undefined) poi.name = poi.nom;
         });
         
-        console.log(`✅ ${pois.length} POIs chargés pour ${giteActuel}`);
         if (pois.length > 0) {
-            console.log('🔍 Premier POI:', {
                 nom: pois[0].nom,
                 lat: pois[0].lat,
                 lng: pois[0].lng,
@@ -470,7 +468,6 @@ async function chargerActivites() {
             // Log pour debug
             const premiereTrevoux = window.activitesParGite['Trévoux'][0];
             if (premiereTrevoux) {
-                console.log('🔍 Exemple activité Trévoux:', {
                     nom: premiereTrevoux.nom,
                     lat: premiereTrevoux.lat,
                     lng: premiereTrevoux.lng,
@@ -479,7 +476,6 @@ async function chargerActivites() {
                 });
             }
             
-            console.log('Activités chargées:', window.activitesParGite);
             
             // Mettre à jour le compteur
             const totalTrevoux = window.activitesParGite['Trévoux'].length;
@@ -493,14 +489,10 @@ async function chargerActivites() {
         // Afficher automatiquement les activités du gîte sélectionné
         const giteSelectionne = document.getElementById('decouvrir_gite')?.value;
         if (giteSelectionne) {
-            console.log('Affichage automatique pour:', giteSelectionne);
             // Petit délai pour s'assurer que le DOM est prêt
             setTimeout(() => {
-                console.log('🎯 Appel de afficherActivites() après délai...');
                 const container = document.getElementById('activitesParCategorie');
-                console.log('📦 Container trouvé ?', container ? 'OUI ✅' : 'NON ❌');
                 if (container) {
-                    console.log('📦 Container innerHTML avant:', container.innerHTML.substring(0, 100));
                 }
                 try {
                     afficherActivites(giteSelectionne);
@@ -509,7 +501,6 @@ async function chargerActivites() {
                 }
             }, 100);
         } else {
-            console.log('Aucun gîte sélectionné, affichage de tous');
             setTimeout(() => {
                 afficherToutesLesActivites();
             }, 100);
@@ -539,7 +530,6 @@ async function chargerToutSurCarte() {
     
     // Récupérer les activités déjà chargées pour ce gîte
     const activitesGite = window.activitesParGite[gite] || [];
-    console.log(`📊 Activités ${gite} disponibles:`, activitesGite.length);
     
     // Mapper les activités pour la carte avec coordonnées valides
     window.allActivites = activitesGite
@@ -562,7 +552,6 @@ async function chargerToutSurCarte() {
             isActivite: true
         }));
     
-    console.log(`✅ ${window.allActivites.length} activités avec coordonnées valides pour la carte`);
     
     if (window.allActivites.length === 0) {
         showNotification('⚠️ Aucune activité avec coordonnées valides', 'warning');
@@ -673,7 +662,6 @@ function afficherActivites(gite) {
     }
     
     const activites = window.activitesParGite[gite] || [];
-    console.log(`📊 Affichage de ${activites.length} activités pour ${gite}`);
     
     if (activites.length === 0) {
         container.innerHTML = '<div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%); border-radius: 16px; border: 2px dashed #ef4444;"><div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div><p style="color: #ef4444; font-size: 1.2rem; font-weight: 600;">Aucune activité enregistrée pour ce gîte</p></div>';
@@ -689,7 +677,6 @@ function afficherActivites(gite) {
         parCategorie[act.categorie].push(act);
     });
     
-    console.log(`📂 ${Object.keys(parCategorie).length} catégories trouvées:`, Object.keys(parCategorie));
     
     let html = `<h3 style="color: white; font-size: 1.6rem; margin-bottom: 24px; text-align: center; padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">✨ Toutes les activités à ${gite} <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activites.length}</span></h3>`;
     
@@ -767,9 +754,7 @@ function afficherActivites(gite) {
         html += `</div></div>`;
     });
     
-    console.log('✍️ Injection HTML dans le DOM...');
     container.innerHTML = html;
-    console.log('✅ Affichage terminé !');
 }
 
 // ==================== SUPPRIMER UNE ACTIVITÉ ====================
@@ -797,13 +782,11 @@ async function supprimerActivite(id) {
 
 // ==================== FILTRER ACTIVITÉS PAR CATÉGORIE ====================
 async function filtrerActivitesParCategorie(motCle) {
-    console.log('🔍 Filtrage par catégorie:', motCle);
     
     const giteInput = document.getElementById('decouvrir_gite');
     const gite = giteInput?.value;
     const container = document.getElementById('activitesParCategorie');
     
-    console.log('📍 Gîte:', gite || 'AUCUN', '| Container:', container ? 'OK' : 'KO');
     
     // Vérifier si les activités sont chargées, sinon les charger
     if (!window.activitesParGite || 
@@ -828,14 +811,12 @@ async function filtrerActivitesParCategorie(motCle) {
         titre = `${motCle} - Tous les gîtes`;
     }
     
-    console.log(`📊 Base: ${activites.length} activités`);
     
     // Filtrer par mot-clé dans la catégorie
     const filtrees = activites.filter(act => 
         act.categorie.toLowerCase().includes(motCle.toLowerCase())
     );
     
-    console.log(`✅ Filtrées: ${filtrees.length} pour "${motCle}"`);
     
     if (filtrees.length === 0) {
         const lieu = gite || 'les gîtes';
@@ -848,7 +829,6 @@ async function filtrerActivitesParCategorie(motCle) {
     
     // 🗺️ Mettre à jour le filtre et la carte
     window.filtreCategorieActive = motCle;
-    console.log('🎯 Appel afficherActivitesFiltrées...');
     afficherActivitesFiltrées(filtrees, titre);
     
     // 📍 Afficher uniquement les activités filtrées sur la carte

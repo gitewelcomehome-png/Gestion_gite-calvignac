@@ -745,7 +745,6 @@ async function saveInfosGiteToSupabase(gite, formData) {
         
         if (error) throw error;
         
-        console.log(`✅ Infos ${gite} sauvegardées en base de données`);
         return true;
     } catch (error) {
         console.error('Erreur sauvegarde Supabase:', error);
@@ -764,7 +763,6 @@ async function loadInfosGiteFromSupabase(gite) {
         
         if (error) {
             if (error.code === 'PGRST116') {
-                console.log(`ℹ️ Pas encore de données pour ${gite} en base`);
                 return null;
             }
             throw error;
@@ -873,7 +871,6 @@ async function loadInfosGiteFromSupabase(gite) {
             dateModification: data.date_modification
         };
         
-        console.log(`✅ Infos ${gite} chargées depuis la base de données`);
         return formData;
     } catch (error) {
         console.error('Erreur chargement Supabase:', error);
@@ -1198,14 +1195,12 @@ window.resetGiteInfosQuick = async function() {
 // ==========================================
 
 window.updateQRCodeWifi = function() {
-    console.log('🔄 updateQRCodeWifi appelée');
     
     const ssid = document.getElementById('infos_wifiSSID')?.value || '';
     const password = document.getElementById('infos_wifiPassword')?.value || '';
     const section = document.getElementById('qrCodeWifiSection');
     const canvas = document.getElementById('qrCodeWifiCanvas');
     
-    console.log('SSID:', ssid, 'Password:', password);
     
     if (!section || !canvas) {
         console.error('❌ Éléments QR code non trouvés');
@@ -1218,7 +1213,6 @@ window.updateQRCodeWifi = function() {
         
         // Format du QR code WiFi selon la spécification
         const wifiString = `WIFI:T:WPA;S:${ssid};P:${password};;`;
-        console.log('📶 Génération QR code pour:', wifiString);
         
         // Générer directement avec l'API
         const ctx = canvas.getContext('2d');
@@ -1228,7 +1222,6 @@ window.updateQRCodeWifi = function() {
         img.onload = function() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            console.log('✅ QR code généré avec succès');
         };
         
         img.onerror = function(e) {
@@ -1246,7 +1239,6 @@ window.updateQRCodeWifi = function() {
         img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedText}`;
         
     } else {
-        console.log('ℹ️ SSID ou password manquant, masquage de la section');
         section.style.display = 'none';
     }
 };
@@ -1407,7 +1399,6 @@ let translationDone = false;
 // Fonction pour basculer entre FR et EN
 window.toggleLanguage = function() {
     const newLang = currentLang === 'fr' ? 'en' : 'fr';
-    console.log('🌍 Toggle language from', currentLang, 'to', newLang);
     
     const btn = document.getElementById('btnToggleLang');
     

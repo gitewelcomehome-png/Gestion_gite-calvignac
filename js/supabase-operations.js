@@ -86,12 +86,10 @@ async function addReservation(reservation) {
 async function getAllReservations(forceRefresh) {
     // Utiliser le cache si valide
     if (!forceRefresh && window.CACHE.reservations && (Date.now() - window.CACHE.reservationsTimestamp < window.CACHE.TTL)) {
-        console.log('📦 Cache hit: reservations');
         return window.CACHE.reservations;
     }
     
     try {
-        console.log('🔄 Fetching reservations from Supabase...');
         const result = await window.supabaseClient
             .from('reservations')
             .select('*')
@@ -216,12 +214,10 @@ async function addCharge(charge) {
 async function getAllCharges(forceRefresh) {
     // Utiliser le cache si valide
     if (!forceRefresh && window.CACHE.charges && (Date.now() - window.CACHE.chargesTimestamp < window.CACHE.TTL)) {
-        console.log('📦 Cache hit: charges');
         return window.CACHE.charges;
     }
     
     try {
-        console.log('🔄 Fetching charges from Supabase...');
         const result = await window.supabaseClient
             .from('charges')
             .select('*')
