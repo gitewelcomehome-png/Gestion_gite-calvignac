@@ -429,6 +429,9 @@
             return window.DEFAULT_ICAL_CONFIGS;
         }
         
+        // Exporter vers le scope global
+        window.getIcalConfigs = getIcalConfigs;
+        
         // Charger les URLs dans les champs du formulaire
         function chargerUrlsIcal() {
             const configs = getIcalConfigs();
@@ -1364,14 +1367,6 @@
                         status: cleaning?.status || 'pending',
                         nextArrivee: nextResa ? parseDateMenage(nextResa.date_debut || nextResa.dateDebut) : null
                     });
-                    
-                    if (cleaning?.status === 'pending_validation') {
-                            nom: resa.nom,
-                            gite: resa.gite,
-                            date: dateMenage,
-                            status: cleaning.status
-                        });
-                    }
                 }
                 
                 // Organiser par semaine
@@ -1506,11 +1501,6 @@
         }
         
         function genererMenageCard(m) {
-                reservationId: m.reservation.id, 
-                nom: m.reservation.nom, 
-                status: m.status 
-            });
-            
             const statusClass = m.validated ? 'validated' : m.status === 'pending_validation' ? 'pending-validation' : '';
             const statusBadge = m.validated ? 
                 '<span class="menage-status status-validated">✓ Validé</span>' :

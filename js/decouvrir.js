@@ -199,14 +199,6 @@ async function chargerPOIsFromSupabase(giteActuel) {
             if (poi.nom !== undefined && poi.name === undefined) poi.name = poi.nom;
         });
         
-        if (pois.length > 0) {
-                nom: pois[0].nom,
-                lat: pois[0].lat,
-                lng: pois[0].lng,
-                categorie: pois[0].categorie
-            });
-        }
-        
         // Ajouter chaque POI sur la carte
         pois.forEach(poi => {
             ajouterMarqueurPOI(poi, giteActuel);
