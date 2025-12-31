@@ -469,13 +469,9 @@ async function autoSaveJSON() {
 }
 
 // ==========================================
-// 🌐 EXole.log('🟢 DOMContentLoaded - Initialisation du formulaire d\'édition');
-    const editForm = document.getElementById('editForm');
-    if (editForm) {
-        console.log('✅ Formulaire editForm trouvé, ajout du listener');
-        editForm.addEventListener('submit', saveEditReservation);
-    } else {
-        console.warn('⚠️ Formulaire editForm non trouvé !'
+// 🌐 EXPORTS GLOBAUX
+// ==========================================
+
 window.filterReservations = filterReservations;
 window.displayFilteredReservations = displayFilteredReservations;
 window.openEditModal = openEditModal;
@@ -494,8 +490,12 @@ window.autoSaveJSON = autoSaveJSON;
 
 // Ajouter le gestionnaire d'événement pour le formulaire d'édition
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🟢 DOMContentLoaded - Initialisation du formulaire d\'édition');
     const editForm = document.getElementById('editForm');
     if (editForm) {
+        console.log('✅ Formulaire editForm trouvé, ajout du listener');
         editForm.addEventListener('submit', saveEditReservation);
+    } else {
+        console.warn('⚠️ Formulaire editForm non trouvé !');
     }
 });
