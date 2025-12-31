@@ -457,18 +457,6 @@ async function chargerActivites() {
                 }
             });
             
-            // Log pour debug
-            const premiereTrevoux = window.activitesParGite['Trévoux'][0];
-            if (premiereTrevoux) {
-                    nom: premiereTrevoux.nom,
-                    lat: premiereTrevoux.lat,
-                    lng: premiereTrevoux.lng,
-                    latitude: premiereTrevoux.latitude,
-                    longitude: premiereTrevoux.longitude
-                });
-            }
-            
-            
             // Mettre à jour le compteur
             const totalTrevoux = window.activitesParGite['Trévoux'].length;
             const totalCouzon = window.activitesParGite['Couzon'].length;
