@@ -45,7 +45,6 @@ function updatePlatformCounters(reservations) {
 
 async function updateAdvancedStats(reservations) {
     // Utiliser directement les réservations passées (déjà filtrées si nécessaire)
-    console.log('updateAdvancedStats - Nombre de réservations:', reservations.length);
     
     // Taux d'occupation
     const trevoux = reservations.filter(r => isTrevoux(r.gite));
@@ -106,7 +105,6 @@ async function updateAdvancedStats(reservations) {
         months.forEach((m, idx) => {
             moisCA[idx] = histTotal.months[m] || 0;
         });
-        console.log('Meilleur mois - Données historiques utilisées');
     } else {
         // Filtrer les réservations par l'année sélectionnée
         reservations.filter(r => parseLocalDate(r.dateDebut).getFullYear() === selectedYear).forEach(r => {
@@ -226,11 +224,8 @@ async function updateAllCharts(filteredReservations = null) {
     const checkboxes = document.querySelectorAll('#yearComparisonCheckboxes input[type="checkbox"]:checked');
     const selectedYears = Array.from(checkboxes).map(cb => parseInt(cb.value)).sort();
     
-    console.log('📊 Années sélectionnées:', selectedYears);
-    console.log('📊 Données historiques disponibles:', historicalData.map(d => `${d.year} (${d.gite})`));
     
     if (selectedYears.length === 0) {
-        console.log('⚠️ Aucune année sélectionnée, destruction des graphiques');
         if (window.caChartInstance) window.caChartInstance.destroy();
         return;
     }
@@ -256,14 +251,12 @@ async function updateAllCharts(filteredReservations = null) {
         const histTotal = historicalData.find(d => d.year === year && d.gite === 'Total');
         
         if (histTotal) {
-            console.log(`📊 Graphique ${year}: Utilisation des données historiques`);
             const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
             months.forEach((m, idx) => {
                 const value = histTotal.months[m] || 0;
                 dataByYear[year].total[idx] = value;
             });
         } else {
-            console.log(`📊 Graphique ${year}: Utilisation des réservations (${reservations.filter(r => parseLocalDate(r.dateDebut).getFullYear() === year).length} trouvées)`);
             reservations.filter(r => parseLocalDate(r.dateDebut).getFullYear() === year).forEach(r => {
                 const month = parseLocalDate(r.dateDebut).getMonth();
                 const giteNormalized = r.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -281,7 +274,6 @@ async function updateAllCharts(filteredReservations = null) {
     selectedYears.forEach((year, idx) => {
         const color = colors[idx % colors.length];
         const total = dataByYear[year].total.reduce((sum, val) => sum + val, 0);
-        console.log(`📊 Dataset ${year}: Total CA = ${total.toFixed(2)} €, Données:`, dataByYear[year].total);
         datasets.push({
             label: `${year} - Total`,
             data: dataByYear[year].total,

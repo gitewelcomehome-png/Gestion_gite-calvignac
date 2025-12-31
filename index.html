@@ -663,7 +663,6 @@
             
             if (histTotal) {
                 // Utiliser UNIQUEMENT les données historiques (pas les réservations)
-                console.log('✓ Utilisation des données historiques pour', selectedYear);
                 const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
                 months.forEach(m => {
                     caTotal += histTotal.months[m] || 0;
@@ -678,7 +677,6 @@
                 if (statCouzonEl) statCouzonEl.textContent = '-';
             } else {
                 // Utiliser les réservations automatiques
-                console.log('✓ Utilisation des réservations automatiques pour', selectedYear);
                 const filteredReservations = reservations.filter(r => {
                     const year = parseLocalDate(r.dateDebut).getFullYear();
                     return year === selectedYear;
@@ -1290,10 +1288,8 @@
                 
                 const cleaningMap = {};
                 if (cleanings) {
-                    console.log('🔍 Cleanings récupérés:', cleanings);
                     cleanings.forEach(c => {
                         if (c.status === 'pending_validation') {
-                            console.log('⏰ Proposition en attente pour résa', c.reservation_id, ':', c);
                         }
                         cleaningMap[c.reservation_id] = c;
                     });
@@ -1370,7 +1366,6 @@
                     });
                     
                     if (cleaning?.status === 'pending_validation') {
-                        console.log('✨ Ménage en attente validation ajouté:', {
                             nom: resa.nom,
                             gite: resa.gite,
                             date: dateMenage,
@@ -1511,7 +1506,6 @@
         }
         
         function genererMenageCard(m) {
-            console.log('🎴 Génération carte pour:', { 
                 reservationId: m.reservation.id, 
                 nom: m.reservation.nom, 
                 status: m.status 
@@ -1553,16 +1547,13 @@
                         <div class="menage-proposition">
                             <p><strong>📩 Proposition société de ménage :</strong></p>
                             <div class="proposition-actions">
-                                <button class="btn btn-success" onclick="console.log('✅ Approuver clic - ID:', ${m.reservation.id}); approuverProposition(${m.reservation.id})">
                                     ✓ Approuver
                                 </button>
-                                <button class="btn btn-danger" onclick="console.log('❌ Refuser clic - ID:', ${m.reservation.id}); afficherRefusForm(${m.reservation.id})">
                                     ✗ Refuser
                                 </button>
                             </div>
                             <div id="refus-form-${m.reservation.id}" style="display: none; margin-top: 10px;">
                                 <textarea id="refus-reason-${m.reservation.id}" placeholder="Raison du refus..." style="width: 100%; min-height: 60px; margin-bottom: 10px; padding: 8px; border: 2px solid #ddd; border-radius: 6px;"></textarea>
-                                <button class="btn btn-danger" onclick="console.log('📧 Envoyer refus - ID:', ${m.reservation.id}); refuserProposition(${m.reservation.id})">
                                     Envoyer le refus
                                 </button>
                             </div>
@@ -1588,7 +1579,6 @@
         }
         
         function afficherRefusForm(resaId) {
-            console.log('🔍 Affichage formulaire refus pour résa:', resaId);
             const form = document.getElementById(`refus-form-${resaId}`);
             const btnRefuser = event?.target;
             
@@ -1601,7 +1591,6 @@
                 if (textarea) {
                     setTimeout(() => textarea.focus(), 300);
                 }
-                console.log('✅ Formulaire affiché');
                 
                 // Cacher le bouton refuser pour éviter double clic
                 if (btnRefuser) {
@@ -1610,7 +1599,6 @@
             } else {
                 console.error('❌ Formulaire refus-form-' + resaId + ' non trouvé dans le DOM');
                 // Vérifier si l'élément existe vraiment
-                console.log('IDs disponibles:', Array.from(document.querySelectorAll('[id^="refus-form-"]')).map(el => el.id));
             }
         }
         
@@ -1692,7 +1680,6 @@
                     status: 'pending'
                 };
                 
-                console.log('Tentative upsert:', dataToUpdate);
                 
                 const { data, error } = await supabase.from('cleaning_schedule').upsert(dataToUpdate, { onConflict: 'reservation_id' });
                 
@@ -1701,7 +1688,6 @@
                     throw error;
                 }
                 
-                console.log('Upsert réussi:', data);
                 
                 showToast('✓ Enregistré', 'success');
                 await afficherPlanningMenageNew();
@@ -2623,7 +2609,6 @@
                 });
                 
                 if (!response.ok) {
-                    console.warn('Erreur HTTP:', response.status, 'pour', address);
                     // Utiliser coordonnées par défaut
                     return gite === 'Trévoux' 
                         ? { lat: 45.9394, lng: 4.7728 }
@@ -2687,7 +2672,6 @@
                     return item.categorie === categorieRecherchee && item.distance <= maxDistance;
                 });
                 
-                console.log(`🔍 Filtrage ${categorieRecherchee}:`, pointsFiltres.length, 'résultats');
                 
                 // Mettre à jour la carte avec les points filtrés
                 if (pointsFiltres.length > 0) {
@@ -2993,7 +2977,6 @@
             let maxDistance = 50; // Distance par défaut si pas de slider
             
             if (!distanceFilter) {
-                console.log('⚠️ Élément distanceFilter non trouvé, affichage de tous les événements (≤50km)');
             } else {
                 maxDistance = parseInt(distanceFilter.value);
             }
@@ -3109,9 +3092,7 @@
                 const gite = document.getElementById('decouvrir_gite')?.value;
                 if (gite && window.activitesParGite && window.activitesParGite[gite]) {
                     evenements = window.activitesParGite[gite];
-                    console.log(`📍 Utilisation des activités de ${gite}: ${evenements.length}`);
                 } else {
-                    console.warn('⚠️ Aucun événement fourni et aucun gîte sélectionné');
                     evenements = [];
                 }
             }
@@ -3128,7 +3109,6 @@
             
             const nbInvalides = evenements.length - evenementsValides.length;
             if (nbInvalides > 0) {
-                console.log(`ℹ️ ${nbInvalides} activité(s) sans coordonnées GPS (non affichées sur la carte)`);
             }
             
             // 🔍 Appliquer le filtre de catégorie s'il est actif
@@ -3136,7 +3116,6 @@
                 evenementsValides = evenementsValides.filter(e => 
                     e.categorie && e.categorie.toLowerCase().includes(window.filtreCategorieActive.toLowerCase())
                 );
-                console.log(`📌 Carte filtrée: ${evenementsValides.length} points pour "${window.filtreCategorieActive}"`);
             }
             
             if (evenementsValides.length === 0) {
@@ -3145,7 +3124,6 @@
                 return;
             }
             
-            console.log(`🗺️ Affichage de ${evenementsValides.length} points sur la carte`);
             mapContainer.style.display = 'block';
             
             // Vérifier si la carte existe déjà (via l'attribut Leaflet)
@@ -3154,7 +3132,6 @@
             // Si la carte n'existe pas encore, la créer
             if (!carteExiste && !mapInstance) {
                 try {
-                    console.log('🗺️ Création de la carte...');
                     
                     // Créer la carte Leaflet avec zoom activé
                     mapInstance = L.map('mapEvenements', {
@@ -3177,7 +3154,6 @@
                     // Créer un layer group pour les marqueurs
                     markersLayer = L.layerGroup().addTo(mapInstance);
                     
-                    console.log('✅ Carte créée avec succès');
                 } catch (error) {
                     console.error('❌ Erreur création carte:', error);
                     mapContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Erreur lors du chargement de la carte</p>';
@@ -3228,7 +3204,6 @@
             evenementsValides.forEach((item, index) => {
                 // Debug: afficher les 3 premiers points
                 if (index < 3) {
-                    console.log(`📍 Point ${index + 1}: "${item.titre || item.nom}" - lat: ${item.lat}, lng: ${item.lng}`);
                 }
                 
                 // Utiliser la fonction pour obtenir l'icône appropriée
@@ -3301,7 +3276,6 @@
                     return actDistance <= distanceMax;
                 });
                 
-                console.log(`🔍 Filtrage par distance: ${activitesFiltrees.length}/${window.allActivites.length} activités ≤ ${distanceMax} km`);
                 afficherCarteEvenements(activitesFiltrees);
             }
         }
@@ -3345,7 +3319,6 @@
                                categorie.toLowerCase().includes(actCategorie.toLowerCase());
                     });
                     afficherCarteEvenements(filtered);
-                    console.log(`Filtered ${filtered.length} activities for category: ${categorie}`);
                 }
             }
         }
@@ -4209,7 +4182,6 @@
         
         // Une fois tous les onglets chargés
         await Promise.all(loadPromises);
-        console.log('✅ Tous les onglets sont chargés');
         
         // Synchronisation automatique au démarrage (si pas déjà faite récemment)
         const lastSync = localStorage.getItem('lastAutoSync');
@@ -4217,12 +4189,10 @@
         const SYNC_INTERVAL = 3600000; // 1 heure
         
         if (!lastSync || (now - parseInt(lastSync)) > SYNC_INTERVAL) {
-            console.log('🔄 Synchronisation automatique au démarrage...');
             localStorage.setItem('lastAutoSync', now.toString());
             // Lancer en arrière-plan sans bloquer l'UI
             syncAllCalendars().catch(err => console.error('Erreur sync auto:', err));
         } else {
-            console.log('⏭️ Sync auto ignorée (dernière sync récente)');
         }
         
         // Attacher les event listeners aux boutons
