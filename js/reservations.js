@@ -119,9 +119,16 @@ function displayFilteredReservations(reservations) {
 // ==========================================
 
 function openEditModal(id) {
+    console.log('🟡 openEditModal appelée avec id:', id);
     getAllReservations().then(reservations => {
+        console.log('🟡 Réservations récupérées, nombre:', reservations.length);
         const reservation = reservations.find(r => r.id === id);
-        if (!reservation) return;
+        if (!reservation) {
+            console.error('❌ Réservation non trouvée pour id:', id);
+            return;
+        }
+        
+        console.log('🟡 Réservation trouvée:', reservation);
         
         document.getElementById('editId').value = reservation.id;
         document.getElementById('editNom').value = reservation.nom;
@@ -132,12 +139,84 @@ function openEditModal(id) {
         document.getElementById('editAcompte').value = reservation.acompte || 0;
         document.getElementById('editPaiement').value = reservation.paiement;
         
+        console.log('🟡 Formulaire rempli, ouverture du modal');
         document.getElementById('editModal').classList.add('show');
+        console.log('✅ Modal ouvert');
+    }).catch(error => {
+        console.error('❌ Erreur dans openEditModal:', error);
     });
 }
 
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('show');
+}
+
+async function saveEditReservation(event) {
+    console.log('🔵 saveEditReservation appelée');
+    event.preventDefault();
+    console.log('🔵 preventDefault() exécuté');
+    
+    const id = parseInt(document.getElementById('editId').value);
+    const nom = document.getElementById('editNom').value.trim();
+    const telephone = document.getElementById('editTelephone').value.trim();
+    const provenance = document.getElementById('editProvenance').value.trim();
+    const nbPersonnes = document.getElementById('editNbPersonnes').value;
+    const montant = parseFloat(document.getElementById('editMontant').value);
+    const acompte = parseFloat(document.getElementById('editAcompte').value) || 0;
+    const paiement = document.getElementById('editPaiement').value;
+    
+    console.log('🔵 Données récupérées:', { id, nom, telephone, provenance, nbPersonnes, montant, acompte, paiement });
+    
+    if (!nom) {
+        console.log('❌ Nom manquant');
+        showToast('Le nom est obligatoire', 'error');
+        return;
+    }
+    
+    if (isNaN(montant)) {
+        console.log('❌ Montant invalide');
+        showToast('Le montant est obligatoire', 'error');
+        return;
+    }
+    
+    console.log('✅ Validation OK, début de l\'enregistrement');
+    
+    try {
+        const updates = {
+            nom: nom,
+            telephone: telephone,
+            provenance: provenance,
+            nbPersonnes: nbPersonnes ? parseInt(nbPersonnes) : null,
+            montant: montant,
+            acompte: acompte,
+            restant: montant - acompte,
+            paiement: paiement
+        };
+        
+        console.log('🔵 Updates à envoyer:', updates);
+        
+        await updateReservation(id, updates);
+        console.log('✅ updateReservation terminé');
+        
+        await updateReservationsList();
+        console.log('✅ updateReservationsList terminé');
+        
+        await updateStats();
+        console.log('✅ updateStats terminé');
+        
+        await autoSaveJSON();
+        console.log('✅ autoSaveJSON terminé');
+        
+        closeEditModal();
+        console.log('✅ Modal fermé');
+        
+        showToast('✓ Réservation modifiée', 'success');
+        console.log('✅ Toast affiché - SUCCÈS COMPLET');
+    } catch (error) {
+        console.error('❌ Erreur lors de la modification:', error);
+        console.error('❌ Stack trace:', error.stack);
+        showToast('Erreur lors de la modification', 'error');
+    }
 }
 
 async function updatePaiementStatus(id, newStatus) {
@@ -390,16 +469,33 @@ async function autoSaveJSON() {
 }
 
 // ==========================================
-// 🌐 EXPORTS GLOBAUX
-// ==========================================
-
+// 🌐 EXole.log('🟢 DOMContentLoaded - Initialisation du formulaire d\'édition');
+    const editForm = document.getElementById('editForm');
+    if (editForm) {
+        console.log('✅ Formulaire editForm trouvé, ajout du listener');
+        editForm.addEventListener('submit', saveEditReservation);
+    } else {
+        console.warn('⚠️ Formulaire editForm non trouvé !'
 window.filterReservations = filterReservations;
 window.displayFilteredReservations = displayFilteredReservations;
 window.openEditModal = openEditModal;
 window.closeEditModal = closeEditModal;
+window.saveEditReservation = saveEditReservation;
 window.updatePaiementStatus = updatePaiementStatus;
 window.deleteReservationById = deleteReservationById;
 window.updateReservationsList = updateReservationsList;
 window.generateWeekReservations = generateWeekReservations;
 window.getPlatformLogo = getPlatformLogo;
 window.autoSaveJSON = autoSaveJSON;
+
+// ==========================================
+// 🎯 INITIALISATION
+// ==========================================
+
+// Ajouter le gestionnaire d'événement pour le formulaire d'édition
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.getElementById('editForm');
+    if (editForm) {
+        editForm.addEventListener('submit', saveEditReservation);
+    }
+});
