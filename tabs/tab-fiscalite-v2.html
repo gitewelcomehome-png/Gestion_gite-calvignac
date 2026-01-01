@@ -6,15 +6,9 @@
     </div>
 
     <!-- Boutons de gestion -->
-    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-        <button onclick="chargerDerniereSimulation()" class="btn btn-secondary">
-            📂 Charger dernière simulation
-        </button>
-        <button onclick="nouvelleSimulation()" class="btn btn-secondary">
-            🔄 Nouvelle simulation
-        </button>
-        <button onclick="sauvegarderSimulation()" class="btn btn-primary">
-            💾 Sauvegarder
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: flex-end;">
+        <button onclick="nouvelleSimulation()" class="btn btn-secondary" title="Nouvelle simulation" style="padding: 10px 15px;">
+            🔄
         </button>
     </div>
 
@@ -177,17 +171,16 @@
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🏠 Charges TRÉVOUX (100% déductibles)</h3>
             <div class="bloc-content">
                 <div class="fiscal-grid">
-                <div class="form-group">
-                    <label>Internet</label>
-                    <div class="input-with-select">
-                        <select id="internet_trevoux_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="internet_trevoux" step="0.01" placeholder="0.00">
-            </div>
-        </div>
-                </div>
+                    <div class="form-group">
+                        <label>Internet</label>
+                        <div class="input-with-select">
+                            <select id="internet_trevoux_type" class="type-select">
+                                <option value="mensuel">Mensuel</option>
+                                <option value="annuel">Annuel</option>
+                            </select>
+                            <input type="number" id="internet_trevoux" step="0.01" placeholder="0.00" oninput="calculerTempsReel()">
+                        </div>
+                    </div>
                 
                 <div class="form-group">
                     <label>Eau</label>
@@ -500,74 +493,24 @@
 
         <!-- BLOC 5 : Véhicule -->
         <div class="fiscal-bloc collapsible">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🚗 Frais de véhicule</h3>
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🚗 Frais de véhicule (Barème kilométrique 2024)</h3>
             <div class="bloc-content">
-                <div style="margin-bottom: 20px;">
-                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <input type="radio" name="vehicule_option" value="bareme" checked onchange="toggleVehiculeOption()"> 
-                    Barème kilométrique 2024
-                </label>
-                <label style="display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="vehicule_option" value="reel" onchange="toggleVehiculeOption()"> 
-                    Frais réels
-                </label>
-            </div>
-
-            <div id="vehicule-bareme" class="fiscal-grid">
-                <div class="form-group">
-                    <label>Puissance fiscale (CV)</label>
-                    <select id="puissance_fiscale">
-                        <option value="3">3 CV</option>
-                        <option value="4">4 CV</option>
-                        <option value="5" selected>5 CV</option>
-                        <option value="6">6 CV</option>
-                        <option value="7">7 CV et +</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Kilomètres professionnels</label>
-                    <input type="number" id="km_professionnels" step="1" placeholder="5000">
-            </div>
-        </div>
-            </div>
-
-            <div id="vehicule-reel" class="fiscal-grid" style="display: none;">
-                <div class="form-group">
-                    <label>Carburant</label>
-                    <div class="input-with-select">
-                        <select id="carburant_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
+                <div class="fiscal-grid">
+                    <div class="form-group">
+                        <label>Puissance fiscale (CV)</label>
+                        <select id="puissance_fiscale" onchange="calculerTempsReel()">
+                            <option value="3">3 CV</option>
+                            <option value="4">4 CV</option>
+                            <option value="5" selected>5 CV</option>
+                            <option value="6">6 CV</option>
+                            <option value="7">7 CV et +</option>
                         </select>
-                        <input type="number" id="carburant" step="0.01" placeholder="0.00">
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Assurance auto</label>
-                    <div class="input-with-select">
-                        <select id="assurance_auto_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="assurance_auto" step="0.01" placeholder="0.00">
+                    
+                    <div class="form-group">
+                        <label>Kilomètres professionnels</label>
+                        <input type="number" id="km_professionnels" step="1" placeholder="5000" oninput="calculerTempsReel()">
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Entretien/réparations (annuel)</label>
-                    <input type="number" id="entretien_auto" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>Amortissement véhicule (annuel)</label>
-                    <input type="number" id="amortissement_auto" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>Usage professionnel (%)</label>
-                    <input type="number" id="usage_pro_pourcent" step="1" min="0" max="100" placeholder="50">
                 </div>
             </div>
         </div>
@@ -632,10 +575,9 @@
             </div>
         </div>
 
-        <!-- Estimation URSSAF en temps réel -->
-        <div class="fiscal-bloc collapsible" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white;">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)" style="color: white; margin-bottom: 0;"><span class="toggle-icon">▼</span> 💰 Estimation URSSAF en temps réel</h3>
-            <div class="bloc-content" id="estimation-urssaf" style="display: none;">
+        <!-- Résultats Fiscaux -->
+        <div class="fiscal-bloc" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; margin-top: 30px;">
+            <h3 style="color: white; margin-bottom: 20px; text-align: center;">📊 RÉSULTATS FISCAUX</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
                 <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
                     <div style="font-size: 0.9rem; opacity: 0.9;">Bénéfice imposable</div>
@@ -650,22 +592,72 @@
                     <div id="preview-reste" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
                 </div>
             </div>
-            <div id="alerte-retraite" style="display: none; background: #e74c3c; padding: 12px; border-radius: 8px; font-weight: 600; margin-top: 15px;">
+            <div id="alerte-retraite" style="display: none; background: #e74c3c; padding: 12px; border-radius: 8px; font-weight: 600;">
                 ⚠️ ATTENTION : Bénéfice en dessous de 7 046 € - Trimestres de retraite non validés !
             </div>
+        </div>
+
+        <!-- Calcul Impôt sur le Revenu -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🧾 Calcul Impôt sur le Revenu (IR)</h3>
+            <div class="bloc-content">
+                <div class="fiscal-grid">
+                    <div class="form-group">
+                        <label>Salaire annuel Madame (€)</label>
+                        <input type="number" id="salaire_madame" step="0.01" placeholder="0.00" oninput="calculerIR()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Salaire annuel Monsieur (€)</label>
+                        <input type="number" id="salaire_monsieur" step="0.01" placeholder="0.00" oninput="calculerIR()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Revenu LMP (calculé automatiquement)</label>
+                        <input type="number" id="revenu_lmp" step="0.01" readonly style="background: #e8f5e9; font-weight: 600;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nombre d'enfants</label>
+                        <select id="nombre_enfants" onchange="calculerIR()">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5+</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="resultat-ir" style="display: none; margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 10px;">
+                    <div style="display: grid; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                            <span>Revenu imposable total :</span>
+                            <strong id="ir-revenu-total">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                            <span>Nombre de parts fiscales :</span>
+                            <strong id="ir-parts">0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                            <span>Quotient familial :</span>
+                            <strong id="ir-quotient">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 15px 0; font-size: 1.3rem; border-top: 2px solid white; margin-top: 10px;">
+                            <span>💵 IMPÔT SUR LE REVENU :</span>
+                            <strong id="ir-montant">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 1.4rem;">
+                            <span>✅ RESTE APRÈS IR :</span>
+                            <strong id="ir-reste-final">0 €</strong>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Bouton Calculer -->
-        <div style="text-align: center; margin-top: 30px;">
-            <button type="submit" class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 40px;">
-                🔢 CALCULER
-            </button>
-        </div>
     </form>
-
-    <!-- Résultats -->
-    <div id="resultats-fiscalite" style="display: none; margin-top: 30px;"></div>
 </div>
 
 <style>

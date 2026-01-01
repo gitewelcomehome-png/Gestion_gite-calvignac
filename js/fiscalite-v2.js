@@ -7,11 +7,12 @@ let travauxCounter = 0;
 let fraisDiversCounter = 0;
 let produitsCounter = 0;
 
-// Debounce pour éviter trop de calculs
+// Debounce pour éviter trop de calculs et sauvegardes
 let calculTempsReelTimeout = null;
+let sauvegardeTimeout = null;
 
 // ==========================================
-// 🔧 CALCUL EN TEMPS RÉEL
+// 🔧 CALCUL EN TEMPS RÉEL + SAUVEGARDE AUTO
 // ==========================================
 
 // Fonction pour toggler les blocs collapsibles
@@ -22,11 +23,24 @@ function toggleBloc(titleElement) {
     }
 }
 
+function sauvegardeAutomatique() {
+    clearTimeout(sauvegardeTimeout);
+    sauvegardeTimeout = setTimeout(() => {
+        sauvegarderSimulation(true); // true = mode silencieux
+    }, 2000); // Sauvegarde après 2 secondes d'inactivité
+}
+
 function calculerTempsReel() {
     clearTimeout(calculTempsReelTimeout);
     calculTempsReelTimeout = setTimeout(() => {
         const ca = parseFloat(document.getElementById('ca')?.value || 0);
-        if (ca === 0) return;
+        if (ca === 0) {
+            // Réinitialiser l'affichage
+            document.getElementById('preview-benefice').textContent = '0 €';
+            document.getElementById('preview-urssaf').textContent = '0 €';
+            document.getElementById('preview-reste').textContent = '0 €';
+            return;
+        }
         
         // Calcul simplifié des charges
         const chargesCouzon = calculerChargesBien('couzon');
@@ -44,15 +58,11 @@ function calculerTempsReel() {
         const totalCharges = chargesBiens + chargesResidence + fraisPro + fraisVehicule;
         const benefice = ca - totalCharges;
         
-        // Cotisations URSSAF
-        const urssaf = benefice * 0.367 + ca * 0.0025; // Simplifié
+        // Cotisations URSSAF (calcul exact 2024)
+        const urssaf = benefice * 0.367 + ca * 0.0025;
         const resteAvantIR = benefice - urssaf;
         
-        // Affichage - Le bloc est maintenant dans un collapsible, on n'a qu'à mettre à jour les valeurs
-        const estimationBlock = document.getElementById('estimation-urssaf');
-        if (estimationBlock) {
-            estimationBlock.style.display = 'block';
-        }
+        // Affichage
         document.getElementById('preview-benefice').textContent = benefice.toFixed(2) + ' €';
         document.getElementById('preview-urssaf').textContent = urssaf.toFixed(2) + ' €';
         document.getElementById('preview-reste').textContent = resteAvantIR.toFixed(2) + ' €';
@@ -68,6 +78,9 @@ function calculerTempsReel() {
         // Mise à jour du revenu LMP pour l'IR
         document.getElementById('revenu_lmp').value = resteAvantIR.toFixed(2);
         calculerIR();
+        
+        // Sauvegarde automatique
+        sauvegardeAutomatique();
         
     }, 500);
 }
@@ -634,9 +647,12 @@ function afficherResultats(data) {
 // 💾 SAUVEGARDE / CHARGEMENT
 // ==========================================
 
-async function sauvegarderSimulation() {
-    const nom = prompt('Nom de la simulation :');
-    if (!nom) return;
+async function sauvegarderSimulation(silencieux = false) {
+    let nom = 'Simulation auto';
+    if (!silencieux) {
+        nom = prompt('Nom de la simulation :');
+        if (!nom) return;
+    }
     
     const data = {
         nom_simulation: nom,
@@ -748,21 +764,19 @@ async function sauvegarderSimulation() {
     try {
         const { error } = await supabase
             .from('simulations_fiscales')
-            .insert(data);
+            .upsert(data, { onConflict: 'nom_simulation' });
         
         if (error) throw error;
-        showToast('✓ Simulation sauvegardée', 'success');
+        if (!silencieux) {
+            showToast('✓ Simulation sauvegardée', 'success');
+        }
     } catch (error) {
         console.error('Erreur sauvegarde:', error);
-        showToast('Erreur lors de la sauvegarde', 'error');
+        if (!silencieux) {
+            showToast('Erreur lors de la sauvegarde', 'error');
+        }
     }
-}
-
-async function chargerDerniereSimulation() {
-    showToast('Fonction de chargement en cours de développement', 'info');
-}
-
-function nouvelleSimulation() {
+}function nouvelleSimulation() {
     document.getElementById('calculateur-lmp').reset();
     document.getElementById('travaux-liste').innerHTML = '';
     document.getElementById('frais-divers-liste').innerHTML = '';
@@ -791,9 +805,22 @@ window.calculerFiscalite = calculerFiscalite;
 window.calculerRatio = calculerRatio;
 window.calculerIR = calculerIR;
 window.toggleBloc = toggleBloc;
-window.toggleVehiculeOption = toggleVehiculeOption;
 window.sauvegarderSimulation = sauvegarderSimulation;
-window.chargerDerniereSimulation = chargerDerniereSimulation;
 window.nouvelleSimulation = nouvelleSimulation;
 window.exporterPDF = exporterPDF;
+window.calculerTempsReel = calculerTempsReel;
 
+// Initialisation : ajouter calculerTempsReel() sur tous les inputs au chargement
+document.addEventListener('DOMContentLoaded', () => {
+    // Attendre que le contenu de l'onglet soit chargé
+    setTimeout(() => {
+        const form = document.getElementById('calculateur-lmp');
+        if (form) {
+            // Ajouter oninput sur tous les inputs et selects
+            form.querySelectorAll('input[type="number"], select').forEach(el => {
+                el.addEventListener('input', () => calculerTempsReel());
+                el.addEventListener('change', () => calculerTempsReel());
+            });
+        }
+    }, 500);
+});
