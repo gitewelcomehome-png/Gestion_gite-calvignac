@@ -14,6 +14,14 @@ let calculTempsReelTimeout = null;
 // 🔧 CALCUL EN TEMPS RÉEL
 // ==========================================
 
+// Fonction pour toggler les blocs collapsibles
+function toggleBloc(titleElement) {
+    const bloc = titleElement.closest('.fiscal-bloc');
+    if (bloc) {
+        bloc.classList.toggle('collapsed');
+    }
+}
+
 function calculerTempsReel() {
     clearTimeout(calculTempsReelTimeout);
     calculTempsReelTimeout = setTimeout(() => {
@@ -779,6 +787,7 @@ window.supprimerItem = supprimerItem;
 window.calculerFiscalite = calculerFiscalite;
 window.calculerRatio = calculerRatio;
 window.calculerIR = calculerIR;
+window.toggleBloc = toggleBloc;
 window.toggleVehiculeOption = toggleVehiculeOption;
 window.sauvegarderSimulation = sauvegarderSimulation;
 window.chargerDerniereSimulation = chargerDerniereSimulation;
