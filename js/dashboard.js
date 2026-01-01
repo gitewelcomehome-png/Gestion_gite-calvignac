@@ -327,6 +327,7 @@ async function updateTodoList(category) {
         .from('todos')
         .select('*')
         .eq('category', category)
+        .eq('completed', false) // Seulement les tâches non complétées
         .is('archived_at', null) // Seulement les tâches non archivées
         .order('created_at', { ascending: true });
     
@@ -339,17 +340,15 @@ async function updateTodoList(category) {
     
     let html = '';
     todos.forEach(todo => {
-        const checked = todo.completed ? 'checked' : '';
-        const textStyle = todo.completed ? 'text-decoration: line-through; opacity: 0.6;' : '';
         const recurrentBadge = todo.is_recurrent ? '<span style="background: #9B59B6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px;">🔁 Récurrent</span>' : '';
         const frequencyLabel = todo.is_recurrent && todo.frequency ? 
             (todo.frequency === 'weekly' ? 'Hebdo' : todo.frequency === 'biweekly' ? 'Bi-hebdo' : 'Mensuel') : '';
         
         html += `
-            <div style="display: flex; gap: 12px; padding: 14px; margin-bottom: 8px; background: ${todo.completed ? '#f8f9fa' : 'white'}; border-radius: 8px; border: 1px solid #e9ecef; align-items: start; transition: all 0.2s;">
-                <input type="checkbox" ${checked} onchange="toggleTodo(${todo.id}, this.checked)" 
+            <div style="display: flex; gap: 12px; padding: 14px; margin-bottom: 8px; background: white; border-radius: 8px; border: 1px solid #e9ecef; align-items: start; transition: all 0.2s;">
+                <input type="checkbox" onchange="toggleTodo(${todo.id}, this.checked)" 
                        style="width: 20px; height: 20px; cursor: pointer; margin-top: 3px; flex-shrink: 0;">
-                <div style="flex: 1; ${textStyle}">
+                <div style="flex: 1;">
                     <div style="font-weight: 500; font-size: 0.95rem; margin-bottom: 6px; line-height: 1.4;">
                         ${todo.title}
                         ${recurrentBadge}
