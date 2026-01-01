@@ -833,7 +833,140 @@ async function sauvegarderSimulation(silencieux = false) {
             showToast('Erreur lors de la sauvegarde', 'error');
         }
     }
-}function nouvelleSimulation() {
+}
+
+async function chargerDerniereSimulation() {
+    console.log('📥 [LOAD] Chargement de la dernière simulation...');
+    
+    try {
+        const { data, error } = await supabase
+            .from('simulations_fiscales')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error) {
+            if (error.code === 'PGRST116') {
+                console.log('ℹ️ [LOAD] Aucune simulation trouvée');
+                return;
+            }
+            throw error;
+        }
+        
+        if (!data) {
+            console.log('ℹ️ [LOAD] Aucune simulation trouvée');
+            return;
+        }
+        
+        console.log('✅ [LOAD] Simulation trouvée, ID:', data.id, 'Date:', data.created_at);
+        
+        // Remplir le formulaire avec les données
+        document.getElementById('ca').value = data.chiffre_affaires || '';
+        
+        // Couzon
+        document.getElementById('internet_couzon').value = data.internet_couzon || '';
+        document.getElementById('internet_couzon_type').value = data.internet_couzon_type || 'mensuel';
+        document.getElementById('eau_couzon').value = data.eau_couzon || '';
+        document.getElementById('eau_couzon_type').value = data.eau_couzon_type || 'mensuel';
+        document.getElementById('electricite_couzon').value = data.electricite_couzon || '';
+        document.getElementById('electricite_couzon_type').value = data.electricite_couzon_type || 'mensuel';
+        document.getElementById('assurance_hab_couzon').value = data.assurance_hab_couzon || '';
+        document.getElementById('assurance_hab_couzon_type').value = data.assurance_hab_couzon_type || 'mensuel';
+        document.getElementById('assurance_emprunt_couzon').value = data.assurance_emprunt_couzon || '';
+        document.getElementById('assurance_emprunt_couzon_type').value = data.assurance_emprunt_couzon_type || 'mensuel';
+        document.getElementById('interets_emprunt_couzon').value = data.interets_emprunt_couzon || '';
+        document.getElementById('interets_emprunt_couzon_type').value = data.interets_emprunt_couzon_type || 'mensuel';
+        document.getElementById('menage_couzon').value = data.menage_couzon || '';
+        document.getElementById('menage_couzon_type').value = data.menage_couzon_type || 'mensuel';
+        document.getElementById('linge_couzon').value = data.linge_couzon || '';
+        document.getElementById('linge_couzon_type').value = data.linge_couzon_type || 'mensuel';
+        document.getElementById('logiciel_couzon').value = data.logiciel_couzon || '';
+        document.getElementById('logiciel_couzon_type').value = data.logiciel_couzon_type || 'mensuel';
+        document.getElementById('taxe_fonciere_couzon').value = data.taxe_fonciere_couzon || '';
+        document.getElementById('cfe_couzon').value = data.cfe_couzon || '';
+        document.getElementById('commissions_couzon').value = data.commissions_couzon || '';
+        document.getElementById('amortissement_couzon').value = data.amortissement_couzon || '';
+        document.getElementById('copropriete_couzon').value = data.copropriete_couzon || '';
+        document.getElementById('copropriete_couzon_type').value = data.copropriete_couzon_type || 'mensuel';
+        
+        // Trévoux
+        document.getElementById('internet_trevoux').value = data.internet_trevoux || '';
+        document.getElementById('internet_trevoux_type').value = data.internet_trevoux_type || 'mensuel';
+        document.getElementById('eau_trevoux').value = data.eau_trevoux || '';
+        document.getElementById('eau_trevoux_type').value = data.eau_trevoux_type || 'mensuel';
+        document.getElementById('electricite_trevoux').value = data.electricite_trevoux || '';
+        document.getElementById('electricite_trevoux_type').value = data.electricite_trevoux_type || 'mensuel';
+        document.getElementById('assurance_hab_trevoux').value = data.assurance_hab_trevoux || '';
+        document.getElementById('assurance_hab_trevoux_type').value = data.assurance_hab_trevoux_type || 'mensuel';
+        document.getElementById('assurance_emprunt_trevoux').value = data.assurance_emprunt_trevoux || '';
+        document.getElementById('assurance_emprunt_trevoux_type').value = data.assurance_emprunt_trevoux_type || 'mensuel';
+        document.getElementById('interets_emprunt_trevoux').value = data.interets_emprunt_trevoux || '';
+        document.getElementById('interets_emprunt_trevoux_type').value = data.interets_emprunt_trevoux_type || 'mensuel';
+        document.getElementById('menage_trevoux').value = data.menage_trevoux || '';
+        document.getElementById('menage_trevoux_type').value = data.menage_trevoux_type || 'mensuel';
+        document.getElementById('linge_trevoux').value = data.linge_trevoux || '';
+        document.getElementById('linge_trevoux_type').value = data.linge_trevoux_type || 'mensuel';
+        document.getElementById('logiciel_trevoux').value = data.logiciel_trevoux || '';
+        document.getElementById('logiciel_trevoux_type').value = data.logiciel_trevoux_type || 'mensuel';
+        document.getElementById('taxe_fonciere_trevoux').value = data.taxe_fonciere_trevoux || '';
+        document.getElementById('cfe_trevoux').value = data.cfe_trevoux || '';
+        document.getElementById('commissions_trevoux').value = data.commissions_trevoux || '';
+        document.getElementById('amortissement_trevoux').value = data.amortissement_trevoux || '';
+        document.getElementById('copropriete_trevoux').value = data.copropriete_trevoux || '';
+        document.getElementById('copropriete_trevoux_type').value = data.copropriete_trevoux_type || 'mensuel';
+        
+        // Résidence principale
+        document.getElementById('surface_bureau').value = data.surface_bureau || '';
+        document.getElementById('surface_totale').value = data.surface_totale || '';
+        document.getElementById('interets_residence').value = data.interets_residence || '';
+        document.getElementById('interets_residence_type').value = data.interets_residence_type || 'mensuel';
+        document.getElementById('assurance_residence').value = data.assurance_residence || '';
+        document.getElementById('assurance_residence_type').value = data.assurance_residence_type || 'mensuel';
+        document.getElementById('electricite_residence').value = data.electricite_residence || '';
+        document.getElementById('electricite_residence_type').value = data.electricite_residence_type || 'mensuel';
+        document.getElementById('internet_residence').value = data.internet_residence || '';
+        document.getElementById('internet_residence_type').value = data.internet_residence_type || 'mensuel';
+        document.getElementById('eau_residence').value = data.eau_residence || '';
+        document.getElementById('eau_residence_type').value = data.eau_residence_type || 'mensuel';
+        document.getElementById('assurance_hab_residence').value = data.assurance_hab_residence || '';
+        document.getElementById('assurance_hab_residence_type').value = data.assurance_hab_residence_type || 'mensuel';
+        document.getElementById('taxe_fonciere_residence').value = data.taxe_fonciere_residence || '';
+        
+        // Frais professionnels
+        document.getElementById('comptable').value = data.comptable || '';
+        document.getElementById('frais_bancaires').value = data.frais_bancaires || '';
+        document.getElementById('telephone').value = data.telephone || '';
+        document.getElementById('telephone_type').value = data.telephone_type || 'mensuel';
+        document.getElementById('materiel_info').value = data.materiel_info || '';
+        document.getElementById('rc_pro').value = data.rc_pro || '';
+        document.getElementById('formation').value = data.formation || '';
+        document.getElementById('fournitures').value = data.fournitures || '';
+        document.getElementById('fournitures_type').value = data.fournitures_type || 'mensuel';
+        
+        // Véhicule
+        document.getElementById('puissance_fiscale').value = data.puissance_fiscale || 5;
+        document.getElementById('km_professionnels').value = data.km_professionnels || '';
+        
+        // IR
+        document.getElementById('salaire_madame').value = data.salaire_madame || '';
+        document.getElementById('salaire_monsieur').value = data.salaire_monsieur || '';
+        document.getElementById('nombre_enfants').value = data.nombre_enfants || 0;
+        
+        console.log('✅ [LOAD] Formulaire rempli, recalcul...');
+        
+        // Recalculer
+        calculerRatio();
+        calculerTempsReel();
+        
+        showToast('📥 Dernière simulation chargée', 'success');
+        
+    } catch (error) {
+        console.error('💥 [LOAD] Erreur:', error);
+    }
+}
+
+function nouvelleSimulation() {
     document.getElementById('calculateur-lmp').reset();
     document.getElementById('travaux-liste').innerHTML = '';
     document.getElementById('frais-divers-liste').innerHTML = '';
@@ -863,6 +996,7 @@ window.calculerRatio = calculerRatio;
 window.calculerIR = calculerIR;
 window.toggleBloc = toggleBloc;
 window.sauvegarderSimulation = sauvegarderSimulation;
+window.chargerDerniereSimulation = chargerDerniereSimulation;
 window.nouvelleSimulation = nouvelleSimulation;
 window.exporterPDF = exporterPDF;
 window.calculerTempsReel = calculerTempsReel;
@@ -896,6 +1030,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             console.log('✅ [INIT] Tous les événements attachés');
+            
+            // Charger automatiquement la dernière simulation
+            setTimeout(() => {
+                chargerDerniereSimulation();
+            }, 100);
+            
         } else {
             console.error('❌ [INIT] Formulaire non trouvé!');
         }
