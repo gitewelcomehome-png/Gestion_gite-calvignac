@@ -157,7 +157,8 @@ function calculerIR() {
     }
     
     const impotTotal = impotQuotient * parts;
-    const resteFinal = revenuLMP - impotTotal;
+    const resteFinalTotal = revenuTotal - impotTotal; // Reste après IR sur le revenu total
+    const resteFinalLMP = revenuLMP - (impotTotal * (revenuLMP / revenuTotal)); // Part IR du LMP
     
     // Affichage
     document.getElementById('resultat-ir').style.display = 'block';
@@ -165,7 +166,7 @@ function calculerIR() {
     document.getElementById('ir-parts').textContent = parts.toFixed(1);
     document.getElementById('ir-quotient').textContent = quotient.toFixed(2) + ' €';
     document.getElementById('ir-montant').textContent = impotTotal.toFixed(2) + ' €';
-    document.getElementById('ir-reste-final').textContent = resteFinal.toFixed(2) + ' €';
+    document.getElementById('ir-reste-final').textContent = resteFinalTotal.toFixed(2) + ' €';
 }
 
 // Attacher les événements de calcul en temps réel
