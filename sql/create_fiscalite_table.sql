@@ -1,5 +1,8 @@
+-- Suppression de l'ancienne table si elle existe
+DROP TABLE IF EXISTS simulations_fiscales CASCADE;
+
 -- Table pour stocker les simulations fiscales LMP
-CREATE TABLE IF NOT EXISTS simulations_fiscales (
+CREATE TABLE simulations_fiscales (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
