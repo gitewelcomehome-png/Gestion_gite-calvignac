@@ -325,6 +325,8 @@ async function updateTodoLists() {
 async function updateTodoList(category) {
     console.log('📋 updateTodoList appelée pour category:', category);
     
+    const now = new Date().toISOString();
+    
     const { data: todos } = await supabase
         .from('todos')
         .select('*')
@@ -333,22 +335,31 @@ async function updateTodoList(category) {
         .is('archived_at', null) // Seulement les tâches non archivées
         .order('created_at', { ascending: true });
     
-    console.log('📋 Tâches récupérées:', todos);
-    console.log('📋 Nombre de tâches:', todos?.length || 0);
-    if (todos && todos.length > 0) {
-        console.log('📋 IDs des tâches affichées:', todos.map(t => `ID:${t.id} - ${t.title}`));
+    // Filtrer les tâches dont la date d'occurrence est passée ou inexistante
+    const visibleTodos = todos?.filter(todo => {
+        if (!todo.is_recurrent || !todo.next_occurrence) {
+            return true; // Tâche normale ou récurrente sans date = visible
+        }
+        // Tâche récurrente : visible seulement si la date est passée
+        return new Date(todo.next_occurrence) <= new Date();
+    }) || [];
+    
+    console.log('📋 Tâches récupérées (total):', todos?.length || 0);
+    console.log('📋 Tâches visibles (après filtre date):', visibleTodos.length);
+    if (visibleTodos.length > 0) {
+        console.log('📋 IDs des tâches affichées:', visibleTodos.map(t => `ID:${t.id} - ${t.title}`));
     }
     
     const container = document.getElementById(`todo-${category}`);
     console.log('📋 Container trouvé:', container ? 'OUI' : 'NON');
     
-    if (!todos || todos.length === 0) {
+    if (!visibleTodos || visibleTodos.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>';
         return;
     }
     
     let html = '';
-    todos.forEach(todo => {
+    visibleTodos.forEach(todo => {
         const recurrentBadge = todo.is_recurrent ? '<span style="background: #9B59B6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px;">🔁 Récurrent</span>' : '';
         const frequencyLabel = todo.is_recurrent && todo.frequency ? 
             (todo.frequency === 'weekly' ? 'Hebdo' : todo.frequency === 'biweekly' ? 'Bi-hebdo' : 'Mensuel') : '';
