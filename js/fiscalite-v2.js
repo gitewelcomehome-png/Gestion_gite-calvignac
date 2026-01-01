@@ -7,9 +7,9 @@ let travauxCounter = 0;
 let fraisDiversCounter = 0;
 let produitsCounter = 0;
 
-// Debounce pour éviter trop de calculs et sauvegardes
+// Debounce pour éviter trop de calculs
 let calculTempsReelTimeout = null;
-let sauvegardeTimeout = null;
+let lastSavedData = null; // Pour éviter les sauvegardes en double
 
 // ==========================================
 // 🔧 CALCUL EN TEMPS RÉEL + SAUVEGARDE AUTO
@@ -24,10 +24,13 @@ function toggleBloc(titleElement) {
 }
 
 function sauvegardeAutomatique() {
-    clearTimeout(sauvegardeTimeout);
-    sauvegardeTimeout = setTimeout(() => {
-        sauvegarderSimulation(true); // true = mode silencieux
-    }, 2000); // Sauvegarde après 2 secondes d'inactivité
+    console.log('🔄 [AUTO-SAVE] Déclenchement sauvegarde automatique');
+    const ca = parseFloat(document.getElementById('ca')?.value || 0);
+    if (ca === 0) {
+        console.log('⚠️ [AUTO-SAVE] CA = 0, pas de sauvegarde');
+        return;
+    }
+    sauvegarderSimulation(true); // true = mode silencieux
 }
 
 function calculerTempsReel() {
@@ -113,9 +116,6 @@ function calculerTempsReel() {
         // Mise à jour du revenu LMP pour l'IR
         document.getElementById('revenu_lmp').value = resteAvantIR.toFixed(2);
         calculerIR();
-        
-        // Sauvegarde automatique
-        sauvegardeAutomatique();
         
     }, 500);
 }
@@ -683,12 +683,18 @@ function afficherResultats(data) {
 // ==========================================
 
 async function sauvegarderSimulation(silencieux = false) {
+    console.log('💾 [SAVE] Début sauvegarderSimulation(), silencieux =', silencieux);
+    
     let nom = 'Simulation auto';
     if (!silencieux) {
         nom = prompt('Nom de la simulation :');
-        if (!nom) return;
+        if (!nom) {
+            console.log('❌ [SAVE] Sauvegarde annulée par utilisateur');
+            return;
+        }
     }
     
+    console.log('📝 [SAVE] Collecte des données pour:', nom);
     const data = {
         nom_simulation: nom,
         chiffre_affaires: parseFloat(document.getElementById('ca').value || 0),
@@ -796,17 +802,33 @@ async function sauvegarderSimulation(silencieux = false) {
         nombre_enfants: parseInt(document.getElementById('nombre_enfants').value || 0)
     };
     
+    // Vérifier si les données ont changé
+    const dataString = JSON.stringify(data);
+    if (silencieux && dataString === lastSavedData) {
+        console.log('⏭️ [SAVE] Données identiques, sauvegarde ignorée');
+        return;
+    }
+    
+    console.log('📤 [SAVE] Envoi vers Supabase...', data);
     try {
-        const { error } = await supabase
+        const { data: result, error } = await supabase
             .from('simulations_fiscales')
-            .insert(data);
+            .insert(data)
+            .select();
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ [SAVE] Erreur Supabase:', error);
+            throw error;
+        }
+        
+        console.log('✅ [SAVE] Succès! ID:', result[0]?.id);
+        lastSavedData = dataString;
+        
         if (!silencieux) {
             showToast('✓ Simulation sauvegardée', 'success');
         }
     } catch (error) {
-        console.error('Erreur sauvegarde:', error);
+        console.error('💥 [SAVE] Exception:', error);
         if (!silencieux) {
             showToast('Erreur lors de la sauvegarde', 'error');
         }
@@ -845,17 +867,37 @@ window.nouvelleSimulation = nouvelleSimulation;
 window.exporterPDF = exporterPDF;
 window.calculerTempsReel = calculerTempsReel;
 
-// Initialisation : ajouter calculerTempsReel() sur tous les inputs au chargement
+// Initialisation : ajouter calculerTempsReel() et sauvegarde sur tous les inputs au chargement
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 [INIT] Initialisation des événements');
     // Attendre que le contenu de l'onglet soit chargé
     setTimeout(() => {
         const form = document.getElementById('calculateur-lmp');
         if (form) {
+            console.log('✅ [INIT] Formulaire trouvé');
             // Ajouter oninput sur tous les inputs et selects
-            form.querySelectorAll('input[type="number"], select').forEach(el => {
-                el.addEventListener('input', () => calculerTempsReel());
-                el.addEventListener('change', () => calculerTempsReel());
+            const inputs = form.querySelectorAll('input[type="number"], select');
+            console.log(`📊 [INIT] ${inputs.length} champs trouvés`);
+            
+            inputs.forEach((el, index) => {
+                el.addEventListener('input', () => {
+                    console.log(`⌨️ [EVENT] Input sur ${el.id || 'champ #' + index}`);
+                    calculerTempsReel();
+                });
+                el.addEventListener('change', () => {
+                    console.log(`🔄 [EVENT] Change sur ${el.id || 'champ #' + index}`);
+                    calculerTempsReel();
+                });
+                // NOUVEAU : Sauvegarde sur blur (perte de focus)
+                el.addEventListener('blur', () => {
+                    console.log(`👋 [EVENT] Blur (perte focus) sur ${el.id || 'champ #' + index}`);
+                    sauvegardeAutomatique();
+                });
             });
+            
+            console.log('✅ [INIT] Tous les événements attachés');
+        } else {
+            console.error('❌ [INIT] Formulaire non trouvé!');
         }
     }, 500);
 });
