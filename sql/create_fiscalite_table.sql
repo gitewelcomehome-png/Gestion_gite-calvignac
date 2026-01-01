@@ -113,6 +113,13 @@ CREATE TABLE simulations_fiscales (
     reste_avant_ir DECIMAL(10,2),
     trimestres_retraite INTEGER,
     
+    -- Calcul IR
+    salaire_madame DECIMAL(10,2) DEFAULT 0,
+    salaire_monsieur DECIMAL(10,2) DEFAULT 0,
+    nombre_enfants INTEGER DEFAULT 0,
+    impot_revenu DECIMAL(10,2),
+    reste_apres_ir DECIMAL(10,2),
+    
     -- Métadonnées
     nom_simulation VARCHAR(255),
     notes TEXT
