@@ -788,7 +788,7 @@ async function sauvegarderSimulation(silencieux = false) {
         assurance_auto_type: 'mensuel',
         entretien_auto: 0, // Non utilisé en mode barème
         amortissement_auto: 0, // Non utilisé en mode barème
-        usage_pro_pourcent: parseInt(document.getElementById('usage_pro_pourcent').value || 0),
+        usage_pro_pourcent: 0, // Non utilisé en mode barème
         
         // IR
         salaire_madame: parseFloat(document.getElementById('salaire_madame').value || 0),
