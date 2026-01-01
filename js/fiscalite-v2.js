@@ -82,7 +82,7 @@ function calculerTempsReel() {
         const resteAvantIR = benefice - urssaf;
         
         // Calcul des trimestres de retraite
-        const smic2024 = 11 873.10;
+        const smic2024 = 11873.10;
         let trimestres = 0;
         if (benefice >= smic2024 * 6) trimestres = 4;
         else if (benefice >= smic2024 * 4.5) trimestres = 3;
