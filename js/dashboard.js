@@ -323,6 +323,8 @@ async function updateTodoLists() {
 }
 
 async function updateTodoList(category) {
+    console.log('📋 updateTodoList appelée pour category:', category);
+    
     const { data: todos } = await supabase
         .from('todos')
         .select('*')
@@ -331,7 +333,11 @@ async function updateTodoList(category) {
         .is('archived_at', null) // Seulement les tâches non archivées
         .order('created_at', { ascending: true });
     
+    console.log('📋 Tâches récupérées:', todos);
+    console.log('📋 Nombre de tâches:', todos?.length || 0);
+    
     const container = document.getElementById(`todo-${category}`);
+    console.log('📋 Container trouvé:', container ? 'OUI' : 'NON');
     
     if (!todos || todos.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>';
