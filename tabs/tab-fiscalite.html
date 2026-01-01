@@ -1,0 +1,535 @@
+<div class="card">
+    <div class="card-header">
+        <span class="card-icon">💰</span>
+        <h2 class="card-title">Calculateur Fiscal LMP</h2>
+        <p style="color: #7f8c8d; font-size: 0.9rem; margin: 8px 0 0 0;">Optimisez votre déclaration et calculez vos charges déductibles</p>
+    </div>
+
+    <!-- Boutons de gestion -->
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+        <button onclick="chargerDerniereSimulation()" class="btn btn-secondary">
+            📂 Charger dernière simulation
+        </button>
+        <button onclick="nouvelleSimulation()" class="btn btn-secondary">
+            🔄 Nouvelle simulation
+        </button>
+        <button onclick="sauvegarderSimulation()" class="btn btn-primary">
+            💾 Sauvegarder
+        </button>
+    </div>
+
+    <form id="calculateur-lmp" onsubmit="calculerFiscalite(event)">
+        
+        <!-- BLOC 1 : Chiffre d'affaires -->
+        <div class="fiscal-bloc">
+            <h3 class="fiscal-bloc-title">📊 Chiffre d'affaires</h3>
+            <div class="form-group">
+                <label>Chiffre d'affaires annuel (€) <span class="required">*</span></label>
+                <input type="number" id="ca" step="0.01" required placeholder="Ex: 25000">
+            </div>
+        </div>
+
+        <!-- BLOC 2 : Charges du bien loué -->
+        <div class="fiscal-bloc">
+            <h3 class="fiscal-bloc-title">🏠 Charges du bien loué (100% déductibles)</h3>
+            <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Internet</label>
+                    <div class="input-with-select">
+                        <select id="internet_bien_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="internet_bien" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Eau</label>
+                    <div class="input-with-select">
+                        <select id="eau_bien_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="eau_bien" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Électricité</label>
+                    <div class="input-with-select">
+                        <select id="electricite_bien_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="electricite_bien" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance habitation</label>
+                    <div class="input-with-select">
+                        <select id="assurance_hab_bien_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_hab_bien" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance emprunteur bien</label>
+                    <div class="input-with-select">
+                        <select id="assurance_emprunt_bien_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_emprunt_bien" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Intérêts emprunt bien</label>
+                    <div class="input-with-select">
+                        <select id="interets_emprunt_bien_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="interets_emprunt_bien" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ménage/Entretien</label>
+                    <div class="input-with-select">
+                        <select id="menage_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="menage" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Linge (draps, serviettes)</label>
+                    <div class="input-with-select">
+                        <select id="linge_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="linge" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Travaux/Réparations</label>
+                    <div class="input-with-select">
+                        <select id="travaux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="travaux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Frais divers</label>
+                    <div class="input-with-select">
+                        <select id="frais_divers_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="frais_divers" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Logiciel de gestion</label>
+                    <div class="input-with-select">
+                        <select id="logiciel_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="logiciel" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Produits d'accueil</label>
+                    <div class="input-with-select">
+                        <select id="produits_accueil_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="produits_accueil" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Charges de copropriété</label>
+                    <div class="input-with-select">
+                        <select id="copropriete_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="copropriete" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Taxe foncière (annuel)</label>
+                    <input type="number" id="taxe_fonciere" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>CFE (annuel)</label>
+                    <input type="number" id="cfe" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Commissions plateformes (annuel)</label>
+                    <input type="number" id="commissions" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Amortissement du bien (annuel)</label>
+                    <input type="number" id="amortissement" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 3 : Résidence principale (Bureau) -->
+        <div class="fiscal-bloc">
+            <h3 class="fiscal-bloc-title">🏡 Charges résidence principale (Bureau)</h3>
+            <p class="fiscal-info">⚠️ Déductibles au prorata de la surface professionnelle</p>
+            
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 10px;">
+                    <div class="form-group">
+                        <label>Surface bureau (m²)</label>
+                        <input type="number" id="surface_bureau" step="0.01" placeholder="15" onchange="calculerRatio()">
+                    </div>
+                    <div class="form-group">
+                        <label>Surface totale logement (m²)</label>
+                        <input type="number" id="surface_totale" step="0.01" placeholder="100" onchange="calculerRatio()">
+                    </div>
+                </div>
+                <div id="ratio-display" style="font-size: 1.2rem; font-weight: 600; color: #27ae60; text-align: center;">
+                    Ratio : 0%
+                </div>
+            </div>
+            
+            <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Intérêts emprunt résidence</label>
+                    <div class="input-with-select">
+                        <select id="interets_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="interets_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance emprunteur résidence</label>
+                    <div class="input-with-select">
+                        <select id="assurance_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Électricité résidence</label>
+                    <div class="input-with-select">
+                        <select id="electricite_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="electricite_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Internet résidence</label>
+                    <div class="input-with-select">
+                        <select id="internet_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="internet_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Eau résidence</label>
+                    <div class="input-with-select">
+                        <select id="eau_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="eau_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance habitation résidence</label>
+                    <div class="input-with-select">
+                        <select id="assurance_hab_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_hab_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Taxe foncière résidence (annuel)</label>
+                    <input type="number" id="taxe_fonciere_residence" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 4 : Frais professionnels -->
+        <div class="fiscal-bloc">
+            <h3 class="fiscal-bloc-title">💼 Frais professionnels (100% déductibles)</h3>
+            <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Comptable (annuel)</label>
+                    <input type="number" id="comptable" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Frais bancaires pro (annuel)</label>
+                    <input type="number" id="frais_bancaires" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Téléphone portable pro</label>
+                    <div class="input-with-select">
+                        <select id="telephone_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="telephone" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ordinateur/Matériel info (annuel)</label>
+                    <input type="number" id="materiel_info" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance RC Pro (annuel)</label>
+                    <input type="number" id="rc_pro" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Formation professionnelle (annuel)</label>
+                    <input type="number" id="formation" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Fournitures bureau</label>
+                    <div class="input-with-select">
+                        <select id="fournitures_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="fournitures" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 5 : Véhicule -->
+        <div class="fiscal-bloc">
+            <h3 class="fiscal-bloc-title">🚗 Véhicule</h3>
+            <p class="fiscal-info">Choisissez l'option la plus avantageuse pour vous</p>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: 600; margin-bottom: 10px; display: block;">Option de déduction :</label>
+                <div style="display: flex; gap: 20px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="radio" name="vehicule_option" value="bareme" checked onchange="toggleVehiculeOption()">
+                        <span>Barème kilométrique</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="radio" name="vehicule_option" value="reel" onchange="toggleVehiculeOption()">
+                        <span>Frais réels</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Option A : Barème -->
+            <div id="vehicule-bareme" class="fiscal-grid">
+                <div class="form-group">
+                    <label>Puissance fiscale</label>
+                    <select id="puissance_fiscale">
+                        <option value="3">3 CV</option>
+                        <option value="4">4 CV</option>
+                        <option value="5" selected>5 CV</option>
+                        <option value="6">6 CV</option>
+                        <option value="7">7 CV</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Kilomètres professionnels annuels</label>
+                    <input type="number" id="km_professionnels" placeholder="5000">
+                </div>
+            </div>
+            
+            <!-- Option B : Frais réels -->
+            <div id="vehicule-reel" class="fiscal-grid" style="display: none;">
+                <div class="form-group">
+                    <label>Carburant</label>
+                    <div class="input-with-select">
+                        <select id="carburant_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="carburant" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance auto</label>
+                    <div class="input-with-select">
+                        <select id="assurance_auto_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_auto" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Entretien/Réparations (annuel)</label>
+                    <input type="number" id="entretien_auto" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Amortissement véhicule (annuel)</label>
+                    <input type="number" id="amortissement_auto" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>% usage professionnel</label>
+                    <input type="number" id="usage_pro_pourcent" min="0" max="100" placeholder="50">
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton de calcul -->
+        <div style="text-align: center; margin: 30px 0;">
+            <button type="submit" class="btn btn-primary" style="padding: 15px 40px; font-size: 1.1rem;">
+                🧮 Calculer mes charges et mon bénéfice
+            </button>
+        </div>
+    </form>
+
+    <!-- Résultats -->
+    <div id="resultats-fiscalite" style="display: none;">
+        <div class="fiscal-bloc" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h3 style="color: white; margin-bottom: 20px;">📊 Résultats de votre déclaration fiscale</h3>
+            
+            <div id="resultats-content"></div>
+            
+            <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+                <button onclick="exporterPDF()" class="btn" style="background: white; color: #667eea;">
+                    📄 Télécharger PDF
+                </button>
+                <button onclick="nouvelleSimulation()" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid white;">
+                    🔄 Nouveau calcul
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.fiscal-bloc {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.fiscal-bloc-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #3498db;
+}
+
+.fiscal-info {
+    background: #fff3cd;
+    color: #856404;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.fiscal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.input-with-select {
+    display: flex;
+    gap: 8px;
+}
+
+.type-select {
+    min-width: 100px;
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.input-with-select input {
+    flex: 1;
+}
+
+#resultats-content {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.resultat-ligne {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.resultat-ligne.total {
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-top: 2px solid white;
+    border-bottom: 2px solid white;
+    margin: 10px 0;
+}
+
+.resultat-section {
+    margin: 20px 0;
+}
+
+.resultat-section h4 {
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+</style>
