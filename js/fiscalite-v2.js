@@ -7,6 +7,176 @@ let travauxCounter = 0;
 let fraisDiversCounter = 0;
 let produitsCounter = 0;
 
+// Debounce pour éviter trop de calculs
+let calculTempsReelTimeout = null;
+
+// ==========================================
+// 🔧 CALCUL EN TEMPS RÉEL
+// ==========================================
+
+function calculerTempsReel() {
+    clearTimeout(calculTempsReelTimeout);
+    calculTempsReelTimeout = setTimeout(() => {
+        const ca = parseFloat(document.getElementById('ca')?.value || 0);
+        if (ca === 0) return;
+        
+        // Calcul simplifié des charges
+        const chargesCouzon = calculerChargesBien('couzon');
+        const chargesTrevoux = calculerChargesBien('trevoux');
+        const travaux = getTravauxListe().reduce((sum, item) => sum + item.montant, 0);
+        const fraisDivers = getFraisDiversListe().reduce((sum, item) => sum + item.montant, 0);
+        const produitsAccueil = getProduitsAccueilListe().reduce((sum, item) => sum + item.montant, 0);
+        const chargesBiens = chargesCouzon + chargesTrevoux + travaux + fraisDivers + produitsAccueil;
+        
+        const ratio = calculerRatio();
+        const chargesResidence = calculerChargesResidence() * ratio;
+        const fraisPro = calculerFraisProfessionnels();
+        const fraisVehicule = calculerFraisVehicule();
+        
+        const totalCharges = chargesBiens + chargesResidence + fraisPro + fraisVehicule;
+        const benefice = ca - totalCharges;
+        
+        // Cotisations URSSAF
+        const urssaf = benefice * 0.367 + ca * 0.0025; // Simplifié
+        const resteAvantIR = benefice - urssaf;
+        
+        // Affichage
+        document.getElementById('estimation-urssaf').style.display = 'block';
+        document.getElementById('preview-benefice').textContent = benefice.toFixed(2) + ' €';
+        document.getElementById('preview-urssaf').textContent = urssaf.toFixed(2) + ' €';
+        document.getElementById('preview-reste').textContent = resteAvantIR.toFixed(2) + ' €';
+        
+        // Alerte retraite
+        const alerteRetraite = document.getElementById('alerte-retraite');
+        if (benefice < 7046) {
+            alerteRetraite.style.display = 'block';
+        } else {
+            alerteRetraite.style.display = 'none';
+        }
+        
+        // Mise à jour du revenu LMP pour l'IR
+        document.getElementById('revenu_lmp').value = resteAvantIR.toFixed(2);
+        calculerIR();
+        
+    }, 500);
+}
+
+function calculerChargesBien(type) {
+    return getAnnualValue(`internet_${type}`, `internet_${type}_type`) +
+        getAnnualValue(`eau_${type}`, `eau_${type}_type`) +
+        getAnnualValue(`electricite_${type}`, `electricite_${type}_type`) +
+        getAnnualValue(`assurance_hab_${type}`, `assurance_hab_${type}_type`) +
+        getAnnualValue(`assurance_emprunt_${type}`, `assurance_emprunt_${type}_type`) +
+        getAnnualValue(`interets_emprunt_${type}`, `interets_emprunt_${type}_type`) +
+        getAnnualValue(`menage_${type}`, `menage_${type}_type`) +
+        getAnnualValue(`linge_${type}`, `linge_${type}_type`) +
+        getAnnualValue(`logiciel_${type}`, `logiciel_${type}_type`) +
+        getAnnualValue(`copropriete_${type}`, `copropriete_${type}_type`) +
+        parseFloat(document.getElementById(`taxe_fonciere_${type}`)?.value || 0) +
+        parseFloat(document.getElementById(`cfe_${type}`)?.value || 0) +
+        parseFloat(document.getElementById(`commissions_${type}`)?.value || 0) +
+        parseFloat(document.getElementById(`amortissement_${type}`)?.value || 0);
+}
+
+function calculerChargesResidence() {
+    return getAnnualValue('interets_residence', 'interets_residence_type') +
+        getAnnualValue('assurance_residence', 'assurance_residence_type') +
+        getAnnualValue('electricite_residence', 'electricite_residence_type') +
+        getAnnualValue('internet_residence', 'internet_residence_type') +
+        getAnnualValue('eau_residence', 'eau_residence_type') +
+        getAnnualValue('assurance_hab_residence', 'assurance_hab_residence_type') +
+        parseFloat(document.getElementById('taxe_fonciere_residence')?.value || 0);
+}
+
+function calculerFraisProfessionnels() {
+    return parseFloat(document.getElementById('comptable')?.value || 0) +
+        parseFloat(document.getElementById('frais_bancaires')?.value || 0) +
+        getAnnualValue('telephone', 'telephone_type') +
+        parseFloat(document.getElementById('materiel_info')?.value || 0) +
+        parseFloat(document.getElementById('rc_pro')?.value || 0) +
+        parseFloat(document.getElementById('formation')?.value || 0) +
+        getAnnualValue('fournitures', 'fournitures_type');
+}
+
+function calculerFraisVehicule() {
+    const vehiculeOption = document.querySelector('input[name="vehicule_option"]:checked')?.value || 'bareme';
+    if (vehiculeOption === 'bareme') {
+        const puissance = parseInt(document.getElementById('puissance_fiscale')?.value || 5);
+        const km = parseInt(document.getElementById('km_professionnels')?.value || 0);
+        return calculerBaremeKilometrique(puissance, km);
+    } else {
+        const fraisReels = 
+            getAnnualValue('carburant', 'carburant_type') +
+            getAnnualValue('assurance_auto', 'assurance_auto_type') +
+            parseFloat(document.getElementById('entretien_auto')?.value || 0) +
+            parseFloat(document.getElementById('amortissement_auto')?.value || 0);
+        const usagePro = parseInt(document.getElementById('usage_pro_pourcent')?.value || 0) / 100;
+        return fraisReels * usagePro;
+    }
+}
+
+// ==========================================
+// 🧾 CALCUL IMPÔT SUR LE REVENU
+// ==========================================
+
+function calculerIR() {
+    const salaireMadame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
+    const salaireMonsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
+    const revenuLMP = parseFloat(document.getElementById('revenu_lmp')?.value || 0);
+    const nbEnfants = parseInt(document.getElementById('nombre_enfants')?.value || 0);
+    
+    // Revenu imposable total
+    const revenuTotal = salaireMadame + salaireMonsieur + revenuLMP;
+    
+    if (revenuTotal === 0) {
+        document.getElementById('resultat-ir').style.display = 'none';
+        return;
+    }
+    
+    // Nombre de parts fiscales
+    let parts = 2; // Couple
+    if (nbEnfants === 1) parts += 0.5;
+    else if (nbEnfants === 2) parts += 1;
+    else if (nbEnfants >= 3) parts += 1 + (nbEnfants - 2);
+    
+    // Quotient familial
+    const quotient = revenuTotal / parts;
+    
+    // Barème progressif 2024
+    let impotQuotient = 0;
+    if (quotient <= 11294) {
+        impotQuotient = 0;
+    } else if (quotient <= 28797) {
+        impotQuotient = (quotient - 11294) * 0.11;
+    } else if (quotient <= 82341) {
+        impotQuotient = (28797 - 11294) * 0.11 + (quotient - 28797) * 0.30;
+    } else if (quotient <= 177106) {
+        impotQuotient = (28797 - 11294) * 0.11 + (82341 - 28797) * 0.30 + (quotient - 82341) * 0.41;
+    } else {
+        impotQuotient = (28797 - 11294) * 0.11 + (82341 - 28797) * 0.30 + (177106 - 82341) * 0.41 + (quotient - 177106) * 0.45;
+    }
+    
+    const impotTotal = impotQuotient * parts;
+    const resteFinal = revenuLMP - impotTotal;
+    
+    // Affichage
+    document.getElementById('resultat-ir').style.display = 'block';
+    document.getElementById('ir-revenu-total').textContent = revenuTotal.toFixed(2) + ' €';
+    document.getElementById('ir-parts').textContent = parts.toFixed(1);
+    document.getElementById('ir-quotient').textContent = quotient.toFixed(2) + ' €';
+    document.getElementById('ir-montant').textContent = impotTotal.toFixed(2) + ' €';
+    document.getElementById('ir-reste-final').textContent = resteFinal.toFixed(2) + ' €';
+}
+
+// Attacher les événements de calcul en temps réel
+document.addEventListener('DOMContentLoaded', () => {
+    const inputs = document.querySelectorAll('input[type="number"], select');
+    inputs.forEach(input => {
+        input.addEventListener('input', calculerTempsReel);
+        input.addEventListener('change', calculerTempsReel);
+    });
+});
+
 // ==========================================
 // 🔧 GESTION DES LISTES DYNAMIQUES
 // ==========================================
@@ -602,8 +772,10 @@ window.ajouterProduitAccueil = ajouterProduitAccueil;
 window.supprimerItem = supprimerItem;
 window.calculerFiscalite = calculerFiscalite;
 window.calculerRatio = calculerRatio;
+window.calculerIR = calculerIR;
 window.toggleVehiculeOption = toggleVehiculeOption;
 window.sauvegarderSimulation = sauvegarderSimulation;
 window.chargerDerniereSimulation = chargerDerniereSimulation;
 window.nouvelleSimulation = nouvelleSimulation;
 window.exporterPDF = exporterPDF;
+
