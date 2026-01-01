@@ -305,8 +305,78 @@ async function sauvegarderSimulation() {
     const data = {
         nom_simulation: nom,
         chiffre_affaires: parseFloat(document.getElementById('ca').value || 0),
-        // ... tous les autres champs
-        // (trop long à lister ici, voir le reste dans la fonction complète)
+        
+        // Charges bien loué
+        internet_bien: parseFloat(document.getElementById('internet_bien').value || 0),
+        internet_bien_type: document.getElementById('internet_bien_type').value,
+        eau_bien: parseFloat(document.getElementById('eau_bien').value || 0),
+        eau_bien_type: document.getElementById('eau_bien_type').value,
+        electricite_bien: parseFloat(document.getElementById('electricite_bien').value || 0),
+        electricite_bien_type: document.getElementById('electricite_bien_type').value,
+        assurance_hab_bien: parseFloat(document.getElementById('assurance_hab_bien').value || 0),
+        assurance_hab_bien_type: document.getElementById('assurance_hab_bien_type').value,
+        assurance_emprunt_bien: parseFloat(document.getElementById('assurance_emprunt_bien').value || 0),
+        assurance_emprunt_bien_type: document.getElementById('assurance_emprunt_bien_type').value,
+        interets_emprunt_bien: parseFloat(document.getElementById('interets_emprunt_bien').value || 0),
+        interets_emprunt_bien_type: document.getElementById('interets_emprunt_bien_type').value,
+        menage: parseFloat(document.getElementById('menage').value || 0),
+        menage_type: document.getElementById('menage_type').value,
+        linge: parseFloat(document.getElementById('linge').value || 0),
+        linge_type: document.getElementById('linge_type').value,
+        travaux: parseFloat(document.getElementById('travaux').value || 0),
+        travaux_type: document.getElementById('travaux_type').value,
+        frais_divers: parseFloat(document.getElementById('frais_divers').value || 0),
+        frais_divers_type: document.getElementById('frais_divers_type').value,
+        logiciel: parseFloat(document.getElementById('logiciel').value || 0),
+        logiciel_type: document.getElementById('logiciel_type').value,
+        taxe_fonciere: parseFloat(document.getElementById('taxe_fonciere').value || 0),
+        cfe: parseFloat(document.getElementById('cfe').value || 0),
+        commissions: parseFloat(document.getElementById('commissions').value || 0),
+        amortissement: parseFloat(document.getElementById('amortissement').value || 0),
+        copropriete: parseFloat(document.getElementById('copropriete').value || 0),
+        copropriete_type: document.getElementById('copropriete_type').value,
+        produits_accueil: parseFloat(document.getElementById('produits_accueil').value || 0),
+        produits_accueil_type: document.getElementById('produits_accueil_type').value,
+        
+        // Résidence principale
+        surface_bureau: parseFloat(document.getElementById('surface_bureau').value || 0),
+        surface_totale: parseFloat(document.getElementById('surface_totale').value || 0),
+        interets_residence: parseFloat(document.getElementById('interets_residence').value || 0),
+        interets_residence_type: document.getElementById('interets_residence_type').value,
+        assurance_residence: parseFloat(document.getElementById('assurance_residence').value || 0),
+        assurance_residence_type: document.getElementById('assurance_residence_type').value,
+        electricite_residence: parseFloat(document.getElementById('electricite_residence').value || 0),
+        electricite_residence_type: document.getElementById('electricite_residence_type').value,
+        internet_residence: parseFloat(document.getElementById('internet_residence').value || 0),
+        internet_residence_type: document.getElementById('internet_residence_type').value,
+        eau_residence: parseFloat(document.getElementById('eau_residence').value || 0),
+        eau_residence_type: document.getElementById('eau_residence_type').value,
+        assurance_hab_residence: parseFloat(document.getElementById('assurance_hab_residence').value || 0),
+        assurance_hab_residence_type: document.getElementById('assurance_hab_residence_type').value,
+        taxe_fonciere_residence: parseFloat(document.getElementById('taxe_fonciere_residence').value || 0),
+        
+        // Frais professionnels
+        comptable: parseFloat(document.getElementById('comptable').value || 0),
+        frais_bancaires: parseFloat(document.getElementById('frais_bancaires').value || 0),
+        telephone: parseFloat(document.getElementById('telephone').value || 0),
+        telephone_type: document.getElementById('telephone_type').value,
+        materiel_info: parseFloat(document.getElementById('materiel_info').value || 0),
+        rc_pro: parseFloat(document.getElementById('rc_pro').value || 0),
+        formation: parseFloat(document.getElementById('formation').value || 0),
+        fournitures: parseFloat(document.getElementById('fournitures').value || 0),
+        fournitures_type: document.getElementById('fournitures_type').value,
+        
+        // Véhicule
+        vehicule_option: document.querySelector('input[name="vehicule_option"]:checked').value,
+        puissance_fiscale: parseInt(document.getElementById('puissance_fiscale').value || 5),
+        km_professionnels: parseInt(document.getElementById('km_professionnels').value || 0),
+        carburant: parseFloat(document.getElementById('carburant').value || 0),
+        carburant_type: document.getElementById('carburant_type').value,
+        assurance_auto: parseFloat(document.getElementById('assurance_auto').value || 0),
+        assurance_auto_type: document.getElementById('assurance_auto_type').value,
+        entretien_auto: parseFloat(document.getElementById('entretien_auto').value || 0),
+        amortissement_auto: parseFloat(document.getElementById('amortissement_auto').value || 0),
+        usage_pro_pourcent: parseInt(document.getElementById('usage_pro_pourcent').value || 0)
     };
     
     try {
@@ -337,12 +407,87 @@ async function chargerDerniereSimulation() {
             return;
         }
         
-        // Remplir le formulaire avec les données
         const sim = data[0];
-        document.getElementById('ca').value = sim.chiffre_affaires;
-        // ... remplir tous les autres champs
         
-        showToast('✓ Simulation chargée', 'success');
+        // CA
+        document.getElementById('ca').value = sim.chiffre_affaires || 0;
+        
+        // Charges bien loué
+        document.getElementById('internet_bien').value = sim.internet_bien || 0;
+        document.getElementById('internet_bien_type').value = sim.internet_bien_type || 'mensuel';
+        document.getElementById('eau_bien').value = sim.eau_bien || 0;
+        document.getElementById('eau_bien_type').value = sim.eau_bien_type || 'mensuel';
+        document.getElementById('electricite_bien').value = sim.electricite_bien || 0;
+        document.getElementById('electricite_bien_type').value = sim.electricite_bien_type || 'mensuel';
+        document.getElementById('assurance_hab_bien').value = sim.assurance_hab_bien || 0;
+        document.getElementById('assurance_hab_bien_type').value = sim.assurance_hab_bien_type || 'mensuel';
+        document.getElementById('assurance_emprunt_bien').value = sim.assurance_emprunt_bien || 0;
+        document.getElementById('assurance_emprunt_bien_type').value = sim.assurance_emprunt_bien_type || 'mensuel';
+        document.getElementById('interets_emprunt_bien').value = sim.interets_emprunt_bien || 0;
+        document.getElementById('interets_emprunt_bien_type').value = sim.interets_emprunt_bien_type || 'mensuel';
+        document.getElementById('menage').value = sim.menage || 0;
+        document.getElementById('menage_type').value = sim.menage_type || 'mensuel';
+        document.getElementById('linge').value = sim.linge || 0;
+        document.getElementById('linge_type').value = sim.linge_type || 'mensuel';
+        document.getElementById('travaux').value = sim.travaux || 0;
+        document.getElementById('travaux_type').value = sim.travaux_type || 'mensuel';
+        document.getElementById('frais_divers').value = sim.frais_divers || 0;
+        document.getElementById('frais_divers_type').value = sim.frais_divers_type || 'mensuel';
+        document.getElementById('logiciel').value = sim.logiciel || 0;
+        document.getElementById('logiciel_type').value = sim.logiciel_type || 'mensuel';
+        document.getElementById('taxe_fonciere').value = sim.taxe_fonciere || 0;
+        document.getElementById('cfe').value = sim.cfe || 0;
+        document.getElementById('commissions').value = sim.commissions || 0;
+        document.getElementById('amortissement').value = sim.amortissement || 0;
+        document.getElementById('copropriete').value = sim.copropriete || 0;
+        document.getElementById('copropriete_type').value = sim.copropriete_type || 'mensuel';
+        document.getElementById('produits_accueil').value = sim.produits_accueil || 0;
+        document.getElementById('produits_accueil_type').value = sim.produits_accueil_type || 'mensuel';
+        
+        // Résidence principale
+        document.getElementById('surface_bureau').value = sim.surface_bureau || 0;
+        document.getElementById('surface_totale').value = sim.surface_totale || 0;
+        document.getElementById('interets_residence').value = sim.interets_residence || 0;
+        document.getElementById('interets_residence_type').value = sim.interets_residence_type || 'mensuel';
+        document.getElementById('assurance_residence').value = sim.assurance_residence || 0;
+        document.getElementById('assurance_residence_type').value = sim.assurance_residence_type || 'mensuel';
+        document.getElementById('electricite_residence').value = sim.electricite_residence || 0;
+        document.getElementById('electricite_residence_type').value = sim.electricite_residence_type || 'mensuel';
+        document.getElementById('internet_residence').value = sim.internet_residence || 0;
+        document.getElementById('internet_residence_type').value = sim.internet_residence_type || 'mensuel';
+        document.getElementById('eau_residence').value = sim.eau_residence || 0;
+        document.getElementById('eau_residence_type').value = sim.eau_residence_type || 'mensuel';
+        document.getElementById('assurance_hab_residence').value = sim.assurance_hab_residence || 0;
+        document.getElementById('assurance_hab_residence_type').value = sim.assurance_hab_residence_type || 'mensuel';
+        document.getElementById('taxe_fonciere_residence').value = sim.taxe_fonciere_residence || 0;
+        
+        // Frais professionnels
+        document.getElementById('comptable').value = sim.comptable || 0;
+        document.getElementById('frais_bancaires').value = sim.frais_bancaires || 0;
+        document.getElementById('telephone').value = sim.telephone || 0;
+        document.getElementById('telephone_type').value = sim.telephone_type || 'mensuel';
+        document.getElementById('materiel_info').value = sim.materiel_info || 0;
+        document.getElementById('rc_pro').value = sim.rc_pro || 0;
+        document.getElementById('formation').value = sim.formation || 0;
+        document.getElementById('fournitures').value = sim.fournitures || 0;
+        document.getElementById('fournitures_type').value = sim.fournitures_type || 'mensuel';
+        
+        // Véhicule
+        const vehiculeOption = sim.vehicule_option || 'bareme';
+        document.querySelector(`input[name="vehicule_option"][value="${vehiculeOption}"]`).checked = true;
+        toggleVehiculeOption();
+        document.getElementById('puissance_fiscale').value = sim.puissance_fiscale || 5;
+        document.getElementById('km_professionnels').value = sim.km_professionnels || 0;
+        document.getElementById('carburant').value = sim.carburant || 0;
+        document.getElementById('carburant_type').value = sim.carburant_type || 'mensuel';
+        document.getElementById('assurance_auto').value = sim.assurance_auto || 0;
+        document.getElementById('assurance_auto_type').value = sim.assurance_auto_type || 'mensuel';
+        document.getElementById('entretien_auto').value = sim.entretien_auto || 0;
+        document.getElementById('amortissement_auto').value = sim.amortissement_auto || 0;
+        document.getElementById('usage_pro_pourcent').value = sim.usage_pro_pourcent || 0;
+        
+        calculerRatio();
+        showToast(`✓ Simulation "${sim.nom_simulation}" chargée`, 'success');
     } catch (error) {
         console.error('Erreur chargement:', error);
         showToast('Erreur lors du chargement', 'error');
