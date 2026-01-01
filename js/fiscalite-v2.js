@@ -48,8 +48,11 @@ function calculerTempsReel() {
         const urssaf = benefice * 0.367 + ca * 0.0025; // Simplifié
         const resteAvantIR = benefice - urssaf;
         
-        // Affichage
-        document.getElementById('estimation-urssaf').style.display = 'block';
+        // Affichage - Le bloc est maintenant dans un collapsible, on n'a qu'à mettre à jour les valeurs
+        const estimationBlock = document.getElementById('estimation-urssaf');
+        if (estimationBlock) {
+            estimationBlock.style.display = 'block';
+        }
         document.getElementById('preview-benefice').textContent = benefice.toFixed(2) + ' €';
         document.getElementById('preview-urssaf').textContent = urssaf.toFixed(2) + ' €';
         document.getElementById('preview-reste').textContent = resteAvantIR.toFixed(2) + ' €';
