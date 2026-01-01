@@ -21,7 +21,7 @@
     <script src="js/decouvrir.js"></script>
     <script src="js/reservations.js"></script>la je 
     <script src="js/archives.js"></script>
-    <script src="js/charges.js"></script>
+    <script src="js/fiscalite.js"></script>
     <script src="js/infos-gites.js"></script>
     <script src="js/fiche-client.js"></script>
     <script src="js/messagerie.js"></script>
@@ -218,7 +218,7 @@
             'tab-reservations': 'tabs/tab-reservations.html',
             'tab-archives': 'tabs/tab-archives.html',
             'tab-statistiques': 'tabs/tab-statistiques.html',
-            'tab-charges': 'tabs/tab-charges.html',
+            'tab-charges': 'tabs/tab-fiscalite.html',
             'tab-menage': 'tabs/tab-menage.html',
             'tab-infos-gites': 'tabs/tab-infos-gites.html',
             'tab-decouvrir': 'tabs/tab-decouvrir.html',
@@ -255,7 +255,7 @@
             <button class="nav-tab" data-tab="gestion" style="display:none;">⚙️ Gestion iCal</button>
             <button class="nav-tab" data-tab="reservations">📝 Réservations</button>
             <button class="nav-tab" data-tab="statistiques">📊 Statistiques</button>
-            <button class="nav-tab" data-tab="charges">💶 Charges & Rentabilité</button>
+            <button class="nav-tab" data-tab="charges">� Fiscalité LMP</button>
             <button class="nav-tab" data-tab="menage">
                 🧹 Planning Ménage
                 <span id="cleaning-notif-badge" style="display:none; background:#e74c3c; color:white; border-radius:50%; padding:2px 6px; margin-left:5px; font-size:0.8em; font-weight:bold;">0</span>
@@ -523,9 +523,8 @@
                 if (typeof updateArchivesDisplay === 'function') updateArchivesDisplay();
                 if (typeof updateArchivedTodos === 'function') updateArchivedTodos();
             }
-            if (tabName === 'charges' && typeof updateChargesDisplay === 'function') {
-                updateChargesDisplay();
-                if (typeof initChargeForm === 'function') initChargeForm();
+            if (tabName === 'charges' && typeof chargerDerniereSimulation === 'function') {
+                chargerDerniereSimulation();
             }
             if (tabName === 'menage' && typeof afficherPlanningMenageNew === 'function') {
                 afficherPlanningMenageNew();
