@@ -799,7 +799,7 @@ async function sauvegarderSimulation(silencieux = false) {
     try {
         const { error } = await supabase
             .from('simulations_fiscales')
-            .upsert(data, { onConflict: 'nom_simulation' });
+            .insert(data);
         
         if (error) throw error;
         if (!silencieux) {
