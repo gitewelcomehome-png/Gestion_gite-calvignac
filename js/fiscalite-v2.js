@@ -725,7 +725,12 @@ async function sauvegarderSimulation() {
         assurance_auto_type: document.getElementById('assurance_auto_type').value,
         entretien_auto: parseFloat(document.getElementById('entretien_auto').value || 0),
         amortissement_auto: parseFloat(document.getElementById('amortissement_auto').value || 0),
-        usage_pro_pourcent: parseInt(document.getElementById('usage_pro_pourcent').value || 0)
+        usage_pro_pourcent: parseInt(document.getElementById('usage_pro_pourcent').value || 0),
+        
+        // IR
+        salaire_madame: parseFloat(document.getElementById('salaire_madame').value || 0),
+        salaire_monsieur: parseFloat(document.getElementById('salaire_monsieur').value || 0),
+        nombre_enfants: parseInt(document.getElementById('nombre_enfants').value || 0)
     };
     
     try {
