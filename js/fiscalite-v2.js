@@ -779,15 +779,15 @@ async function sauvegarderSimulation(silencieux = false) {
         fournitures_type: document.getElementById('fournitures_type').value,
         
         // Véhicule
-        vehicule_option: document.querySelector('input[name="vehicule_option"]:checked').value,
+        vehicule_option: 'bareme', // Toujours barème kilométrique (frais réels supprimés)
         puissance_fiscale: parseInt(document.getElementById('puissance_fiscale').value || 5),
         km_professionnels: parseInt(document.getElementById('km_professionnels').value || 0),
-        carburant: parseFloat(document.getElementById('carburant').value || 0),
-        carburant_type: document.getElementById('carburant_type').value,
-        assurance_auto: parseFloat(document.getElementById('assurance_auto').value || 0),
-        assurance_auto_type: document.getElementById('assurance_auto_type').value,
-        entretien_auto: parseFloat(document.getElementById('entretien_auto').value || 0),
-        amortissement_auto: parseFloat(document.getElementById('amortissement_auto').value || 0),
+        carburant: 0, // Non utilisé en mode barème
+        carburant_type: 'mensuel',
+        assurance_auto: 0, // Non utilisé en mode barème
+        assurance_auto_type: 'mensuel',
+        entretien_auto: 0, // Non utilisé en mode barème
+        amortissement_auto: 0, // Non utilisé en mode barème
         usage_pro_pourcent: parseInt(document.getElementById('usage_pro_pourcent').value || 0),
         
         // IR
