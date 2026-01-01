@@ -560,7 +560,7 @@ async function toggleTodo(id, completed) {
         }
         
         // Archiver l'ancienne
-        await supabase
+        const { error: archiveError } = await supabase
             .from('todos')
             .update({ 
                 completed: true, 
@@ -568,6 +568,11 @@ async function toggleTodo(id, completed) {
                 last_generated: new Date().toISOString()
             })
             .eq('id', id);
+        
+        if (archiveError) {
+            console.error('Erreur mise à jour todo:', archiveError);
+            return;
+        }
     } else {
         // Si coché (non récurrente), archiver la tâche
         // Si décoché, restaurer
@@ -575,20 +580,15 @@ async function toggleTodo(id, completed) {
             { completed: true, archived_at: new Date().toISOString() } : 
             { completed: false, archived_at: null };
         
-        await supabase
+        const { error } = await supabase
             .from('todos')
             .update(updateData)
             .eq('id', id);
-    }
-    
-    const { error } = await supabase
-        .from('todos')
-        .update(updateData)
-        .eq('id', id);
-    
-    if (error) {
-        console.error('Erreur mise à jour todo:', error);
-        return;
+        
+        if (error) {
+            console.error('Erreur mise à jour todo:', error);
+            return;
+        }
     }
     
     // Recharger la liste correspondante
