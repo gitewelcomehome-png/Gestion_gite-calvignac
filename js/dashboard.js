@@ -335,6 +335,9 @@ async function updateTodoList(category) {
     
     console.log('📋 Tâches récupérées:', todos);
     console.log('📋 Nombre de tâches:', todos?.length || 0);
+    if (todos && todos.length > 0) {
+        console.log('📋 IDs des tâches affichées:', todos.map(t => `ID:${t.id} - ${t.title}`));
+    }
     
     const container = document.getElementById(`todo-${category}`);
     console.log('📋 Container trouvé:', container ? 'OUI' : 'NON');
