@@ -321,10 +321,10 @@
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 📝 Frais divers</h3>
             <div class="bloc-content">
                 <div style="margin-bottom: 15px;">
-                <button type="button" onclick="ajouterFraisDivers()" class="btn btn-secondary">➕ Ajouter un frais</button>
-            </div>
-            <div id="frais-divers-liste" style="display: grid; gap: 10px;">
-            </div>
+                    <button type="button" onclick="ajouterFraisDivers()" class="btn btn-secondary">➕ Ajouter un frais</button>
+                </div>
+                <div id="frais-divers-liste" style="display: grid; gap: 10px;">
+                </div>
             </div>
         </div>
 
@@ -517,24 +517,60 @@
         </div>
 
         <!-- Résultats Fiscaux -->
-        <div class="fiscal-bloc" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; margin-top: 30px;">
-            <h3 style="color: white; margin-bottom: 20px; text-align: center;">📊 RÉSULTATS FISCAUX</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Bénéfice imposable</div>
-                    <div id="preview-benefice" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+        <div class="fiscal-bloc collapsible" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; margin-top: 30px;">
+            <h3 class="fiscal-bloc-title" style="color: white; cursor: pointer;" onclick="toggleBloc(this)">
+                <span class="toggle-icon">▼</span> 📊 RÉSULTATS FISCAUX
+            </h3>
+            <div class="bloc-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Bénéfice imposable</div>
+                        <div id="preview-benefice" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Cotisations URSSAF</div>
+                        <div id="preview-urssaf" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Reste avant IR</div>
+                        <div id="preview-reste" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                    </div>
                 </div>
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Cotisations URSSAF</div>
-                    <div id="preview-urssaf" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                
+                <!-- Détails des calculs URSSAF -->
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h4 style="color: white; margin-bottom: 15px; font-size: 1rem;">📋 Détails URSSAF :</h4>
+                    <div style="display: grid; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Cotisations sociales (22%)</span>
+                            <strong id="detail-sociales">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>CSG/CRDS (9.7%)</span>
+                            <strong id="detail-csg-crds">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Formation professionnelle (0.25%)</span>
+                            <strong id="detail-formation-pro">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Allocations familiales (0% à 3.1%)</span>
+                            <strong id="detail-allocations">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 4px; font-weight: 600; margin-top: 5px;">
+                            <span>TOTAL URSSAF</span>
+                            <strong id="detail-total-urssaf">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(46, 204, 113, 0.3); border-radius: 4px; font-weight: 600; margin-top: 5px;">
+                            <span>Trimestres de retraite validés</span>
+                            <strong id="detail-trimestres">0</strong>
+                        </div>
+                    </div>
                 </div>
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Reste avant IR</div>
-                    <div id="preview-reste" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                
+                <div id="alerte-retraite" style="display: none; background: #e74c3c; padding: 12px; border-radius: 8px; font-weight: 600;">
+                    ⚠️ ATTENTION : Bénéfice en dessous de 7 046 € - Trimestres de retraite non validés !
                 </div>
-            </div>
-            <div id="alerte-retraite" style="display: none; background: #e74c3c; padding: 12px; border-radius: 8px; font-weight: 600;">
-                ⚠️ ATTENTION : Bénéfice en dessous de 7 046 € - Trimestres de retraite non validés !
             </div>
         </div>
 

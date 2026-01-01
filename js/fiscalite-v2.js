@@ -39,6 +39,12 @@ function calculerTempsReel() {
             document.getElementById('preview-benefice').textContent = '0 €';
             document.getElementById('preview-urssaf').textContent = '0 €';
             document.getElementById('preview-reste').textContent = '0 €';
+            document.getElementById('detail-sociales').textContent = '0 €';
+            document.getElementById('detail-csg-crds').textContent = '0 €';
+            document.getElementById('detail-formation-pro').textContent = '0 €';
+            document.getElementById('detail-allocations').textContent = '0 €';
+            document.getElementById('detail-total-urssaf').textContent = '0 €';
+            document.getElementById('detail-trimestres').textContent = '0';
             return;
         }
         
@@ -58,18 +64,47 @@ function calculerTempsReel() {
         const totalCharges = chargesBiens + chargesResidence + fraisPro + fraisVehicule;
         const benefice = ca - totalCharges;
         
-        // Cotisations URSSAF (calcul exact 2024)
-        const urssaf = benefice * 0.367 + ca * 0.0025;
+        // Détail des cotisations URSSAF 2024
+        const cotisationsSociales = benefice * 0.22; // 22%
+        const csgCrds = benefice * 0.097; // 9.7%
+        const formationPro = ca * 0.0025; // 0.25% du CA
+        
+        // Allocations familiales (progressif entre 110% et 140% du PASS)
+        let allocations = 0;
+        const pass2024 = 46368;
+        if (benefice > pass2024 * 1.1) {
+            const baseAlloc = Math.min(benefice - (pass2024 * 1.1), pass2024 * 0.3);
+            const tauxAlloc = (baseAlloc / (pass2024 * 0.3)) * 0.031;
+            allocations = benefice * tauxAlloc;
+        }
+        
+        const urssaf = cotisationsSociales + csgCrds + formationPro + allocations;
         const resteAvantIR = benefice - urssaf;
         
-        // Affichage
+        // Calcul des trimestres de retraite
+        const smic2024 = 11 873.10;
+        let trimestres = 0;
+        if (benefice >= smic2024 * 6) trimestres = 4;
+        else if (benefice >= smic2024 * 4.5) trimestres = 3;
+        else if (benefice >= smic2024 * 3) trimestres = 2;
+        else if (benefice >= smic2024 * 1.5) trimestres = 1;
+        
+        // Affichage résultats principaux
         document.getElementById('preview-benefice').textContent = benefice.toFixed(2) + ' €';
         document.getElementById('preview-urssaf').textContent = urssaf.toFixed(2) + ' €';
         document.getElementById('preview-reste').textContent = resteAvantIR.toFixed(2) + ' €';
         
+        // Affichage détails URSSAF
+        document.getElementById('detail-sociales').textContent = cotisationsSociales.toFixed(2) + ' €';
+        document.getElementById('detail-csg-crds').textContent = csgCrds.toFixed(2) + ' €';
+        document.getElementById('detail-formation-pro').textContent = formationPro.toFixed(2) + ' €';
+        document.getElementById('detail-allocations').textContent = allocations.toFixed(2) + ' €';
+        document.getElementById('detail-total-urssaf').textContent = urssaf.toFixed(2) + ' €';
+        document.getElementById('detail-trimestres').textContent = trimestres;
+        
         // Alerte retraite
         const alerteRetraite = document.getElementById('alerte-retraite');
-        if (benefice < 7046) {
+        if (trimestres === 0) {
             alerteRetraite.style.display = 'block';
         } else {
             alerteRetraite.style.display = 'none';
