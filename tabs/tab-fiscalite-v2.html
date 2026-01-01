@@ -516,66 +516,6 @@
             </div>
         </div>
 
-        <!-- Calcul Impôt sur le Revenu -->
-        <div class="fiscal-bloc collapsible">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🧾 Calcul Impôt sur le Revenu (IR)</h3>
-            <div class="bloc-content">
-                <div class="fiscal-grid">
-                    <div class="form-group">
-                        <label>Salaire annuel Madame (€)</label>
-                        <input type="number" id="salaire_madame" step="0.01" placeholder="0.00" oninput="calculerIR()">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Salaire annuel Monsieur (€)</label>
-                        <input type="number" id="salaire_monsieur" step="0.01" placeholder="0.00" oninput="calculerIR()">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Revenu LMP (calculé automatiquement)</label>
-                        <input type="number" id="revenu_lmp" step="0.01" readonly style="background: #e8f5e9; font-weight: 600;">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Nombre d'enfants</label>
-                        <select id="nombre_enfants" onchange="calculerIR()">
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5+</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div id="resultat-ir" style="display: none; margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 10px;">
-                    <div style="display: grid; gap: 10px;">
-                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
-                            <span>Revenu imposable total :</span>
-                            <strong id="ir-revenu-total">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
-                            <span>Nombre de parts fiscales :</span>
-                            <strong id="ir-parts">0</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
-                            <span>Quotient familial :</span>
-                            <strong id="ir-quotient">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 15px 0; font-size: 1.3rem; border-top: 2px solid white; margin-top: 10px;">
-                            <span>💵 IMPÔT SUR LE REVENU :</span>
-                            <strong id="ir-montant">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 1.4rem;">
-                            <span>✅ RESTE APRÈS IR :</span>
-                            <strong id="ir-reste-final">0 €</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Résultats Fiscaux -->
         <div class="fiscal-bloc" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; margin-top: 30px;">
             <h3 style="color: white; margin-bottom: 20px; text-align: center;">📊 RÉSULTATS FISCAUX</h3>
