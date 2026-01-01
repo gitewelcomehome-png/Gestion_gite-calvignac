@@ -488,18 +488,22 @@
 .input-with-select {
     display: flex;
     gap: 8px;
+    align-items: center;
 }
 
 .type-select {
-    min-width: 100px;
-    padding: 8px;
+    min-width: 85px;
+    max-width: 85px;
+    padding: 8px 4px;
     border: 2px solid #ddd;
     border-radius: 6px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    flex-shrink: 0;
 }
 
 .input-with-select input {
     flex: 1;
+    min-width: 0;
 }
 
 #resultats-content {
