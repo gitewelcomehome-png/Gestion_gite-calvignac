@@ -1329,7 +1329,15 @@ async function sauvegarderSimulation(silencieux = false) {
         frais_perso_eau: parseFloat(document.getElementById('frais_perso_eau')?.value || 0),
         frais_perso_assurance: parseFloat(document.getElementById('frais_perso_assurance')?.value || 0),
         frais_perso_taxe: parseFloat(document.getElementById('frais_perso_taxe')?.value || 0),
-        frais_perso_autres: parseFloat(document.getElementById('frais_perso_autres')?.value || 0)
+        frais_perso_autres: parseFloat(document.getElementById('frais_perso_autres')?.value || 0),
+        
+        // 💾 RÉSULTATS CALCULÉS (pour affichage dans le dashboard)
+        benefice_imposable: parseFloat(document.getElementById('preview-benefice')?.textContent.replace(/[€\s]/g, '') || 0),
+        cotisations_urssaf: parseFloat(document.getElementById('preview-urssaf')?.textContent.replace(/[€\s]/g, '') || 0),
+        reste_avant_ir: parseFloat(document.getElementById('preview-reste')?.textContent.replace(/[€\s]/g, '') || 0),
+        impot_revenu: parseFloat(document.getElementById('resultat-ir')?.textContent.replace(/[€\s]/g, '') || 0),
+        reste_apres_ir: parseFloat(document.getElementById('reste-vivre-final')?.textContent.replace(/[€\s]/g, '') || 0),
+        trimestres_retraite: parseInt(document.getElementById('detail-trimestres')?.textContent || 0)
     };
     
     // Vérifier si les données ont changé
