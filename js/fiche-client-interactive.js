@@ -912,11 +912,11 @@ function genererOngletArrivee(reservation, infosGite) {
         <!-- Récupération clés -->
         <div class="section">
             <div class="section-title">🔑 Récupération des clés / Key Collection</div>
-            ${infosGite.code_cle ? `
+            ${(reservation.gite === 'Trévoux' || infosGite.code_cle) ? `
             <div class="alert alert-success">
                 <div style="flex: 1; text-align: center;">
                     <strong style="font-size: 1.2rem;">Code boîte à clés / Keybox code:</strong><br>
-                    <div class="code-box" style="margin-top: 15px;">${infosGite.code_cle}</div>
+                    <div class="code-box" style="margin-top: 15px;">${reservation.gite === 'Trévoux' ? '3841' : infosGite.code_cle}</div>
                 </div>
             </div>` : '<div class="alert alert-info">Le code d\'accès vous sera communiqué 48h avant votre arrivée.<br>Access code will be sent 48h before arrival.</div>'}
             
@@ -972,14 +972,6 @@ function genererOngletArrivee(reservation, infosGite) {
                 <label class="checklist-item">
                     <input type="checkbox">
                     <span>Tester le WiFi / Test WiFi connection</span>
-                </label>
-                <label class="checklist-item">
-                    <input type="checkbox">
-                    <span>Repérer les sorties de secours / Locate emergency exits</span>
-                </label>
-                <label class="checklist-item">
-                    <input type="checkbox">
-                    <span>Localiser l'extincteur / Find fire extinguisher</span>
                 </label>
                 <label class="checklist-item">
                     <input type="checkbox">
@@ -1764,8 +1756,9 @@ function genererFAQHTML(faqItems) {
 // ================================================================
 
 function genererScripts(reservation, infosGite) {
-    const supabaseUrl = window.SUPABASE_URL || 'https://ivqiisnudabxemcxxyru.supabase.co';
-    const supabaseKey = window.SUPABASE_ANON_KEY || '';
+    // Clé Supabase réelle depuis shared-config.js
+    const supabaseUrl = 'https://ivqiisnudabxemcxxyru.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
     
     return `
     <script>
@@ -1815,9 +1808,28 @@ function genererScripts(reservation, infosGite) {
                 return;
             }
             
-            // Simuler recherche (adapter selon vos données)
-            resultsContainer.classList.remove('hidden');
-            resultsContainer.innerHTML = '<div class="alert alert-info">Recherche: "' + terme + '"...</div>';
+            // Rechercher dans toutes les FAQ
+            const allFAQ = document.querySelectorAll('#faq-all-container .faq-item');
+            const termeLower = terme.toLowerCase();
+            let matches = [];
+            
+            allFAQ.forEach(item => {
+                const question = item.querySelector('.faq-question')?.textContent.toLowerCase() || '';
+                const answer = item.querySelector('.faq-answer')?.textContent.toLowerCase() || '';
+                
+                if (question.includes(termeLower) || answer.includes(termeLower)) {
+                    matches.push(item.cloneNode(true));
+                }
+            });
+            
+            if (matches.length > 0) {
+                resultsContainer.classList.remove('hidden');
+                resultsContainer.innerHTML = `<div class="alert alert-success">✅ ${matches.length} résultat(s) trouvé(s) / ${matches.length} result(s) found</div>`;
+                matches.forEach(match => resultsContainer.appendChild(match));
+            } else {
+                resultsContainer.classList.remove('hidden');
+                resultsContainer.innerHTML = '<div class="alert alert-warning">⚠️ Aucun résultat trouvé / No results found</div>';
+            }
         }
         
         function toggleAllFAQ() {
