@@ -766,9 +766,16 @@ async function chargerAnnee(annee) {
         
         if (error) {
             if (error.code === 'PGRST116') {
-                // Aucune donnée pour cette année, réinitialiser le formulaire
+                // Aucune donnée pour cette année, créer une simulation vide
+                console.log(`📅 Aucune simulation pour ${annee}, création d'une nouvelle`);
                 document.getElementById('annee_simulation').value = annee;
+                
+                // Réinitialiser le formulaire
                 nouvelleSimulation();
+                
+                // Calculer automatiquement le CA de cette année
+                await calculerCAAutomatique();
+                
                 return;
             }
             throw error;
@@ -777,10 +784,14 @@ async function chargerAnnee(annee) {
         // Mettre à jour l'année cachée
         document.getElementById('annee_simulation').value = annee;
         
-        // Charger les données dans le formulaire (réutiliser la fonction existante)
+        // Charger les données dans le formulaire
         chargerDonneesFormulaire(data);
         
-        // Recalculer
+        // Recalculer automatiquement le CA depuis les réservations de cette année
+        console.log(`📊 Recalcul du CA pour l'année ${annee}`);
+        await calculerCAAutomatique();
+        
+        // Recalculer les indicateurs
         calculerTempsReel();
         
     } catch (error) {
