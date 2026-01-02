@@ -45,10 +45,12 @@ function updateDashboardHeader() {
     const dateEl = document.getElementById('dashboard-date');
     const weekNumEl = document.getElementById('dashboard-week-number');
     const weekInfoEl = document.getElementById('dashboard-week-info');
+    const anneeEl = document.getElementById('annee-benefice');
     
     if (dateEl) dateEl.textContent = formatDateFromObj(today);
     if (weekNumEl) weekNumEl.textContent = `Semaine ${weekNumber}`;
     if (weekInfoEl) weekInfoEl.textContent = `Du ${formatDateFromObj(weekStart)} au ${formatDateFromObj(weekEnd)}`;
+    if (anneeEl) anneeEl.textContent = today.getFullYear();
 }
 
 // ==========================================
@@ -689,45 +691,135 @@ function openFicheClient(id) {
 async function updateFinancialIndicators() {
     console.log('🔄 Mise à jour des indicateurs financiers...');
     
-    // Charger la dernière simulation fiscale
-    const { data: simulation, error: simError } = await supabase
+    const anneeActuelle = new Date().getFullYear();
+    
+    // 1. Calculer le bénéfice RÉEL de l'année en cours
+    const reservations = await getAllReservations();
+    const charges = await getAllCharges();
+    
+    // Filtrer par année actuelle
+    const reservationsAnnee = reservations.filter(r => {
+        const dateDebut = parseLocalDate(r.dateDebut);
+        return dateDebut.getFullYear() === anneeActuelle;
+    });
+    
+    const chargesAnnee = charges.filter(c => {
+        if (!c.date) return false;
+        const dateCharge = new Date(c.date);
+        return dateCharge.getFullYear() === anneeActuelle;
+    });
+    
+    // Calculer CA et charges de l'année
+    const caAnnee = reservationsAnnee.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
+    const totalChargesAnnee = chargesAnnee.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
+    
+    // Bénéfice = CA - Charges
+    const beneficeAnnee = caAnnee - totalChargesAnnee;
+    
+    console.log(`💰 Bénéfice ${anneeActuelle}:`, {
+        ca: caAnnee,
+        charges: totalChargesAnnee,
+        benefice: beneficeAnnee
+    });
+    
+    // 2. Calculer l'URSSAF (22% + 9.7% CSG-CRDS + allocations familiales progressives)
+    const cotisationsSociales = beneficeAnnee * 0.22; // 22%
+    const csgCrds = beneficeAnnee * 0.097; // 9.7%
+    const formationPro = caAnnee * 0.0025; // 0.25% du CA
+    
+    // Allocations familiales (progressif entre 110% et 140% du PASS)
+    let allocations = 0;
+    const pass2024 = 46368;
+    if (beneficeAnnee > pass2024 * 1.1) {
+        const baseAlloc = Math.min(beneficeAnnee - (pass2024 * 1.1), pass2024 * 0.3);
+        const tauxAlloc = (baseAlloc / (pass2024 * 0.3)) * 0.031;
+        allocations = beneficeAnnee * tauxAlloc;
+    }
+    
+    const urssafTotal = cotisationsSociales + csgCrds + formationPro + allocations;
+    
+    console.log('📊 URSSAF calculée:', urssafTotal);
+    
+    // 3. Calculer l'Impôt sur le Revenu
+    // Charger la dernière simulation pour récupérer les salaires et nombre d'enfants
+    const { data: simulation } = await supabase
         .from('simulations_fiscales')
         .select('*')
+        .eq('annee', anneeActuelle)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
     
-    if (simError) {
-        console.error('❌ Erreur chargement simulation:', simError);
-    }
+    let impotRevenu = 0;
     
-    console.log('📋 Simulation chargée:', simulation);
-    
-    // URSSAF et IR
     if (simulation) {
-        const urssafEl = document.getElementById('dashboard-urssaf');
-        const irEl = document.getElementById('dashboard-ir');
+        const salaireMadame = parseFloat(simulation.salaire_madame || 0);
+        const salaireMonsieur = parseFloat(simulation.salaire_monsieur || 0);
+        const nbEnfants = parseInt(simulation.nombre_enfants || 0);
         
-        console.log('💰 URSSAF:', simulation.total_urssaf, 'IR:', simulation.impot_revenu);
+        // Revenu imposable = bénéfice - URSSAF + salaires
+        const resteApresURSSAF = beneficeAnnee - urssafTotal;
+        const revenuFiscal = resteApresURSSAF + salaireMadame + salaireMonsieur;
         
-        if (urssafEl) urssafEl.textContent = formatCurrency(simulation.total_urssaf || 0);
-        if (irEl) irEl.textContent = formatCurrency(simulation.impot_revenu || 0);
+        // Calcul du nombre de parts
+        let nbParts = 2; // Couple par défaut
+        if (nbEnfants === 1) nbParts = 2.5;
+        else if (nbEnfants === 2) nbParts = 3;
+        else if (nbEnfants >= 3) nbParts = 3 + (nbEnfants - 2);
+        
+        // Quotient familial
+        const quotient = revenuFiscal / nbParts;
+        
+        // Barème 2024 (inchangé pour 2025/2026)
+        let impotParPart = 0;
+        if (quotient > 177106) {
+            impotParPart = (quotient - 177106) * 0.45 + 44797;
+        } else if (quotient > 78570) {
+            impotParPart = (quotient - 78570) * 0.41 + 14372;
+        } else if (quotient > 27478) {
+            impotParPart = (quotient - 27478) * 0.30 + 5686;
+        } else if (quotient > 11294) {
+            impotParPart = (quotient - 11294) * 0.11 + 906;
+        } else if (quotient > 11109) {
+            impotParPart = (quotient - 11109) * 0.11;
+        }
+        
+        impotRevenu = Math.max(0, impotParPart * nbParts);
+        
+        console.log(`💸 IR calculé: ${impotRevenu}€ (quotient: ${quotient.toFixed(0)}, parts: ${nbParts})`);
     } else {
-        console.warn('⚠️ Aucune simulation trouvée');
+        console.warn('⚠️ Pas de simulation pour calculer l\'IR, calcul simplifié');
+        // Calcul simplifié sans salaires
+        const resteApresURSSAF = beneficeAnnee - urssafTotal;
+        const quotient = resteApresURSSAF / 2; // Couple sans enfant
+        
+        let impotParPart = 0;
+        if (quotient > 177106) {
+            impotParPart = (quotient - 177106) * 0.45 + 44797;
+        } else if (quotient > 78570) {
+            impotParPart = (quotient - 78570) * 0.41 + 14372;
+        } else if (quotient > 27478) {
+            impotParPart = (quotient - 27478) * 0.30 + 5686;
+        } else if (quotient > 11294) {
+            impotParPart = (quotient - 11294) * 0.11 + 906;
+        } else if (quotient > 11109) {
+            impotParPart = (quotient - 11109) * 0.11;
+        }
+        
+        impotRevenu = Math.max(0, impotParPart * 2);
     }
     
-    // Calculer bénéfices mensuels des gîtes
-    const benefices = await calculerBeneficesMensuels();
-    const moyenneMensuelle = benefices.reduce((sum, b) => sum + b.total, 0) / 12;
-    
-    console.log('📈 Bénéfice mensuel moyen:', moyenneMensuelle);
-    
+    // 4. Mettre à jour l'affichage
+    const urssafEl = document.getElementById('dashboard-urssaf');
+    const irEl = document.getElementById('dashboard-ir');
     const beneficeEl = document.getElementById('dashboard-benefice-moyen');
-    if (beneficeEl) beneficeEl.textContent = formatCurrency(moyenneMensuelle);
     
-    // Trésorerie actuelle (dernier mois enregistré)
+    if (urssafEl) urssafEl.textContent = formatCurrency(urssafTotal);
+    if (irEl) irEl.textContent = formatCurrency(impotRevenu);
+    if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeAnnee);
+    
+    // 5. Trésorerie actuelle (dernier mois enregistré)
     const moisActuel = new Date().getMonth() + 1;
-    const anneeActuelle = new Date().getFullYear();
     
     const { data: soldeMois } = await supabase
         .from('suivi_soldes_bancaires')
@@ -736,14 +828,13 @@ async function updateFinancialIndicators() {
         .eq('mois', moisActuel)
         .single();
     
-    console.log('🏦 Trésorerie actuelle:', soldeMois);
-    
     const tresorerieEl = document.getElementById('dashboard-tresorerie');
     if (tresorerieEl) {
         tresorerieEl.textContent = soldeMois ? formatCurrency(soldeMois.solde) : '-';
     }
     
-    // Afficher les graphiques
+    // 6. Afficher les graphiques
+    const benefices = await calculerBeneficesMensuels();
     await afficherGraphiqueBenefices(benefices);
     await afficherGraphiqueTresorerieDashboard();
 }
