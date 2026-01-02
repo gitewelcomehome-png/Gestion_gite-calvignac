@@ -34,9 +34,12 @@ function sauvegardeAutomatique() {
 }
 
 function calculerTempsReel() {
+    console.log('🔵 [DEBUG] calculerTempsReel() appelée');
     clearTimeout(calculTempsReelTimeout);
     calculTempsReelTimeout = setTimeout(() => {
+        console.log('⏱️ [DEBUG] Timeout terminé, début calcul...');
         const ca = parseFloat(document.getElementById('ca')?.value || 0);
+        console.log('💵 [DEBUG] CA récupéré:', ca, '€');
         if (ca === 0) {
             // Réinitialiser l'affichage
             document.getElementById('preview-benefice').textContent = '0 €';
@@ -57,6 +60,11 @@ function calculerTempsReel() {
         const travaux = getTravauxListe().reduce((sum, item) => sum + item.montant, 0);
         const fraisDivers = getFraisDiversListe().reduce((sum, item) => sum + item.montant, 0);
         const produitsAccueil = getProduitsAccueilListe().reduce((sum, item) => sum + item.montant, 0);
+        
+        console.log('💰 [CALCUL] Travaux:', travaux, '€');
+        console.log('💰 [CALCUL] Frais divers:', fraisDivers, '€');
+        console.log('💰 [CALCUL] Produits accueil:', produitsAccueil, '€');
+        
         const chargesBiens = chargesCouzon + chargesTrevoux + travaux + fraisDivers + produitsAccueil;
         
         const ratio = calculerRatio();
@@ -234,6 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
     inputs.forEach(input => {
         input.addEventListener('input', calculerTempsReel);
         input.addEventListener('change', calculerTempsReel);
+        // Ajouter la sauvegarde automatique sur blur pour les inputs number
+        if (input.type === 'number') {
+            input.addEventListener('blur', sauvegardeAutomatique);
+        }
     });
 });
 
@@ -242,8 +254,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 
 function ajouterTravaux() {
+    console.log('➕ [DEBUG] ajouterTravaux() appelée');
     const id = ++travauxCounter;
+    console.log('🆔 [DEBUG] Nouveau travail ID:', id);
     const container = document.getElementById('travaux-liste');
+    console.log('📦 [DEBUG] Container trouvé:', container ? 'OUI' : 'NON');
     const item = document.createElement('div');
     item.className = 'liste-item';
     item.id = `travaux-${id}`;
@@ -258,6 +273,8 @@ function ajouterTravaux() {
         <button type="button" onclick="supprimerItem('travaux-${id}')">×</button>
     `;
     container.appendChild(item);
+    console.log('✅ [DEBUG] Travail ID', id, 'ajouté (événements gérés par délégation)');
+    // Les événements sont gérés automatiquement par la délégation sur le formulaire
 }
 
 function ajouterFraisDivers() {
@@ -277,6 +294,7 @@ function ajouterFraisDivers() {
         <button type="button" onclick="supprimerItem('frais-${id}')">×</button>
     `;
     container.appendChild(item);
+    console.log('✅ [DEBUG] Frais ID', id, 'ajouté (événements gérés par délégation)');
 }
 
 function ajouterProduitAccueil() {
@@ -296,11 +314,17 @@ function ajouterProduitAccueil() {
         <button type="button" onclick="supprimerItem('produits-${id}')">×</button>
     `;
     container.appendChild(item);
+    console.log('✅ [DEBUG] Produit ID', id, 'ajouté (événements gérés par délégation)');
 }
 
 function supprimerItem(itemId) {
     const item = document.getElementById(itemId);
-    if (item) item.remove();
+    if (item) {
+        item.remove();
+        // Recalculer après suppression
+        calculerTempsReel();
+        sauvegardeAutomatique();
+    }
 }
 
 // Récupérer les données des listes
@@ -316,6 +340,7 @@ function getTravauxListe() {
             });
         }
     }
+    console.log('📋 [GET] Travaux récupérés:', items.length, 'items, total:', items.reduce((s,i)=>s+i.montant,0), '€');
     return items;
 }
 
@@ -331,6 +356,7 @@ function getFraisDiversListe() {
             });
         }
     }
+    console.log('📋 [GET] Frais divers récupérés:', items.length, 'items, total:', items.reduce((s,i)=>s+i.montant,0), '€');
     return items;
 }
 
@@ -346,6 +372,7 @@ function getProduitsAccueilListe() {
             });
         }
     }
+    console.log('📋 [GET] Produits accueil récupérés:', items.length, 'items, total:', items.reduce((s,i)=>s+i.montant,0), '€');
     return items;
 }
 
@@ -360,21 +387,25 @@ function getAnnualValue(fieldId, typeFieldId) {
 }
 
 function calculerRatio() {
-    const surfaceBureau = parseFloat(document.getElementById('surface_bureau').value || 0);
-    const surfaceTotale = parseFloat(document.getElementById('surface_totale').value || 0);
+    const surfaceBureau = parseFloat(document.getElementById('surface_bureau')?.value || 0);
+    const surfaceTotale = parseFloat(document.getElementById('surface_totale')?.value || 0);
+    
+    const ratioDisplay = document.getElementById('ratio-display');
     
     if (surfaceTotale === 0) {
-        document.getElementById('ratio-display').textContent = 'Ratio : 0%';
+        if (ratioDisplay) ratioDisplay.textContent = 'Ratio : 0%';
         return 0;
     }
     
     if (surfaceBureau > surfaceTotale) {
-        showToast('⚠️ La surface du bureau ne peut pas dépasser la surface totale', 'error');
+        if (typeof showToast === 'function') {
+            showToast('⚠️ La surface du bureau ne peut pas dépasser la surface totale', 'error');
+        }
         return 0;
     }
     
     const ratio = (surfaceBureau / surfaceTotale) * 100;
-    document.getElementById('ratio-display').textContent = `Ratio : ${ratio.toFixed(2)}%`;
+    if (ratioDisplay) ratioDisplay.textContent = `Ratio : ${ratio.toFixed(2)}%`;
     return ratio / 100;
 }
 
@@ -751,10 +782,10 @@ async function sauvegarderSimulation(silencieux = false) {
         copropriete_trevoux: parseFloat(document.getElementById('copropriete_trevoux').value || 0),
         copropriete_trevoux_type: document.getElementById('copropriete_trevoux_type').value,
         
-        // Listes
-        travaux_liste: JSON.stringify(getTravauxListe()),
-        frais_divers_liste: JSON.stringify(getFraisDiversListe()),
-        produits_accueil_liste: JSON.stringify(getProduitsAccueilListe()),
+        // Listes (envoyer en tant qu'objets, pas de JSON.stringify pour JSONB)
+        travaux_liste: getTravauxListe(),
+        frais_divers_liste: getFraisDiversListe(),
+        produits_accueil_liste: getProduitsAccueilListe(),
         
         // Résidence
         surface_bureau: parseFloat(document.getElementById('surface_bureau').value || 0),
@@ -953,11 +984,74 @@ async function chargerDerniereSimulation() {
         document.getElementById('salaire_monsieur').value = data.salaire_monsieur || '';
         document.getElementById('nombre_enfants').value = data.nombre_enfants || 0;
         
+        // Restaurer les listes dynamiques
+        console.log('🔄 [LOAD] Restauration des listes dynamiques...');
+        
+        // Réinitialiser les conteneurs
+        document.getElementById('travaux-liste').innerHTML = '';
+        document.getElementById('frais-divers-liste').innerHTML = '';
+        document.getElementById('produits-accueil-liste').innerHTML = '';
+        travauxCounter = 0;
+        fraisDiversCounter = 0;
+        produitsCounter = 0;
+        
+        // Restaurer les travaux
+        if (data.travaux_liste) {
+            const travaux = Array.isArray(data.travaux_liste) ? data.travaux_liste : [];
+            console.log('📋 [LOAD] Travaux trouvés:', travaux.length);
+            travaux.forEach(item => {
+                ajouterTravaux();
+                const id = travauxCounter;
+                document.getElementById(`travaux-desc-${id}`).value = item.description || '';
+                document.getElementById(`travaux-gite-${id}`).value = item.gite || 'couzon';
+                document.getElementById(`travaux-montant-${id}`).value = item.montant || 0;
+            });
+        }
+        
+        // Restaurer les frais divers
+        if (data.frais_divers_liste) {
+            const frais = Array.isArray(data.frais_divers_liste) ? data.frais_divers_liste : [];
+            console.log('📋 [LOAD] Frais divers trouvés:', frais.length);
+            frais.forEach(item => {
+                ajouterFraisDivers();
+                const id = fraisDiversCounter;
+                document.getElementById(`frais-desc-${id}`).value = item.description || '';
+                document.getElementById(`frais-gite-${id}`).value = item.gite || 'couzon';
+                document.getElementById(`frais-montant-${id}`).value = item.montant || 0;
+            });
+        }
+        
+        // Restaurer les produits d'accueil
+        if (data.produits_accueil_liste) {
+            const produits = Array.isArray(data.produits_accueil_liste) ? data.produits_accueil_liste : [];
+            console.log('📋 [LOAD] Produits d\'accueil trouvés:', produits.length);
+            produits.forEach(item => {
+                ajouterProduitAccueil();
+                const id = produitsCounter;
+                document.getElementById(`produits-desc-${id}`).value = item.description || '';
+                document.getElementById(`produits-gite-${id}`).value = item.gite || 'couzon';
+                document.getElementById(`produits-montant-${id}`).value = item.montant || 0;
+            });
+        }
+        
         console.log('✅ [LOAD] Formulaire rempli, recalcul...');
         
         // Recalculer
-        calculerRatio();
-        calculerTempsReel();
+        try {
+            console.log('🔢 [LOAD] Appel calculerRatio()...');
+            calculerRatio();
+            console.log('✅ [LOAD] calculerRatio() terminé');
+        } catch (e) {
+            console.error('❌ [LOAD] Erreur calculerRatio():', e);
+        }
+        
+        try {
+            console.log('⏱️ [LOAD] Appel calculerTempsReel()...');
+            calculerTempsReel();
+            console.log('✅ [LOAD] calculerTempsReel() terminé');
+        } catch (e) {
+            console.error('❌ [LOAD] Erreur calculerTempsReel():', e);
+        }
         
         showToast('📥 Dernière simulation chargée', 'success');
         
@@ -984,6 +1078,70 @@ function exporterPDF() {
 }
 
 // ==========================================
+// 🚀 INITIALISATION
+// ==========================================
+
+function initFiscalite() {
+    console.log('🚀 [INIT-FISCALITE] Début initialisation module fiscalité');
+    
+    const form = document.getElementById('calculateur-lmp');
+    if (!form) {
+        console.warn('⚠️ [INIT-FISCALITE] Formulaire non trouvé, nouvelle tentative dans 500ms...');
+        setTimeout(initFiscalite, 500);
+        return;
+    }
+    
+    console.log('✅ [INIT-FISCALITE] Formulaire trouvé');
+    
+    // NOUVELLE APPROCHE : Délégation d'événements sur le formulaire entier
+    // Cela fonctionne même pour les champs ajoutés dynamiquement !
+    console.log('🎯 [INIT-FISCALITE] Installation de la délégation d\'événements...');
+    
+    // Supprimer les anciens événements s'ils existent
+    form.removeEventListener('input', handleFormInput);
+    form.removeEventListener('change', handleFormChange);
+    form.removeEventListener('focusout', handleFormBlur);
+    
+    // Ajouter les nouveaux événements avec délégation
+    form.addEventListener('input', handleFormInput);
+    form.addEventListener('change', handleFormChange);
+    form.addEventListener('focusout', handleFormBlur);
+    
+    console.log('✅ [INIT-FISCALITE] Délégation d\'événements installée');
+    
+    // Charger automatiquement la dernière simulation
+    setTimeout(() => {
+        console.log('📥 [INIT-FISCALITE] Chargement de la dernière simulation...');
+        chargerDerniereSimulation();
+    }, 100);
+}
+
+// Gestionnaires d'événements avec délégation
+function handleFormInput(e) {
+    const target = e.target;
+    if (target.type === 'number' || target.tagName === 'SELECT') {
+        console.log(`⌨️ [EVENT] Input sur ${target.id || target.name || 'champ'}`);
+        calculerTempsReel();
+    }
+}
+
+function handleFormChange(e) {
+    const target = e.target;
+    if (target.type === 'number' || target.tagName === 'SELECT') {
+        console.log(`🔄 [EVENT] Change sur ${target.id || target.name || 'champ'}`);
+        calculerTempsReel();
+    }
+}
+
+function handleFormBlur(e) {
+    const target = e.target;
+    if (target.type === 'number') {
+        console.log(`👋 [EVENT] Blur sur ${target.id || target.name || 'champ'}`);
+        sauvegardeAutomatique();
+    }
+}
+
+// ==========================================
 // 🌐 EXPORTS GLOBAUX
 // ==========================================
 
@@ -1000,44 +1158,11 @@ window.chargerDerniereSimulation = chargerDerniereSimulation;
 window.nouvelleSimulation = nouvelleSimulation;
 window.exporterPDF = exporterPDF;
 window.calculerTempsReel = calculerTempsReel;
+window.initFiscalite = initFiscalite; // NOUVELLE FONCTION D'INIT
 
-// Initialisation : ajouter calculerTempsReel() et sauvegarde sur tous les inputs au chargement
+// Initialisation automatique au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 [INIT] Initialisation des événements');
-    // Attendre que le contenu de l'onglet soit chargé
-    setTimeout(() => {
-        const form = document.getElementById('calculateur-lmp');
-        if (form) {
-            console.log('✅ [INIT] Formulaire trouvé');
-            // Ajouter oninput sur tous les inputs et selects
-            const inputs = form.querySelectorAll('input[type="number"], select');
-            console.log(`📊 [INIT] ${inputs.length} champs trouvés`);
-            
-            inputs.forEach((el, index) => {
-                el.addEventListener('input', () => {
-                    console.log(`⌨️ [EVENT] Input sur ${el.id || 'champ #' + index}`);
-                    calculerTempsReel();
-                });
-                el.addEventListener('change', () => {
-                    console.log(`🔄 [EVENT] Change sur ${el.id || 'champ #' + index}`);
-                    calculerTempsReel();
-                });
-                // NOUVEAU : Sauvegarde sur blur (perte de focus)
-                el.addEventListener('blur', () => {
-                    console.log(`👋 [EVENT] Blur (perte focus) sur ${el.id || 'champ #' + index}`);
-                    sauvegardeAutomatique();
-                });
-            });
-            
-            console.log('✅ [INIT] Tous les événements attachés');
-            
-            // Charger automatiquement la dernière simulation
-            setTimeout(() => {
-                chargerDerniereSimulation();
-            }, 100);
-            
-        } else {
-            console.error('❌ [INIT] Formulaire non trouvé!');
-        }
-    }, 500);
+    console.log('🚀 [INIT] DOMContentLoaded - Tentative d\'initialisation...');
+    // Attendre que le contenu de l'onglet soit potentiellement chargé
+    setTimeout(initFiscalite, 1000);
 });
