@@ -4,6 +4,9 @@
 
 // Note: Dépend de shared-utils.js et shared-config.js
 
+// Export de l'instance Supabase pour les modules ES6
+export const supabase = window.supabase;
+
 // ==========================================
 // RÉSERVATIONS
 // ==========================================

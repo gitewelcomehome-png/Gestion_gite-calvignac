@@ -158,7 +158,10 @@ async function aperçuFicheClient(reservationId) {
             modal.remove();
         }
     });
-}📥 TÉLÉCHARGEMENT FICHE INTERACTIVE
+}
+
+// ==========================================
+// 📥 TÉLÉCHARGEMENT FICHE INTERACTIVE
 // ==========================================
 
 async function telechargerFicheInteractive(reservationId) {
