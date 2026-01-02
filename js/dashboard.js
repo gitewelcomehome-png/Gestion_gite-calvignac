@@ -907,13 +907,6 @@ async function updateFinancialIndicators() {
     const ir2026El = document.getElementById('dashboard-ir-2026');
     const beneficeEl = document.getElementById('dashboard-benefice-moyen');
     
-        urssaf2025: urssafPrecedent,
-        urssaf2026: urssafTotal,
-        ir2025: impotRevenuPrecedent,
-        ir2026: impotRevenuCourant,
-        benefice: beneficeAnnee
-    });
-    
     // Afficher URSSAF des 2 années
     if (urssaf2025El) {
         urssaf2025El.textContent = simulationPrecedente ? formatCurrency(urssafPrecedent) : '-';
