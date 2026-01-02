@@ -398,12 +398,85 @@ async function updateAllCharts(filteredReservations = null) {
         });
     }
     
-    // Graphique Bénéfices Mensuels (ligne - repris du dashboard)
+    // Graphique Bénéfices Mensuels (ligne - logique dashboard: CA mensuel - charges moyennes)
     const ctx4 = document.getElementById('beneficesChart')?.getContext('2d');
     if (ctx4) {
         if (window.beneficesChartInstance) window.beneficesChartInstance.destroy();
         
-        // Calculer les bénéfices mensuels comme dans le dashboard
+        // Récupérer la simulation fiscale pour obtenir le total des charges annuelles
+        const { data: simFiscale } = await supabase
+            .from('simulations_fiscales')
+            .select('*')
+            .eq('annee', selectedYear)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        
+        let totalChargesAnnee = 0;
+        
+        if (simFiscale) {
+            // Calculer le total selon la même formule que fiscalité-v2.js
+            const getAnnual = (val, type) => (val || 0) * (type === 'mensuel' ? 12 : 1);
+            
+            // Couzon (sans amortissement)
+            const chargesCouzon = 
+                getAnnual(simFiscale.internet_couzon, simFiscale.internet_couzon_type) +
+                getAnnual(simFiscale.eau_couzon, simFiscale.eau_couzon_type) +
+                getAnnual(simFiscale.electricite_couzon, simFiscale.electricite_couzon_type) +
+                getAnnual(simFiscale.assurance_hab_couzon, simFiscale.assurance_hab_couzon_type) +
+                getAnnual(simFiscale.assurance_emprunt_couzon, simFiscale.assurance_emprunt_couzon_type) +
+                getAnnual(simFiscale.interets_emprunt_couzon, simFiscale.interets_emprunt_couzon_type) +
+                getAnnual(simFiscale.menage_couzon, simFiscale.menage_couzon_type) +
+                getAnnual(simFiscale.linge_couzon, simFiscale.linge_couzon_type) +
+                getAnnual(simFiscale.logiciel_couzon, simFiscale.logiciel_couzon_type) +
+                getAnnual(simFiscale.copropriete_couzon, simFiscale.copropriete_couzon_type) +
+                (simFiscale.taxe_fonciere_couzon || 0) +
+                (simFiscale.cfe_couzon || 0) +
+                (simFiscale.commissions_couzon || 0);
+            
+            // Trévoux (sans amortissement)
+            const chargesTrevoux = 
+                getAnnual(simFiscale.internet_trevoux, simFiscale.internet_trevoux_type) +
+                getAnnual(simFiscale.eau_trevoux, simFiscale.eau_trevoux_type) +
+                getAnnual(simFiscale.electricite_trevoux, simFiscale.electricite_trevoux_type) +
+                getAnnual(simFiscale.assurance_hab_trevoux, simFiscale.assurance_hab_trevoux_type) +
+                getAnnual(simFiscale.assurance_emprunt_trevoux, simFiscale.assurance_emprunt_trevoux_type) +
+                getAnnual(simFiscale.interets_emprunt_trevoux, simFiscale.interets_emprunt_trevoux_type) +
+                getAnnual(simFiscale.menage_trevoux, simFiscale.menage_trevoux_type) +
+                getAnnual(simFiscale.linge_trevoux, simFiscale.linge_trevoux_type) +
+                getAnnual(simFiscale.logiciel_trevoux, simFiscale.logiciel_trevoux_type) +
+                getAnnual(simFiscale.copropriete_trevoux, simFiscale.copropriete_trevoux_type) +
+                (simFiscale.taxe_fonciere_trevoux || 0) +
+                (simFiscale.cfe_trevoux || 0) +
+                (simFiscale.commissions_trevoux || 0);
+            
+            // Frais professionnels
+            const fraisPro = 
+                (simFiscale.comptable || 0) +
+                (simFiscale.frais_bancaires || 0) +
+                getAnnual(simFiscale.telephone, simFiscale.telephone_type) +
+                (simFiscale.materiel_info || 0) +
+                (simFiscale.rc_pro || 0) +
+                (simFiscale.formation || 0) +
+                getAnnual(simFiscale.fournitures, simFiscale.fournitures_type);
+            
+            // Listes
+            const travaux = (simFiscale.travaux_liste || []).reduce((sum, item) => sum + item.montant, 0);
+            const fraisDivers = (simFiscale.frais_divers_liste || []).reduce((sum, item) => sum + item.montant, 0);
+            const produitsAccueil = (simFiscale.produits_accueil_liste || []).reduce((sum, item) => sum + item.montant, 0);
+            
+            // Crédit Trévoux
+            const creditTrevoux = (simFiscale.credits_liste || [])
+                .filter(c => c.nom && c.nom.toLowerCase().includes('trévoux'))
+                .reduce((sum, c) => sum + (c.mensualite * 12), 0);
+            
+            totalChargesAnnee = chargesCouzon + chargesTrevoux + fraisPro + travaux + fraisDivers + produitsAccueil + creditTrevoux;
+        }
+        
+        // Charges moyennes mensuelles
+        const chargesMoyennesMensuelles = totalChargesAnnee / 12;
+        
+        // Calculer les bénéfices mensuels : CA du mois - charges moyennes
         const beneficesParMois = [];
         
         for (let mois = 0; mois < 12; mois++) {
@@ -414,17 +487,8 @@ async function updateAllCharts(filteredReservations = null) {
             });
             const caMois = reservationsDuMois.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
             
-            // Charges du mois (on prend 1/12 des charges annuelles pour simplifier)
-            const charges = await getAllCharges();
-            const chargesDuMois = charges.filter(c => {
-                if (!c.date) return false;
-                const dateCharge = new Date(c.date);
-                return dateCharge.getFullYear() === selectedYear && dateCharge.getMonth() === mois;
-            });
-            const totalChargesMois = chargesDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
-            
-            // Bénéfice = CA - Charges
-            beneficesParMois.push(caMois - totalChargesMois);
+            // Bénéfice = CA du mois - charges moyennes mensuelles
+            beneficesParMois.push(caMois - chargesMoyennesMensuelles);
         }
         
         window.beneficesChartInstance = new Chart(ctx4, {
@@ -453,7 +517,7 @@ async function updateAllCharts(filteredReservations = null) {
                     legend: { display: true, position: 'top' },
                     title: { 
                         display: true, 
-                        text: `Évolution des Bénéfices Mensuels (${selectedYear})`, 
+                        text: `Évolution des Bénéfices Mensuels (${selectedYear}) - CA mensuel - Charges moyennes (${chargesMoyennesMensuelles.toFixed(0)}€/mois)`, 
                         font: { size: 16, weight: 'bold' } 
                     },
                     tooltip: {
