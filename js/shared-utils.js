@@ -167,6 +167,25 @@ function handleQuickAction(action) {
     }
 }
 
+// ==========================================
+// GESTION DES SLIDES COLLAPSIBLES
+// ==========================================
+
+function toggleSlide(slideId) {
+    const slideContent = document.getElementById(slideId);
+    const slideIcon = document.getElementById(slideId + '-icon');
+    
+    if (!slideContent) return;
+    
+    if (slideContent.style.display === 'none' || slideContent.style.display === '') {
+        slideContent.style.display = 'block';
+        if (slideIcon) slideIcon.style.transform = 'rotate(180deg)';
+    } else {
+        slideContent.style.display = 'none';
+        if (slideIcon) slideIcon.style.transform = 'rotate(0deg)';
+    }
+}
+
 // Export vers window pour accessibilité globale
 window.showToast = showToast;
 window.dateToLocalString = dateToLocalString;
@@ -183,3 +202,4 @@ window.getPlatformLogo = getPlatformLogo;
 window.getWeekNumber = getWeekNumber;
 window.getWeekDates = getWeekDates;
 window.handleQuickAction = handleQuickAction;
+window.toggleSlide = toggleSlide;

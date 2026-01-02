@@ -31,11 +31,6 @@
                         <div id="countGites" style="font-size: 2rem; font-weight: 700;">-</div>
                         <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
                     </div>
-                    <div style="background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Autres</div>
-                        <div id="countAutres" style="font-size: 2rem; font-weight: 700;">-</div>
-                        <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
-                    </div>
                 </div>
                 
                 <!-- 📈 NOUVELLES STATISTIQUES UTILES -->
@@ -221,28 +216,39 @@
                     </div>
                 </div>
                 
-                <!-- Section sélection années pour comparaison -->
-                <div class="card" style="margin: 30px 0; padding: 20px; background: #f8f9fa;">
-                    <h4 style="color: var(--primary); margin-bottom: 15px;">📊 Comparer les années</h4>
-                    <div id="yearComparisonCheckboxes" style="display: flex; flex-wrap: wrap; gap: 15px;">
-                        <!-- Les checkboxes seront générées dynamiquement -->
+                <!-- Section Graphiques dans un slide collapsible -->
+                <div style="margin-top: 30px; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+                    <div onclick="toggleSlide('slide-graphiques')" style="cursor: pointer; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">
+                            📊 Graphiques Comparatifs
+                        </h3>
+                        <span id="slide-graphiques-icon" style="font-size: 1.5rem; transition: transform 0.3s;">▼</span>
                     </div>
-                </div>
-                
-                <div class="chart-container">
-                    <canvas id="caChart"></canvas>
-                </div>
-                
-                <div class="chart-container" style="margin-top: 50px;">
-                    <canvas id="gitesChart"></canvas>
-                </div>
-                
-                <div class="chart-container" style="margin-top: 50px;">
-                    <canvas id="platformsChart"></canvas>
-                </div>
-                
-                <!-- Graphique Bénéfices Mensuels (en ligne) -->
-                <div class="chart-container" style="margin-top: 50px;">
-                    <canvas id="beneficesChart"></canvas>
+                    <div id="slide-graphiques" style="display: none; padding: 20px;">
+                        <!-- Section sélection années pour comparaison -->
+                        <div class="card" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa;">
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">📊 Comparer les années</h4>
+                            <div id="yearComparisonCheckboxes" style="display: flex; flex-wrap: wrap; gap: 15px;">
+                                <!-- Les checkboxes seront générées dynamiquement -->
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="caChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container" style="margin-top: 50px;">
+                            <canvas id="gitesChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container" style="margin-top: 50px;">
+                            <canvas id="platformsChart"></canvas>
+                        </div>
+                        
+                        <!-- Graphique Bénéfices Mensuels (en ligne) -->
+                        <div class="chart-container" style="margin-top: 50px;">
+                            <canvas id="beneficesChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
