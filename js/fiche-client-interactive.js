@@ -811,11 +811,12 @@ function genererOngletAccueil(reservation, infosGite, faqGite) {
                 </div>
             </div>` : '<div class="alert alert-info">Le code d\'accès vous sera communiqué 48h avant votre arrivée / Access code will be sent 48h before arrival</div>'}
             
-            ${infosGite.wifi ? `
+            ${infosGite.wifi_password ? `
             <div class="alert alert-info">
                 <div style="flex: 1;">
                     <strong>📶 WiFi:</strong><br>
-                    <div class="code-box" style="margin-top: 10px; font-size: 1.2rem;">${infosGite.wifi}</div>
+                    ${infosGite.wifi_ssid ? `<div style="margin-top: 5px;">Réseau: <strong>${infosGite.wifi_ssid}</strong></div>` : ''}
+                    <div class="code-box" style="margin-top: 10px; font-size: 1.2rem;">${infosGite.wifi_password}</div>
                 </div>
             </div>` : ''}
             
@@ -881,14 +882,14 @@ function genererOngletArrivee(reservation, infosGite) {
         <div class="section">
             <div class="section-title">📍 Itinéraire / Directions</div>
             ${infosGite.adresse ? `<div class="info-item"><strong>Adresse / Address:</strong> ${infosGite.adresse}</div>` : ''}
-            ${infosGite.gpsLat && infosGite.gpsLon ? `
+            ${infosGite.gps_lat && infosGite.gps_lon ? `
             <div class="mt-20">
-                <a href="https://www.google.com/maps?q=${infosGite.gpsLat},${infosGite.gpsLon}" 
+                <a href="https://www.google.com/maps?q=${infosGite.gps_lat},${infosGite.gps_lon}" 
                    target="_blank" 
                    class="btn btn-primary btn-lg">
                     🗺️ Ouvrir dans Google Maps
                 </a>
-                <a href="https://waze.com/ul?ll=${infosGite.gpsLat},${infosGite.gpsLon}&navigate=yes" 
+                <a href="https://waze.com/ul?ll=${infosGite.gps_lat},${infosGite.gps_lon}&navigate=yes" 
                    target="_blank" 
                    class="btn btn-primary" style="margin-top: 10px;">
                     🚗 Ouvrir dans Waze
@@ -896,34 +897,34 @@ function genererOngletArrivee(reservation, infosGite) {
             </div>
             <div class="mt-20 text-center" style="color: #666;">
                 <strong>GPS Coordonnées / Coordinates:</strong><br>
-                ${infosGite.gpsLat}, ${infosGite.gpsLon}
+                ${infosGite.gps_lat}, ${infosGite.gps_lon}
             </div>` : ''}
         </div>
         
         <!-- Parking -->
-        ${infosGite.parking ? `
+        ${infosGite.parking_details ? `
         <div class="section">
             <div class="section-title">🅿️ Parking</div>
             <div class="card">
-                <div class="card-content">${infosGite.parking}</div>
+                <div class="card-content" style="white-space: pre-wrap;">${infosGite.parking_details}</div>
             </div>
         </div>` : ''}
         
         <!-- Récupération clés -->
         <div class="section">
             <div class="section-title">🔑 Récupération des clés / Key Collection</div>
-            ${(reservation.gite === 'Trévoux' || infosGite.code_cle) ? `
+            ${infosGite.code_acces ? `
             <div class="alert alert-success">
                 <div style="flex: 1; text-align: center;">
                     <strong style="font-size: 1.2rem;">Code boîte à clés / Keybox code:</strong><br>
-                    <div class="code-box" style="margin-top: 15px;">${reservation.gite === 'Trévoux' ? '3841' : infosGite.code_cle}</div>
+                    <div class="code-box" style="margin-top: 15px;">${infosGite.code_acces}</div>
                 </div>
             </div>` : '<div class="alert alert-info">Le code d\'accès vous sera communiqué 48h avant votre arrivée.<br>Access code will be sent 48h before arrival.</div>'}
             
-            ${infosGite.instructions_arrivee ? `
+            ${infosGite.instructions_cles ? `
             <div class="card mt-20">
                 <div class="card-title">✅ Instructions détaillées / Detailed Instructions</div>
-                <div class="card-content" style="white-space: pre-wrap;">${infosGite.instructions_arrivee}</div>
+                <div class="card-content" style="white-space: pre-wrap;">${infosGite.instructions_cles}</div>
             </div>` : ''}
         </div>
         
@@ -945,7 +946,7 @@ function genererOngletArrivee(reservation, infosGite) {
                 </div>
                 <div class="card">
                     <div class="card-title">📶 WiFi</div>
-                    <div class="card-content">${infosGite.wifi ? `Code: <strong>${infosGite.wifi}</strong>` : 'Voir sur la box / See on router'}</div>
+                    <div class="card-content">${infosGite.wifi_ssid || infosGite.wifi_password ? `${infosGite.wifi_ssid ? `Réseau: <strong>${infosGite.wifi_ssid}</strong><br>` : ''}${infosGite.wifi_password ? `Mot de passe: <strong>${infosGite.wifi_password}</strong>` : ''}` : 'Voir sur la box / See on router'}</div>
                 </div>
             </div>
         </div>
@@ -2150,12 +2151,13 @@ async function loadInfosGites(gite) {
             .maybeSingle(); // maybeSingle au lieu de single pour éviter erreur si 0 résultat
         
         if (error) throw error;
+        
+        // Retourner les données RÉELLES de la BDD (pas de code inventé!)
         return data || {};
     } catch (error) {
         console.error('Erreur chargement infos gîte:', error);
-        // Fallback localStorage si BDD indisponible
-        const allInfos = JSON.parse(localStorage.getItem('infosGites') || '{}');
-        return allInfos[gite] || {};
+        // Si erreur BDD, retourner vide (PAS d'invention de données)
+        return {};
     }
 }
 
