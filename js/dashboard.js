@@ -874,6 +874,15 @@ async function updateFinancialIndicators() {
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
         const revenuFiscal = resteApresURSSAF + salaireMadame + salaireMonsieur;
         
+        console.log(`🧮 Détail calcul IR ${anneeActuelle}:`, {
+            benefice: beneficeAnnee,
+            urssaf: urssafTotal,
+            resteApresURSSAF: resteApresURSSAF,
+            salaireMadame: salaireMadame,
+            salaireMonsieur: salaireMonsieur,
+            revenuFiscal: revenuFiscal
+        });
+        
         // Calcul du nombre de parts
         let nbParts = 2; // Couple par défaut
         if (nbEnfants === 1) nbParts = 2.5;
@@ -899,12 +908,19 @@ async function updateFinancialIndicators() {
         
         impotRevenuCourant = Math.max(0, impotParPart * nbParts);
         
-        console.log(`💸 IR ${anneeActuelle} (temps réel): ${impotRevenuCourant}€ (quotient: ${quotient.toFixed(0)}, parts: ${nbParts})`);
+        console.log(`💸 IR ${anneeActuelle} (temps réel): ${impotRevenuCourant.toFixed(0)}€ (revenu: ${revenuFiscal.toFixed(0)}€, quotient: ${quotient.toFixed(0)}€, parts: ${nbParts})`);
     } else {
         console.warn(`⚠️ Pas de simulation pour ${anneeActuelle}, calcul simplifié`);
         // Calcul simplifié sans salaires
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
         const quotient = resteApresURSSAF / 2; // Couple sans enfant
+        
+        console.log(`🧮 Calcul simplifié IR ${anneeActuelle}:`, {
+            benefice: beneficeAnnee,
+            urssaf: urssafTotal,
+            resteApresURSSAF: resteApresURSSAF,
+            quotient: quotient
+        });
         
         let impotParPart = 0;
         if (quotient > 177106) {
@@ -920,6 +936,7 @@ async function updateFinancialIndicators() {
         }
         
         impotRevenuCourant = Math.max(0, impotParPart * 2);
+        console.log(`💸 IR ${anneeActuelle} simplifié: ${impotRevenuCourant.toFixed(0)}€`);
     }
     
     // 5. Mettre à jour l'affichage
@@ -929,13 +946,33 @@ async function updateFinancialIndicators() {
     const ir2026El = document.getElementById('dashboard-ir-2026');
     const beneficeEl = document.getElementById('dashboard-benefice-moyen');
     
+    console.log('🖥️ Affichage final:', {
+        urssaf2025: urssafPrecedent,
+        urssaf2026: urssafTotal,
+        ir2025: impotRevenuPrecedent,
+        ir2026: impotRevenuCourant,
+        benefice: beneficeAnnee
+    });
+    
     // Afficher URSSAF des 2 années
-    if (urssaf2025El) urssaf2025El.textContent = simulationPrecedente ? formatCurrency(urssafPrecedent) : '-';
-    if (urssaf2026El) urssaf2026El.textContent = formatCurrency(urssafTotal);
+    if (urssaf2025El) {
+        urssaf2025El.textContent = simulationPrecedente ? formatCurrency(urssafPrecedent) : '-';
+        console.log(`✅ URSSAF 2025 affiché: ${urssaf2025El.textContent}`);
+    }
+    if (urssaf2026El) {
+        urssaf2026El.textContent = formatCurrency(urssafTotal);
+        console.log(`✅ URSSAF 2026 affiché: ${urssaf2026El.textContent}`);
+    }
     
     // Afficher IR des 2 années  
-    if (ir2025El) ir2025El.textContent = simulationPrecedente ? formatCurrency(impotRevenuPrecedent) : '-';
-    if (ir2026El) ir2026El.textContent = formatCurrency(impotRevenuCourant);
+    if (ir2025El) {
+        ir2025El.textContent = simulationPrecedente ? formatCurrency(impotRevenuPrecedent) : '-';
+        console.log(`✅ IR 2025 affiché: ${ir2025El.textContent}`);
+    }
+    if (ir2026El) {
+        ir2026El.textContent = formatCurrency(impotRevenuCourant);
+        console.log(`✅ IR 2026 affiché: ${ir2026El.textContent}`);
+    }
     
     // Afficher bénéfice
     if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeAnnee);
