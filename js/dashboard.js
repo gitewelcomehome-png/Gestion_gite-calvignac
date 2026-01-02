@@ -710,20 +710,32 @@ async function updateFinancialIndicators() {
         return dateCharge.getFullYear() === anneeActuelle;
     });
     
-    // Calculer CA et charges de l'année
+    // Calculer CA
     const caAnnee = reservationsAnnee.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
-    const totalChargesAnnee = chargesAnnee.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
     
-    // Bénéfice = CA - Charges
-    const beneficeAnnee = caAnnee - totalChargesAnnee;
+    // Calculer les charges HORS frais personnels et crédit Trévoux
+    // On garde uniquement les charges des gîtes et professionnelles
+    const chargesGites = chargesAnnee.filter(c => 
+        c.categorie && (c.categorie.includes('gite') || c.categorie.includes('professionnel') || c.categorie === 'Frais Professionnel')
+    );
+    const totalChargesGites = chargesGites.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
     
-    console.log(`💰 Bénéfice ${anneeActuelle}:`, {
+    // Récupérer le crédit Trévoux de l'année
+    const creditTrevoux = chargesAnnee.find(c => c.description && c.description.toLowerCase().includes('crédit trévoux'));
+    const montantCreditTrevoux = creditTrevoux ? parseFloat(creditTrevoux.montant || 0) : 0;
+    
+    // Bénéfice = CA - Charges gîtes - Crédit Trévoux
+    const beneficeAnnee = caAnnee - totalChargesGites - montantCreditTrevoux;
+    
+    console.log(`💰 Détail bénéfice ${anneeActuelle}:`, {
         ca: caAnnee,
-        charges: totalChargesAnnee,
+        chargesGites: totalChargesGites,
+        creditTrevoux: montantCreditTrevoux,
+        totalCharges: totalChargesGites + montantCreditTrevoux,
         benefice: beneficeAnnee
     });
     
-    // 2. Calculer l'URSSAF (22% + 9.7% CSG-CRDS + allocations familiales progressives)
+    // 2. Calculer l'URSSAF pour l'année en cours (22% + 9.7% CSG-CRDS + allocations familiales progressives)
     const cotisationsSociales = beneficeAnnee * 0.22; // 22%
     const csgCrds = beneficeAnnee * 0.097; // 9.7%
     const formationPro = caAnnee * 0.0025; // 0.25% du CA
@@ -856,6 +868,7 @@ async function updateFinancialIndicators() {
     
     // 5. Mettre à jour l'affichage
     const urssafEl = document.getElementById('dashboard-urssaf');
+    const urssafLabelEl = document.getElementById('urssaf-annee-label');
     const irPrecedentEl = document.getElementById('dashboard-ir-precedent');
     const irCourantEl = document.getElementById('dashboard-ir-courant');
     const beneficeEl = document.getElementById('dashboard-benefice-moyen');
@@ -867,8 +880,13 @@ async function updateFinancialIndicators() {
     if (anneePrecedenteLabel) anneePrecedenteLabel.textContent = anneePrecedente;
     if (anneeCouranteLabel) anneeCouranteLabel.textContent = anneeActuelle;
     
-    if (urssafEl) urssafEl.textContent = formatCurrency(urssafTotal);
-    if (irPrecedentEl) irPrecedentEl.textContent = formatCurrency(impotRevenuPrecedent);
+    // Afficher URSSAF année précédente si dispo, sinon année en cours
+    const urssafAffiche = urssafPrecedent > 0 ? urssafPrecedent : urssafTotal;
+    const anneeUrssaf = urssafPrecedent > 0 ? anneePrecedente : anneeActuelle;
+    
+    if (urssafEl) urssafEl.textContent = formatCurrency(urssafAffiche);
+    if (urssafLabelEl) urssafLabelEl.textContent = anneeUrssaf;
+    if (irPrecedentEl) irPrecedentEl.textContent = impotRevenuPrecedent > 0 ? formatCurrency(impotRevenuPrecedent) : '-';
     if (irCourantEl) irCourantEl.textContent = formatCurrency(impotRevenuCourant);
     if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeAnnee);
     
@@ -932,28 +950,32 @@ async function calculerBeneficesMensuels() {
             
             const caMois = reservationsDuMois.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
             
-            // 2. Calculer TOUTES les charges du mois (tous types confondus)
+            // 2. Calculer les charges du mois HORS frais personnels et crédit Trévoux
             const chargesDuMois = charges.filter(c => {
-                if (!c.date) {
-                    return false;
-                }
+                if (!c.date) return false;
                 const dateCharge = new Date(c.date);
                 const isGoodYear = dateCharge.getFullYear() === anneeActuelle;
                 const isGoodMonth = dateCharge.getMonth() === mois;
-                return isGoodYear && isGoodMonth;
+                
+                // Exclure les frais personnels et le crédit Trévoux
+                const estFraisPro = c.categorie && (
+                    c.categorie.includes('gite') || 
+                    c.categorie.includes('professionnel') || 
+                    c.categorie === 'Frais Professionnel'
+                );
+                const estCreditTrevoux = c.description && c.description.toLowerCase().includes('crédit trévoux');
+                
+                return isGoodYear && isGoodMonth && (estFraisPro || estCreditTrevoux);
             });
             
             const totalCharges = chargesDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
             
-            // Calcul du bénéfice : Réservations - TOUTES les charges
+            // Calcul du bénéfice : Réservations - Charges gîtes/pro - Crédit Trévoux
             const beneficeMois = caMois - totalCharges;
             
             // Log détaillé pour TOUS les mois avec activité
             if (caMois > 0 || totalCharges > 0) {
-                console.log(`📊 ${nomMois} 2026: CA=${caMois}€ - Charges=${totalCharges}€ (${chargesDuMois.length} charges) = Bénéfice=${beneficeMois}€`);
-                if (chargesDuMois.length > 0) {
-                    console.log(`   → Détail charges ${nomMois}:`, chargesDuMois);
-                }
+                console.log(`📊 ${nomMois} ${anneeActuelle}: CA=${caMois.toFixed(0)}€ - Charges=${totalCharges.toFixed(0)}€ (${chargesDuMois.length} charges) = Bénéfice=${beneficeMois.toFixed(0)}€`);
             }
             
             benefices.push({
