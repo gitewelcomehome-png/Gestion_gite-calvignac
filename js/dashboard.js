@@ -692,6 +692,7 @@ async function updateFinancialIndicators() {
     console.log('🔄 Mise à jour des indicateurs financiers...');
     
     const anneeActuelle = new Date().getFullYear();
+    const anneePrecedente = anneeActuelle - 1;
     
     // 1. Calculer le bénéfice RÉEL de l'année en cours
     const reservations = await getAllReservations();
@@ -736,13 +737,35 @@ async function updateFinancialIndicators() {
         allocations = beneficeAnnee * tauxAlloc;
     }
     
-    const urssafTotal = cotisationsSociales + csgCrds + formationPro + allocations;
+    let urssafTotal = cotisationsSociales + csgCrds + formationPro + allocations;
     
-    console.log('📊 URSSAF calculée:', urssafTotal);
+    // ⚠️ Appliquer le minimum URSSAF de 1200€
+    if (urssafTotal < 1200) {
+        console.log(`📊 URSSAF calculée (${urssafTotal.toFixed(0)}€) < 1200€ → Application du minimum`);
+        urssafTotal = 1200;
+    }
     
-    // 3. Calculer l'Impôt sur le Revenu
-    // Charger la dernière simulation pour récupérer les salaires et nombre d'enfants
-    const { data: simulation } = await supabase
+    console.log('📊 URSSAF finale:', urssafTotal);
+    
+    // 3. Calculer l'IR de l'ANNÉE PRÉCÉDENTE (depuis la base)
+    const { data: simulationPrecedente } = await supabase
+        .from('simulations_fiscales')
+        .select('*')
+        .eq('annee', anneePrecedente)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+    
+    let impotRevenuPrecedent = 0;
+    if (simulationPrecedente && simulationPrecedente.impot_revenu) {
+        impotRevenuPrecedent = parseFloat(simulationPrecedente.impot_revenu);
+        console.log(`💸 IR ${anneePrecedente} (depuis DB):`, impotRevenuPrecedent);
+    } else {
+        console.warn(`⚠️ Pas d'IR enregistré pour ${anneePrecedente}`);
+    }
+    
+    // 4. Calculer l'IR de l'ANNÉE EN COURS (temps réel)
+    const { data: simulationCourante } = await supabase
         .from('simulations_fiscales')
         .select('*')
         .eq('annee', anneeActuelle)
@@ -750,12 +773,12 @@ async function updateFinancialIndicators() {
         .limit(1)
         .single();
     
-    let impotRevenu = 0;
+    let impotRevenuCourant = 0;
     
-    if (simulation) {
-        const salaireMadame = parseFloat(simulation.salaire_madame || 0);
-        const salaireMonsieur = parseFloat(simulation.salaire_monsieur || 0);
-        const nbEnfants = parseInt(simulation.nombre_enfants || 0);
+    if (simulationCourante) {
+        const salaireMadame = parseFloat(simulationCourante.salaire_madame || 0);
+        const salaireMonsieur = parseFloat(simulationCourante.salaire_monsieur || 0);
+        const nbEnfants = parseInt(simulationCourante.nombre_enfants || 0);
         
         // Revenu imposable = bénéfice - URSSAF + salaires
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
@@ -784,11 +807,11 @@ async function updateFinancialIndicators() {
             impotParPart = (quotient - 11109) * 0.11;
         }
         
-        impotRevenu = Math.max(0, impotParPart * nbParts);
+        impotRevenuCourant = Math.max(0, impotParPart * nbParts);
         
-        console.log(`💸 IR calculé: ${impotRevenu}€ (quotient: ${quotient.toFixed(0)}, parts: ${nbParts})`);
+        console.log(`💸 IR ${anneeActuelle} (temps réel): ${impotRevenuCourant}€ (quotient: ${quotient.toFixed(0)}, parts: ${nbParts})`);
     } else {
-        console.warn('⚠️ Pas de simulation pour calculer l\'IR, calcul simplifié');
+        console.warn(`⚠️ Pas de simulation pour ${anneeActuelle}, calcul simplifié`);
         // Calcul simplifié sans salaires
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
         const quotient = resteApresURSSAF / 2; // Couple sans enfant
@@ -806,19 +829,28 @@ async function updateFinancialIndicators() {
             impotParPart = (quotient - 11109) * 0.11;
         }
         
-        impotRevenu = Math.max(0, impotParPart * 2);
+        impotRevenuCourant = Math.max(0, impotParPart * 2);
     }
     
-    // 4. Mettre à jour l'affichage
+    // 5. Mettre à jour l'affichage
     const urssafEl = document.getElementById('dashboard-urssaf');
-    const irEl = document.getElementById('dashboard-ir');
+    const irPrecedentEl = document.getElementById('dashboard-ir-precedent');
+    const irCourantEl = document.getElementById('dashboard-ir-courant');
     const beneficeEl = document.getElementById('dashboard-benefice-moyen');
     
+    // Labels des années
+    const anneePrecedenteLabel = document.getElementById('annee-precedente-label');
+    const anneeCouranteLabel = document.getElementById('annee-courante-label');
+    
+    if (anneePrecedenteLabel) anneePrecedenteLabel.textContent = anneePrecedente;
+    if (anneeCouranteLabel) anneeCouranteLabel.textContent = anneeActuelle;
+    
     if (urssafEl) urssafEl.textContent = formatCurrency(urssafTotal);
-    if (irEl) irEl.textContent = formatCurrency(impotRevenu);
+    if (irPrecedentEl) irPrecedentEl.textContent = formatCurrency(impotRevenuPrecedent);
+    if (irCourantEl) irCourantEl.textContent = formatCurrency(impotRevenuCourant);
     if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeAnnee);
     
-    // 5. Trésorerie actuelle (dernier mois enregistré)
+    // 6. Trésorerie actuelle (dernier mois enregistré)
     const moisActuel = new Date().getMonth() + 1;
     
     const { data: soldeMois } = await supabase
@@ -833,7 +865,7 @@ async function updateFinancialIndicators() {
         tresorerieEl.textContent = soldeMois ? formatCurrency(soldeMois.solde) : '-';
     }
     
-    // 6. Afficher les graphiques
+    // 7. Afficher les graphiques
     const benefices = await calculerBeneficesMensuels();
     await afficherGraphiqueBenefices(benefices);
     await afficherGraphiqueTresorerieDashboard();
