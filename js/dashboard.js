@@ -713,26 +713,82 @@ async function updateFinancialIndicators() {
     // Calculer CA
     const caAnnee = reservationsAnnee.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
     
-    // Calculer les charges HORS frais personnels et crédit Trévoux
-    // On garde uniquement les charges des gîtes et professionnelles
-    const chargesGites = chargesAnnee.filter(c => 
-        c.categorie && (c.categorie.includes('gite') || c.categorie.includes('professionnel') || c.categorie === 'Frais Professionnel')
-    );
-    const totalChargesGites = chargesGites.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
+    // Récupérer le Total Charges depuis la simulation fiscale de l'année en cours
+    const { data: simFiscale } = await supabase
+        .from('simulations_fiscales')
+        .select('*')
+        .eq('annee', anneeActuelle)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
     
-    // Récupérer le crédit Trévoux de l'année
-    const creditTrevoux = chargesAnnee.find(c => c.description && c.description.toLowerCase().includes('crédit trévoux'));
-    const montantCreditTrevoux = creditTrevoux ? parseFloat(creditTrevoux.montant || 0) : 0;
+    let totalChargesAnnee = 0;
     
-    // Bénéfice = CA - Charges gîtes - Crédit Trévoux
-    const beneficeAnnee = caAnnee - totalChargesGites - montantCreditTrevoux;
+    if (simFiscale) {
+        // Calculer le total selon la même formule que fiscalité-v2.js
+        // Couzon (sans amortissement)
+        const chargesCouzon = (
+            simFiscale.internet_couzon || 0) * (simFiscale.internet_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.eau_couzon || 0) * (simFiscale.eau_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.electricite_couzon || 0) * (simFiscale.electricite_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.assurance_hab_couzon || 0) * (simFiscale.assurance_hab_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.assurance_emprunt_couzon || 0) * (simFiscale.assurance_emprunt_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.interets_emprunt_couzon || 0) * (simFiscale.interets_emprunt_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.menage_couzon || 0) * (simFiscale.menage_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.linge_couzon || 0) * (simFiscale.linge_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.logiciel_couzon || 0) * (simFiscale.logiciel_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.copropriete_couzon || 0) * (simFiscale.copropriete_couzon_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.taxe_fonciere_couzon || 0) +
+            (simFiscale.cfe_couzon || 0) +
+            (simFiscale.commissions_couzon || 0);
+        
+        // Trévoux (sans amortissement)
+        const chargesTrevoux = (
+            simFiscale.internet_trevoux || 0) * (simFiscale.internet_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.eau_trevoux || 0) * (simFiscale.eau_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.electricite_trevoux || 0) * (simFiscale.electricite_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.assurance_hab_trevoux || 0) * (simFiscale.assurance_hab_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.assurance_emprunt_trevoux || 0) * (simFiscale.assurance_emprunt_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.interets_emprunt_trevoux || 0) * (simFiscale.interets_emprunt_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.menage_trevoux || 0) * (simFiscale.menage_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.linge_trevoux || 0) * (simFiscale.linge_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.logiciel_trevoux || 0) * (simFiscale.logiciel_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.copropriete_trevoux || 0) * (simFiscale.copropriete_trevoux_type === 'mensuel' ? 12 : 1) +
+            (simFiscale.taxe_fonciere_trevoux || 0) +
+            (simFiscale.cfe_trevoux || 0) +
+            (simFiscale.commissions_trevoux || 0);
+        
+        // Frais professionnels
+        const fraisPro = 
+            (simFiscale.comptable || 0) +
+            (simFiscale.frais_bancaires || 0) +
+            ((simFiscale.telephone || 0) * (simFiscale.telephone_type === 'mensuel' ? 12 : 1)) +
+            (simFiscale.materiel_info || 0) +
+            (simFiscale.rc_pro || 0) +
+            (simFiscale.formation || 0) +
+            ((simFiscale.fournitures || 0) * (simFiscale.fournitures_type === 'mensuel' ? 12 : 1));
+        
+        // Listes
+        const travaux = (simFiscale.travaux_liste || []).reduce((sum, item) => sum + item.montant, 0);
+        const fraisDivers = (simFiscale.frais_divers_liste || []).reduce((sum, item) => sum + item.montant, 0);
+        const produitsAccueil = (simFiscale.produits_accueil_liste || []).reduce((sum, item) => sum + item.montant, 0);
+        
+        // Crédit Trévoux
+        const creditTrevoux = (simFiscale.credits_liste || [])
+            .filter(c => c.nom && c.nom.toLowerCase().includes('trévoux'))
+            .reduce((sum, c) => sum + (c.mensualite * 12), 0);
+        
+        totalChargesAnnee = chargesCouzon + chargesTrevoux + fraisPro + travaux + fraisDivers + produitsAccueil + creditTrevoux;
+    }
+    
+    // Bénéfice = CA - Total Charges (depuis fiscalité)
+    const beneficeAnnee = caAnnee - totalChargesAnnee;
     
     console.log(`💰 Détail bénéfice ${anneeActuelle}:`, {
         ca: caAnnee,
-        chargesGites: totalChargesGites,
-        creditTrevoux: montantCreditTrevoux,
-        totalCharges: totalChargesGites + montantCreditTrevoux,
-        benefice: beneficeAnnee
+        totalCharges: totalChargesAnnee,
+        benefice: beneficeAnnee,
+        source: simFiscale ? 'Calculé depuis fiscalité' : 'Aucune simulation trouvée'
     });
     
     // 2. Calculer l'URSSAF pour l'année en cours (22% + 9.7% CSG-CRDS + allocations familiales progressives)
@@ -900,7 +956,7 @@ async function updateFinancialIndicators() {
     }
     
     // 7. Afficher les graphiques
-    const benefices = await calculerBeneficesMensuels();
+    const benefices = await calculerBeneficesMensuels(totalChargesAnnee);
     await afficherGraphiqueBenefices(benefices);
     await afficherGraphiqueTresorerieDashboard();
 }
@@ -909,28 +965,15 @@ async function updateFinancialIndicators() {
 // 📊 CALCUL BÉNÉFICES MENSUELS
 // ==========================================
 
-async function calculerBeneficesMensuels() {
+async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
     try {
         // Récupérer toutes les réservations
         const reservations = await getAllReservations();
         
-        // Récupérer toutes les charges
-        const charges = await getAllCharges();
-        
-        console.log('📊 DEBUG - Nombre total de charges:', charges.length);
-        console.log('📊 DEBUG - Premières charges:', charges.slice(0, 5));
-        
-        // Vérifier combien de charges ont une date
-        const chargesAvecDate = charges.filter(c => c.date);
-        const chargesSansDate = charges.filter(c => !c.date);
-        console.log('📊 DEBUG - Charges avec date:', chargesAvecDate.length);
-        console.log('📊 DEBUG - Charges SANS date:', chargesSansDate.length);
-        if (chargesSansDate.length > 0) {
-            console.warn('⚠️ ATTENTION: Des charges n\'ont pas de date!', chargesSansDate.slice(0, 3));
-        }
-        
         const anneeActuelle = new Date().getFullYear();
         const benefices = [];
+        
+        console.log(`📊 Calcul bénéfices mensuels ${anneeActuelle} avec Total Charges: ${totalChargesAnnee.toFixed(0)}€`);
         
         // Pour chaque mois
         for (let mois = 0; mois < 12; mois++) {
@@ -944,32 +987,17 @@ async function calculerBeneficesMensuels() {
             
             const caMois = reservationsDuMois.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
             
-            // 2. Calculer les charges du mois HORS frais personnels et crédit Trévoux
-            const chargesDuMois = charges.filter(c => {
-                if (!c.date) return false;
-                const dateCharge = new Date(c.date);
-                const isGoodYear = dateCharge.getFullYear() === anneeActuelle;
-                const isGoodMonth = dateCharge.getMonth() === mois;
-                
-                // Exclure les frais personnels et le crédit Trévoux
-                const estFraisPro = c.categorie && (
-                    c.categorie.includes('gite') || 
-                    c.categorie.includes('professionnel') || 
-                    c.categorie === 'Frais Professionnel'
-                );
-                const estCreditTrevoux = c.description && c.description.toLowerCase().includes('crédit trévoux');
-                
-                return isGoodYear && isGoodMonth && (estFraisPro || estCreditTrevoux);
-            });
+            // 2. Calculer les charges du mois : prendre le 1/12 du total annuel depuis fiscalité
+            // Pour simplifier, on divise le total annuel par 12
+            // Note : ce calcul sera plus précis une fois que toutes les charges mensuelles seront trackées
+            const totalCharges = totalChargesAnnee / 12;
             
-            const totalCharges = chargesDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
-            
-            // Calcul du bénéfice : Réservations - Charges gîtes/pro - Crédit Trévoux
+            // Calcul du bénéfice : CA - Charges (1/12 du total annuel)
             const beneficeMois = caMois - totalCharges;
             
             // Log détaillé pour TOUS les mois avec activité
             if (caMois > 0 || totalCharges > 0) {
-                console.log(`📊 ${nomMois} ${anneeActuelle}: CA=${caMois.toFixed(0)}€ - Charges=${totalCharges.toFixed(0)}€ (${chargesDuMois.length} charges) = Bénéfice=${beneficeMois.toFixed(0)}€`);
+                console.log(`📊 ${nomMois} ${anneeActuelle}: CA=${caMois.toFixed(0)}€ - Charges=${totalCharges.toFixed(0)}€ = Bénéfice=${beneficeMois.toFixed(0)}€`);
             }
             
             benefices.push({

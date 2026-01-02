@@ -484,7 +484,7 @@ function calculerFiscalite(event) {
         return;
     }
     
-    // CHARGES COUZON
+    // CHARGES COUZON (SANS amortissement)
     const chargesCouzon = 
         getAnnualValue('internet_couzon', 'internet_couzon_type') +
         getAnnualValue('eau_couzon', 'eau_couzon_type') +
@@ -498,10 +498,9 @@ function calculerFiscalite(event) {
         getAnnualValue('copropriete_couzon', 'copropriete_couzon_type') +
         parseFloat(document.getElementById('taxe_fonciere_couzon').value || 0) +
         parseFloat(document.getElementById('cfe_couzon').value || 0) +
-        parseFloat(document.getElementById('commissions_couzon').value || 0) +
-        parseFloat(document.getElementById('amortissement_couzon').value || 0);
+        parseFloat(document.getElementById('commissions_couzon').value || 0);
     
-    // CHARGES TRÉVOUX
+    // CHARGES TRÉVOUX (SANS amortissement)
     const chargesTrevoux = 
         getAnnualValue('internet_trevoux', 'internet_trevoux_type') +
         getAnnualValue('eau_trevoux', 'eau_trevoux_type') +
@@ -515,27 +514,12 @@ function calculerFiscalite(event) {
         getAnnualValue('copropriete_trevoux', 'copropriete_trevoux_type') +
         parseFloat(document.getElementById('taxe_fonciere_trevoux').value || 0) +
         parseFloat(document.getElementById('cfe_trevoux').value || 0) +
-        parseFloat(document.getElementById('commissions_trevoux').value || 0) +
-        parseFloat(document.getElementById('amortissement_trevoux').value || 0);
+        parseFloat(document.getElementById('commissions_trevoux').value || 0);
     
     // LISTES (Travaux, Frais divers, Produits)
     const travaux = getTravauxListe().reduce((sum, item) => sum + item.montant, 0);
     const fraisDivers = getFraisDiversListe().reduce((sum, item) => sum + item.montant, 0);
     const produitsAccueil = getProduitsAccueilListe().reduce((sum, item) => sum + item.montant, 0);
-    
-    const chargesBiens = chargesCouzon + chargesTrevoux + travaux + fraisDivers + produitsAccueil;
-    
-    // CHARGES RÉSIDENCE (avec prorata)
-    const ratio = calculerRatio();
-    const chargesResidence = (
-        getAnnualValue('interets_residence', 'interets_residence_type') +
-        getAnnualValue('assurance_residence', 'assurance_residence_type') +
-        getAnnualValue('electricite_residence', 'electricite_residence_type') +
-        getAnnualValue('internet_residence', 'internet_residence_type') +
-        getAnnualValue('eau_residence', 'eau_residence_type') +
-        getAnnualValue('assurance_hab_residence', 'assurance_hab_residence_type') +
-        parseFloat(document.getElementById('taxe_fonciere_residence').value || 0)
-    ) * ratio;
     
     // FRAIS PROFESSIONNELS
     const fraisPro = 
@@ -547,10 +531,30 @@ function calculerFiscalite(event) {
         parseFloat(document.getElementById('formation').value || 0) +
         getAnnualValue('fournitures', 'fournitures_type');
     
-    // VÉHICULE
+    // CRÉDIT TRÉVOUX (depuis la liste des crédits)
+    const creditsListe = getCreditsList();
+    const creditTrevoux = creditsListe
+        .filter(c => c.nom && c.nom.toLowerCase().includes('trévoux'))
+        .reduce((sum, c) => sum + (c.mensualite * 12), 0);
+    
+    // CALCUL FINAL : Couzon + Trévoux + Pro + Travaux + Frais Divers + Produits + Crédit Trévoux
+    // EXCLURE : Résidence principale et Véhicule
+    const totalCharges = chargesCouzon + chargesTrevoux + fraisPro + travaux + fraisDivers + produitsAccueil + creditTrevoux;
+    
+    // Garder les calculs résidence et véhicule pour affichage mais ne pas les inclure dans le total
+    const ratio = calculerRatio();
+    const chargesResidence = (
+        getAnnualValue('interets_residence', 'interets_residence_type') +
+        getAnnualValue('assurance_residence', 'assurance_residence_type') +
+        getAnnualValue('electricite_residence', 'electricite_residence_type') +
+        getAnnualValue('internet_residence', 'internet_residence_type') +
+        getAnnualValue('eau_residence', 'eau_residence_type') +
+        getAnnualValue('assurance_hab_residence', 'assurance_hab_residence_type') +
+        parseFloat(document.getElementById('taxe_fonciere_residence').value || 0)
+    ) * ratio;
+    
     let fraisVehicule = 0;
     const vehiculeOption = document.querySelector('input[name="vehicule_option"]:checked').value;
-    
     if (vehiculeOption === 'bareme') {
         const puissance = parseInt(document.getElementById('puissance_fiscale').value || 5);
         const km = parseInt(document.getElementById('km_professionnels').value || 0);
@@ -564,9 +568,6 @@ function calculerFiscalite(event) {
         const usagePro = parseInt(document.getElementById('usage_pro_pourcent').value || 0) / 100;
         fraisVehicule = fraisReels * usagePro;
     }
-    
-    // CALCUL FINAL
-    const totalCharges = chargesBiens + chargesResidence + fraisPro + fraisVehicule;
     const benefice = ca - totalCharges;
     
     // COTISATIONS URSSAF
@@ -593,11 +594,11 @@ function calculerFiscalite(event) {
         travaux,
         fraisDivers,
         produitsAccueil,
-        chargesBiens,
         chargesResidence,
         ratio: ratio * 100,
         fraisPro,
         fraisVehicule,
+        creditTrevoux,
         totalCharges,
         benefice,
         cotisations,
