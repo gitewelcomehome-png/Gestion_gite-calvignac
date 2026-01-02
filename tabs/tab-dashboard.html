@@ -24,37 +24,41 @@
     <!-- Indicateurs financiers - Ligne 1 -->
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
         <!-- URSSAF Annuel -->
-        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">URSSAF Annuel</div>
-            <div id="dashboard-urssaf" style="font-size: 2rem; font-weight: bold;">-</div>
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; text-align: center; border-radius: 15px; box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);">
+            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 8px; font-weight: 500;">URSSAF <span id="urssaf-annee-label">2025</span></div>
+            <div id="dashboard-urssaf" style="font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">-</div>
+            <div style="font-size: 0.7rem; opacity: 0.75; margin-top: 8px;">Cotisations sociales</div>
         </div>
 
         <!-- IR Année Précédente -->
-        <div class="card" style="background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%); color: white; padding: 20px; text-align: center;">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">IR <span id="annee-precedente-label">2025</span></div>
-            <div id="dashboard-ir-precedent" style="font-size: 2rem; font-weight: bold;">-</div>
+        <div class="card" style="background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%); color: white; padding: 24px; text-align: center; border-radius: 15px; box-shadow: 0 8px 16px rgba(231, 76, 60, 0.3);">
+            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 8px; font-weight: 500;">IR <span id="annee-precedente-label">2025</span></div>
+            <div id="dashboard-ir-precedent" style="font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">-</div>
+            <div style="font-size: 0.7rem; opacity: 0.75; margin-top: 8px;">Année clôturée</div>
         </div>
 
         <!-- IR Année en Cours -->
-        <div class="card" style="background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%); color: white; padding: 20px; text-align: center;">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">IR <span id="annee-courante-label">2026</span></div>
-            <div id="dashboard-ir-courant" style="font-size: 2rem; font-weight: bold;">-</div>
+        <div class="card" style="background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%); color: white; padding: 24px; text-align: center; border-radius: 15px; box-shadow: 0 8px 16px rgba(243, 156, 18, 0.3);">
+            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 8px; font-weight: 500;">IR <span id="annee-courante-label">2026</span></div>
+            <div id="dashboard-ir-courant" style="font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">-</div>
+            <div style="font-size: 0.7rem; opacity: 0.75; margin-top: 8px;">Estimation en cours</div>
         </div>
     </div>
 
     <!-- Indicateurs financiers - Ligne 2 -->
     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
         <!-- Bénéfice Année en Cours -->
-        <div class="card" style="background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%); color: white; padding: 20px; text-align: center;">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">Bénéfice <span id="annee-benefice">2026</span> (en cours)</div>
-            <div id="dashboard-benefice-moyen" style="font-size: 2rem; font-weight: bold;">-</div>
-            <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 5px;">Réservations - Charges</div>
+        <div class="card" style="background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%); color: white; padding: 24px; text-align: center; border-radius: 15px; box-shadow: 0 8px 16px rgba(39, 174, 96, 0.3);">
+            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 8px; font-weight: 500;">Bénéfice <span id="annee-benefice">2026</span></div>
+            <div id="dashboard-benefice-moyen" style="font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">-</div>
+            <div style="font-size: 0.7rem; opacity: 0.75; margin-top: 8px;">CA - Charges - Crédit Trévoux</div>
         </div>
 
         <!-- Trésorerie Actuelle -->
-        <div class="card" style="background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%); color: white; padding: 20px; text-align: center;">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">Trésorerie Actuelle</div>
-            <div id="dashboard-tresorerie" style="font-size: 2rem; font-weight: bold;">-</div>
+        <div class="card" style="background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%); color: white; padding: 24px; text-align: center; border-radius: 15px; box-shadow: 0 8px 16px rgba(52, 152, 219, 0.3);">
+            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 8px; font-weight: 500;">Trésorerie Actuelle</div>
+            <div id="dashboard-tresorerie" style="font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">-</div>
+            <div style="font-size: 0.7rem; opacity: 0.75; margin-top: 8px;">Solde bancaire</div>
         </div>
     </div>
 
