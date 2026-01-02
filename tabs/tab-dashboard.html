@@ -16,6 +16,58 @@
     <!-- Alertes / Notifications importantes -->
     <div id="dashboard-alerts" style="margin-bottom: 20px;"></div>
 
+    <!-- Indicateurs financiers -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
+        <!-- URSSAF Annuel -->
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
+            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">URSSAF Annuel</div>
+            <div id="dashboard-urssaf" style="font-size: 2rem; font-weight: bold;">-</div>
+        </div>
+
+        <!-- Impôts Annuels -->
+        <div class="card" style="background: linear-gradient(135deg, #F39C12 0%, #E74C3C 100%); color: white; padding: 20px; text-align: center;">
+            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">Impôts Annuels</div>
+            <div id="dashboard-ir" style="font-size: 2rem; font-weight: bold;">-</div>
+        </div>
+
+        <!-- Bénéfice Mensuel Moyen -->
+        <div class="card" style="background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%); color: white; padding: 20px; text-align: center;">
+            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">Bénéfice Mensuel Moyen</div>
+            <div id="dashboard-benefice-moyen" style="font-size: 2rem; font-weight: bold;">-</div>
+        </div>
+
+        <!-- Trésorerie Actuelle -->
+        <div class="card" style="background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%); color: white; padding: 20px; text-align: center;">
+            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">Trésorerie Actuelle</div>
+            <div id="dashboard-tresorerie" style="font-size: 2rem; font-weight: bold;">-</div>
+        </div>
+    </div>
+
+    <!-- Graphiques financiers -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+        <!-- Bénéfices mensuels des gîtes -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">💰</span>
+                <h3 class="card-title">Bénéfices Mensuels des Gîtes</h3>
+            </div>
+            <div style="padding: 20px;">
+                <canvas id="graphique-benefices-gites" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+
+        <!-- Trésorerie -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📈</span>
+                <h3 class="card-title">Évolution Trésorerie</h3>
+            </div>
+            <div style="padding: 20px;">
+                <canvas id="graphique-tresorerie-dashboard" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
     <!-- Layout principal : 2 colonnes -->
     <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
         
