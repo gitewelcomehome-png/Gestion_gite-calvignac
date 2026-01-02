@@ -687,26 +687,40 @@ function openFicheClient(id) {
 // ==========================================
 
 async function updateFinancialIndicators() {
+    console.log('🔄 Mise à jour des indicateurs financiers...');
+    
     // Charger la dernière simulation fiscale
-    const { data: simulation } = await supabase
+    const { data: simulation, error: simError } = await supabase
         .from('simulations_fiscales')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
     
+    if (simError) {
+        console.error('❌ Erreur chargement simulation:', simError);
+    }
+    
+    console.log('📋 Simulation chargée:', simulation);
+    
     // URSSAF et IR
     if (simulation) {
         const urssafEl = document.getElementById('dashboard-urssaf');
         const irEl = document.getElementById('dashboard-ir');
         
+        console.log('💰 URSSAF:', simulation.total_urssaf, 'IR:', simulation.impot_revenu);
+        
         if (urssafEl) urssafEl.textContent = formatCurrency(simulation.total_urssaf || 0);
         if (irEl) irEl.textContent = formatCurrency(simulation.impot_revenu || 0);
+    } else {
+        console.warn('⚠️ Aucune simulation trouvée');
     }
     
     // Calculer bénéfices mensuels des gîtes
     const benefices = await calculerBeneficesMensuels();
     const moyenneMensuelle = benefices.reduce((sum, b) => sum + b.total, 0) / 12;
+    
+    console.log('📈 Bénéfice mensuel moyen:', moyenneMensuelle);
     
     const beneficeEl = document.getElementById('dashboard-benefice-moyen');
     if (beneficeEl) beneficeEl.textContent = formatCurrency(moyenneMensuelle);
@@ -721,6 +735,8 @@ async function updateFinancialIndicators() {
         .eq('annee', anneeActuelle)
         .eq('mois', moisActuel)
         .single();
+    
+    console.log('🏦 Trésorerie actuelle:', soldeMois);
     
     const tresorerieEl = document.getElementById('dashboard-tresorerie');
     if (tresorerieEl) {
@@ -737,31 +753,88 @@ async function updateFinancialIndicators() {
 // ==========================================
 
 async function calculerBeneficesMensuels() {
-    const anneeActuelle = new Date().getFullYear();
-    
-    // Récupérer toutes les réservations de l'année
-    const { data: reservations } = await supabase
-        .from('reservations')
+    // Récupérer la dernière simulation fiscale
+    const { data: simulation } = await supabase
+        .from('simulations_fiscales')
         .select('*')
-        .gte('dateDebut', `${anneeActuelle}-01-01`)
-        .lte('dateDebut', `${anneeActuelle}-12-31`);
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
     
-    // Initialiser 12 mois
+    if (!simulation) {
+        console.warn('Aucune simulation fiscale trouvée');
+        return Array.from({ length: 12 }, (_, i) => ({
+            mois: i + 1,
+            nom: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'][i],
+            total: 0
+        }));
+    }
+    
+    // Calculer CA annuel des gîtes
+    const caCouzon = parseFloat(simulation.ca_couzon || 0);
+    const caTrevoux = parseFloat(simulation.ca_trevoux || 0);
+    const caTotal = caCouzon + caTrevoux;
+    
+    // Calculer frais annuels HORS amortissement
+    // Tous les champs de frais sauf amortissements
+    const fraisCouzon = [
+        'internet_couzon', 'eau_couzon', 'electricite_couzon', 
+        'assurance_hab_couzon', 'assurance_emprunt_couzon', 
+        'interets_emprunt_couzon', 'menage_couzon', 'linge_couzon',
+        'logiciel_couzon', 'taxe_fonciere_couzon', 'cfe_couzon',
+        'commissions_couzon', 'copropriete_couzon'
+    ].reduce((sum, field) => sum + (parseFloat(simulation[field] || 0)), 0);
+    
+    const fraisTrevoux = [
+        'internet_trevoux', 'eau_trevoux', 'electricite_trevoux',
+        'assurance_hab_trevoux', 'assurance_emprunt_trevoux',
+        'interets_emprunt_trevoux', 'menage_trevoux', 'linge_trevoux',
+        'logiciel_trevoux', 'taxe_fonciere_trevoux', 'cfe_trevoux',
+        'commissions_trevoux', 'copropriete_trevoux'
+    ].reduce((sum, field) => sum + (parseFloat(simulation[field] || 0)), 0);
+    
+    // Frais professionnels
+    const fraisPro = [
+        'comptable', 'frais_bancaires', 'telephone', 'materiel_info',
+        'rc_pro', 'formation', 'fournitures'
+    ].reduce((sum, field) => sum + (parseFloat(simulation[field] || 0)), 0);
+    
+    // Résidence principale (bureau)
+    const surfaceBureau = parseFloat(simulation.surface_bureau || 0);
+    const surfaceTotale = parseFloat(simulation.surface_totale || 1);
+    const ratio = surfaceBureau / surfaceTotale;
+    
+    const fraisResidence = [
+        'interets_residence', 'assurance_residence', 'electricite_residence',
+        'internet_residence', 'eau_residence', 'assurance_hab_residence',
+        'taxe_fonciere_residence'
+    ].reduce((sum, field) => sum + (parseFloat(simulation[field] || 0) * ratio), 0);
+    
+    // Frais véhicule (forfait kilométrique déjà calculé)
+    const fraisVehicule = parseFloat(simulation.frais_vehicule || 0);
+    
+    // Total frais HORS amortissement
+    const totalFrais = fraisCouzon + fraisTrevoux + fraisPro + fraisResidence + fraisVehicule;
+    
+    // Bénéfice annuel = CA - Frais (hors amortissement)
+    const beneficeAnnuel = caTotal - totalFrais;
+    
+    // Bénéfice mensuel moyen
+    const beneficeMensuel = beneficeAnnuel / 12;
+    
+    console.log('📊 Calcul bénéfices:', {
+        caTotal,
+        totalFrais,
+        beneficeAnnuel,
+        beneficeMensuel
+    });
+    
+    // Répartir uniformément sur 12 mois
     const benefices = Array.from({ length: 12 }, (_, i) => ({
         mois: i + 1,
         nom: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'][i],
-        total: 0
+        total: beneficeMensuel
     }));
-    
-    // Calculer les bénéfices par mois
-    if (reservations) {
-        reservations.forEach(resa => {
-            const date = new Date(resa.dateDebut);
-            const mois = date.getMonth(); // 0-11
-            const montant = parseFloat(resa.montant) || 0;
-            benefices[mois].total += montant;
-        });
-    }
     
     return benefices;
 }
