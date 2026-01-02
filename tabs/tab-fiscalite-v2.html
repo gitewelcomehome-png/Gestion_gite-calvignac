@@ -658,6 +658,57 @@
             </div>
         </div>
 
+        <!-- BLOC : Total Charges Annuelles -->
+        <div class="fiscal-bloc collapsible" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; margin-top: 30px;">
+            <h3 class="fiscal-bloc-title" style="color: white; cursor: pointer;" onclick="toggleBloc(this)">
+                <span class="toggle-icon">▼</span> 💼 TOTAL CHARGES ANNUELLES
+            </h3>
+            <div class="bloc-content">
+                <p style="color: white; opacity: 0.9; margin-bottom: 20px;">Récapitulatif de toutes les charges pour le calcul du bénéfice</p>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="display: grid; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Charges Couzon</span>
+                            <strong id="total-charges-couzon">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Charges Trévoux</span>
+                            <strong id="total-charges-trevoux">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Charges Résidence (proratisées)</span>
+                            <strong id="total-charges-residence">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Frais Professionnels</span>
+                            <strong id="total-frais-pro">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Frais Véhicule</span>
+                            <strong id="total-frais-vehicule">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Travaux</span>
+                            <strong id="total-travaux">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Frais Divers</span>
+                            <strong id="total-frais-divers">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Produits d'accueil</span>
+                            <strong id="total-produits-accueil">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 4px; font-weight: 700; margin-top: 10px; font-size: 1.1rem;">
+                            <span>TOTAL CHARGES</span>
+                            <strong id="total-charges-annuelles">0 €</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- BLOC : Reste à vivre -->
         <div class="fiscal-bloc collapsible">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
