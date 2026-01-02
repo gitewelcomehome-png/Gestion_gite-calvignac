@@ -136,12 +136,14 @@ function calculerTempsReel() {
         const anneeSimulation = parseInt(document.getElementById('annee_simulation')?.value);
         const anneeActuelle = new Date().getFullYear();
         if (anneeSimulation && anneeSimulation < anneeActuelle) {
-            console.log(`💾 Auto-sauvegarde de l'année ${anneeSimulation} (année précédente)`);
+            console.log(`💾 Auto-sauvegarde déclenchée pour ${anneeSimulation} (année précédente)`);
+            // Attendre que l'IR soit calculé (100ms) + reste à vivre (100ms) + marge (300ms)
             setTimeout(() => {
+                console.log(`💾 Lecture IR depuis élément #ir-montant:`, document.getElementById('ir-montant')?.textContent);
                 sauvegarderSimulation(true); // true = mode silencieux
                 // Vérifier après sauvegarde
                 setTimeout(() => verifierSauvegardeAnnee(anneeSimulation), 1000);
-            }, 1000);
+            }, 600); // Augmenté de 1000ms à 600ms (assez pour l'IR mais plus réactif)
         }
         
     }, 500);
