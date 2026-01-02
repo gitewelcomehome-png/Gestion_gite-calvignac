@@ -1,10 +1,8 @@
 /**
- * 📊 MODULE DASHBOARD - Tableau de bord principal
  * Vue d'ensemble hebdomadaire : réservations, ménages, todos
  */
 
 // ==========================================
-// 💰 UTILITAIRES FORMATAGE
 // ==========================================
 
 function formatCurrency(amount) {
@@ -130,7 +128,6 @@ function openEditReservation(id) {
 }
 
 // ==========================================
-// 📊 RÉSUMÉ FINANCIER & STATS
 // ==========================================
 
 async function updateDashboardStats() {
@@ -216,7 +213,6 @@ async function updateDashboardReservations() {
         const badgeColor = isArrival ? '#27AE60' : '#3498DB';
         const giteColor = r.gite === 'Trévoux' ? '#667eea' : '#f093fb';
         
-        const paiementIcon = r.paiement === 'Soldé' ? '✅' : r.paiement === 'Acompte reçu' ? '⏳' : '❌';
         const paiementColor = r.paiement === 'Soldé' ? '#27AE60' : r.paiement === 'Acompte reçu' ? '#F39C12' : '#E74C3C';
         
         // Calculer jours avant arrivée
@@ -235,7 +231,6 @@ async function updateDashboardReservations() {
                         </div>
                         <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #666; margin-top: 6px;">
                             <span>🏠 ${r.gite}</span>
-                            <span>💰 ${r.montant.toFixed(0)} €</span>
                             <span>👥 ${r.nb_personnes || '-'} pers.</span>
                             ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'};">📅 J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
                         </div>
@@ -291,7 +286,6 @@ async function updateDashboardMenages() {
     let html = '';
     cleanings.forEach(c => {
         const statusIcons = {
-            'validated': '✅',
             'pending_validation': '⏳',
             'refused': '❌',
             'pending': '✗'
@@ -325,7 +319,6 @@ async function updateDashboardMenages() {
 }
 
 // ==========================================
-// ✅ TODO LISTES
 // ==========================================
 
 async function updateTodoLists() {
@@ -685,11 +678,9 @@ function openFicheClient(id) {
 }
 
 // ==========================================
-// 💰 INDICATEURS FINANCIERS
 // ==========================================
 
 async function updateFinancialIndicators() {
-    console.log('🔄 Mise à jour des indicateurs financiers...');
     
     const anneeActuelle = new Date().getFullYear();
     const anneePrecedente = anneeActuelle - 1;
@@ -784,7 +775,6 @@ async function updateFinancialIndicators() {
     // Bénéfice = CA - Total Charges (depuis fiscalité)
     const beneficeAnnee = caAnnee - totalChargesAnnee;
     
-    console.log(`💰 Détail bénéfice ${anneeActuelle}:`, {
         ca: caAnnee,
         totalCharges: totalChargesAnnee,
         benefice: beneficeAnnee,
@@ -809,14 +799,11 @@ async function updateFinancialIndicators() {
     
     // ⚠️ Appliquer le minimum URSSAF de 1200€
     if (urssafTotal < 1200) {
-        console.log(`📊 URSSAF calculée (${urssafTotal.toFixed(0)}€) < 1200€ → Application du minimum`);
         urssafTotal = 1200;
     }
     
-    console.log('📊 URSSAF finale:', urssafTotal);
     
     // 3. Calculer l'IR de l'ANNÉE PRÉCÉDENTE (depuis la base)
-    console.log(`🔍 Recherche IR pour année ${anneePrecedente}...`);
     const { data: simulationPrecedente, error: errorPrecedente } = await supabase
         .from('simulations_fiscales')
         .select('*')
@@ -839,14 +826,12 @@ async function updateFinancialIndicators() {
     if (simulationPrecedente) {
         if (simulationPrecedente.impot_revenu) {
             impotRevenuPrecedent = parseFloat(simulationPrecedente.impot_revenu);
-            console.log(`💸 IR ${anneePrecedente} (depuis DB):`, impotRevenuPrecedent);
         } else {
             console.warn(`⚠️ Champ impot_revenu null ou undefined pour ${anneePrecedente}`);
         }
         
         if (simulationPrecedente.cotisations_urssaf) {
             urssafPrecedent = parseFloat(simulationPrecedente.cotisations_urssaf);
-            console.log(`📊 URSSAF ${anneePrecedente} (depuis DB):`, urssafPrecedent);
         } else {
             console.warn(`⚠️ Champ cotisations_urssaf null ou undefined pour ${anneePrecedente}`);
         }
@@ -874,7 +859,6 @@ async function updateFinancialIndicators() {
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
         const revenuFiscal = resteApresURSSAF + salaireMadame + salaireMonsieur;
         
-        console.log(`🧮 Détail calcul IR ${anneeActuelle}:`, {
             benefice: beneficeAnnee,
             urssaf: urssafTotal,
             resteApresURSSAF: resteApresURSSAF,
@@ -908,14 +892,12 @@ async function updateFinancialIndicators() {
         
         impotRevenuCourant = Math.max(0, impotParPart * nbParts);
         
-        console.log(`💸 IR ${anneeActuelle} (temps réel): ${impotRevenuCourant.toFixed(0)}€ (revenu: ${revenuFiscal.toFixed(0)}€, quotient: ${quotient.toFixed(0)}€, parts: ${nbParts})`);
     } else {
         console.warn(`⚠️ Pas de simulation pour ${anneeActuelle}, calcul simplifié`);
         // Calcul simplifié sans salaires
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
         const quotient = resteApresURSSAF / 2; // Couple sans enfant
         
-        console.log(`🧮 Calcul simplifié IR ${anneeActuelle}:`, {
             benefice: beneficeAnnee,
             urssaf: urssafTotal,
             resteApresURSSAF: resteApresURSSAF,
@@ -936,7 +918,6 @@ async function updateFinancialIndicators() {
         }
         
         impotRevenuCourant = Math.max(0, impotParPart * 2);
-        console.log(`💸 IR ${anneeActuelle} simplifié: ${impotRevenuCourant.toFixed(0)}€`);
     }
     
     // 5. Mettre à jour l'affichage
@@ -946,7 +927,6 @@ async function updateFinancialIndicators() {
     const ir2026El = document.getElementById('dashboard-ir-2026');
     const beneficeEl = document.getElementById('dashboard-benefice-moyen');
     
-    console.log('🖥️ Affichage final:', {
         urssaf2025: urssafPrecedent,
         urssaf2026: urssafTotal,
         ir2025: impotRevenuPrecedent,
@@ -957,21 +937,17 @@ async function updateFinancialIndicators() {
     // Afficher URSSAF des 2 années
     if (urssaf2025El) {
         urssaf2025El.textContent = simulationPrecedente ? formatCurrency(urssafPrecedent) : '-';
-        console.log(`✅ URSSAF 2025 affiché: ${urssaf2025El.textContent}`);
     }
     if (urssaf2026El) {
         urssaf2026El.textContent = formatCurrency(urssafTotal);
-        console.log(`✅ URSSAF 2026 affiché: ${urssaf2026El.textContent}`);
     }
     
     // Afficher IR des 2 années  
     if (ir2025El) {
         ir2025El.textContent = simulationPrecedente ? formatCurrency(impotRevenuPrecedent) : '-';
-        console.log(`✅ IR 2025 affiché: ${ir2025El.textContent}`);
     }
     if (ir2026El) {
         ir2026El.textContent = formatCurrency(impotRevenuCourant);
-        console.log(`✅ IR 2026 affiché: ${ir2026El.textContent}`);
     }
     
     // Afficher bénéfice
@@ -999,7 +975,6 @@ async function updateFinancialIndicators() {
 }
 
 // ==========================================
-// 📊 CALCUL BÉNÉFICES MENSUELS
 // ==========================================
 
 async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
@@ -1010,7 +985,6 @@ async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
         const anneeActuelle = new Date().getFullYear();
         const benefices = [];
         
-        console.log(`📊 Calcul bénéfices mensuels ${anneeActuelle} avec Total Charges: ${totalChargesAnnee.toFixed(0)}€`);
         
         // Pour chaque mois
         for (let mois = 0; mois < 12; mois++) {
@@ -1034,7 +1008,6 @@ async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
             
             // Log détaillé pour TOUS les mois avec activité
             if (caMois > 0 || totalCharges > 0) {
-                console.log(`📊 ${nomMois} ${anneeActuelle}: CA=${caMois.toFixed(0)}€ - Charges=${totalCharges.toFixed(0)}€ = Bénéfice=${beneficeMois.toFixed(0)}€`);
             }
             
             benefices.push({
@@ -1048,7 +1021,6 @@ async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
             });
         }
         
-        console.log('📊 Calcul bénéfices mensuels terminé');
         
         return benefices;
         
@@ -1122,7 +1094,6 @@ async function afficherGraphiqueBenefices(benefices) {
 }
 
 // ==========================================
-// 📊 GRAPHIQUE TRÉSORERIE DASHBOARD
 // ==========================================
 
 let chartTresorerieDashboard = null;

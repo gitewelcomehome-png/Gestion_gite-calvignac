@@ -819,7 +819,6 @@ async function chargerAnnee(annee) {
         
         // Pour l'année en cours, nettoyer les listes et recalculer le CA
         if (parseInt(annee) === anneeActuelle) {
-            console.log(`📊 Année en cours (${annee}) : nettoyage des listes et recalcul du CA`);
             
             // Vider les listes de travaux, frais divers et produits d'accueil
             document.getElementById('travaux-liste').innerHTML = '';

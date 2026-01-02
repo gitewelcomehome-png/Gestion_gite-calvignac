@@ -1,0 +1,257 @@
+<!-- ================================================ -->
+<!-- ONGLET FAQ - QUESTIONS FRÉQUENTES CLIENTS      -->
+<!-- ================================================ -->
+<!-- Remplace l'ancien onglet Messagerie            -->
+<!-- ================================================ -->
+
+<div class="tab-content" id="faq-tab">
+    <div class="page-header">
+        <div class="header-title">
+            <h1>❓ FAQ - Questions Fréquentes</h1>
+            <p>Réponses aux questions courantes des clients</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn-primary" onclick="ajouterQuestionFAQ()">
+                <i class="fas fa-plus"></i> Ajouter une Question
+            </button>
+            <button class="btn-secondary" onclick="exporterFAQHTML()">
+                <i class="fas fa-file-export"></i> Exporter en HTML
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtres par catégorie -->
+    <div class="filters-section" style="margin-bottom: 20px;">
+        <div class="filter-chips">
+            <button class="chip active" data-category="all" onclick="filtrerFAQ('all')">
+                Toutes
+            </button>
+            <button class="chip" data-category="arrivee" onclick="filtrerFAQ('arrivee')">
+                🔑 Arrivée
+            </button>
+            <button class="chip" data-category="depart" onclick="filtrerFAQ('depart')">
+                🚪 Départ
+            </button>
+            <button class="chip" data-category="equipements" onclick="filtrerFAQ('equipements')">
+                🏠 Équipements
+            </button>
+            <button class="chip" data-category="localisation" onclick="filtrerFAQ('localisation')">
+                📍 Localisation
+            </button>
+            <button class="chip" data-category="tarifs" onclick="filtrerFAQ('tarifs')">
+                💰 Tarifs
+            </button>
+            <button class="chip" data-category="reglement" onclick="filtrerFAQ('reglement')">
+                📋 Règlement
+            </button>
+            <button class="chip" data-category="autre" onclick="filtrerFAQ('autre')">
+                ℹ️ Autre
+            </button>
+        </div>
+    </div>
+
+    <!-- Liste des questions -->
+    <div id="faq-list" class="faq-container">
+        <!-- Les questions seront chargées ici -->
+    </div>
+</div>
+
+<!-- Modal Ajouter/Modifier Question -->
+<div id="modal-question-faq" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h2 id="modal-question-title">Ajouter une Question FAQ</h2>
+            <button class="btn-close" onclick="fermerModalQuestion()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="form-question-faq">
+                <input type="hidden" id="question-id">
+
+                <div class="form-group">
+                    <label for="question-categorie">Catégorie *</label>
+                    <select id="question-categorie" required>
+                        <option value="arrivee">🔑 Arrivée</option>
+                        <option value="depart">🚪 Départ</option>
+                        <option value="equipements">🏠 Équipements</option>
+                        <option value="localisation">📍 Localisation</option>
+                        <option value="tarifs">💰 Tarifs</option>
+                        <option value="reglement">📋 Règlement</option>
+                        <option value="autre">ℹ️ Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="question-gite">Gîte concerné</label>
+                    <select id="question-gite">
+                        <option value="tous">📍 Tous les gîtes</option>
+                        <option value="trevoux">🏠 Trévoux</option>
+                        <option value="calvignac">🏠 Calvignac</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="question-titre">Question *</label>
+                    <input type="text" 
+                           id="question-titre" 
+                           placeholder="Ex: Quelle est l'heure d'arrivée ?"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="question-reponse">Réponse *</label>
+                    <textarea id="question-reponse" 
+                              rows="6"
+                              placeholder="Réponse détaillée à la question..."
+                              required></textarea>
+                    <small>Vous pouvez utiliser des balises HTML (gras, listes, liens...)</small>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="question-visible">
+                        Afficher dans la fiche client
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="question-ordre">Ordre d'affichage</label>
+                    <input type="number" 
+                           id="question-ordre" 
+                           value="0"
+                           min="0"
+                           placeholder="0">
+                    <small>Plus le nombre est petit, plus la question apparaît en haut</small>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="fermerModalQuestion()">Annuler</button>
+            <button class="btn-primary" onclick="sauvegarderQuestionFAQ()">Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.faq-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.faq-item {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.faq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    cursor: pointer;
+    background: #f8f9fa;
+}
+
+.faq-header:hover {
+    background: #e9ecef;
+}
+
+.faq-question {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.faq-question h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.faq-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.faq-badge.arrivee { background: #e3f2fd; color: #1976d2; }
+.faq-badge.depart { background: #fff3e0; color: #f57c00; }
+.faq-badge.equipements { background: #f3e5f5; color: #7b1fa2; }
+.faq-badge.localisation { background: #e8f5e9; color: #388e3c; }
+.faq-badge.tarifs { background: #fff9c4; color: #f9a825; }
+.faq-badge.reglement { background: #fce4ec; color: #c2185b; }
+.faq-badge.autre { background: #eceff1; color: #546e7a; }
+
+.faq-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.faq-body {
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-item.open .faq-body {
+    max-height: 500px;
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.faq-answer {
+    color: #555;
+    line-height: 1.6;
+}
+
+.faq-meta {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 13px;
+    color: #777;
+}
+
+.filter-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.chip:hover {
+    background: #f5f5f5;
+}
+
+.chip.active {
+    background: #2196f3;
+    color: white;
+    border-color: #2196f3;
+}
+
+.faq-item.hidden {
+    display: none;
+}
+</style>

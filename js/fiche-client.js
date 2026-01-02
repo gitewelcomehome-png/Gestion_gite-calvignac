@@ -3,6 +3,8 @@
 // ==========================================
 // Génération de la fiche client avec toutes les informations pratiques
 
+import { genererFicheClientComplete } from './fiche-client-interactive.js';
+
 async function aperçuFicheClient(reservationId) {
     // Fermer le modal si ouvert
     document.querySelectorAll('div[style*="z-index: 10000"]').forEach(el => el.remove());
@@ -130,12 +132,15 @@ async function aperçuFicheClient(reservationId) {
             </div>
             
             <!-- Actions -->
-            <div style="background: #f8f9fa; padding: 20px; border-top: 1px solid #e0e0e0; display: flex; gap: 10px; justify-content: center;">
+            <div style="background: #f8f9fa; padding: 20px; border-top: 1px solid #e0e0e0; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                 <button onclick="window.print()" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                     🖨️ Imprimer
                 </button>
                 <button onclick="telechargerPageHTML(${JSON.stringify(reservation).replace(/"/g, '&quot;')}); this.closest('[style*=\\'z-index: 10001\\']').remove();" style="padding: 12px 24px; background: linear-gradient(135deg, #27AE60 0%, #229954 100%); color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    💾 Télécharger HTML
+                    💾 Télécharger Simple
+                </button>
+                <button onclick="telechargerFicheInteractive(${reservationId}); this.closest('[style*=\\'z-index: 10001\\']').remove();" style="padding: 12px 24px; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    ✨ Fiche Interactive Client
                 </button>
                 <button onclick="this.closest('[style*=\\'z-index: 10001\\']').remove()" style="padding: 12px 24px; background: #e0e0e0; color: #666; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer;">
                     Fermer
@@ -153,10 +158,45 @@ async function aperçuFicheClient(reservationId) {
             modal.remove();
         }
     });
+}📥 TÉLÉCHARGEMENT FICHE INTERACTIVE
+// ==========================================
+
+async function telechargerFicheInteractive(reservationId) {
+    const reservations = await getAllReservations();
+    const reservation = reservations.find(r => r.id === reservationId);
+    
+    if (!reservation) {
+        showToast('Réservation introuvable', 'error');
+        return;
+    }
+    
+    showToast('Génération de la fiche interactive...', 'info');
+    
+    try {
+        const htmlContent = await genererFicheClientComplete(reservation);
+        
+        // Créer le fichier et le télécharger
+        const blob = new Blob([htmlContent], { type: 'text/html; charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `fiche-client-${reservation.nom.replace(/\s+/g, '-')}-${reservation.gite}.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showToast('Fiche interactive générée avec succès !', 'success');
+    } catch (error) {
+        console.error('Erreur génération fiche:', error);
+        showToast('Erreur lors de la génération', 'error');
+    }
 }
 
 // ==========================================
 // 🌐 EXPORTS GLOBAUX
+// ==========================================
+
+window.aperçuFicheClient = aperçuFicheClient;
+window.telechargerFicheInteractive = telechargerFicheInteractive
 // ==========================================
 
 window.aperçuFicheClient = aperçuFicheClient;
