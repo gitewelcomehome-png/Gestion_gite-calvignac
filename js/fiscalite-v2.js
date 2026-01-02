@@ -1349,6 +1349,7 @@ function genererTableauSoldes() {
             <td style="padding: 10px; text-align: center;">
                 <input type="number" 
                        id="solde_m${numeroMois}" 
+                       class="solde-bancaire-input"
                        step="0.01" 
                        placeholder="0.00"
                        style="width: 150px; padding: 8px; border: 2px solid #ddd; border-radius: 6px; text-align: right;">
@@ -1356,6 +1357,7 @@ function genererTableauSoldes() {
             <td style="padding: 10px;">
                 <input type="text" 
                        id="notes_m${numeroMois}" 
+                       class="notes-bancaire-input"
                        placeholder="Notes optionnelles..."
                        style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 6px;">
             </td>
@@ -1600,6 +1602,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (anneeInput) {
             anneeInput.value = currentYear;
             genererTableauSoldes();
+            
+            // Ajouter sauvegarde automatique sur les inputs de soldes
+            setTimeout(() => {
+                const tbody = document.getElementById('tbody-soldes');
+                if (tbody) {
+                    // Délégation d'événements pour la sauvegarde auto
+                    tbody.addEventListener('input', debounce(async (e) => {
+                        if (e.target.classList.contains('solde-bancaire-input') || 
+                            e.target.classList.contains('notes-bancaire-input')) {
+                            console.log('💾 Sauvegarde auto des soldes...');
+                            await sauvegarderSoldesBancairesAuto();
+                        }
+                    }, 1500)); // Attendre 1.5s après la dernière saisie
+                }
+            }, 1200);
         }
         
         if (anneeSimulInput && !anneeSimulInput.value) {
@@ -1607,3 +1624,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 1100);
 });
+
+// Fonction debounce pour éviter trop de sauvegardes
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Sauvegarde automatique sans toast
+async function sauvegarderSoldesBancairesAuto() {
+    const annee = parseInt(document.getElementById('annee_tresorerie')?.value);
+    
+    if (!annee || annee < 2020 || annee > 2050) return;
+    
+    const soldesData = [];
+    
+    for (let mois = 1; mois <= 12; mois++) {
+        const soldeInput = document.getElementById(`solde_m${mois}`);
+        const notesInput = document.getElementById(`notes_m${mois}`);
+        
+        if (soldeInput && soldeInput.value) {
+            soldesData.push({
+                annee: annee,
+                mois: mois,
+                solde: parseFloat(soldeInput.value) || 0,
+                notes: notesInput?.value || null
+            });
+        }
+    }
+    
+    if (soldesData.length === 0) return;
+    
+    try {
+        const { error } = await supabase
+            .from('suivi_soldes_bancaires')
+            .upsert(soldesData, { 
+                onConflict: 'annee,mois',
+                ignoreDuplicates: false 
+            });
+        
+        if (error) throw error;
+        
+        console.log(`✅ ${soldesData.length} mois sauvegardés automatiquement`);
+        
+        // Actualiser le graphique
+        afficherGraphiqueSoldes();
+        
+    } catch (error) {
+        console.error('Erreur sauvegarde auto soldes:', error);
+    }
+}
+
