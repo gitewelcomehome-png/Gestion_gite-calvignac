@@ -105,8 +105,78 @@ function getCategorieIcon(categorie) {
 }
 
 // ================================================================
-// FILTRAGE
+// FILTRAGE ET RECHERCHE
 // ================================================================
+
+window.filtrerFAQ = function(categorie) {
+    categorieActive = categorie;
+    
+    // Mettre à jour l'UI des chips
+    document.querySelectorAll('.filter-chips .chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.category === categorie);
+    });
+    
+    // Réinitialiser la recherche
+    const searchInput = document.getElementById('faq-search');
+    if (searchInput) searchInput.value = '';
+    
+    afficherFAQ();
+};
+
+window.rechercherFAQ = function(terme) {
+    const container = document.getElementById('faq-list');
+    if (!container) return;
+    
+    const termeNormalisé = terme.toLowerCase().trim();
+    
+    // Si recherche vide, afficher toutes les FAQ
+    if (termeNormalisé === '') {
+        afficherFAQ();
+        return;
+    }
+    
+    // Filtrer par terme de recherche
+    const faqFiltrees = faqData.filter(q => {
+        const questionMatch = q.question.toLowerCase().includes(termeNormalisé);
+        const reponseMatch = q.reponse.toLowerCase().includes(termeNormalisé);
+        return questionMatch || reponseMatch;
+    });
+    
+    // Afficher résultats
+    if (faqFiltrees.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Aucun résultat trouvé pour "' + terme + '"</p>';
+        return;
+    }
+    
+    let html = '';
+    faqFiltrees.forEach(q => {
+        html += `
+            <div class="faq-item" data-id="${q.id}">
+                <div class="faq-header" onclick="toggleFAQ(${q.id})">
+                    <div class="faq-question">
+                        <span class="faq-badge ${q.categorie}">${getCategorieIcon(q.categorie)} ${q.categorie}</span>
+                        <h3>${q.question}</h3>
+                        ${q.gite !== 'tous' ? `<span style="background: #e0e0e0; padding: 4px 8px; border-radius: 6px; font-size: 12px;">${q.gite}</span>` : ''}
+                    </div>
+                    <div class="faq-actions">
+                        <button class="btn-icon" onclick="event.stopPropagation(); modifierQuestion(${q.id})" title="Modifier">
+                            ✏️
+                        </button>
+                        <button class="btn-icon" onclick="event.stopPropagation(); supprimerQuestion(${q.id})" title="Supprimer">
+                            🗑️
+                        </button>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                </div>
+                <div class="faq-body">
+                    <div class="faq-answer">${q.reponse}</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+};
 
 window.filtrerFAQ = function(categorie) {
     categorieActive = categorie;
