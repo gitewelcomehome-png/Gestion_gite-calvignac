@@ -6,9 +6,14 @@
                 <h2 style="margin: 0; font-size: 1.5rem;">📊 Tableau de Bord</h2>
                 <p id="dashboard-week-info" style="margin: 4px 0 0 0; font-size: 0.9rem; opacity: 0.9;">Semaine en cours</p>
             </div>
-            <div style="text-align: right;">
-                <div id="dashboard-date" style="font-size: 1rem; font-weight: 600;">29 décembre 2025</div>
-                <div id="dashboard-week-number" style="font-size: 0.8rem; opacity: 0.85; margin-top: 2px;">Semaine 52</div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button onclick="updateFinancialIndicators()" style="background: rgba(255,255,255,0.2); border: 2px solid white; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                    🔄 Actualiser
+                </button>
+                <div style="text-align: right;">
+                    <div id="dashboard-date" style="font-size: 1rem; font-weight: 600;">29 décembre 2025</div>
+                    <div id="dashboard-week-number" style="font-size: 0.8rem; opacity: 0.85; margin-top: 2px;">Semaine 52</div>
+                </div>
             </div>
         </div>
     </div>

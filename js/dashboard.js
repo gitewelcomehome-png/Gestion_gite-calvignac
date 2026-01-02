@@ -757,14 +757,33 @@ async function updateFinancialIndicators() {
         .limit(1)
         .single();
     
-    console.log('📋 Résultat requête année précédente:', { simulationPrecedente, errorPrecedente });
+    console.log('📋 Résultat requête année précédente:', { 
+        data: simulationPrecedente, 
+        error: errorPrecedente,
+        impot_revenu: simulationPrecedente?.impot_revenu,
+        cotisations_urssaf: simulationPrecedente?.cotisations_urssaf,
+        benefice_imposable: simulationPrecedente?.benefice_imposable
+    });
     
     let impotRevenuPrecedent = 0;
-    if (simulationPrecedente && simulationPrecedente.impot_revenu) {
-        impotRevenuPrecedent = parseFloat(simulationPrecedente.impot_revenu);
-        console.log(`💸 IR ${anneePrecedente} (depuis DB):`, impotRevenuPrecedent);
+    let urssafPrecedent = 0;
+    
+    if (simulationPrecedente) {
+        if (simulationPrecedente.impot_revenu) {
+            impotRevenuPrecedent = parseFloat(simulationPrecedente.impot_revenu);
+            console.log(`💸 IR ${anneePrecedente} (depuis DB):`, impotRevenuPrecedent);
+        } else {
+            console.warn(`⚠️ Champ impot_revenu null ou undefined pour ${anneePrecedente}`);
+        }
+        
+        if (simulationPrecedente.cotisations_urssaf) {
+            urssafPrecedent = parseFloat(simulationPrecedente.cotisations_urssaf);
+            console.log(`📊 URSSAF ${anneePrecedente} (depuis DB):`, urssafPrecedent);
+        } else {
+            console.warn(`⚠️ Champ cotisations_urssaf null ou undefined pour ${anneePrecedente}`);
+        }
     } else {
-        console.warn(`⚠️ Pas d'IR enregistré pour ${anneePrecedente}`, simulationPrecedente);
+        console.warn(`⚠️ Aucune simulation trouvée pour ${anneePrecedente}`);
     }
     
     // 4. Calculer l'IR de l'ANNÉE EN COURS (temps réel)
