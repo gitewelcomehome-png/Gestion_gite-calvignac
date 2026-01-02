@@ -670,6 +670,229 @@ function openFicheClient(id) {
 }
 
 // ==========================================
+// 💰 INDICATEURS FINANCIERS
+// ==========================================
+
+async function updateFinancialIndicators() {
+    // Charger la dernière simulation fiscale
+    const { data: simulation } = await supabase
+        .from('simulations_fiscales')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+    
+    // URSSAF et IR
+    if (simulation) {
+        const urssafEl = document.getElementById('dashboard-urssaf');
+        const irEl = document.getElementById('dashboard-ir');
+        
+        if (urssafEl) urssafEl.textContent = formatCurrency(simulation.total_urssaf || 0);
+        if (irEl) irEl.textContent = formatCurrency(simulation.impot_revenu || 0);
+    }
+    
+    // Calculer bénéfices mensuels des gîtes
+    const benefices = await calculerBeneficesMensuels();
+    const moyenneMensuelle = benefices.reduce((sum, b) => sum + b.total, 0) / 12;
+    
+    const beneficeEl = document.getElementById('dashboard-benefice-moyen');
+    if (beneficeEl) beneficeEl.textContent = formatCurrency(moyenneMensuelle);
+    
+    // Trésorerie actuelle (dernier mois enregistré)
+    const moisActuel = new Date().getMonth() + 1;
+    const anneeActuelle = new Date().getFullYear();
+    
+    const { data: soldeMois } = await supabase
+        .from('suivi_soldes_bancaires')
+        .select('solde')
+        .eq('annee', anneeActuelle)
+        .eq('mois', moisActuel)
+        .single();
+    
+    const tresorerieEl = document.getElementById('dashboard-tresorerie');
+    if (tresorerieEl) {
+        tresorerieEl.textContent = soldeMois ? formatCurrency(soldeMois.solde) : '-';
+    }
+    
+    // Afficher les graphiques
+    await afficherGraphiqueBenefices(benefices);
+    await afficherGraphiqueTresorerieDashboard();
+}
+
+// ==========================================
+// 📊 CALCUL BÉNÉFICES MENSUELS
+// ==========================================
+
+async function calculerBeneficesMensuels() {
+    const anneeActuelle = new Date().getFullYear();
+    
+    // Récupérer toutes les réservations de l'année
+    const { data: reservations } = await supabase
+        .from('reservations')
+        .select('*')
+        .gte('dateDebut', `${anneeActuelle}-01-01`)
+        .lte('dateDebut', `${anneeActuelle}-12-31`);
+    
+    // Initialiser 12 mois
+    const benefices = Array.from({ length: 12 }, (_, i) => ({
+        mois: i + 1,
+        nom: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'][i],
+        total: 0
+    }));
+    
+    // Calculer les bénéfices par mois
+    if (reservations) {
+        reservations.forEach(resa => {
+            const date = new Date(resa.dateDebut);
+            const mois = date.getMonth(); // 0-11
+            const montant = parseFloat(resa.montant) || 0;
+            benefices[mois].total += montant;
+        });
+    }
+    
+    return benefices;
+}
+
+// ==========================================
+// 📈 GRAPHIQUE BÉNÉFICES GÎTES
+// ==========================================
+
+let chartBenefices = null;
+
+async function afficherGraphiqueBenefices(benefices) {
+    const canvas = document.getElementById('graphique-benefices-gites');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Détruire le graphique existant
+    if (chartBenefices) {
+        chartBenefices.destroy();
+    }
+    
+    chartBenefices = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: benefices.map(b => b.nom),
+            datasets: [{
+                label: 'Bénéfices (€)',
+                data: benefices.map(b => b.total),
+                backgroundColor: 'rgba(39, 174, 96, 0.8)',
+                borderColor: 'rgba(39, 174, 96, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return formatCurrency(context.parsed.y);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('fr-FR') + ' €';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ==========================================
+// 📊 GRAPHIQUE TRÉSORERIE DASHBOARD
+// ==========================================
+
+let chartTresorerieDashboard = null;
+
+async function afficherGraphiqueTresorerieDashboard() {
+    const canvas = document.getElementById('graphique-tresorerie-dashboard');
+    if (!canvas) return;
+    
+    const anneeActuelle = new Date().getFullYear();
+    
+    // Récupérer les soldes de l'année en cours
+    const { data: soldes } = await supabase
+        .from('suivi_soldes_bancaires')
+        .select('*')
+        .eq('annee', anneeActuelle)
+        .order('mois', { ascending: true });
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Détruire le graphique existant
+    if (chartTresorerieDashboard) {
+        chartTresorerieDashboard.destroy();
+    }
+    
+    // Préparer les données (12 mois)
+    const moisNoms = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const soldesData = Array(12).fill(null);
+    
+    if (soldes) {
+        soldes.forEach(s => {
+            soldesData[s.mois - 1] = parseFloat(s.solde);
+        });
+    }
+    
+    chartTresorerieDashboard = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: moisNoms,
+            datasets: [{
+                label: 'Trésorerie (€)',
+                data: soldesData,
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                spanGaps: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.parsed.y === null) return 'Pas de données';
+                            return formatCurrency(context.parsed.y);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('fr-FR') + ' €';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ==========================================
 // 🔄 RAFRAÎCHISSEMENT COMPLET
 // ==========================================
 
@@ -680,7 +903,7 @@ async function refreshDashboard() {
     await updateDashboardReservations();
     await updateDashboardMenages();
     await updateTodoLists();
-    
+    await updateFinancialIndicators();
     // Initialiser le modal si pas déjà fait
     initializeTodoModal();
 }
