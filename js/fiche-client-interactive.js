@@ -15,6 +15,7 @@ export async function genererFicheClientComplete(reservation) {
     const infosGite = loadInfosGites(reservation.gite);
     const faqGite = await getFAQPourGite(reservation.gite.toLowerCase());
     const prochainMenage = await getProchainMenage(reservation.gite, reservation.dateFin);
+    const activites = await getActivitesGite(reservation.gite);
     
     // Calculer les horaires disponibles
     const horairesArrivee = calculerHorairesArrivee(prochainMenage);
@@ -250,9 +251,11 @@ export async function genererFicheClientComplete(reservation) {
             <!-- Informations du séjour -->
             <div class="section section-info">
                 <h2>📅 Votre Séjour</h2>
-                <div class="info-item"><strong>Arrivée :</strong> ${formatDateLong(reservation.date_debut)}</div>
-                <div class="info-item"><strong>Départ :</strong> ${formatDateLong(reservation.date_fin)}</div>
-                <div class="info-item"><strong>Durée :</strong> ${calculerNuits(reservation.date_debut, reservation.date_fin)} nuit(s)</div>
+                <div class="info-item"><strong>Nom :</strong> ${reservation.nom}</div>
+                <div class="info-item"><strong>Gîte :</strong> ${reservation.gite}</div>
+                <div class="info-item"><strong>Arrivée :</strong> ${formatDateLong(reservation.dateDebut)}</div>
+                <div class="info-item"><strong>Départ :</strong> ${formatDateLong(reservation.dateFin)}</div>
+                <div class="info-item"><strong>Durée :</strong> ${calculerNuits(reservation.dateDebut, reservation.dateFin)} nuit(s)</div>
                 ${infosGite.adresse ? `<div class="info-item"><strong>📍 Adresse :</strong> ${infosGite.adresse}</div>` : ''}
                 ${infosGite.gpsLat && infosGite.gpsLon ? `
                 <div class="info-item">
@@ -346,20 +349,61 @@ export async function genererFicheClientComplete(reservation) {
             
             <!-- FAQ -->
             <div class="section section-faq">
-                <h2>❓ Questions Fréquentes</h2>
+                <h2>❓ Questions Fréquentes / FAQ</h2>
                 ${genererFAQHTML(faqGite)}
+            </div>
+            
+            <!-- À Découvrir (Activités) -->
+            ${activites && activites.length > 0 ? `
+            <div class="section" style="background: #f0f9ff; border-left-color: #4facfe;">
+                <h2>🎯 À Découvrir / Things to Do</h2>
+                ${genererActivitesHTML(activites)}
+            </div>` : ''}
+            
+            <!-- Infos Pratiques -->
+            <div class="section" style="background: #f0fff4; border-left-color: #48bb78;">
+                <h2>ℹ️ Informations Pratiques / Practical Information</h2>
+                
+                <h3 style="margin-top: 15px; color: #667eea;">🏠 Le Gîte / The Cottage</h3>
+                ${infosGite.capacite ? `<div class="info-item"><strong>Capacité / Capacity:</strong> ${infosGite.capacite} personnes / people</div>` : ''}
+                ${infosGite.chambres ? `<div class="info-item"><strong>Chambres / Bedrooms:</strong> ${infosGite.chambres}</div>` : ''}
+                ${infosGite.description_fr || infosGite.description ? `
+                <div style="margin: 15px 0; padding: 15px; background: white; border-radius: 10px;">
+                    <p style="margin-bottom: 10px;"><strong>🇫🇷 Description FR:</strong></p>
+                    <p style="line-height: 1.7;">${infosGite.description_fr || infosGite.description}</p>
+                </div>` : ''}
+                ${infosGite.description_en ? `
+                <div style="margin: 15px 0; padding: 15px; background: white; border-radius: 10px;">
+                    <p style="margin-bottom: 10px;"><strong>🇬🇧 Description EN:</strong></p>
+                    <p style="line-height: 1.7;">${infosGite.description_en}</p>
+                </div>` : ''}
+                
+                <h3 style="margin-top: 25px; color: #667eea;">🕐 Horaires / Check-in & Check-out</h3>
+                <div class="info-item"><strong>🔑 Arrivée / Check-in:</strong> À partir de 16h / From 4pm</div>
+                <div class="info-item"><strong>🚪 Départ / Check-out:</strong> Avant 10h / Before 10am</div>
+                <div class="info-item" style="font-size: 0.95rem; color: #666;">
+                    <em>Dimanche / Sunday: départ possible jusqu'à 17h / check-out possible until 5pm</em>
+                </div>
+                
+                <h3 style="margin-top: 25px; color: #667eea;">🚗 Accès / Access</h3>
+                ${infosGite.parking ? `<div class="info-item"><strong>🅿️ Parking:</strong> ${infosGite.parking}</div>` : ''}
+                ${infosGite.acces ? `<div class="info-item">${infosGite.acces}</div>` : ''}
+                
+                <h3 style="margin-top: 25px; color: #667eea;">🧺 Services</h3>
+                <div class="info-item">• <strong>Ménage de fin de séjour inclus / End-of-stay cleaning included</strong></div>
+                <div class="info-item">• <strong>Draps et linge fournis / Sheets and linen provided</strong></div>
+                ${infosGite.services ? `<div style="white-space: pre-wrap; margin-top: 10px;">${infosGite.services}</div>` : ''}
+                
+                <h3 style="margin-top: 25px; color: #667eea;">⚠️ Règlement / House Rules</h3>
+                <div class="info-item">• 🚭 Non-fumeurs / Non-smoking</div>
+                <div class="info-item">• 🐾 Animaux non acceptés / No pets allowed</div>
+                <div class="info-item">• 🔇 Respect du voisinage / Respect the neighborhood</div>
             </div>
             
             ${infosGite.restaurants ? `
             <div class="section" style="background: #fff5f7; border-left-color: #f5576c;">
-                <h2>🍽️ Nos Restaurants Recommandés</h2>
+                <h2>🍽️ Nos Restaurants Recommandés / Recommended Restaurants</h2>
                 <div style="white-space: pre-wrap; line-height: 1.8;">${infosGite.restaurants}</div>
-            </div>` : ''}
-            
-            ${infosGite.activites ? `
-            <div class="section" style="background: #f0f9ff; border-left-color: #4facfe;">
-                <h2>🎯 Activités à Proximité</h2>
-                <div style="white-space: pre-wrap; line-height: 1.8;">${infosGite.activites}</div>
             </div>` : ''}
         </div>
         
@@ -481,6 +525,70 @@ function calculerHorairesDepart(dateDepart, prochainMenage) {
     }
     
     return { heures, dimancheJusque17h };
+}
+
+/**
+ * Récupère les activités pour un gîte depuis la base
+ */
+async function getActivitesGite(gite) {
+    try {
+        const { data, error } = await supabase
+            .from('activites_gites')
+            .select('*')
+            .eq('gite', gite.toLowerCase())
+            .order('distance_km', { ascending: true });
+        
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('Erreur chargement activités:', error);
+        return [];
+    }
+}
+
+/**
+ * Génère le HTML pour les activités
+ */
+function genererActivitesHTML(activites) {
+    if (!activites || activites.length === 0) {
+        return '<p>Aucune activité enregistrée.</p>';
+    }
+    
+    // Grouper par type
+    const parType = {};
+    activites.forEach(act => {
+        const type = act.type || 'Autre';
+        if (!parType[type]) {
+            parType[type] = [];
+        }
+        parType[type].push(act);
+    });
+    
+    let html = '';
+    Object.entries(parType).forEach(([type, items]) => {
+        html += `<h3 style="margin-top: 20px; color: #4facfe; font-size: 1.2rem;">${type}</h3>`;
+        html += '<div style="display: grid; gap: 15px;">';
+        
+        items.forEach(act => {
+            html += `
+                <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #4facfe;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <strong style="font-size: 1.1rem; color: #333;">${act.nom}</strong>
+                        ${act.distance_km ? `<span style="background: #4facfe; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;">${act.distance_km} km</span>` : ''}
+                    </div>
+                    ${act.adresse ? `<div style="color: #666; margin-bottom: 5px;">📍 ${act.adresse}</div>` : ''}
+                    ${act.phone ? `<div style="color: #666; margin-bottom: 5px;">📞 ${act.phone}</div>` : ''}
+                    ${act.opening_hours ? `<div style="color: #666; margin-bottom: 5px;">🕐 ${act.opening_hours}</div>` : ''}
+                    ${act.website ? `<div style="margin-top: 10px;"><a href="${act.website}" target="_blank" style="color: #4facfe; text-decoration: none;">🌐 Site web / Website →</a></div>` : ''}
+                    ${act.latitude && act.longitude ? `<div style="margin-top: 5px;"><a href="https://www.google.com/maps?q=${act.latitude},${act.longitude}" target="_blank" style="color: #27AE60; text-decoration: none;">🗺️ Voir sur la carte / View on map →</a></div>` : ''}
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+    });
+    
+    return html;
 }
 
 /**

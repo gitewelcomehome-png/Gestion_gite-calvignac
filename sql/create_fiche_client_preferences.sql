@@ -38,6 +38,13 @@ CREATE TRIGGER update_clients_preferences_updated_at
 ALTER TABLE clients_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fiches_consultations ENABLE ROW LEVEL SECURITY;
 
+-- Supprimer les politiques existantes
+DROP POLICY IF EXISTS "Clients preferences are viewable by everyone" ON clients_preferences;
+DROP POLICY IF EXISTS "Clients preferences are insertable by everyone" ON clients_preferences;
+DROP POLICY IF EXISTS "Clients preferences are updatable by everyone" ON clients_preferences;
+DROP POLICY IF EXISTS "Fiches consultations are viewable by everyone" ON fiches_consultations;
+DROP POLICY IF EXISTS "Fiches consultations are insertable by everyone" ON fiches_consultations;
+
 -- Politique : lecture pour tous
 CREATE POLICY "Clients preferences are viewable by everyone"
     ON clients_preferences FOR SELECT
