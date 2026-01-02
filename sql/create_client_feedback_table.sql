@@ -2,8 +2,11 @@
 -- CRÉATION TABLE CLIENT_FEEDBACK - RETOURS CLIENTS
 -- ================================================================
 
+-- Supprimer la table si elle existe (pour réinitialisation propre)
+DROP TABLE IF EXISTS client_feedback CASCADE;
+
 -- Créer la table pour les feedbacks clients
-CREATE TABLE IF NOT EXISTS client_feedback (
+CREATE TABLE client_feedback (
     id BIGSERIAL PRIMARY KEY,
     reservation_id BIGINT NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
     
@@ -50,11 +53,6 @@ CREATE TRIGGER update_client_feedback_updated_at
 
 -- RLS (Row Level Security)
 ALTER TABLE client_feedback ENABLE ROW LEVEL SECURITY;
-
--- Supprimer les politiques existantes
-DROP POLICY IF EXISTS "Client feedback are viewable by everyone" ON client_feedback;
-DROP POLICY IF EXISTS "Client feedback are insertable by everyone" ON client_feedback;
-DROP POLICY IF EXISTS "Client feedback are updatable by everyone" ON client_feedback;
 
 -- Politiques : lecture pour tous
 CREATE POLICY "Client feedback are viewable by everyone"

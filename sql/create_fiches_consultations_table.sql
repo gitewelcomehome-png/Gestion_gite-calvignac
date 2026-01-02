@@ -3,12 +3,11 @@
 -- Suivi des consultations des fiches clients
 -- ================================================================
 
--- Supprimer les anciennes policies si elles existent
-DROP POLICY IF EXISTS "Permettre consultation anonyme" ON fiches_consultations;
-DROP POLICY IF EXISTS "Permettre lecture pour propriétaire" ON fiches_consultations;
+-- Supprimer la table si elle existe (pour réinitialisation propre)
+DROP TABLE IF EXISTS fiches_consultations CASCADE;
 
 -- Créer la table
-CREATE TABLE IF NOT EXISTS fiches_consultations (
+CREATE TABLE fiches_consultations (
     id SERIAL PRIMARY KEY,
     reservation_id INTEGER REFERENCES reservations(id) ON DELETE CASCADE,
     consulted_at TIMESTAMPTZ DEFAULT NOW(),
