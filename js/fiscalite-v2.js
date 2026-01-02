@@ -1266,10 +1266,11 @@ function calculerResteAVivre() {
     const salaireMadameMensuel = salaireMadameAnnuel / 12;
     const salaireMonsieurMensuel = salaireMonsieurAnnuel / 12;
     
-    // Revenus LMP après IR (on prend le reste final de l'IR, divisé par 12 pour mensualiser)
-    const resteFinalIRElement = document.getElementById('ir-reste-final');
-    const revenuLMPAnnuel = resteFinalIRElement && resteFinalIRElement.textContent !== '0 €' 
-        ? parseFloat(resteFinalIRElement.textContent.replace(/[^\d.-]/g, '')) 
+    // Revenus LMP après URSSAF (avant IR) - converti en mensuel
+    // On prend le "reste avant IR" du LMP uniquement (preview-reste)
+    const previewResteElement = document.getElementById('preview-reste');
+    const revenuLMPAnnuel = previewResteElement && previewResteElement.textContent !== '0 €' 
+        ? parseFloat(previewResteElement.textContent.replace(/[^\d.-]/g, '')) 
         : 0;
     const revenuLMPMensuel = revenuLMPAnnuel / 12;
     
