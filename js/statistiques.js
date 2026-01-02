@@ -398,75 +398,53 @@ async function updateAllCharts(filteredReservations = null) {
         });
     }
     
-    // Graphique CA vs Charges vs Bénéfice
-    const ctx4 = document.getElementById('profitChart')?.getContext('2d');
+    // Graphique Bénéfices Mensuels (ligne - repris du dashboard)
+    const ctx4 = document.getElementById('beneficesChart')?.getContext('2d');
     if (ctx4) {
-        if (window.profitChartInstance) window.profitChartInstance.destroy();
+        if (window.beneficesChartInstance) window.beneficesChartInstance.destroy();
         
-        const caParMois = Array(12).fill(0);
-        currentReservations.forEach(r => {
-            const month = parseLocalDate(r.dateDebut).getMonth();
-            caParMois[month] += r.montant;
-        });
+        // Calculer les bénéfices mensuels comme dans le dashboard
+        const beneficesParMois = [];
         
-        const charges = await getAllCharges();
-        const chargesParMois = Array(12).fill(0);
+        for (let mois = 0; mois < 12; mois++) {
+            // CA du mois
+            const reservationsDuMois = currentReservations.filter(r => {
+                const dateDebut = parseLocalDate(r.dateDebut);
+                return dateDebut.getMonth() === mois;
+            });
+            const caMois = reservationsDuMois.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
+            
+            // Charges du mois (on prend 1/12 des charges annuelles pour simplifier)
+            const charges = await getAllCharges();
+            const chargesDuMois = charges.filter(c => {
+                if (!c.date) return false;
+                const dateCharge = new Date(c.date);
+                return dateCharge.getFullYear() === selectedYear && dateCharge.getMonth() === mois;
+            });
+            const totalChargesMois = chargesDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
+            
+            // Bénéfice = CA - Charges
+            beneficesParMois.push(caMois - totalChargesMois);
+        }
         
-        charges.forEach(c => {
-            const chargeDate = new Date(c.date);
-            if (chargeDate.getFullYear() === selectedYear) {
-                if (c.type === 'mensuelle') {
-                    for (let i = 0; i < 12; i++) {
-                        chargesParMois[i] += c.montant;
-                    }
-                } else if (c.type === 'annuelle') {
-                    const montantMensuel = c.montant / 12;
-                    for (let i = 0; i < 12; i++) {
-                        chargesParMois[i] += montantMensuel;
-                    }
-                } else {
-                    const month = chargeDate.getMonth();
-                    chargesParMois[month] += c.montant;
-                }
-            }
-        });
-        
-        const beneficeParMois = caParMois.map((ca, idx) => ca - chargesParMois[idx]);
-        
-        window.profitChartInstance = new Chart(ctx4, {
+        window.beneficesChartInstance = new Chart(ctx4, {
             type: 'line',
             data: {
                 labels: monthLabels,
-                datasets: [
-                    {
-                        label: 'Chiffre d\'affaires',
-                        data: caParMois,
-                        borderColor: '#27AE60',
-                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 3
-                    },
-                    {
-                        label: 'Charges',
-                        data: chargesParMois,
-                        borderColor: '#E74C3C',
-                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Bénéfice',
-                        data: beneficeParMois,
-                        borderColor: '#3498DB',
-                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 2,
-                        borderDash: [5, 5]
-                    }
-                ]
+                datasets: [{
+                    label: 'Bénéfice mensuel',
+                    data: beneficesParMois,
+                    borderColor: '#3498DB',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#3498DB',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
             },
             options: {
                 responsive: true,
@@ -475,21 +453,31 @@ async function updateAllCharts(filteredReservations = null) {
                     legend: { display: true, position: 'top' },
                     title: { 
                         display: true, 
-                        text: `CA vs Charges vs Bénéfice (${selectedYear})`, 
+                        text: `Évolution des Bénéfices Mensuels (${selectedYear})`, 
                         font: { size: 16, weight: 'bold' } 
                     },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' €';
+                                const value = context.parsed.y;
+                                return 'Bénéfice: ' + value.toFixed(0) + ' €';
                             }
                         }
                     }
                 },
                 scales: {
                     y: {
-                        beginAtZero: true,
-                        ticks: { callback: value => value + ' €' }
+                        ticks: { 
+                            callback: value => value.toFixed(0) + ' €' 
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }

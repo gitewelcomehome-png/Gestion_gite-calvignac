@@ -137,37 +137,43 @@
         <!-- COLONNE DROITE : Todo listes -->
         <div>
             <!-- Todo : Actions Réservations -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header" style="background: #667eea; color: white;">
-                    <span class="card-icon">✅</span>
-                    <h3 class="card-title" style="color: white;">Actions Réservations <span id="todo-count-reservations" style="background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;">0</span></h3>
-                    <button onclick="addTodoItem('reservations')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2rem;">+</button>
+            <div class="card" style="margin-bottom: 20px; border-left: 4px solid #667eea; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #e9ecef;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.3rem;">✅</span>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Actions Réservations <span id="todo-count-reservations" style="background: #667eea; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
+                    </div>
+                    <button onclick="addTodoItem('reservations')" style="background: #667eea; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#5568d3'" onmouseout="this.style.background='#667eea'">+</button>
                 </div>
-                <div id="todo-reservations" style="padding: 10px; max-height: 250px; overflow-y: auto;">
+                <div id="todo-reservations" style="padding: 15px; max-height: 250px; overflow-y: auto;">
                     <!-- Todos dynamiques -->
                 </div>
             </div>
 
             <!-- Todo : Travaux par gîte -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header" style="background: #F39C12; color: white;">
-                    <span class="card-icon">🔧</span>
-                    <h3 class="card-title" style="color: white;">Travaux & Maintenance <span id="todo-count-travaux" style="background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;">0</span></h3>
-                    <button onclick="addTodoItem('travaux')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2rem;">+</button>
+            <div class="card" style="margin-bottom: 20px; border-left: 4px solid #F39C12; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #e9ecef;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.3rem;">🔧</span>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Travaux & Maintenance <span id="todo-count-travaux" style="background: #F39C12; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
+                    </div>
+                    <button onclick="addTodoItem('travaux')" style="background: #F39C12; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#e67e22'" onmouseout="this.style.background='#F39C12'">+</button>
                 </div>
-                <div id="todo-travaux" style="padding: 10px; max-height: 250px; overflow-y: auto;">
+                <div id="todo-travaux" style="padding: 15px; max-height: 250px; overflow-y: auto;">
                     <!-- Todos dynamiques -->
                 </div>
             </div>
 
             <!-- Todo : Achats -->
-            <div class="card">
-                <div class="card-header" style="background: #27AE60; color: white;">
-                    <span class="card-icon">🛒</span>
-                    <h3 class="card-title" style="color: white;">Achats & Courses <span id="todo-count-achats" style="background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;">0</span></h3>
-                    <button onclick="addTodoItem('achats')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2rem;">+</button>
+            <div class="card" style="border-left: 4px solid #27AE60; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #e9ecef;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.3rem;">🛒</span>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Achats & Courses <span id="todo-count-achats" style="background: #27AE60; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
+                    </div>
+                    <button onclick="addTodoItem('achats')" style="background: #27AE60; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#229954'" onmouseout="this.style.background='#27AE60'">+</button>
                 </div>
-                <div id="todo-achats" style="padding: 10px; max-height: 250px; overflow-y: auto;">
+                <div id="todo-achats" style="padding: 15px; max-height: 250px; overflow-y: auto;">
                     <!-- Todos dynamiques -->
                 </div>
             </div>
