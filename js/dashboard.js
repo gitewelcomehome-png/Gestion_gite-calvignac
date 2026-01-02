@@ -748,7 +748,8 @@ async function updateFinancialIndicators() {
     console.log('📊 URSSAF finale:', urssafTotal);
     
     // 3. Calculer l'IR de l'ANNÉE PRÉCÉDENTE (depuis la base)
-    const { data: simulationPrecedente } = await supabase
+    console.log(`🔍 Recherche IR pour année ${anneePrecedente}...`);
+    const { data: simulationPrecedente, error: errorPrecedente } = await supabase
         .from('simulations_fiscales')
         .select('*')
         .eq('annee', anneePrecedente)
@@ -756,12 +757,14 @@ async function updateFinancialIndicators() {
         .limit(1)
         .single();
     
+    console.log('📋 Résultat requête année précédente:', { simulationPrecedente, errorPrecedente });
+    
     let impotRevenuPrecedent = 0;
     if (simulationPrecedente && simulationPrecedente.impot_revenu) {
         impotRevenuPrecedent = parseFloat(simulationPrecedente.impot_revenu);
         console.log(`💸 IR ${anneePrecedente} (depuis DB):`, impotRevenuPrecedent);
     } else {
-        console.warn(`⚠️ Pas d'IR enregistré pour ${anneePrecedente}`);
+        console.warn(`⚠️ Pas d'IR enregistré pour ${anneePrecedente}`, simulationPrecedente);
     }
     
     // 4. Calculer l'IR de l'ANNÉE EN COURS (temps réel)
