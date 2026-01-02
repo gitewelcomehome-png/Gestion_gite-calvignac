@@ -191,12 +191,16 @@ function calculerFraisVehicule() {
 // ==========================================
 
 function calculerIR() {
-    const salaireMadame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
-    const salaireMonsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
+    const salaireMadameBrut = parseFloat(document.getElementById('salaire_madame')?.value || 0);
+    const salaireMonsieurBrut = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
     const revenuLMP = parseFloat(document.getElementById('revenu_lmp')?.value || 0);
     const nbEnfants = parseInt(document.getElementById('nombre_enfants')?.value || 0);
     
-    // Revenu imposable total
+    // Appliquer l'abattement de 10% pour frais professionnels sur les salaires
+    const salaireMadame = salaireMadameBrut * 0.90; // 10% d'abattement
+    const salaireMonsieur = salaireMonsieurBrut * 0.90; // 10% d'abattement
+    
+    // Revenu imposable total (salaires après abattement + LMP)
     const revenuTotal = salaireMadame + salaireMonsieur + revenuLMP;
     
     if (revenuTotal === 0) {
@@ -837,7 +841,18 @@ async function sauvegarderSimulation(silencieux = false) {
         // IR
         salaire_madame: parseFloat(document.getElementById('salaire_madame').value || 0),
         salaire_monsieur: parseFloat(document.getElementById('salaire_monsieur').value || 0),
-        nombre_enfants: parseInt(document.getElementById('nombre_enfants').value || 0)
+        nombre_enfants: parseInt(document.getElementById('nombre_enfants').value || 0),
+        
+        // Reste à vivre - Crédits
+        credits_liste: getCreditsListe(),
+        
+        // Reste à vivre - Frais personnels mensuels
+        frais_perso_internet: parseFloat(document.getElementById('frais_perso_internet')?.value || 0),
+        frais_perso_electricite: parseFloat(document.getElementById('frais_perso_electricite')?.value || 0),
+        frais_perso_eau: parseFloat(document.getElementById('frais_perso_eau')?.value || 0),
+        frais_perso_assurance: parseFloat(document.getElementById('frais_perso_assurance')?.value || 0),
+        frais_perso_taxe: parseFloat(document.getElementById('frais_perso_taxe')?.value || 0),
+        frais_perso_autres: parseFloat(document.getElementById('frais_perso_autres')?.value || 0)
     };
     
     // Vérifier si les données ont changé
@@ -991,6 +1006,26 @@ async function chargerDerniereSimulation() {
         document.getElementById('salaire_monsieur').value = data.salaire_monsieur || '';
         document.getElementById('nombre_enfants').value = data.nombre_enfants || 0;
         
+        // Reste à vivre - Frais personnels
+        if (document.getElementById('frais_perso_internet')) {
+            document.getElementById('frais_perso_internet').value = data.frais_perso_internet || '';
+        }
+        if (document.getElementById('frais_perso_electricite')) {
+            document.getElementById('frais_perso_electricite').value = data.frais_perso_electricite || '';
+        }
+        if (document.getElementById('frais_perso_eau')) {
+            document.getElementById('frais_perso_eau').value = data.frais_perso_eau || '';
+        }
+        if (document.getElementById('frais_perso_assurance')) {
+            document.getElementById('frais_perso_assurance').value = data.frais_perso_assurance || '';
+        }
+        if (document.getElementById('frais_perso_taxe')) {
+            document.getElementById('frais_perso_taxe').value = data.frais_perso_taxe || '';
+        }
+        if (document.getElementById('frais_perso_autres')) {
+            document.getElementById('frais_perso_autres').value = data.frais_perso_autres || '';
+        }
+        
         // Restaurer les listes dynamiques
         console.log('🔄 [LOAD] Restauration des listes dynamiques...');
         
@@ -1039,6 +1074,25 @@ async function chargerDerniereSimulation() {
                 document.getElementById(`produits-gite-${id}`).value = item.gite || 'couzon';
                 document.getElementById(`produits-montant-${id}`).value = item.montant || 0;
             });
+        }
+        
+        // Restaurer les crédits (reste à vivre)
+        if (data.credits_liste) {
+            const credits = Array.isArray(data.credits_liste) ? data.credits_liste : [];
+            console.log('📋 [LOAD] Crédits trouvés:', credits.length);
+            // Réinitialiser le conteneur des crédits
+            const creditsContainer = document.getElementById('credits-liste');
+            if (creditsContainer) {
+                creditsContainer.innerHTML = '';
+                creditsCounter = 0;
+                credits.forEach(item => {
+                    ajouterCredit();
+                    const id = creditsCounter;
+                    document.getElementById(`credit-desc-${id}`).value = item.description || '';
+                    document.getElementById(`credit-mensuel-${id}`).value = item.mensuel || 0;
+                    document.getElementById(`credit-capital-${id}`).value = item.capital || 0;
+                });
+            }
         }
         
         console.log('✅ [LOAD] Formulaire rempli, recalcul...');
@@ -1205,10 +1259,12 @@ function getCreditsListe() {
 function calculerResteAVivre() {
     console.log('💰 [RAV] Calcul du reste à vivre...');
     
-    // ==================== REVENUS ====================
-    // Salaires mensuels
-    const salaireMadame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
-    const salaireMonsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
+    // ==================== REVENUS (tout converti en MENSUEL) ====================
+    // Salaires annuels convertis en mensuels
+    const salaireMadameAnnuel = parseFloat(document.getElementById('salaire_madame')?.value || 0);
+    const salaireMonsieurAnnuel = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
+    const salaireMadameMensuel = salaireMadameAnnuel / 12;
+    const salaireMonsieurMensuel = salaireMonsieurAnnuel / 12;
     
     // Revenus LMP après IR (on prend le reste final de l'IR, divisé par 12 pour mensualiser)
     const resteFinalIRElement = document.getElementById('ir-reste-final');
@@ -1217,19 +1273,19 @@ function calculerResteAVivre() {
         : 0;
     const revenuLMPMensuel = revenuLMPAnnuel / 12;
     
-    // Frais kilométriques (barème - c'est une économie réelle)
+    // Frais kilométriques (barème annuel converti en mensuel - c'est une économie réelle)
     const kmPro = parseInt(document.getElementById('km_professionnels')?.value || 0);
     const puissance = parseInt(document.getElementById('puissance_fiscale')?.value || 5);
     const fraisKmAnnuel = calculerBaremeKilometrique(puissance, kmPro);
     const fraisKmMensuel = fraisKmAnnuel / 12;
     
-    // Amortissements réintégrés (ce n'est pas une sortie d'argent réelle)
+    // Amortissements réintégrés (annuels convertis en mensuels - ce n'est pas une sortie d'argent réelle)
     const amortCouzon = parseFloat(document.getElementById('amortissement_couzon')?.value || 0);
     const amortTrevoux = parseFloat(document.getElementById('amortissement_trevoux')?.value || 0);
     const amortAuto = parseFloat(document.getElementById('amortissement_auto')?.value || 0);
     const amortissementsMensuel = (amortCouzon + amortTrevoux + amortAuto) / 12;
     
-    const totalRevenus = salaireMadame + salaireMonsieur + revenuLMPMensuel + fraisKmMensuel + amortissementsMensuel;
+    const totalRevenus = salaireMadameMensuel + salaireMonsieurMensuel + revenuLMPMensuel + fraisKmMensuel + amortissementsMensuel;
     
     // ==================== DÉPENSES ====================
     // Crédits
@@ -1252,9 +1308,9 @@ function calculerResteAVivre() {
     // ==================== RESTE À VIVRE ====================
     const resteAVivre = totalRevenus - totalDepenses;
     
-    // ==================== AFFICHAGE ====================
-    document.getElementById('rav-salaire-madame').textContent = salaireMadame.toFixed(2) + ' €';
-    document.getElementById('rav-salaire-monsieur').textContent = salaireMonsieur.toFixed(2) + ' €';
+    // ==================== AFFICHAGE (tout en MENSUEL) ====================
+    document.getElementById('rav-salaire-madame').textContent = salaireMadameMensuel.toFixed(2) + ' €';
+    document.getElementById('rav-salaire-monsieur').textContent = salaireMonsieurMensuel.toFixed(2) + ' €';
     document.getElementById('rav-lmp').textContent = revenuLMPMensuel.toFixed(2) + ' €';
     document.getElementById('rav-kms').textContent = fraisKmMensuel.toFixed(2) + ' €';
     document.getElementById('rav-amortissements').textContent = amortissementsMensuel.toFixed(2) + ' €';
