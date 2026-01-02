@@ -16,20 +16,29 @@
     <!-- Alertes / Notifications importantes -->
     <div id="dashboard-alerts" style="margin-bottom: 20px;"></div>
 
-    <!-- Indicateurs financiers -->
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
+    <!-- Indicateurs financiers - Ligne 1 -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
         <!-- URSSAF Annuel -->
         <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
             <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">URSSAF Annuel</div>
             <div id="dashboard-urssaf" style="font-size: 2rem; font-weight: bold;">-</div>
         </div>
 
-        <!-- Impôts Annuels -->
-        <div class="card" style="background: linear-gradient(135deg, #F39C12 0%, #E74C3C 100%); color: white; padding: 20px; text-align: center;">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">Impôts Annuels</div>
-            <div id="dashboard-ir" style="font-size: 2rem; font-weight: bold;">-</div>
+        <!-- IR Année Précédente -->
+        <div class="card" style="background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%); color: white; padding: 20px; text-align: center;">
+            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">IR <span id="annee-precedente-label">2025</span></div>
+            <div id="dashboard-ir-precedent" style="font-size: 2rem; font-weight: bold;">-</div>
         </div>
 
+        <!-- IR Année en Cours -->
+        <div class="card" style="background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%); color: white; padding: 20px; text-align: center;">
+            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">IR <span id="annee-courante-label">2026</span></div>
+            <div id="dashboard-ir-courant" style="font-size: 2rem; font-weight: bold;">-</div>
+        </div>
+    </div>
+
+    <!-- Indicateurs financiers - Ligne 2 -->
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
         <!-- Bénéfice Année en Cours -->
         <div class="card" style="background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%); color: white; padding: 20px; text-align: center;">
             <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">Bénéfice <span id="annee-benefice">2026</span> (en cours)</div>
