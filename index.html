@@ -23,8 +23,10 @@
     <script src="js/archives.js"></script>
     <script src="js/fiscalite-v2.js?v=1735863600"></script>
     <script src="js/infos-gites.js"></script>
-    <script src="js/fiche-client.js"></script>
-    <script src="js/messagerie.js"></script>
+    <script src="js/fiche-client-interactive.js" type="module"></script>
+    <script src="js/fiche-client.js" type="module"></script>
+    <script src="js/widget-horaires-clients.js" type="module"></script>
+    <script src="js/faq.js" type="module"></script>
     
     <!-- Chart.js pour les graphiques -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -233,7 +235,7 @@
             'tab-menage': 'tabs/tab-menage.html',
             'tab-infos-gites': 'tabs/tab-infos-gites.html',
             'tab-decouvrir': 'tabs/tab-decouvrir.html',
-            'tab-messagerie': 'tabs/tab-messagerie.html',
+            'tab-faq': 'tabs/tab-faq.html',
         };
         for (const [tabId, file] of Object.entries(tabFiles)) {
             fetch(file)
@@ -282,7 +284,7 @@
             </button>
             <button class="nav-tab" data-tab="infos-gites">📝 Infos Pratiques</button>
             <button class="nav-tab" data-tab="decouvrir">🗺️ À Découvrir</button>
-            <button class="nav-tab" data-tab="messagerie">📧 Messagerie</button>
+            <button class="nav-tab" data-tab="faq">❓ FAQ</button>
         </div>
         
 
@@ -291,7 +293,7 @@
         <div id="tab-gestion" class="tab-content"></div>
         <div id="tab-reservations" class="tab-content"></div>
         <div id="tab-archives" class="tab-content"></div>
-        <div id="tab-messagerie" class="tab-content"></div>
+        <div id="tab-faq" class="tab-content"></div>
         <div id="tab-statistiques" class="tab-content"></div>
         <div id="tab-charges" class="tab-content"></div>
         <div id="tab-menage" class="tab-content"></div>
@@ -565,8 +567,16 @@
                     chargerActivitesEtSorties();
                 }
             }
-            if (tabName === 'messagerie' && typeof initMessagerieTab === 'function') {
-                initMessagerieTab();
+            if (tabName === 'faq' && typeof initFAQ === 'function') {
+                initFAQ();
+            }
+            if (tabName === 'dashboard') {
+                // Charger le widget horaires clients
+                import('./js/widget-horaires-clients.js').then(module => {
+                    if (module.afficherHorairesClients) {
+                        module.afficherHorairesClients();
+                    }
+                });
             }
             if (tabName === 'decouvrir') {
                 // Pré-sélectionner Trévoux si aucun gîte n'est sélectionné
