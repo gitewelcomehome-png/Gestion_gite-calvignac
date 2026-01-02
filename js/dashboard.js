@@ -770,7 +770,7 @@ async function calculerBeneficesMensuels() {
         for (let mois = 0; mois < 12; mois++) {
             const nomMois = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'][mois];
             
-            // 1. Calculer le CA du mois (réservations)
+            // 1. Calculer le CA du mois (toutes les réservations Trévoux + Couzon)
             const reservationsDuMois = reservations.filter(r => {
                 const dateDebut = parseLocalDate(r.dateDebut);
                 return dateDebut.getFullYear() === anneeActuelle && dateDebut.getMonth() === mois;
@@ -778,48 +778,21 @@ async function calculerBeneficesMensuels() {
             
             const caMois = reservationsDuMois.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
             
-            // 2. Calculer les charges des gîtes du mois (accepter tous les types de gîtes)
-            const chargesGitesDuMois = charges.filter(c => {
+            // 2. Calculer TOUTES les charges du mois (tous types confondus)
+            const chargesDuMois = charges.filter(c => {
                 if (!c.date) return false;
                 const dateCharge = new Date(c.date);
-                const isGoodDate = dateCharge.getFullYear() === anneeActuelle && dateCharge.getMonth() === mois;
-                // Accepter tout ce qui a un gîte ET n'est ni frais pro ni crédit
-                const isGiteCharge = c.gite && 
-                                   c.type !== 'Frais professionnels' && 
-                                   c.type !== 'Crédit Trevoux gite';
-                return isGoodDate && isGiteCharge;
+                return dateCharge.getFullYear() === anneeActuelle && dateCharge.getMonth() === mois;
             });
             
-            const totalChargesGites = chargesGitesDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
+            const totalCharges = chargesDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
             
-            // 3. Calculer les frais professionnels du mois
-            const fraisProDuMois = charges.filter(c => {
-                if (!c.date) return false;
-                const dateCharge = new Date(c.date);
-                return dateCharge.getFullYear() === anneeActuelle && 
-                       dateCharge.getMonth() === mois &&
-                       c.type === 'Frais professionnels';
-            });
-            
-            const totalFraisPro = fraisProDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
-            
-            // 4. Calculer le crédit Trevoux du mois
-            const creditTrevouxDuMois = charges.filter(c => {
-                if (!c.date) return false;
-                const dateCharge = new Date(c.date);
-                return dateCharge.getFullYear() === anneeActuelle && 
-                       dateCharge.getMonth() === mois &&
-                       c.type === 'Crédit Trevoux gite';
-            });
-            
-            const totalCreditTrevoux = creditTrevouxDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
-            
-            // Calcul du bénéfice : Réservations - Charges gîtes - Frais pro - Crédit Trevoux
-            const beneficeMois = caMois - totalChargesGites - totalFraisPro - totalCreditTrevoux;
+            // Calcul du bénéfice : Réservations - TOUTES les charges
+            const beneficeMois = caMois - totalCharges;
             
             // Log détaillé pour les mois avec activité
-            if (caMois > 0 || totalChargesGites > 0 || totalFraisPro > 0 || totalCreditTrevoux > 0) {
-                console.log(`📊 ${nomMois}: CA=${caMois}€ - Charges gîtes=${totalChargesGites}€ - Frais pro=${totalFraisPro}€ - Crédit=${totalCreditTrevoux}€ = ${beneficeMois}€`);
+            if (caMois > 0 || totalCharges > 0) {
+                console.log(`📊 ${nomMois}: Réservations=${caMois}€ - Charges totales=${totalCharges}€ = Bénéfice=${beneficeMois}€`);
             }
             
             benefices.push({
@@ -828,9 +801,7 @@ async function calculerBeneficesMensuels() {
                 total: beneficeMois,
                 details: {
                     ca: caMois,
-                    chargesGites: totalChargesGites,
-                    fraisPro: totalFraisPro,
-                    creditTrevoux: totalCreditTrevoux
+                    charges: totalCharges
                 }
             });
         }
