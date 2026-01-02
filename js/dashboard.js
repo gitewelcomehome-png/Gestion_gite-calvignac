@@ -323,7 +323,6 @@ async function updateTodoLists() {
 }
 
 async function updateTodoList(category) {
-    console.log('📋 updateTodoList appelée pour category:', category);
     
     const now = new Date().toISOString();
     
@@ -344,14 +343,10 @@ async function updateTodoList(category) {
         return new Date(todo.next_occurrence) <= new Date();
     }) || [];
     
-    console.log('📋 Tâches récupérées (total):', todos?.length || 0);
-    console.log('📋 Tâches visibles (après filtre date):', visibleTodos.length);
     if (visibleTodos.length > 0) {
-        console.log('📋 IDs des tâches affichées:', visibleTodos.map(t => `ID:${t.id} - ${t.title}`));
     }
     
     const container = document.getElementById(`todo-${category}`);
-    console.log('📋 Container trouvé:', container ? 'OUI' : 'NON');
     
     if (!visibleTodos || visibleTodos.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>';
@@ -541,18 +536,14 @@ function calculateNextOccurrence(frequency, frequencyDetail) {
 }
 
 async function toggleTodo(id, completed) {
-    console.log('🔵 toggleTodo appelée - ID:', id, 'Completed:', completed);
     try {
         // Récupérer la tâche pour vérifier si elle est récurrente
-        console.log('🔵 Récupération de la tâche...');
         const { data: todo, error: fetchError } = await supabase
             .from('todos')
             .select('*')
             .eq('id', id)
             .single();
         
-        console.log('🔵 Tâche récupérée:', todo);
-        console.log('🔵 Erreur fetch:', fetchError);
         
         if (fetchError || !todo) {
             console.error('❌ Erreur récupération todo:', fetchError);
@@ -562,14 +553,11 @@ async function toggleTodo(id, completed) {
             return;
         }
         
-        console.log('🔵 Tâche is_recurrent:', todo.is_recurrent);
         
         // Si cochée et récurrente, créer une nouvelle occurrence et archiver l'actuelle
         if (completed && todo.is_recurrent) {
-            console.log('🟡 Tâche récurrente complétée - création nouvelle occurrence');
             // Calculer la prochaine occurrence
             const nextOccurrence = calculateNextOccurrence(todo.frequency, todo.frequency_detail);
-            console.log('🟡 Prochaine occurrence:', nextOccurrence);
             
             // Créer la nouvelle occurrence
             const { error: insertError } = await supabase
@@ -587,7 +575,6 @@ async function toggleTodo(id, completed) {
                     archived_at: null
                 });
             
-            console.log('🟡 Insert error:', insertError);
             
             if (insertError) {
                 console.error('❌ Erreur création nouvelle occurrence:', insertError);
@@ -596,7 +583,6 @@ async function toggleTodo(id, completed) {
                 return;
             }
             
-            console.log('🟡 Archivage de l\'ancienne tâche...');
             // Archiver l'ancienne
             const { error: archiveError } = await supabase
                 .from('todos')
@@ -607,7 +593,6 @@ async function toggleTodo(id, completed) {
                 })
                 .eq('id', id);
             
-            console.log('🟡 Archive error:', archiveError);
             
             if (archiveError) {
                 console.error('❌ Erreur mise à jour todo:', archiveError);
@@ -616,24 +601,20 @@ async function toggleTodo(id, completed) {
                 return;
             }
             
-            console.log('✅ Tâche récurrente traitée avec succès');
             showToast('✓ Tâche terminée, prochaine occurrence créée', 'success');
         } else {
-            console.log('🟢 Tâche non récurrente - mise à jour simple');
             // Si coché (non récurrente), archiver la tâche
             // Si décoché, restaurer
             const updateData = completed ? 
                 { completed: true, archived_at: new Date().toISOString() } : 
                 { completed: false, archived_at: null };
             
-            console.log('🟢 updateData:', updateData);
             
             const { error } = await supabase
                 .from('todos')
                 .update(updateData)
                 .eq('id', id);
             
-            console.log('🟢 Update error:', error);
             
             if (error) {
                 console.error('❌ Erreur mise à jour todo:', error);
@@ -642,17 +623,13 @@ async function toggleTodo(id, completed) {
                 return;
             }
             
-            console.log('✅ Tâche non récurrente mise à jour avec succès');
             showToast(completed ? '✓ Tâche terminée' : '↺ Tâche réactivée', 'success');
         }
         
-        console.log('🔵 Rechargement de la liste - category:', todo.category);
         // Recharger la liste correspondante
         await updateTodoList(todo.category);
-        console.log('✅ Liste rechargée');
         
         await updateDashboardStats(); // Mettre à jour le compteur
-        console.log('✅ Stats mises à jour');
     } catch (error) {
         console.error('❌ Erreur dans toggleTodo:', error);
         console.error('❌ Stack:', error.stack);

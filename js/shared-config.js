@@ -61,7 +61,6 @@ function createParisDate(...args) {
 
 // Initialisation (remplace initDB)
 function initDB() {
-    console.log('✓ Supabase prêt - IndexedDB non nécessaire');
     return Promise.resolve();
 }
 

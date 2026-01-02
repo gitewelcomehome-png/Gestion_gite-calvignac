@@ -379,7 +379,6 @@ async function updateStats() {
     
     if (histTotal) {
         // Utiliser UNIQUEMENT les données historiques (pas les réservations)
-        console.log('✓ Utilisation des données historiques pour', selectedYear);
         const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
         months.forEach(m => {
             caTotal += histTotal.months[m] || 0;
@@ -394,7 +393,6 @@ async function updateStats() {
         if (statCouzonEl) statCouzonEl.textContent = '-';
     } else {
         // Utiliser les réservations automatiques
-        console.log('✓ Utilisation des réservations automatiques pour', selectedYear);
         const filteredReservations = reservations.filter(r => {
             const year = parseLocalDate(r.dateDebut).getFullYear();
             return year === selectedYear;
