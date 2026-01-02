@@ -756,6 +756,8 @@ async function chargerListeAnnees() {
 // Charger les données d'une année spécifique
 async function chargerAnnee(annee) {
     try {
+        const anneeActuelle = new Date().getFullYear();
+        
         const { data, error } = await supabase
             .from('simulations_fiscales')
             .select('*')
@@ -773,8 +775,10 @@ async function chargerAnnee(annee) {
                 // Réinitialiser le formulaire
                 nouvelleSimulation();
                 
-                // Calculer automatiquement le CA de cette année
-                await calculerCAAutomatique();
+                // Calculer automatiquement le CA UNIQUEMENT pour l'année en cours
+                if (parseInt(annee) === anneeActuelle) {
+                    await calculerCAAutomatique();
+                }
                 
                 return;
             }
@@ -787,9 +791,24 @@ async function chargerAnnee(annee) {
         // Charger les données dans le formulaire
         chargerDonneesFormulaire(data);
         
-        // Recalculer automatiquement le CA depuis les réservations de cette année
-        console.log(`📊 Recalcul du CA pour l'année ${annee}`);
-        await calculerCAAutomatique();
+        // Pour l'année en cours, nettoyer les listes et recalculer le CA
+        if (parseInt(annee) === anneeActuelle) {
+            console.log(`📊 Année en cours (${annee}) : nettoyage des listes et recalcul du CA`);
+            
+            // Vider les listes de travaux, frais divers et produits d'accueil
+            document.getElementById('travaux-liste').innerHTML = '';
+            document.getElementById('frais-divers-liste').innerHTML = '';
+            document.getElementById('produits-accueil-liste').innerHTML = '';
+            travauxCounter = 0;
+            fraisDiversCounter = 0;
+            produitsCounter = 0;
+            
+            // Recalculer le CA depuis les réservations de cette année
+            await calculerCAAutomatique();
+        } else {
+            // Pour les années passées, garder le CA tel quel
+            console.log(`📋 Année ${annee} : conservation du CA existant`);
+        }
         
         // Recalculer les indicateurs
         calculerTempsReel();
