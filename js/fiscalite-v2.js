@@ -1606,3 +1606,4 @@ document.addEventListener('DOMContentLoaded', () => {
             anneeSimulInput.value = currentYear;
         }
     }, 1100);
+});
