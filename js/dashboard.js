@@ -760,8 +760,17 @@ async function calculerBeneficesMensuels() {
         // Récupérer toutes les charges
         const charges = await getAllCharges();
         
-        console.log('📊 DEBUG - Nombre de charges:', charges.length);
-        console.log('📊 DEBUG - Exemple de charges:', charges.slice(0, 3));
+        console.log('📊 DEBUG - Nombre total de charges:', charges.length);
+        console.log('📊 DEBUG - Premières charges:', charges.slice(0, 5));
+        
+        // Vérifier combien de charges ont une date
+        const chargesAvecDate = charges.filter(c => c.date);
+        const chargesSansDate = charges.filter(c => !c.date);
+        console.log('📊 DEBUG - Charges avec date:', chargesAvecDate.length);
+        console.log('📊 DEBUG - Charges SANS date:', chargesSansDate.length);
+        if (chargesSansDate.length > 0) {
+            console.warn('⚠️ ATTENTION: Des charges n\'ont pas de date!', chargesSansDate.slice(0, 3));
+        }
         
         const anneeActuelle = new Date().getFullYear();
         const benefices = [];
@@ -780,9 +789,13 @@ async function calculerBeneficesMensuels() {
             
             // 2. Calculer TOUTES les charges du mois (tous types confondus)
             const chargesDuMois = charges.filter(c => {
-                if (!c.date) return false;
+                if (!c.date) {
+                    return false;
+                }
                 const dateCharge = new Date(c.date);
-                return dateCharge.getFullYear() === anneeActuelle && dateCharge.getMonth() === mois;
+                const isGoodYear = dateCharge.getFullYear() === anneeActuelle;
+                const isGoodMonth = dateCharge.getMonth() === mois;
+                return isGoodYear && isGoodMonth;
             });
             
             const totalCharges = chargesDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
@@ -790,9 +803,12 @@ async function calculerBeneficesMensuels() {
             // Calcul du bénéfice : Réservations - TOUTES les charges
             const beneficeMois = caMois - totalCharges;
             
-            // Log détaillé pour les mois avec activité
+            // Log détaillé pour TOUS les mois avec activité
             if (caMois > 0 || totalCharges > 0) {
-                console.log(`📊 ${nomMois}: Réservations=${caMois}€ - Charges totales=${totalCharges}€ = Bénéfice=${beneficeMois}€`);
+                console.log(`📊 ${nomMois} 2026: CA=${caMois}€ - Charges=${totalCharges}€ (${chargesDuMois.length} charges) = Bénéfice=${beneficeMois}€`);
+                if (chargesDuMois.length > 0) {
+                    console.log(`   → Détail charges ${nomMois}:`, chargesDuMois);
+                }
             }
             
             benefices.push({
