@@ -891,6 +891,16 @@ async function calculerCAAutomatique() {
     }
 }
 
+// Helper formatCurrency
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
 // Créer une nouvelle année en copiant les frais fixes de l'année précédente
 async function creerNouvelleAnnee() {
     const anneeActuelle = parseInt(document.getElementById('annee_simulation').value);

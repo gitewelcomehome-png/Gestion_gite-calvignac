@@ -4,7 +4,7 @@
 // Affiche les horaires d'arrivée/départ confirmés par les clients
 // dans le dashboard
 
-import { supabase } from './supabase-operations.js';
+const supabase = window.supabase;
 
 /**
  * Affiche les horaires clients dans le dashboard
@@ -162,6 +162,3 @@ function formatDateHeure(dateTimeStr) {
         minute: '2-digit'
     });
 }
-
-// Export
-export { afficherHorairesClients };
