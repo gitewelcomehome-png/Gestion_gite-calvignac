@@ -4,7 +4,20 @@
  */
 
 // ==========================================
-// �️ UTILITAIRES DATE
+// 💰 UTILITAIRES FORMATAGE
+// ==========================================
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+// ==========================================
+// 📅 UTILITAIRES DATE
 // ==========================================
 
 function formatDateFromObj(dateObj) {
