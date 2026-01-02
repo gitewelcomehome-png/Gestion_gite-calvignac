@@ -884,12 +884,6 @@ async function updateFinancialIndicators() {
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
         const quotient = resteApresURSSAF / 2; // Couple sans enfant
         
-            benefice: beneficeAnnee,
-            urssaf: urssafTotal,
-            resteApresURSSAF: resteApresURSSAF,
-            quotient: quotient
-        });
-        
         let impotParPart = 0;
         if (quotient > 177106) {
             impotParPart = (quotient - 177106) * 0.45 + 44797;
