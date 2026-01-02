@@ -2,7 +2,7 @@
 // GESTION FAQ - QUESTIONS FRÉQUENTES CLIENTS
 // ================================================================
 
-import { supabase } from './supabase-operations.js';
+const supabase = window.supabase;
 
 let faqData = [];
 let categorieActive = 'all';

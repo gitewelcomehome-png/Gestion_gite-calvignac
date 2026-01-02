@@ -853,14 +853,6 @@ async function updateFinancialIndicators() {
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
         const revenuFiscal = resteApresURSSAF + salaireMadame + salaireMonsieur;
         
-            benefice: beneficeAnnee,
-            urssaf: urssafTotal,
-            resteApresURSSAF: resteApresURSSAF,
-            salaireMadame: salaireMadame,
-            salaireMonsieur: salaireMonsieur,
-            revenuFiscal: revenuFiscal
-        });
-        
         // Calcul du nombre de parts
         let nbParts = 2; // Couple par défaut
         if (nbEnfants === 1) nbParts = 2.5;

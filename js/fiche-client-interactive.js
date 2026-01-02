@@ -4,7 +4,7 @@
 // Génère une page HTML complète envoyable au client
 // Avec formulaire d'horaires et FAQ personnalisée
 
-import { supabase } from './supabase-operations.js';
+const supabase = window.supabase;
 import { getFAQPourGite } from './faq.js';
 
 /**
