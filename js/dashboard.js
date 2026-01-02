@@ -775,12 +775,6 @@ async function updateFinancialIndicators() {
     // Bénéfice = CA - Total Charges (depuis fiscalité)
     const beneficeAnnee = caAnnee - totalChargesAnnee;
     
-        ca: caAnnee,
-        totalCharges: totalChargesAnnee,
-        benefice: beneficeAnnee,
-        source: simFiscale ? 'Calculé depuis fiscalité' : 'Aucune simulation trouvée'
-    });
-    
     // 2. Calculer l'URSSAF pour l'année en cours (22% + 9.7% CSG-CRDS + allocations familiales progressives)
     const cotisationsSociales = beneficeAnnee * 0.22; // 22%
     const csgCrds = beneficeAnnee * 0.097; // 9.7%

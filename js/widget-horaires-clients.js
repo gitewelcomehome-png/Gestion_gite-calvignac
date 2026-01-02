@@ -113,10 +113,10 @@ export async function afficherHorairesClients() {
  * Retourne le début de la semaine courante
  */
 function getDebutSemaine() {
-    const aujourd'hui = new Date();
-    const jour = aujourd'hui.getDay();
-    const diff = aujourd'hui.getDate() - jour + (jour === 0 ? -6 : 1);
-    const lundi = new Date(aujourd'hui.setDate(diff));
+    const aujourdhui = new Date();
+    const jour = aujourdhui.getDay();
+    const diff = aujourdhui.getDate() - jour + (jour === 0 ? -6 : 1);
+    const lundi = new Date(aujourdhui.setDate(diff));
     lundi.setHours(0, 0, 0, 0);
     return lundi.toISOString().split('T')[0];
 }
