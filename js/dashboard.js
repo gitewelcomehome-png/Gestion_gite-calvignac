@@ -867,27 +867,21 @@ async function updateFinancialIndicators() {
     }
     
     // 5. Mettre à jour l'affichage
-    const urssafEl = document.getElementById('dashboard-urssaf');
-    const urssafLabelEl = document.getElementById('urssaf-annee-label');
-    const irPrecedentEl = document.getElementById('dashboard-ir-precedent');
-    const irCourantEl = document.getElementById('dashboard-ir-courant');
+    const urssaf2025El = document.getElementById('dashboard-urssaf-2025');
+    const urssaf2026El = document.getElementById('dashboard-urssaf-2026');
+    const ir2025El = document.getElementById('dashboard-ir-2025');
+    const ir2026El = document.getElementById('dashboard-ir-2026');
     const beneficeEl = document.getElementById('dashboard-benefice-moyen');
     
-    // Labels des années
-    const anneePrecedenteLabel = document.getElementById('annee-precedente-label');
-    const anneeCouranteLabel = document.getElementById('annee-courante-label');
+    // Afficher URSSAF des 2 années
+    if (urssaf2025El) urssaf2025El.textContent = urssafPrecedent > 0 ? formatCurrency(urssafPrecedent) : '-';
+    if (urssaf2026El) urssaf2026El.textContent = formatCurrency(urssafTotal);
     
-    if (anneePrecedenteLabel) anneePrecedenteLabel.textContent = anneePrecedente;
-    if (anneeCouranteLabel) anneeCouranteLabel.textContent = anneeActuelle;
+    // Afficher IR des 2 années  
+    if (ir2025El) ir2025El.textContent = impotRevenuPrecedent > 0 ? formatCurrency(impotRevenuPrecedent) : '-';
+    if (ir2026El) ir2026El.textContent = formatCurrency(impotRevenuCourant);
     
-    // Afficher URSSAF année précédente si dispo, sinon année en cours
-    const urssafAffiche = urssafPrecedent > 0 ? urssafPrecedent : urssafTotal;
-    const anneeUrssaf = urssafPrecedent > 0 ? anneePrecedente : anneeActuelle;
-    
-    if (urssafEl) urssafEl.textContent = formatCurrency(urssafAffiche);
-    if (urssafLabelEl) urssafLabelEl.textContent = anneeUrssaf;
-    if (irPrecedentEl) irPrecedentEl.textContent = impotRevenuPrecedent > 0 ? formatCurrency(impotRevenuPrecedent) : '-';
-    if (irCourantEl) irCourantEl.textContent = formatCurrency(impotRevenuCourant);
+    // Afficher bénéfice
     if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeAnnee);
     
     // 6. Trésorerie actuelle (dernier mois enregistré)

@@ -106,6 +106,17 @@ function calculerTempsReel() {
         document.getElementById('detail-total-urssaf').textContent = urssaf.toFixed(2) + ' €';
         document.getElementById('detail-trimestres').textContent = trimestres;
         
+        // Affichage total des charges
+        document.getElementById('total-charges-couzon').textContent = chargesCouzon.toFixed(2) + ' €';
+        document.getElementById('total-charges-trevoux').textContent = chargesTrevoux.toFixed(2) + ' €';
+        document.getElementById('total-charges-residence').textContent = chargesResidence.toFixed(2) + ' €';
+        document.getElementById('total-frais-pro').textContent = fraisPro.toFixed(2) + ' €';
+        document.getElementById('total-frais-vehicule').textContent = fraisVehicule.toFixed(2) + ' €';
+        document.getElementById('total-travaux').textContent = travaux.toFixed(2) + ' €';
+        document.getElementById('total-frais-divers').textContent = fraisDivers.toFixed(2) + ' €';
+        document.getElementById('total-produits-accueil').textContent = produitsAccueil.toFixed(2) + ' €';
+        document.getElementById('total-charges-annuelles').textContent = totalCharges.toFixed(2) + ' €';
+        
         // Alerte retraite
         const alerteRetraite = document.getElementById('alerte-retraite');
         if (trimestres === 0) {
