@@ -121,6 +121,18 @@ function calculerTempsReel() {
         // Calculer le reste à vivre
         setTimeout(() => calculerResteAVivre(), 100);
         
+        // 💾 SAUVEGARDE AUTOMATIQUE pour les années précédentes
+        const anneeSimulation = parseInt(document.getElementById('annee_simulation')?.value);
+        const anneeActuelle = new Date().getFullYear();
+        if (anneeSimulation && anneeSimulation < anneeActuelle) {
+            console.log(`💾 Auto-sauvegarde de l'année ${anneeSimulation} (année précédente)`);
+            setTimeout(() => {
+                sauvegarderSimulation(true); // true = mode silencieux
+                // Vérifier après sauvegarde
+                setTimeout(() => verifierSauvegardeAnnee(anneeSimulation), 1000);
+            }, 1000);
+        }
+        
     }, 500);
 }
 
@@ -808,6 +820,9 @@ async function chargerAnnee(annee) {
         } else {
             // Pour les années passées, garder le CA tel quel
             console.log(`📋 Année ${annee} : conservation du CA existant`);
+            
+            // Vérifier les données sauvegardées
+            setTimeout(() => verifierSauvegardeAnnee(annee), 500);
         }
         
         // Recalculer les indicateurs
@@ -1816,6 +1831,42 @@ function calculerResteAVivre() {
 }
 
 // ==========================================
+// 🔍 VÉRIFICATION SAUVEGARDE
+// ==========================================
+
+async function verifierSauvegardeAnnee(annee) {
+    console.log(`🔍 Vérification de la sauvegarde pour l'année ${annee}...`);
+    
+    try {
+        const { data, error } = await supabase
+            .from('simulations_fiscales')
+            .select('annee, cotisations_urssaf, impot_revenu, benefice_imposable, created_at')
+            .eq('annee', annee)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error) {
+            console.error(`❌ Erreur vérification année ${annee}:`, error);
+            return;
+        }
+        
+        if (data) {
+            console.log(`✅ Données sauvegardées pour ${annee}:`, {
+                'URSSAF': data.cotisations_urssaf ? `${data.cotisations_urssaf.toFixed(2)} €` : 'Non défini',
+                'Impôt Revenu': data.impot_revenu ? `${data.impot_revenu.toFixed(2)} €` : 'Non défini',
+                'Bénéfice imposable': data.benefice_imposable ? `${data.benefice_imposable.toFixed(2)} €` : 'Non défini',
+                'Date sauvegarde': new Date(data.created_at).toLocaleString('fr-FR')
+            });
+        } else {
+            console.warn(`⚠️ Aucune donnée trouvée pour l'année ${annee}`);
+        }
+    } catch (error) {
+        console.error(`💥 Exception lors de la vérification:`, error);
+    }
+}
+
+// ==========================================
 // 🌐 EXPORTS GLOBAUX
 // ==========================================
 
@@ -1848,6 +1899,7 @@ window.chargerListeAnnees = chargerListeAnnees;
 window.chargerAnnee = chargerAnnee;
 window.calculerCAAutomatique = calculerCAAutomatique;
 window.creerNouvelleAnnee = creerNouvelleAnnee;
+window.verifierSauvegardeAnnee = verifierSauvegardeAnnee;
 
 // ==========================================
 // 💰 SUIVI TRÉSORERIE MENSUELLE
