@@ -1824,7 +1824,7 @@ function genererScripts(reservation, infosGite) {
             
             if (matches.length > 0) {
                 resultsContainer.classList.remove('hidden');
-                resultsContainer.innerHTML = `<div class="alert alert-success">✅ ${matches.length} résultat(s) trouvé(s) / ${matches.length} result(s) found</div>`;
+                resultsContainer.innerHTML = '<div class="alert alert-success">✅ ' + matches.length + ' résultat(s) trouvé(s) / ' + matches.length + ' result(s) found</div>';
                 matches.forEach(match => resultsContainer.appendChild(match));
             } else {
                 resultsContainer.classList.remove('hidden');
