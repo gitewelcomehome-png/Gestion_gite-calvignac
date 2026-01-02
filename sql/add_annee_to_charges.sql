@@ -9,10 +9,29 @@
 ALTER TABLE charges 
 ADD COLUMN IF NOT EXISTS annee INTEGER;
 
--- Remplir l'année automatiquement à partir de la date existante
-UPDATE charges 
-SET annee = EXTRACT(YEAR FROM date::date)
-WHERE date IS NOT NULL AND annee IS NULL;
+-- Remplir l'année automatiquement à partir de la colonne date (si elle existe)
+-- Sinon utiliser created_at
+DO $$ 
+BEGIN
+    -- Vérifier si la colonne 'date' existe
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'charges' AND column_name = 'date'
+    ) THEN
+        -- Utiliser la colonne 'date'
+        UPDATE charges 
+        SET annee = EXTRACT(YEAR FROM date::date)
+        WHERE date IS NOT NULL AND annee IS NULL;
+    ELSIF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'charges' AND column_name = 'created_at'
+    ) THEN
+        -- Utiliser la colonne 'created_at'
+        UPDATE charges 
+        SET annee = EXTRACT(YEAR FROM created_at)
+        WHERE created_at IS NOT NULL AND annee IS NULL;
+    END IF;
+END $$;
 
 -- Définir l'année actuelle par défaut pour les nouvelles lignes
 ALTER TABLE charges 
@@ -32,13 +51,28 @@ COMMENT ON COLUMN charges.annee IS 'Année de la charge (extrait de la date, uti
 CREATE OR REPLACE FUNCTION update_charge_annee()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Si la date est fournie, extraire l'année
-    IF NEW.date IS NOT NULL THEN
-        NEW.annee = EXTRACT(YEAR FROM NEW.date::date);
-    ELSE
-        -- Sinon utiliser l'année actuelle
-        NEW.annee = EXTRACT(YEAR FROM NOW());
+    -- Essayer d'extraire l'année de la colonne 'date' si elle existe
+    IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+        -- Vérifier si NEW a une colonne 'date'
+        BEGIN
+            IF NEW.date IS NOT NULL THEN
+                NEW.annee := EXTRACT(YEAR FROM NEW.date::date);
+                RETURN NEW;
+            END IF;
+        EXCEPTION
+            WHEN undefined_column THEN
+                -- La colonne 'date' n'existe pas, utiliser created_at
+                NULL;
+        END;
+        
+        -- Sinon utiliser created_at ou l'année actuelle
+        IF NEW.created_at IS NOT NULL THEN
+            NEW.annee := EXTRACT(YEAR FROM NEW.created_at);
+        ELSE
+            NEW.annee := EXTRACT(YEAR FROM NOW());
+        END IF;
     END IF;
+    
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -55,6 +89,12 @@ CREATE TRIGGER trigger_update_charge_annee
 -- =====================================================
 -- VÉRIFICATION
 -- =====================================================
+
+-- Afficher la structure de la table
+SELECT column_name, data_type 
+FROM information_schema.columns 
+WHERE table_name = 'charges'
+ORDER BY ordinal_position;
 
 -- Afficher un résumé des charges par année
 SELECT 
