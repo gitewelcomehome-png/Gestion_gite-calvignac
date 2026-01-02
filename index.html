@@ -21,7 +21,7 @@
     <script src="js/decouvrir.js"></script>
     <script src="js/reservations.js"></script>
     <script src="js/archives.js"></script>
-    <script src="js/fiscalite-v2.js?v=3.9"></script>
+    <script src="js/fiscalite-v2.js?v=1767312004"></script>
     <script src="js/infos-gites.js"></script>
     <script src="js/fiche-client.js"></script>
     <script src="js/messagerie.js"></script></script>
@@ -524,8 +524,16 @@
                 if (typeof updateArchivesDisplay === 'function') updateArchivesDisplay();
                 if (typeof updateArchivedTodos === 'function') updateArchivedTodos();
             }
-            if (tabName === 'charges' && typeof chargerDerniereSimulation === 'function') {
-                chargerDerniereSimulation();
+            if (tabName === 'charges') {
+                console.log('💰 [SWITCH-TAB] Onglet Fiscalité activé, initialisation...');
+                // Attendre que le HTML soit complètement chargé
+                setTimeout(() => {
+                    if (typeof initFiscalite === 'function') {
+                        initFiscalite();
+                    } else {
+                        console.warn('⚠️ [SWITCH-TAB] initFiscalite non disponible');
+                    }
+                }, 100);
             }
             if (tabName === 'menage' && typeof afficherPlanningMenageNew === 'function') {
                 afficherPlanningMenageNew();

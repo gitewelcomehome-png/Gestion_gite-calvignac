@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fiscalité - Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .liste-item {
+            display: grid;
+            grid-template-columns: 1fr 120px 150px 40px;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .resultat {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .resultat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .console {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .console-line {
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Module Fiscalité - Debug</h1>
+    
+    <div class="test-section">
+        <h2>📊 Chiffre d'affaires</h2>
+        <div class="form-group">
+            <label>CA annuel (€)</label>
+            <input type="number" id="ca" step="0.01" placeholder="Ex: 30000">
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔨 Travaux et améliorations</h2>
+        <div id="travaux-liste"></div>
+        <button onclick="ajouterTravaux()">➕ Ajouter un travail</button>
+    </div>
+
+    <div class="test-section">
+        <h2>💸 Frais divers</h2>
+        <div id="frais-divers-liste"></div>
+        <button onclick="ajouterFraisDivers()">➕ Ajouter un frais</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🎁 Produits d'accueil</h2>
+        <div id="produits-accueil-liste"></div>
+        <button onclick="ajouterProduitAccueil()">➕ Ajouter un produit</button>
+    </div>
+
+    <div class="test-section resultat">
+        <h2>📈 RÉSULTATS</h2>
+        <div class="resultat-item">
+            <span>Bénéfice imposable</span>
+            <strong id="preview-benefice">0 €</strong>
+        </div>
+        <div class="resultat-item">
+            <span>Cotisations URSSAF</span>
+            <strong id="preview-urssaf">0 €</strong>
+        </div>
+        <div class="resultat-item">
+            <span>Reste avant IR</span>
+            <strong id="preview-reste">0 €</strong>
+        </div>
+        
+        <h3 style="margin-top: 20px; margin-bottom: 10px;">Détails URSSAF</h3>
+        <div class="resultat-item">
+            <span>Cotisations sociales (22%)</span>
+            <strong id="detail-sociales">0 €</strong>
+        </div>
+        <div class="resultat-item">
+            <span>CSG/CRDS (9.7%)</span>
+            <strong id="detail-csg-crds">0 €</strong>
+        </div>
+        <div class="resultat-item">
+            <span>Formation pro (0.25%)</span>
+            <strong id="detail-formation-pro">0 €</strong>
+        </div>
+        <div class="resultat-item">
+            <span>Allocations familiales</span>
+            <strong id="detail-allocations">0 €</strong>
+        </div>
+        <div class="resultat-item" style="background: rgba(255,255,255,0.2); font-weight: 700;">
+            <span>TOTAL URSSAF</span>
+            <strong id="detail-total-urssaf">0 €</strong>
+        </div>
+        <div class="resultat-item" style="background: rgba(46, 204, 113, 0.3);">
+            <span>Trimestres validés</span>
+            <strong id="detail-trimestres">0</strong>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🖥️ Console de débogage</h2>
+        <div class="console" id="debug-console">
+            <div class="console-line">Console prête... Ouvrez aussi la console navigateur (F12)</div>
+        </div>
+        <button onclick="document.getElementById('debug-console').innerHTML='<div class=\'console-line\'>Console effacée...</div>'">🗑️ Effacer</button>
+    </div>
+
+    <script>
+        // Rediriger console.log vers notre console HTML
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const consoleDiv = document.getElementById('debug-console');
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.textContent = args.join(' ');
+            consoleDiv.appendChild(line);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        };
+
+        // Variables globales
+        let travauxCounter = 0;
+        let fraisDiversCounter = 0;
+        let produitsCounter = 0;
+        let calculTempsReelTimeout = null;
+
+        // Fonction de calcul en temps réel (simplifiée)
+        function calculerTempsReel() {
+            console.log('🔵 [DEBUG] calculerTempsReel() appelée');
+            clearTimeout(calculTempsReelTimeout);
+            calculTempsReelTimeout = setTimeout(() => {
+                console.log('⏱️ [DEBUG] Timeout terminé, début calcul...');
+                const ca = parseFloat(document.getElementById('ca')?.value || 0);
+                console.log('💵 [DEBUG] CA récupéré:', ca, '€');
+                
+                if (ca === 0) {
+                    console.log('⚠️ [DEBUG] CA = 0, réinitialisation');
+                    document.getElementById('preview-benefice').textContent = '0 €';
+                    document.getElementById('preview-urssaf').textContent = '0 €';
+                    document.getElementById('preview-reste').textContent = '0 €';
+                    return;
+                }
+                
+                // Récupérer les listes
+                const travaux = getTravauxListe().reduce((sum, item) => sum + item.montant, 0);
+                const fraisDivers = getFraisDiversListe().reduce((sum, item) => sum + item.montant, 0);
+                const produitsAccueil = getProduitsAccueilListe().reduce((sum, item) => sum + item.montant, 0);
+                
+                console.log('💰 [CALCUL] Travaux:', travaux, '€');
+                console.log('💰 [CALCUL] Frais divers:', fraisDivers, '€');
+                console.log('💰 [CALCUL] Produits accueil:', produitsAccueil, '€');
+                
+                const totalCharges = travaux + fraisDivers + produitsAccueil;
+                const benefice = ca - totalCharges;
+                
+                // Calculs URSSAF
+                const cotisationsSociales = benefice * 0.22;
+                const csgCrds = benefice * 0.097;
+                const formationPro = ca * 0.0025;
+                
+                const pass2024 = 46368;
+                let allocations = 0;
+                if (benefice > pass2024 * 1.1) {
+                    const baseAlloc = Math.min(benefice - (pass2024 * 1.1), pass2024 * 0.3);
+                    const tauxAlloc = (baseAlloc / (pass2024 * 0.3)) * 0.031;
+                    allocations = benefice * tauxAlloc;
+                }
+                
+                const urssaf = cotisationsSociales + csgCrds + formationPro + allocations;
+                const resteAvantIR = benefice - urssaf;
+                
+                // Trimestres
+                const smic2024 = 11873.10;
+                let trimestres = 0;
+                if (benefice >= smic2024 * 6) trimestres = 4;
+                else if (benefice >= smic2024 * 4.5) trimestres = 3;
+                else if (benefice >= smic2024 * 3) trimestres = 2;
+                else if (benefice >= smic2024 * 1.5) trimestres = 1;
+                
+                console.log('✅ [CALCUL] Bénéfice:', benefice.toFixed(2), '€');
+                console.log('✅ [CALCUL] URSSAF:', urssaf.toFixed(2), '€');
+                
+                // Affichage
+                document.getElementById('preview-benefice').textContent = benefice.toFixed(2) + ' €';
+                document.getElementById('preview-urssaf').textContent = urssaf.toFixed(2) + ' €';
+                document.getElementById('preview-reste').textContent = resteAvantIR.toFixed(2) + ' €';
+                document.getElementById('detail-sociales').textContent = cotisationsSociales.toFixed(2) + ' €';
+                document.getElementById('detail-csg-crds').textContent = csgCrds.toFixed(2) + ' €';
+                document.getElementById('detail-formation-pro').textContent = formationPro.toFixed(2) + ' €';
+                document.getElementById('detail-allocations').textContent = allocations.toFixed(2) + ' €';
+                document.getElementById('detail-total-urssaf').textContent = urssaf.toFixed(2) + ' €';
+                document.getElementById('detail-trimestres').textContent = trimestres;
+                
+            }, 500);
+        }
+
+        // Ajouter travaux
+        function ajouterTravaux() {
+            console.log('➕ [DEBUG] ajouterTravaux() appelée');
+            const id = ++travauxCounter;
+            console.log('🆔 [DEBUG] Nouveau travail ID:', id);
+            const container = document.getElementById('travaux-liste');
+            const item = document.createElement('div');
+            item.className = 'liste-item';
+            item.id = `travaux-${id}`;
+            item.innerHTML = `
+                <input type="text" placeholder="Description" id="travaux-desc-${id}">
+                <select id="travaux-gite-${id}">
+                    <option value="couzon">Couzon</option>
+                    <option value="trevoux">Trévoux</option>
+                </select>
+                <input type="number" step="0.01" placeholder="Montant €" id="travaux-montant-${id}">
+                <button onclick="supprimerItem('travaux-${id}')">×</button>
+            `;
+            container.appendChild(item);
+            
+            console.log('🔗 [DEBUG] Attachement des événements pour travail ID:', id);
+            const montantInput = document.getElementById(`travaux-montant-${id}`);
+            if (montantInput) {
+                montantInput.addEventListener('input', calculerTempsReel);
+                montantInput.addEventListener('change', calculerTempsReel);
+                console.log('✅ [DEBUG] Événements attachés à travaux-montant-' + id);
+            }
+        }
+
+        // Ajouter frais divers
+        function ajouterFraisDivers() {
+            const id = ++fraisDiversCounter;
+            const container = document.getElementById('frais-divers-liste');
+            const item = document.createElement('div');
+            item.className = 'liste-item';
+            item.id = `frais-${id}`;
+            item.innerHTML = `
+                <input type="text" placeholder="Description" id="frais-desc-${id}">
+                <select id="frais-gite-${id}">
+                    <option value="couzon">Couzon</option>
+                    <option value="trevoux">Trévoux</option>
+                </select>
+                <input type="number" step="0.01" placeholder="Montant €" id="frais-montant-${id}">
+                <button onclick="supprimerItem('frais-${id}')">×</button>
+            `;
+            container.appendChild(item);
+            
+            const montantInput = document.getElementById(`frais-montant-${id}`);
+            if (montantInput) {
+                montantInput.addEventListener('input', calculerTempsReel);
+                montantInput.addEventListener('change', calculerTempsReel);
+            }
+        }
+
+        // Ajouter produits
+        function ajouterProduitAccueil() {
+            const id = ++produitsCounter;
+            const container = document.getElementById('produits-accueil-liste');
+            const item = document.createElement('div');
+            item.className = 'liste-item';
+            item.id = `produits-${id}`;
+            item.innerHTML = `
+                <input type="text" placeholder="Description" id="produits-desc-${id}">
+                <select id="produits-gite-${id}">
+                    <option value="couzon">Couzon</option>
+                    <option value="trevoux">Trévoux</option>
+                </select>
+                <input type="number" step="0.01" placeholder="Montant €" id="produits-montant-${id}">
+                <button onclick="supprimerItem('produits-${id}')">×</button>
+            `;
+            container.appendChild(item);
+            
+            const montantInput = document.getElementById(`produits-montant-${id}`);
+            if (montantInput) {
+                montantInput.addEventListener('input', calculerTempsReel);
+                montantInput.addEventListener('change', calculerTempsReel);
+            }
+        }
+
+        // Supprimer
+        function supprimerItem(itemId) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                item.remove();
+                calculerTempsReel();
+            }
+        }
+
+        // Récupérer listes
+        function getTravauxListe() {
+            const items = [];
+            for (let i = 1; i <= travauxCounter; i++) {
+                const desc = document.getElementById(`travaux-desc-${i}`);
+                if (desc) {
+                    items.push({
+                        description: desc.value,
+                        gite: document.getElementById(`travaux-gite-${i}`).value,
+                        montant: parseFloat(document.getElementById(`travaux-montant-${i}`).value || 0)
+                    });
+                }
+            }
+            return items;
+        }
+
+        function getFraisDiversListe() {
+            const items = [];
+            for (let i = 1; i <= fraisDiversCounter; i++) {
+                const desc = document.getElementById(`frais-desc-${i}`);
+                if (desc) {
+                    items.push({
+                        description: desc.value,
+                        gite: document.getElementById(`frais-gite-${i}`).value,
+                        montant: parseFloat(document.getElementById(`frais-montant-${i}`).value || 0)
+                    });
+                }
+            }
+            return items;
+        }
+
+        function getProduitsAccueilListe() {
+            const items = [];
+            for (let i = 1; i <= produitsCounter; i++) {
+                const desc = document.getElementById(`produits-desc-${i}`);
+                if (desc) {
+                    items.push({
+                        description: desc.value,
+                        gite: document.getElementById(`produits-gite-${i}`).value,
+                        montant: parseFloat(document.getElementById(`produits-montant-${i}`).value || 0)
+                    });
+                }
+            }
+            return items;
+        }
+
+        // Événement sur le CA
+        document.getElementById('ca').addEventListener('input', calculerTempsReel);
+        
+        console.log('🚀 [INIT] Page de test chargée et prête');
+        console.log('📝 [INIT] Pour tester:');
+        console.log('  1. Saisissez un CA (ex: 30000)');
+        console.log('  2. Ajoutez un travail avec un montant');
+        console.log('  3. Observez les calculs se mettre à jour');
+    </script>
+</body>
+</html>
