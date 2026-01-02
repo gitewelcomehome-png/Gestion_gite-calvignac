@@ -536,7 +536,7 @@ async function getActivitesGite(gite) {
             .from('activites_gites')
             .select('*')
             .eq('gite', gite.toLowerCase())
-            .order('distance_km', { ascending: true });
+            .order('distance', { ascending: true });
         
         if (error) throw error;
         return data || [];
@@ -574,7 +574,7 @@ function genererActivitesHTML(activites) {
                 <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #4facfe;">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                         <strong style="font-size: 1.1rem; color: #333;">${act.nom}</strong>
-                        ${act.distance_km ? `<span style="background: #4facfe; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;">${act.distance_km} km</span>` : ''}
+                        ${act.distance ? `<span style="background: #4facfe; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;">${act.distance} km</span>` : ''}
                     </div>
                     ${act.adresse ? `<div style="color: #666; margin-bottom: 5px;">📍 ${act.adresse}</div>` : ''}
                     ${act.phone ? `<div style="color: #666; margin-bottom: 5px;">📞 ${act.phone}</div>` : ''}
@@ -595,16 +595,22 @@ function genererActivitesHTML(activites) {
  * Récupère le prochain ménage après une date
  */
 async function getProchainMenage(gite, dateApres) {
-    const { data, error } = await supabase
-        .from('planning_menage')
-        .select('*')
-        .eq('gite', gite)
-        .gte('date', dateApres)
-        .order('date', { ascending: true })
-        .limit(1)
-        .single();
-    
-    return data;
+    try {
+        const { data, error } = await supabase
+            .from('cleaning_schedule')
+            .select('*')
+            .eq('gite', gite)
+            .gte('scheduled_date', dateApres)
+            .order('scheduled_date', { ascending: true })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+    } catch (error) {
+        console.error('Erreur chargement ménage:', error);
+        return null;
+    }
 }
 
 /**
