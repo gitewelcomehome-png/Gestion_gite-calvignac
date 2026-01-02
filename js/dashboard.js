@@ -753,90 +753,90 @@ async function updateFinancialIndicators() {
 // ==========================================
 
 async function calculerBeneficesMensuels() {
-    // Récupérer la dernière simulation fiscale
-    const { data: simulation } = await supabase
-        .from('simulations_fiscales')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-    
-    if (!simulation) {
-        console.warn('Aucune simulation fiscale trouvée');
+    try {
+        // Récupérer toutes les réservations
+        const reservations = await getAllReservations();
+        
+        // Récupérer toutes les charges
+        const charges = await getAllCharges();
+        
+        const anneeActuelle = new Date().getFullYear();
+        const benefices = [];
+        
+        // Pour chaque mois
+        for (let mois = 0; mois < 12; mois++) {
+            const nomMois = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'][mois];
+            
+            // 1. Calculer le CA du mois (réservations)
+            const reservationsDuMois = reservations.filter(r => {
+                const dateDebut = parseLocalDate(r.dateDebut);
+                return dateDebut.getFullYear() === anneeActuelle && dateDebut.getMonth() === mois;
+            });
+            
+            const caMois = reservationsDuMois.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
+            
+            // 2. Calculer les charges des gîtes du mois
+            const chargesGitesDuMois = charges.filter(c => {
+                if (!c.date) return false;
+                const dateCharge = new Date(c.date);
+                return dateCharge.getFullYear() === anneeActuelle && 
+                       dateCharge.getMonth() === mois &&
+                       (c.gite === 'Couzon' || c.gite === 'Trevoux');
+            });
+            
+            const totalChargesGites = chargesGitesDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
+            
+            // 3. Calculer les frais professionnels du mois
+            const fraisProDuMois = charges.filter(c => {
+                if (!c.date) return false;
+                const dateCharge = new Date(c.date);
+                return dateCharge.getFullYear() === anneeActuelle && 
+                       dateCharge.getMonth() === mois &&
+                       c.type === 'Frais professionnels';
+            });
+            
+            const totalFraisPro = fraisProDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
+            
+            // 4. Calculer le crédit Trevoux du mois
+            const creditTrevouxDuMois = charges.filter(c => {
+                if (!c.date) return false;
+                const dateCharge = new Date(c.date);
+                return dateCharge.getFullYear() === anneeActuelle && 
+                       dateCharge.getMonth() === mois &&
+                       c.type === 'Crédit Trevoux gite';
+            });
+            
+            const totalCreditTrevoux = creditTrevouxDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
+            
+            // Calcul du bénéfice : Réservations - Charges gîtes - Frais pro - Crédit Trevoux
+            const beneficeMois = caMois - totalChargesGites - totalFraisPro - totalCreditTrevoux;
+            
+            benefices.push({
+                mois: mois + 1,
+                nom: nomMois,
+                total: beneficeMois,
+                details: {
+                    ca: caMois,
+                    chargesGites: totalChargesGites,
+                    fraisPro: totalFraisPro,
+                    creditTrevoux: totalCreditTrevoux
+                }
+            });
+        }
+        
+        console.log('📊 Calcul bénéfices mensuels:', benefices);
+        
+        return benefices;
+        
+    } catch (error) {
+        console.error('Erreur calculerBeneficesMensuels:', error);
+        // Retourner des valeurs par défaut
         return Array.from({ length: 12 }, (_, i) => ({
             mois: i + 1,
             nom: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'][i],
             total: 0
         }));
     }
-    
-    // Calculer CA annuel des gîtes
-    const caCouzon = parseFloat(simulation.ca_couzon || 0);
-    const caTrevoux = parseFloat(simulation.ca_trevoux || 0);
-    const caTotal = caCouzon + caTrevoux;
-    
-    // Calculer frais annuels HORS amortissement
-    // Tous les champs de frais sauf amortissements
-    const fraisCouzon = [
-        'internet_couzon', 'eau_couzon', 'electricite_couzon', 
-        'assurance_hab_couzon', 'assurance_emprunt_couzon', 
-        'interets_emprunt_couzon', 'menage_couzon', 'linge_couzon',
-        'logiciel_couzon', 'taxe_fonciere_couzon', 'cfe_couzon',
-        'commissions_couzon', 'copropriete_couzon'
-    ].reduce((sum, field) => sum + (parseFloat(simulation[field] || 0)), 0);
-    
-    const fraisTrevoux = [
-        'internet_trevoux', 'eau_trevoux', 'electricite_trevoux',
-        'assurance_hab_trevoux', 'assurance_emprunt_trevoux',
-        'interets_emprunt_trevoux', 'menage_trevoux', 'linge_trevoux',
-        'logiciel_trevoux', 'taxe_fonciere_trevoux', 'cfe_trevoux',
-        'commissions_trevoux', 'copropriete_trevoux'
-    ].reduce((sum, field) => sum + (parseFloat(simulation[field] || 0)), 0);
-    
-    // Frais professionnels
-    const fraisPro = [
-        'comptable', 'frais_bancaires', 'telephone', 'materiel_info',
-        'rc_pro', 'formation', 'fournitures'
-    ].reduce((sum, field) => sum + (parseFloat(simulation[field] || 0)), 0);
-    
-    // Résidence principale (bureau)
-    const surfaceBureau = parseFloat(simulation.surface_bureau || 0);
-    const surfaceTotale = parseFloat(simulation.surface_totale || 1);
-    const ratio = surfaceBureau / surfaceTotale;
-    
-    const fraisResidence = [
-        'interets_residence', 'assurance_residence', 'electricite_residence',
-        'internet_residence', 'eau_residence', 'assurance_hab_residence',
-        'taxe_fonciere_residence'
-    ].reduce((sum, field) => sum + (parseFloat(simulation[field] || 0) * ratio), 0);
-    
-    // Frais véhicule (forfait kilométrique déjà calculé)
-    const fraisVehicule = parseFloat(simulation.frais_vehicule || 0);
-    
-    // Total frais HORS amortissement
-    const totalFrais = fraisCouzon + fraisTrevoux + fraisPro + fraisResidence + fraisVehicule;
-    
-    // Bénéfice annuel = CA - Frais (hors amortissement)
-    const beneficeAnnuel = caTotal - totalFrais;
-    
-    // Bénéfice mensuel moyen
-    const beneficeMensuel = beneficeAnnuel / 12;
-    
-    console.log('📊 Calcul bénéfices:', {
-        caTotal,
-        totalFrais,
-        beneficeAnnuel,
-        beneficeMensuel
-    });
-    
-    // Répartir uniformément sur 12 mois
-    const benefices = Array.from({ length: 12 }, (_, i) => ({
-        mois: i + 1,
-        nom: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'][i],
-        total: beneficeMensuel
-    }));
-    
-    return benefices;
 }
 
 // ==========================================
