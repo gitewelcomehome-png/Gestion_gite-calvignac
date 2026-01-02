@@ -2093,10 +2093,15 @@ function genererScripts(reservation, infosGite) {
 
 async function getActivitesGite(gite) {
     try {
+        // Normaliser le nom du gîte
+        const giteNormalized = gite.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+        
         const { data, error } = await window.supabase
             .from('activites_gites')
             .select('*')
-            .eq('gite', gite.toLowerCase())
+            .eq('gite', giteNormalized)
             .order('distance', { ascending: true });
         
         if (error) throw error;
@@ -2109,14 +2114,19 @@ async function getActivitesGite(gite) {
 
 async function getProchainMenage(gite, dateApres) {
     try {
+        // Normaliser le nom du gîte
+        const giteNormalized = gite.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+        
         const { data, error } = await window.supabase
             .from('cleaning_schedule')
             .select('*')
-            .eq('gite', gite)
+            .eq('gite', giteNormalized)
             .gte('scheduled_date', dateApres)
             .order('scheduled_date', { ascending: true })
             .limit(1)
-            .single();
+            .maybeSingle(); // maybeSingle au lieu de single
         
         if (error && error.code !== 'PGRST116') throw error;
         return data;
@@ -2128,11 +2138,16 @@ async function getProchainMenage(gite, dateApres) {
 
 async function loadInfosGites(gite) {
     try {
+        // Normaliser le nom du gîte (minuscule, sans accent)
+        const giteNormalized = gite.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, ''); // Enlever les accents
+        
         const { data, error } = await window.supabaseClient
             .from('infos_gites')
             .select('*')
-            .eq('gite', gite)
-            .single();
+            .eq('gite', giteNormalized)
+            .maybeSingle(); // maybeSingle au lieu de single pour éviter erreur si 0 résultat
         
         if (error) throw error;
         return data || {};
