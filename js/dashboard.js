@@ -760,6 +760,9 @@ async function calculerBeneficesMensuels() {
         // Récupérer toutes les charges
         const charges = await getAllCharges();
         
+        console.log('📊 DEBUG - Nombre de charges:', charges.length);
+        console.log('📊 DEBUG - Exemple de charges:', charges.slice(0, 3));
+        
         const anneeActuelle = new Date().getFullYear();
         const benefices = [];
         
@@ -775,13 +778,16 @@ async function calculerBeneficesMensuels() {
             
             const caMois = reservationsDuMois.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
             
-            // 2. Calculer les charges des gîtes du mois
+            // 2. Calculer les charges des gîtes du mois (accepter tous les types de gîtes)
             const chargesGitesDuMois = charges.filter(c => {
                 if (!c.date) return false;
                 const dateCharge = new Date(c.date);
-                return dateCharge.getFullYear() === anneeActuelle && 
-                       dateCharge.getMonth() === mois &&
-                       (c.gite === 'Couzon' || c.gite === 'Trevoux');
+                const isGoodDate = dateCharge.getFullYear() === anneeActuelle && dateCharge.getMonth() === mois;
+                // Accepter tout ce qui a un gîte ET n'est ni frais pro ni crédit
+                const isGiteCharge = c.gite && 
+                                   c.type !== 'Frais professionnels' && 
+                                   c.type !== 'Crédit Trevoux gite';
+                return isGoodDate && isGiteCharge;
             });
             
             const totalChargesGites = chargesGitesDuMois.reduce((sum, c) => sum + (parseFloat(c.montant) || 0), 0);
@@ -811,6 +817,11 @@ async function calculerBeneficesMensuels() {
             // Calcul du bénéfice : Réservations - Charges gîtes - Frais pro - Crédit Trevoux
             const beneficeMois = caMois - totalChargesGites - totalFraisPro - totalCreditTrevoux;
             
+            // Log détaillé pour les mois avec activité
+            if (caMois > 0 || totalChargesGites > 0 || totalFraisPro > 0 || totalCreditTrevoux > 0) {
+                console.log(`📊 ${nomMois}: CA=${caMois}€ - Charges gîtes=${totalChargesGites}€ - Frais pro=${totalFraisPro}€ - Crédit=${totalCreditTrevoux}€ = ${beneficeMois}€`);
+            }
+            
             benefices.push({
                 mois: mois + 1,
                 nom: nomMois,
@@ -824,7 +835,7 @@ async function calculerBeneficesMensuels() {
             });
         }
         
-        console.log('📊 Calcul bénéfices mensuels:', benefices);
+        console.log('📊 Calcul bénéfices mensuels terminé');
         
         return benefices;
         
