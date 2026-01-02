@@ -704,8 +704,474 @@ function afficherResultats(data) {
 }
 
 // ==========================================
-// 💾 SAUVEGARDE / CHARGEMENT
+// � GESTION DES ANNÉES FISCALES
 // ==========================================
+
+// Charger la liste des années disponibles
+async function chargerListeAnnees() {
+    try {
+        const { data, error } = await supabase
+            .from('simulations_fiscales')
+            .select('annee')
+            .order('annee', { ascending: false });
+        
+        if (error) throw error;
+        
+        // Récupérer les années uniques
+        const anneesUniques = [...new Set(data.map(s => s.annee))];
+        
+        const selector = document.getElementById('annee_selector');
+        if (!selector) return;
+        
+        selector.innerHTML = '';
+        
+        // Si aucune année, créer l'année actuelle
+        if (anneesUniques.length === 0) {
+            const anneeActuelle = new Date().getFullYear();
+            const option = document.createElement('option');
+            option.value = anneeActuelle;
+            option.textContent = anneeActuelle;
+            selector.appendChild(option);
+            document.getElementById('annee_simulation').value = anneeActuelle;
+            return;
+        }
+        
+        // Ajouter les années au sélecteur
+        anneesUniques.forEach(annee => {
+            const option = document.createElement('option');
+            option.value = annee;
+            option.textContent = annee;
+            selector.appendChild(option);
+        });
+        
+        // Sélectionner l'année la plus récente
+        selector.value = anneesUniques[0];
+        document.getElementById('annee_simulation').value = anneesUniques[0];
+        
+    } catch (error) {
+        console.error('Erreur chargement liste années:', error);
+    }
+}
+
+// Charger les données d'une année spécifique
+async function chargerAnnee(annee) {
+    try {
+        const { data, error } = await supabase
+            .from('simulations_fiscales')
+            .select('*')
+            .eq('annee', parseInt(annee))
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error) {
+            if (error.code === 'PGRST116') {
+                // Aucune donnée pour cette année, réinitialiser le formulaire
+                document.getElementById('annee_simulation').value = annee;
+                nouvelleSimulation();
+                return;
+            }
+            throw error;
+        }
+        
+        // Mettre à jour l'année cachée
+        document.getElementById('annee_simulation').value = annee;
+        
+        // Charger les données dans le formulaire (réutiliser la fonction existante)
+        chargerDonneesFormulaire(data);
+        
+        // Recalculer
+        calculerTempsReel();
+        
+    } catch (error) {
+        console.error('Erreur chargement année:', error);
+        showToast('Erreur lors du chargement de l\'année', 'error');
+    }
+}
+
+// Calculer automatiquement le CA depuis les réservations
+async function calculerCAAutomatique() {
+    const annee = parseInt(document.getElementById('annee_simulation').value);
+    
+    if (!annee) {
+        showToast('Veuillez sélectionner une année', 'warning');
+        return;
+    }
+    
+    try {
+        // Récupérer toutes les réservations
+        const reservations = await getAllReservations();
+        
+        // Filtrer par année et calculer le CA
+        const reservationsAnnee = reservations.filter(r => {
+            const dateDebut = parseLocalDate(r.dateDebut);
+            return dateDebut.getFullYear() === annee;
+        });
+        
+        const ca = reservationsAnnee.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
+        
+        // Mettre à jour le champ CA
+        document.getElementById('ca').value = ca.toFixed(2);
+        
+        // Afficher le message de confirmation
+        const infoDiv = document.getElementById('ca_auto_info');
+        if (infoDiv) {
+            infoDiv.style.display = 'block';
+            setTimeout(() => {
+                infoDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        showToast(`✓ CA ${annee}: ${formatCurrency(ca)} (${reservationsAnnee.length} réservations)`, 'success');
+        
+        // Recalculer
+        calculerTempsReel();
+        
+    } catch (error) {
+        console.error('Erreur calcul CA automatique:', error);
+        showToast('Erreur lors du calcul du CA', 'error');
+    }
+}
+
+// Créer une nouvelle année en copiant les frais fixes de l'année précédente
+async function creerNouvelleAnnee() {
+    const anneeActuelle = parseInt(document.getElementById('annee_simulation').value);
+    const nouvelleAnnee = anneeActuelle + 1;
+    
+    // Vérifier si l'année suivante existe déjà
+    const { data: existing } = await supabase
+        .from('simulations_fiscales')
+        .select('id')
+        .eq('annee', nouvelleAnnee)
+        .limit(1)
+        .single();
+    
+    if (existing) {
+        showToast(`L'année ${nouvelleAnnee} existe déjà`, 'warning');
+        return;
+    }
+    
+    if (!confirm(`Créer l'année ${nouvelleAnnee} avec les frais fixes de ${anneeActuelle} ?`)) {
+        return;
+    }
+    
+    try {
+        // Récupérer les données de l'année actuelle
+        const { data: anneePrecedente, error: loadError } = await supabase
+            .from('simulations_fiscales')
+            .select('*')
+            .eq('annee', anneeActuelle)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (loadError) throw loadError;
+        
+        // Créer les nouvelles données en copiant uniquement les frais fixes
+        const nouvellesDonnees = {
+            nom_simulation: `Simulation ${nouvelleAnnee}`,
+            annee: nouvelleAnnee,
+            chiffre_affaires: 0, // CA à 0, sera calculé automatiquement
+            
+            // Copier les frais fixes de Couzon
+            internet_couzon: anneePrecedente.internet_couzon,
+            internet_couzon_type: anneePrecedente.internet_couzon_type,
+            eau_couzon: anneePrecedente.eau_couzon,
+            eau_couzon_type: anneePrecedente.eau_couzon_type,
+            electricite_couzon: anneePrecedente.electricite_couzon,
+            electricite_couzon_type: anneePrecedente.electricite_couzon_type,
+            assurance_hab_couzon: anneePrecedente.assurance_hab_couzon,
+            assurance_hab_couzon_type: anneePrecedente.assurance_hab_couzon_type,
+            assurance_emprunt_couzon: anneePrecedente.assurance_emprunt_couzon,
+            assurance_emprunt_couzon_type: anneePrecedente.assurance_emprunt_couzon_type,
+            interets_emprunt_couzon: anneePrecedente.interets_emprunt_couzon,
+            interets_emprunt_couzon_type: anneePrecedente.interets_emprunt_couzon_type,
+            menage_couzon: anneePrecedente.menage_couzon,
+            menage_couzon_type: anneePrecedente.menage_couzon_type,
+            linge_couzon: anneePrecedente.linge_couzon,
+            linge_couzon_type: anneePrecedente.linge_couzon_type,
+            logiciel_couzon: anneePrecedente.logiciel_couzon,
+            logiciel_couzon_type: anneePrecedente.logiciel_couzon_type,
+            taxe_fonciere_couzon: anneePrecedente.taxe_fonciere_couzon,
+            cfe_couzon: anneePrecedente.cfe_couzon,
+            commissions_couzon: anneePrecedente.commissions_couzon,
+            amortissement_couzon: anneePrecedente.amortissement_couzon,
+            copropriete_couzon: anneePrecedente.copropriete_couzon,
+            copropriete_couzon_type: anneePrecedente.copropriete_couzon_type,
+            
+            // Copier les frais fixes de Trévoux
+            internet_trevoux: anneePrecedente.internet_trevoux,
+            internet_trevoux_type: anneePrecedente.internet_trevoux_type,
+            eau_trevoux: anneePrecedente.eau_trevoux,
+            eau_trevoux_type: anneePrecedente.eau_trevoux_type,
+            electricite_trevoux: anneePrecedente.electricite_trevoux,
+            electricite_trevoux_type: anneePrecedente.electricite_trevoux_type,
+            assurance_hab_trevoux: anneePrecedente.assurance_hab_trevoux,
+            assurance_hab_trevoux_type: anneePrecedente.assurance_hab_trevoux_type,
+            assurance_emprunt_trevoux: anneePrecedente.assurance_emprunt_trevoux,
+            assurance_emprunt_trevoux_type: anneePrecedente.assurance_emprunt_trevoux_type,
+            interets_emprunt_trevoux: anneePrecedente.interets_emprunt_trevoux,
+            interets_emprunt_trevoux_type: anneePrecedente.interets_emprunt_trevoux_type,
+            menage_trevoux: anneePrecedente.menage_trevoux,
+            menage_trevoux_type: anneePrecedente.menage_trevoux_type,
+            linge_trevoux: anneePrecedente.linge_trevoux,
+            linge_trevoux_type: anneePrecedente.linge_trevoux_type,
+            logiciel_trevoux: anneePrecedente.logiciel_trevoux,
+            logiciel_trevoux_type: anneePrecedente.logiciel_trevoux_type,
+            taxe_fonciere_trevoux: anneePrecedente.taxe_fonciere_trevoux,
+            cfe_trevoux: anneePrecedente.cfe_trevoux,
+            commissions_trevoux: anneePrecedente.commissions_trevoux,
+            amortissement_trevoux: anneePrecedente.amortissement_trevoux,
+            copropriete_trevoux: anneePrecedente.copropriete_trevoux,
+            copropriete_trevoux_type: anneePrecedente.copropriete_trevoux_type,
+            
+            // NE PAS copier: travaux_liste, frais_divers_liste, produits_accueil_liste
+            travaux_liste: [],
+            frais_divers_liste: [],
+            produits_accueil_liste: [],
+            
+            // Copier résidence principale
+            surface_bureau: anneePrecedente.surface_bureau,
+            surface_totale: anneePrecedente.surface_totale,
+            interets_residence: anneePrecedente.interets_residence,
+            interets_residence_type: anneePrecedente.interets_residence_type,
+            assurance_residence: anneePrecedente.assurance_residence,
+            assurance_residence_type: anneePrecedente.assurance_residence_type,
+            electricite_residence: anneePrecedente.electricite_residence,
+            electricite_residence_type: anneePrecedente.electricite_residence_type,
+            internet_residence: anneePrecedente.internet_residence,
+            internet_residence_type: anneePrecedente.internet_residence_type,
+            eau_residence: anneePrecedente.eau_residence,
+            eau_residence_type: anneePrecedente.eau_residence_type,
+            assurance_hab_residence: anneePrecedente.assurance_hab_residence,
+            assurance_hab_residence_type: anneePrecedente.assurance_hab_residence_type,
+            taxe_fonciere_residence: anneePrecedente.taxe_fonciere_residence,
+            
+            // Copier frais professionnels
+            comptable: anneePrecedente.comptable,
+            frais_bancaires: anneePrecedente.frais_bancaires,
+            telephone: anneePrecedente.telephone,
+            telephone_type: anneePrecedente.telephone_type,
+            materiel_info: anneePrecedente.materiel_info,
+            rc_pro: anneePrecedente.rc_pro,
+            formation: anneePrecedente.formation,
+            fournitures: anneePrecedente.fournitures,
+            fournitures_type: anneePrecedente.fournitures_type,
+            
+            // Copier véhicule
+            vehicule_option: anneePrecedente.vehicule_option,
+            puissance_fiscale: anneePrecedente.puissance_fiscale,
+            km_professionnels: anneePrecedente.km_professionnels,
+            
+            // Copier IR
+            salaire_madame: anneePrecedente.salaire_madame,
+            salaire_monsieur: anneePrecedente.salaire_monsieur,
+            nombre_enfants: anneePrecedente.nombre_enfants,
+            
+            // Copier crédits et frais perso
+            credits_liste: anneePrecedente.credits_liste || [],
+            frais_perso_internet: anneePrecedente.frais_perso_internet,
+            frais_perso_electricite: anneePrecedente.frais_perso_electricite,
+            frais_perso_eau: anneePrecedente.frais_perso_eau,
+            frais_perso_assurance: anneePrecedente.frais_perso_assurance,
+            frais_perso_taxe: anneePrecedente.frais_perso_taxe,
+            frais_perso_autres: anneePrecedente.frais_perso_autres
+        };
+        
+        // Sauvegarder la nouvelle année
+        const { error: insertError } = await supabase
+            .from('simulations_fiscales')
+            .insert(nouvellesDonnees);
+        
+        if (insertError) throw insertError;
+        
+        showToast(`✓ Année ${nouvelleAnnee} créée avec succès !`, 'success');
+        
+        // Recharger la liste des années et basculer sur la nouvelle
+        await chargerListeAnnees();
+        document.getElementById('annee_selector').value = nouvelleAnnee;
+        await chargerAnnee(nouvelleAnnee);
+        
+    } catch (error) {
+        console.error('Erreur création nouvelle année:', error);
+        showToast('Erreur lors de la création de la nouvelle année', 'error');
+    }
+}
+
+// Fonction helper pour charger les données dans le formulaire
+function chargerDonneesFormulaire(data) {
+    // Remplir le formulaire avec les données (même logique que chargerDerniereSimulation)
+    document.getElementById('ca').value = data.chiffre_affaires || '';
+    
+    // Couzon
+    document.getElementById('internet_couzon').value = data.internet_couzon || '';
+    document.getElementById('internet_couzon_type').value = data.internet_couzon_type || 'mensuel';
+    document.getElementById('eau_couzon').value = data.eau_couzon || '';
+    document.getElementById('eau_couzon_type').value = data.eau_couzon_type || 'mensuel';
+    document.getElementById('electricite_couzon').value = data.electricite_couzon || '';
+    document.getElementById('electricite_couzon_type').value = data.electricite_couzon_type || 'mensuel';
+    document.getElementById('assurance_hab_couzon').value = data.assurance_hab_couzon || '';
+    document.getElementById('assurance_hab_couzon_type').value = data.assurance_hab_couzon_type || 'mensuel';
+    document.getElementById('assurance_emprunt_couzon').value = data.assurance_emprunt_couzon || '';
+    document.getElementById('assurance_emprunt_couzon_type').value = data.assurance_emprunt_couzon_type || 'mensuel';
+    document.getElementById('interets_emprunt_couzon').value = data.interets_emprunt_couzon || '';
+    document.getElementById('interets_emprunt_couzon_type').value = data.interets_emprunt_couzon_type || 'mensuel';
+    document.getElementById('menage_couzon').value = data.menage_couzon || '';
+    document.getElementById('menage_couzon_type').value = data.menage_couzon_type || 'mensuel';
+    document.getElementById('linge_couzon').value = data.linge_couzon || '';
+    document.getElementById('linge_couzon_type').value = data.linge_couzon_type || 'mensuel';
+    document.getElementById('logiciel_couzon').value = data.logiciel_couzon || '';
+    document.getElementById('logiciel_couzon_type').value = data.logiciel_couzon_type || 'mensuel';
+    document.getElementById('taxe_fonciere_couzon').value = data.taxe_fonciere_couzon || '';
+    document.getElementById('cfe_couzon').value = data.cfe_couzon || '';
+    document.getElementById('commissions_couzon').value = data.commissions_couzon || '';
+    document.getElementById('amortissement_couzon').value = data.amortissement_couzon || '';
+    document.getElementById('copropriete_couzon').value = data.copropriete_couzon || '';
+    document.getElementById('copropriete_couzon_type').value = data.copropriete_couzon_type || 'mensuel';
+    
+    // Trévoux
+    document.getElementById('internet_trevoux').value = data.internet_trevoux || '';
+    document.getElementById('internet_trevoux_type').value = data.internet_trevoux_type || 'mensuel';
+    document.getElementById('eau_trevoux').value = data.eau_trevoux || '';
+    document.getElementById('eau_trevoux_type').value = data.eau_trevoux_type || 'mensuel';
+    document.getElementById('electricite_trevoux').value = data.electricite_trevoux || '';
+    document.getElementById('electricite_trevoux_type').value = data.electricite_trevoux_type || 'mensuel';
+    document.getElementById('assurance_hab_trevoux').value = data.assurance_hab_trevoux || '';
+    document.getElementById('assurance_hab_trevoux_type').value = data.assurance_hab_trevoux_type || 'mensuel';
+    document.getElementById('assurance_emprunt_trevoux').value = data.assurance_emprunt_trevoux || '';
+    document.getElementById('assurance_emprunt_trevoux_type').value = data.assurance_emprunt_trevoux_type || 'mensuel';
+    document.getElementById('interets_emprunt_trevoux').value = data.interets_emprunt_trevoux || '';
+    document.getElementById('interets_emprunt_trevoux_type').value = data.interets_emprunt_trevoux_type || 'mensuel';
+    document.getElementById('menage_trevoux').value = data.menage_trevoux || '';
+    document.getElementById('menage_trevoux_type').value = data.menage_trevoux_type || 'mensuel';
+    document.getElementById('linge_trevoux').value = data.linge_trevoux || '';
+    document.getElementById('linge_trevoux_type').value = data.linge_trevoux_type || 'mensuel';
+    document.getElementById('logiciel_trevoux').value = data.logiciel_trevoux || '';
+    document.getElementById('logiciel_trevoux_type').value = data.logiciel_trevoux_type || 'mensuel';
+    document.getElementById('taxe_fonciere_trevoux').value = data.taxe_fonciere_trevoux || '';
+    document.getElementById('cfe_trevoux').value = data.cfe_trevoux || '';
+    document.getElementById('commissions_trevoux').value = data.commissions_trevoux || '';
+    document.getElementById('amortissement_trevoux').value = data.amortissement_trevoux || '';
+    document.getElementById('copropriete_trevoux').value = data.copropriete_trevoux || '';
+    document.getElementById('copropriete_trevoux_type').value = data.copropriete_trevoux_type || 'mensuel';
+    
+    // Résidence principale
+    document.getElementById('surface_bureau').value = data.surface_bureau || '';
+    document.getElementById('surface_totale').value = data.surface_totale || '';
+    document.getElementById('interets_residence').value = data.interets_residence || '';
+    document.getElementById('interets_residence_type').value = data.interets_residence_type || 'mensuel';
+    document.getElementById('assurance_residence').value = data.assurance_residence || '';
+    document.getElementById('assurance_residence_type').value = data.assurance_residence_type || 'mensuel';
+    document.getElementById('electricite_residence').value = data.electricite_residence || '';
+    document.getElementById('electricite_residence_type').value = data.electricite_residence_type || 'mensuel';
+    document.getElementById('internet_residence').value = data.internet_residence || '';
+    document.getElementById('internet_residence_type').value = data.internet_residence_type || 'mensuel';
+    document.getElementById('eau_residence').value = data.eau_residence || '';
+    document.getElementById('eau_residence_type').value = data.eau_residence_type || 'mensuel';
+    document.getElementById('assurance_hab_residence').value = data.assurance_hab_residence || '';
+    document.getElementById('assurance_hab_residence_type').value = data.assurance_hab_residence_type || 'mensuel';
+    document.getElementById('taxe_fonciere_residence').value = data.taxe_fonciere_residence || '';
+    
+    // Frais professionnels
+    document.getElementById('comptable').value = data.comptable || '';
+    document.getElementById('frais_bancaires').value = data.frais_bancaires || '';
+    document.getElementById('telephone').value = data.telephone || '';
+    document.getElementById('telephone_type').value = data.telephone_type || 'mensuel';
+    document.getElementById('materiel_info').value = data.materiel_info || '';
+    document.getElementById('rc_pro').value = data.rc_pro || '';
+    document.getElementById('formation').value = data.formation || '';
+    document.getElementById('fournitures').value = data.fournitures || '';
+    document.getElementById('fournitures_type').value = data.fournitures_type || 'mensuel';
+    
+    // Véhicule
+    document.getElementById('puissance_fiscale').value = data.puissance_fiscale || 5;
+    document.getElementById('km_professionnels').value = data.km_professionnels || '';
+    
+    // IR
+    document.getElementById('salaire_madame').value = data.salaire_madame || '';
+    document.getElementById('salaire_monsieur').value = data.salaire_monsieur || '';
+    document.getElementById('nombre_enfants').value = data.nombre_enfants || 0;
+    
+    // Reste à vivre - Frais personnels
+    if (document.getElementById('frais_perso_internet')) {
+        document.getElementById('frais_perso_internet').value = data.frais_perso_internet || '';
+    }
+    if (document.getElementById('frais_perso_electricite')) {
+        document.getElementById('frais_perso_electricite').value = data.frais_perso_electricite || '';
+    }
+    if (document.getElementById('frais_perso_eau')) {
+        document.getElementById('frais_perso_eau').value = data.frais_perso_eau || '';
+    }
+    if (document.getElementById('frais_perso_assurance')) {
+        document.getElementById('frais_perso_assurance').value = data.frais_perso_assurance || '';
+    }
+    if (document.getElementById('frais_perso_taxe')) {
+        document.getElementById('frais_perso_taxe').value = data.frais_perso_taxe || '';
+    }
+    if (document.getElementById('frais_perso_autres')) {
+        document.getElementById('frais_perso_autres').value = data.frais_perso_autres || '';
+    }
+    
+    // Restaurer les listes dynamiques
+    document.getElementById('travaux-liste').innerHTML = '';
+    document.getElementById('frais-divers-liste').innerHTML = '';
+    document.getElementById('produits-accueil-liste').innerHTML = '';
+    travauxCounter = 0;
+    fraisDiversCounter = 0;
+    produitsCounter = 0;
+    
+    // Restaurer les travaux
+    if (data.travaux_liste) {
+        const travaux = Array.isArray(data.travaux_liste) ? data.travaux_liste : [];
+        travaux.forEach(item => {
+            ajouterTravaux();
+            const id = travauxCounter;
+            document.getElementById(`travaux-desc-${id}`).value = item.description || '';
+            document.getElementById(`travaux-gite-${id}`).value = item.gite || 'couzon';
+            document.getElementById(`travaux-montant-${id}`).value = item.montant || 0;
+        });
+    }
+    
+    // Restaurer les frais divers
+    if (data.frais_divers_liste) {
+        const frais = Array.isArray(data.frais_divers_liste) ? data.frais_divers_liste : [];
+        frais.forEach(item => {
+            ajouterFraisDivers();
+            const id = fraisDiversCounter;
+            document.getElementById(`frais-desc-${id}`).value = item.description || '';
+            document.getElementById(`frais-gite-${id}`).value = item.gite || 'couzon';
+            document.getElementById(`frais-montant-${id}`).value = item.montant || 0;
+        });
+    }
+    
+    // Restaurer les produits d'accueil
+    if (data.produits_accueil_liste) {
+        const produits = Array.isArray(data.produits_accueil_liste) ? data.produits_accueil_liste : [];
+        produits.forEach(item => {
+            ajouterProduitAccueil();
+            const id = produitsCounter;
+            document.getElementById(`produits-desc-${id}`).value = item.description || '';
+            document.getElementById(`produits-gite-${id}`).value = item.gite || 'couzon';
+            document.getElementById(`produits-montant-${id}`).value = item.montant || 0;
+        });
+    }
+    
+    // Restaurer les crédits
+    if (document.getElementById('credits-liste-container')) {
+        document.getElementById('credits-liste-container').innerHTML = '';
+        creditsCounter = 0;
+        
+        if (data.credits_liste) {
+            const credits = Array.isArray(data.credits_liste) ? data.credits_liste : [];
+            credits.forEach(item => {
+                ajouterCredit();
+                const id = creditsCounter;
+                document.getElementById(`credit-nom-${id}`).value = item.nom || '';
+                document.getElementById(`credit-montant-${id}`).value = item.montant || 0;
+            });
+        }
+    }
+}
 
 async function sauvegarderSimulation(silencieux = false) {
     
@@ -1135,10 +1601,16 @@ function initFiscalite() {
     form.addEventListener('focusout', handleFormBlur);
     
     
-    // Charger automatiquement la dernière simulation
-    setTimeout(() => {
-        chargerDerniereSimulation();
-    }, 100);
+    // Charger la liste des années disponibles
+    chargerListeAnnees().then(() => {
+        // Charger automatiquement la dernière simulation après avoir chargé la liste
+        const anneeSelectionnee = document.getElementById('annee_selector').value;
+        if (anneeSelectionnee) {
+            chargerAnnee(anneeSelectionnee);
+        } else {
+            chargerDerniereSimulation();
+        }
+    });
 }
 
 // Gestionnaires d'événements avec délégation
@@ -1322,6 +1794,12 @@ window.genererTableauSoldes = genererTableauSoldes;
 window.chargerSoldesBancaires = chargerSoldesBancaires;
 window.sauvegarderSoldesBancaires = sauvegarderSoldesBancaires;
 window.afficherGraphiqueSoldes = afficherGraphiqueSoldes;
+
+// Nouvelles fonctions pour la gestion des années fiscales
+window.chargerListeAnnees = chargerListeAnnees;
+window.chargerAnnee = chargerAnnee;
+window.calculerCAAutomatique = calculerCAAutomatique;
+window.creerNouvelleAnnee = creerNouvelleAnnee;
 
 // ==========================================
 // 💰 SUIVI TRÉSORERIE MENSUELLE
