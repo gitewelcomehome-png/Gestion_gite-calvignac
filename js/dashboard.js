@@ -874,11 +874,11 @@ async function updateFinancialIndicators() {
     const beneficeEl = document.getElementById('dashboard-benefice-moyen');
     
     // Afficher URSSAF des 2 années
-    if (urssaf2025El) urssaf2025El.textContent = urssafPrecedent > 0 ? formatCurrency(urssafPrecedent) : '-';
+    if (urssaf2025El) urssaf2025El.textContent = simulationPrecedente ? formatCurrency(urssafPrecedent) : '-';
     if (urssaf2026El) urssaf2026El.textContent = formatCurrency(urssafTotal);
     
     // Afficher IR des 2 années  
-    if (ir2025El) ir2025El.textContent = impotRevenuPrecedent > 0 ? formatCurrency(impotRevenuPrecedent) : '-';
+    if (ir2025El) ir2025El.textContent = simulationPrecedente ? formatCurrency(impotRevenuPrecedent) : '-';
     if (ir2026El) ir2026El.textContent = formatCurrency(impotRevenuCourant);
     
     // Afficher bénéfice
