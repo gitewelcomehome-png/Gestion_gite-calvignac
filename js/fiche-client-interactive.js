@@ -11,7 +11,7 @@ import { getFAQPourGite } from './faq.js';
  */
 export async function genererFicheClientComplete(reservation) {
     // Charger toutes les données
-    const infosGite = loadInfosGites(reservation.gite);
+    const infosGite = await loadInfosGites(reservation.gite);
     const faqGite = await getFAQPourGite(reservation.gite.toLowerCase());
     const activites = await getActivitesGite(reservation.gite);
     const prochainMenage = await getProchainMenage(reservation.gite, reservation.dateFin);
@@ -2126,9 +2126,22 @@ async function getProchainMenage(gite, dateApres) {
     }
 }
 
-function loadInfosGites(gite) {
-    const allInfos = JSON.parse(localStorage.getItem('infosGites') || '{}');
-    return allInfos[gite] || {};
+async function loadInfosGites(gite) {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('infos_gites')
+            .select('*')
+            .eq('gite', gite)
+            .single();
+        
+        if (error) throw error;
+        return data || {};
+    } catch (error) {
+        console.error('Erreur chargement infos gîte:', error);
+        // Fallback localStorage si BDD indisponible
+        const allInfos = JSON.parse(localStorage.getItem('infosGites') || '{}');
+        return allInfos[gite] || {};
+    }
 }
 
 // Exports
