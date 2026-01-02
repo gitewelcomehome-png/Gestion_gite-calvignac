@@ -2193,6 +2193,11 @@ document.addEventListener('DOMContentLoaded', () => {
             anneeInput.value = currentYear;
             genererTableauSoldes();
             
+            // Charger les données de l'année en cours
+            setTimeout(() => {
+                chargerSoldesBancaires();
+            }, 500);
+            
             // Ajouter sauvegarde automatique sur les inputs de soldes
             setTimeout(() => {
                 const tbody = document.getElementById('tbody-soldes');
