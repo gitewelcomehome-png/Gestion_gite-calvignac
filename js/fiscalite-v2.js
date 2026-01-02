@@ -6,6 +6,7 @@
 let travauxCounter = 0;
 let fraisDiversCounter = 0;
 let produitsCounter = 0;
+let creditsCounter = 0; // Nouveau compteur pour les crédits
 
 // Debounce pour éviter trop de calculs
 let calculTempsReelTimeout = null;
@@ -125,6 +126,9 @@ function calculerTempsReel() {
         document.getElementById('revenu_lmp').value = resteAvantIR.toFixed(2);
         calculerIR();
         
+        // Calculer le reste à vivre
+        setTimeout(() => calculerResteAVivre(), 100);
+        
     }, 500);
 }
 
@@ -234,6 +238,9 @@ function calculerIR() {
     document.getElementById('ir-quotient').textContent = quotient.toFixed(2) + ' €';
     document.getElementById('ir-montant').textContent = impotTotal.toFixed(2) + ' €';
     document.getElementById('ir-reste-final').textContent = resteFinalTotal.toFixed(2) + ' €';
+    
+    // Calculer le reste à vivre après le calcul de l'IR
+    setTimeout(() => calculerResteAVivre(), 100);
 }
 
 // Attacher les événements de calcul en temps réel
@@ -1122,6 +1129,11 @@ function handleFormInput(e) {
     if (target.type === 'number' || target.tagName === 'SELECT') {
         console.log(`⌨️ [EVENT] Input sur ${target.id || target.name || 'champ'}`);
         calculerTempsReel();
+        
+        // Si c'est un champ de la section reste à vivre, recalculer immédiatement
+        if (target.id && (target.id.startsWith('frais_perso_') || target.id.startsWith('credit_'))) {
+            setTimeout(() => calculerResteAVivre(), 100);
+        }
     }
 }
 
@@ -1130,6 +1142,11 @@ function handleFormChange(e) {
     if (target.type === 'number' || target.tagName === 'SELECT') {
         console.log(`🔄 [EVENT] Change sur ${target.id || target.name || 'champ'}`);
         calculerTempsReel();
+        
+        // Si c'est un champ de la section reste à vivre, recalculer immédiatement
+        if (target.id && (target.id.startsWith('frais_perso_') || target.id.startsWith('credit_'))) {
+            setTimeout(() => calculerResteAVivre(), 100);
+        }
     }
 }
 
@@ -1139,6 +1156,128 @@ function handleFormBlur(e) {
         console.log(`👋 [EVENT] Blur sur ${target.id || target.name || 'champ'}`);
         sauvegardeAutomatique();
     }
+}
+
+// ==========================================
+// 💰 GESTION DU RESTE À VIVRE
+// ==========================================
+
+function ajouterCredit() {
+    const id = ++creditsCounter;
+    const container = document.getElementById('credits-liste');
+    const item = document.createElement('div');
+    item.className = 'credit-item';
+    item.id = `credit-${id}`;
+    item.innerHTML = `
+        <input type="text" placeholder="Description du crédit" id="credit-desc-${id}">
+        <input type="number" step="0.01" placeholder="Mensualité €" id="credit-mensuel-${id}">
+        <input type="number" step="0.01" placeholder="Capital restant €" id="credit-capital-${id}">
+        <button type="button" onclick="supprimerCredit('credit-${id}')">×</button>
+    `;
+    container.appendChild(item);
+    console.log('✅ [DEBUG] Crédit ID', id, 'ajouté');
+    calculerResteAVivre();
+}
+
+function supprimerCredit(itemId) {
+    const item = document.getElementById(itemId);
+    if (item) {
+        item.remove();
+        calculerResteAVivre();
+    }
+}
+
+function getCreditsListe() {
+    const items = [];
+    for (let i = 1; i <= creditsCounter; i++) {
+        const desc = document.getElementById(`credit-desc-${i}`);
+        if (desc) {
+            items.push({
+                description: desc.value,
+                mensuel: parseFloat(document.getElementById(`credit-mensuel-${i}`).value || 0),
+                capital: parseFloat(document.getElementById(`credit-capital-${i}`).value || 0)
+            });
+        }
+    }
+    return items;
+}
+
+function calculerResteAVivre() {
+    console.log('💰 [RAV] Calcul du reste à vivre...');
+    
+    // ==================== REVENUS ====================
+    // Salaires mensuels
+    const salaireMadame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
+    const salaireMonsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
+    
+    // Revenus LMP après IR (on prend le reste final de l'IR, divisé par 12 pour mensualiser)
+    const resteFinalIRElement = document.getElementById('ir-reste-final');
+    const revenuLMPAnnuel = resteFinalIRElement && resteFinalIRElement.textContent !== '0 €' 
+        ? parseFloat(resteFinalIRElement.textContent.replace(/[^\d.-]/g, '')) 
+        : 0;
+    const revenuLMPMensuel = revenuLMPAnnuel / 12;
+    
+    // Frais kilométriques (barème - c'est une économie réelle)
+    const kmPro = parseInt(document.getElementById('km_professionnels')?.value || 0);
+    const puissance = parseInt(document.getElementById('puissance_fiscale')?.value || 5);
+    const fraisKmAnnuel = calculerBaremeKilometrique(puissance, kmPro);
+    const fraisKmMensuel = fraisKmAnnuel / 12;
+    
+    // Amortissements réintégrés (ce n'est pas une sortie d'argent réelle)
+    const amortCouzon = parseFloat(document.getElementById('amortissement_couzon')?.value || 0);
+    const amortTrevoux = parseFloat(document.getElementById('amortissement_trevoux')?.value || 0);
+    const amortAuto = parseFloat(document.getElementById('amortissement_auto')?.value || 0);
+    const amortissementsMensuel = (amortCouzon + amortTrevoux + amortAuto) / 12;
+    
+    const totalRevenus = salaireMadame + salaireMonsieur + revenuLMPMensuel + fraisKmMensuel + amortissementsMensuel;
+    
+    // ==================== DÉPENSES ====================
+    // Crédits
+    const credits = getCreditsListe();
+    const totalCredits = credits.reduce((sum, c) => sum + c.mensuel, 0);
+    const totalCapital = credits.reduce((sum, c) => sum + c.capital, 0);
+    
+    // Frais personnels mensuels
+    const fraisInternet = parseFloat(document.getElementById('frais_perso_internet')?.value || 0);
+    const fraisElec = parseFloat(document.getElementById('frais_perso_electricite')?.value || 0);
+    const fraisEau = parseFloat(document.getElementById('frais_perso_eau')?.value || 0);
+    const fraisAssurance = parseFloat(document.getElementById('frais_perso_assurance')?.value || 0);
+    const fraisTaxeAnnuel = parseFloat(document.getElementById('frais_perso_taxe')?.value || 0);
+    const fraisAutres = parseFloat(document.getElementById('frais_perso_autres')?.value || 0);
+    
+    const totalFraisPerso = fraisInternet + fraisElec + fraisEau + fraisAssurance + (fraisTaxeAnnuel / 12) + fraisAutres;
+    
+    const totalDepenses = totalCredits + totalFraisPerso;
+    
+    // ==================== RESTE À VIVRE ====================
+    const resteAVivre = totalRevenus - totalDepenses;
+    
+    // ==================== AFFICHAGE ====================
+    document.getElementById('rav-salaire-madame').textContent = salaireMadame.toFixed(2) + ' €';
+    document.getElementById('rav-salaire-monsieur').textContent = salaireMonsieur.toFixed(2) + ' €';
+    document.getElementById('rav-lmp').textContent = revenuLMPMensuel.toFixed(2) + ' €';
+    document.getElementById('rav-kms').textContent = fraisKmMensuel.toFixed(2) + ' €';
+    document.getElementById('rav-amortissements').textContent = amortissementsMensuel.toFixed(2) + ' €';
+    document.getElementById('rav-total-revenus').textContent = totalRevenus.toFixed(2) + ' €';
+    
+    document.getElementById('rav-credits').textContent = totalCredits.toFixed(2) + ' €';
+    document.getElementById('rav-frais-perso').textContent = totalFraisPerso.toFixed(2) + ' €';
+    document.getElementById('rav-total-depenses').textContent = totalDepenses.toFixed(2) + ' €';
+    
+    document.getElementById('rav-final').textContent = resteAVivre.toFixed(2) + ' €';
+    document.getElementById('rav-capital-total').textContent = `Capital restant dû total : ${totalCapital.toFixed(2)} €`;
+    
+    // Couleur selon le résultat
+    const ravFinalElement = document.getElementById('rav-final');
+    if (resteAVivre < 0) {
+        ravFinalElement.style.color = '#e74c3c';
+    } else if (resteAVivre < 1000) {
+        ravFinalElement.style.color = '#f39c12';
+    } else {
+        ravFinalElement.style.color = '#2ecc71';
+    }
+    
+    console.log('✅ [RAV] Reste à vivre calculé:', resteAVivre.toFixed(2), '€');
 }
 
 // ==========================================
@@ -1158,7 +1297,10 @@ window.chargerDerniereSimulation = chargerDerniereSimulation;
 window.nouvelleSimulation = nouvelleSimulation;
 window.exporterPDF = exporterPDF;
 window.calculerTempsReel = calculerTempsReel;
-window.initFiscalite = initFiscalite; // NOUVELLE FONCTION D'INIT
+window.initFiscalite = initFiscalite;
+window.ajouterCredit = ajouterCredit; // Nouvelle fonction
+window.supprimerCredit = supprimerCredit; // Nouvelle fonction
+window.calculerResteAVivre = calculerResteAVivre; // Nouvelle fonction
 
 // Initialisation automatique au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
