@@ -42,6 +42,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Supprimer le trigger s'il existe déjà
+DROP TRIGGER IF EXISTS update_soldes_updated_at ON suivi_soldes_bancaires;
+
+-- Créer le trigger
 CREATE TRIGGER update_soldes_updated_at
     BEFORE UPDATE ON suivi_soldes_bancaires
     FOR EACH ROW
