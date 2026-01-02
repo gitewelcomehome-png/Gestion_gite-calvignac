@@ -25,22 +25,17 @@ function toggleBloc(titleElement) {
 }
 
 function sauvegardeAutomatique() {
-    console.log('🔄 [AUTO-SAVE] Déclenchement sauvegarde automatique');
     const ca = parseFloat(document.getElementById('ca')?.value || 0);
     if (ca === 0) {
-        console.log('⚠️ [AUTO-SAVE] CA = 0, pas de sauvegarde');
         return;
     }
     sauvegarderSimulation(true); // true = mode silencieux
 }
 
 function calculerTempsReel() {
-    console.log('🔵 [DEBUG] calculerTempsReel() appelée');
     clearTimeout(calculTempsReelTimeout);
     calculTempsReelTimeout = setTimeout(() => {
-        console.log('⏱️ [DEBUG] Timeout terminé, début calcul...');
         const ca = parseFloat(document.getElementById('ca')?.value || 0);
-        console.log('💵 [DEBUG] CA récupéré:', ca, '€');
         if (ca === 0) {
             // Réinitialiser l'affichage
             document.getElementById('preview-benefice').textContent = '0 €';
@@ -62,9 +57,6 @@ function calculerTempsReel() {
         const fraisDivers = getFraisDiversListe().reduce((sum, item) => sum + item.montant, 0);
         const produitsAccueil = getProduitsAccueilListe().reduce((sum, item) => sum + item.montant, 0);
         
-        console.log('💰 [CALCUL] Travaux:', travaux, '€');
-        console.log('💰 [CALCUL] Frais divers:', fraisDivers, '€');
-        console.log('💰 [CALCUL] Produits accueil:', produitsAccueil, '€');
         
         const chargesBiens = chargesCouzon + chargesTrevoux + travaux + fraisDivers + produitsAccueil;
         
@@ -265,11 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 
 function ajouterTravaux() {
-    console.log('➕ [DEBUG] ajouterTravaux() appelée');
     const id = ++travauxCounter;
-    console.log('🆔 [DEBUG] Nouveau travail ID:', id);
     const container = document.getElementById('travaux-liste');
-    console.log('📦 [DEBUG] Container trouvé:', container ? 'OUI' : 'NON');
     const item = document.createElement('div');
     item.className = 'liste-item';
     item.id = `travaux-${id}`;
@@ -284,7 +273,6 @@ function ajouterTravaux() {
         <button type="button" onclick="supprimerItem('travaux-${id}')">×</button>
     `;
     container.appendChild(item);
-    console.log('✅ [DEBUG] Travail ID', id, 'ajouté (événements gérés par délégation)');
     // Les événements sont gérés automatiquement par la délégation sur le formulaire
 }
 
@@ -305,7 +293,6 @@ function ajouterFraisDivers() {
         <button type="button" onclick="supprimerItem('frais-${id}')">×</button>
     `;
     container.appendChild(item);
-    console.log('✅ [DEBUG] Frais ID', id, 'ajouté (événements gérés par délégation)');
 }
 
 function ajouterProduitAccueil() {
@@ -325,7 +312,6 @@ function ajouterProduitAccueil() {
         <button type="button" onclick="supprimerItem('produits-${id}')">×</button>
     `;
     container.appendChild(item);
-    console.log('✅ [DEBUG] Produit ID', id, 'ajouté (événements gérés par délégation)');
 }
 
 function supprimerItem(itemId) {
@@ -351,7 +337,6 @@ function getTravauxListe() {
             });
         }
     }
-    console.log('📋 [GET] Travaux récupérés:', items.length, 'items, total:', items.reduce((s,i)=>s+i.montant,0), '€');
     return items;
 }
 
@@ -367,7 +352,6 @@ function getFraisDiversListe() {
             });
         }
     }
-    console.log('📋 [GET] Frais divers récupérés:', items.length, 'items, total:', items.reduce((s,i)=>s+i.montant,0), '€');
     return items;
 }
 
@@ -383,7 +367,6 @@ function getProduitsAccueilListe() {
             });
         }
     }
-    console.log('📋 [GET] Produits accueil récupérés:', items.length, 'items, total:', items.reduce((s,i)=>s+i.montant,0), '€');
     return items;
 }
 
@@ -725,18 +708,15 @@ function afficherResultats(data) {
 // ==========================================
 
 async function sauvegarderSimulation(silencieux = false) {
-    console.log('💾 [SAVE] Début sauvegarderSimulation(), silencieux =', silencieux);
     
     let nom = 'Simulation auto';
     if (!silencieux) {
         nom = prompt('Nom de la simulation :');
         if (!nom) {
-            console.log('❌ [SAVE] Sauvegarde annulée par utilisateur');
             return;
         }
     }
     
-    console.log('📝 [SAVE] Collecte des données pour:', nom);
     const data = {
         nom_simulation: nom,
         chiffre_affaires: parseFloat(document.getElementById('ca').value || 0),
@@ -858,11 +838,9 @@ async function sauvegarderSimulation(silencieux = false) {
     // Vérifier si les données ont changé
     const dataString = JSON.stringify(data);
     if (silencieux && dataString === lastSavedData) {
-        console.log('⏭️ [SAVE] Données identiques, sauvegarde ignorée');
         return;
     }
     
-    console.log('📤 [SAVE] Envoi vers Supabase...', data);
     try {
         const { data: result, error } = await supabase
             .from('simulations_fiscales')
@@ -874,7 +852,6 @@ async function sauvegarderSimulation(silencieux = false) {
             throw error;
         }
         
-        console.log('✅ [SAVE] Succès! ID:', result[0]?.id);
         lastSavedData = dataString;
         
         if (!silencieux) {
@@ -889,7 +866,6 @@ async function sauvegarderSimulation(silencieux = false) {
 }
 
 async function chargerDerniereSimulation() {
-    console.log('📥 [LOAD] Chargement de la dernière simulation...');
     
     try {
         const { data, error } = await supabase
@@ -901,18 +877,15 @@ async function chargerDerniereSimulation() {
         
         if (error) {
             if (error.code === 'PGRST116') {
-                console.log('ℹ️ [LOAD] Aucune simulation trouvée');
                 return;
             }
             throw error;
         }
         
         if (!data) {
-            console.log('ℹ️ [LOAD] Aucune simulation trouvée');
             return;
         }
         
-        console.log('✅ [LOAD] Simulation trouvée, ID:', data.id, 'Date:', data.created_at);
         
         // Remplir le formulaire avec les données
         document.getElementById('ca').value = data.chiffre_affaires || '';
@@ -1027,7 +1000,6 @@ async function chargerDerniereSimulation() {
         }
         
         // Restaurer les listes dynamiques
-        console.log('🔄 [LOAD] Restauration des listes dynamiques...');
         
         // Réinitialiser les conteneurs
         document.getElementById('travaux-liste').innerHTML = '';
@@ -1040,7 +1012,6 @@ async function chargerDerniereSimulation() {
         // Restaurer les travaux
         if (data.travaux_liste) {
             const travaux = Array.isArray(data.travaux_liste) ? data.travaux_liste : [];
-            console.log('📋 [LOAD] Travaux trouvés:', travaux.length);
             travaux.forEach(item => {
                 ajouterTravaux();
                 const id = travauxCounter;
@@ -1053,7 +1024,6 @@ async function chargerDerniereSimulation() {
         // Restaurer les frais divers
         if (data.frais_divers_liste) {
             const frais = Array.isArray(data.frais_divers_liste) ? data.frais_divers_liste : [];
-            console.log('📋 [LOAD] Frais divers trouvés:', frais.length);
             frais.forEach(item => {
                 ajouterFraisDivers();
                 const id = fraisDiversCounter;
@@ -1066,7 +1036,6 @@ async function chargerDerniereSimulation() {
         // Restaurer les produits d'accueil
         if (data.produits_accueil_liste) {
             const produits = Array.isArray(data.produits_accueil_liste) ? data.produits_accueil_liste : [];
-            console.log('📋 [LOAD] Produits d\'accueil trouvés:', produits.length);
             produits.forEach(item => {
                 ajouterProduitAccueil();
                 const id = produitsCounter;
@@ -1079,7 +1048,6 @@ async function chargerDerniereSimulation() {
         // Restaurer les crédits (reste à vivre)
         if (data.credits_liste) {
             const credits = Array.isArray(data.credits_liste) ? data.credits_liste : [];
-            console.log('📋 [LOAD] Crédits trouvés:', credits.length);
             // Réinitialiser le conteneur des crédits
             const creditsContainer = document.getElementById('credits-liste');
             if (creditsContainer) {
@@ -1095,21 +1063,16 @@ async function chargerDerniereSimulation() {
             }
         }
         
-        console.log('✅ [LOAD] Formulaire rempli, recalcul...');
         
         // Recalculer
         try {
-            console.log('🔢 [LOAD] Appel calculerRatio()...');
             calculerRatio();
-            console.log('✅ [LOAD] calculerRatio() terminé');
         } catch (e) {
             console.error('❌ [LOAD] Erreur calculerRatio():', e);
         }
         
         try {
-            console.log('⏱️ [LOAD] Appel calculerTempsReel()...');
             calculerTempsReel();
-            console.log('✅ [LOAD] calculerTempsReel() terminé');
         } catch (e) {
             console.error('❌ [LOAD] Erreur calculerTempsReel():', e);
         }
@@ -1143,7 +1106,6 @@ function exporterPDF() {
 // ==========================================
 
 function initFiscalite() {
-    console.log('🚀 [INIT-FISCALITE] Début initialisation module fiscalité');
     
     const form = document.getElementById('calculateur-lmp');
     if (!form) {
@@ -1152,11 +1114,9 @@ function initFiscalite() {
         return;
     }
     
-    console.log('✅ [INIT-FISCALITE] Formulaire trouvé');
     
     // NOUVELLE APPROCHE : Délégation d'événements sur le formulaire entier
     // Cela fonctionne même pour les champs ajoutés dynamiquement !
-    console.log('🎯 [INIT-FISCALITE] Installation de la délégation d\'événements...');
     
     // Supprimer les anciens événements s'ils existent
     form.removeEventListener('input', handleFormInput);
@@ -1168,11 +1128,9 @@ function initFiscalite() {
     form.addEventListener('change', handleFormChange);
     form.addEventListener('focusout', handleFormBlur);
     
-    console.log('✅ [INIT-FISCALITE] Délégation d\'événements installée');
     
     // Charger automatiquement la dernière simulation
     setTimeout(() => {
-        console.log('📥 [INIT-FISCALITE] Chargement de la dernière simulation...');
         chargerDerniereSimulation();
     }, 100);
 }
@@ -1181,7 +1139,6 @@ function initFiscalite() {
 function handleFormInput(e) {
     const target = e.target;
     if (target.type === 'number' || target.tagName === 'SELECT') {
-        console.log(`⌨️ [EVENT] Input sur ${target.id || target.name || 'champ'}`);
         calculerTempsReel();
         
         // Si c'est un champ de la section reste à vivre, recalculer immédiatement
@@ -1194,7 +1151,6 @@ function handleFormInput(e) {
 function handleFormChange(e) {
     const target = e.target;
     if (target.type === 'number' || target.tagName === 'SELECT') {
-        console.log(`🔄 [EVENT] Change sur ${target.id || target.name || 'champ'}`);
         calculerTempsReel();
         
         // Si c'est un champ de la section reste à vivre, recalculer immédiatement
@@ -1207,7 +1163,6 @@ function handleFormChange(e) {
 function handleFormBlur(e) {
     const target = e.target;
     if (target.type === 'number') {
-        console.log(`👋 [EVENT] Blur sur ${target.id || target.name || 'champ'}`);
         sauvegardeAutomatique();
     }
 }
@@ -1229,7 +1184,6 @@ function ajouterCredit() {
         <button type="button" onclick="supprimerCredit('credit-${id}')">×</button>
     `;
     container.appendChild(item);
-    console.log('✅ [DEBUG] Crédit ID', id, 'ajouté');
     calculerResteAVivre();
 }
 
@@ -1257,7 +1211,6 @@ function getCreditsListe() {
 }
 
 function calculerResteAVivre() {
-    console.log('💰 [RAV] Calcul du reste à vivre...');
     
     // ==================== REVENUS (tout converti en MENSUEL) ====================
     // Salaires annuels convertis en mensuels
@@ -1334,7 +1287,6 @@ function calculerResteAVivre() {
         ravFinalElement.style.color = '#2ecc71';
     }
     
-    console.log('✅ [RAV] Reste à vivre calculé:', resteAVivre.toFixed(2), '€');
 }
 
 // ==========================================
@@ -1361,7 +1313,6 @@ window.calculerResteAVivre = calculerResteAVivre; // Nouvelle fonction
 
 // Initialisation automatique au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 [INIT] DOMContentLoaded - Tentative d\'initialisation...');
     // Attendre que le contenu de l'onglet soit potentiellement chargé
     setTimeout(initFiscalite, 1000);
 });
