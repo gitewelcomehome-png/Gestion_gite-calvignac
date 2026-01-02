@@ -213,7 +213,7 @@ async function updateDashboardReservations() {
         const badgeColor = isArrival ? '#27AE60' : '#3498DB';
         const giteColor = r.gite === 'Trévoux' ? '#667eea' : '#f093fb';
         
-        const paiementColor = r.paiement === 'Soldé' ? '#27AE60' : r.paiement === 'Acompte reçu' ? '#F39C12' : '#E74C3C';
+        const paiementIcon = r.paiement === 'Soldé' ? '✅' : r.paiement === 'Acompte reçu' ? '⏳' : '❌';
         
         // Calculer jours avant arrivée
         const daysUntilArrival = Math.ceil((arrival - today) / (1000 * 60 * 60 * 24));
