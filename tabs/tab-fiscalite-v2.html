@@ -635,6 +635,120 @@
             </div>
         </div>
 
+        <!-- BLOC : Reste à vivre -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
+                <span class="toggle-icon">▼</span> 💰 Reste à vivre après crédits
+            </h3>
+            <div class="bloc-content">
+                <p style="color: #7f8c8d; margin-bottom: 20px;">Calculez votre reste à vivre mensuel en intégrant tous vos revenus (salaires, LMP, amortissements) et toutes vos charges (crédits, frais personnels).</p>
+                
+                <!-- Crédits en cours -->
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+                    <h4 style="margin-bottom: 15px; color: #856404;">📋 Crédits en cours</h4>
+                    <div id="credits-liste" style="display: grid; gap: 10px; margin-bottom: 15px;">
+                        <!-- Les crédits seront ajoutés ici dynamiquement -->
+                    </div>
+                    <button type="button" onclick="ajouterCredit()" class="btn btn-secondary" style="width: 100%;">
+                        ➕ Ajouter un crédit
+                    </button>
+                </div>
+
+                <!-- Frais personnels mensuels -->
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                    <h4 style="margin-bottom: 15px; color: #1565c0;">🏠 Frais personnels mensuels (maison)</h4>
+                    <div class="fiscal-grid">
+                        <div class="form-group">
+                            <label>Internet personnel (€/mois)</label>
+                            <input type="number" id="frais_perso_internet" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Électricité personnel (€/mois)</label>
+                            <input type="number" id="frais_perso_electricite" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Eau personnel (€/mois)</label>
+                            <input type="number" id="frais_perso_eau" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Assurance personnel (€/mois)</label>
+                            <input type="number" id="frais_perso_assurance" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Taxe foncière personnel (€/an)</label>
+                            <input type="number" id="frais_perso_taxe" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Autres frais mensuels</label>
+                            <input type="number" id="frais_perso_autres" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Résultat Reste à vivre -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px;">
+                    <h4 style="color: white; margin-bottom: 20px; font-size: 1.2rem;">📊 Calcul du reste à vivre mensuel</h4>
+                    
+                    <!-- Revenus -->
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <h5 style="color: white; margin-bottom: 10px;">💰 REVENUS MENSUELS</h5>
+                        <div style="display: grid; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Salaire Madame</span>
+                                <strong id="rav-salaire-madame">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Salaire Monsieur</span>
+                                <strong id="rav-salaire-monsieur">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Revenus LMP (après IR)</span>
+                                <strong id="rav-lmp">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Économie frais kilométriques</span>
+                                <strong id="rav-kms">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Amortissements réintégrés</span>
+                                <strong id="rav-amortissements">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 10px 0; font-weight: 700; border-top: 2px solid rgba(255,255,255,0.5); margin-top: 5px;">
+                                <span>TOTAL REVENUS</span>
+                                <strong id="rav-total-revenus">0 €</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dépenses -->
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <h5 style="color: white; margin-bottom: 10px;">💸 DÉPENSES MENSUELLES</h5>
+                        <div style="display: grid; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Crédits</span>
+                                <strong id="rav-credits">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Frais personnels</span>
+                                <strong id="rav-frais-perso">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 10px 0; font-weight: 700; border-top: 2px solid rgba(255,255,255,0.5); margin-top: 5px;">
+                                <span>TOTAL DÉPENSES</span>
+                                <strong id="rav-total-depenses">0 €</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Résultat final -->
+                    <div style="background: rgba(255,255,255,0.25); padding: 20px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.1rem; margin-bottom: 10px;">💵 RESTE À VIVRE MENSUEL</div>
+                        <div id="rav-final" style="font-size: 2.5rem; font-weight: 900;">0 €</div>
+                        <div id="rav-capital-total" style="font-size: 0.9rem; opacity: 0.9; margin-top: 10px;">Capital restant dû total : 0 €</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </form>
 </div>
 
@@ -726,6 +840,42 @@
 }
 
 .liste-item button:hover {
+    background: #c0392b;
+}
+
+.credit-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 40px;
+    gap: 10px;
+    align-items: center;
+    background: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.credit-item input {
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+}
+
+.credit-item button {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.credit-item button:hover {
     background: #c0392b;
 }
 
