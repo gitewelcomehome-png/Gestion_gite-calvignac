@@ -719,6 +719,7 @@ async function sauvegarderSimulation(silencieux = false) {
     
     const data = {
         nom_simulation: nom,
+        annee: parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear()),
         chiffre_affaires: parseFloat(document.getElementById('ca').value || 0),
         
         // Couzon
@@ -889,6 +890,11 @@ async function chargerDerniereSimulation() {
         
         // Remplir le formulaire avec les données
         document.getElementById('ca').value = data.chiffre_affaires || '';
+        
+        // Année
+        if (document.getElementById('annee_simulation')) {
+            document.getElementById('annee_simulation').value = data.annee || new Date().getFullYear();
+        }
         
         // Couzon
         document.getElementById('internet_couzon').value = data.internet_couzon || '';
@@ -1307,12 +1313,296 @@ window.nouvelleSimulation = nouvelleSimulation;
 window.exporterPDF = exporterPDF;
 window.calculerTempsReel = calculerTempsReel;
 window.initFiscalite = initFiscalite;
-window.ajouterCredit = ajouterCredit; // Nouvelle fonction
-window.supprimerCredit = supprimerCredit; // Nouvelle fonction
-window.calculerResteAVivre = calculerResteAVivre; // Nouvelle fonction
+window.ajouterCredit = ajouterCredit;
+window.supprimerCredit = supprimerCredit;
+window.calculerResteAVivre = calculerResteAVivre;
+
+// Nouvelles fonctions pour le suivi des soldes bancaires
+window.genererTableauSoldes = genererTableauSoldes;
+window.chargerSoldesBancaires = chargerSoldesBancaires;
+window.sauvegarderSoldesBancaires = sauvegarderSoldesBancaires;
+window.afficherGraphiqueSoldes = afficherGraphiqueSoldes;
+
+// ==========================================
+// 💰 SUIVI TRÉSORERIE MENSUELLE
+// ==========================================
+
+let chartSoldes = null; // Instance du graphique Chart.js
+
+// Générer le tableau de saisie des soldes mensuels
+function genererTableauSoldes() {
+    const annee = parseInt(document.getElementById('annee_tresorerie')?.value || new Date().getFullYear());
+    const tbody = document.getElementById('tbody-soldes');
+    if (!tbody) return;
+    
+    const mois = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
+                  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    
+    tbody.innerHTML = '';
+    
+    mois.forEach((nomMois, index) => {
+        const numeroMois = index + 1;
+        const row = document.createElement('tr');
+        row.style.borderBottom = '1px solid #ddd';
+        row.innerHTML = `
+            <td style="padding: 10px; font-weight: 500;">${nomMois} ${annee}</td>
+            <td style="padding: 10px; text-align: center;">
+                <input type="number" 
+                       id="solde_m${numeroMois}" 
+                       step="0.01" 
+                       placeholder="0.00"
+                       style="width: 150px; padding: 8px; border: 2px solid #ddd; border-radius: 6px; text-align: right;">
+            </td>
+            <td style="padding: 10px;">
+                <input type="text" 
+                       id="notes_m${numeroMois}" 
+                       placeholder="Notes optionnelles..."
+                       style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 6px;">
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Charger les soldes bancaires depuis Supabase
+async function chargerSoldesBancaires() {
+    const annee = parseInt(document.getElementById('annee_tresorerie')?.value);
+    
+    if (!annee || annee < 2020 || annee > 2050) {
+        showToast('⚠️ Veuillez saisir une année valide (2020-2050)', 'error');
+        return;
+    }
+    
+    try {
+        const { data, error } = await supabase
+            .from('suivi_soldes_bancaires')
+            .select('*')
+            .eq('annee', annee)
+            .order('mois', { ascending: true });
+        
+        if (error) throw error;
+        
+        // Réinitialiser le tableau
+        genererTableauSoldes();
+        
+        // Remplir les données
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                const soldeInput = document.getElementById(`solde_m${item.mois}`);
+                const notesInput = document.getElementById(`notes_m${item.mois}`);
+                if (soldeInput) soldeInput.value = item.solde || '';
+                if (notesInput) notesInput.value = item.notes || '';
+            });
+            showToast(`📥 ${data.length} mois chargés pour ${annee}`, 'success');
+        } else {
+            showToast(`ℹ️ Aucune donnée pour ${annee}`, 'info');
+        }
+        
+        // Afficher le graphique
+        afficherGraphiqueSoldes();
+        
+    } catch (error) {
+        console.error('Erreur chargement soldes:', error);
+        showToast('Erreur lors du chargement', 'error');
+    }
+}
+
+// Sauvegarder les soldes bancaires dans Supabase
+async function sauvegarderSoldesBancaires() {
+    const annee = parseInt(document.getElementById('annee_tresorerie')?.value);
+    
+    if (!annee || annee < 2020 || annee > 2050) {
+        showToast('⚠️ Veuillez saisir une année valide (2020-2050)', 'error');
+        return;
+    }
+    
+    const soldesData = [];
+    
+    for (let mois = 1; mois <= 12; mois++) {
+        const soldeInput = document.getElementById(`solde_m${mois}`);
+        const notesInput = document.getElementById(`notes_m${mois}`);
+        
+        if (soldeInput && soldeInput.value) {
+            soldesData.push({
+                annee: annee,
+                mois: mois,
+                solde: parseFloat(soldeInput.value) || 0,
+                notes: notesInput?.value || null
+            });
+        }
+    }
+    
+    if (soldesData.length === 0) {
+        showToast('⚠️ Aucune donnée à sauvegarder', 'error');
+        return;
+    }
+    
+    try {
+        // Upsert (insert ou update) pour chaque mois
+        const { error } = await supabase
+            .from('suivi_soldes_bancaires')
+            .upsert(soldesData, { 
+                onConflict: 'annee,mois',
+                ignoreDuplicates: false 
+            });
+        
+        if (error) throw error;
+        
+        showToast(`✅ ${soldesData.length} mois sauvegardés pour ${annee}`, 'success');
+        
+        // Actualiser le graphique
+        afficherGraphiqueSoldes();
+        
+    } catch (error) {
+        console.error('Erreur sauvegarde soldes:', error);
+        showToast('Erreur lors de la sauvegarde', 'error');
+    }
+}
+
+// Afficher le graphique des soldes bancaires
+async function afficherGraphiqueSoldes() {
+    const canvas = document.getElementById('graphique-soldes');
+    if (!canvas) return;
+    
+    const vueGraphique = document.querySelector('input[name="vue_graphique"]:checked')?.value || 'annee';
+    const annee = parseInt(document.getElementById('annee_tresorerie')?.value || new Date().getFullYear());
+    
+    try {
+        let query = supabase
+            .from('suivi_soldes_bancaires')
+            .select('*')
+            .order('annee', { ascending: true })
+            .order('mois', { ascending: true });
+        
+        if (vueGraphique === 'annee') {
+            query = query.eq('annee', annee);
+        }
+        
+        const { data, error } = await query;
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            // Détruire le graphique existant
+            if (chartSoldes) {
+                chartSoldes.destroy();
+                chartSoldes = null;
+            }
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+        
+        // Préparer les données pour Chart.js
+        const labels = [];
+        const values = [];
+        const moisNoms = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 
+                          'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+        
+        if (vueGraphique === 'annee') {
+            // Vue par année : afficher les 12 mois
+            for (let m = 1; m <= 12; m++) {
+                const item = data.find(d => d.mois === m);
+                labels.push(moisNoms[m - 1]);
+                values.push(item ? item.solde : null);
+            }
+        } else {
+            // Vue générale : afficher tous les mois de toutes les années
+            data.forEach(item => {
+                labels.push(`${moisNoms[item.mois - 1]} ${item.annee}`);
+                values.push(item.solde);
+            });
+        }
+        
+        // Détruire l'ancien graphique s'il existe
+        if (chartSoldes) {
+            chartSoldes.destroy();
+        }
+        
+        // Créer le nouveau graphique
+        const ctx = canvas.getContext('2d');
+        chartSoldes = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Solde bancaire (€)',
+                    data: values,
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#3498db',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: vueGraphique === 'annee' ? 
+                              `Évolution trésorerie ${annee}` : 
+                              'Évolution trésorerie globale',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y !== null ? 
+                                       `${context.parsed.y.toFixed(2)} €` : 
+                                       'Pas de données';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString('fr-FR') + ' €';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Erreur affichage graphique:', error);
+        showToast('Erreur lors de l\'affichage du graphique', 'error');
+    }
+}
 
 // Initialisation automatique au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     // Attendre que le contenu de l'onglet soit potentiellement chargé
     setTimeout(initFiscalite, 1000);
-});
+    
+    // Initialiser l'année pour la trésorerie
+    setTimeout(() => {
+        const anneeInput = document.getElementById('annee_tresorerie');
+        const anneeSimulInput = document.getElementById('annee_simulation');
+        const currentYear = new Date().getFullYear();
+        
+        if (anneeInput) {
+            anneeInput.value = currentYear;
+            genererTableauSoldes();
+        }
+        
+        if (anneeSimulInput && !anneeSimulInput.value) {
+            anneeSimulInput.value = currentYear;
+        }
+    }, 1100);

@@ -14,6 +14,16 @@
 
     <form id="calculateur-lmp" onsubmit="calculerFiscalite(event)">
         
+        <!-- BLOC ANNÉE -->
+        <div class="fiscal-bloc">
+            <div class="bloc-content" style="margin-top: 0;">
+                <div class="form-group">
+                    <label>Année de la simulation <span class="required">*</span></label>
+                    <input type="number" id="annee_simulation" min="2020" max="2050" required placeholder="Ex: 2026" style="max-width: 150px;">
+                </div>
+            </div>
+        </div>
+        
         <!-- BLOC 1 : Chiffre d'affaires -->
         <div class="fiscal-bloc collapsible">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
@@ -750,6 +760,52 @@
         </div>
 
     </form>
+    
+    <!-- SECTION SUIVI TRÉSORERIE -->
+    <div class="fiscal-bloc" style="margin-top: 40px;">
+        <h3 class="fiscal-bloc-title">
+            💰 Suivi Trésorerie Mensuelle
+        </h3>
+        <div class="bloc-content">
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
+                <label for="annee_tresorerie" style="margin: 0;">Année :</label>
+                <input type="number" id="annee_tresorerie" min="2020" max="2050" style="max-width: 120px; padding: 8px;">
+                <button type="button" onclick="chargerSoldesBancaires()" class="btn btn-secondary" style="padding: 8px 15px;">📥 Charger</button>
+                <button type="button" onclick="sauvegarderSoldesBancaires()" class="btn btn-primary" style="padding: 8px 15px;">💾 Sauvegarder</button>
+                <div style="margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="vue_graphique" value="annee" checked onchange="afficherGraphiqueSoldes()"> Par année
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="vue_graphique" value="generale" onchange="afficherGraphiqueSoldes()"> Vue générale
+                    </label>
+                    <button type="button" onclick="afficherGraphiqueSoldes()" class="btn btn-secondary" style="padding: 8px 15px;">📊 Actualiser</button>
+                </div>
+            </div>
+            
+            <!-- Tableau de saisie mensuelle -->
+            <div style="overflow-x: auto; margin-bottom: 30px;">
+                <table id="tableau-soldes" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--primary); color: white;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Mois</th>
+                            <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Solde en banque (€)</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-soldes">
+                        <!-- Généré dynamiquement par genererTableauSoldes() -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Graphique -->
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <canvas id="graphique-soldes" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+    </div>
+    
 </div>
 
 <style>
