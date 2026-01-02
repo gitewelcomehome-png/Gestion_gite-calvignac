@@ -72,8 +72,9 @@
         
         .subtitle {
             font-size: 1.1rem;
-            opacity: 0.95;
-            font-weight: 300;
+            opacity: 1;
+            font-weight: 500;
+            color: #1a252f;
         }
         
         .nav-tabs {
@@ -564,8 +565,8 @@
                     chargerActivitesEtSorties();
                 }
             }
-            if (tabName === 'messagerie' && typeof loadEmails === 'function') {
-                loadEmails();
+            if (tabName === 'messagerie' && typeof initMessagerieTab === 'function') {
+                initMessagerieTab();
             }
             if (tabName === 'decouvrir') {
                 // Pré-sélectionner Trévoux si aucun gîte n'est sélectionné

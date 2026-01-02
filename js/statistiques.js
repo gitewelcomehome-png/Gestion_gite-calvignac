@@ -12,7 +12,6 @@ function updatePlatformCounters(reservations) {
     let countAirbnb = 0;
     let countAbritel = 0;
     let countGites = 0;
-    let countAutres = 0;
     
     reservations.forEach(r => {
         const site = (r.site || '').toLowerCase();
@@ -22,8 +21,6 @@ function updatePlatformCounters(reservations) {
             countAbritel++;
         } else if (site.includes('gîtes') || site.includes('gites')) {
             countGites++;
-        } else {
-            countAutres++;
         }
     });
     
@@ -31,12 +28,10 @@ function updatePlatformCounters(reservations) {
     const el1 = document.getElementById('countAirbnb');
     const el2 = document.getElementById('countAbritel');
     const el3 = document.getElementById('countGites');
-    const el4 = document.getElementById('countAutres');
     
     if (el1) el1.textContent = countAirbnb;
     if (el2) el2.textContent = countAbritel;
     if (el3) el3.textContent = countGites;
-    if (el4) el4.textContent = countAutres;
 }
 
 // ==========================================

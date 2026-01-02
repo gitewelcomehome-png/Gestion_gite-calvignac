@@ -15,19 +15,14 @@
                 </select>
             </div>
             <div style="display: flex; gap: 10px;">
-                <button type="button" onclick="calculerCAAutomatique()" class="btn btn-secondary" title="Calculer le CA depuis les réservations" style="padding: 8px 15px; font-size: 0.9rem;">
-                    🔄 Calculer CA
-                </button>
-                <button type="button" onclick="sauvegarderSimulation()" class="btn btn-success" title="Sauvegarder l'année fiscale" style="padding: 8px 15px; font-size: 0.9rem; background: #27ae60;">
-                    💾 Sauvegarder
-                </button>
                 <button type="button" onclick="creerNouvelleAnnee()" class="btn btn-primary" title="Créer l'année suivante" style="padding: 8px 15px; font-size: 0.9rem;">
                     ➕ Nouvelle Année
                 </button>
             </div>
         </div>
-        <div id="ca_auto_info" style="margin-top: 10px; padding: 10px; background: #e8f5e9; border-left: 4px solid #27ae60; border-radius: 6px; display: none;">
-            <span style="color: #27ae60; font-weight: 600;">✓ CA calculé automatiquement depuis les réservations</span>
+        <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 6px;">
+            <span style="color: #1976d2; font-weight: 600;">ℹ️ CA calculé automatiquement | Sauvegarde automatique activée</span>
+        </div>
         </div>
     </div>
 
@@ -37,7 +32,7 @@
         <input type="hidden" id="annee_simulation" value=""  />
         
         <!-- BLOC 1 : Chiffre d'affaires -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
                 <span class="toggle-icon">▼</span> 📊 Chiffre d'affaires
             </h3>
@@ -51,7 +46,7 @@
         </div>
 
         <!-- BLOC 2A : Charges COUZON -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
                 <span class="toggle-icon">▼</span> 🏠 Charges COUZON (100% déductibles)
             </h3>
@@ -191,7 +186,7 @@
         </div>
 
         <!-- BLOC 2B : Charges TRÉVOUX -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🏠 Charges TRÉVOUX (100% déductibles)</h3>
             <div class="bloc-content">
                 <div class="fiscal-grid">
@@ -329,7 +324,7 @@
         </div>
 
         <!-- BLOC 2C : Travaux (Liste dynamique) -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🔧 Travaux/Réparations</h3>
             <div class="bloc-content">
                 <div style="margin-bottom: 15px;">
@@ -341,7 +336,7 @@
         </div>
 
         <!-- BLOC 2D : Frais divers (Liste dynamique) -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 📝 Frais divers</h3>
             <div class="bloc-content">
                 <div style="margin-bottom: 15px;">
@@ -353,7 +348,7 @@
         </div>
 
         <!-- BLOC 2E : Produits d'accueil (Liste dynamique) -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🧴 Produits d'accueil</h3>
             <div class="bloc-content">
                 <div style="margin-bottom: 15px;">
@@ -365,7 +360,7 @@
         </div>
 
         <!-- BLOC 3 : Résidence principale (Bureau) -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🏡 Charges résidence principale (Bureau)</h3>
             <div class="bloc-content">
                 <p class="fiscal-info">⚠️ Déductibles au prorata de la surface professionnelle</p>
@@ -462,7 +457,7 @@
         </div>
 
         <!-- BLOC 4 : Frais professionnels -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 💼 Frais professionnels (100% déductibles)</h3>
             <div class="bloc-content">
                 <div class="fiscal-grid">
@@ -517,7 +512,7 @@
         </div>
 
         <!-- BLOC 5 : Véhicule -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🚗 Frais de véhicule (Barème kilométrique 2024)</h3>
             <div class="bloc-content">
                 <div class="fiscal-grid">
@@ -541,7 +536,7 @@
         </div>
 
         <!-- Résultats Fiscaux -->
-        <div class="fiscal-bloc collapsible" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; margin-top: 30px;">
+        <div class="fiscal-bloc collapsible collapsed" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; margin-top: 30px;">
             <h3 class="fiscal-bloc-title" style="color: white; cursor: pointer;" onclick="toggleBloc(this)">
                 <span class="toggle-icon">▼</span> 📊 RÉSULTATS FISCAUX
             </h3>
@@ -599,7 +594,7 @@
         </div>
 
         <!-- Calcul Impôt sur le Revenu -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🧾 Calcul Impôt sur le Revenu (IR)</h3>
             <div class="bloc-content">
                 <div class="fiscal-grid">
@@ -659,7 +654,7 @@
         </div>
 
         <!-- BLOC : Total Charges Annuelles -->
-        <div class="fiscal-bloc collapsible" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; margin-top: 30px;">
+        <div class="fiscal-bloc collapsible collapsed" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; margin-top: 30px;">
             <h3 class="fiscal-bloc-title" style="color: white; cursor: pointer;" onclick="toggleBloc(this)">
                 <span class="toggle-icon">▼</span> 💼 TOTAL CHARGES ANNUELLES
             </h3>
@@ -710,7 +705,7 @@
         </div>
 
         <!-- BLOC : Reste à vivre -->
-        <div class="fiscal-bloc collapsible">
+        <div class="fiscal-bloc collapsible collapsed">
             <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
                 <span class="toggle-icon">▼</span> 💰 Reste à vivre après crédits
             </h3>
@@ -826,11 +821,14 @@
     </form>
     
     <!-- SECTION SUIVI TRÉSORERIE -->
-    <div class="fiscal-bloc" style="margin-top: 40px;">
-        <h3 class="fiscal-bloc-title">
-            💰 Suivi Trésorerie Mensuelle
-        </h3>
-        <div class="bloc-content">
+    <div class="fiscal-bloc" style="margin-top: 40px; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+        <div onclick="toggleSlide('slide-tresorerie')" style="cursor: pointer; padding: 20px; background: linear-gradient(135deg, #3498DB 0%, #2874A6 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">
+                💰 Suivi Trésorerie Mensuelle
+            </h3>
+            <span id="slide-tresorerie-icon" style="font-size: 1.5rem; transition: transform 0.3s;">▼</span>
+        </div>
+        <div id="slide-tresorerie" class="bloc-content" style="display: none; padding: 20px;">
             <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
                 <label for="annee_tresorerie" style="margin: 0;">Année :</label>
                 <input type="number" id="annee_tresorerie" min="2020" max="2050" style="max-width: 120px; padding: 8px;">

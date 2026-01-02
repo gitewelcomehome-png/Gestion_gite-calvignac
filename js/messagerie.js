@@ -1,429 +1,245 @@
+/**
+ * 📧 MODULE MESSAGERIE
+ * Gestion des connexions aux messageries et synchronisation des emails
+ */
+
 // ==========================================
-// 📧 GESTION DES EMAILS ET TEMPLATES
+// CONFIGURATION DES PROVIDERS
 // ==========================================
 
-function switchMessagerieTab(tab) {
-    // Mettre à jour les boutons
-    const emailBtn = document.getElementById('tabEmails');
-    const templatesBtn = document.getElementById('tabTemplates');
-    
-    if (emailBtn) {
-        emailBtn.style.background = tab === 'emails' ? '#3498DB' : 'white';
-        emailBtn.style.color = tab === 'emails' ? 'white' : '#666';
+const EMAIL_PROVIDERS = {
+    gmail: {
+        name: 'Gmail',
+        authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+        clientId: '', // À configurer
+        scopes: ['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.send']
+    },
+    outlook: {
+        name: 'Outlook',
+        authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+        clientId: '', // À configurer
+        scopes: ['https://outlook.office.com/Mail.Read', 'https://outlook.office.com/Mail.Send']
     }
-    if (templatesBtn) {
-        templatesBtn.style.background = tab === 'templates' ? '#3498DB' : 'white';
-        templatesBtn.style.color = tab === 'templates' ? 'white' : '#666';
+};
+
+// État de connexion (stocké dans localStorage)
+let connectedAccounts = JSON.parse(localStorage.getItem('connectedAccounts') || '{}');
+
+// ==========================================
+// CONNEXION GMAIL
+// ==========================================
+
+async function connectGmail() {
+    showToast('⚠️ Configuration OAuth nécessaire', 'error');
+    
+    // Modal d'information
+    const modal = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
+            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+                <h3 style="margin-top: 0; color: #EA4335;">🔐 Configuration OAuth Gmail</h3>
+                <p style="line-height: 1.6;">Pour connecter Gmail, vous devez :</p>
+                <ol style="line-height: 1.8;">
+                    <li>Créer un projet sur <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a></li>
+                    <li>Activer l'API Gmail</li>
+                    <li>Créer des identifiants OAuth 2.0</li>
+                    <li>Configurer les URI de redirection autorisées</li>
+                    <li>Ajouter le Client ID dans le code</li>
+                </ol>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                    <strong>Alternative :</strong> Utilisez une configuration IMAP personnalisée ci-dessous
+                </div>
+                <button onclick="this.closest('div[style*=fixed]').remove()" style="background: #EA4335; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                    Compris
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modal);
+}
+
+// ==========================================
+// CONNEXION OUTLOOK
+// ==========================================
+
+async function connectOutlook() {
+    showToast('⚠️ Configuration OAuth nécessaire', 'error');
+    
+    const modal = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
+            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+                <h3 style="margin-top: 0; color: #0078D4;">🔐 Configuration OAuth Outlook</h3>
+                <p style="line-height: 1.6;">Pour connecter Outlook, vous devez :</p>
+                <ol style="line-height: 1.8;">
+                    <li>Créer une application sur <a href="https://portal.azure.com" target="_blank">Azure Portal</a></li>
+                    <li>Configurer les permissions Microsoft Graph</li>
+                    <li>Ajouter les URI de redirection</li>
+                    <li>Obtenir le Client ID et Secret</li>
+                    <li>Configurer dans le code</li>
+                </ol>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                    <strong>Alternative :</strong> Utilisez une configuration IMAP personnalisée ci-dessous
+                </div>
+                <button onclick="this.closest('div[style*=fixed]').remove()" style="background: #0078D4; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                    Compris
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modal);
+}
+
+// ==========================================
+// CONFIGURATION IMAP PERSONNALISÉE
+// ==========================================
+
+function configureIMAP() {
+    const modal = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="closeIMAPModal(event)">
+            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                <h3 style="margin-top: 0; color: #2c3e50;">⚙️ Configuration IMAP</h3>
+                <form id="imapForm" onsubmit="saveIMAPConfig(event)" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px;">Serveur IMAP</label>
+                        <input type="text" id="imap_host" placeholder="imap.example.com" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <small style="color: #7f8c8d;">Ex: imap.gmail.com, outlook.office365.com</small>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px;">Port</label>
+                        <input type="number" id="imap_port" value="993" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <small style="color: #7f8c8d;">Port SSL standard: 993</small>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px;">Email</label>
+                        <input type="email" id="imap_email" placeholder="votre@email.com" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px;">Mot de passe</label>
+                        <input type="password" id="imap_password" placeholder="Mot de passe ou mot de passe d'application" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <small style="color: #e74c3c;">⚠️ Gmail/Outlook nécessitent un mot de passe d'application</small>
+                    </div>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                        <strong>⚠️ Sécurité</strong>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Les identifiants seront stockés localement dans votre navigateur. Cette méthode nécessite un backend sécurisé pour une utilisation en production.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="closeIMAPModal()" style="background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            Annuler
+                        </button>
+                        <button type="submit" style="background: #27AE60; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            Sauvegarder
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modal);
+}
+
+function closeIMAPModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    const modal = document.querySelector('div[style*="position: fixed"]');
+    if (modal) modal.remove();
+}
+
+function saveIMAPConfig(event) {
+    event.preventDefault();
+    
+    const config = {
+        host: document.getElementById('imap_host').value,
+        port: document.getElementById('imap_port').value,
+        email: document.getElementById('imap_email').value,
+        password: document.getElementById('imap_password').value,
+        connected: true,
+        connectedAt: new Date().toISOString()
+    };
+    
+    // Sauvegarder dans localStorage (en production, utiliser un backend sécurisé)
+    localStorage.setItem('imap_config', JSON.stringify(config));
+    connectedAccounts.imap = config;
+    localStorage.setItem('connectedAccounts', JSON.stringify(connectedAccounts));
+    
+    // Mettre à jour l'interface
+    updateConnectionStatus();
+    
+    closeIMAPModal();
+    showToast('✅ Configuration IMAP sauvegardée', 'success');
+    
+    // Afficher la section emails
+    document.getElementById('emailsSection').style.display = 'block';
+}
+
+// ==========================================
+// MISE À JOUR DES STATUS DE CONNEXION
+// ==========================================
+
+function updateConnectionStatus() {
+    // Gmail
+    const gmailStatus = document.getElementById('gmail-status');
+    if (connectedAccounts.gmail) {
+        gmailStatus.style.background = '#d4edda';
+        gmailStatus.style.color = '#155724';
+        gmailStatus.innerHTML = '✅ Connecté : ' + connectedAccounts.gmail.email;
     }
     
-    // Afficher la section correspondante
-    const emailsSection = document.getElementById('emailsSection');
-    const templatesSection = document.getElementById('templatesSection');
+    // Outlook
+    const outlookStatus = document.getElementById('outlook-status');
+    if (connectedAccounts.outlook) {
+        outlookStatus.style.background = '#d4edda';
+        outlookStatus.style.color = '#155724';
+        outlookStatus.innerHTML = '✅ Connecté : ' + connectedAccounts.outlook.email;
+    }
     
-    if (emailsSection) emailsSection.style.display = tab === 'emails' ? 'block' : 'none';
-    if (templatesSection) templatesSection.style.display = tab === 'templates' ? 'block' : 'none';
-    
-    // Charger les données
-    if (tab === 'emails') {
-        loadEmails();
-    } else {
-        loadTemplates();
+    // IMAP
+    const imapStatus = document.getElementById('imap-status');
+    if (connectedAccounts.imap) {
+        imapStatus.style.background = '#d4edda';
+        imapStatus.style.color = '#155724';
+        imapStatus.innerHTML = '✅ Configuré : ' + connectedAccounts.imap.email;
+        document.getElementById('emailsSection').style.display = 'block';
     }
 }
+
+// ==========================================
+// CHARGEMENT DES EMAILS
+// ==========================================
 
 async function loadEmails() {
-    const { data, error } = await supabase
-        .from('emails')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
+    showToast('🔄 Chargement des emails...', 'success');
     
-    if (error) {
-        console.error('Erreur chargement emails:', error);
+    // Vérifier s'il y a des comptes connectés
+    if (!connectedAccounts.imap && !connectedAccounts.gmail && !connectedAccounts.outlook) {
+        showToast('⚠️ Aucun compte connecté', 'error');
         return;
     }
     
-    displayEmails(data || []);
-    updateEmailStats(data || []);
-}
-
-function displayEmails(emails) {
-    const container = document.getElementById('emailsContainer');
-    if (!container) return;
-    
-    if (emails.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun email</p>';
-        return;
-    }
-    
-    const statusIcons = {
-        'unread': '📬',
-        'read': '📭',
-        'replied': '✅',
-        'archived': '📦'
-    };
-    
-    const statusColors = {
-        'unread': '#E74C3C',
-        'read': '#95A5A6',
-        'replied': '#27AE60',
-        'archived': '#BDC3C7'
-    };
-    
-    let html = '';
-    emails.forEach(email => {
-        const icon = statusIcons[email.status] || '📧';
-        const color = statusColors[email.status] || '#999';
-        const isUnread = email.status === 'unread';
-        const date = formatDateFromObj(new Date(email.created_at));
-        
-        html += `
-            <div onclick="openEmail(${email.id})" style="
-                border: 1px solid ${isUnread ? '#3498DB' : '#ddd'}; 
-                padding: 16px; 
-                margin-bottom: 8px; 
-                border-radius: 8px; 
-                background: ${isUnread ? '#EBF5FB' : 'white'}; 
-                cursor: pointer;
-                transition: all 0.2s;
-            " onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                            <span style="font-size: 1.5rem;">${icon}</span>
-                            <strong style="font-weight: ${isUnread ? 'bold' : 'normal'};">${email.subject || '(Sans objet)'}</strong>
-                        </div>
-                        <div style="font-size: 0.9rem; color: #666;">
-                            <strong>De:</strong> ${email.from_name || email.from_email}
-                        </div>
-                        ${email.to_name ? `<div style="font-size: 0.9rem; color: #666;"><strong>À:</strong> ${email.to_name}</div>` : ''}
-                        <div style="font-size: 0.85rem; color: #999; margin-top: 4px;">
-                            ${date}
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <span style="padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; background: ${color}; color: white;">
-                            ${email.status === 'unread' ? 'Non lu' : email.status === 'read' ? 'Lu' : email.status === 'replied' ? 'Répondu' : 'Archivé'}
-                        </span>
-                        ${email.type === 'received' ? '<button onclick="replyToEmail(event, ' + email.id + ')" class="btn" style="background: #3498DB; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 0.85rem;">↩️ Répondre</button>' : ''}
-                    </div>
-                </div>
+    // Simuler un chargement (en production, appeler une API backend)
+    setTimeout(() => {
+        const emailsContainer = document.getElementById('emailsContainer');
+        emailsContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">📭</div>
+                <p style="margin: 0;">Fonctionnalité en développement</p>
+                <small>La synchronisation des emails nécessite un backend Node.js</small>
             </div>
         `;
-    });
-    
-    container.innerHTML = html;
-}
-
-function updateEmailStats(emails) {
-    const unreadCount = emails.filter(e => e.status === 'unread').length;
-    const repliedCount = emails.filter(e => e.status === 'replied').length;
-    const totalCount = emails.length;
-    
-    const statsContainer = document.getElementById('emailStats');
-    if (statsContainer) {
-        statsContainer.innerHTML = `
-            <div style="display: flex; gap: 16px; padding: 16px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="flex: 1; text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; color: #E74C3C;">${unreadCount}</div>
-                    <div style="font-size: 0.9rem; color: #666;">Non lus</div>
-                </div>
-                <div style="flex: 1; text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; color: #27AE60;">${repliedCount}</div>
-                    <div style="font-size: 0.9rem; color: #666;">Répondus</div>
-                </div>
-                <div style="flex: 1; text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; color: #3498DB;">${totalCount}</div>
-                    <div style="font-size: 0.9rem; color: #666;">Total</div>
-                </div>
-            </div>
-        `;
-    }
-}
-
-async function openEmail(emailId) {
-    const { data: email, error } = await supabase
-        .from('emails')
-        .select('*')
-        .eq('id', emailId)
-        .single();
-    
-    if (error || !email) {
-        console.error('Erreur chargement email:', error);
-        return;
-    }
-    
-    // Marquer comme lu
-    if (email.status === 'unread') {
-        await supabase
-            .from('emails')
-            .update({ status: 'read', read_at: new Date().toISOString() })
-            .eq('id', emailId);
-    }
-    
-    // Afficher le modal
-    const modal = document.getElementById('emailModal');
-    if (!modal) return;
-    
-    document.getElementById('emailModalSubject').textContent = email.subject || '(Sans objet)';
-    document.getElementById('emailModalFrom').textContent = email.from_name || email.from_email;
-    document.getElementById('emailModalDate').textContent = formatDateFromObj(new Date(email.created_at));
-    document.getElementById('emailModalBody').innerHTML = email.html_body || email.body.replace(/\n/g, '<br>');
-    
-    modal.style.display = 'flex';
-    
-    // Recharger la liste
-    loadEmails();
-}
-
-function closeEmailModal() {
-    const modal = document.getElementById('emailModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function replyToEmail(event, emailId) {
-    event.stopPropagation(); // Empêcher l'ouverture de l'email
-    
-    // Afficher le formulaire de réponse
-    const modal = document.getElementById('replyModal');
-    if (!modal) return;
-    
-    modal.dataset.replyToId = emailId;
-    modal.style.display = 'flex';
-    
-    // Charger les templates
-    loadTemplatesForReply();
-}
-
-function closeReplyModal() {
-    const modal = document.getElementById('replyModal');
-    if (modal) modal.style.display = 'none';
-}
-
-async function loadTemplatesForReply() {
-    const { data, error } = await supabase
-        .from('email_templates')
-        .select('*')
-        .eq('is_active', true)
-        .order('usage_count', { ascending: false });
-    
-    if (error) {
-        console.error('Erreur chargement templates:', error);
-        return;
-    }
-    
-    const select = document.getElementById('templateSelect');
-    if (!select) return;
-    
-    select.innerHTML = '<option value="">-- Choisir un template --</option>';
-    (data || []).forEach(template => {
-        select.innerHTML += `<option value="${template.id}">${template.name} (${template.category})</option>`;
-    });
-}
-
-async function applyTemplate() {
-    const select = document.getElementById('templateSelect');
-    const templateId = select.value;
-    
-    if (!templateId) return;
-    
-    const { data: template, error } = await supabase
-        .from('email_templates')
-        .select('*')
-        .eq('id', templateId)
-        .single();
-    
-    if (error || !template) {
-        console.error('Erreur chargement template:', error);
-        return;
-    }
-    
-    document.getElementById('replySubject').value = template.subject;
-    document.getElementById('replyBody').value = template.body;
-    
-    // Afficher les variables disponibles
-    if (template.variables) {
-        alert('Variables disponibles:\n' + Object.entries(template.variables).map(([key, desc]) => `{{${key}}} = ${desc}`).join('\n'));
-    }
-}
-
-async function sendReply() {
-    const modal = document.getElementById('replyModal');
-    const replyToId = modal.dataset.replyToId;
-    const subject = document.getElementById('replySubject').value;
-    const body = document.getElementById('replyBody').value;
-    
-    if (!subject || !body) {
-        alert('⚠️ Veuillez remplir le sujet et le message');
-        return;
-    }
-    
-    // Récupérer l'email original
-    const { data: originalEmail } = await supabase
-        .from('emails')
-        .select('*')
-        .eq('id', replyToId)
-        .single();
-    
-    if (!originalEmail) return;
-    
-    // Créer la réponse
-    const { error: insertError } = await supabase
-        .from('emails')
-        .insert({
-            type: 'sent',
-            from_email: 'contact@welcomehome.fr', // À adapter
-            from_name: 'Welcome Home',
-            to_email: originalEmail.from_email,
-            to_name: originalEmail.from_name,
-            subject: subject,
-            body: body,
-            replied_to_id: replyToId,
-            status: 'read',
-            reservation_id: originalEmail.reservation_id
-        });
-    
-    if (insertError) {
-        console.error('Erreur envoi réponse:', insertError);
-        alert('❌ Erreur lors de l\'envoi');
-        return;
-    }
-    
-    // Marquer l'original comme répondu
-    await supabase
-        .from('emails')
-        .update({ status: 'replied', replied_at: new Date().toISOString() })
-        .eq('id', replyToId);
-    
-    alert('✅ Réponse envoyée !');
-    closeReplyModal();
-    loadEmails();
+        showToast('ℹ️ Backend requis pour la synchronisation', 'error');
+    }, 500);
 }
 
 // ==========================================
-// 📝 GESTION DES TEMPLATES
+// INITIALISATION
 // ==========================================
 
-async function loadTemplates() {
-    const { data, error } = await supabase
-        .from('email_templates')
-        .select('*')
-        .order('category', { ascending: true });
-    
-    if (error) {
-        console.error('Erreur chargement templates:', error);
-        return;
-    }
-    
-    displayTemplates(data || []);
+function initMessagerieTab() {
+    updateConnectionStatus();
 }
 
-function displayTemplates(templates) {
-    const container = document.getElementById('templatesContainer');
-    if (!container) return;
-    
-    if (templates.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun template</p>';
-        return;
-    }
-    
-    // Grouper par catégorie
-    const byCategory = {};
-    templates.forEach(t => {
-        if (!byCategory[t.category]) byCategory[t.category] = [];
-        byCategory[t.category].push(t);
-    });
-    
-    let html = '';
-    Object.entries(byCategory).forEach(([category, temps]) => {
-        html += `<h3 style="margin-top: 24px; color: #2c3e50; text-transform: capitalize;">${category}</h3>`;
-        
-        temps.forEach(template => {
-            const activeColor = template.is_active ? '#27AE60' : '#95A5A6';
-            
-            html += `
-                <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 12px; border-radius: 8px; background: white;">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                <strong>${template.name}</strong>
-                                <span style="padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; background: ${activeColor}; color: white;">
-                                    ${template.is_active ? 'Actif' : 'Inactif'}
-                                </span>
-                                <span style="color: #999; font-size: 0.85rem;">📊 Utilisé ${template.usage_count || 0} fois</span>
-                            </div>
-                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 4px;">
-                                <strong>Sujet:</strong> ${template.subject}
-                            </div>
-                            <details style="margin-top: 8px;">
-                                <summary style="cursor: pointer; color: #3498DB;">Voir le contenu</summary>
-                                <pre style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-top: 8px; white-space: pre-wrap; font-size: 0.85rem;">${template.body}</pre>
-                            </details>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="editTemplate(${template.id})" class="btn" style="background: #3498DB; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 0.85rem;">✏️</button>
-                            <button onclick="deleteTemplate(${template.id})" class="btn" style="background: #E74C3C; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 0.85rem;">🗑️</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-    });
-    
-    container.innerHTML = html;
-}
-
-async function addTemplate() {
-    const name = prompt('Nom du template:');
-    if (!name) return;
-    
-    const category = prompt('Catégorie (reservation/information/reclamation/post_sejour):');
-    if (!category) return;
-    
-    const subject = prompt('Sujet du message:');
-    if (!subject) return;
-    
-    const body = prompt('Contenu du message (utilisez {{variable}} pour les variables):');
-    if (!body) return;
-    
-    const { error } = await supabase
-        .from('email_templates')
-        .insert({
-            name,
-            category,
-            subject,
-            body,
-            is_active: true
-        });
-    
-    if (error) {
-        console.error('Erreur création template:', error);
-        alert('❌ Erreur lors de la création');
-        return;
-    }
-    
-    alert('✅ Template créé !');
-    loadTemplates();
-}
-
-async function editTemplate(id) {
-    alert('⚠️ Fonctionnalité d\'édition à venir');
-    // TODO: Implémenter un formulaire d'édition
-}
-
-async function deleteTemplate(id) {
-    if (!confirm('Supprimer ce template ?')) return;
-    
-    const { error } = await supabase
-        .from('email_templates')
-        .delete()
-        .eq('id', id);
-    
-    if (error) {
-        console.error('Erreur suppression:', error);
-        return;
-    }
-    
-    alert('✅ Template supprimé');
-    loadTemplates();
-}
+// Export vers window pour accessibilité globale
+window.connectGmail = connectGmail;
+window.connectOutlook = connectOutlook;
+window.configureIMAP = configureIMAP;
+window.loadEmails = loadEmails;
+window.closeIMAPModal = closeIMAPModal;
+window.saveIMAPConfig = saveIMAPConfig;
+window.initMessagerieTab = initMessagerieTab;
