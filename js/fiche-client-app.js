@@ -8,8 +8,12 @@ const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
 
 // Initialiser Supabase
-const { createClient } = window.supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabaseClient;
+if (!window.ficheClientSupabase) {
+    const { createClient } = window.supabase;
+    window.ficheClientSupabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+}
+const supabase = window.ficheClientSupabase;
 
 // ==================== VARIABLES GLOBALES ====================
 let currentLanguage = 'fr';
