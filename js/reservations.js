@@ -226,7 +226,8 @@ async function updateReservationsList() {
         });
     }
     
-    const active = reservations.filter(r => parseLocalDate(r.dateFin) >= today);
+    // Ne montrer que les réservations dont la date de fin est APRÈS aujourd'hui (réservations terminées exclues)
+    const active = reservations.filter(r => parseLocalDate(r.dateFin) > today);
     
     const container = document.getElementById('planning-container');
     if (!container) return; // Conteneur pas encore chargé
