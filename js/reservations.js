@@ -214,6 +214,8 @@ async function updateReservationsList() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
+    console.log('🕐 Date du jour (today):', today.toISOString());
+    
     // Récupérer les validations de la société de ménage
     const { data: cleaningSchedules } = await supabase
         .from('cleaning_schedule')
@@ -227,7 +229,17 @@ async function updateReservationsList() {
     }
     
     // Afficher les réservations se terminant aujourd'hui ou après (pour gérer le checkout)
-    const active = reservations.filter(r => parseLocalDate(r.dateFin) >= today);
+    const active = reservations.filter(r => {
+        const dateFin = parseLocalDate(r.dateFin);
+        dateFin.setHours(0, 0, 0, 0); // Normaliser à minuit
+        const isActive = dateFin >= today;
+        
+        if (!isActive) {
+            console.log('❌ Réservation masquée (terminée):', r.id, r.nom, 'dateFin:', dateFin.toISOString());
+        }
+        
+        return isActive;
+    });
     
     const container = document.getElementById('planning-container');
     if (!container) return; // Conteneur pas encore chargé
@@ -285,11 +297,11 @@ async function updateReservationsList() {
                 
                 <div class="week-content-grid" style="border-top: none;">
                     <div class="gite-column-inline">
-                        ${generateWeekReservations(byGite['Trévoux'], weekNum, 'trevoux', active, validationMap)}
+                        ${generateWeekReservations(byGite['Trévoux'], weekNum, 'trevoux', active, validationMap, today)}
                     </div>
                     
                     <div class="gite-column-inline">
-                        ${generateWeekReservations(byGite['Couzon'], weekNum, 'couzon', active, validationMap)}
+                        ${generateWeekReservations(byGite['Couzon'], weekNum, 'couzon', active, validationMap, today)}
                     </div>
                 </div>
             </div>
@@ -308,7 +320,7 @@ async function updateReservationsList() {
     }, 100);
 }
 
-function generateWeekReservations(reservations, weekKey, cssClass, toutesReservations, validationMap = {}) {
+function generateWeekReservations(reservations, weekKey, cssClass, toutesReservations, validationMap = {}, today = null) {
     // Trouver les réservations dont la date de DÉBUT est dans cette semaine
     const weekReservations = reservations.filter(r => {
         const start = parseLocalDate(r.dateDebut);
@@ -368,10 +380,12 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
             statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
         }
         
-        // Vérifier si réservation se termine aujourd'hui pour masquer le bouton fiche client
+        // Vérifier si réservation se termine aujourd'hui ou avant pour masquer le bouton fiche client
         const dateFin = parseLocalDate(r.dateFin);
-        const isExpiredToday = dateFin.getTime() === today.getTime();
-        const ficheClientButton = isExpiredToday ? '' : `<button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
+        dateFin.setHours(0, 0, 0, 0);
+        const isExpiredOrExpiringToday = today && dateFin.getTime() <= today.getTime();
+        console.log('📄 Bouton fiche client:', r.id, r.nom, 'dateFin:', dateFin.toISOString(), 'today:', today?.toISOString(), 'masqué:', isExpiredOrExpiringToday);
+        const ficheClientButton = isExpiredOrExpiringToday ? '' : `<button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
         
         html += `
             <div class="week-reservation ${cssClass}" style="position: relative; padding: 12px; padding-top: 40px;">
