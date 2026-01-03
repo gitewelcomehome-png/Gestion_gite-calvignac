@@ -672,10 +672,19 @@ function openEditReservation(id) {
 
 // Helper pour ouvrir la fiche client
 function openFicheClient(id) {
+    console.log('🔍 openFicheClient appelé avec ID:', id);
+    console.log('🔍 aperçuFicheClient existe?', typeof aperçuFicheClient);
+    console.log('🔍 window.aperçuFicheClient existe?', typeof window.aperçuFicheClient);
+    
     if (typeof aperçuFicheClient === 'function') {
+        console.log('✅ Appel de aperçuFicheClient');
         aperçuFicheClient(id);
+    } else if (typeof window.aperçuFicheClient === 'function') {
+        console.log('✅ Appel de window.aperçuFicheClient');
+        window.aperçuFicheClient(id);
     } else {
-        console.error('Function aperçuFicheClient not found');
+        console.error('❌ Function aperçuFicheClient not found');
+        alert('Erreur : fonction aperçuFicheClient introuvable. Vérifiez que fiche-client.js est chargé.');
     }
 }
 

@@ -4,23 +4,34 @@
 // Génération directe du token et options d'envoi/partage
 
 async function aperçuFicheClient(reservationId) {
+    console.log('🎯 aperçuFicheClient appelé avec reservationId:', reservationId);
     try {
         // Attendre que supabaseClient soit disponible
+        console.log('🔍 Vérification supabaseClient...');
         if (typeof window.supabaseClient === 'undefined') {
+            console.log('⏳ Attente de supabaseClient...');
             await new Promise(resolve => {
                 const check = setInterval(() => {
                     if (typeof window.supabaseClient !== 'undefined') {
                         clearInterval(check);
+                        console.log('✅ supabaseClient chargé');
                         resolve();
                     }
                 }, 50);
             });
+        } else {
+            console.log('✅ supabaseClient déjà disponible');
         }
         
+        console.log('📋 Récupération des réservations...');
         const reservations = await getAllReservations();
+        console.log('📋 Réservations récupérées:', reservations.length);
+        
         const reservation = reservations.find(r => r.id === reservationId);
+        console.log('🔍 Réservation trouvée:', reservation);
         
         if (!reservation) {
+            console.error('❌ Réservation introuvable pour ID:', reservationId);
             showToast('Réservation introuvable', 'error');
             return;
         }
