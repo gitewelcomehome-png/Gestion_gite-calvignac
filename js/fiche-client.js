@@ -52,8 +52,36 @@ async function aperçuFicheClient(reservationId) {
             // Générer un nouveau token
             token = generateSecureToken();
             isNewToken = true;
-            const expiresAt = new Date(reservation.date_fin);
+            // Support des deux formats de nom de colonne
+            const dateFin = reservation.date_fin || reservation.dateFin;
+            console.log('📅 Date fin récupérée:', dateFin);
+            
+            // Utiliser parseLocalDate si disponible, sinon parser manuellement
+            let expiresAt;
+            if (typeof parseLocalDate === 'function' && dateFin.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Format YYYY-MM-DD
+                console.log('✅ Utilisation de parseLocalDate');
+                expiresAt = parseLocalDate(dateFin);
+            } else if (dateFin.includes('-')) {
+                // Format DD-MM-YYYY
+                console.log('📝 Format DD-MM-YYYY détecté');
+                const [day, month, year] = dateFin.split('-');
+                expiresAt = new Date(year, month - 1, day);
+            } else if (dateFin.includes('/')) {
+                // Format DD/MM/YYYY
+                console.log('📝 Format DD/MM/YYYY détecté');
+                const [day, month, year] = dateFin.split('/');
+                expiresAt = new Date(year, month - 1, day);
+            } else {
+                // Fallback
+                console.log('⚠️ Fallback parsing');
+                expiresAt = new Date(dateFin);
+            }
+            
+            console.log('📅 Date expiration calculée:', expiresAt);
             expiresAt.setDate(expiresAt.getDate() + 7);
+            console.log('📅 Date expiration +7 jours:', expiresAt);
+            console.log('📅 ISO String:', expiresAt.toISOString());
             
             const { error } = await window.supabaseClient
                 .from('client_access_tokens')

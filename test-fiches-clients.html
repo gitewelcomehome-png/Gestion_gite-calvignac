@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Test Fiches Clients - Diagnostic</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-bottom: 30px; }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .result {
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        .warning { background: #fff3cd; color: #856404; border-left: 4px solid #ffc107; }
+        .info { background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 5px;
+        }
+        button:hover { background: #5568d3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic Système Fiches Clients</h1>
+        
+        <!-- Configuration -->
+        <div class="test-section">
+            <h2>1️⃣ Configuration Supabase</h2>
+            <div id="config-result"></div>
+        </div>
+
+        <!-- Tables -->
+        <div class="test-section">
+            <h2>2️⃣ Vérification des tables</h2>
+            <button onclick="testTables()">🧪 Tester les tables</button>
+            <div id="tables-result"></div>
+        </div>
+
+        <!-- RLS -->
+        <div class="test-section">
+            <h2>3️⃣ État du RLS (Row Level Security)</h2>
+            <button onclick="testRLS()">🔒 Vérifier RLS</button>
+            <div id="rls-result"></div>
+        </div>
+
+        <!-- Données -->
+        <div class="test-section">
+            <h2>4️⃣ Données existantes</h2>
+            <button onclick="testData()">📊 Analyser les données</button>
+            <div id="data-result"></div>
+        </div>
+
+        <!-- Test génération -->
+        <div class="test-section">
+            <h2>5️⃣ Test génération de token</h2>
+            <button onclick="testTokenGeneration()">🎫 Générer un token de test</button>
+            <div id="token-result"></div>
+        </div>
+
+        <!-- Fonctions JS -->
+        <div class="test-section">
+            <h2>6️⃣ Fonctions JavaScript</h2>
+            <button onclick="testJSFunctions()">⚙️ Vérifier les fonctions</button>
+            <div id="js-result"></div>
+        </div>
+
+        <!-- Résumé -->
+        <div class="test-section">
+            <h2>📋 Résumé</h2>
+            <div id="summary-result"></div>
+        </div>
+    </div>
+
+    <script>
+        let supabase;
+        const issues = [];
+
+        // Initialiser Supabase depuis shared-config.js
+        async function initSupabase() {
+            const configResult = document.getElementById('config-result');
+            
+            try {
+                // Charger shared-config.js
+                const response = await fetch('js/shared-config.js');
+                const configText = await response.text();
+                
+                // Extraire l'URL et la clé (méthode simple)
+                const urlMatch = configText.match(/SUPABASE_URL\s*=\s*['"]([^'"]+)['"]/);
+                const keyMatch = configText.match(/SUPABASE_ANON_KEY\s*=\s*['"]([^'"]+)['"]/);
+                
+                if (!urlMatch || !keyMatch) {
+                    throw new Error('Impossible de trouver les credentials Supabase');
+                }
+                
+                const SUPABASE_URL = urlMatch[1];
+                const SUPABASE_KEY = keyMatch[1];
+                
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                
+                configResult.innerHTML = `
+                    <div class="result success">✅ Supabase initialisé</div>
+                    <div class="result info">📍 URL: ${SUPABASE_URL.substring(0, 30)}...</div>
+                `;
+            } catch (error) {
+                configResult.innerHTML = `
+                    <div class="result error">❌ Erreur: ${error.message}</div>
+                `;
+                issues.push('Configuration Supabase');
+            }
+        }
+
+        async function testTables() {
+            const result = document.getElementById('tables-result');
+            result.innerHTML = '<div class="result info">⏳ Vérification en cours...</div>';
+            
+            const requiredTables = [
+                'infos_gites',
+                'checklists',
+                'checklist_validations',
+                'demandes_horaires',
+                'retours_clients',
+                'client_access_tokens',
+                'fiche_generation_logs',
+                'activites_consultations'
+            ];
+            
+            let html = '';
+            let missingTables = [];
+            
+            for (const table of requiredTables) {
+                try {
+                    const { data, error } = await supabase.from(table).select('id').limit(1);
+                    
+                    if (error && error.message.includes('does not exist')) {
+                        html += `<div class="result error">❌ Table manquante: ${table}</div>`;
+                        missingTables.push(table);
+                    } else if (error) {
+                        html += `<div class="result warning">⚠️ ${table}: ${error.message}</div>`;
+                    } else {
+                        html += `<div class="result success">✅ ${table}: OK</div>`;
+                    }
+                } catch (err) {
+                    html += `<div class="result error">❌ ${table}: ${err.message}</div>`;
+                }
+            }
+            
+            if (missingTables.length > 0) {
+                issues.push(`Tables manquantes: ${missingTables.join(', ')}`);
+                html += `<div class="result error" style="margin-top: 20px;">
+                    <strong>🔧 Action requise:</strong><br>
+                    Exécutez le script <code>sql/create_fiches_clients_tables.sql</code> dans Supabase SQL Editor
+                </div>`;
+            }
+            
+            result.innerHTML = html;
+            updateSummary();
+        }
+
+        async function testRLS() {
+            const result = document.getElementById('rls-result');
+            result.innerHTML = '<div class="result info">⏳ Vérification RLS...</div>';
+            
+            try {
+                // On ne peut pas vérifier directement le RLS via l'API
+                // Mais on peut tester l'accès
+                const { data, error } = await supabase
+                    .from('client_access_tokens')
+                    .select('*')
+                    .limit(1);
+                
+                if (error && error.message.includes('row-level security')) {
+                    result.innerHTML = `
+                        <div class="result error">❌ RLS est ACTIVÉ - Les clients ne pourront pas accéder aux fiches</div>
+                        <div class="result warning" style="margin-top: 10px;">
+                            <strong>🔧 Action requise:</strong><br>
+                            Exécutez le script <code>sql/force_disable_rls.sql</code> dans Supabase SQL Editor
+                        </div>
+                    `;
+                    issues.push('RLS activé');
+                } else {
+                    result.innerHTML = `<div class="result success">✅ RLS désactivé correctement</div>`;
+                }
+            } catch (err) {
+                result.innerHTML = `<div class="result error">❌ Erreur test RLS: ${err.message}</div>`;
+            }
+            
+            updateSummary();
+        }
+
+        async function testData() {
+            const result = document.getElementById('data-result');
+            result.innerHTML = '<div class="result info">⏳ Analyse des données...</div>';
+            
+            try {
+                // Compter les données
+                const { count: reservations } = await supabase.from('reservations').select('*', { count: 'exact', head: true });
+                const { count: gites } = await supabase.from('infos_gites').select('*', { count: 'exact', head: true });
+                const { count: checklists } = await supabase.from('checklists').select('*', { count: 'exact', head: true });
+                const { count: tokens } = await supabase.from('client_access_tokens').select('*', { count: 'exact', head: true });
+                
+                let html = '<div class="stats">';
+                html += `<div class="stat-card"><div class="stat-value">${reservations || 0}</div><div class="stat-label">Réservations</div></div>`;
+                html += `<div class="stat-card"><div class="stat-value">${gites || 0}</div><div class="stat-label">Gîtes configurés</div></div>`;
+                html += `<div class="stat-card"><div class="stat-value">${checklists || 0}</div><div class="stat-label">Checklists</div></div>`;
+                html += `<div class="stat-card"><div class="stat-value">${tokens || 0}</div><div class="stat-label">Fiches générées</div></div>`;
+                html += '</div>';
+                
+                if (gites === 0) {
+                    html += `<div class="result warning" style="margin-top: 20px;">
+                        ⚠️ Aucun gîte configuré. Allez dans l'onglet "Fiches Clients" → "Configuration gîtes"
+                    </div>`;
+                    issues.push('Gîtes non configurés');
+                }
+                
+                result.innerHTML = html;
+            } catch (err) {
+                result.innerHTML = `<div class="result error">❌ Erreur: ${err.message}</div>`;
+            }
+            
+            updateSummary();
+        }
+
+        async function testTokenGeneration() {
+            const result = document.getElementById('token-result');
+            result.innerHTML = '<div class="result info">⏳ Génération d\'un token de test...</div>';
+            
+            try {
+                // Récupérer une réservation
+                const { data: reservations } = await supabase
+                    .from('reservations')
+                    .select('*')
+                    .limit(1);
+                
+                if (!reservations || reservations.length === 0) {
+                    result.innerHTML = `<div class="result warning">⚠️ Aucune réservation disponible pour tester</div>`;
+                    return;
+                }
+                
+                const reservation = reservations[0];
+                
+                // Générer un token
+                const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), 
+                    byte => byte.toString(16).padStart(2, '0')).join('');
+                
+                const expiresAt = new Date(reservation.date_fin || new Date());
+                expiresAt.setDate(expiresAt.getDate() + 7);
+                
+                const { data, error } = await supabase
+                    .from('client_access_tokens')
+                    .insert({
+                        token: token,
+                        reservation_id: reservation.id,
+                        expires_at: expiresAt.toISOString()
+                    })
+                    .select();
+                
+                if (error) {
+                    result.innerHTML = `<div class="result error">❌ Erreur génération: ${error.message}</div>`;
+                    issues.push('Génération de token');
+                } else {
+                    const ficheUrl = `${window.location.origin}/fiche-client.html?token=${token}`;
+                    result.innerHTML = `
+                        <div class="result success">✅ Token généré avec succès</div>
+                        <div class="result info" style="margin-top: 10px;">
+                            <strong>Réservation:</strong> ${reservation.nom_client || reservation.nom}<br>
+                            <strong>Token:</strong> ${token.substring(0, 20)}...<br>
+                            <strong>Expire:</strong> ${expiresAt.toLocaleDateString()}<br><br>
+                            <strong>URL de la fiche:</strong><br>
+                            <a href="${ficheUrl}" target="_blank" style="color: #667eea; word-break: break-all;">${ficheUrl}</a>
+                        </div>
+                        <button onclick="window.open('${ficheUrl}', '_blank')" style="margin-top: 15px;">
+                            🌐 Ouvrir la fiche de test
+                        </button>
+                    `;
+                }
+            } catch (err) {
+                result.innerHTML = `<div class="result error">❌ Erreur: ${err.message}</div>`;
+            }
+            
+            updateSummary();
+        }
+
+        async function testJSFunctions() {
+            const result = document.getElementById('js-result');
+            
+            const functions = [
+                { name: 'aperçuFicheClient', global: 'window.aperçuFicheClient' },
+                { name: 'getAllReservations', global: 'window.getAllReservations' },
+                { name: 'supabaseClient', global: 'window.supabaseClient' },
+                { name: 'initFichesClients', global: 'window.initFichesClients' }
+            ];
+            
+            let html = '';
+            let missingFunctions = [];
+            
+            for (const func of functions) {
+                try {
+                    const exists = eval(`typeof ${func.global}`) !== 'undefined';
+                    if (exists) {
+                        html += `<div class="result success">✅ ${func.name}: Disponible</div>`;
+                    } else {
+                        html += `<div class="result error">❌ ${func.name}: Non trouvée</div>`;
+                        missingFunctions.push(func.name);
+                    }
+                } catch (err) {
+                    html += `<div class="result error">❌ ${func.name}: ${err.message}</div>`;
+                }
+            }
+            
+            if (missingFunctions.length > 0) {
+                issues.push(`Fonctions JS manquantes: ${missingFunctions.join(', ')}`);
+            }
+            
+            result.innerHTML = html;
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summary = document.getElementById('summary-result');
+            
+            if (issues.length === 0) {
+                summary.innerHTML = `
+                    <div class="result success" style="font-size: 1.1rem; padding: 20px;">
+                        🎉 <strong>Tout fonctionne parfaitement !</strong><br><br>
+                        Le système de fiches clients est opérationnel.<br>
+                        Testez en cliquant sur "📄 Fiche Client" dans le dashboard.
+                    </div>
+                `;
+            } else {
+                summary.innerHTML = `
+                    <div class="result error" style="font-size: 1.1rem; padding: 20px;">
+                        ⚠️ <strong>${issues.length} problème(s) détecté(s):</strong><br><br>
+                        ${issues.map(i => `• ${i}`).join('<br>')}
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-init
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initSupabase();
+        });
+    </script>
+</body>
+</html>

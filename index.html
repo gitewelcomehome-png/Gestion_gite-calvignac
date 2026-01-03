@@ -234,6 +234,7 @@
             'tab-charges': 'tabs/tab-fiscalite-v2.html',
             'tab-menage': 'tabs/tab-menage.html',
             'tab-infos-gites': 'tabs/tab-infos-gites.html',
+            'tab-fiches-clients': 'tabs/tab-fiches-clients.html',
             'tab-decouvrir': 'tabs/tab-decouvrir.html',
             'tab-faq': 'tabs/tab-faq.html',
         };
@@ -299,6 +300,7 @@
         <div id="tab-charges" class="tab-content"></div>
         <div id="tab-menage" class="tab-content"></div>
         <div id="tab-infos-gites" class="tab-content"></div>
+        <div id="tab-fiches-clients" class="tab-content"></div>
         <div id="tab-decouvrir" class="tab-content"></div>
     </div>
     
@@ -570,6 +572,9 @@
             }
             if (tabName === 'faq' && typeof initFAQ === 'function') {
                 initFAQ();
+            }
+            if (tabName === 'fiches-clients' && typeof initFichesClients === 'function') {
+                initFichesClients();
             }
             if (tabName === 'dashboard') {
                 // Charger le widget horaires clients
