@@ -701,20 +701,152 @@ function openEditReservation(id) {
 }
 
 // Helper pour ouvrir la fiche client
-function openFicheClient(id) {
-    console.log('🔍 openFicheClient appelé avec ID:', id);
-    console.log('🔍 aperçuFicheClient existe?', typeof aperçuFicheClient);
-    console.log('🔍 window.aperçuFicheClient existe?', typeof window.aperçuFicheClient);
+function openFicheClient(reservationId) {
+    // Générer modal direct avec 2 options
+    const existingModal = document.querySelector('.modal-fiche-simple');
+    if (existingModal) existingModal.remove();
     
-    if (typeof aperçuFicheClient === 'function') {
-        console.log('✅ Appel de aperçuFicheClient');
-        aperçuFicheClient(id);
-    } else if (typeof window.aperçuFicheClient === 'function') {
-        console.log('✅ Appel de window.aperçuFicheClient');
-        window.aperçuFicheClient(id);
-    } else {
-        console.error('❌ Function aperçuFicheClient not found');
-        alert('Erreur : fonction aperçuFicheClient introuvable. Vérifiez que fiche-client.js est chargé.');
+    const modal = document.createElement('div');
+    modal.className = 'modal-fiche-simple';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); min-width: 400px; max-width: 500px;">
+            <h3 style="margin: 0 0 20px 0; font-size: 1.3rem; color: #2c3e50;">📄 Fiche Client - Réservation #${reservationId}</h3>
+            
+            <button onclick="window.openFicheWhatsApp(${reservationId})" 
+                    style="width: 100%; padding: 15px; margin-bottom: 12px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='scale(1.02)'"
+                    onmouseout="this.style.transform='scale(1)'">
+                <span style="font-size: 24px;">📱</span>
+                Envoyer par WhatsApp
+            </button>
+            
+            <button onclick="window.downloadFichePDF(${reservationId})" 
+                    style="width: 100%; padding: 15px; margin-bottom: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='scale(1.02)'"
+                    onmouseout="this.style.transform='scale(1)'">
+                <span style="font-size: 24px;">📥</span>
+                Télécharger en PDF
+            </button>
+            
+            <button onclick="this.closest('.modal-fiche-simple').remove()" 
+                    style="width: 100%; padding: 10px; background: #e0e0e0; color: #666; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                Annuler
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Fermer au clic sur le fond
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// Fonction WhatsApp
+async function openFicheWhatsApp(reservationId) {
+    try {
+        const reservations = await getAllReservations();
+        const reservation = reservations.find(r => r.id === reservationId);
+        
+        if (!reservation || !reservation.telephone) {
+            alert('⚠️ Aucun numéro de téléphone renseigné pour cette réservation');
+            return;
+        }
+        
+        // Générer ou récupérer le token
+        let token;
+        const { data: existingTokens } = await supabaseClient
+            .from('client_access_tokens')
+            .select('token')
+            .eq('reservation_id', reservationId)
+            .limit(1);
+        
+        if (existingTokens && existingTokens.length > 0) {
+            token = existingTokens[0].token;
+        } else {
+            // Générer nouveau token
+            token = generateSecureToken();
+            const dateFin = parseLocalDate(reservation.dateFin);
+            dateFin.setDate(dateFin.getDate() + 7);
+            
+            await supabaseClient.from('client_access_tokens').insert({
+                token: token,
+                reservation_id: reservationId,
+                expires_at: dateFin.toISOString()
+            });
+        }
+        
+        const ficheUrl = `${window.location.origin}/fiche-client.html?token=${token}`;
+        const message = `Bonjour ${reservation.nom} ! 👋\n\nVoici votre fiche d'accueil pour votre séjour au gîte ${reservation.gite} :\n\n${ficheUrl}\n\nBon séjour ! 🏡`;
+        
+        const phone = reservation.telephone.replace(/\s/g, '').replace(/^0/, '33');
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+        
+        document.querySelector('.modal-fiche-simple')?.remove();
+    } catch (error) {
+        console.error('Erreur WhatsApp:', error);
+        alert('❌ Erreur lors de la génération du lien');
+    }
+}
+
+// Fonction téléchargement PDF
+async function downloadFichePDF(reservationId) {
+    try {
+        const reservations = await getAllReservations();
+        const reservation = reservations.find(r => r.id === reservationId);
+        
+        if (!reservation) {
+            alert('⚠️ Réservation introuvable');
+            return;
+        }
+        
+        // Générer ou récupérer le token
+        let token;
+        const { data: existingTokens } = await supabaseClient
+            .from('client_access_tokens')
+            .select('token')
+            .eq('reservation_id', reservationId)
+            .limit(1);
+        
+        if (existingTokens && existingTokens.length > 0) {
+            token = existingTokens[0].token;
+        } else {
+            token = generateSecureToken();
+            const dateFin = parseLocalDate(reservation.dateFin);
+            dateFin.setDate(dateFin.getDate() + 7);
+            
+            await supabaseClient.from('client_access_tokens').insert({
+                token: token,
+                reservation_id: reservationId,
+                expires_at: dateFin.toISOString()
+            });
+        }
+        
+        const ficheUrl = `${window.location.origin}/fiche-client.html?token=${token}`;
+        
+        // Ouvrir dans nouvel onglet pour impression/PDF
+        const printWindow = window.open(ficheUrl, '_blank');
+        if (printWindow) {
+            printWindow.addEventListener('load', () => {
+                setTimeout(() => printWindow.print(), 1000);
+            });
+        }
+        
+        document.querySelector('.modal-fiche-simple')?.remove();
+    } catch (error) {
+        console.error('Erreur PDF:', error);
+        alert('❌ Erreur lors de la génération');
     }
 }
 
@@ -1209,5 +1341,7 @@ window.toggleTodo = toggleTodo;
 window.deleteTodo = deleteTodo;
 window.openEditReservation = openEditReservation;
 window.openFicheClient = openFicheClient;
+window.openFicheWhatsApp = openFicheWhatsApp;
+window.downloadFichePDF = downloadFichePDF;
 window.refreshDashboard = refreshDashboard;
 window.closeAddTodoModal = closeAddTodoModal;
