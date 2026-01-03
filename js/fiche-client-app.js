@@ -323,21 +323,20 @@ function initOngletEntree() {
             details: giteInfo.parking_details_en
         };
     
-    if (parkingInfo.dispo || parkingInfo.details) {
-        let parkingHTML = '';
-        if (parkingInfo.dispo) {
-            parkingHTML += `<p style="margin-bottom: 0.75rem;"><strong>Disponibilité :</strong> ${parkingInfo.dispo}</p>`;
-        }
-        if (parkingInfo.places) {
-            parkingHTML += `<p style="margin-bottom: 0.75rem;"><strong>Places :</strong> ${parkingInfo.places}</p>`;
-        }
-        if (parkingInfo.details) {
-            parkingHTML += `<p style="white-space: pre-line; color: var(--gray-700);">${parkingInfo.details}</p>`;
-        }
-        document.getElementById('parkingInfo').innerHTML = parkingHTML;
-    } else {
-        document.getElementById('parkingSection').style.display = 'none';
+    let parkingHTML = '';
+    if (parkingInfo.dispo) {
+        parkingHTML += `<p style="margin-bottom: 0.75rem;"><strong>Disponibilité :</strong> ${parkingInfo.dispo}</p>`;
     }
+    if (parkingInfo.places) {
+        parkingHTML += `<p style="margin-bottom: 0.75rem;"><strong>Places :</strong> ${parkingInfo.places}</p>`;
+    }
+    if (parkingInfo.details) {
+        parkingHTML += `<p style="white-space: pre-line; color: var(--gray-700);">${parkingInfo.details}</p>`;
+    }
+    if (!parkingHTML) {
+        parkingHTML = '<p style="color: var(--gray-500); font-style: italic;">Aucune information disponible</p>';
+    }
+    document.getElementById('parkingInfo').innerHTML = parkingHTML;
     
     // Checklist d'entrée
     loadChecklist('entree', 'checklistEntreeContainer', 'progressEntree', 'progressEntreeText');
@@ -357,24 +356,23 @@ function initOngletPendant() {
             instructions: giteInfo.instructions_chauffage_en
         };
     
-    if (chauffageInfo.type || chauffageInfo.clim) {
-        let chauffageHTML = '';
-        if (chauffageInfo.type) {
-            chauffageHTML += `<p style="margin-bottom: 0.75rem;"><strong>Type de chauffage :</strong> ${chauffageInfo.type}</p>`;
-        }
-        if (chauffageInfo.clim) {
-            chauffageHTML += `<p style="margin-bottom: 0.75rem;"><strong>Climatisation :</strong> ${chauffageInfo.clim}</p>`;
-        }
-        if (chauffageInfo.instructions) {
-            chauffageHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
-                <strong style="display: block; margin-bottom: 0.5rem;">📝 Instructions :</strong>
-                <p style="white-space: pre-line; color: var(--gray-700);">${chauffageInfo.instructions}</p>
-            </div>`;
-        }
-        document.getElementById('chauffageInfo').innerHTML = chauffageHTML;
-    } else {
-        document.getElementById('chauffageSection').style.display = 'none';
+    let chauffageHTML = '';
+    if (chauffageInfo.type) {
+        chauffageHTML += `<p style="margin-bottom: 0.75rem;"><strong>Type de chauffage :</strong> ${chauffageInfo.type}</p>`;
     }
+    if (chauffageInfo.clim) {
+        chauffageHTML += `<p style="margin-bottom: 0.75rem;"><strong>Climatisation :</strong> ${chauffageInfo.clim}</p>`;
+    }
+    if (chauffageInfo.instructions) {
+        chauffageHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+            <strong style="display: block; margin-bottom: 0.5rem;">📝 Instructions :</strong>
+            <p style="white-space: pre-line; color: var(--gray-700);">${chauffageInfo.instructions}</p>
+        </div>`;
+    }
+    if (!chauffageHTML) {
+        chauffageHTML = '<p style="color: var(--gray-500); font-style: italic;">Aucune information disponible</p>';
+    }
+    document.getElementById('chauffageInfo').innerHTML = chauffageHTML;
     
     // CUISINE
     const cuisineInfo = currentLanguage === 'fr'
@@ -393,35 +391,34 @@ function initOngletPendant() {
             laveLinge: giteInfo.instructions_lave_linge_en
         };
     
-    if (cuisineInfo.equipements || cuisineInfo.four || cuisineInfo.plaques) {
-        let cuisineHTML = '';
-        if (cuisineInfo.equipements) {
-            cuisineHTML += `<p style="margin-bottom: 1rem; white-space: pre-line;">${cuisineInfo.equipements}</p>`;
-        }
-        if (cuisineInfo.four) {
-            cuisineHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
-                <strong>🔥 Four :</strong><br>${cuisineInfo.four}
-            </div>`;
-        }
-        if (cuisineInfo.plaques) {
-            cuisineHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
-                <strong>🍳 Plaques :</strong><br>${cuisineInfo.plaques}
-            </div>`;
-        }
-        if (cuisineInfo.laveVaisselle) {
-            cuisineHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
-                <strong>🍽️ Lave-vaisselle :</strong><br>${cuisineInfo.laveVaisselle}
-            </div>`;
-        }
-        if (cuisineInfo.laveLinge) {
-            cuisineHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem;">
-                <strong>👕 Lave-linge :</strong><br>${cuisineInfo.laveLinge}
-            </div>`;
-        }
-        document.getElementById('cuisineInfo').innerHTML = cuisineHTML;
-    } else {
-        document.getElementById('cuisineSection').style.display = 'none';
+    let cuisineHTML = '';
+    if (cuisineInfo.equipements) {
+        cuisineHTML += `<p style="margin-bottom: 1rem; white-space: pre-line;">${cuisineInfo.equipements}</p>`;
     }
+    if (cuisineInfo.four) {
+        cuisineHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
+            <strong>🔥 Four :</strong><br>${cuisineInfo.four}
+        </div>`;
+    }
+    if (cuisineInfo.plaques) {
+        cuisineHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
+            <strong>🍳 Plaques :</strong><br>${cuisineInfo.plaques}
+        </div>`;
+    }
+    if (cuisineInfo.laveVaisselle) {
+        cuisineHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
+            <strong>🍽️ Lave-vaisselle :</strong><br>${cuisineInfo.laveVaisselle}
+        </div>`;
+    }
+    if (cuisineInfo.laveLinge) {
+        cuisineHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem;">
+            <strong>👕 Lave-linge :</strong><br>${cuisineInfo.laveLinge}
+        </div>`;
+    }
+    if (!cuisineHTML) {
+        cuisineHTML = '<p style="color: var(--gray-500); font-style: italic;">Aucune information disponible</p>';
+    }
+    document.getElementById('cuisineInfo').innerHTML = cuisineHTML;
     
     // TRI DES DÉCHETS
     const dechetsInfo = currentLanguage === 'fr'
@@ -436,23 +433,22 @@ function initOngletPendant() {
             decheterie: giteInfo.decheterie_en
         };
     
-    if (dechetsInfo.tri || dechetsInfo.collecte) {
-        let dechetsHTML = '';
-        if (dechetsInfo.tri) {
-            dechetsHTML += `<p style="margin-bottom: 1rem; white-space: pre-line;">${dechetsInfo.tri}</p>`;
-        }
-        if (dechetsInfo.collecte) {
-            dechetsHTML += `<p style="margin-bottom: 0.75rem;"><strong>📅 Jours de collecte :</strong> ${dechetsInfo.collecte}</p>`;
-        }
-        if (dechetsInfo.decheterie) {
-            dechetsHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem;">
-                <strong>🏭 Déchèterie :</strong><br>${dechetsInfo.decheterie}
-            </div>`;
-        }
-        document.getElementById('dechetsInfo').innerHTML = dechetsHTML;
-    } else {
-        document.getElementById('dechetsSection').style.display = 'none';
+    let dechetsHTML = '';
+    if (dechetsInfo.tri) {
+        dechetsHTML += `<p style="margin-bottom: 1rem; white-space: pre-line;">${dechetsInfo.tri}</p>`;
     }
+    if (dechetsInfo.collecte) {
+        dechetsHTML += `<p style="margin-bottom: 0.75rem;"><strong>📅 Jours de collecte :</strong> ${dechetsInfo.collecte}</p>`;
+    }
+    if (dechetsInfo.decheterie) {
+        dechetsHTML += `<div style="background: var(--gray-100); padding: 1rem; border-radius: 0.5rem;">
+            <strong>🏭 Déchèterie :</strong><br>${dechetsInfo.decheterie}
+        </div>`;
+    }
+    if (!dechetsHTML) {
+        dechetsHTML = '<p style="color: var(--gray-500); font-style: italic;">Aucune information disponible</p>';
+    }
+    document.getElementById('dechetsInfo').innerHTML = dechetsHTML;
     
     // Équipements
     if (giteInfo.equipements && giteInfo.equipements.length > 0) {
