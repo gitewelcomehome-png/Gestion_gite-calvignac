@@ -181,44 +181,75 @@ async function updateDashboardReservations() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - today.getDay() + 1);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
+    // Les 7 prochains jours (aujourd'hui + 6 jours)
+    const in7Days = new Date(today);
+    in7Days.setDate(today.getDate() + 6);
     
-    // Réservations de la semaine (uniquement futures ou en cours)
-    const weekReservations = reservations.filter(r => {
-        const arrival = parseLocalDate(r.dateDebut);
-        const departure = parseLocalDate(r.dateFin);
-        // N'afficher que si l'arrivée est cette semaine OU si le séjour est en cours
-        const isArrivalThisWeek = arrival >= weekStart && arrival <= weekEnd;
-        const isDepartureThisWeek = departure >= weekStart && departure <= weekEnd && departure > today; // FIX: > au lieu de >=
-        return isArrivalThisWeek || (isDepartureThisWeek && arrival < weekStart);
+    // Filtrer les réservations
+    const filtered = reservations.filter(r => {
+        const dateDebut = parseLocalDate(r.dateDebut);
+        const dateFin = parseLocalDate(r.dateFin);
+        dateDebut.setHours(0, 0, 0, 0);
+        dateFin.setHours(0, 0, 0, 0);
+        
+        // 1. Masquer si terminée (dateFin <= aujourd'hui)
+        if (dateFin <= today) return false;
+        
+        // 2. Masquer si réservation d'une seule nuit
+        const nuits = Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24));
+        if (nuits <= 1) return false;
+        
+        // 3. Afficher si début dans les 7 prochains jours
+        if (dateDebut >= today && dateDebut <= in7Days) return true;
+        
+        // 4. Afficher si fin dans les 7 prochains jours (séjour en cours)
+        if (dateFin >= today && dateFin <= in7Days && dateDebut < today) return true;
+        
+        return false;
     }).sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     
     const container = document.getElementById('dashboard-reservations');
     
-    if (weekReservations.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation cette semaine</p>';
+    if (filtered.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation dans les 7 prochains jours</p>';
         return;
     }
     
     let html = '';
-    weekReservations.forEach(r => {
-        const arrival = parseLocalDate(r.dateDebut);
-        const departure = parseLocalDate(r.dateFin);
-        const isArrival = arrival >= weekStart && arrival <= weekEnd;
-        const isDeparture = departure >= weekStart && departure <= weekEnd;
+    filtered.forEach(r => {
+        const dateDebut = parseLocalDate(r.dateDebut);
+        const dateFin = parseLocalDate(r.dateFin);
+        dateDebut.setHours(0, 0, 0, 0);
+        dateFin.setHours(0, 0, 0, 0);
         
-        const badge = isArrival ? '📥 Arrivée' : '📤 Départ';
-        const badgeColor = isArrival ? '#27AE60' : '#3498DB';
+        const isArrivalToday = dateDebut.getTime() === today.getTime();
+        const isDepartureToday = dateFin.getTime() === today.getTime();
+        
+        let badge = '';
+        let badgeColor = '';
+        if (isArrivalToday) {
+            badge = '📥 Arrivée AUJOURD\'HUI';
+            badgeColor = '#27AE60';
+        } else if (isDepartureToday) {
+            badge = '📤 Départ AUJOURD\'HUI';
+            badgeColor = '#E74C3C';
+        } else if (dateDebut > today) {
+            badge = '📥 Arrivée prochaine';
+            badgeColor = '#3498DB';
+        } else {
+            badge = '🏠 Séjour en cours';
+            badgeColor = '#9B59B6';
+        }
+        
         const giteColor = r.gite === 'Trévoux' ? '#667eea' : '#f093fb';
-        
         const paiementIcon = r.paiement === 'Soldé' ? '✅' : r.paiement === 'Acompte reçu' ? '⏳' : '❌';
         
         // Calculer jours avant arrivée
-        const daysUntilArrival = Math.ceil((arrival - today) / (1000 * 60 * 60 * 24));
+        const daysUntilArrival = Math.ceil((dateDebut - today) / (1000 * 60 * 60 * 24));
         const shouldSendReminder = daysUntilArrival === 3;
+        
+        // Masquer bouton fiche client si départ aujourd'hui ou passé
+        const showFicheButton = dateFin > today;
         
         html += `
             <div style="border-left: 4px solid ${giteColor}; padding: 15px; margin-bottom: 10px; background: ${shouldSendReminder ? '#FFF9E6' : '#f8f9fa'}; border-radius: 8px; position: relative;">
@@ -228,28 +259,28 @@ async function updateDashboardReservations() {
                         <strong style="font-size: 1.1rem; color: ${giteColor};">${r.nom}</strong>
                         <div style="color: #666; font-size: 0.9rem; margin-top: 4px;">
                             <span style="background: ${badgeColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 8px;">${badge}</span>
-                            ${formatDateFromObj(arrival)} → ${formatDateFromObj(departure)} (${r.nuits} nuits)
+                            ${formatDateFromObj(dateDebut)} → ${formatDateFromObj(dateFin)} (${r.nuits} nuits)
                         </div>
                         <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #666; margin-top: 6px;">
                             <span>🏠 ${r.gite}</span>
-                            <span>👥 ${r.nb_personnes || '-'} pers.</span>
+                            <span>👥 ${r.nbPersonnes || '-'} pers.</span>
                             ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'};">📅 J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
                         </div>
                     </div>
                     <span style="font-size: 1.5rem; margin-left: 10px;" title="${r.paiement}">${paiementIcon}</span>
                 </div>
-                ${isArrival ? `
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; display: flex; gap: 8px;">
+                    ${showFicheButton ? `
                     <button onclick="openFicheClient(${r.id})" 
                             style="flex: 1; background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;">
                         📄 Fiche Client
                     </button>
+                    ` : ''}
                     <button onclick="openEditReservation(${r.id})" 
                             style="background: #3498DB; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
                         ✏️
                     </button>
                 </div>
-                ` : ''}
             </div>
         `;
     });
