@@ -4,9 +4,24 @@
 -- ============================================
 
 -- ============================================
+-- SUPPRESSION DES TABLES EXISTANTES (ordre inverse des dépendances)
+-- ============================================
+DROP TABLE IF EXISTS public.activites_consultations CASCADE;
+DROP TABLE IF EXISTS public.fiche_generation_logs CASCADE;
+DROP TABLE IF EXISTS public.client_access_tokens CASCADE;
+DROP TABLE IF EXISTS public.retours_clients CASCADE;
+DROP TABLE IF EXISTS public.demandes_horaires CASCADE;
+DROP TABLE IF EXISTS public.checklist_validations CASCADE;
+DROP TABLE IF EXISTS public.checklists CASCADE;
+DROP TABLE IF EXISTS public.infos_gites CASCADE;
+
+-- Supprimer les fonctions trigger si elles existent
+DROP FUNCTION IF EXISTS update_infos_gites_timestamp() CASCADE;
+
+-- ============================================
 -- TABLE 1 : Informations générales des gîtes
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.infos_gites (
+CREATE TABLE public.infos_gites (
   id SERIAL PRIMARY KEY,
   gite TEXT NOT NULL UNIQUE CHECK (gite = ANY (ARRAY['Trévoux', 'Couzon'])),
   
@@ -74,7 +89,7 @@ FOR EACH ROW EXECUTE FUNCTION update_infos_gites_timestamp();
 -- ============================================
 -- TABLE 2 : Checklists (entrée/sortie)
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.checklists (
+CREATE TABLE public.checklists (
   id SERIAL PRIMARY KEY,
   gite TEXT NOT NULL CHECK (gite = ANY (ARRAY['Trévoux', 'Couzon'])),
   type TEXT NOT NULL CHECK (type = ANY (ARRAY['entree', 'sortie'])),
@@ -99,7 +114,7 @@ CREATE INDEX IF NOT EXISTS idx_checklists_gite_type ON checklists(gite, type, or
 -- ============================================
 -- TABLE 3 : Validations checklists par client
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.checklist_validations (
+CREATE TABLE public.checklist_validations (
   id SERIAL PRIMARY KEY,
   reservation_id BIGINT NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
   checklist_id INTEGER NOT NULL REFERENCES checklists(id) ON DELETE CASCADE,
@@ -117,7 +132,7 @@ CREATE INDEX IF NOT EXISTS idx_checklist_validations_reservation ON checklist_va
 -- ============================================
 -- TABLE 4 : Demandes horaires (arrivée/départ)
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.demandes_horaires (
+CREATE TABLE public.demandes_horaires (
   id SERIAL PRIMARY KEY,
   reservation_id BIGINT NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
   type TEXT NOT NULL CHECK (type = ANY (ARRAY['arrivee_anticipee', 'depart_tardif'])),
@@ -148,7 +163,7 @@ CREATE INDEX IF NOT EXISTS idx_demandes_horaires_status ON demandes_horaires(sta
 -- ============================================
 -- TABLE 5 : Retours clients
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.retours_clients (
+CREATE TABLE public.retours_clients (
   id SERIAL PRIMARY KEY,
   reservation_id BIGINT NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
   
@@ -176,7 +191,7 @@ CREATE INDEX IF NOT EXISTS idx_retours_clients_urgence ON retours_clients(urgenc
 -- ============================================
 -- TABLE 6 : Tokens d'accès client (sécurité)
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.client_access_tokens (
+CREATE TABLE public.client_access_tokens (
   id SERIAL PRIMARY KEY,
   reservation_id BIGINT NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
   token TEXT NOT NULL UNIQUE,
@@ -197,7 +212,7 @@ CREATE INDEX IF NOT EXISTS idx_client_tokens_expiry ON client_access_tokens(expi
 -- ============================================
 -- TABLE 7 : Logs génération fiches
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.fiche_generation_logs (
+CREATE TABLE public.fiche_generation_logs (
   id SERIAL PRIMARY KEY,
   reservation_id BIGINT NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
   
@@ -220,7 +235,7 @@ CREATE INDEX IF NOT EXISTS idx_fiche_logs_reservation ON fiche_generation_logs(r
 -- ============================================
 -- TABLE 8 : Statistiques activités consultées
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.activites_consultations (
+CREATE TABLE public.activites_consultations (
   id SERIAL PRIMARY KEY,
   activite_id BIGINT NOT NULL REFERENCES activites_gites(id) ON DELETE CASCADE,
   reservation_id BIGINT REFERENCES reservations(id) ON DELETE SET NULL,
