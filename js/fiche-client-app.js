@@ -246,13 +246,41 @@ async function loadReservationData() {
 }
 
 async function loadGiteInfo() {
-    const { data, error } = await supabase
+    // Essayer avec le nom normalisé
+    let { data, error } = await supabase
         .from('infos_gites')
         .select('*')
         .eq('gite', normalizeGiteName(reservationData.gite))
-        .single();
+        .maybeSingle();
+    
+    // Si pas de résultat, essayer avec le nom original en minuscules
+    if (!data && !error) {
+        const result = await supabase
+            .from('infos_gites')
+            .select('*')
+            .eq('gite', reservationData.gite.toLowerCase())
+            .maybeSingle();
+        data = result.data;
+        error = result.error;
+    }
+    
+    // Si toujours pas de résultat, essayer avec le nom original
+    if (!data && !error) {
+        const result = await supabase
+            .from('infos_gites')
+            .select('*')
+            .eq('gite', reservationData.gite)
+            .maybeSingle();
+        data = result.data;
+        error = result.error;
+    }
     
     if (error) throw error;
+    
+    if (!data) {
+        throw new Error(`Aucune information trouvée pour le gîte "${reservationData.gite}". Veuillez configurer les infos pratiques dans le back-office.`);
+    }
+    
     giteInfo = data;
 }
 
@@ -263,7 +291,7 @@ async function loadCleaningSchedule() {
         .select('*')
         .eq('gite', normalizeGiteName(reservationData.gite))
         .eq('scheduled_date', reservationData.date_debut)
-        .single();
+        .maybeSingle();
     
     cleaningScheduleAvant = menageAvant;
     
@@ -273,7 +301,7 @@ async function loadCleaningSchedule() {
         .select('*')
         .eq('gite', normalizeGiteName(reservationData.gite))
         .eq('scheduled_date', reservationData.date_fin)
-        .single();
+        .maybeSingle();
     
     cleaningScheduleApres = menageApres;
 }
