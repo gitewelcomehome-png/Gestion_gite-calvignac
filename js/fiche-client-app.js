@@ -252,7 +252,7 @@ async function loadCleaningSchedule() {
     const { data: menageAvant } = await supabase
         .from('cleaning_schedule')
         .select('*')
-        .eq('gite', reservationData.gite)
+        .eq('gite', reservationData.gite.toLowerCase())
         .eq('scheduled_date', reservationData.date_debut)
         .single();
     
@@ -262,7 +262,7 @@ async function loadCleaningSchedule() {
     const { data: menageApres } = await supabase
         .from('cleaning_schedule')
         .select('*')
-        .eq('gite', reservationData.gite)
+        .eq('gite', reservationData.gite.toLowerCase())
         .eq('scheduled_date', reservationData.date_fin)
         .single();
     
@@ -741,7 +741,7 @@ async function loadActivitesMap() {
     const { data: activites, error } = await supabase
         .from('activites_gites')
         .select('*')
-        .eq('gite', reservationData.gite)
+        .eq('gite', reservationData.gite.toLowerCase())
         .order('distance', { ascending: true });
     
     if (error) {
@@ -894,7 +894,7 @@ window.filtrerActivites = async function(categorie) {
     const { data: activites } = await supabase
         .from('activites_gites')
         .select('*')
-        .eq('gite', reservationData.gite)
+        .eq('gite', reservationData.gite.toLowerCase())
         .order('distance', { ascending: true });
     
     createActivitesFilters(activites || []);
@@ -912,7 +912,7 @@ async function loadChecklist(type, containerId, progressId, progressTextId) {
     const { data: items } = await supabase
         .from('checklists')
         .select('*')
-        .eq('gite', reservationData.gite)
+        .eq('gite', reservationData.gite.toLowerCase())
         .eq('type', type)
         .eq('actif', true)
         .order('ordre');
