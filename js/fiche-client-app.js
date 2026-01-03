@@ -26,7 +26,8 @@ var currentLanguage = 'fr';
 var reservationData = null;
 var giteInfo = null;
 var token = null;
-var cleaningSchedule = null;
+var cleaningScheduleAvant = null;  // Ménage AVANT l'arrivée (jour d'arrivée)
+var cleaningScheduleApres = null;   // Ménage APRÈS le départ (jour de départ)
 
 // ==================== TRADUCTIONS ====================
 const translations = {
@@ -247,14 +248,25 @@ async function loadGiteInfo() {
 }
 
 async function loadCleaningSchedule() {
-    const { data } = await supabase
+    // Charger le ménage du jour d'ARRIVÉE (avant la résa)
+    const { data: menageAvant } = await supabase
         .from('cleaning_schedule')
         .select('*')
         .eq('gite', reservationData.gite)
         .eq('scheduled_date', reservationData.date_debut)
         .single();
     
-    cleaningSchedule = data;
+    cleaningScheduleAvant = menageAvant;
+    
+    // Charger le ménage du jour de DÉPART (après la résa)
+    const { data: menageApres } = await supabase
+        .from('cleaning_schedule')
+        .select('*')
+        .eq('gite', reservationData.gite)
+        .eq('scheduled_date', reservationData.date_fin)
+        .single();
+    
+    cleaningScheduleApres = menageApres;
 }
 
 function initializeUI() {
@@ -291,12 +303,12 @@ function initOngletEntree() {
     const heureArrivee = currentLanguage === 'fr' ? giteInfo.heure_arrivee : giteInfo.heure_arrivee_en;
     document.getElementById('heureArrivee').textContent = formatTime(heureArrivee || giteInfo.heure_arrivee_standard || '17:00');
     
-    // Règle arrivée anticipée
-    const heureMin = !cleaningSchedule || cleaningSchedule.time_of_day !== 'afternoon' 
+    // Règle arrivée anticipée selon le ménage du jour d'arrivée
+    const heureMin = !cleaningScheduleAvant || cleaningScheduleAvant.time_of_day !== 'afternoon' 
         ? giteInfo.heure_arrivee_anticipee_min 
         : giteInfo.heure_arrivee_avec_menage;
     
-    const regleKey = !cleaningSchedule || cleaningSchedule.time_of_day !== 'afternoon'
+    const regleKey = !cleaningScheduleAvant || cleaningScheduleAvant.time_of_day !== 'afternoon'
         ? 'arrivee_possible_13h'
         : 'arrivee_possible_17h';
     
@@ -571,15 +583,30 @@ function initOngletSortie() {
     const heureDepart = currentLanguage === 'fr' ? giteInfo.heure_depart : giteInfo.heure_depart_en;
     document.getElementById('heureDepart').textContent = formatTime(heureDepart || giteInfo.heure_depart_standard || '10:00');
     
-    // Règle départ tardif
+    // Règle départ tardif selon le ménage du jour de départ
     const isDimanche = new Date(reservationData.date_fin).getDay() === 0;
-    const regleKey = isDimanche ? 'depart_possible_17h_dimanche' : 'depart_possible_12h';
+    
+    // Si PAS de ménage l'après-midi du départ, on peut partir plus tard
+    const pasDeMenuageApresMidi = !cleaningScheduleApres || cleaningScheduleApres.time_of_day !== 'afternoon';
+    
+    let regleKey;
+    let heureMax;
+    
+    if (isDimanche && pasDeMenuageApresMidi) {
+        // Dimanche SANS ménage l'après-midi : départ jusqu'à 17h possible
+        regleKey = 'depart_possible_17h_dimanche';
+        heureMax = giteInfo.heure_depart_dimanche_max || '17:00';
+    } else if (!isDimanche && pasDeMenuageApresMidi) {
+        // Semaine SANS ménage l'après-midi : départ jusqu'à 12h possible
+        regleKey = 'depart_possible_12h';
+        heureMax = giteInfo.heure_depart_semaine_max || '12:00';
+    } else {
+        // AVEC ménage l'après-midi : départ standard 10h
+        regleKey = 'depart_possible_12h';
+        heureMax = giteInfo.heure_depart_standard || '10:00';
+    }
+    
     document.getElementById('regleDepart').textContent = t(regleKey);
-    
-    const heureMax = isDimanche && (!cleaningSchedule || cleaningSchedule.time_of_day !== 'afternoon')
-        ? giteInfo.heure_depart_dimanche_max
-        : giteInfo.heure_depart_semaine_max;
-    
     document.getElementById('heureDepartDemandee').max = formatTime(heureMax);
     
     // Afficher le bloc départ tardif si configuré
