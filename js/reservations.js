@@ -214,11 +214,6 @@ async function updateReservationsList() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Fin de semaine (dimanche)
-    const endOfWeek = new Date(today);
-    endOfWeek.setDate(today.getDate() + (7 - today.getDay()));
-    endOfWeek.setHours(23, 59, 59, 999);
-    
     // Récupérer les validations de la société de ménage
     const { data: cleaningSchedules } = await supabase
         .from('cleaning_schedule')
@@ -231,15 +226,13 @@ async function updateReservationsList() {
         });
     }
     
-    // Afficher uniquement les réservations de la semaine qui ne sont PAS terminées
+    // Afficher TOUTES les réservations futures (date de fin après aujourd'hui)
     const active = reservations.filter(r => {
-        const dateDebut = parseLocalDate(r.dateDebut);
         const dateFin = parseLocalDate(r.dateFin);
-        dateDebut.setHours(0, 0, 0, 0);
         dateFin.setHours(0, 0, 0, 0);
         
-        // Masquer si terminé (dateFin < aujourd'hui) OU hors semaine
-        return dateFin > today && dateDebut <= endOfWeek;
+        // Afficher si la réservation se termine après aujourd'hui
+        return dateFin > today;
     });
     
     const container = document.getElementById('planning-container');
