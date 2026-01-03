@@ -1204,7 +1204,5 @@ window.toggleTodo = toggleTodo;
 window.deleteTodo = deleteTodo;
 window.openEditReservation = openEditReservation;
 window.openFicheClient = openFicheClient;
-window.openFicheWhatsApp = openFicheWhatsApp;
-window.downloadFichePDF = downloadFichePDF;
 window.refreshDashboard = refreshDashboard;
 window.closeAddTodoModal = closeAddTodoModal;
