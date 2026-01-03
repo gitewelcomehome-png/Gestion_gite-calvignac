@@ -22,12 +22,10 @@ if (!window.ficheClientAppLoaded) {
 var supabase = window.ficheClientSupabase;
 
 // ==================== HELPER FUNCTIONS ====================
-// Fonction pour normaliser le nom du gîte (enlever accents + minuscules)
+// Fonction pour normaliser le nom du gîte (juste minuscules, GARDER les accents)
 function normalizeGiteName(name) {
     if (!name) return '';
-    return name.toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, ''); // Enlève les accents
+    return name.toLowerCase(); // Juste minuscules, on garde les accents !
 }
 
 // ==================== VARIABLES GLOBALES ====================
