@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guide de votre séjour</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest-fiche-client.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Guide Gîte">
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Leaflet pour la carte -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Google Maps (optionnel, selon préférence) -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initGoogleMap"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        
+        /* Header fixe */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            z-index: 100;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .language-switch {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--gray-100);
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+        }
+        
+        .language-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .language-btn.active {
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            color: var(--primary);
+        }
+        
+        /* Navigation tabs mobile */
+        .tab-navigation {
+            position: fixed;
+            top: 4rem;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            z-index: 99;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tab-navigation::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .tabs-list {
+            display: flex;
+            padding: 0 1rem;
+            min-width: min-content;
+        }
+        
+        .tab-btn {
+            flex-shrink: 0;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--gray-600);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .tab-btn .icon {
+            font-size: 1.5rem;
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-top: 9rem;
+            padding: 1rem;
+            padding-bottom: 2rem;
+            min-height: calc(100vh - 9rem);
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        
+        .card-description {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 0.25rem;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .btn-outline:hover {
+            background: var(--gray-50);
+        }
+        
+        .btn-full {
+            width: 100%;
+        }
+        
+        .btn-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;
+        }
+        
+        /* Form elements */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .input,
+        .textarea,
+        .select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .input:focus,
+        .textarea:focus,
+        .select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .textarea {
+            resize: vertical;
+            min-height: 6rem;
+        }
+        
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .checkbox-group:hover {
+            background: var(--gray-50);
+        }
+        
+        .checkbox-group.checked {
+            background: #dbeafe;
+            border-color: var(--primary);
+        }
+        
+        .checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            margin-top: 0.125rem;
+        }
+        
+        .checkbox-label {
+            flex: 1;
+            cursor: pointer;
+        }
+        
+        /* Progress bar */
+        .progress-bar {
+            height: 0.5rem;
+            background: var(--gray-200);
+            border-radius: 0.25rem;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        /* Big display for codes */
+        .code-display {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+        
+        .code-value {
+            font-size: 3rem;
+            font-weight: 900;
+            font-family: 'Courier New', monospace;
+            color: white;
+            letter-spacing: 0.25rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* Map */
+        .map-container {
+            height: 400px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        /* Hide inactive tabs */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            gap: 1rem;
+        }
+        
+        /* Radio buttons */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Accordion */
+        .accordion {
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .accordion-trigger {
+            width: 100%;
+            padding: 1rem;
+            background: white;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .accordion-trigger:hover {
+            background: var(--gray-50);
+        }
+        
+        .accordion-content {
+            padding: 0 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s, padding 0.3s;
+        }
+        
+        .accordion-content.open {
+            padding: 1rem;
+            max-height: 500px;
+        }
+        
+        /* Copy button */
+        .copy-btn {
+            padding: 0.5rem;
+            background: var(--gray-100);
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+        
+        .copy-btn:hover {
+            background: var(--gray-200);
+        }
+        
+        /* QR Code */
+        .qr-code {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .qr-code img {
+            max-width: 200px;
+            border-radius: 0.5rem;
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            .main-content {
+                max-width: 768px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+        
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gray-900);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideUp 0.3s;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Chargement de votre guide...</p>
+    </div>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="logo" id="giteName">🏡 Gîte</div>
+        <div class="language-switch">
+            <button class="language-btn active" data-lang="fr">FR</button>
+            <button class="language-btn" data-lang="en">EN</button>
+        </div>
+    </header>
+    
+    <!-- Tab Navigation -->
+    <nav class="tab-navigation">
+        <div class="tabs-list">
+            <button class="tab-btn active" data-tab="entree">
+                <span class="icon">🔑</span>
+                <span class="label" data-i18n="tab_entree">Entrée</span>
+            </button>
+            <button class="tab-btn" data-tab="pendant">
+                <span class="icon">🏠</span>
+                <span class="label" data-i18n="tab_pendant">Pendant</span>
+            </button>
+            <button class="tab-btn" data-tab="sortie">
+                <span class="icon">👋</span>
+                <span class="label" data-i18n="tab_sortie">Sortie</span>
+            </button>
+            <button class="tab-btn" data-tab="activites">
+                <span class="icon">🗺️</span>
+                <span class="label" data-i18n="tab_activites">Activités</span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Onglet ENTRÉE -->
+        <div class="tab-content active" id="tab-entree">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="adresse_title">📍 Adresse du gîte</h2>
+                </div>
+                <p id="giteAddress" style="font-size: 1.125rem; margin-bottom: 1rem;"></p>
+                <a href="#" id="mapsLink" class="btn btn-primary btn-full" target="_blank">
+                    📍 <span data-i18n="ouvrir_maps">Ouvrir dans Google Maps</span>
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="horaire_arrivee">⏰ Horaire d'arrivée</h2>
+                </div>
+                <div style="text-align: center; padding: 2rem 0;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🕐</div>
+                    <p style="font-size: 2rem; font-weight: 700;" id="heureArrivee">18:00</p>
+                </div>
+                
+                <div id="arriveeAnticipaBlock" style="display: none;">
+                    <button class="btn btn-outline btn-full" id="btnDemandeArrivee">
+                        ⏰ <span data-i18n="demander_arrivee">Demander une arrivée plus tôt</span>
+                    </button>
+                    
+                    <form id="formArriveeAnticipee" style="display: none; margin-top: 1rem;">
+                        <div class="alert alert-info">
+                            <span>ℹ️</span>
+                            <p id="regleArrivee"></p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label" data-i18n="heure_souhaitee">Heure souhaitée</label>
+                            <input type="time" class="input" id="heureArriveeDemandee" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label" data-i18n="motif_optionnel">Motif (optionnel)</label>
+                            <textarea class="textarea" id="motifArrivee" rows="3"></textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">
+                                <span data-i18n="envoyer">Envoyer</span>
+                            </button>
+                            <button type="button" class="btn btn-outline" id="btnAnnulerArrivee">
+                                <span data-i18n="annuler">Annuler</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="code_entree">🔑 Code d'entrée</h2>
+                </div>
+                <div class="code-display">
+                    <div class="code-value" id="codeEntree">****</div>
+                </div>
+                <div class="accordion">
+                    <button class="accordion-trigger" id="accordionInstructions">
+                        <span data-i18n="instructions_acces">Instructions d'accès</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="accordion-content" id="accordionContent">
+                        <p id="instructionsAcces" style="white-space: pre-line;"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📶 WiFi</h2>
+                </div>
+                <div class="form-group">
+                    <label class="label" data-i18n="reseau">Réseau</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" class="input" id="wifiSSID" readonly style="flex: 1;">
+                        <button class="copy-btn" onclick="copyToClipboard('wifiSSID')">📋</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="label" data-i18n="mot_de_passe">Mot de passe</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" class="input" id="wifiPassword" readonly style="flex: 1;">
+                        <button class="copy-btn" onclick="copyToClipboard('wifiPassword')">📋</button>
+                    </div>
+                </div>
+                <div class="qr-code" id="qrCodeContainer"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="checklist_entree">✅ Checklist d'arrivée</h2>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressEntree" style="width: 0%;"></div>
+                </div>
+                <div class="progress-text">
+                    <span data-i18n="progression">Progression</span>
+                    <span id="progressEntreeText">0%</span>
+                </div>
+                <div id="checklistEntreeContainer" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+        
+        <!-- Onglet PENDANT -->
+        <div class="tab-content" id="tab-pendant">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="equipements">🏡 Équipements disponibles</h2>
+                </div>
+                <div id="equipementsContainer"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="reglement">📋 Règlement intérieur</h2>
+                </div>
+                <p id="reglementInterieur" style="white-space: pre-line;"></p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="contacts_urgence">📞 Contacts d'urgence</h2>
+                </div>
+                <div id="contactsUrgenceContainer"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="vos_retours">💬 Demandes / Retours / Améliorations</h2>
+                    <p class="card-description" data-i18n="description_retours">
+                        N'hésitez pas à nous faire part de vos besoins ou suggestions
+                    </p>
+                </div>
+                <form id="formRetours">
+                    <div class="form-group">
+                        <label class="label" data-i18n="type">Type</label>
+                        <select class="select" id="typeRetour" required>
+                            <option value="demande" data-i18n-option="demande">🙋 Demande</option>
+                            <option value="retour" data-i18n-option="retour">💬 Retour</option>
+                            <option value="amelioration" data-i18n-option="amelioration">💡 Amélioration</option>
+                            <option value="probleme" data-i18n-option="probleme">⚠️ Problème</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label" data-i18n="sujet">Sujet</label>
+                        <input type="text" class="input" id="sujetRetour" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label" data-i18n="description">Description</label>
+                        <textarea class="textarea" id="descriptionRetour" rows="5" required></textarea>
+                    </div>
+                    
+                    <div class="form-group" id="urgenceGroup" style="display: none;">
+                        <label class="label" data-i18n="urgence">Niveau d'urgence</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" name="urgence" value="basse" id="urgenceBasse">
+                                <label for="urgenceBasse" data-i18n="urgence_basse">Basse</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="urgence" value="normale" id="urgenceNormale" checked>
+                                <label for="urgenceNormale" data-i18n="urgence_normale">Normale</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="urgence" value="haute" id="urgenceHaute">
+                                <label for="urgenceHaute" data-i18n="urgence_haute">Haute</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <span data-i18n="envoyer">Envoyer</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Onglet SORTIE -->
+        <div class="tab-content" id="tab-sortie">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="horaire_depart">⏰ Horaire de départ</h2>
+                </div>
+                <div style="text-align: center; padding: 2rem 0;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🕙</div>
+                    <p style="font-size: 2rem; font-weight: 700;" id="heureDepart">10:00</p>
+                </div>
+                
+                <div id="departTardifBlock" style="display: none;">
+                    <button class="btn btn-outline btn-full" id="btnDemandeDeparttardif">
+                        ⏰ <span data-i18n="demander_depart">Demander un départ plus tard</span>
+                    </button>
+                    
+                    <form id="formDepartTardif" style="display: none; margin-top: 1rem;">
+                        <div class="alert alert-info">
+                            <span>ℹ️</span>
+                            <p id="regleDepart"></p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label" data-i18n="heure_souhaitee">Heure souhaitée</label>
+                            <input type="time" class="input" id="heureDepartDemandee" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label" data-i18n="motif_optionnel">Motif (optionnel)</label>
+                            <textarea class="textarea" id="motifDepart" rows="3"></textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">
+                                <span data-i18n="envoyer">Envoyer</span>
+                            </button>
+                            <button type="button" class="btn btn-outline" id="btnAnnulerDepart">
+                                <span data-i18n="annuler">Annuler</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="instructions_sortie">📝 Instructions de départ</h2>
+                </div>
+                <p id="instructionsSortie" style="white-space: pre-line;"></p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="checklist_sortie">✅ Checklist de départ</h2>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressSortie" style="width: 0%;"></div>
+                </div>
+                <div class="progress-text">
+                    <span data-i18n="progression">Progression</span>
+                    <span id="progressSortieText">0%</span>
+                </div>
+                <div id="checklistSortieContainer" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+        
+        <!-- Onglet ACTIVITÉS -->
+        <div class="tab-content" id="tab-activites">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="activites_title">🗺️ Activités à découvrir</h2>
+                </div>
+                <div class="map-container" id="mapActivites"></div>
+                <div id="filtresActivites" style="margin-bottom: 1rem;">
+                    <!-- Filtres seront injectés dynamiquement -->
+                </div>
+                <div id="listeActivites"></div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="js/fiche-client-app.js"></script>
+</body>
+</html>
