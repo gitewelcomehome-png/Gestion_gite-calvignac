@@ -580,6 +580,16 @@
                     }
                 });
             }
+            if (tabName === 'fiches-clients') {
+                console.log('📄 [SWITCH-TAB] Onglet Fiches Clients activé');
+                setTimeout(() => {
+                    if (typeof initFichesClients === 'function') {
+                        initFichesClients();
+                    } else {
+                        console.warn('⚠️ [SWITCH-TAB] initFichesClients non disponible');
+                    }
+                }, 100);
+            }
             if (tabName === 'decouvrir') {
                 // Pré-sélectionner Trévoux si aucun gîte n'est sélectionné
                 const giteInput = document.getElementById('decouvrir_gite');
