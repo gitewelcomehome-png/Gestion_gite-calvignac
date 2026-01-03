@@ -183,9 +183,22 @@ async function loadReservationData() {
         throw new Error('Token invalide ou expiré');
     }
     
-    // Vérifier l'expiration
-    if (new Date(tokenData.expires_at) < new Date()) {
+    // Vérifier l'expiration (désactivé en mode test si ?debug=1)
+    const urlParams = new URLSearchParams(window.location.search);
+    const debugMode = urlParams.get('debug') === '1';
+    const isExpired = new Date(tokenData.expires_at) < new Date();
+    
+    if (isExpired && !debugMode) {
+        console.error('🔴 Token expiré:', {
+            expires_at: tokenData.expires_at,
+            now: new Date().toISOString(),
+            tip: 'Ajoutez ?debug=1 à l\'URL pour tester avec un vieux token'
+        });
         throw new Error('Ce lien a expiré');
+    }
+    
+    if (isExpired && debugMode) {
+        console.warn('⚠️ Mode DEBUG: Token expiré mais affiché quand même');
     }
     
     // Mettre à jour les stats d'accès
