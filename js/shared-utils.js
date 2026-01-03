@@ -156,14 +156,65 @@ function getWeekDates(year, weekNum) {
 }
 
 // ==========================================
+// GESTION DES ONGLETS
+// ==========================================
+
+function switchTab(tabName) {
+    // Masquer tous les onglets
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Désactiver tous les boutons
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Activer l'onglet sélectionné
+    const targetTab = document.getElementById(`tab-${tabName}`);
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
+    
+    // Activer le bouton correspondant
+    const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
+    if (targetBtn) {
+        targetBtn.classList.add('active');
+    }
+    
+    // Initialiser les fonctions spécifiques par onglet
+    if (tabName === 'dashboard' && typeof window.refreshDashboard === 'function') {
+        window.refreshDashboard();
+    } else if (tabName === 'reservations' && typeof window.loadReservationsTab === 'function') {
+        window.loadReservationsTab();
+    } else if (tabName === 'statistiques' && typeof window.loadStatistiquesTab === 'function') {
+        window.loadStatistiquesTab();
+    } else if (tabName === 'charges' && typeof window.initFiscaliteV2 === 'function') {
+        window.initFiscaliteV2();
+    } else if (tabName === 'menage' && typeof window.loadCleaningSchedule === 'function') {
+        window.loadCleaningSchedule();
+    } else if (tabName === 'infos-gites' && typeof window.initInfosGites === 'function') {
+        window.initInfosGites();
+    } else if (tabName === 'decouvrir' && typeof window.initDecouvrirTab === 'function') {
+        window.initDecouvrirTab();
+    } else if (tabName === 'faq' && typeof window.loadFAQTab === 'function') {
+        window.loadFAQTab();
+    } else if (tabName === 'fiches-clients' && typeof window.initFichesClients === 'function') {
+        window.initFichesClients();
+    } else if (tabName === 'archives' && typeof window.loadArchivesTab === 'function') {
+        window.loadArchivesTab();
+    }
+}
+
+// ==========================================
 // MENU ACTIONS RAPIDES
 // ==========================================
 
 function handleQuickAction(action) {
     if (action === 'archives') {
-        window.switchTab('archives');
+        switchTab('archives');
     } else if (action === 'ical') {
-        window.switchTab('gestion');
+        switchTab('gestion');
     }
 }
 
@@ -187,6 +238,7 @@ function toggleSlide(slideId) {
 }
 
 // Export vers window pour accessibilité globale
+window.switchTab = switchTab;
 window.showToast = showToast;
 window.dateToLocalString = dateToLocalString;
 window.parseLocalDate = parseLocalDate;
