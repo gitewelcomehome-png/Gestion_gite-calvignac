@@ -299,7 +299,6 @@
         <div id="tab-charges" class="tab-content"></div>
         <div id="tab-menage" class="tab-content"></div>
         <div id="tab-infos-gites" class="tab-content"></div>
-        <div id="tab-fiches-clients" class="tab-content"></div>
         <div id="tab-decouvrir" class="tab-content"></div>
     </div>
     
@@ -579,16 +578,6 @@
                         module.afficherHorairesClients();
                     }
                 });
-            }
-            if (tabName === 'fiches-clients') {
-                console.log('📄 [SWITCH-TAB] Onglet Fiches Clients activé');
-                setTimeout(() => {
-                    if (typeof initFichesClients === 'function') {
-                        initFichesClients();
-                    } else {
-                        console.warn('⚠️ [SWITCH-TAB] initFichesClients non disponible');
-                    }
-                }, 100);
             }
             if (tabName === 'decouvrir') {
                 // Pré-sélectionner Trévoux si aucun gîte n'est sélectionné
@@ -4205,7 +4194,6 @@
             'tab-charges': '/tabs/tab-fiscalite-v2.html',
             'tab-menage': '/tabs/tab-menage.html',
             'tab-infos-gites': '/tabs/tab-infos-gites.html',
-            'tab-fiches-clients': '/tabs/tab-fiches-clients.html',
             'tab-decouvrir': '/tabs/tab-decouvrir.html',
         };
         

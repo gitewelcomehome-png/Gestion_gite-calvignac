@@ -1,12 +1,85 @@
 // ==========================================
-// 📋 MODULE APERÇU FICHE CLIENT
+// 📋 MODULE GÉNÉRATION FICHE CLIENT
 // ==========================================
-// Génération de la fiche client avec toutes les informations pratiques
+// Génération directe du token et ouverture de la fiche
 
 async function aperçuFicheClient(reservationId) {
-    // Fermer le modal si ouvert
-    document.querySelectorAll('div[style*="z-index: 10000"]').forEach(el => el.remove());
-    
+    try {
+        // Attendre que supabaseClient soit disponible
+        if (typeof window.supabaseClient === 'undefined') {
+            await new Promise(resolve => {
+                const check = setInterval(() => {
+                    if (typeof window.supabaseClient !== 'undefined') {
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 50);
+            });
+        }
+        
+        const reservations = await getAllReservations();
+        const reservation = reservations.find(r => r.id === reservationId);
+        
+        if (!reservation) {
+            showToast('Réservation introuvable', 'error');
+            return;
+        }
+        
+        // Vérifier si un token existe déjà
+        const { data: existingTokens } = await window.supabaseClient
+            .from('client_access_tokens')
+            .select('token')
+            .eq('reservation_id', reservationId)
+            .limit(1);
+        
+        let token;
+        
+        if (existingTokens && existingTokens.length > 0) {
+            // Token existe déjà, le réutiliser
+            token = existingTokens[0].token;
+            showToast('Fiche client ouverte', 'success');
+        } else {
+            // Générer un nouveau token
+            token = generateSecureToken();
+            const expiresAt = new Date(reservation.date_fin);
+            expiresAt.setDate(expiresAt.getDate() + 7); // Expire 7 jours après la fin
+            
+            const { error } = await window.supabaseClient
+                .from('client_access_tokens')
+                .insert({
+                    token: token,
+                    reservation_id: reservationId,
+                    expires_at: expiresAt.toISOString()
+                });
+            
+            if (error) {
+                console.error('Erreur génération token:', error);
+                showToast('Erreur lors de la génération', 'error');
+                return;
+            }
+            
+            showToast('Fiche client générée avec succès !', 'success');
+        }
+        
+        // Ouvrir la fiche dans un nouvel onglet
+        const ficheUrl = `${window.location.origin}/fiche-client.html?token=${token}`;
+        window.open(ficheUrl, '_blank');
+        
+    } catch (error) {
+        console.error('Erreur:', error);
+        showToast('Erreur lors de l\'ouverture de la fiche', 'error');
+    }
+}
+
+// Fonction pour générer un token sécurisé
+function generateSecureToken() {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+// Ancienne fonction d'aperçu (conservée pour référence mais non utilisée)
+async function aperçuFicheClientOLD_UNUSED(reservationId) {
     const reservations = await getAllReservations();
     const reservation = reservations.find(r => r.id === reservationId);
     
