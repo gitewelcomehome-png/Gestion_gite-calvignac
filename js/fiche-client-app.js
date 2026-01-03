@@ -21,6 +21,15 @@ if (!window.ficheClientAppLoaded) {
 // Référence Supabase (utiliser var pour éviter redéclaration)
 var supabase = window.ficheClientSupabase;
 
+// ==================== HELPER FUNCTIONS ====================
+// Fonction pour normaliser le nom du gîte (enlever accents + minuscules)
+function normalizeGiteName(name) {
+    if (!name) return '';
+    return name.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, ''); // Enlève les accents
+}
+
 // ==================== VARIABLES GLOBALES ====================
 var currentLanguage = 'fr';
 var reservationData = null;
@@ -240,7 +249,7 @@ async function loadGiteInfo() {
     const { data, error } = await supabase
         .from('infos_gites')
         .select('*')
-        .eq('gite', reservationData.gite.toLowerCase())
+        .eq('gite', normalizeGiteName(reservationData.gite))
         .single();
     
     if (error) throw error;
@@ -252,7 +261,7 @@ async function loadCleaningSchedule() {
     const { data: menageAvant } = await supabase
         .from('cleaning_schedule')
         .select('*')
-        .eq('gite', reservationData.gite.toLowerCase())
+        .eq('gite', normalizeGiteName(reservationData.gite))
         .eq('scheduled_date', reservationData.date_debut)
         .single();
     
@@ -262,7 +271,7 @@ async function loadCleaningSchedule() {
     const { data: menageApres } = await supabase
         .from('cleaning_schedule')
         .select('*')
-        .eq('gite', reservationData.gite.toLowerCase())
+        .eq('gite', normalizeGiteName(reservationData.gite))
         .eq('scheduled_date', reservationData.date_fin)
         .single();
     
@@ -741,7 +750,7 @@ async function loadActivitesMap() {
     const { data: activites, error } = await supabase
         .from('activites_gites')
         .select('*')
-        .eq('gite', reservationData.gite.toLowerCase())
+        .eq('gite', normalizeGiteName(reservationData.gite))
         .order('distance', { ascending: true });
     
     if (error) {
@@ -894,7 +903,7 @@ window.filtrerActivites = async function(categorie) {
     const { data: activites } = await supabase
         .from('activites_gites')
         .select('*')
-        .eq('gite', reservationData.gite.toLowerCase())
+        .eq('gite', normalizeGiteName(reservationData.gite))
         .order('distance', { ascending: true });
     
     createActivitesFilters(activites || []);
@@ -912,7 +921,7 @@ async function loadChecklist(type, containerId, progressId, progressTextId) {
     const { data: items } = await supabase
         .from('checklists')
         .select('*')
-        .eq('gite', reservationData.gite.toLowerCase())
+        .eq('gite', normalizeGiteName(reservationData.gite))
         .eq('type', type)
         .eq('actif', true)
         .order('ordre');
