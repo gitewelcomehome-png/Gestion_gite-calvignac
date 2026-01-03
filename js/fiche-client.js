@@ -403,7 +403,6 @@ async function telechargerFicheInteractive(reservationId) {
 // ==========================================
 
 window.aperçuFicheClient = aperçuFicheClient;
-window.telechargerFicheInteractive = telechargerFicheInteractive
-// ==========================================
-
-window.aperçuFicheClient = aperçuFicheClient;
+window.showFicheOptionsModal = showFicheOptionsModal;
+window.telechargerFicheInteractive = telechargerFicheInteractive;
+window.genererPageClient = aperçuFicheClient; // Alias
