@@ -89,7 +89,7 @@ function displayFilteredReservations(reservations) {
                 <div style="position: relative;">
                     <div style="position: absolute; top: 0; right: 0; display: flex; gap: 4px;">
                         <button onclick="openEditModal(${r.id})" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Modifier">✏️</button>
-                        <button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Page Client">📄</button>
+                        <button onclick="aperçuFicheClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Page Client">📄</button>
                         <button onclick="deleteReservationById(${r.id})" style="background: #ffebee; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Supprimer">🗑️</button>
                     </div>
                     
@@ -385,7 +385,7 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         const dateFin = parseLocalDate(r.dateFin);
         dateFin.setHours(0, 0, 0, 0);
         const isExpired = today && dateFin.getTime() <= today.getTime();
-        const ficheClientButton = isExpired ? '' : `<button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
+        const ficheClientButton = isExpired ? '' : `<button onclick="aperçuFicheClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
         
         html += `
             <div class="week-reservation ${cssClass}" style="position: relative; padding: 12px; padding-top: 40px;">
