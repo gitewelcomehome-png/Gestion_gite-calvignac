@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test sauvegarde Infos Trévoux</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test de sauvegarde des données Trévoux</h1>
+    <button onclick="testSave()">🧪 Lancer le test de sauvegarde</button>
+    <button onclick="testLoad()">📥 Lancer le test de chargement</button>
+    <div id="results"></div>
+
+    <script>
+        const supabaseUrl = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE0MDU0ODAsImV4cCI6MjA0Njk4MTQ4MH0.sHb2ARi-ACq1kBGYGQhBsLqO07SY12U7-Wj82i_T6ao';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        async function testSave() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>🔍 Test de sauvegarde en cours...</p>';
+
+            const dataToSave = {
+                gite: 'trévoux',
+                adresse: 'Test Adresse 123',
+                telephone: '01 23 45 67 89',
+                gps_lat: '45.9408',
+                gps_lon: '4.7728',
+                email: 'test@example.com',
+                wifi_ssid: 'TestWiFi',
+                wifi_password: 'test1234',
+                heure_arrivee: '16:00',
+                heure_depart: '10:00',
+                date_modification: new Date().toISOString()
+            };
+
+            try {
+                console.log('Envoi des données:', dataToSave);
+                
+                const { data, error } = await supabase
+                    .from('infos_gites')
+                    .upsert(dataToSave, { onConflict: 'gite' })
+                    .select();
+
+                if (error) {
+                    results.innerHTML = `<p style="color: red;">❌ Erreur: ${error.message}</p>
+                        <pre>${JSON.stringify(error, null, 2)}</pre>`;
+                    console.error('Erreur:', error);
+                } else {
+                    results.innerHTML = `<p style="color: green;">✅ Sauvegarde réussie!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    console.log('Succès:', data);
+                }
+            } catch (error) {
+                results.innerHTML = `<p style="color: red;">❌ Exception: ${error.message}</p>`;
+                console.error('Exception:', error);
+            }
+        }
+
+        async function testLoad() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>🔍 Test de chargement en cours...</p>';
+
+            try {
+                const { data, error } = await supabase
+                    .from('infos_gites')
+                    .select('*')
+                    .eq('gite', 'trévoux')
+                    .maybeSingle();
+
+                if (error) {
+                    results.innerHTML = `<p style="color: red;">❌ Erreur: ${error.message}</p>`;
+                    console.error('Erreur:', error);
+                } else if (data) {
+                    results.innerHTML = `<p style="color: green;">✅ Données trouvées!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    console.log('Données:', data);
+                } else {
+                    results.innerHTML = `<p style="color: orange;">⚠️ Aucune donnée trouvée pour "trévoux"</p>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<p style="color: red;">❌ Exception: ${error.message}</p>`;
+                console.error('Exception:', error);
+            }
+        }
+    </script>
+</body>
+</html>
