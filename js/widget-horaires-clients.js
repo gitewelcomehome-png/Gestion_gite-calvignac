@@ -21,7 +21,7 @@ export async function afficherHorairesClients() {
         .from('demandes_horaires')
         .select(`
             *,
-            reservation:reservations!reservation_id (
+            reservations(
                 id,
                 nom,
                 gite,
@@ -56,8 +56,8 @@ export async function afficherHorairesClients() {
     
     container.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 15px;">
-            ${demandes.filter(d => d.reservation).map(demande => {
-                const reservation = demande.reservation;
+            ${demandes.filter(d => d.reservations).map(demande => {
+                const reservation = demande.reservations;
                 if (!reservation) return '';
                 const typeLabel = demande.type === 'arrivee_anticipee' ? '🕐 Arrivée' : '🕐 Départ';
                 return `

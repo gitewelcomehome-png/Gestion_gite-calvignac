@@ -3,8 +3,6 @@
 // ==========================================
 // Génération de la fiche client avec toutes les informations pratiques
 
-import { genererFicheClientComplete } from './fiche-client-interactive.js';
-
 async function aperçuFicheClient(reservationId) {
     // Fermer le modal si ouvert
     document.querySelectorAll('div[style*="z-index: 10000"]').forEach(el => el.remove());
