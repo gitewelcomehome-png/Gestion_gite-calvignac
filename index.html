@@ -577,6 +577,10 @@
                 initFichesClients();
             }
             if (tabName === 'dashboard') {
+                // Rafraîchir le header avec la vraie date
+                if (typeof refreshDashboard === 'function') {
+                    refreshDashboard();
+                }
                 // Charger le widget horaires clients
                 import('./js/widget-horaires-clients.js').then(module => {
                     if (module.afficherHorairesClients) {
