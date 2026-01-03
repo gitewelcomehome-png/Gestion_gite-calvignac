@@ -226,8 +226,8 @@ async function updateReservationsList() {
         });
     }
     
-    // Ne montrer que les réservations dont la date de fin est APRÈS aujourd'hui (réservations terminées exclues)
-    const active = reservations.filter(r => parseLocalDate(r.dateFin) > today);
+    // Afficher les réservations se terminant aujourd'hui ou après (pour gérer le checkout)
+    const active = reservations.filter(r => parseLocalDate(r.dateFin) >= today);
     
     const container = document.getElementById('planning-container');
     if (!container) return; // Conteneur pas encore chargé
@@ -368,11 +368,16 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
             statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
         }
         
+        // Vérifier si réservation se termine aujourd'hui pour masquer le bouton fiche client
+        const dateFin = parseLocalDate(r.dateFin);
+        const isExpiredToday = dateFin.getTime() === today.getTime();
+        const ficheClientButton = isExpiredToday ? '' : `<button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
+        
         html += `
             <div class="week-reservation ${cssClass}" style="position: relative; padding: 12px; padding-top: 40px;">
                 <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;">
                     <button onclick="openEditModal(${r.id})" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Modifier">✏️</button>
-                    <button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>
+                    ${ficheClientButton}
                     <button onclick="deleteReservationById(${r.id})" style="background: #ffebee; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Supprimer">🗑️</button>
                 </div>
                 
