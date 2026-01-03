@@ -21,7 +21,7 @@ export async function afficherHorairesClients() {
         .from('demandes_horaires')
         .select(`
             *,
-            reservations:reservation_id (
+            reservation:reservations!reservation_id (
                 id,
                 nom,
                 gite,
@@ -30,9 +30,8 @@ export async function afficherHorairesClients() {
             )
         `)
         .eq('status', 'approved')
-        .gte('reservations.date_debut', dateDebut)
-        .lte('reservations.date_debut', dateFin)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(10);
     
     if (error) {
         console.error('Erreur chargement horaires:', error);
@@ -57,8 +56,8 @@ export async function afficherHorairesClients() {
     
     container.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 15px;">
-            ${demandes.map(demande => {
-                const reservation = demande.reservations;
+            ${demandes.filter(d => d.reservation).map(demande => {
+                const reservation = demande.reservation;
                 if (!reservation) return '';
                 const typeLabel = demande.type === 'arrivee_anticipee' ? '🕐 Arrivée' : '🕐 Départ';
                 return `
