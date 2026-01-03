@@ -303,6 +303,34 @@ function initOngletEntree() {
     const heureArrivee = currentLanguage === 'fr' ? giteInfo.heure_arrivee : giteInfo.heure_arrivee_en;
     document.getElementById('heureArrivee').textContent = formatTime(heureArrivee || giteInfo.heure_arrivee_standard || '17:00');
     
+    // Explication de l'horaire d'arrivée selon le ménage
+    let explicationArrivee = '';
+    if (cleaningScheduleAvant && cleaningScheduleAvant.time_of_day === 'afternoon') {
+        explicationArrivee = currentLanguage === 'fr' 
+            ? '🧹 Ménage prévu l\'après-midi de votre arrivée' 
+            : '🧹 Cleaning scheduled on your arrival afternoon';
+    } else if (cleaningScheduleAvant && cleaningScheduleAvant.time_of_day === 'morning') {
+        explicationArrivee = currentLanguage === 'fr' 
+            ? '✨ Ménage effectué le matin, logement prêt dès 13h' 
+            : '✨ Morning cleaning, accommodation ready from 1pm';
+    } else {
+        explicationArrivee = currentLanguage === 'fr' 
+            ? '✨ Pas de ménage prévu ce jour, arrivée flexible' 
+            : '✨ No cleaning scheduled, flexible arrival';
+    }
+    
+    // Ajouter l'explication sous l'heure d'arrivée
+    const heureArriveeContainer = document.getElementById('heureArrivee').parentElement;
+    const existingExplication = heureArriveeContainer.querySelector('.explication-horaire');
+    if (existingExplication) {
+        existingExplication.remove();
+    }
+    const explicationElement = document.createElement('p');
+    explicationElement.className = 'explication-horaire';
+    explicationElement.style.cssText = 'font-size: 0.9rem; color: var(--gray-600); margin-top: 0.5rem; text-align: center; font-style: italic;';
+    explicationElement.textContent = explicationArrivee;
+    heureArriveeContainer.appendChild(explicationElement);
+    
     // Règle arrivée anticipée selon le ménage du jour d'arrivée
     const heureMin = !cleaningScheduleAvant || cleaningScheduleAvant.time_of_day !== 'afternoon' 
         ? giteInfo.heure_arrivee_anticipee_min 
@@ -588,6 +616,38 @@ function initOngletSortie() {
     
     // Si PAS de ménage l'après-midi du départ, on peut partir plus tard
     const pasDeMenuageApresMidi = !cleaningScheduleApres || cleaningScheduleApres.time_of_day !== 'afternoon';
+    
+    // Explication de l'horaire de départ selon le ménage
+    let explicationDepart = '';
+    if (cleaningScheduleApres && cleaningScheduleApres.time_of_day === 'afternoon') {
+        explicationDepart = currentLanguage === 'fr' 
+            ? '🧹 Ménage prévu l\'après-midi après votre départ' 
+            : '🧹 Cleaning scheduled in the afternoon after your departure';
+    } else if (cleaningScheduleApres && cleaningScheduleApres.time_of_day === 'morning') {
+        explicationDepart = currentLanguage === 'fr' 
+            ? '🧹 Ménage prévu le matin de votre départ' 
+            : '🧹 Cleaning scheduled in the morning of your departure';
+    } else if (isDimanche) {
+        explicationDepart = currentLanguage === 'fr' 
+            ? '🎉 Pas de ménage le dimanche après-midi, départ flexible jusqu\'à 17h' 
+            : '🎉 No Sunday afternoon cleaning, flexible departure until 5pm';
+    } else {
+        explicationDepart = currentLanguage === 'fr' 
+            ? '✨ Pas de ménage prévu l\'après-midi, départ flexible jusqu\'à 12h' 
+            : '✨ No afternoon cleaning scheduled, flexible departure until 12pm';
+    }
+    
+    // Ajouter l'explication sous l'heure de départ
+    const heureDepartContainer = document.getElementById('heureDepart').parentElement;
+    const existingExplication = heureDepartContainer.querySelector('.explication-horaire');
+    if (existingExplication) {
+        existingExplication.remove();
+    }
+    const explicationElement = document.createElement('p');
+    explicationElement.className = 'explication-horaire';
+    explicationElement.style.cssText = 'font-size: 0.9rem; color: var(--gray-600); margin-top: 0.5rem; text-align: center; font-style: italic;';
+    explicationElement.textContent = explicationDepart;
+    heureDepartContainer.appendChild(explicationElement);
     
     let regleKey;
     let heureMax;
