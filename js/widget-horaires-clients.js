@@ -13,40 +13,43 @@ export async function afficherHorairesClients() {
     const container = document.getElementById('widget-horaires-clients');
     if (!container) return;
     
-    // Récupérer les réservations de la semaine en cours
+    // Récupérer les demandes horaires de la semaine en cours (nouvelle table)
     const dateDebut = getDebutSemaine();
     const dateFin = getFinSemaine();
     
-    const { data: reservations, error } = await supabase
-        .from('reservations')
+    const { data: demandes, error } = await window.supabaseClient
+        .from('demandes_horaires')
         .select(`
             *,
-            clients_preferences (
-                heure_arrivee,
-                heure_depart,
-                commentaires,
-                date_soumission
+            reservations:reservation_id (
+                id,
+                nom,
+                gite,
+                date_debut,
+                date_fin
             )
         `)
-        .gte('date_debut', dateDebut)
-        .lte('date_debut', dateFin)
-        .order('date_debut', { ascending: true });
+        .eq('status', 'approved')
+        .gte('reservations.date_debut', dateDebut)
+        .lte('reservations.date_debut', dateFin)
+        .order('created_at', { ascending: false });
     
     if (error) {
         console.error('Erreur chargement horaires:', error);
-        return;
-    }
-    
-    // Filtrer celles qui ont des préférences
-    const avecPreferences = reservations.filter(r => 
-        r.clients_preferences && r.clients_preferences.length > 0
-    );
-    
-    if (avecPreferences.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 30px; color: #999;">
                 <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
-                <p>Aucun client n'a encore confirmé ses horaires cette semaine</p>
+                <p>Aucune demande horaire cette semaine</p>
+            </div>
+        `;
+        return;
+    }
+    
+    if (!demandes || demandes.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #999;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
+                <p>Aucune demande horaire validée cette semaine</p>
             </div>
         `;
         return;
@@ -54,8 +57,10 @@ export async function afficherHorairesClients() {
     
     container.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 15px;">
-            ${avecPreferences.map(reservation => {
-                const pref = reservation.clients_preferences[0];
+            ${demandes.map(demande => {
+                const reservation = demande.reservations;
+                if (!reservation) return '';
+                const typeLabel = demande.type === 'arrivee_anticipee' ? '🕐 Arrivée' : '🕐 Départ';
                 return `
                     <div style="
                         background: white;
@@ -74,37 +79,31 @@ export async function afficherHorairesClients() {
                                 </div>
                             </div>
                             <div style="background: #e8f5e9; color: #27AE60; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                ✅ Confirmé
+                                ✅ Approuvé
                             </div>
                         </div>
                         
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px;">
                             <div style="background: #f0f9ff; padding: 12px; border-radius: 8px;">
-                                <div style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">🔑 Arrivée</div>
+                                <div style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">${typeLabel}</div>
                                 <div style="font-size: 1.3rem; font-weight: 700; color: #2196f3;">
-                                    ${formatHeure(pref.heure_arrivee)}
-                                </div>
-                            </div>
-                            <div style="background: #fff3e0; padding: 12px; border-radius: 8px;">
-                                <div style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">🚪 Départ</div>
-                                <div style="font-size: 1.3rem; font-weight: 700; color: #ff9800;">
-                                    ${formatHeure(pref.heure_depart)}
+                                    ${demande.heure_demandee}
                                 </div>
                             </div>
                         </div>
                         
-                        ${pref.commentaires ? `
+                        ${demande.motif ? `
                         <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 3px solid #667eea;">
-                            <div style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">💬 Commentaire</div>
-                            <div style="color: #333; font-style: italic;">"${pref.commentaires}"</div>
+                            <div style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">💬 Motif</div>
+                            <div style="color: #333; font-style: italic;">"${demande.motif}"</div>
                         </div>` : ''}
                         
                         <div style="margin-top: 10px; font-size: 0.8rem; color: #999;">
-                            Reçu le ${formatDateHeure(pref.date_soumission)}
+                            Demandé le ${formatDateHeure(demande.created_at)}
                         </div>
                     </div>
                 `;
-            }).join('')}
+            }).filter(Boolean).join('')}
         </div>
     `;
 }
