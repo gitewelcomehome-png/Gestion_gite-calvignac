@@ -13,42 +13,57 @@ export async function afficherHorairesClients() {
     const container = document.getElementById('widget-horaires-clients');
     if (!container) return;
     
-    // Récupérer les demandes horaires de la semaine en cours (nouvelle table)
-    const dateDebut = getDebutSemaine();
-    const dateFin = getFinSemaine();
-    
-    const { data: demandes, error } = await window.supabaseClient
+    // Récupérer d'abord les demandes horaires approuvées
+    const { data: demandes, error: errorDemandes } = await window.supabaseClient
         .from('demandes_horaires')
-        .select(`
-            *,
-            reservations(
-                id,
-                nom,
-                gite,
-                date_debut,
-                date_fin
-            )
-        `)
+        .select('*')
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(10);
     
-    if (error) {
-        console.error('Erreur chargement horaires:', error);
+    if (errorDemandes) {
+        console.error('Erreur chargement demandes:', errorDemandes);
         container.innerHTML = `
             <div style="text-align: center; padding: 30px; color: #999;">
                 <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
-                <p>Aucune demande horaire cette semaine</p>
+                <p>Erreur chargement des horaires</p>
             </div>
         `;
         return;
     }
     
-    if (!demandes || demandes.length === 0) {
+    // Récupérer les réservations associées
+    const reservationIds = demandes.map(d => d.reservation_id).filter(Boolean);
+    const { data: reservations, error: errorReservations } = await window.supabaseClient
+        .from('reservations')
+        .select('*')
+        .in('id', reservationIds);
+    
+    // Récupérer les réservations associées
+    const reservationIds = demandes.map(d => d.reservation_id).filter(Boolean);
+    const { data: reservations, error: errorReservations } = await window.supabaseClient
+        .from('reservations')
+        .select('*')
+        .in('id', reservationIds);
+    
+    if (errorReservations) {
+        console.error('Erreur chargement réservations:', errorReservations);
+    }
+    
+    // Créer une map des réservations pour accès rapide
+    const reservationsMap = {};
+    (reservations || []).forEach(r => {
+        reservationsMap[r.id] = r;
+    });
+    
+    // Filtrer les demandes qui ont une réservation valide
+    const demandesValides = demandes.filter(d => reservationsMap[d.reservation_id]);
+    
+    if (demandesValides.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 30px; color: #999;">
                 <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
-                <p>Aucune demande horaire validée cette semaine</p>
+                <p>Aucune demande horaire validée récente</p>
             </div>
         `;
         return;
@@ -56,8 +71,8 @@ export async function afficherHorairesClients() {
     
     container.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 15px;">
-            ${demandes.filter(d => d.reservations).map(demande => {
-                const reservation = demande.reservations;
+            ${demandesValides.map(demande => {
+                const reservation = reservationsMap[demande.reservation_id];
                 if (!reservation) return '';
                 const typeLabel = demande.type === 'arrivee_anticipee' ? '🕐 Arrivée' : '🕐 Départ';
                 return `
