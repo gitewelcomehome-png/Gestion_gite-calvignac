@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Migration localStorage → Supabase</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Migration des données Infos Pratiques</h1>
+        <p>Cette page va récupérer les données stockées dans le localStorage de votre navigateur et les envoyer vers Supabase.</p>
+        
+        <button onclick="checkLocalStorage()">1️⃣ Vérifier le localStorage</button>
+        <button onclick="migrateToSupabase()">2️⃣ Migrer vers Supabase</button>
+        <button onclick="verifySupabase()">3️⃣ Vérifier dans Supabase</button>
+        
+        <div id="results" class="results"></div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        const DB_KEY = 'gites_infos_pratiques_complet';
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            results.innerHTML += `<span class="${className}">${message}</span>\n`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function checkLocalStorage() {
+            document.getElementById('results').innerHTML = '';
+            log('🔍 Vérification du localStorage...', 'info');
+            
+            const data = localStorage.getItem(DB_KEY);
+            if (!data) {
+                log('❌ Aucune donnée trouvée dans localStorage avec la clé "' + DB_KEY + '"', 'error');
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(data);
+                log('✅ Données trouvées dans localStorage!', 'success');
+                log('\nGîtes présents : ' + Object.keys(parsed).join(', '), 'info');
+                
+                for (const [gite, infos] of Object.entries(parsed)) {
+                    log('\n📋 Gîte: ' + gite, 'info');
+                    const fields = Object.keys(infos).filter(k => infos[k] && infos[k].toString().trim());
+                    log('   Champs remplis: ' + fields.length + ' / ' + Object.keys(infos).length, 'info');
+                    if (fields.length > 0) {
+                        log('   Exemples: ' + fields.slice(0, 5).join(', '), 'info');
+                    }
+                }
+
+                log('\n📦 Données complètes:', 'info');
+                log(JSON.stringify(parsed, null, 2), 'info');
+                
+            } catch (error) {
+                log('❌ Erreur de parsing: ' + error.message, 'error');
+            }
+        }
+
+        async function migrateToSupabase() {
+            document.getElementById('results').innerHTML = '';
+            log('🚀 Début de la migration...', 'info');
+            
+            const data = localStorage.getItem(DB_KEY);
+            if (!data) {
+                log('❌ Aucune donnée dans localStorage', 'error');
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(data);
+                
+                for (const [gite, formData] of Object.entries(parsed)) {
+                    log('\n📤 Migration de: ' + gite, 'info');
+                    
+                    const dataToSave = {
+                        gite: gite.toLowerCase(),
+                        // Section 1: Base
+                        adresse: formData.adresse || null,
+                        telephone: formData.telephone || null,
+                        gps_lat: formData.gpsLat || null,
+                        gps_lon: formData.gpsLon || null,
+                        email: formData.email || null,
+                        adresse_en: formData.adresse_en || null,
+                        telephone_en: formData.telephone_en || null,
+                        email_en: formData.email_en || null,
+                        // Section 2: WiFi
+                        wifi_ssid: formData.wifiSSID || null,
+                        wifi_password: formData.wifiPassword || null,
+                        wifi_debit: formData.wifiDebit || null,
+                        wifi_localisation: formData.wifiLocalisation || null,
+                        wifi_zones: formData.wifiZones || null,
+                        wifi_ssid_en: formData.wifiSSID_en || null,
+                        wifi_password_en: formData.wifiPassword_en || null,
+                        wifi_debit_en: formData.wifiDebit_en || null,
+                        wifi_localisation_en: formData.wifiLocalisation_en || null,
+                        wifi_zones_en: formData.wifiZones_en || null,
+                        // Section 3: Arrivée
+                        heure_arrivee: formData.heureArrivee || null,
+                        arrivee_tardive: formData.arriveeTardive || null,
+                        parking_dispo: formData.parkingDispo || null,
+                        parking_places: formData.parkingPlaces || null,
+                        parking_details: formData.parkingDetails || null,
+                        type_acces: formData.typeAcces || null,
+                        code_acces: formData.codeAcces || null,
+                        instructions_cles: formData.instructionsCles || null,
+                        etage: formData.etage || null,
+                        ascenseur: formData.ascenseur || null,
+                        itineraire_logement: formData.itineraireLogement || null,
+                        premiere_visite: formData.premiereVisite || null,
+                        heure_arrivee_en: formData.heureArrivee_en || null,
+                        arrivee_tardive_en: formData.arriveeTardive_en || null,
+                        parking_dispo_en: formData.parkingDispo_en || null,
+                        parking_places_en: formData.parkingPlaces_en || null,
+                        parking_details_en: formData.parkingDetails_en || null,
+                        type_acces_en: formData.typeAcces_en || null,
+                        code_acces_en: formData.codeAcces_en || null,
+                        instructions_cles_en: formData.instructionsCles_en || null,
+                        etage_en: formData.etage_en || null,
+                        ascenseur_en: formData.ascenseur_en || null,
+                        itineraire_logement_en: formData.itineraireLogement_en || null,
+                        premiere_visite_en: formData.premiereVisite_en || null,
+                        // Section 4: Logement
+                        type_chauffage: formData.typeChauffage || null,
+                        climatisation: formData.climatisation || null,
+                        instructions_chauffage: formData.instructionsChauffage || null,
+                        equipements_cuisine: formData.equipementsCuisine || null,
+                        instructions_four: formData.instructionsFour || null,
+                        instructions_plaques: formData.instructionsPlaques || null,
+                        instructions_lave_vaisselle: formData.instructionsLaveVaisselle || null,
+                        instructions_lave_linge: formData.instructionsLaveLinge || null,
+                        seche_linge: formData.secheLinge || null,
+                        fer_repasser: formData.ferRepasser || null,
+                        linge_fourni: formData.lingeFourni || null,
+                        configuration_chambres: formData.configurationChambres || null,
+                        type_chauffage_en: formData.typeChauffage_en || null,
+                        climatisation_en: formData.climatisation_en || null,
+                        instructions_chauffage_en: formData.instructionsChauffage_en || null,
+                        equipements_cuisine_en: formData.equipementsCuisine_en || null,
+                        instructions_four_en: formData.instructionsFour_en || null,
+                        instructions_plaques_en: formData.instructionsPlaques_en || null,
+                        instructions_lave_vaisselle_en: formData.instructionsLaveVaisselle_en || null,
+                        instructions_lave_linge_en: formData.instructionsLaveLinge_en || null,
+                        seche_linge_en: formData.secheLinge_en || null,
+                        fer_repasser_en: formData.ferRepasser_en || null,
+                        linge_fourni_en: formData.lingeFourni_en || null,
+                        configuration_chambres_en: formData.configurationChambres_en || null,
+                        // Section 5: Déchets
+                        instructions_tri: formData.instructionsTri || null,
+                        jours_collecte: formData.joursCollecte || null,
+                        decheterie: formData.decheterie || null,
+                        instructions_tri_en: formData.instructionsTri_en || null,
+                        jours_collecte_en: formData.joursCollecte_en || null,
+                        decheterie_en: formData.decheterie_en || null,
+                        // Section 6: Sécurité
+                        detecteur_fumee: formData.detecteurFumee || null,
+                        extincteur: formData.extincteur || null,
+                        coupure_eau: formData.coupureEau || null,
+                        disjoncteur: formData.disjoncteur || null,
+                        consignes_urgence: formData.consignesUrgence || null,
+                        detecteur_fumee_en: formData.detecteurFumee_en || null,
+                        extincteur_en: formData.extincteur_en || null,
+                        coupure_eau_en: formData.coupureEau_en || null,
+                        disjoncteur_en: formData.disjoncteur_en || null,
+                        consignes_urgence_en: formData.consignesUrgence_en || null,
+                        // Section 7: Départ
+                        heure_depart: formData.heureDepart || null,
+                        depart_tardif: formData.departTardif || null,
+                        checklist_depart: formData.checklistDepart || null,
+                        restitution_cles: formData.restitutionCles || null,
+                        heure_depart_en: formData.heureDepart_en || null,
+                        depart_tardif_en: formData.departTardif_en || null,
+                        checklist_depart_en: formData.checklistDepart_en || null,
+                        restitution_cles_en: formData.restitutionCles_en || null,
+                        // Section 8: Règlement
+                        tabac: formData.tabac || null,
+                        animaux: formData.animaux || null,
+                        nb_max_personnes: formData.nbMaxPersonnes || null,
+                        caution: formData.caution || null,
+                        tabac_en: formData.tabac_en || null,
+                        animaux_en: formData.animaux_en || null,
+                        nb_max_personnes_en: formData.nbMaxPersonnes_en || null,
+                        caution_en: formData.caution_en || null,
+                        date_modification: new Date().toISOString()
+                    };
+
+                    const { data, error } = await supabase
+                        .from('infos_gites')
+                        .upsert(dataToSave, { onConflict: 'gite' })
+                        .select();
+
+                    if (error) {
+                        log('❌ Erreur pour ' + gite + ': ' + error.message, 'error');
+                        log('   Code: ' + error.code, 'error');
+                    } else {
+                        log('✅ ' + gite + ' migré avec succès!', 'success');
+                        const nonNullFields = Object.entries(dataToSave).filter(([k, v]) => v !== null).length;
+                        log('   Champs non-null: ' + nonNullFields, 'info');
+                    }
+                }
+
+                log('\n🎉 Migration terminée!', 'success');
+                
+            } catch (error) {
+                log('❌ Erreur fatale: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        async function verifySupabase() {
+            document.getElementById('results').innerHTML = '';
+            log('🔍 Vérification dans Supabase...', 'info');
+
+            try {
+                const { data, error } = await supabase
+                    .from('infos_gites')
+                    .select('*');
+
+                if (error) {
+                    log('❌ Erreur: ' + error.message, 'error');
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    log('⚠️ Aucune donnée dans Supabase', 'error');
+                    return;
+                }
+
+                log('✅ ' + data.length + ' enregistrement(s) trouvé(s)', 'success');
+                
+                for (const row of data) {
+                    log('\n📋 Gîte: ' + row.gite, 'info');
+                    const nonNullFields = Object.entries(row).filter(([k, v]) => v !== null && v !== '' && k !== 'id').length;
+                    log('   Champs remplis: ' + nonNullFields + ' / 137', 'info');
+                    log('   Dernière modification: ' + (row.date_modification || 'N/A'), 'info');
+                }
+
+                log('\n📦 Données complètes:', 'info');
+                log(JSON.stringify(data, null, 2), 'info');
+
+            } catch (error) {
+                log('❌ Exception: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
