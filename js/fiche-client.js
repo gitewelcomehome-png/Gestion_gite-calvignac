@@ -1,7 +1,7 @@
 // ==========================================
 // 📋 MODULE GÉNÉRATION FICHE CLIENT
 // ==========================================
-// Génération directe du token et ouverture de la fiche
+// Génération directe du token et options d'envoi/partage
 
 async function aperçuFicheClient(reservationId) {
     try {
@@ -33,16 +33,16 @@ async function aperçuFicheClient(reservationId) {
             .limit(1);
         
         let token;
+        let isNewToken = false;
         
         if (existingTokens && existingTokens.length > 0) {
-            // Token existe déjà, le réutiliser
             token = existingTokens[0].token;
-            showToast('Fiche client ouverte', 'success');
         } else {
             // Générer un nouveau token
             token = generateSecureToken();
+            isNewToken = true;
             const expiresAt = new Date(reservation.date_fin);
-            expiresAt.setDate(expiresAt.getDate() + 7); // Expire 7 jours après la fin
+            expiresAt.setDate(expiresAt.getDate() + 7);
             
             const { error } = await window.supabaseClient
                 .from('client_access_tokens')
@@ -57,17 +57,111 @@ async function aperçuFicheClient(reservationId) {
                 showToast('Erreur lors de la génération', 'error');
                 return;
             }
-            
-            showToast('Fiche client générée avec succès !', 'success');
         }
         
-        // Ouvrir la fiche dans un nouvel onglet
         const ficheUrl = `${window.location.origin}/fiche-client.html?token=${token}`;
-        window.open(ficheUrl, '_blank');
+        
+        // Afficher modal avec options
+        showFicheOptionsModal(reservation, ficheUrl, isNewToken);
         
     } catch (error) {
         console.error('Erreur:', error);
-        showToast('Erreur lors de l\'ouverture de la fiche', 'error');
+        showToast('Erreur lors de la génération', 'error');
+    }
+}
+
+// Afficher modal avec options d'envoi
+function showFicheOptionsModal(reservation, ficheUrl, isNewToken) {
+    // Fermer modals existants
+    document.querySelectorAll('.modal-fiche-options').forEach(m => m.remove());
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal-fiche-options';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">${isNewToken ? '✨' : '📄'}</div>
+                <h2 style="margin: 0 0 10px 0; color: #333;">Fiche Client ${isNewToken ? 'Générée' : 'Prête'}</h2>
+                <p style="color: #666; margin: 0;">${reservation.nom} - ${reservation.gite}</p>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button onclick="window.open('${ficheUrl}', '_blank'); this.closest('.modal-fiche-options').remove();" 
+                        style="padding: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;">
+                    <span style="font-size: 1.3rem;">🌐</span> Ouvrir la fiche
+                </button>
+                
+                ${reservation.telephone ? `
+                <button onclick="sendWhatsAppFiche('${reservation.telephone}', '${ficheUrl}', '${reservation.nom}'); this.closest('.modal-fiche-options').remove();" 
+                        style="padding: 16px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; border-radius: 12px; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;">
+                    <span style="font-size: 1.3rem;">💬</span> Envoyer par WhatsApp
+                </button>
+                ` : '<p style="text-align: center; color: #999; padding: 10px;">⚠️ Numéro de téléphone manquant</p>'}
+                
+                <button onclick="copyToClipboard('${ficheUrl}'); showToast('Lien copié !', 'success');" 
+                        style="padding: 16px; background: #f5f5f5; color: #333; border: 2px solid #ddd; border-radius: 12px; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;">
+                    <span style="font-size: 1.3rem;">📋</span> Copier le lien
+                </button>
+            </div>
+            
+            <button onclick="this.closest('.modal-fiche-options').remove();" 
+                    style="margin-top: 20px; width: 100%; padding: 12px; background: transparent; border: none; color: #999; font-size: 0.95rem; cursor: pointer;">
+                Fermer
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Fermer en cliquant en dehors
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// Fonction helper pour envoyer WhatsApp
+function sendWhatsAppFiche(telephone, ficheUrl, nom) {
+    const message = `Bonjour ${nom},
+
+Voici votre guide personnalisé pour votre séjour :
+${ficheUrl}
+
+Vous y trouverez toutes les informations nécessaires (codes, WiFi, horaires, activités...).
+
+À très bientôt ! 🏡`;
+    
+    const whatsappUrl = `https://wa.me/${telephone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    showToast('WhatsApp ouvert', 'success');
+}
+
+// Fonction helper pour copier dans le presse-papier
+function copyToClipboard(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+    } else {
+        // Fallback pour navigateurs anciens
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
     }
 }
 
