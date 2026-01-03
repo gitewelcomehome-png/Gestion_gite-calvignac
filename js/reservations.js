@@ -214,15 +214,10 @@ async function updateReservationsList() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Calculer la fin de la semaine (dimanche)
+    // Fin de semaine (dimanche)
     const endOfWeek = new Date(today);
-    endOfWeek.setDate(today.getDate() + (7 - today.getDay())); // Dimanche
+    endOfWeek.setDate(today.getDate() + (7 - today.getDay()));
     endOfWeek.setHours(23, 59, 59, 999);
-    
-    console.log('%c🕐 FILTRE RÉSERVATIONS - Semaine en cours', 'background: #4CAF50; color: white; font-weight: bold; padding: 5px;');
-    console.log('📅 Aujourd\'hui:', today.toLocaleDateString('fr-FR'));
-    console.log('📅 Fin semaine (dimanche):', endOfWeek.toLocaleDateString('fr-FR'));
-    console.log('📊 Total réservations dans la base:', reservations.length);
     
     // Récupérer les validations de la société de ménage
     const { data: cleaningSchedules } = await supabase
@@ -236,27 +231,16 @@ async function updateReservationsList() {
         });
     }
     
-    // Afficher uniquement les réservations de la semaine en cours
-    // (date de fin > aujourd'hui OU date de début dans la semaine)
+    // Afficher uniquement les réservations de la semaine qui ne sont PAS terminées
     const active = reservations.filter(r => {
         const dateDebut = parseLocalDate(r.dateDebut);
         const dateFin = parseLocalDate(r.dateFin);
         dateDebut.setHours(0, 0, 0, 0);
         dateFin.setHours(0, 0, 0, 0);
         
-        // Afficher si : date de fin >= aujourd'hui ET date de début <= fin de semaine
-        const isInCurrentWeek = dateFin >= today && dateDebut <= endOfWeek;
-        
-        if (!isInCurrentWeek) {
-            console.log('%c❌ HORS SEMAINE:', 'color: gray;', `[${r.id}] ${r.nom} - Du ${r.dateDebut} au ${r.dateFin}`);
-        } else {
-            console.log('%c✅ DANS LA SEMAINE:', 'color: green;', `[${r.id}] ${r.nom} - Du ${r.dateDebut} au ${r.dateFin}`);
-        }
-        
-        return isInCurrentWeek;
+        // Masquer si terminé (dateFin < aujourd'hui) OU hors semaine
+        return dateFin > today && dateDebut <= endOfWeek;
     });
-    
-    console.log('%c📈 Réservations semaine affichées:', 'background: #2196F3; color: white; font-weight: bold; padding: 5px;', active.length);
     
     const container = document.getElementById('planning-container');
     if (!container) return; // Conteneur pas encore chargé
@@ -397,18 +381,11 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
             statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
         }
         
-        // Vérifier si réservation se termine aujourd'hui ou avant pour masquer le bouton fiche client
+        // Masquer bouton si réservation se termine aujourd'hui ou avant
         const dateFin = parseLocalDate(r.dateFin);
         dateFin.setHours(0, 0, 0, 0);
-        const isExpiredOrExpiringToday = today && dateFin.getTime() <= today.getTime();
-        
-        console.log(
-            isExpiredOrExpiringToday ? '%c🚫 BOUTON MASQUÉ:' : '%c📄 BOUTON VISIBLE:', 
-            isExpiredOrExpiringToday ? 'color: red; font-weight: bold;' : 'color: blue;',
-            `[${r.id}] ${r.nom} - Fin: ${r.dateFin}`
-        );
-        
-        const ficheClientButton = isExpiredOrExpiringToday ? '' : `<button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
+        const isExpired = today && dateFin.getTime() <= today.getTime();
+        const ficheClientButton = isExpired ? '' : `<button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
         
         html += `
             <div class="week-reservation ${cssClass}" style="position: relative; padding: 12px; padding-top: 40px;">
