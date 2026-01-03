@@ -39,13 +39,6 @@ export async function afficherHorairesClients() {
         .select('*')
         .in('id', reservationIds);
     
-    // Récupérer les réservations associées
-    const reservationIds = demandes.map(d => d.reservation_id).filter(Boolean);
-    const { data: reservations, error: errorReservations } = await window.supabaseClient
-        .from('reservations')
-        .select('*')
-        .in('id', reservationIds);
-    
     if (errorReservations) {
         console.error('Erreur chargement réservations:', errorReservations);
     }
