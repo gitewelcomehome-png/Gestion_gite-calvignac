@@ -835,12 +835,17 @@ async function downloadFichePDF(reservationId) {
         
         const ficheUrl = `${window.location.origin}/fiche-client.html?token=${token}`;
         
-        // Ouvrir dans nouvel onglet pour impression/PDF
+        // Ouvrir dans nouvel onglet avec instructions pour sauver en PDF
         const printWindow = window.open(ficheUrl, '_blank');
         if (printWindow) {
             printWindow.addEventListener('load', () => {
-                setTimeout(() => printWindow.print(), 1000);
+                setTimeout(() => {
+                    alert('💡 Dans la fenêtre qui s\'est ouverte :\n\n1. Faites Ctrl+P (ou Cmd+P sur Mac)\n2. Choisissez "Enregistrer au format PDF"\n3. Cliquez sur Enregistrer');
+                    printWindow.print();
+                }, 1500);
             });
+        } else {
+            alert('⚠️ Veuillez autoriser les popups pour télécharger le PDF');
         }
         
         document.querySelector('.modal-fiche-simple')?.remove();
