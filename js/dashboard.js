@@ -36,9 +36,8 @@ function updateDashboardHeader() {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6); // Dimanche
     
-    // Numéro de semaine
-    const onejan = new Date(today.getFullYear(), 0, 1);
-    const weekNumber = Math.ceil((((today - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+    // Utiliser le vrai calcul ISO 8601 de getWeekNumber
+    const weekNumber = getWeekNumber(today);
     
     const dateEl = document.getElementById('dashboard-date');
     const weekNumEl = document.getElementById('dashboard-week-number');

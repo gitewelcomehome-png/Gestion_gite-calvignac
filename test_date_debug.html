@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Date Debug</title></head>
+<body>
+<h1>Test calcul dates</h1>
+<pre id="result"></pre>
+<script type="module">
+import { supabaseUrl, supabaseAnonKey } from './js/shared-config.js';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+function parseLocalDate(dateStr) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const { data: reservations } = await supabase.from('reservations').select('*').order('dateFin', { ascending: true }).limit(20);
+
+let output = `Date du jour: ${today.toLocaleDateString('fr-FR')}\n\n`;
+output += `Réservations (20 dernières par date de fin):\n\n`;
+
+reservations.forEach(r => {
+    const dateFin = parseLocalDate(r.dateFin);
+    dateFin.setHours(0, 0, 0, 0);
+    const isActive = dateFin >= today;
+    const status = isActive ? '✅ AFFICHÉE' : '❌ MASQUÉE';
+    output += `${status} [${r.id}] ${r.nom} | Du ${r.dateDebut} au ${r.dateFin}\n`;
+});
+
+document.getElementById('result').textContent = output;
+</script>
+</body>
+</html>
