@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Réservation Récente</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test Réservation Récente</h1>
+    <pre id="result"></pre>
+    <script type="module">
+        import { supabaseUrl, supabaseAnonKey } from './js/shared-config.js';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        
+        const { data, error } = await supabase
+            .from('reservations')
+            .select('id, gite, dateDebut, dateFin, nomClient')
+            .gte('dateFin', '2025-12-01')
+            .order('dateFin', { ascending: false })
+            .limit(10);
+        
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    </script>
+</body>
+</html>
