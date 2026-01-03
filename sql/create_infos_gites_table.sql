@@ -1,10 +1,16 @@
+-- ==========================================
+-- TABLE: infos_gites
+-- Description: Stocke toutes les informations pratiques des gîtes en français et anglais
+-- Utilisée par: Back-office (Infos Pratiques) + Page client (fiche-client.html)
+-- ==========================================
+
 -- Supprimer l'ancienne table si elle existe (ATTENTION: supprime les données!)
 DROP TABLE IF EXISTS infos_gites CASCADE;
 
 -- Table pour les informations pratiques des gîtes (FR + EN)
 CREATE TABLE infos_gites (
     id SERIAL PRIMARY KEY,
-    gite VARCHAR(50) UNIQUE NOT NULL, -- 'trevoux' ou 'couzon'
+    gite VARCHAR(50) UNIQUE NOT NULL, -- 'trévoux' ou 'couzon' (minuscule avec accents)
     
     -- Section 1: Base (FR)
     adresse TEXT,
@@ -182,8 +188,14 @@ CREATE POLICY "Allow public delete on infos_gites"
     USING (true);
 
 -- Insérer les lignes par défaut pour les deux gîtes
-INSERT INTO infos_gites (gite) VALUES ('trevoux')
+-- Note: Les noms sont en minuscule avec accents (cohérent avec normalizeGiteName() en JavaScript)
+INSERT INTO infos_gites (gite) VALUES ('trévoux')
 ON CONFLICT (gite) DO NOTHING;
 
 INSERT INTO infos_gites (gite) VALUES ('couzon')
 ON CONFLICT (gite) DO NOTHING;
+
+-- ==========================================
+-- FIN DU SCRIPT
+-- Après exécution, rafraîchir le cache: NOTIFY pgrst, 'reload schema';
+-- ==========================================
