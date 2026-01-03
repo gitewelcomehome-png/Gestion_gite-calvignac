@@ -62,7 +62,7 @@
     <script>
         const supabaseUrl = 'https://ivqiisnudabxemcxxyru.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseMigrate = window.supabase.createClient(supabaseUrl, supabaseKey);
         const DB_KEY = 'gites_infos_pratiques_complet';
 
         function log(message, type = 'info') {
@@ -72,7 +72,7 @@
             results.scrollTop = results.scrollHeight;
         }
 
-        function checkLocalStorage() {
+        window.checkLocalStorage = function checkLocalStorage() {
             document.getElementById('results').innerHTML = '';
             log('🔍 Vérification du localStorage...', 'info');
             
@@ -102,9 +102,9 @@
             } catch (error) {
                 log('❌ Erreur de parsing: ' + error.message, 'error');
             }
-        }
+        };
 
-        async function migrateToSupabase() {
+        window.migrateToSupabase = async function migrateToSupabase() {
             document.getElementById('results').innerHTML = '';
             log('🚀 Début de la migration...', 'info');
             
@@ -231,7 +231,7 @@
                         date_modification: new Date().toISOString()
                     };
 
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseMigrate
                         .from('infos_gites')
                         .upsert(dataToSave, { onConflict: 'gite' })
                         .select();
@@ -252,14 +252,14 @@
                 log('❌ Erreur fatale: ' + error.message, 'error');
                 console.error(error);
             }
-        }
+        };
 
-        async function verifySupabase() {
+        window.verifySupabase = async function verifySupabase() {
             document.getElementById('results').innerHTML = '';
             log('🔍 Vérification dans Supabase...', 'info');
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseMigrate
                     .from('infos_gites')
                     .select('*');
 
@@ -288,7 +288,7 @@
             } catch (error) {
                 log('❌ Exception: ' + error.message, 'error');
             }
-        }
+        };
     </script>
 </body>
 </html>
