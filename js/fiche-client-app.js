@@ -4,30 +4,29 @@
  */
 
 // ==================== CONFIGURATION ====================
-(function() {
-    if (window.ficheClientAppLoaded) return; // Éviter double chargement
+// Protection contre double chargement
+if (!window.ficheClientAppLoaded) {
     window.ficheClientAppLoaded = true;
 
     const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
 
-    // Initialiser Supabase
+    // Initialiser Supabase (une seule fois)
     if (!window.ficheClientSupabase) {
         const { createClient } = window.supabase;
         window.ficheClientSupabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     }
-    window.supabaseFicheClient = window.ficheClientSupabase;
-})();
+}
 
-// Référence locale pour éviter conflits
-const supabase = window.ficheClientSupabase || window.supabaseFicheClient;
+// Référence Supabase (utiliser var pour éviter redéclaration)
+var supabase = window.ficheClientSupabase;
 
 // ==================== VARIABLES GLOBALES ====================
-let currentLanguage = 'fr';
-let reservationData = null;
-let giteInfo = null;
-let token = null;
-let cleaningSchedule = null;
+var currentLanguage = 'fr';
+var reservationData = null;
+var giteInfo = null;
+var token = null;
+var cleaningSchedule = null;
 
 // ==================== TRADUCTIONS ====================
 const translations = {
