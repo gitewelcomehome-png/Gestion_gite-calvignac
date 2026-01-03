@@ -192,7 +192,7 @@ async function updateDashboardReservations() {
         const departure = parseLocalDate(r.dateFin);
         // N'afficher que si l'arrivée est cette semaine OU si le séjour est en cours
         const isArrivalThisWeek = arrival >= weekStart && arrival <= weekEnd;
-        const isDepartureThisWeek = departure >= weekStart && departure <= weekEnd && departure >= today;
+        const isDepartureThisWeek = departure >= weekStart && departure <= weekEnd && departure > today; // FIX: > au lieu de >=
         return isArrivalThisWeek || (isDepartureThisWeek && arrival < weekStart);
     }).sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     
