@@ -214,7 +214,8 @@ async function updateReservationsList() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    console.log('🕐 Date du jour (today):', today.toISOString());
+    console.log('%c🕐 FILTRE RÉSERVATIONS - Date du jour:', 'background: #4CAF50; color: white; font-weight: bold; padding: 5px;', today.toLocaleDateString('fr-FR'));
+    console.log('📊 Total réservations dans la base:', reservations.length);
     
     // Récupérer les validations de la société de ménage
     const { data: cleaningSchedules } = await supabase
@@ -231,15 +232,19 @@ async function updateReservationsList() {
     // Afficher les réservations se terminant aujourd'hui ou après (pour gérer le checkout)
     const active = reservations.filter(r => {
         const dateFin = parseLocalDate(r.dateFin);
-        dateFin.setHours(0, 0, 0, 0); // Normaliser à minuit
+        dateFin.setHours(0, 0, 0, 0);
         const isActive = dateFin >= today;
         
         if (!isActive) {
-            console.log('❌ Réservation masquée (terminée):', r.id, r.nom, 'dateFin:', dateFin.toISOString());
+            console.log('%c❌ MASQUÉE:', 'color: red; font-weight: bold;', `[${r.id}] ${r.nom} - Fin: ${r.dateFin}`);
+        } else {
+            console.log('%c✅ AFFICHÉE:', 'color: green;', `[${r.id}] ${r.nom} - Du ${r.dateDebut} au ${r.dateFin}`);
         }
         
         return isActive;
     });
+    
+    console.log('%c📈 Réservations actives affichées:', 'background: #2196F3; color: white; font-weight: bold; padding: 5px;', active.length);
     
     const container = document.getElementById('planning-container');
     if (!container) return; // Conteneur pas encore chargé
@@ -384,7 +389,13 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         const dateFin = parseLocalDate(r.dateFin);
         dateFin.setHours(0, 0, 0, 0);
         const isExpiredOrExpiringToday = today && dateFin.getTime() <= today.getTime();
-        console.log('📄 Bouton fiche client:', r.id, r.nom, 'dateFin:', dateFin.toISOString(), 'today:', today?.toISOString(), 'masqué:', isExpiredOrExpiringToday);
+        
+        console.log(
+            isExpiredOrExpiringToday ? '%c🚫 BOUTON MASQUÉ:' : '%c📄 BOUTON VISIBLE:', 
+            isExpiredOrExpiringToday ? 'color: red; font-weight: bold;' : 'color: blue;',
+            `[${r.id}] ${r.nom} - Fin: ${r.dateFin}`
+        );
+        
         const ficheClientButton = isExpiredOrExpiringToday ? '' : `<button onclick="genererPageClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
         
         html += `
