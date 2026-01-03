@@ -271,7 +271,7 @@ async function updateDashboardReservations() {
                 </div>
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; display: flex; gap: 8px;">
                     ${showFicheButton ? `
-                    <button onclick="openFicheClient(${r.id})" 
+                    <button onclick="aperçuFicheClient(${r.id})" 
                             style="flex: 1; background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;">
                         📄 Fiche Client
                     </button>
