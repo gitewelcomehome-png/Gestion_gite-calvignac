@@ -214,7 +214,14 @@ async function updateReservationsList() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    console.log('%c🕐 FILTRE RÉSERVATIONS - Date du jour:', 'background: #4CAF50; color: white; font-weight: bold; padding: 5px;', today.toLocaleDateString('fr-FR'));
+    // Calculer la fin de la semaine (dimanche)
+    const endOfWeek = new Date(today);
+    endOfWeek.setDate(today.getDate() + (7 - today.getDay())); // Dimanche
+    endOfWeek.setHours(23, 59, 59, 999);
+    
+    console.log('%c🕐 FILTRE RÉSERVATIONS - Semaine en cours', 'background: #4CAF50; color: white; font-weight: bold; padding: 5px;');
+    console.log('📅 Aujourd\'hui:', today.toLocaleDateString('fr-FR'));
+    console.log('📅 Fin semaine (dimanche):', endOfWeek.toLocaleDateString('fr-FR'));
     console.log('📊 Total réservations dans la base:', reservations.length);
     
     // Récupérer les validations de la société de ménage
@@ -229,22 +236,27 @@ async function updateReservationsList() {
         });
     }
     
-    // Afficher les réservations se terminant aujourd'hui ou après (pour gérer le checkout)
+    // Afficher uniquement les réservations de la semaine en cours
+    // (date de fin > aujourd'hui OU date de début dans la semaine)
     const active = reservations.filter(r => {
+        const dateDebut = parseLocalDate(r.dateDebut);
         const dateFin = parseLocalDate(r.dateFin);
+        dateDebut.setHours(0, 0, 0, 0);
         dateFin.setHours(0, 0, 0, 0);
-        const isActive = dateFin >= today;
         
-        if (!isActive) {
-            console.log('%c❌ MASQUÉE:', 'color: red; font-weight: bold;', `[${r.id}] ${r.nom} - Fin: ${r.dateFin}`);
+        // Afficher si : date de fin >= aujourd'hui ET date de début <= fin de semaine
+        const isInCurrentWeek = dateFin >= today && dateDebut <= endOfWeek;
+        
+        if (!isInCurrentWeek) {
+            console.log('%c❌ HORS SEMAINE:', 'color: gray;', `[${r.id}] ${r.nom} - Du ${r.dateDebut} au ${r.dateFin}`);
         } else {
-            console.log('%c✅ AFFICHÉE:', 'color: green;', `[${r.id}] ${r.nom} - Du ${r.dateDebut} au ${r.dateFin}`);
+            console.log('%c✅ DANS LA SEMAINE:', 'color: green;', `[${r.id}] ${r.nom} - Du ${r.dateDebut} au ${r.dateFin}`);
         }
         
-        return isActive;
+        return isInCurrentWeek;
     });
     
-    console.log('%c📈 Réservations actives affichées:', 'background: #2196F3; color: white; font-weight: bold; padding: 5px;', active.length);
+    console.log('%c📈 Réservations semaine affichées:', 'background: #2196F3; color: white; font-weight: bold; padding: 5px;', active.length);
     
     const container = document.getElementById('planning-container');
     if (!container) return; // Conteneur pas encore chargé
