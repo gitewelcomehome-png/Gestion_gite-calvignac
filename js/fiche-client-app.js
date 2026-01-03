@@ -149,6 +149,18 @@ function updateTranslations() {
 
 // ==================== INITIALISATION ====================
 document.addEventListener('DOMContentLoaded', async () => {
+    // Forcer la langue française au démarrage
+    currentLanguage = 'fr';
+    
+    // S'assurer que le bouton FR est actif
+    document.querySelectorAll('.language-btn').forEach(btn => {
+        if (btn.dataset.lang === 'fr') {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
     // Récupérer le token depuis l'URL
     const urlParams = new URLSearchParams(window.location.search);
     token = urlParams.get('token');
@@ -227,7 +239,7 @@ async function loadGiteInfo() {
     const { data, error } = await supabase
         .from('infos_gites')
         .select('*')
-        .eq('gite', reservationData.gite)
+        .eq('gite', reservationData.gite.toLowerCase())
         .single();
     
     if (error) throw error;
