@@ -2,7 +2,8 @@
 // GESTION FAQ - QUESTIONS FRÉQUENTES CLIENTS
 // ================================================================
 
-const supabase = window.supabase;
+// Supabase est déjà disponible globalement via window.supabase
+// const supabase = window.supabase; // Commentaire car peut causer un conflit
 
 let faqData = [];
 let categorieActive = 'all';
@@ -25,7 +26,7 @@ window.initFAQ = initFAQ;
 
 async function chargerFAQ() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabase
             .from('faq')
             .select('*')
             .order('ordre', { ascending: true })
@@ -250,7 +251,7 @@ window.sauvegarderQuestionFAQ = async function() {
     try {
         if (id) {
             // Mise à jour
-            const { error } = await supabase
+            const { error } = await window.supabase
                 .from('faq')
                 .update(data)
                 .eq('id', id);
@@ -258,7 +259,7 @@ window.sauvegarderQuestionFAQ = async function() {
             if (error) throw error;
         } else {
             // Création
-            const { error } = await supabase
+            const { error } = await window.supabase
                 .from('faq')
                 .insert([data]);
 
@@ -278,7 +279,7 @@ window.supprimerQuestion = async function(id) {
     if (!confirm('Supprimer cette question ?')) return;
 
     try {
-        const { error } = await supabase
+        const { error } = await window.supabase
             .from('faq')
             .delete()
             .eq('id', id);
