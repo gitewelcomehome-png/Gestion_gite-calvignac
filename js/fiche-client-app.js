@@ -42,6 +42,7 @@ var giteInfo = null;
 var token = null;
 var cleaningScheduleAvant = null;  // Ménage AVANT l'arrivée (jour d'arrivée)
 var cleaningScheduleApres = null;   // Ménage APRÈS le départ (jour de départ)
+var mapActivites = null;  // Carte Leaflet (pour éviter réinitialisation)
 
 // ==================== TRADUCTIONS ====================
 const translations = {
@@ -1044,13 +1045,37 @@ async function loadActivitesForClient() {
         .eq('gite', reservationData.gite)
         .order('distance');
     
-    // Initialiser la carte Leaflet
-    const mapElement = document.getElementById('mapActivites');
-    const map = L.map(mapElement).setView([giteInfo.latitude, giteInfo.longitude], 12);
+    // Vérifier que giteInfo a des coordonnées valides
+    if (!giteInfo || !giteInfo.latitude || !giteInfo.longitude) {
+        console.warn('Coordonnées gîte manquantes, carte non initialisée');
+        document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
+        // Afficher quand même la liste des activités
+        displayActivitesList(activites || []);
+        return;
+    }
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    // Initialiser la carte Leaflet (une seule fois)
+    const mapElement = document.getElementById('mapActivites');
+    
+    if (!mapActivites) {
+        // Première initialisation
+        mapActivites = L.map(mapElement).setView([giteInfo.latitude, giteInfo.longitude], 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(mapActivites);
+    } else {
+        // Carte déjà initialisée, juste recentrer
+        mapActivites.setView([giteInfo.latitude, giteInfo.longitude], 12);
+        // Supprimer les anciens marqueurs
+        mapActivites.eachLayer(layer => {
+            if (layer instanceof L.Marker) {
+                mapActivites.removeLayer(layer);
+            }
+        });
+    }
+    
+    const map = mapActivites;
     
     // Marqueur du gîte
     const giteMarker = L.marker([giteInfo.latitude, giteInfo.longitude], {
@@ -1079,6 +1104,10 @@ async function loadActivitesForClient() {
     });
     
     // Liste des activités
+    displayActivitesList(activites || []);
+}
+
+function displayActivitesList(activites) {
     const listeContainer = document.getElementById('listeActivites');
     listeContainer.innerHTML = activites.map(activite => `
         <div class="card" style="margin-bottom: 1rem; cursor: pointer;" onclick="openActiviteModal(${JSON.stringify(activite).replace(/"/g, '&quot;')})">
