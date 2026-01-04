@@ -316,6 +316,27 @@ async function loadGiteInfo() {
     }
     
     giteInfo = data;
+    
+    // ✅ NOUVEAU: Charger les horaires validés pour cette réservation
+    const { data: horairesValidees } = await supabase
+        .from('demandes_horaires')
+        .select('type, heure_validee, statut')
+        .eq('reservation_id', reservationData.id)
+        .eq('statut', 'validee')
+        .in('type', ['arrivee', 'depart']);
+    
+    // Stocker les horaires validées dans giteInfo pour utilisation ultérieure
+    if (horairesValidees && horairesValidees.length > 0) {
+        horairesValidees.forEach(h => {
+            if (h.type === 'arrivee') {
+                giteInfo.heure_arrivee_validee = h.heure_validee;
+            }
+            if (h.type === 'depart') {
+                giteInfo.heure_depart_validee = h.heure_validee;
+            }
+        });
+        console.log('✅ Horaires validées trouvées:', giteInfo.heure_arrivee_validee, giteInfo.heure_depart_validee);
+    }
 }
 
 async function loadCleaningSchedule() {
@@ -375,8 +396,11 @@ function initOngletEntree() {
     
     // Horaire d'arrivée
     const heureArrivee = currentLanguage === 'fr' ? giteInfo.heure_arrivee : giteInfo.heure_arrivee_en;
-    console.log('🕒 Heure arrivée brute:', heureArrivee, 'Standard:', giteInfo.heure_arrivee_standard, 'Lang:', currentLanguage);
-    const heureArriveeFormatted = formatTime(heureArrivee || giteInfo.heure_arrivee_standard || '17:00');
+    console.log('🕒 Heure arrivée brute:', heureArrivee, 'Standard:', giteInfo.heure_arrivee_standard, 'Validée:', giteInfo.heure_arrivee_validee, 'Lang:', currentLanguage);
+    
+    // ✅ PRIORITÉ: Heure validée > Heure configurée > Heure standard
+    const heureArriveeEffective = giteInfo.heure_arrivee_validee || heureArrivee || giteInfo.heure_arrivee_standard || '17:00';
+    const heureArriveeFormatted = formatTime(heureArriveeEffective);
     console.log('🕒 Heure arrivée formatée:', heureArriveeFormatted);
     document.getElementById('heureArrivee').textContent = heureArriveeFormatted;
     
@@ -418,7 +442,15 @@ function initOngletEntree() {
     
     // Explication de l'horaire d'arrivée selon le ménage
     let explicationArrivee = '';
-    if (cleaningScheduleAvant && cleaningScheduleAvant.time_of_day === 'afternoon') {
+    
+    // ✅ SI HORAIRE VALIDÉE → Message de confirmation
+    if (giteInfo.heure_arrivee_validee) {
+        explicationArrivee = currentLanguage === 'fr' 
+            ? '✅ Horaire d\'arrivée validé par le gestionnaire' 
+            : '✅ Arrival time validated by manager';
+    }
+    // Sinon, messages selon le ménage
+    else if (cleaningScheduleAvant && cleaningScheduleAvant.time_of_day === 'afternoon') {
         explicationArrivee = currentLanguage === 'fr' 
             ? '🧹 Ménage prévu l\'après-midi de votre arrivée' 
             : '🧹 Cleaning scheduled on your arrival afternoon';
@@ -739,7 +771,10 @@ function initOngletPendant() {
 function initOngletSortie() {
     // Horaire de départ
     const heureDepart = currentLanguage === 'fr' ? giteInfo.heure_depart : giteInfo.heure_depart_en;
-    const heureDepartFormatted = formatTime(heureDepart || giteInfo.heure_depart_standard || '10:00');
+    
+    // ✅ PRIORITÉ: Heure validée > Heure configurée > Heure standard
+    const heureDepartEffective = giteInfo.heure_depart_validee || heureDepart || giteInfo.heure_depart_standard || '10:00';
+    const heureDepartFormatted = formatTime(heureDepartEffective);
     const heureDepartElement = document.getElementById('heureDepart');
     if (heureDepartElement) {
         heureDepartElement.textContent = heureDepartFormatted;
@@ -796,7 +831,15 @@ function initOngletSortie() {
     
     // Explication de l'horaire de départ selon le ménage
     let explicationDepart = '';
-    if (cleaningScheduleApres && cleaningScheduleApres.time_of_day === 'afternoon') {
+    
+    // ✅ SI HORAIRE VALIDÉE → Message de confirmation
+    if (giteInfo.heure_depart_validee) {
+        explicationDepart = currentLanguage === 'fr' 
+            ? '✅ Horaire de départ validé par le gestionnaire' 
+            : '✅ Departure time validated by manager';
+    }
+    // Sinon, messages selon le ménage
+    else if (cleaningScheduleApres && cleaningScheduleApres.time_of_day === 'afternoon') {
         explicationDepart = currentLanguage === 'fr' 
             ? '🧹 Ménage prévu l\'après-midi après votre départ' 
             : '🧹 Cleaning scheduled in the afternoon after your departure';
