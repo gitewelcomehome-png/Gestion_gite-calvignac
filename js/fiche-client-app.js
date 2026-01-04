@@ -1018,15 +1018,21 @@ async function loadActivitesForClient() {
     
     // Si aucune activité
     if (!activites || activites.length === 0) {
+        console.warn('⚠️ Aucune activité trouvée pour ce gîte');
         document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
         displayActivitesList([]);
         return;
     }
     
+    console.log('📊 Activités avec coordonnées:', activites.filter(a => a.latitude && a.longitude).length, '/', activites.length);
+    
     // Initialiser la carte Leaflet (une seule fois)
     const mapElement = document.getElementById('mapActivites');
+    console.log('🗺️ Élément carte trouvé:', mapElement ? 'OUI' : 'NON');
+    console.log('🗺️ Leaflet disponible:', typeof L !== 'undefined' ? 'OUI' : 'NON');
     
     if (!mapActivites) {
+        console.log('🗺️ Initialisation carte avec coords:', giteLat, giteLon);
         // Première initialisation
         mapActivites = L.map(mapElement).setView([giteLat, giteLon], 12);
         
@@ -1093,90 +1099,139 @@ function displayActivitesList(activites) {
         return;
     }
     
-    // Fonction pour obtenir l'icône selon le type
+    // Fonction pour obtenir l'icône Font Awesome selon le type
     const getIconForType = (type) => {
         const typeNormalized = (type || '').toLowerCase();
         const icons = {
-            'restaurant': '🍽️',
-            'musée': '🏛️',
-            'museum': '🏛️',
-            'parc': '🌳',
-            'park': '🌳',
-            'plage': '🏖️',
-            'beach': '🏖️',
-            'château': '🏰',
-            'castle': '🏰',
-            'église': '⛪',
-            'church': '⛪',
-            'commerce': '🛒',
-            'shop': '🛒',
-            'bar': '🍺',
-            'café': '☕',
-            'coffee': '☕',
-            'randonnée': '🥾',
-            'hiking': '🥾',
-            'vélo': '🚴',
-            'bike': '🚴',
-            'piscine': '🏊',
-            'pool': '🏊',
-            'spectacle': '🎭',
-            'show': '🎭',
-            'cinéma': '🎬',
-            'cinema': '🎬',
-            'vin': '🍷',
-            'wine': '🍷',
-            'marché': '🛍️',
-            'market': '🛍️'
+            'restaurant': 'fa-solid fa-utensils',
+            'musée': 'fa-solid fa-landmark',
+            'museum': 'fa-solid fa-landmark',
+            'parc': 'fa-solid fa-tree',
+            'park': 'fa-solid fa-tree',
+            'plage': 'fa-solid fa-umbrella-beach',
+            'beach': 'fa-solid fa-umbrella-beach',
+            'château': 'fa-solid fa-chess-rook',
+            'castle': 'fa-solid fa-chess-rook',
+            'église': 'fa-solid fa-church',
+            'church': 'fa-solid fa-church',
+            'commerce': 'fa-solid fa-shopping-cart',
+            'shop': 'fa-solid fa-shopping-bag',
+            'bar': 'fa-solid fa-beer-mug-empty',
+            'café': 'fa-solid fa-mug-hot',
+            'coffee': 'fa-solid fa-mug-hot',
+            'randonnée': 'fa-solid fa-person-hiking',
+            'hiking': 'fa-solid fa-person-hiking',
+            'vélo': 'fa-solid fa-person-biking',
+            'bike': 'fa-solid fa-person-biking',
+            'piscine': 'fa-solid fa-person-swimming',
+            'pool': 'fa-solid fa-person-swimming',
+            'spectacle': 'fa-solid fa-masks-theater',
+            'show': 'fa-solid fa-masks-theater',
+            'cinéma': 'fa-solid fa-film',
+            'cinema': 'fa-solid fa-film',
+            'vin': 'fa-solid fa-wine-glass',
+            'wine': 'fa-solid fa-wine-bottle',
+            'marché': 'fa-solid fa-basket-shopping',
+            'market': 'fa-solid fa-basket-shopping',
+            'sport': 'fa-solid fa-dumbbell',
+            'spa': 'fa-solid fa-spa',
+            'montagne': 'fa-solid fa-mountain',
+            'mountain': 'fa-solid fa-mountain'
         };
         
         for (const [key, icon] of Object.entries(icons)) {
             if (typeNormalized.includes(key)) return icon;
         }
-        return '📍'; // Icône par défaut
+        return 'fa-solid fa-location-dot'; // Icône par défaut
+    };
+    
+    // Couleurs de gradient par type
+    const getGradientForType = (type) => {
+        const typeNormalized = (type || '').toLowerCase();
+        const gradients = {
+            'restaurant': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'musée': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'museum': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'parc': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'park': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'plage': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'château': 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            'bar': 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+            'café': 'linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%)'
+        };
+        
+        for (const [key, gradient] of Object.entries(gradients)) {
+            if (typeNormalized.includes(key)) return gradient;
+        }
+        return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; // Défaut
     };
     
     listeContainer.innerHTML = activites.map(activite => {
-        const icon = getIconForType(activite.type || activite.categorie);
+        const iconClass = getIconForType(activite.type || activite.categorie);
+        const gradient = getGradientForType(activite.type || activite.categorie);
         const hasCoords = activite.latitude && activite.longitude;
         
         return `
-        <div class="card activite-card" style="margin-bottom: 1rem; border-left: 4px solid var(--primary-color); transition: transform 0.2s, box-shadow 0.2s;" 
-             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
-             onmouseout="this.style.transform=''; this.style.boxShadow=''">
-            <div style="display: flex; gap: 1rem;">
-                <div style="font-size: 3rem; flex-shrink: 0; line-height: 1;">${icon}</div>
+        <div class="card activite-card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--primary-color);">
+            <div style="display: flex; gap: 1.5rem; align-items: start;">
+                <div class="activite-icon" style="background: ${gradient};">
+                    <i class="${iconClass}"></i>
+                </div>
                 <div style="flex: 1;">
-                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--primary-color);">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--primary-color);">
                         ${activite.nom}
                     </h3>
-                    <div style="display: flex; gap: 1rem; color: var(--gray-600); font-size: 0.875rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-                        ${activite.type || activite.categorie ? `<span style="background: var(--gray-100); padding: 0.25rem 0.75rem; border-radius: 1rem;">${activite.type || activite.categorie}</span>` : ''}
-                        ${activite.distance_km ? `<span>📏 ${activite.distance_km.toFixed(1)} km</span>` : ''}
-                        ${activite.phone ? `<span>📞 ${activite.phone}</span>` : ''}
+                    <div style="display: flex; gap: 1rem; color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;">
+                        ${activite.type || activite.categorie ? `
+                            <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.375rem 1rem; border-radius: 2rem; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                ${activite.type || activite.categorie}
+                            </span>
+                        ` : ''}
+                        ${activite.distance_km ? `
+                            <span style="display: flex; align-items: center; gap: 0.25rem;">
+                                <i class="fa-solid fa-route" style="color: var(--primary-color);"></i>
+                                ${activite.distance_km.toFixed(1)} km
+                            </span>
+                        ` : ''}
+                        ${activite.phone ? `
+                            <span style="display: flex; align-items: center; gap: 0.25rem;">
+                                <i class="fa-solid fa-phone" style="color: var(--primary-color);"></i>
+                                ${activite.phone}
+                            </span>
+                        ` : ''}
                     </div>
-                    ${activite.description ? `<p style="margin-bottom: 1rem; color: var(--gray-700);">${activite.description.substring(0, 150)}${activite.description.length > 150 ? '...' : ''}</p>` : ''}
-                    ${activite.adresse ? `<p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 1rem;">📍 ${activite.adresse}</p>` : ''}
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    ${activite.description ? `
+                        <p style="margin-bottom: 1.25rem; color: var(--gray-700); line-height: 1.6;">
+                            ${activite.description.substring(0, 180)}${activite.description.length > 180 ? '...' : ''}
+                        </p>
+                    ` : ''}
+                    ${activite.adresse ? `
+                        <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-location-dot" style="color: var(--primary-color);"></i>
+                            ${activite.adresse}
+                        </p>
+                    ` : ''}
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                         ${hasCoords ? `
                             <a href="https://www.google.com/maps/dir/?api=1&destination=${activite.latitude},${activite.longitude}" 
                                target="_blank" class="btn btn-primary"
                                onclick="trackActiviteConsultation(${activite.id}, 'click_maps')"
-                               style="text-decoration: none;">
-                                🗺️ Itinéraire
+                               style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-route"></i> Itinéraire
                             </a>
                         ` : ''}
                         ${activite.website ? `
                             <a href="${activite.website}" target="_blank" class="btn btn-outline"
                                onclick="trackActiviteConsultation(${activite.id}, 'click_website')"
-                               style="text-decoration: none;">
-                                🌐 Site web
+                               style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-globe"></i> Site web
                             </a>
                         ` : ''}
                         ${activite.phone ? `
                             <a href="tel:${activite.phone}" class="btn btn-outline"
                                onclick="trackActiviteConsultation(${activite.id}, 'click_phone')"
-                               style="text-decoration: none;">
-                                📞 ${activite.phone}
+                               style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-phone"></i> Appeler
                             </a>
                         ` : ''}
                     </div>
