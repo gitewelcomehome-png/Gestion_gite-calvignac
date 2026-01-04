@@ -1228,7 +1228,7 @@ async function updateDemandesClients() {
         
         const { data: demandes, error } = await supabaseClient
             .from('demandes_horaires')
-            .select('*, reservations(nom, prenom, gite)')
+            .select('*')
             .eq('statut', 'en_attente')
             .order('created_at', { ascending: true });
         
@@ -1257,9 +1257,9 @@ async function updateDemandesClients() {
         demandes.forEach(d => {
             const typeLabel = d.type === 'arrivee' ? '📥 Arrivée' : '📤 Départ';
             const typeColor = d.type === 'arrivee' ? '#27AE60' : '#E74C3C';
-            const clientNom = d.client_nom || d.reservations?.nom || 'Client';
-            const clientPrenom = d.client_prenom || d.reservations?.prenom || '';
-            const gite = d.gite || d.reservations?.gite || '';
+            const clientNom = d.client_nom || 'Client';
+            const clientPrenom = d.client_prenom || '';
+            const gite = d.gite || '';
             
             html += `
                 <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
