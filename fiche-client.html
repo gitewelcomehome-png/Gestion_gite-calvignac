@@ -511,6 +511,14 @@
             animation: slideUp 0.3s;
         }
         
+        .toast.success {
+            background: var(--success);
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
         @keyframes slideUp {
             from {
                 transform: translateX(-50%) translateY(100%);
@@ -520,6 +528,41 @@
                 transform: translateX(-50%) translateY(0);
                 opacity: 1;
             }
+        }
+        
+        /* Rating stars */
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 2rem;
+            justify-content: center;
+            margin: 0.5rem 0;
+        }
+        
+        .rating-stars span {
+            cursor: pointer;
+            opacity: 0.3;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .rating-stars span:hover,
+        .rating-stars span.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .rating-stars span.active {
+            filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.8));
+        }
+        
+        /* Photos preview */
+        #photosPreview img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            border: 2px solid var(--gray-200);
         }
     </style>
 </head>
@@ -842,6 +885,116 @@
                     <span id="progressSortieText">0%</span>
                 </div>
                 <div id="checklistSortieContainer" style="margin-top: 1rem;"></div>
+            </div>
+            
+            <!-- ÉTAT DES LIEUX -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📸 Signaler un problème</h2>
+                    <p class="card-description">Si vous constatez un dommage avant votre départ</p>
+                </div>
+                <form id="formEtatDesLieux">
+                    <div class="form-group">
+                        <label class="label">Description du problème</label>
+                        <textarea class="textarea" id="descriptionDommage" rows="4" placeholder="Décrivez le problème constaté..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Ajouter des photos (optionnel)</label>
+                        <input type="file" id="photosInput" accept="image/*" multiple style="display: none;">
+                        <button type="button" class="btn btn-outline btn-full" onclick="document.getElementById('photosInput').click()">
+                            📷 Prendre / Choisir des photos
+                        </button>
+                        <div id="photosPreview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem; margin-top: 0.75rem;"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Envoyer le signalement
+                    </button>
+                </form>
+            </div>
+            
+            <!-- ÉVALUATION DU SÉJOUR -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">⭐ Comment s'est passé votre séjour ?</h2>
+                </div>
+                <form id="formEvaluation">
+                    <div class="form-group">
+                        <label class="label">Propreté</label>
+                        <div class="rating-stars" data-rating-for="proprete">
+                            <span data-value="1">⭐</span>
+                            <span data-value="2">⭐</span>
+                            <span data-value="3">⭐</span>
+                            <span data-value="4">⭐</span>
+                            <span data-value="5">⭐</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Confort</label>
+                        <div class="rating-stars" data-rating-for="confort">
+                            <span data-value="1">⭐</span>
+                            <span data-value="2">⭐</span>
+                            <span data-value="3">⭐</span>
+                            <span data-value="4">⭐</span>
+                            <span data-value="5">⭐</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Équipements</label>
+                        <div class="rating-stars" data-rating-for="equipements">
+                            <span data-value="1">⭐</span>
+                            <span data-value="2">⭐</span>
+                            <span data-value="3">⭐</span>
+                            <span data-value="4">⭐</span>
+                            <span data-value="5">⭐</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Communication</label>
+                        <div class="rating-stars" data-rating-for="communication">
+                            <span data-value="1">⭐</span>
+                            <span data-value="2">⭐</span>
+                            <span data-value="3">⭐</span>
+                            <span data-value="4">⭐</span>
+                            <span data-value="5">⭐</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Un commentaire ?</label>
+                        <textarea class="textarea" id="commentaireEvaluation" rows="4" placeholder="Partagez votre expérience..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Recommanderiez-vous ce gîte ?</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" name="recommandation" value="oui_sans_hesiter" id="recoOui">
+                                <label for="recoOui">Oui, sans hésiter</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="recommandation" value="oui_probablement" id="recoProbable">
+                                <label for="recoProbable">Oui, probablement</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="recommandation" value="peut_etre" id="recoPeutEtre">
+                                <label for="recoPeutEtre">Peut-être</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="recommandation" value="non" id="recoNon">
+                                <label for="recoNon">Non</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Envoyer mon avis
+                    </button>
+                </form>
             </div>
         </div>
         

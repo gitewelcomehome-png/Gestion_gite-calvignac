@@ -1176,6 +1176,10 @@ function initializeEventListeners() {
         e.preventDefault();
         await submitRetourClient();
     });
+    
+    // Initialiser état des lieux et évaluation
+    initEtatDesLieux();
+    initEvaluation();
 }
 
 function switchTab(tabId) {
@@ -1284,12 +1288,12 @@ function copyToClipboard(inputId) {
     const input = document.getElementById(inputId);
     input.select();
     document.execCommand('copy');
-    showToast(t('copie_success'));
+    showToast(t('copie_success'), 'success');
 }
 
-function showToast(message) {
+function showToast(message, type = 'info') {
     const toast = document.createElement('div');
-    toast.className = 'toast';
+    toast.className = `toast ${type}`;
     toast.textContent = message;
     document.body.appendChild(toast);
     
@@ -1311,7 +1315,199 @@ function hideLoading() {
     document.getElementById('loadingScreen').style.display = 'none';
 }
 
+// ==================== ÉTAT DES LIEUX ====================
+async function initEtatDesLieux() {
+    const form = document.getElementById('formEtatDesLieux');
+    const photosInput = document.getElementById('photosInput');
+    const photosPreview = document.getElementById('photosPreview');
+    let selectedPhotos = [];
+    
+    // Gestion des photos
+    photosInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        selectedPhotos = files;
+        
+        photosPreview.innerHTML = '';
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.position = 'relative';
+                const wrapper = document.createElement('div');
+                wrapper.style.position = 'relative';
+                wrapper.appendChild(img);
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.textContent = '×';
+                removeBtn.style = 'position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;';
+                removeBtn.onclick = () => {
+                    selectedPhotos.splice(index, 1);
+                    wrapper.remove();
+                };
+                wrapper.appendChild(removeBtn);
+                
+                photosPreview.appendChild(wrapper);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+    
+    // Soumission du formulaire
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const description = document.getElementById('descriptionDommage').value;
+        
+        if (!description.trim()) {
+            showToast('Veuillez décrire le problème', 'error');
+            return;
+        }
+        
+        try {
+            // Upload photos si présentes
+            const photoUrls = [];
+            for (const photo of selectedPhotos) {
+                const fileName = `${token}_${Date.now()}_${photo.name}`;
+                const { data, error } = await supabase.storage
+                    .from('etat-lieux')
+                    .upload(fileName, photo);
+                
+                if (error) throw error;
+                
+                const { data: { publicUrl } } = supabase.storage
+                    .from('etat-lieux')
+                    .getPublicUrl(fileName);
+                
+                photoUrls.push(publicUrl);
+            }
+            
+            // Enregistrer l'état des lieux
+            const { error } = await supabase
+                .from('etat_lieux')
+                .insert({
+                    reservation_id: reservationData.id,
+                    description: description,
+                    photos: photoUrls,
+                    date_signalement: new Date().toISOString()
+                });
+            
+            if (error) throw error;
+            
+            showToast('✓ Signalement envoyé', 'success');
+            form.reset();
+            photosPreview.innerHTML = '';
+            selectedPhotos = [];
+            
+        } catch (error) {
+            console.error(error);
+            showToast('Erreur lors de l\'envoi', 'error');
+        }
+    });
+}
+
+// ==================== ÉVALUATION DU SÉJOUR ====================
+async function initEvaluation() {
+    const ratings = {
+        proprete: 0,
+        confort: 0,
+        equipements: 0,
+        communication: 0
+    };
+    
+    // Gestion des étoiles
+    document.querySelectorAll('.rating-stars').forEach(container => {
+        const category = container.getAttribute('data-rating-for');
+        const stars = container.querySelectorAll('span');
+        
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                ratings[category] = index + 1;
+                
+                // Mettre à jour l'affichage
+                stars.forEach((s, i) => {
+                    if (i <= index) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+            
+            star.addEventListener('mouseenter', () => {
+                stars.forEach((s, i) => {
+                    if (i <= index) {
+                        s.style.opacity = '1';
+                    } else {
+                        s.style.opacity = '0.3';
+                    }
+                });
+            });
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            stars.forEach((s, i) => {
+                if (i < ratings[category]) {
+                    s.style.opacity = '1';
+                } else {
+                    s.style.opacity = '0.3';
+                }
+            });
+        });
+    });
+    
+    // Soumission du formulaire
+    document.getElementById('formEvaluation').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Vérifier que toutes les notes sont données
+        if (Object.values(ratings).some(r => r === 0)) {
+            showToast('Veuillez noter toutes les catégories', 'error');
+            return;
+        }
+        
+        const commentaire = document.getElementById('commentaireEvaluation').value;
+        const recommandation = document.querySelector('input[name="recommandation"]:checked')?.value;
+        
+        if (!recommandation) {
+            showToast('Veuillez indiquer si vous recommandez le gîte', 'error');
+            return;
+        }
+        
+        try {
+            const { error } = await supabase
+                .from('evaluations')
+                .insert({
+                    reservation_id: reservationData.id,
+                    note_proprete: ratings.proprete,
+                    note_confort: ratings.confort,
+                    note_equipements: ratings.equipements,
+                    note_communication: ratings.communication,
+                    commentaire: commentaire,
+                    recommandation: recommandation,
+                    date_evaluation: new Date().toISOString()
+                });
+            
+            if (error) throw error;
+            
+            showToast('✓ Merci pour votre avis !', 'success');
+            
+            // Désactiver le formulaire après envoi
+            document.getElementById('formEvaluation').querySelectorAll('input, textarea, button').forEach(el => {
+                el.disabled = true;
+            });
+            
+        } catch (error) {
+            console.error(error);
+            showToast('Erreur lors de l\'envoi', 'error');
+        }
+    });
+}
+
 // Rendre les fonctions globales pour onclick
 window.toggleChecklistItem = toggleChecklistItem;
 window.copyToClipboard = copyToClipboard;
 window.trackActiviteConsultation = trackActiviteConsultation;
+window.initEtatDesLieux = initEtatDesLieux;
+window.initEvaluation = initEvaluation;

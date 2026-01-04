@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Vérification données Trévoux</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Vérification des données pour Trévoux</h1>
+    <div id="results"></div>
+
+    <script>
+        const supabaseUrl = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE0MDU0ODAsImV4cCI6MjA0Njk4MTQ4MH0.sHb2ARi-ACq1kBGYGQhBsLqO07SY12U7-Wj82i_T6ao';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        async function checkData() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>🔍 Recherche en cours...</p>';
+
+            try {
+                // Test 1: Recherche avec "trévoux" (minuscule avec accent)
+                console.log('Test 1: Recherche avec "trévoux"');
+                const { data: data1, error: error1 } = await supabase
+                    .from('infos_gites')
+                    .select('*')
+                    .eq('gite', 'trévoux')
+                    .maybeSingle();
+
+                let html = '<h2>Test 1: eq("gite", "trévoux")</h2>';
+                if (error1) {
+                    html += `<p style="color: red;">❌ Erreur: ${error1.message}</p>`;
+                } else if (data1) {
+                    html += `<p style="color: green;">✅ Données trouvées!</p>`;
+                    html += `<pre>${JSON.stringify(data1, null, 2)}</pre>`;
+                } else {
+                    html += `<p style="color: orange;">⚠️ Aucune donnée trouvée</p>`;
+                }
+
+                // Test 2: Recherche avec "Trévoux" (majuscule)
+                console.log('Test 2: Recherche avec "Trévoux"');
+                const { data: data2, error: error2 } = await supabase
+                    .from('infos_gites')
+                    .select('*')
+                    .eq('gite', 'Trévoux')
+                    .maybeSingle();
+
+                html += '<h2>Test 2: eq("gite", "Trévoux")</h2>';
+                if (error2) {
+                    html += `<p style="color: red;">❌ Erreur: ${error2.message}</p>`;
+                } else if (data2) {
+                    html += `<p style="color: green;">✅ Données trouvées!</p>`;
+                    html += `<pre>${JSON.stringify(data2, null, 2)}</pre>`;
+                } else {
+                    html += `<p style="color: orange;">⚠️ Aucune donnée trouvée</p>`;
+                }
+
+                // Test 3: Liste de TOUTES les entrées de la table
+                console.log('Test 3: Liste de toutes les entrées');
+                const { data: allData, error: error3 } = await supabase
+                    .from('infos_gites')
+                    .select('gite, dateModification');
+
+                html += '<h2>Test 3: Toutes les entrées de la table</h2>';
+                if (error3) {
+                    html += `<p style="color: red;">❌ Erreur: ${error3.message}</p>`;
+                } else if (allData && allData.length > 0) {
+                    html += `<p style="color: green;">✅ ${allData.length} entrée(s) trouvée(s):</p>`;
+                    html += '<ul>';
+                    allData.forEach(item => {
+                        html += `<li><strong>${item.gite}</strong> (modifié: ${item.dateModification || 'N/A'})</li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html += `<p style="color: red;">❌ La table est vide!</p>`;
+                }
+
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">❌ Erreur fatale: ${error.message}</p>`;
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Lancer la vérification au chargement
+        checkData();
+    </script>
+</body>
+</html>
