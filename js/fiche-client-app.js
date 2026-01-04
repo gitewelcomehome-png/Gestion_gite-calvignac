@@ -1003,18 +1003,32 @@ async function loadActivitesForClient() {
     console.log('Activités chargées:', activites);
     
     // Vérifier que giteInfo a des coordonnées valides
+    console.log('🔍 giteInfo complet:', giteInfo);
+    console.log('🔍 giteInfo.gps_lat:', giteInfo?.gps_lat, 'type:', typeof giteInfo?.gps_lat);
+    console.log('🔍 giteInfo.gps_lon:', giteInfo?.gps_lon, 'type:', typeof giteInfo?.gps_lon);
+    
     const giteLat = parseFloat(giteInfo?.gps_lat || giteInfo?.latitude);
     const giteLon = parseFloat(giteInfo?.gps_lon || giteInfo?.longitude);
     
+    console.log('🔍 Après parseFloat - giteLat:', giteLat, 'giteLon:', giteLon);
+    console.log('🔍 isNaN giteLat:', isNaN(giteLat), 'isNaN giteLon:', isNaN(giteLon));
+    
     if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
-        console.warn('Coordonnées gîte manquantes ou invalides:', { gps_lat: giteInfo?.gps_lat, gps_lon: giteInfo?.gps_lon });
+        console.error('❌ Coordonnées gîte manquantes ou invalides:', { 
+            gps_lat: giteInfo?.gps_lat, 
+            gps_lon: giteInfo?.gps_lon,
+            giteLat,
+            giteLon,
+            'isNaN giteLat': isNaN(giteLat),
+            'isNaN giteLon': isNaN(giteLon)
+        });
         document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
         // Afficher quand même la liste des activités
         displayActivitesList(activites || []);
         return;
     }
     
-    console.log('✅ Coordonnées gîte:', giteLat, giteLon);
+    console.log('✅ Coordonnées gîte valides:', giteLat, giteLon);
     
     // Si aucune activité
     if (!activites || activites.length === 0) {
@@ -1028,13 +1042,22 @@ async function loadActivitesForClient() {
     
     // Initialiser la carte Leaflet (une seule fois)
     const mapElement = document.getElementById('mapActivites');
-    console.log('🗺️ Élément carte trouvé:', mapElement ? 'OUI' : 'NON');
+    console.log('🗺️ Élément carte trouvé:', mapElement ? 'OUI' : 'NON', mapElement);
     console.log('🗺️ Leaflet disponible:', typeof L !== 'undefined' ? 'OUI' : 'NON');
+    console.log('🗺️ mapActivites existe déjà:', mapActivites ? 'OUI' : 'NON');
     
     if (!mapActivites) {
         console.log('🗺️ Initialisation carte avec coords:', giteLat, giteLon);
-        // Première initialisation
-        mapActivites = L.map(mapElement).setView([giteLat, giteLon], 12);
+        try {
+            // Première initialisation
+            mapActivites = L.map(mapElement).setView([giteLat, giteLon], 12);
+            console.log('✅ Carte Leaflet créée avec succès');
+        } catch (error) {
+            console.error('❌ Erreur création carte Leaflet:', error);
+            document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Erreur d\'initialisation de la carte</p>';
+            displayActivitesList(activites || []);
+            return;
+        }
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
