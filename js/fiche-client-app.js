@@ -106,8 +106,8 @@ const translations = {
         instructions_sortie: '📝 Instructions de départ',
         checklist_sortie: '✅ Checklist de départ',
         activites_title: '🗺️ Activités à découvrir',
-        arrivee_possible_13h: 'Arrivée possible dès 13h (pas de ménage l\'après-midi)',
-        arrivee_possible_17h: 'Arrivée possible à partir de 17h (ménage en cours l\'après-midi)',
+        arrivee_possible_13h: 'Arrivée dès 13h possible. ⚠️ 13h-17h: validation manuelle. ✅ Après 17h: automatique.',
+        arrivee_possible_17h: 'Arrivée à partir de 17h (ménage prévu l\'après-midi). ✅ Validation automatique.',
         depart_possible_12h: 'Départ jusqu\'à 12h possible en semaine (sur validation)',
         depart_possible_17h_dimanche: 'Départ jusqu\'à 17h possible le dimanche si pas de ménage l\'après-midi',
         demande_envoyee: 'Votre demande a été envoyée avec succès !',
@@ -1253,18 +1253,41 @@ function calculateAutoApproval(type, heureDemandee) {
     const [hours, minutes] = heureDemandee.split(':').map(Number);
     const requestedMinutes = hours * 60 + minutes;
     
+    console.log('🔍 Calculate auto-approval:', {type, heureDemandee, requestedMinutes, cleaningSchedule});
+    
     if (type === 'arrivee_anticipee') {
-        if (!cleaningSchedule || cleaningSchedule.time_of_day !== 'afternoon') {
-            return requestedMinutes >= 13 * 60;
+        // Règles pour l'arrivée anticipée
+        
+        // Si ménage l'après-midi du jour d'arrivée
+        if (cleaningSchedule && cleaningSchedule.time_of_day === 'afternoon') {
+            // Arrivée minimum 17h (automatique si >= 17h)
+            const autoApprove = requestedMinutes >= 17 * 60;
+            console.log('✅ Avec ménage après-midi: arrivée >= 17h →', autoApprove);
+            return autoApprove;
         } else {
-            return requestedMinutes >= 17 * 60;
+            // Pas de ménage ou ménage le matin
+            // Arrivée minimum 13h (automatique si >= 17h, manuelle entre 13h-17h)
+            const autoApprove = requestedMinutes >= 17 * 60;
+            console.log('✅ Sans ménage après-midi: arrivée >= 17h →', autoApprove, '(entre 13h-17h = validation manuelle)');
+            return autoApprove;
         }
     } else { // depart_tardif
+        // Règles pour le départ tardif
+        
         const isDimanche = new Date(reservationData.date_fin).getDay() === 0;
+        
+        // Si ménage l'après-midi du jour de départ (ou dimanche sans ménage)
         if (isDimanche && (!cleaningSchedule || cleaningSchedule.time_of_day !== 'afternoon')) {
-            return requestedMinutes <= 17 * 60;
+            // Départ jusqu'à 17h possible
+            const autoApprove = requestedMinutes <= 17 * 60;
+            console.log('✅ Dimanche sans ménage: départ <= 17h →', autoApprove);
+            return autoApprove;
         }
-        return requestedMinutes <= 12 * 60;
+        
+        // Avec ménage l'après-midi : départ standard 10h (automatique si <= 12h)
+        const autoApprove = requestedMinutes <= 12 * 60;
+        console.log('✅ Avec ménage: départ <= 12h →', autoApprove);
+        return autoApprove;
     }
 }
 
