@@ -990,8 +990,32 @@ async function loadActivitesForClient() {
         return;
     }
     
-    // Utiliser le nouveau module de carte interactive
-    initMapActivites(giteLat, giteLon, activites);
+    // Iframe OpenStreetMap simple avec zoom 16 (très proche)
+    const mapElement = document.getElementById('mapActivites');
+    const zoom = 16;
+    const bbox = `${giteLon-0.01},${giteLat-0.01},${giteLon+0.01},${giteLat+0.01}`;
+    
+    mapElement.innerHTML = `
+        <iframe 
+            width="100%" 
+            height="400" 
+            frameborder="0" 
+            scrolling="no" 
+            marginheight="0" 
+            marginwidth="0" 
+            src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${giteLat},${giteLon}" 
+            style="border: 1px solid #ccc; border-radius: 8px;">
+        </iframe>
+        <div style="text-align: center; margin-top: 0.5rem;">
+            <a href="https://www.openstreetmap.org/?mlat=${giteLat}&mlon=${giteLon}#map=${zoom}/${giteLat}/${giteLon}" 
+               target="_blank" 
+               style="color: var(--primary); font-size: 0.875rem;">
+                📍 Voir sur OpenStreetMap (zoom proche)
+            </a>
+        </div>
+    `;
+    
+    // Liste interactive des activités
     displayActivitesListInteractive(activites, giteLat, giteLon);
 }
 
@@ -1264,12 +1288,9 @@ function switchTab(tabId) {
     document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
     document.getElementById(`tab-${tabId}`).classList.add('active');
     
-    // Charger la carte APRÈS que l'onglet soit visible
+    // Charger les activités
     if (tabId === 'activites') {
-        // Attendre que le DOM soit mis à jour et que l'onglet soit visible
-        setTimeout(() => {
-            initOngletActivites();
-        }, 50);
+        initOngletActivites();
     }
 }
 

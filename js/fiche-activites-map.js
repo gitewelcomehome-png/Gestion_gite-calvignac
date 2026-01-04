@@ -140,7 +140,7 @@ function toggleActivityMarker(activiteId, show) {
     }
 }
 
-// Afficher la liste des activités avec sélecteurs
+// Afficher la liste des activités avec sélecteurs (SANS marqueurs carte)
 function displayActivitesListInteractive(activites, giteLat, giteLon) {
     const listeContainer = document.getElementById('listeActivites');
     
@@ -177,8 +177,8 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
                         <span class="activite-categorie">${activite.categorie || 'Autre'}</span>
                         <div class="activite-distance">📏 ${activite.distance.toFixed(1)} km</div>
                     </div>
-                    <button class="btn-show-map" onclick="selectActivite(${activite.id})">
-                        📍 Voir sur la carte
+                    <button class="btn-show-map" onclick="toggleTravelInfo(${activite.id})">
+                        ⏱️ Voir durées
                     </button>
                 </div>
                 <div class="activite-travel" id="travel-${activite.id}" style="display: none;">
@@ -190,6 +190,12 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
                 </div>
                 ${activite.description ? `<p class="activite-description">${activite.description}</p>` : ''}
                 ${activite.adresse ? `<p class="activite-adresse">📍 ${activite.adresse}</p>` : ''}
+                <a href="https://www.google.com/maps/dir/?api=1&origin=${giteLat},${giteLon}&destination=${activite.latitude},${activite.longitude}" 
+                   target="_blank" 
+                   class="btn-itineraire"
+                   style="display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #10b981; color: white; text-decoration: none; border-radius: 0.5rem; font-size: 0.875rem;">
+                    🗺️ Itinéraire Google Maps
+                </a>
             </div>
         `;
     });
@@ -197,26 +203,11 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
     listeContainer.innerHTML = html;
 }
 
-// Sélectionner une activité
-window.selectActivite = function(activiteId) {
-    // Masquer tous les marqueurs et infos de trajet
-    currentMarkers.forEach(m => m.marker.setOpacity(0));
-    document.querySelectorAll('.activite-travel').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.activite-card').forEach(card => card.classList.remove('selected'));
-    
-    // Afficher le marqueur sélectionné
-    toggleActivityMarker(activiteId, true);
-    
-    // Afficher les infos de trajet
+// Afficher/masquer les temps de trajet
+window.toggleTravelInfo = function(activiteId) {
     const travelDiv = document.getElementById(`travel-${activiteId}`);
     if (travelDiv) {
-        travelDiv.style.display = 'block';
-    }
-    
-    // Marquer la card comme sélectionnée
-    const card = document.querySelector(`[data-activite-id="${activiteId}"]`);
-    if (card) {
-        card.classList.add('selected');
+        travelDiv.style.display = travelDiv.style.display === 'none' ? 'block' : 'none';
     }
 };
 
