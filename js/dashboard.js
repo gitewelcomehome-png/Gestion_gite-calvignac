@@ -1246,7 +1246,7 @@ async function updateDemandesClients() {
         if (!demandes || demandes.length === 0) {
             container.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>';
             badge.textContent = '0';
-            card.style.display = 'block'; // Toujours afficher, même si vide
+            card.style.display = 'none'; // Cacher si aucune demande
             return;
         }
         

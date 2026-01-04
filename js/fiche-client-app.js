@@ -1302,36 +1302,71 @@ async function submitDemandeHoraire(type) {
         ? document.getElementById('motifArrivee')?.value || ''
         : document.getElementById('motifDepart')?.value || '';
     
+    const typeDb = type === 'arrivee_anticipee' ? 'arrivee' : 'depart';
+    
     try {
-        const { data, error } = await supabase
+        // 1. Vérifier si une demande en_attente existe déjà pour cette réservation et ce type
+        const { data: existingDemandes, error: checkError } = await supabase
             .from('demandes_horaires')
-            .insert({
-                reservation_id: reservationData.id,
-                client_nom: reservationData.nom || '',
-                client_prenom: reservationData.prenom || '',
-                gite: reservationData.gite || '',
-                type: type === 'arrivee_anticipee' ? 'arrivee' : 'depart',
-                heure_demandee: heureDemandee,
-                date_debut: reservationData.dateDebut,
-                date_fin: reservationData.dateFin,
-                statut: 'en_attente'
-            });
+            .select('id')
+            .eq('reservation_id', reservationData.id)
+            .eq('type', typeDb)
+            .eq('statut', 'en_attente')
+            .limit(1);
         
-        if (error) {
-            console.error('❌ Erreur Supabase:', error);
+        if (checkError) {
+            console.error('❌ Erreur vérification:', checkError);
             
-            // Message spécifique si la table n'existe pas
-            if (error.message && error.message.includes('relation') && error.message.includes('does not exist')) {
+            if (checkError.message && checkError.message.includes('relation') && checkError.message.includes('does not exist')) {
                 showToast('⚠️ Fonctionnalité non encore activée. Contactez le gestionnaire.');
-                console.warn('⚠️ La table demandes_horaires n\'existe pas encore. Exécutez sql/create_demandes_horaires_table.sql dans Supabase.');
+                console.warn('⚠️ La table demandes_horaires n\'existe pas encore. Exécutez sql/migrate_demandes_horaires.sql dans Supabase.');
             } else {
-                showToast(t('erreur') || '❌ Erreur lors de l\'envoi');
+                showToast(t('erreur') || '❌ Erreur lors de la vérification');
             }
             return;
         }
         
-        console.log('✅ Demande enregistrée:', data);
-        showToast(t('demande_envoyee') || '✅ Demande envoyée avec succès !');
+        let result;
+        
+        // 2. Si une demande existe déjà, la mettre à jour (écraser)
+        if (existingDemandes && existingDemandes.length > 0) {
+            const { data, error } = await supabase
+                .from('demandes_horaires')
+                .update({
+                    heure_demandee: heureDemandee,
+                    client_nom: reservationData.nom || '',
+                    client_prenom: reservationData.prenom || '',
+                    gite: reservationData.gite || '',
+                    date_debut: reservationData.dateDebut,
+                    date_fin: reservationData.dateFin,
+                    created_at: new Date().toISOString() // Mettre à jour la date
+                })
+                .eq('id', existingDemandes[0].id);
+            
+            if (error) throw error;
+            console.log('✅ Demande mise à jour:', data);
+            showToast('✅ Demande mise à jour avec succès !');
+        } 
+        // 3. Sinon, créer une nouvelle demande
+        else {
+            const { data, error } = await supabase
+                .from('demandes_horaires')
+                .insert({
+                    reservation_id: reservationData.id,
+                    client_nom: reservationData.nom || '',
+                    client_prenom: reservationData.prenom || '',
+                    gite: reservationData.gite || '',
+                    type: typeDb,
+                    heure_demandee: heureDemandee,
+                    date_debut: reservationData.dateDebut,
+                    date_fin: reservationData.dateFin,
+                    statut: 'en_attente'
+                });
+            
+            if (error) throw error;
+            console.log('✅ Demande créée:', data);
+            showToast(t('demande_envoyee') || '✅ Demande envoyée avec succès !');
+        }
         
         // Cacher le formulaire
         if (type === 'arrivee_anticipee') {
