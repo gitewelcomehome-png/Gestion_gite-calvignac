@@ -366,8 +366,8 @@ function initializeUI() {
     // Onglet Sortie
     initOngletSortie();
     
-    // Onglet Activités
-    initOngletActivites();
+    // Onglet Activités - NE PAS CHARGER ICI (onglet caché)
+    // initOngletActivites(); // Sera chargé au premier clic sur l'onglet
     
     // Onglet FAQ
     initOngletFaq();
@@ -1392,13 +1392,19 @@ function switchTab(tabId) {
     document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
     document.getElementById(`tab-${tabId}`).classList.add('active');
     
-    // Fix pour la carte Leaflet : redimensionner quand on affiche l'onglet activités
-    if (tabId === 'activites' && mapActivites) {
-        console.log('🗺️ Redimensionnement de la carte suite au changement d\'onglet');
-        setTimeout(() => {
-            mapActivites.invalidateSize();
-            console.log('✅ Carte redimensionnée après changement onglet');
-        }, 100);
+    // Charger les activités au premier affichage de l'onglet
+    if (tabId === 'activites') {
+        if (!window.activitesLoaded) {
+            console.log('🗺️ Premier affichage onglet activités - chargement des données...');
+            initOngletActivites();
+            window.activitesLoaded = true;
+        } else if (mapActivites) {
+            console.log('🗺️ Redimensionnement de la carte suite au changement d\'onglet');
+            setTimeout(() => {
+                mapActivites.invalidateSize();
+                console.log('✅ Carte redimensionnée après changement onglet');
+            }, 100);
+        }
     }
 }
 
