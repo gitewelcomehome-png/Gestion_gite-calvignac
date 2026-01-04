@@ -1052,17 +1052,27 @@ async function loadActivitesForClient() {
             // Première initialisation
             mapActivites = L.map(mapElement).setView([giteLat, giteLon], 12);
             console.log('✅ Carte Leaflet créée avec succès');
+            
+            // Ajouter les tuiles OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(mapActivites);
+            console.log('✅ Tuiles OpenStreetMap ajoutées');
+            
+            // Forcer le redimensionnement de la carte
+            setTimeout(() => {
+                mapActivites.invalidateSize();
+                console.log('✅ Carte redimensionnée');
+            }, 100);
         } catch (error) {
             console.error('❌ Erreur création carte Leaflet:', error);
             document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Erreur d\'initialisation de la carte</p>';
             displayActivitesList(activites || []);
             return;
         }
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(mapActivites);
     } else {
+        console.log('🗺️ Carte déjà existante, recentrage sur:', giteLat, giteLon);
         // Carte déjà initialisée, juste recentrer
         mapActivites.setView([giteLat, giteLon], 12);
         // Supprimer les anciens marqueurs
@@ -1071,11 +1081,14 @@ async function loadActivitesForClient() {
                 mapActivites.removeLayer(layer);
             }
         });
+        console.log('✅ Carte recentrée et marqueurs supprimés');
     }
     
     const map = mapActivites;
+    console.log('🗺️ Objet map final:', map);
     
     // Marqueur du gîte
+    console.log('📍 Ajout marqueur gîte à:', giteLat, giteLon);
     const giteMarker = L.marker([giteLat, giteLon], {
         icon: L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -1084,22 +1097,27 @@ async function loadActivitesForClient() {
         })
     }).addTo(map);
     giteMarker.bindPopup(`<b>${reservationData.gite}</b><br>🏡 Votre gîte`);
+    console.log('✅ Marqueur gîte ajouté');
     
     // Marqueurs des activités
-    activites.forEach(activite => {
+    let markersAdded = 0;
+    activites.forEach((activite, index) => {
         if (activite.latitude && activite.longitude) {
+            console.log(`📍 Ajout marqueur activité ${index + 1}:`, activite.nom, activite.latitude, activite.longitude);
             const marker = L.marker([activite.latitude, activite.longitude]).addTo(map);
             marker.bindPopup(`
                 <b>${activite.nom}</b><br>
                 ${activite.categorie || ''}<br>
-                ${activite.distance ? `${activite.distance.toFixed(1)} km` : ''}
+                ${activite.distance_km ? `${activite.distance_km.toFixed(1)} km` : ''}
             `);
             
             marker.on('click', () => {
                 trackActiviteConsultation(activite.id, 'view');
             });
+            markersAdded++;
         }
     });
+    console.log(`✅ ${markersAdded} marqueurs d'activités ajoutés`);
     
     // Liste des activités
     displayActivitesList(activites || []);
