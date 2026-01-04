@@ -3,7 +3,7 @@
  * Cache les ressources pour permettre l'accès offline
  */
 
-const CACHE_NAME = 'fiche-client-v1';
+const CACHE_NAME = 'fiche-client-v2'; // Incrémenté pour forcer le rechargement
 const urlsToCache = [
     '/fiche-client.html',
     '/js/fiche-client-app.js',
