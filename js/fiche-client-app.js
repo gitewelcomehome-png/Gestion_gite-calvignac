@@ -1264,9 +1264,12 @@ function switchTab(tabId) {
     document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
     document.getElementById(`tab-${tabId}`).classList.add('active');
     
-    // Charger la carte à chaque fois (iframe simple)
+    // Charger la carte APRÈS que l'onglet soit visible
     if (tabId === 'activites') {
-        initOngletActivites();
+        // Attendre que le DOM soit mis à jour et que l'onglet soit visible
+        setTimeout(() => {
+            initOngletActivites();
+        }, 50);
     }
 }
 

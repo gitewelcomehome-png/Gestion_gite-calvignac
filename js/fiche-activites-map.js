@@ -49,6 +49,13 @@ function formatTravelTime(minutes) {
 function initMapActivites(giteLat, giteLon, activites) {
     const mapContainer = document.getElementById('mapActivites');
     
+    // Vérifier que le conteneur est visible
+    if (mapContainer.offsetWidth === 0 || mapContainer.offsetHeight === 0) {
+        console.warn('⚠️ Conteneur carte invisible, attente...');
+        setTimeout(() => initMapActivites(giteLat, giteLon, activites), 100);
+        return;
+    }
+    
     // Détruire l'ancienne carte si elle existe
     if (mapActivitesInstance) {
         mapActivitesInstance.remove();
@@ -66,6 +73,13 @@ function initMapActivites(giteLat, giteLon, activites) {
         attribution: '© OpenStreetMap',
         maxZoom: 19
     }).addTo(mapActivitesInstance);
+    
+    // Forcer le redimensionnement après création
+    setTimeout(() => {
+        if (mapActivitesInstance) {
+            mapActivitesInstance.invalidateSize();
+        }
+    }, 100);
     
     // Marqueur du gîte (rouge)
     giteMarker = L.marker([giteLat, giteLon], {
