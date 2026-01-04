@@ -371,10 +371,19 @@
         /* Map */
         .map-container {
             height: 400px;
+            width: 100%;
             border-radius: 0.75rem;
             overflow: hidden;
             margin-bottom: 1rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #e5e7eb; /* Fond gris pour voir si la carte est là */
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Fix pour Leaflet dans onglets cachés */
+        .leaflet-container {
+            height: 100% !important;
         }
         
         /* Titres centrés avec icône */

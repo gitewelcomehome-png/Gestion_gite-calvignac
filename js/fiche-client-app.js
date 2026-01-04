@@ -1391,6 +1391,15 @@ function switchTab(tabId) {
     // Activer l'onglet sélectionné
     document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
     document.getElementById(`tab-${tabId}`).classList.add('active');
+    
+    // Fix pour la carte Leaflet : redimensionner quand on affiche l'onglet activités
+    if (tabId === 'activites' && mapActivites) {
+        console.log('🗺️ Redimensionnement de la carte suite au changement d\'onglet');
+        setTimeout(() => {
+            mapActivites.invalidateSize();
+            console.log('✅ Carte redimensionnée après changement onglet');
+        }, 100);
+    }
 }
 
 async function submitDemandeHoraire(type) {
