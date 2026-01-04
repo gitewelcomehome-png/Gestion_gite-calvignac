@@ -1396,8 +1396,11 @@ function switchTab(tabId) {
     if (tabId === 'activites') {
         if (!window.activitesLoaded) {
             console.log('🗺️ Premier affichage onglet activités - chargement des données...');
-            initOngletActivites();
-            window.activitesLoaded = true;
+            // Attendre que l'onglet soit complètement affiché
+            setTimeout(() => {
+                initOngletActivites();
+                window.activitesLoaded = true;
+            }, 50);
         } else if (mapActivites) {
             console.log('🗺️ Redimensionnement de la carte suite au changement d\'onglet');
             setTimeout(() => {

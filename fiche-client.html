@@ -370,20 +370,22 @@
         
         /* Map */
         .map-container {
-            height: 400px;
+            height: 400px !important;
             width: 100%;
             border-radius: 0.75rem;
             overflow: hidden;
             margin-bottom: 1rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            background: #e5e7eb; /* Fond gris pour voir si la carte est là */
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); /* Fond bleu ciel visible */
             position: relative;
             z-index: 1;
+            border: 3px solid #3b82f6; /* Bordure bleue pour debug */
         }
         
         /* Fix pour Leaflet dans onglets cachés */
         .leaflet-container {
             height: 100% !important;
+            width: 100% !important;
         }
         
         /* Titres centrés avec icône */
