@@ -1392,22 +1392,26 @@ function switchTab(tabId) {
     document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
     document.getElementById(`tab-${tabId}`).classList.add('active');
     
-    // Charger les activités au premier affichage de l'onglet
+    // DÉTRUIRE et RECRÉER la carte à chaque affichage de l'onglet activités
     if (tabId === 'activites') {
-        if (!window.activitesLoaded) {
-            console.log('🗺️ Premier affichage onglet activités - chargement des données...');
-            // Attendre que l'onglet soit complètement affiché
-            setTimeout(() => {
-                initOngletActivites();
-                window.activitesLoaded = true;
-            }, 50);
-        } else if (mapActivites) {
-            console.log('🗺️ Redimensionnement de la carte suite au changement d\'onglet');
-            setTimeout(() => {
-                mapActivites.invalidateSize();
-                console.log('✅ Carte redimensionnée après changement onglet');
-            }, 100);
+        console.log('🗺️ Affichage onglet activités - DESTRUCTION + RECRÉATION de la carte...');
+        
+        // Détruire la carte existante
+        if (mapActivites) {
+            console.log('🗑️ Destruction de l\'ancienne carte');
+            mapActivites.remove();
+            mapActivites = null;
         }
+        
+        // Vider le conteneur
+        const mapElement = document.getElementById('mapActivites');
+        mapElement.innerHTML = '';
+        
+        // Recréer après un petit délai
+        setTimeout(() => {
+            console.log('🆕 Recréation de la carte...');
+            initOngletActivites();
+        }, 100);
     }
 }
 
