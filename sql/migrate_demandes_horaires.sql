@@ -1,6 +1,43 @@
 -- Migration de la table demandes_horaires
 -- Ajoute les colonnes manquantes si elles n'existent pas
 
+-- Supprimer l'ancienne contrainte CHECK sur type si elle existe
+DO $$ 
+BEGIN
+    -- Supprimer toutes les contraintes CHECK sur la colonne type
+    DECLARE
+        constraint_name TEXT;
+    BEGIN
+        FOR constraint_name IN 
+            SELECT con.conname
+            FROM pg_constraint con
+            INNER JOIN pg_class rel ON rel.oid = con.conrelid
+            WHERE rel.relname = 'demandes_horaires' 
+            AND con.contype = 'c'
+            AND pg_get_constraintdef(con.oid) LIKE '%type%'
+        LOOP
+            EXECUTE format('ALTER TABLE demandes_horaires DROP CONSTRAINT IF EXISTS %I', constraint_name);
+            RAISE NOTICE 'Contrainte % supprimée', constraint_name;
+        END LOOP;
+    END;
+END $$;
+
+-- Ajouter la colonne type avec la bonne contrainte si elle n'existe pas
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'demandes_horaires' 
+        AND column_name = 'type'
+    ) THEN
+        ALTER TABLE demandes_horaires ADD COLUMN type TEXT NOT NULL DEFAULT 'arrivee';
+    END IF;
+    
+    -- Ajouter la nouvelle contrainte CHECK
+    ALTER TABLE demandes_horaires DROP CONSTRAINT IF EXISTS demandes_horaires_type_check_new;
+    ALTER TABLE demandes_horaires ADD CONSTRAINT demandes_horaires_type_check_new CHECK (type IN ('arrivee', 'depart'));
+END $$;
+
 -- Ajouter la colonne gite si elle n'existe pas
 DO $$ 
 BEGIN
