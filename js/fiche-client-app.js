@@ -456,20 +456,23 @@ function initOngletEntree() {
     document.getElementById('wifiSSID').value = wifiSSID || '';
     document.getElementById('wifiPassword').value = wifiPassword || '';
     
-    // QR Code WiFi
+    // QR Code WiFi - Génération dynamique via API
     const qrContainer = document.getElementById('qrCodeContainer');
-    if (qrContainer) {
-        if (giteInfo.wifi_qr_code_url) {
-            qrContainer.innerHTML = `
-                <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem; text-align: center;">
-                    ${currentLanguage === 'fr' ? '📱 Scannez pour vous connecter' : '📱 Scan to connect'}
-                </p>
-                <img src="${giteInfo.wifi_qr_code_url}" alt="QR Code WiFi" style="max-width: 200px; display: block; margin: 0 auto;">
-            `;
-            qrContainer.style.display = 'block';
-        } else {
-            qrContainer.style.display = 'none';
-        }
+    if (qrContainer && wifiSSID && wifiPassword) {
+        // Format WiFi QR code selon spécification
+        const wifiString = `WIFI:T:WPA;S:${wifiSSID};P:${wifiPassword};;`;
+        const encodedText = encodeURIComponent(wifiString);
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedText}`;
+        
+        qrContainer.innerHTML = `
+            <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem; text-align: center;">
+                ${currentLanguage === 'fr' ? '📱 Scannez pour vous connecter' : '📱 Scan to connect'}
+            </p>
+            <img src="${qrCodeUrl}" alt="QR Code WiFi" style="max-width: 200px; display: block; margin: 0 auto; background: white; padding: 10px; border-radius: 8px;" onerror="this.parentElement.style.display='none'">
+        `;
+        qrContainer.style.display = 'block';
+    } else if (qrContainer) {
+        qrContainer.style.display = 'none';
     }
     
     // PARKING
