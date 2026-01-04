@@ -639,6 +639,9 @@ function initOngletPendant() {
     if (contactsHTML) {
         document.getElementById('contactsUrgenceContainer').innerHTML = contactsHTML;
     }
+    
+    // Charger les commerces proximité
+    loadCommerces();
 }
 
 function initOngletSortie() {
@@ -1011,6 +1014,9 @@ async function toggleChecklistItem(checklistId, validated, type) {
     const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
     
     updateChecklistProgress(total, checked, progressId, progressTextId);
+    
+    // Mettre à jour les badges
+    updateTabBadges();
 }
 
 function updateChecklistProgress(total, checked, progressId, progressTextId) {
@@ -1068,31 +1074,31 @@ async function loadActivitesForClient() {
     // Liste des activités
     const listeContainer = document.getElementById('listeActivites');
     listeContainer.innerHTML = activites.map(activite => `
-        <div class="card" style="margin-bottom: 1rem;">
+        <div class="card" style="margin-bottom: 1rem; cursor: pointer;" onclick="openActiviteModal(${JSON.stringify(activite).replace(/"/g, '&quot;')})">
             <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">
                 ${activite.nom}
             </h3>
             <div style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 0.75rem;">
                 ${activite.categorie || ''} • ${activite.distance ? `${activite.distance.toFixed(1)} km` : ''}
             </div>
-            <p style="margin-bottom: 1rem;">${activite.description || ''}</p>
+            <p style="margin-bottom: 1rem;">${(activite.description || '').substring(0, 120)}${(activite.description || '').length > 120 ? '...' : ''}</p>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                 ${activite.latitude && activite.longitude ? `
                     <a href="https://www.google.com/maps?q=${activite.latitude},${activite.longitude}" 
                        target="_blank" class="btn btn-outline"
-                       onclick="trackActiviteConsultation(${activite.id}, 'click_maps')">
+                       onclick="event.stopPropagation(); trackActiviteConsultation(${activite.id}, 'click_maps')">
                         📍 Itinéraire
                     </a>
                 ` : ''}
                 ${activite.website ? `
                     <a href="${activite.website}" target="_blank" class="btn btn-outline"
-                       onclick="trackActiviteConsultation(${activite.id}, 'click_website')">
+                       onclick="event.stopPropagation(); trackActiviteConsultation(${activite.id}, 'click_website')">
                         🌐 Site web
                     </a>
                 ` : ''}
                 ${activite.telephone ? `
                     <a href="tel:${activite.telephone}" class="btn btn-outline"
-                       onclick="trackActiviteConsultation(${activite.id}, 'click_phone')">
+                       onclick="event.stopPropagation(); trackActiviteConsultation(${activite.id}, 'click_phone')">
                         📞 Appeler
                     </a>
                 ` : ''}
@@ -1177,9 +1183,16 @@ function initializeEventListeners() {
         await submitRetourClient();
     });
     
-    // Initialiser état des lieux et évaluation
+    // Initialiser état des lieux, évaluation et modal activité
     initEtatDesLieux();
     initEvaluation();
+    initModalActivite();
+    
+    // Mettre à jour les badges au chargement
+    setTimeout(updateTabBadges, 500);
+    
+    // Bouton partage
+    document.getElementById('btnShare')?.addEventListener('click', sharePageLink);
 }
 
 function switchTab(tabId) {
@@ -1505,9 +1518,199 @@ async function initEvaluation() {
     });
 }
 
+// Commerces proximité
+async function loadCommerces() {
+    const commerces = [
+        {
+            icon: '🥖',
+            nom: 'Boulangerie du Village',
+            type: 'Boulangerie-Pâtisserie',
+            distance: 1.2,
+            lat: 45.941,
+            lng: 4.755,
+            horaires: 'Lun-Sam 7h-19h',
+            ferme: 'Dimanche'
+        },
+        {
+            icon: '🛒',
+            nom: 'Carrefour Market',
+            type: 'Supermarché',
+            distance: 2.3,
+            lat: 45.939,
+            lng: 4.757,
+            horaires: 'Lun-Sam 8h-20h, Dim 9h-13h',
+            ferme: null
+        },
+        {
+            icon: '🍕',
+            nom: 'La Bella Vita',
+            type: 'Restaurant Italien',
+            distance: 0.8,
+            lat: 45.942,
+            lng: 4.754,
+            horaires: 'Mar-Dim 12h-14h, 19h-22h',
+            ferme: 'Lundi'
+        },
+        {
+            icon: '☕',
+            nom: 'Café de la Place',
+            type: 'Café-Bar',
+            distance: 0.5,
+            lat: 45.943,
+            lng: 4.753,
+            horaires: 'Lun-Dim 7h-23h',
+            ferme: null
+        },
+        {
+            icon: '💊',
+            nom: 'Pharmacie Centrale',
+            type: 'Pharmacie',
+            distance: 1.5,
+            lat: 45.940,
+            lng: 4.756,
+            horaires: 'Lun-Ven 8h30-19h, Sam 9h-18h',
+            ferme: 'Dimanche'
+        }
+    ];
+    
+    const container = document.getElementById('commercesContainer');
+    
+    container.innerHTML = commerces.map(commerce => `
+        <div class="commerce-item">
+            <div class="commerce-info">
+                <div class="commerce-name">${commerce.icon} ${commerce.nom}</div>
+                <div class="commerce-details">
+                    ${commerce.type} • ${commerce.horaires}
+                    ${commerce.ferme ? `<br><small style="color: var(--danger);">Fermé ${commerce.ferme}</small>` : ''}
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="commerce-distance">${commerce.distance} km</span>
+                <button class="btn btn-primary" onclick="openItineraire(${commerce.lat}, ${commerce.lng})" 
+                        style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                    🗺️
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Modal Activité Détail
+function initModalActivite() {
+    const modal = document.getElementById('modalActivite');
+    const closeBtn = document.getElementById('closeModalActivite');
+    
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
+}
+
+function openActiviteModal(activite) {
+    const modal = document.getElementById('modalActivite');
+    
+    document.getElementById('modalActiviteImage').src = activite.image || 'images/default-activity.jpg';
+    document.getElementById('modalActiviteTitre').textContent = activite.nom;
+    document.getElementById('modalActiviteDescription').textContent = activite.description || 'Aucune description disponible';
+    document.getElementById('modalActiviteAdresse').textContent = activite.adresse || 'Non spécifié';
+    document.getElementById('modalActiviteHoraires').textContent = activite.horaires || 'Se renseigner';
+    document.getElementById('modalActiviteContact').textContent = activite.telephone || 'Non spécifié';
+    
+    const webLink = document.getElementById('modalActiviteWeb');
+    if (activite.site_web) {
+        webLink.href = activite.site_web;
+        webLink.textContent = activite.site_web;
+        webLink.parentElement.style.display = 'block';
+    } else {
+        webLink.parentElement.style.display = 'none';
+    }
+    
+    document.getElementById('modalActiviteItineraire').onclick = () => {
+        openItineraire(activite.latitude, activite.longitude);
+    };
+    
+    modal.classList.add('active');
+}
+
+// Ouvrir itinéraire Google Maps
+function openItineraire(lat, lng) {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, '_blank');
+}
+
+// Partage de page
+async function sharePageLink() {
+    const url = window.location.href;
+    
+    // Si le navigateur supporte Web Share API (mobile)
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: `Fiche Client - ${reservationData.gite}`,
+                text: 'Toutes les infos pour votre séjour',
+                url: url
+            });
+            showToast('✓ Lien partagé', 'success');
+        } catch (error) {
+            // Utilisateur a annulé le partage
+        }
+    } else {
+        // Copier dans le presse-papier (desktop)
+        try {
+            await navigator.clipboard.writeText(url);
+            showToast('✓ Lien copié dans le presse-papier', 'success');
+        } catch (error) {
+            // Fallback manuel
+            const input = document.createElement('input');
+            input.value = url;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            showToast('✓ Lien copié', 'success');
+        }
+    }
+}
+
+// Badges notification sur tabs
+function updateTabBadges() {
+    // Badge Entrée: checklist items non cochés
+    const checklistEntree = document.querySelectorAll('#checklistEntreeContainer input[type="checkbox"]:not(:checked)');
+    updateBadge('tab-entree', checklistEntree.length);
+    
+    // Badge Sortie: checklist items non cochés
+    const checklistSortie = document.querySelectorAll('#checklistSortieContainer input[type="checkbox"]:not(:checked)');
+    updateBadge('tab-sortie', checklistSortie.length);
+}
+
+function updateBadge(tabId, count) {
+    const tab = document.querySelector(`[data-tab="${tabId}"]`);
+    if (!tab) return;
+    
+    let badge = tab.querySelector('.tab-badge');
+    
+    if (count > 0) {
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'tab-badge';
+            tab.appendChild(badge);
+        }
+        badge.textContent = count;
+    } else {
+        if (badge) badge.remove();
+    }
+}
+
 // Rendre les fonctions globales pour onclick
 window.toggleChecklistItem = toggleChecklistItem;
 window.copyToClipboard = copyToClipboard;
+window.openActiviteModal = openActiviteModal;
+window.openItineraire = openItineraire;
 window.trackActiviteConsultation = trackActiviteConsultation;
 window.initEtatDesLieux = initEtatDesLieux;
 window.initEvaluation = initEvaluation;
