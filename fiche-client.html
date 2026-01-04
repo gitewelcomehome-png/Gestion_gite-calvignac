@@ -353,11 +353,11 @@
         /* Big display for codes */
         .code-display {
             text-align: center;
-            padding: 3rem 2rem;
+            padding: 1.5rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 1rem;
+            border-radius: 0.75rem;
             margin: 1rem 0;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
             position: relative;
             overflow: hidden;
         }
@@ -374,14 +374,14 @@
         }
         
         .code-value {
-            font-size: 3.5rem;
-            font-weight: 900;
+            font-size: 2rem;
+            font-weight: 700;
             font-family: 'Courier New', monospace;
             color: white;
-            letter-spacing: 0.5rem;
+            letter-spacing: 0.3rem;
             text-shadow: 
-                2px 2px 4px rgba(0,0,0,0.3),
-                0 0 20px rgba(255,255,255,0.3);
+                1px 1px 3px rgba(0,0,0,0.3),
+                0 0 15px rgba(255,255,255,0.2);
             position: relative;
             z-index: 1;
             animation: codeGlow 2s ease-in-out infinite alternate;
@@ -390,14 +390,13 @@
         @keyframes codeGlow {
             from {
                 text-shadow: 
-                    2px 2px 4px rgba(0,0,0,0.3),
-                    0 0 20px rgba(255,255,255,0.3);
+                    1px 1px 3px rgba(0,0,0,0.3),
+                    0 0 15px rgba(255,255,255,0.2);
             }
             to {
                 text-shadow: 
-                    2px 2px 4px rgba(0,0,0,0.3),
-                    0 0 30px rgba(255,255,255,0.5),
-                    0 0 40px rgba(255,255,255,0.2);
+                    1px 1px 3px rgba(0,0,0,0.3),
+                    0 0 20px rgba(255,255,255,0.4);
             }
         }
         
