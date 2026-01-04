@@ -1003,13 +1003,18 @@ async function loadActivitesForClient() {
     console.log('Activités chargées:', activites);
     
     // Vérifier que giteInfo a des coordonnées valides
-    if (!giteInfo || !giteInfo.latitude || !giteInfo.longitude) {
-        console.warn('Coordonnées gîte manquantes, carte non initialisée');
+    const giteLat = parseFloat(giteInfo?.gps_lat || giteInfo?.latitude);
+    const giteLon = parseFloat(giteInfo?.gps_lon || giteInfo?.longitude);
+    
+    if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
+        console.warn('Coordonnées gîte manquantes ou invalides:', { gps_lat: giteInfo?.gps_lat, gps_lon: giteInfo?.gps_lon });
         document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
         // Afficher quand même la liste des activités
         displayActivitesList(activites || []);
         return;
     }
+    
+    console.log('✅ Coordonnées gîte:', giteLat, giteLon);
     
     // Si aucune activité
     if (!activites || activites.length === 0) {
@@ -1023,14 +1028,14 @@ async function loadActivitesForClient() {
     
     if (!mapActivites) {
         // Première initialisation
-        mapActivites = L.map(mapElement).setView([giteInfo.latitude, giteInfo.longitude], 12);
+        mapActivites = L.map(mapElement).setView([giteLat, giteLon], 12);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(mapActivites);
     } else {
         // Carte déjà initialisée, juste recentrer
-        mapActivites.setView([giteInfo.latitude, giteInfo.longitude], 12);
+        mapActivites.setView([giteLat, giteLon], 12);
         // Supprimer les anciens marqueurs
         mapActivites.eachLayer(layer => {
             if (layer instanceof L.Marker) {
@@ -1042,14 +1047,14 @@ async function loadActivitesForClient() {
     const map = mapActivites;
     
     // Marqueur du gîte
-    const giteMarker = L.marker([giteInfo.latitude, giteInfo.longitude], {
+    const giteMarker = L.marker([giteLat, giteLon], {
         icon: L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41]
         })
     }).addTo(map);
-    giteMarker.bindPopup(`<b>${reservationData.gite}</b><br>Votre gîte`);
+    giteMarker.bindPopup(`<b>${reservationData.gite}</b><br>🏡 Votre gîte`);
     
     // Marqueurs des activités
     activites.forEach(activite => {
@@ -1088,38 +1093,97 @@ function displayActivitesList(activites) {
         return;
     }
     
-    listeContainer.innerHTML = activites.map(activite => `
-        <div class="card" style="margin-bottom: 1rem; cursor: pointer;" onclick="openActiviteModal(${JSON.stringify(activite).replace(/"/g, '&quot;')})">
-            <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">
-                ${activite.nom}
-            </h3>
-            <div style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 0.75rem;">
-                ${activite.categorie || ''} • ${activite.distance ? `${activite.distance.toFixed(1)} km` : ''}
-            </div>
-            <p style="margin-bottom: 1rem;">${(activite.description || '').substring(0, 120)}${(activite.description || '').length > 120 ? '...' : ''}</p>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                ${activite.latitude && activite.longitude ? `
-                    <a href="https://www.google.com/maps?q=${activite.latitude},${activite.longitude}" 
-                       target="_blank" class="btn btn-outline"
-                       onclick="event.stopPropagation(); trackActiviteConsultation(${activite.id}, 'click_maps')">
-                        📍 Itinéraire
-                    </a>
-                ` : ''}
-                ${activite.website ? `
-                    <a href="${activite.website}" target="_blank" class="btn btn-outline"
-                       onclick="event.stopPropagation(); trackActiviteConsultation(${activite.id}, 'click_website')">
-                        🌐 Site web
-                    </a>
-                ` : ''}
-                ${activite.telephone ? `
-                    <a href="tel:${activite.telephone}" class="btn btn-outline"
-                       onclick="event.stopPropagation(); trackActiviteConsultation(${activite.id}, 'click_phone')">
-                        📞 Appeler
-                    </a>
-                ` : ''}
+    // Fonction pour obtenir l'icône selon le type
+    const getIconForType = (type) => {
+        const typeNormalized = (type || '').toLowerCase();
+        const icons = {
+            'restaurant': '🍽️',
+            'musée': '🏛️',
+            'museum': '🏛️',
+            'parc': '🌳',
+            'park': '🌳',
+            'plage': '🏖️',
+            'beach': '🏖️',
+            'château': '🏰',
+            'castle': '🏰',
+            'église': '⛪',
+            'church': '⛪',
+            'commerce': '🛒',
+            'shop': '🛒',
+            'bar': '🍺',
+            'café': '☕',
+            'coffee': '☕',
+            'randonnée': '🥾',
+            'hiking': '🥾',
+            'vélo': '🚴',
+            'bike': '🚴',
+            'piscine': '🏊',
+            'pool': '🏊',
+            'spectacle': '🎭',
+            'show': '🎭',
+            'cinéma': '🎬',
+            'cinema': '🎬',
+            'vin': '🍷',
+            'wine': '🍷',
+            'marché': '🛍️',
+            'market': '🛍️'
+        };
+        
+        for (const [key, icon] of Object.entries(icons)) {
+            if (typeNormalized.includes(key)) return icon;
+        }
+        return '📍'; // Icône par défaut
+    };
+    
+    listeContainer.innerHTML = activites.map(activite => {
+        const icon = getIconForType(activite.type || activite.categorie);
+        const hasCoords = activite.latitude && activite.longitude;
+        
+        return `
+        <div class="card activite-card" style="margin-bottom: 1rem; border-left: 4px solid var(--primary-color); transition: transform 0.2s, box-shadow 0.2s;" 
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
+             onmouseout="this.style.transform=''; this.style.boxShadow=''">
+            <div style="display: flex; gap: 1rem;">
+                <div style="font-size: 3rem; flex-shrink: 0; line-height: 1;">${icon}</div>
+                <div style="flex: 1;">
+                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--primary-color);">
+                        ${activite.nom}
+                    </h3>
+                    <div style="display: flex; gap: 1rem; color: var(--gray-600); font-size: 0.875rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                        ${activite.type || activite.categorie ? `<span style="background: var(--gray-100); padding: 0.25rem 0.75rem; border-radius: 1rem;">${activite.type || activite.categorie}</span>` : ''}
+                        ${activite.distance_km ? `<span>📏 ${activite.distance_km.toFixed(1)} km</span>` : ''}
+                        ${activite.phone ? `<span>📞 ${activite.phone}</span>` : ''}
+                    </div>
+                    ${activite.description ? `<p style="margin-bottom: 1rem; color: var(--gray-700);">${activite.description.substring(0, 150)}${activite.description.length > 150 ? '...' : ''}</p>` : ''}
+                    ${activite.adresse ? `<p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 1rem;">📍 ${activite.adresse}</p>` : ''}
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        ${hasCoords ? `
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${activite.latitude},${activite.longitude}" 
+                               target="_blank" class="btn btn-primary"
+                               onclick="trackActiviteConsultation(${activite.id}, 'click_maps')"
+                               style="text-decoration: none;">
+                                🗺️ Itinéraire
+                            </a>
+                        ` : ''}
+                        ${activite.website ? `
+                            <a href="${activite.website}" target="_blank" class="btn btn-outline"
+                               onclick="trackActiviteConsultation(${activite.id}, 'click_website')"
+                               style="text-decoration: none;">
+                                🌐 Site web
+                            </a>
+                        ` : ''}
+                        ${activite.phone ? `
+                            <a href="tel:${activite.phone}" class="btn btn-outline"
+                               onclick="trackActiviteConsultation(${activite.id}, 'click_phone')"
+                               style="text-decoration: none;">
+                                📞 ${activite.phone}
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 async function trackActiviteConsultation(activiteId, action) {
