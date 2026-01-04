@@ -19,9 +19,30 @@ if (!window.ficheClientAppLoaded) {
     
     // Enregistrer Service Worker pour PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw-fiche-client.js')
-            .then(registration => console.log('SW registered:', registration.scope))
-            .catch(error => console.log('SW registration failed:', error));
+        // Force la mise à jour du SW à chaque chargement
+        navigator.serviceWorker.register('/sw-fiche-client.js', {
+            updateViaCache: 'none' // Ne JAMAIS mettre le SW en cache
+        }).then(registration => {
+            console.log('✅ SW registered:', registration.scope);
+            
+            // Forcer la vérification de mise à jour
+            registration.update().then(() => {
+                console.log('🔄 SW update checked');
+            });
+            
+            // Recharger si un nouveau SW est en attente
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                console.log('🆕 New SW found!');
+                
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'activated') {
+                        console.log('🟢 New SW activated! Reloading...');
+                        window.location.reload();
+                    }
+                });
+            });
+        }).catch(error => console.log('❌ SW registration failed:', error));
     }
 }
 
