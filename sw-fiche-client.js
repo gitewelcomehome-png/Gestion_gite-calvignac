@@ -46,12 +46,15 @@ self.addEventListener('fetch', event => {
         fetch(event.request)
             .then(response => {
                 // Cloner la réponse pour la mettre en cache
-                const responseToCache = response.clone();
-                
-                caches.open(CACHE_NAME)
-                    .then(cache => {
-                        cache.put(event.request, responseToCache);
-                    });
+                // Ne pas cacher les requêtes HEAD (non supportées)
+                if (event.request.method === 'GET') {
+                    const responseToCache = response.clone();
+                    
+                    caches.open(CACHE_NAME)
+                        .then(cache => {
+                            cache.put(event.request, responseToCache);
+                        });
+                }
                 
                 return response;
             })

@@ -2,6 +2,8 @@
 // GESTION FAQ - QUESTIONS FRÉQUENTES CLIENTS
 // ================================================================
 
+const supabase = window.supabase;
+
 let faqData = [];
 let categorieActive = 'all';
 
@@ -13,6 +15,9 @@ async function initFAQ() {
     await chargerFAQ();
     afficherFAQ();
 }
+
+// Exposer globalement pour index.html
+window.initFAQ = initFAQ;
 
 // ================================================================
 // CHARGEMENT DES DONNÉES
