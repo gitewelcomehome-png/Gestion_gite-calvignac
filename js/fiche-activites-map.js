@@ -37,8 +37,8 @@ function estimateTravel(distanceKm) {
     };
 }
 
-// Formater le temps
-function formatTime(minutes) {
+// Formater le temps de trajet
+function formatTravelTime(minutes) {
     if (minutes < 60) return `${minutes} min`;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -169,9 +169,9 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
                 </div>
                 <div class="activite-travel" id="travel-${activite.id}" style="display: none;">
                     <div class="travel-time">
-                        <span>🚶 ${formatTime(travel.walk)}</span>
-                        <span>🚴 ${formatTime(travel.bike)}</span>
-                        <span>🚗 ${formatTime(travel.car)}</span>
+                        <span>🚶 ${formatTravelTime(travel.walk)}</span>
+                        <span>🚴 ${formatTravelTime(travel.bike)}</span>
+                        <span>🚗 ${formatTravelTime(travel.car)}</span>
                     </div>
                 </div>
                 ${activite.description ? `<p class="activite-description">${activite.description}</p>` : ''}
