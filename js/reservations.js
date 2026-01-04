@@ -326,8 +326,28 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
     }
     
     let html = '';
-    weekReservations.forEach(r => {
+    weekReservations.forEach(async r => {
         const platformLogo = getPlatformLogo(r.site);
+        
+        // Récupérer les horaires validées pour cette réservation
+        let horaireArrivee = '17:00';
+        let horaireDepart = '10:00';
+        try {
+            const { data: horaires } = await supabaseClient
+                .from('demandes_horaires')
+                .select('*')
+                .eq('reservation_id', r.id)
+                .eq('statut', 'validee');
+            
+            if (horaires && horaires.length > 0) {
+                horaires.forEach(h => {
+                    if (h.type === 'arrivee') horaireArrivee = h.heure_validee;
+                    if (h.type === 'depart') horaireDepart = h.heure_validee;
+                });
+            }
+        } catch (err) {
+            // Ignorer silencieusement si la table n'existe pas encore
+        }
         
         // Récupérer l'état de validation du ménage
         const validation = validationMap[r.id];
@@ -393,9 +413,9 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
                     ${r.nom}${messageEnvoye}
                 </div>
                 
-                <!-- Dates et tarif -->
+                <!-- Dates et tarif avec horaires -->
                 <div style="font-size: 1.05rem; color: #334155; margin-bottom: 8px; line-height: 1.5;">
-                    📅 <strong>${formatDate(r.dateDebut)} → ${formatDate(r.dateFin)}</strong>${telephoneDisplay}<br>
+                    📅 <strong>${formatDate(r.dateDebut)} <span style="color: #27AE60;">⏰ ${horaireArrivee}</span> → ${formatDate(r.dateFin)} <span style="color: #E74C3C;">⏰ ${horaireDepart}</span></strong>${telephoneDisplay}<br>
                     💰 <strong>${r.montant.toFixed(2)} €</strong>
                 </div>
                 

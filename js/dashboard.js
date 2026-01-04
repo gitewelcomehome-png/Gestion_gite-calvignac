@@ -181,6 +181,21 @@ async function updateDashboardReservations() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
+    // Charger les horaires validées
+    const { data: horairesValidees } = await supabaseClient
+        .from('demandes_horaires')
+        .select('*')
+        .eq('statut', 'validee');
+    
+    // Créer un map pour accès rapide
+    const horairesMap = {};
+    if (horairesValidees) {
+        horairesValidees.forEach(h => {
+            if (!horairesMap[h.reservation_id]) horairesMap[h.reservation_id] = {};
+            horairesMap[h.reservation_id][h.type] = h.heure_validee;
+        });
+    }
+    
     // Les 7 prochains jours (aujourd'hui + 6 jours)
     const in7Days = new Date(today);
     in7Days.setDate(today.getDate() + 6);
@@ -225,6 +240,10 @@ async function updateDashboardReservations() {
         const isArrivalToday = dateDebut.getTime() === today.getTime();
         const isDepartureToday = dateFin.getTime() === today.getTime();
         
+        // Récupérer les horaires validées
+        const horaireArrivee = horairesMap[r.id]?.arrivee || '17:00';
+        const horaireDepart = horairesMap[r.id]?.depart || '10:00';
+        
         let badge = '';
         let badgeColor = '';
         if (isArrivalToday) {
@@ -259,7 +278,7 @@ async function updateDashboardReservations() {
                         <strong style="font-size: 1.1rem; color: ${giteColor};">${r.nom}</strong>
                         <div style="color: #666; font-size: 0.9rem; margin-top: 4px;">
                             <span style="background: ${badgeColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 8px;">${badge}</span>
-                            ${formatDateFromObj(dateDebut)} → ${formatDateFromObj(dateFin)} (${r.nuits} nuits)
+                            ${formatDateFromObj(dateDebut)} <strong style="color: #27AE60;">⏰ ${horaireArrivee}</strong> → ${formatDateFromObj(dateFin)} <strong style="color: #E74C3C;">⏰ ${horaireDepart}</strong> (${r.nuits} nuits)
                         </div>
                         <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #666; margin-top: 6px;">
                             <span>🏠 ${r.gite}</span>
@@ -1189,6 +1208,7 @@ async function afficherGraphiqueTresorerieDashboard() {
 async function refreshDashboard() {
     updateDashboardHeader();
     await updateDashboardAlerts();
+    await updateDemandesClients(); // Nouvelle fonction
     await updateDashboardStats();
     await updateDashboardReservations();
     await updateDashboardMenages();
@@ -1196,6 +1216,125 @@ async function refreshDashboard() {
     await updateFinancialIndicators();
     // Initialiser le modal si pas déjà fait
     initializeTodoModal();
+}
+
+// ==========================================
+// ⏰ DEMANDES D'HORAIRES CLIENTS
+// ==========================================
+
+async function updateDemandesClients() {
+    try {
+        const { data: demandes, error } = await supabaseClient
+            .from('demandes_horaires')
+            .select('*, reservations(nom, prenom, gite)')
+            .eq('statut', 'en_attente')
+            .order('created_at', { ascending: true });
+        
+        if (error) throw error;
+        
+        const container = document.getElementById('liste-demandes-clients');
+        const badge = document.getElementById('badge-demandes-count');
+        const card = document.getElementById('dashboard-demandes-clients');
+        
+        if (!demandes || demandes.length === 0) {
+            container.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>';
+            badge.textContent = '0';
+            card.style.display = 'none';
+            return;
+        }
+        
+        badge.textContent = demandes.length;
+        card.style.display = 'block';
+        
+        let html = '';
+        demandes.forEach(d => {
+            const typeLabel = d.type === 'arrivee' ? '📥 Arrivée' : '📤 Départ';
+            const typeColor = d.type === 'arrivee' ? '#27AE60' : '#E74C3C';
+            const clientNom = d.client_nom || d.reservations?.nom || 'Client';
+            const clientPrenom = d.client_prenom || d.reservations?.prenom || '';
+            const gite = d.gite || d.reservations?.gite || '';
+            
+            html += `
+                <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                            <span style="background: ${typeColor}; color: white; padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">${typeLabel}</span>
+                            <strong style="font-size: 1rem;">${clientNom} ${clientPrenom}</strong>
+                            ${gite ? `<span style="color: #666; font-size: 0.85rem;">• ${gite}</span>` : ''}
+                        </div>
+                        <div style="color: #666; font-size: 0.9rem;">
+                            📅 ${formatDateFromObj(new Date(d.date_debut))} → ${formatDateFromObj(new Date(d.date_fin))}
+                            • ⏰ Demande: <strong>${d.heure_demandee}</strong>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="validerDemandeHoraire(${d.id}, '${d.heure_demandee}')" 
+                                style="background: #27AE60; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
+                            ✓ Valider
+                        </button>
+                        <button onclick="refuserDemandeHoraire(${d.id})" 
+                                style="background: #E74C3C; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
+                            ✗ Refuser
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    } catch (err) {
+        console.error('Erreur chargement demandes:', err);
+    }
+}
+
+async function validerDemandeHoraire(demandeId, heureValidee) {
+    const username = sessionStorage.getItem('username') || 'Admin';
+    
+    try {
+        const { error } = await supabaseClient
+            .from('demandes_horaires')
+            .update({
+                statut: 'validee',
+                heure_validee: heureValidee,
+                validated_at: new Date().toISOString(),
+                validated_by: username
+            })
+            .eq('id', demandeId);
+        
+        if (error) throw error;
+        
+        alert('✅ Demande validée avec succès !');
+        await updateDemandesClients();
+        await updateDashboardReservations();
+    } catch (err) {
+        console.error('Erreur validation:', err);
+        alert('❌ Erreur lors de la validation');
+    }
+}
+
+async function refuserDemandeHoraire(demandeId) {
+    const raison = prompt('Raison du refus (optionnel):');
+    const username = sessionStorage.getItem('username') || 'Admin';
+    
+    try {
+        const { error } = await supabaseClient
+            .from('demandes_horaires')
+            .update({
+                statut: 'refusee',
+                raison_refus: raison || 'Non disponible',
+                validated_at: new Date().toISOString(),
+                validated_by: username
+            })
+            .eq('id', demandeId);
+        
+        if (error) throw error;
+        
+        alert('❌ Demande refusée');
+        await updateDemandesClients();
+    } catch (err) {
+        console.error('Erreur refus:', err);
+        alert('❌ Erreur lors du refus');
+    }
 }
 
 // Exposer les fonctions dans le scope global pour les appels depuis HTML
@@ -1206,3 +1345,5 @@ window.openEditReservation = openEditReservation;
 window.openFicheClient = openFicheClient;
 window.refreshDashboard = refreshDashboard;
 window.closeAddTodoModal = closeAddTodoModal;
+window.validerDemandeHoraire = validerDemandeHoraire;
+window.refuserDemandeHoraire = refuserDemandeHoraire;

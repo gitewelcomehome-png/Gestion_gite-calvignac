@@ -18,6 +18,20 @@
         </div>
     </div>
 
+    <!-- Demandes des clients en attente -->
+    <div id="dashboard-demandes-clients" class="card" style="margin-bottom: 20px; border-left: 4px solid #f39c12;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 1.1rem; color: #2c3e50;">
+                ⏰ Demandes d'horaires en attente
+            </h3>
+            <span id="badge-demandes-count" style="background: #f39c12; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">0</span>
+        </div>
+        <div id="liste-demandes-clients" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Les demandes seront chargées ici par JS -->
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>
+        </div>
+    </div>
+
     <!-- Alertes / Notifications importantes -->
     <div id="dashboard-alerts" style="margin-bottom: 20px;"></div>
 
