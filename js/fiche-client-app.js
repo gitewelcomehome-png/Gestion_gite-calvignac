@@ -411,11 +411,14 @@ function initOngletEntree() {
     }
     selectElement.innerHTML = '';
     
-    console.log('📋 Génération', (23-6+1)*2, 'options horaires (6h-23h par 30 min)');
+    // Déterminer l'heure minimum selon le ménage
+    const heureMinArrivee = !cleaningScheduleAvant || cleaningScheduleAvant.time_of_day !== 'afternoon' ? 13 : 17;
     
-    // Générer options de 6h à 23h par pas de 30 min
+    console.log('📋 Génération options horaires à partir de', heureMinArrivee + 'h (selon règles ménage)');
+    
+    // Générer options de l'heure min à 23h par pas de 30 min
     let optionsCount = 0;
-    for (let h = 6; h <= 23; h++) {
+    for (let h = heureMinArrivee; h <= 23; h++) {
         for (let m = 0; m < 60; m += 30) {
             const timeValue = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
             const option = document.createElement('option');
@@ -426,7 +429,7 @@ function initOngletEntree() {
         }
     }
     
-    console.log('✅', optionsCount, 'options générées dans le select');
+    console.log('✅', optionsCount, 'options générées dans le select (à partir de ' + heureMinArrivee + 'h)');
     console.log('📄 Select HTML:', selectElement.outerHTML.substring(0, 200) + '...');
     
     // Explication de l'horaire d'arrivée selon le ménage
@@ -769,12 +772,28 @@ function initOngletSortie() {
         selectDepart.parentNode.replaceChild(newSelect, selectDepart);
     }
     
+    // Règle départ tardif selon le ménage du jour de départ
+    const isDimanche = new Date(reservationData.date_fin).getDay() === 0;
+    
+    // Si PAS de ménage l'après-midi du départ, on peut partir plus tard
+    const pasDeMenuageApresMidi = !cleaningScheduleApres || cleaningScheduleApres.time_of_day !== 'afternoon';
+    
+    // Déterminer l'heure max selon les règles
+    let heureMaxDepart;
+    if (isDimanche && pasDeMenuageApresMidi) {
+        heureMaxDepart = 17; // Dimanche sans ménage : jusqu'à 17h
+    } else if (!isDimanche && pasDeMenuageApresMidi) {
+        heureMaxDepart = 12; // Semaine sans ménage après-midi : jusqu'à 12h
+    } else {
+        heureMaxDepart = 12; // Avec ménage après-midi : jusqu'à 12h
+    }
+    
     const selectDepartElement = document.getElementById('heureDepartDemandee');
     if (selectDepartElement) {
         selectDepartElement.innerHTML = '';
         
-        // Générer options de 6h à 20h par pas de 30 min
-        for (let h = 6; h <= 20; h++) {
+        // Générer options de 10h jusqu'à l'heure max
+        for (let h = 10; h <= heureMaxDepart; h++) {
             for (let m = 0; m < 60; m += 30) {
                 const timeValue = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
                 const option = document.createElement('option');
@@ -783,13 +802,9 @@ function initOngletSortie() {
                 selectDepartElement.appendChild(option);
             }
         }
+        
+        console.log('✅ Options départ générées de 10h à', heureMaxDepart + 'h (selon règles ménage)');
     }
-    
-    // Règle départ tardif selon le ménage du jour de départ
-    const isDimanche = new Date(reservationData.date_fin).getDay() === 0;
-    
-    // Si PAS de ménage l'après-midi du départ, on peut partir plus tard
-    const pasDeMenuageApresMidi = !cleaningScheduleApres || cleaningScheduleApres.time_of_day !== 'afternoon';
     
     // Explication de l'horaire de départ selon le ménage
     let explicationDepart = '';
@@ -823,25 +838,15 @@ function initOngletSortie() {
     explicationElement.textContent = explicationDepart;
     heureDepartContainer.appendChild(explicationElement);
     
+    // Déterminer le message de règle selon le contexte
     let regleKey;
-    let heureMax;
-    
     if (isDimanche && pasDeMenuageApresMidi) {
-        // Dimanche SANS ménage l'après-midi : départ jusqu'à 17h possible
         regleKey = 'depart_possible_17h_dimanche';
-        heureMax = giteInfo.heure_depart_dimanche_max || '17:00';
-    } else if (!isDimanche && pasDeMenuageApresMidi) {
-        // Semaine SANS ménage l'après-midi : départ jusqu'à 12h possible
-        regleKey = 'depart_possible_12h';
-        heureMax = giteInfo.heure_depart_semaine_max || '12:00';
     } else {
-        // AVEC ménage l'après-midi : départ standard 10h
         regleKey = 'depart_possible_12h';
-        heureMax = giteInfo.heure_depart_standard || '10:00';
     }
     
     document.getElementById('regleDepart').textContent = t(regleKey);
-    // Note: Les selects n'ont pas d'attribut max, donc on ne l'applique pas
     
     // Toujours afficher le bloc départ tardif (validation automatique selon les règles)
     document.getElementById('departTardifBlock').style.display = 'block';
