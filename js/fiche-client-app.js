@@ -388,7 +388,9 @@ function initOngletEntree() {
     
     // Horaire d'arrivée
     const heureArrivee = currentLanguage === 'fr' ? giteInfo.heure_arrivee : giteInfo.heure_arrivee_en;
+    console.log('🕒 Heure arrivée brute:', heureArrivee, 'Standard:', giteInfo.heure_arrivee_standard, 'Lang:', currentLanguage);
     const heureArriveeFormatted = formatTime(heureArrivee || giteInfo.heure_arrivee_standard || '17:00');
+    console.log('🕒 Heure arrivée formatée:', heureArriveeFormatted);
     document.getElementById('heureArrivee').textContent = heureArriveeFormatted;
     
     // Générer les options de sélection horaire (toutes les 30 min)
@@ -404,12 +406,15 @@ function initOngletEntree() {
     
     const selectElement = document.getElementById('heureArriveeDemandee');
     if (!selectElement) {
-        console.warn('heureArriveeDemandee select not found');
+        console.warn('⚠️ heureArriveeDemandee select not found');
         return;
     }
     selectElement.innerHTML = '';
     
+    console.log('📋 Génération', (23-6+1)*2, 'options horaires (6h-23h par 30 min)');
+    
     // Générer options de 6h à 23h par pas de 30 min
+    let optionsCount = 0;
     for (let h = 6; h <= 23; h++) {
         for (let m = 0; m < 60; m += 30) {
             const timeValue = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
@@ -417,8 +422,12 @@ function initOngletEntree() {
             option.value = timeValue;
             option.textContent = formatTime(timeValue);
             selectElement.appendChild(option);
+            optionsCount++;
         }
     }
+    
+    console.log('✅', optionsCount, 'options générées dans le select');
+    console.log('📄 Select HTML:', selectElement.outerHTML.substring(0, 200) + '...');
     
     // Explication de l'horaire d'arrivée selon le ménage
     let explicationArrivee = '';
@@ -960,10 +969,13 @@ function initOngletFaq() {
 }
 
 async function loadActivitesForClient() {
+    const giteNormalized = normalizeGiteName(reservationData.gite);
+    console.log('🔍 Recherche activités pour gîte:', giteNormalized, '(original:', reservationData.gite + ')');
+    
     const { data: activites, error } = await supabase
         .from('activites_gites')
         .select('*')
-        .eq('gite', normalizeGiteName(reservationData.gite))
+        .eq('gite', giteNormalized)
         .order('distance');
     
     if (error) {
