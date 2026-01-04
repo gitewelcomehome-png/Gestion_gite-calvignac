@@ -376,16 +376,123 @@
             overflow: hidden;
             margin-bottom: 1rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); /* Fond bleu ciel visible */
             position: relative;
             z-index: 1;
-            border: 3px solid #3b82f6; /* Bordure bleue pour debug */
         }
         
-        /* Fix pour Leaflet dans onglets cachés */
+        /* Fix pour Leaflet */
         .leaflet-container {
             height: 100% !important;
             width: 100% !important;
+        }
+        
+        /* Cards activités interactives */
+        .activite-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .activite-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .activite-card.selected {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+        
+        .activite-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .activite-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+        
+        .activite-info {
+            flex: 1;
+        }
+        
+        .activite-info h4 {
+            margin: 0 0 0.25rem 0;
+            color: var(--gray-900);
+        }
+        
+        .activite-categorie {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: white;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .activite-distance {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .btn-show-map {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .btn-show-map:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+        
+        .activite-travel {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .travel-time {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-around;
+        }
+        
+        .travel-time span {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .activite-description {
+            margin: 0.5rem 0;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+        
+        .activite-adresse {
+            margin: 0.5rem 0 0 0;
+            color: var(--gray-500);
+            font-size: 0.8125rem;
         }
         
         /* Titres centrés avec icône */
@@ -1419,6 +1526,7 @@
         </div>
     </div>
     
+    <script src="js/fiche-activites-map.js"></script>
     <script src="js/fiche-client-app.js"></script>
 </body>
 </html>

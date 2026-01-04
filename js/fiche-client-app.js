@@ -24,11 +24,9 @@ if (!window.ficheClientAppLoaded) {
         navigator.serviceWorker.register('/sw-fiche-client.js', {
             updateViaCache: 'none' // Ne JAMAIS mettre le SW en cache
         }).then(registration => {
-            console.log('✅ SW registered:', registration.scope);
             
             // Forcer la vérification de mise à jour
             registration.update().then(() => {
-                console.log('🔄 SW update checked');
             });
             
             // Recharger si un nouveau SW est en attente
@@ -212,28 +210,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     try {
-        console.log('🔄 Chargement reservation data...');
         await loadReservationData();
-        console.log('✅ Reservation data loaded');
         
-        console.log('🔄 Chargement gite info...');
         await loadGiteInfo();
-        console.log('✅ Gite info loaded');
         
-        console.log('🔄 Chargement cleaning schedule...');
         await loadCleaningSchedule();
-        console.log('✅ Cleaning schedule loaded');
         
-        console.log('🔄 Initialisation UI...');
         initializeUI();
-        console.log('✅ UI initialized');
         
-        console.log('🔄 Initialisation event listeners...');
         initializeEventListeners();
-        console.log('✅ Event listeners initialized');
         
         hideLoading();
-        console.log('✅ Loading hidden - Page ready!');
     } catch (error) {
         console.error('❌ Erreur lors du chargement:', error);
         showError('Impossible de charger les données. Veuillez réessayer plus tard.');
@@ -414,7 +401,6 @@ function initOngletEntree() {
     // Déterminer l'heure minimum selon le ménage
     const heureMinArrivee = !cleaningScheduleAvant || cleaningScheduleAvant.time_of_day !== 'afternoon' ? 13 : 17;
     
-    console.log('📋 Génération options horaires à partir de', heureMinArrivee + 'h (selon règles ménage)');
     
     // Générer options de l'heure min à 23h par pas de 30 min
     let optionsCount = 0;
@@ -429,8 +415,6 @@ function initOngletEntree() {
         }
     }
     
-    console.log('✅', optionsCount, 'options générées dans le select (à partir de ' + heureMinArrivee + 'h)');
-    console.log('📄 Select HTML:', selectElement.outerHTML.substring(0, 200) + '...');
     
     // Explication de l'horaire d'arrivée selon le ménage
     let explicationArrivee = '';
@@ -474,7 +458,6 @@ function initOngletEntree() {
     
     // Toujours afficher le bloc arrivée anticipée (validation automatique selon les règles)
     document.getElementById('arriveeAnticipaBlock').style.display = 'block';
-    console.log('✅ Bloc arrivée anticipée affiché');
     
     // Code d'entrée
     document.getElementById('codeEntree').textContent = giteInfo.code_acces || giteInfo.code_entree || '****';
@@ -809,7 +792,6 @@ function initOngletSortie() {
             }
         }
         
-        console.log('✅ Options départ générées de 10h à', heureMaxDepart + ':00 (selon règles ménage)');
     }
     
     // Explication de l'horaire de départ selon le ménage
@@ -856,7 +838,6 @@ function initOngletSortie() {
     
     // Toujours afficher le bloc départ tardif (validation automatique selon les règles)
     document.getElementById('departTardifBlock').style.display = 'block';
-    console.log('✅ Bloc départ tardif affiché');
     
     // Instructions de sortie
     const instructions = currentLanguage === 'fr'
@@ -978,7 +959,6 @@ function initOngletFaq() {
 async function loadActivitesForClient() {
     const giteNormalized = normalizeGiteName(reservationData.gite);
     
-    // Essayer plusieurs variantes du nom pour maximiser les résultats
     const variantes = [
         giteNormalized,
         giteNormalized.toLowerCase(),
@@ -986,7 +966,6 @@ async function loadActivitesForClient() {
         reservationData.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     ];
     
-    // Rechercher avec OR sur toutes les variantes
     const { data: activites, error } = await supabase
         .from('activites_gites')
         .select('*')
@@ -1003,48 +982,17 @@ async function loadActivitesForClient() {
     
     if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
         document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
-        displayActivitesList(activites || []);
         return;
     }
     
     if (!activites || activites.length === 0) {
         document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
-        displayActivitesList([]);
         return;
     }
     
-    // NOUVELLE APPROCHE : iframe OpenStreetMap avec marqueurs
-    const mapElement = document.getElementById('mapActivites');
-    
-    // Construire l'URL avec les marqueurs
-    const markers = activites
-        .filter(a => a.latitude && a.longitude)
-        .map(a => `&mlon=${a.longitude}&mlat=${a.latitude}`)
-        .join('');
-    
-    // Créer l'iframe avec la carte centrée sur le gîte
-    mapElement.innerHTML = `
-        <iframe 
-            width="100%" 
-            height="400" 
-            frameborder="0" 
-            scrolling="no" 
-            marginheight="0" 
-            marginwidth="0" 
-            src="https://www.openstreetmap.org/export/embed.html?bbox=${giteLon-0.1},${giteLat-0.1},${giteLon+0.1},${giteLat+0.1}&layer=mapnik&marker=${giteLat},${giteLon}" 
-            style="border: 1px solid #ccc; border-radius: 8px;">
-        </iframe>
-        <div style="text-align: center; margin-top: 0.5rem;">
-            <a href="https://www.openstreetmap.org/?mlat=${giteLat}&mlon=${giteLon}#map=13/${giteLat}/${giteLon}" 
-               target="_blank" 
-               style="color: var(--primary); font-size: 0.875rem;">
-                📍 Voir sur OpenStreetMap
-            </a>
-        </div>
-    `;
-    
-    // Liste des activités
-    displayActivitesList(activites || []);
+    // Utiliser le nouveau module de carte interactive
+    initMapActivites(giteLat, giteLon, activites);
+    displayActivitesListInteractive(activites, giteLat, giteLon);
 }
 
 function displayActivitesList(activites) {
@@ -1371,13 +1319,11 @@ function calculateAutoApproval(type, heureDemandee) {
         if (cleaningSchedule && cleaningSchedule.time_of_day === 'afternoon') {
             // Arrivée minimum 17h (automatique si >= 17h)
             const autoApprove = requestedMinutes >= 17 * 60;
-            console.log('✅ Avec ménage après-midi: arrivée >= 17h →', autoApprove);
             return autoApprove;
         } else {
             // Pas de ménage ou ménage le matin
             // Arrivée minimum 13h (automatique si >= 17h, manuelle entre 13h-17h)
             const autoApprove = requestedMinutes >= 17 * 60;
-            console.log('✅ Sans ménage après-midi: arrivée >= 17h →', autoApprove, '(entre 13h-17h = validation manuelle)');
             return autoApprove;
         }
     } else { // depart_tardif
@@ -1389,13 +1335,11 @@ function calculateAutoApproval(type, heureDemandee) {
         if (isDimanche && (!cleaningSchedule || cleaningSchedule.time_of_day !== 'afternoon')) {
             // Départ jusqu'à 17h possible
             const autoApprove = requestedMinutes <= 17 * 60;
-            console.log('✅ Dimanche sans ménage: départ <= 17h →', autoApprove);
             return autoApprove;
         }
         
         // Avec ménage l'après-midi : départ standard 10h (automatique si <= 12h)
         const autoApprove = requestedMinutes <= 12 * 60;
-        console.log('✅ Avec ménage: départ <= 12h →', autoApprove);
         return autoApprove;
     }
 }
@@ -1527,7 +1471,6 @@ function hideLoading() {
         loadingScreen.style.display = 'none';
         loadingScreen.style.opacity = '0';
         loadingScreen.style.visibility = 'hidden';
-        console.log('🎉 Loading screen caché');
     } else {
         console.error('❌ Element loadingScreen non trouvé!');
     }
