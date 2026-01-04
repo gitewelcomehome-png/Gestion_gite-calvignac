@@ -1099,50 +1099,66 @@ function displayActivitesList(activites) {
         return;
     }
     
-    // Fonction pour obtenir l'icône Font Awesome selon le type
+    // Fonction pour obtenir une belle icône emoji selon le type
     const getIconForType = (type) => {
         const typeNormalized = (type || '').toLowerCase();
         const icons = {
-            'restaurant': 'fa-solid fa-utensils',
-            'musée': 'fa-solid fa-landmark',
-            'museum': 'fa-solid fa-landmark',
-            'parc': 'fa-solid fa-tree',
-            'park': 'fa-solid fa-tree',
-            'plage': 'fa-solid fa-umbrella-beach',
-            'beach': 'fa-solid fa-umbrella-beach',
-            'château': 'fa-solid fa-chess-rook',
-            'castle': 'fa-solid fa-chess-rook',
-            'église': 'fa-solid fa-church',
-            'church': 'fa-solid fa-church',
-            'commerce': 'fa-solid fa-shopping-cart',
-            'shop': 'fa-solid fa-shopping-bag',
-            'bar': 'fa-solid fa-beer-mug-empty',
-            'café': 'fa-solid fa-mug-hot',
-            'coffee': 'fa-solid fa-mug-hot',
-            'randonnée': 'fa-solid fa-person-hiking',
-            'hiking': 'fa-solid fa-person-hiking',
-            'vélo': 'fa-solid fa-person-biking',
-            'bike': 'fa-solid fa-person-biking',
-            'piscine': 'fa-solid fa-person-swimming',
-            'pool': 'fa-solid fa-person-swimming',
-            'spectacle': 'fa-solid fa-masks-theater',
-            'show': 'fa-solid fa-masks-theater',
-            'cinéma': 'fa-solid fa-film',
-            'cinema': 'fa-solid fa-film',
-            'vin': 'fa-solid fa-wine-glass',
-            'wine': 'fa-solid fa-wine-bottle',
-            'marché': 'fa-solid fa-basket-shopping',
-            'market': 'fa-solid fa-basket-shopping',
-            'sport': 'fa-solid fa-dumbbell',
-            'spa': 'fa-solid fa-spa',
-            'montagne': 'fa-solid fa-mountain',
-            'mountain': 'fa-solid fa-mountain'
+            'restaurant': '🍽️',
+            'resto': '🍽️',
+            'musée': '🏛️',
+            'museum': '🏛️',
+            'parc': '🌳',
+            'park': '🌳',
+            'jardin': '🌺',
+            'garden': '🌺',
+            'plage': '🏖️',
+            'beach': '🏖️',
+            'château': '🏰',
+            'castle': '🏰',
+            'église': '⛪',
+            'church': '⛪',
+            'commerce': '🛍️',
+            'shop': '🛍️',
+            'bar': '🍺',
+            'pub': '🍻',
+            'café': '☕',
+            'coffee': '☕',
+            'randonnée': '🥾',
+            'hiking': '🥾',
+            'vélo': '🚴',
+            'bike': '🚴',
+            'piscine': '🏊',
+            'pool': '🏊',
+            'spectacle': '🎭',
+            'show': '🎭',
+            'théâtre': '🎭',
+            'theater': '🎭',
+            'cinéma': '🎬',
+            'cinema': '🎬',
+            'vin': '🍷',
+            'wine': '🍷',
+            'cave': '🍾',
+            'marché': '🛍️',
+            'market': '🛍️',
+            'sport': '⚽',
+            'spa': '💆',
+            'montagne': '⛰️',
+            'mountain': '⛰️',
+            'lac': '🏞️',
+            'lake': '🏞️',
+            'rivière': '🌊',
+            'river': '🌊',
+            'ski': '⛷️',
+            'golf': '⛳',
+            'tennis': '🎾',
+            'équitation': '🐴',
+            'horse': '🐴'
         };
         
         for (const [key, icon] of Object.entries(icons)) {
             if (typeNormalized.includes(key)) return icon;
         }
-        return 'fa-solid fa-location-dot'; // Icône par défaut
+        return '📍'; // Icône par défaut
     };
     
     // Couleurs de gradient par type
@@ -1167,15 +1183,15 @@ function displayActivitesList(activites) {
     };
     
     listeContainer.innerHTML = activites.map(activite => {
-        const iconClass = getIconForType(activite.type || activite.categorie);
+        const icon = getIconForType(activite.type || activite.categorie);
         const gradient = getGradientForType(activite.type || activite.categorie);
         const hasCoords = activite.latitude && activite.longitude;
         
         return `
         <div class="card activite-card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--primary-color);">
             <div style="display: flex; gap: 1.5rem; align-items: start;">
-                <div class="activite-icon" style="background: ${gradient};">
-                    <i class="${iconClass}"></i>
+                <div class="activite-icon" style="background: ${gradient}; font-size: 2.5rem;">
+                    ${icon}
                 </div>
                 <div style="flex: 1;">
                     <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--primary-color);">
@@ -1189,14 +1205,12 @@ function displayActivitesList(activites) {
                         ` : ''}
                         ${activite.distance_km ? `
                             <span style="display: flex; align-items: center; gap: 0.25rem;">
-                                <i class="fa-solid fa-route" style="color: var(--primary-color);"></i>
-                                ${activite.distance_km.toFixed(1)} km
+                                📏 ${activite.distance_km.toFixed(1)} km
                             </span>
                         ` : ''}
                         ${activite.phone ? `
                             <span style="display: flex; align-items: center; gap: 0.25rem;">
-                                <i class="fa-solid fa-phone" style="color: var(--primary-color);"></i>
-                                ${activite.phone}
+                                📞 ${activite.phone}
                             </span>
                         ` : ''}
                     </div>
@@ -1207,8 +1221,7 @@ function displayActivitesList(activites) {
                     ` : ''}
                     ${activite.adresse ? `
                         <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fa-solid fa-location-dot" style="color: var(--primary-color);"></i>
-                            ${activite.adresse}
+                            📍 ${activite.adresse}
                         </p>
                     ` : ''}
                     <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
@@ -1217,21 +1230,21 @@ function displayActivitesList(activites) {
                                target="_blank" class="btn btn-primary"
                                onclick="trackActiviteConsultation(${activite.id}, 'click_maps')"
                                style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-                                <i class="fa-solid fa-route"></i> Itinéraire
+                                🗺️ Itinéraire
                             </a>
                         ` : ''}
                         ${activite.website ? `
                             <a href="${activite.website}" target="_blank" class="btn btn-outline"
                                onclick="trackActiviteConsultation(${activite.id}, 'click_website')"
                                style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-                                <i class="fa-solid fa-globe"></i> Site web
+                                🌐 Site web
                             </a>
                         ` : ''}
                         ${activite.phone ? `
                             <a href="tel:${activite.phone}" class="btn btn-outline"
                                onclick="trackActiviteConsultation(${activite.id}, 'click_phone')"
                                style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-                                <i class="fa-solid fa-phone"></i> Appeler
+                                📞 Appeler
                             </a>
                         ` : ''}
                     </div>
