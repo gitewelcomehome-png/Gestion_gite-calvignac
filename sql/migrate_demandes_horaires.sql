@@ -1,6 +1,18 @@
 -- Migration de la table demandes_horaires
 -- Ajoute les colonnes manquantes si elles n'existent pas
 
+-- Ajouter la colonne gite si elle n'existe pas
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'demandes_horaires' 
+        AND column_name = 'gite'
+    ) THEN
+        ALTER TABLE demandes_horaires ADD COLUMN gite TEXT NOT NULL DEFAULT 'Inconnu';
+    END IF;
+END $$;
+
 -- Ajouter la colonne statut si elle n'existe pas
 DO $$ 
 BEGIN
