@@ -344,7 +344,33 @@ function initOngletEntree() {
     
     // Horaire d'arrivée
     const heureArrivee = currentLanguage === 'fr' ? giteInfo.heure_arrivee : giteInfo.heure_arrivee_en;
-    document.getElementById('heureArrivee').textContent = formatTime(heureArrivee || giteInfo.heure_arrivee_standard || '17:00');
+    const heureArriveeFormatted = formatTime(heureArrivee || giteInfo.heure_arrivee_standard || '17:00');
+    document.getElementById('heureArrivee').textContent = heureArriveeFormatted;
+    
+    // Générer les options de sélection horaire (toutes les 30 min)
+    const selectArrivee = document.getElementById('heureArriveeDemandee');
+    if (selectArrivee && selectArrivee.tagName === 'INPUT') {
+        // Créer un select à la place de l'input
+        const newSelect = document.createElement('select');
+        newSelect.id = 'heureArriveeDemandee';
+        newSelect.className = selectArrivee.className;
+        newSelect.style.cssText = selectArrivee.style.cssText;
+        selectArrivee.parentNode.replaceChild(newSelect, selectArrivee);
+    }
+    
+    const selectElement = document.getElementById('heureArriveeDemandee');
+    selectElement.innerHTML = '';
+    
+    // Générer options de 6h à 23h par pas de 30 min
+    for (let h = 6; h <= 23; h++) {
+        for (let m = 0; m < 60; m += 30) {
+            const timeValue = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            const option = document.createElement('option');
+            option.value = timeValue;
+            option.textContent = formatTime(timeValue);
+            selectElement.appendChild(option);
+        }
+    }
     
     // Explication de l'horaire d'arrivée selon le ménage
     let explicationArrivee = '';
@@ -395,15 +421,22 @@ function initOngletEntree() {
     // Code d'entrée
     document.getElementById('codeEntree').textContent = giteInfo.code_acces || giteInfo.code_entree || '****';
     
-    // Instructions d'accès
+    // Instructions d'accès (affichage direct, pas d'accordion)
     const instructions = currentLanguage === 'fr' 
         ? (giteInfo.instructions_cles || giteInfo.instructions_acces_fr)
         : (giteInfo.instructions_cles_en || giteInfo.instructions_acces_en);
     
+    const instructionsSection = document.getElementById('accordionInstructions');
     if (instructions) {
+        // Afficher directement sans accordion
+        instructionsSection.style.display = 'block';
+        instructionsSection.style.cursor = 'default';
+        const contentDiv = document.getElementById('accordionContent');
+        contentDiv.classList.add('open');
+        contentDiv.style.maxHeight = 'none';
         document.getElementById('instructionsAcces').textContent = instructions;
     } else {
-        document.getElementById('accordionInstructions').style.display = 'none';
+        instructionsSection.style.display = 'none';
     }
     
     // WiFi
@@ -414,13 +447,19 @@ function initOngletEntree() {
     document.getElementById('wifiPassword').value = wifiPassword || '';
     
     // QR Code WiFi
-    if (giteInfo.wifi_qr_code_url) {
-        document.getElementById('qrCodeContainer').innerHTML = `
-            <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">
-                ${t('scanner_qr_code') || 'Scannez pour vous connecter'}
-            </p>
-            <img src="${giteInfo.wifi_qr_code_url}" alt="QR Code WiFi">
-        `;
+    const qrContainer = document.getElementById('qrCodeContainer');
+    if (qrContainer) {
+        if (giteInfo.wifi_qr_code_url) {
+            qrContainer.innerHTML = `
+                <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem; text-align: center;">
+                    ${currentLanguage === 'fr' ? '📱 Scannez pour vous connecter' : '📱 Scan to connect'}
+                </p>
+                <img src="${giteInfo.wifi_qr_code_url}" alt="QR Code WiFi" style="max-width: 200px; display: block; margin: 0 auto;">
+            `;
+            qrContainer.style.display = 'block';
+        } else {
+            qrContainer.style.display = 'none';
+        }
     }
     
     // PARKING
@@ -655,7 +694,37 @@ function initOngletPendant() {
 function initOngletSortie() {
     // Horaire de départ
     const heureDepart = currentLanguage === 'fr' ? giteInfo.heure_depart : giteInfo.heure_depart_en;
-    document.getElementById('heureDepart').textContent = formatTime(heureDepart || giteInfo.heure_depart_standard || '10:00');
+    const heureDepartFormatted = formatTime(heureDepart || giteInfo.heure_depart_standard || '10:00');
+    const heureDepartElement = document.getElementById('heureDepart');
+    if (heureDepartElement) {
+        heureDepartElement.textContent = heureDepartFormatted;
+    }
+    
+    // Générer les options de sélection horaire départ (toutes les 30 min)
+    const selectDepart = document.getElementById('heureDepartDemandee');
+    if (selectDepart && selectDepart.tagName === 'INPUT') {
+        const newSelect = document.createElement('select');
+        newSelect.id = 'heureDepartDemandee';
+        newSelect.className = selectDepart.className;
+        newSelect.style.cssText = selectDepart.style.cssText;
+        selectDepart.parentNode.replaceChild(newSelect, selectDepart);
+    }
+    
+    const selectDepartElement = document.getElementById('heureDepartDemandee');
+    if (selectDepartElement) {
+        selectDepartElement.innerHTML = '';
+        
+        // Générer options de 6h à 20h par pas de 30 min
+        for (let h = 6; h <= 20; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                const timeValue = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                const option = document.createElement('option');
+                option.value = timeValue;
+                option.textContent = formatTime(timeValue);
+                selectDepartElement.appendChild(option);
+            }
+        }
+    }
     
     // Règle départ tardif selon le ménage du jour de départ
     const isDimanche = new Date(reservationData.date_fin).getDay() === 0;
@@ -1039,11 +1108,17 @@ function initOngletActivites() {
 }
 
 async function loadActivitesForClient() {
-    const { data: activites } = await supabase
+    const { data: activites, error } = await supabase
         .from('activites_gites')
         .select('*')
-        .eq('gite', reservationData.gite)
+        .eq('gite', normalizeGiteName(reservationData.gite))
         .order('distance');
+    
+    if (error) {
+        console.error('Erreur chargement activités:', error);
+    }
+    
+    console.log('Activités chargées:', activites);
     
     // Vérifier que giteInfo a des coordonnées valides
     if (!giteInfo || !giteInfo.latitude || !giteInfo.longitude) {
@@ -1051,6 +1126,13 @@ async function loadActivitesForClient() {
         document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
         // Afficher quand même la liste des activités
         displayActivitesList(activites || []);
+        return;
+    }
+    
+    // Si aucune activité
+    if (!activites || activites.length === 0) {
+        document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
+        displayActivitesList([]);
         return;
     }
     
@@ -1109,6 +1191,21 @@ async function loadActivitesForClient() {
 
 function displayActivitesList(activites) {
     const listeContainer = document.getElementById('listeActivites');
+    
+    if (!activites || activites.length === 0) {
+        listeContainer.innerHTML = `
+            <div class="card" style="text-align: center; padding: 2rem;">
+                <p style="color: var(--gray-600); font-size: 1.125rem;">
+                    ${currentLanguage === 'fr' 
+                        ? 'ℹ️ Aucune activité n\'a encore été ajoutée pour ce gîte.<br><small>Rendez-vous dans l\'onglet "À découvrir" du back-office pour ajouter des activités.</small>'
+                        : 'ℹ️ No activities have been added for this accommodation yet.<br><small>Go to the "Discover" tab in the back-office to add activities.</small>'
+                    }
+                </p>
+            </div>
+        `;
+        return;
+    }
+    
     listeContainer.innerHTML = activites.map(activite => `
         <div class="card" style="margin-bottom: 1rem; cursor: pointer;" onclick="openActiviteModal(${JSON.stringify(activite).replace(/"/g, '&quot;')})">
             <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">
@@ -1175,11 +1272,11 @@ function initializeEventListeners() {
         });
     });
     
-    // Accordion
-    document.getElementById('accordionInstructions').addEventListener('click', () => {
-        const content = document.getElementById('accordionContent');
-        content.classList.toggle('open');
-    });
+    // Accordion (désactivé, affichage direct maintenant)
+    // document.getElementById('accordionInstructions').addEventListener('click', () => {
+    //     const content = document.getElementById('accordionContent');
+    //     content.classList.toggle('open');
+    // });
     
     // Formulaires demandes horaires
     document.getElementById('btnDemandeArrivee')?.addEventListener('click', () => {
@@ -1317,10 +1414,41 @@ async function submitRetourClient() {
         
         if (error) throw error;
         
-        showToast(t('retour_envoye'));
+        // Message de validation selon le type
+        let message = '✓ Demande envoyée avec succès';
+        if (currentLanguage === 'en') {
+            message = '✓ Request sent successfully';
+        }
+        
+        showToast(message, 'success');
+        
+        // Afficher message complémentaire
+        const complementDiv = document.createElement('div');
+        complementDiv.style.cssText = 'background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; border-left: 3px solid var(--primary);';
+        
+        if (type === 'probleme') {
+            complementDiv.innerHTML = currentLanguage === 'fr'
+                ? '<strong>⚠️ Problème urgent ?</strong><br>La réponse par message n\'est pas instantanée.<br>Pour un problème à régler immédiatement :<br>📞 Téléphonez-nous ou 💬 Envoyez un WhatsApp'
+                : '<strong>⚠️ Urgent problem?</strong><br>Response by message is not instant.<br>For immediate assistance:<br>📞 Call us or 💬 Send a WhatsApp';
+        } else {
+            complementDiv.innerHTML = currentLanguage === 'fr'
+                ? '<strong>📨 Nous avons bien reçu votre message</strong><br>Nous vous répondrons dans les plus brefs délais.'
+                : '<strong>📨 We received your message</strong><br>We will respond as soon as possible.';
+        }
+        
+        const form = document.getElementById('formRetours');
+        const existingMsg = form.querySelector('.message-confirmation');
+        if (existingMsg) existingMsg.remove();
+        
+        complementDiv.className = 'message-confirmation';
+        form.appendChild(complementDiv);
+        
+        // Masquer après 8 secondes
+        setTimeout(() => complementDiv.remove(), 8000);
         
         // Réinitialiser le formulaire
-        document.getElementById('formRetours').reset();
+        form.reset();
+        document.getElementById('urgenceGroup').style.display = 'none';
     } catch (error) {
         console.error(error);
         showToast(t('erreur'));
@@ -1330,7 +1458,19 @@ async function submitRetourClient() {
 // ==================== UTILITAIRES ====================
 function formatTime(timeString) {
     if (!timeString) return '';
-    return timeString.substring(0, 5);
+    const time = timeString.substring(0, 5);
+    
+    if (currentLanguage === 'en') {
+        // Format 12h pour anglais (6:00 PM)
+        const [hours, minutes] = time.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour === 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+        return `${hour12}:${minutes} ${ampm}`;
+    } else {
+        // Format 24h pour français (18:00)
+        return time;
+    }
 }
 
 function copyToClipboard(inputId) {
