@@ -792,10 +792,16 @@ function initOngletSortie() {
     if (selectDepartElement) {
         selectDepartElement.innerHTML = '';
         
-        // Générer options de 10h jusqu'à l'heure max
+        // Générer options de 10h jusqu'à l'heure max (incluse)
         for (let h = 10; h <= heureMaxDepart; h++) {
             for (let m = 0; m < 60; m += 30) {
                 const timeValue = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                const timeMinutes = h * 60 + m;
+                const maxMinutes = heureMaxDepart * 60;
+                
+                // Ne pas dépasser l'heure max
+                if (timeMinutes > maxMinutes) break;
+                
                 const option = document.createElement('option');
                 option.value = timeValue;
                 option.textContent = formatTime(timeValue);
@@ -803,7 +809,7 @@ function initOngletSortie() {
             }
         }
         
-        console.log('✅ Options départ générées de 10h à', heureMaxDepart + 'h (selon règles ménage)');
+        console.log('✅ Options départ générées de 10h à', heureMaxDepart + ':00 (selon règles ménage)');
     }
     
     // Explication de l'horaire de départ selon le ménage
