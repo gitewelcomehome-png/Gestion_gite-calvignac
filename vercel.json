@@ -4,6 +4,23 @@
   "trailingSlash": false,
   "headers": [
     {
+      "source": "/sw-fiche-client.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/tabs/(.*)",
       "headers": [
         {
