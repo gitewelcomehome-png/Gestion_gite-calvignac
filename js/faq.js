@@ -2,8 +2,6 @@
 // GESTION FAQ - QUESTIONS FRÉQUENTES CLIENTS
 // ================================================================
 
-const supabase = window.supabase;
-
 let faqData = [];
 let categorieActive = 'all';
 
@@ -11,7 +9,7 @@ let categorieActive = 'all';
 // INITIALISATION
 // ================================================================
 
-export async function initFAQ() {
+async function initFAQ() {
     await chargerFAQ();
     afficherFAQ();
 }
@@ -432,7 +430,10 @@ window.exporterFAQHTML = function() {
 // RÉCUPÉRER LA FAQ POUR UN GÎTE (utilisé dans fiche-client.js)
 // ================================================================
 
-export async function getFAQPourGite(gite) {
+async function getFAQPourGite(gite) {
     await chargerFAQ();
     return faqData.filter(q => q.visible && (q.gite === 'tous' || q.gite === gite));
 }
+
+// Exposer la fonction globalement si besoin
+window.getFAQPourGite = getFAQPourGite;
