@@ -215,19 +215,16 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
 window.showActivityOnMap = function(actLat, actLon, actName, actId) {
     const mapContainer = document.getElementById('mapActivites');
     
-    // Calculer la bbox pour inclure le gîte et l'activité
-    const minLat = Math.min(currentGiteLat, actLat) - 0.005;
-    const maxLat = Math.max(currentGiteLat, actLat) + 0.005;
-    const minLon = Math.min(currentGiteLon, actLon) - 0.005;
-    const maxLon = Math.max(currentGiteLon, actLon) + 0.005;
+    // Calculer les bounds pour inclure les 2 points
+    const minLat = Math.min(currentGiteLat, actLat) - 0.002;
+    const maxLat = Math.max(currentGiteLat, actLat) + 0.002;
+    const minLon = Math.min(currentGiteLon, actLon) - 0.002;
+    const maxLon = Math.max(currentGiteLon, actLon) + 0.002;
     
     const bbox = `${minLon},${minLat},${maxLon},${maxLat}`;
     
-    // Créer l'URL avec 2 marqueurs : utiliser umap ou URL directe OSM
-    // Note: OSM embed ne supporte qu'un seul marqueur, donc on centre entre les deux
-    const centerLat = (currentGiteLat + actLat) / 2;
-    const centerLon = (currentGiteLon + actLon) / 2;
-    
+    // Utiliser Google Maps qui supporte plusieurs marqueurs facilement
+    // Format: markers=label:G|lat,lon&markers=label:A|lat,lon
     mapContainer.innerHTML = `
         <iframe 
             width="100%" 
@@ -236,18 +233,18 @@ window.showActivityOnMap = function(actLat, actLon, actName, actId) {
             scrolling="no" 
             marginheight="0" 
             marginwidth="0" 
-            src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${actLat},${actLon}" 
+            src="https://maps.google.com/maps?q=${currentGiteLat},${currentGiteLon}+(Gîte)&q=${actLat},${actLon}+(${encodeURIComponent(actName)})&z=14&output=embed" 
             style="border: 1px solid #10b981; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
         </iframe>
         <div style="text-align: center; margin-top: 0.5rem;">
-            <strong style="color: #10b981;">📍 ${actName}</strong><br>
-            <a href="https://www.openstreetmap.org/?mlat=${actLat}&mlon=${actLon}#map=15/${actLat}/${actLon}&layers=N" 
+            <strong style="color: #10b981;">📍 ${actName}</strong> + <strong style="color: #ef4444;">🏡 Votre gîte</strong><br>
+            <a href="https://www.google.com/maps/dir/${currentGiteLat},${currentGiteLon}/${actLat},${actLon}" 
                target="_blank" 
                style="color: var(--primary); font-size: 0.875rem; margin-right: 1rem;">
-                🗺️ Voir sur OpenStreetMap
+                🗺️ Itinéraire Google Maps
             </a>
             <button onclick="resetMapToGite()" style="padding: 0.25rem 0.75rem; background: var(--gray-200); border: none; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;">
-                🏡 Retour gîte
+                🏡 Retour gîte seul
             </button>
         </div>
     `;
