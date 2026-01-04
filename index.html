@@ -27,6 +27,7 @@
     <script src="js/widget-horaires-clients.js" type="module"></script>
     <script src="js/faq.js"></script>
     <script src="js/fiches-clients.js"></script>
+    <script src="js/checklists.js"></script>
     
     <!-- Chart.js pour les graphiques -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -285,6 +286,7 @@
             </button>
             <button class="nav-tab" data-tab="infos-gites">📝 Infos Pratiques</button>
             <button class="nav-tab" data-tab="fiches-clients">📄 Fiches Clients</button>
+            <button class="nav-tab" data-tab="checklists">📋 Check-lists</button>
             <button class="nav-tab" data-tab="decouvrir">🗺️ À Découvrir</button>
             <button class="nav-tab" data-tab="faq">❓ FAQ</button>
         </div>
@@ -301,6 +303,7 @@
         <div id="tab-menage" class="tab-content"></div>
         <div id="tab-infos-gites" class="tab-content"></div>
         <div id="tab-fiches-clients" class="tab-content"></div>
+        <div id="tab-checklists" class="tab-content"></div>
         <div id="tab-decouvrir" class="tab-content"></div>
     </div>
     
@@ -575,6 +578,9 @@
             }
             if (tabName === 'fiches-clients' && typeof initFichesClients === 'function') {
                 initFichesClients();
+            }
+            if (tabName === 'checklists' && typeof initChecklistsTab === 'function') {
+                initChecklistsTab();
             }
             if (tabName === 'dashboard') {
                 // Rafraîchir le header avec la vraie date
@@ -4203,6 +4209,7 @@
             'tab-charges': '/tabs/tab-fiscalite-v2.html',
             'tab-menage': '/tabs/tab-menage.html',
             'tab-infos-gites': '/tabs/tab-infos-gites.html',
+            'tab-checklists': '/tabs/tab-checklists.html',
             'tab-decouvrir': '/tabs/tab-decouvrir.html',
         };
         

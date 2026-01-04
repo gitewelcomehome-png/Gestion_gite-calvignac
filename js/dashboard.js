@@ -231,7 +231,7 @@ async function updateDashboardReservations() {
     }
     
     let html = '';
-    filtered.forEach(r => {
+    for (const r of filtered) {
         const dateDebut = parseLocalDate(r.dateDebut);
         const dateFin = parseLocalDate(r.dateFin);
         dateDebut.setHours(0, 0, 0, 0);
@@ -243,6 +243,9 @@ async function updateDashboardReservations() {
         // Récupérer les horaires validées
         const horaireArrivee = horairesMap[r.id]?.arrivee || '17:00';
         const horaireDepart = horairesMap[r.id]?.depart || '10:00';
+        
+        // Charger la progression checklist
+        const checklistProgress = await getReservationChecklistProgressDashboard(r.id, r.gite);
         
         let badge = '';
         let badgeColor = '';
@@ -270,6 +273,34 @@ async function updateDashboardReservations() {
         // Masquer bouton fiche client si départ aujourd'hui ou passé
         const showFicheButton = dateFin > today;
         
+        // Affichage checklist avec indicateur
+        let checklistHtml = '';
+        if (checklistProgress.entree.total > 0 || checklistProgress.sortie.total > 0) {
+            checklistHtml = '<div style="display: flex; gap: 10px; font-size: 0.85rem; margin-top: 8px;">';
+            
+            if (checklistProgress.entree.total > 0) {
+                const colorEntree = getProgressColorDashboard(checklistProgress.entree.percent);
+                checklistHtml += `
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <span style="width: 10px; height: 10px; border-radius: 50%; background: ${colorEntree};"></span>
+                        🚪 Entrée: ${checklistProgress.entree.completed}/${checklistProgress.entree.total}
+                    </span>
+                `;
+            }
+            
+            if (checklistProgress.sortie.total > 0) {
+                const colorSortie = getProgressColorDashboard(checklistProgress.sortie.percent);
+                checklistHtml += `
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <span style="width: 10px; height: 10px; border-radius: 50%; background: ${colorSortie};"></span>
+                        🧳 Sortie: ${checklistProgress.sortie.completed}/${checklistProgress.sortie.total}
+                    </span>
+                `;
+            }
+            
+            checklistHtml += '</div>';
+        }
+        
         html += `
             <div style="border-left: 4px solid ${giteColor}; padding: 15px; margin-bottom: 10px; background: ${shouldSendReminder ? '#FFF9E6' : '#f8f9fa'}; border-radius: 8px; position: relative;">
                 ${shouldSendReminder ? '<div style="position: absolute; top: 10px; right: 10px; background: #F39C12; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">⏰ J-3 : Envoyer fiche</div>' : ''}
@@ -285,6 +316,7 @@ async function updateDashboardReservations() {
                             <span>👥 ${r.nbPersonnes || '-'} pers.</span>
                             ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'};">📅 J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
                         </div>
+                        ${checklistHtml}
                     </div>
                     <span style="font-size: 1.5rem; margin-left: 10px;" title="${r.paiement}">${paiementIcon}</span>
                 </div>
@@ -302,7 +334,7 @@ async function updateDashboardReservations() {
                 </div>
             </div>
         `;
-    });
+    }
     
     container.innerHTML = html;
 }
@@ -1354,3 +1386,67 @@ window.refreshDashboard = refreshDashboard;
 window.closeAddTodoModal = closeAddTodoModal;
 window.validerDemandeHoraire = validerDemandeHoraire;
 window.refuserDemandeHoraire = refuserDemandeHoraire;
+
+// =============================================
+// FONCTIONS CHECKLIST POUR DASHBOARD
+// =============================================
+
+async function getReservationChecklistProgressDashboard(reservationId, gite) {
+    try {
+        // Récupérer les templates pour ce gîte
+        const { data: templates, error: templatesError } = await supabaseClient
+            .from('checklist_templates')
+            .select('id, type')
+            .eq('gite', gite)
+            .eq('actif', true);
+        
+        if (templatesError) throw templatesError;
+        
+        const templatesEntree = templates ? templates.filter(t => t.type === 'entree') : [];
+        const templatesSortie = templates ? templates.filter(t => t.type === 'sortie') : [];
+        
+        // Récupérer les items complétés
+        const { data: progress, error: progressError } = await supabaseClient
+            .from('checklist_progress')
+            .select('template_id, completed')
+            .eq('reservation_id', reservationId);
+        
+        if (progressError) throw progressError;
+        
+        // Calculer entrée
+        const completedEntree = progress ? progress.filter(p => 
+            p.completed && templatesEntree.some(t => t.id === p.template_id)
+        ).length : 0;
+        
+        // Calculer sortie
+        const completedSortie = progress ? progress.filter(p => 
+            p.completed && templatesSortie.some(t => t.id === p.template_id)
+        ).length : 0;
+        
+        return {
+            entree: {
+                total: templatesEntree.length,
+                completed: completedEntree,
+                percent: templatesEntree.length > 0 ? Math.round((completedEntree / templatesEntree.length) * 100) : 0
+            },
+            sortie: {
+                total: templatesSortie.length,
+                completed: completedSortie,
+                percent: templatesSortie.length > 0 ? Math.round((completedSortie / templatesSortie.length) * 100) : 0
+            }
+        };
+        
+    } catch (error) {
+        console.error('❌ Erreur calcul progression checklist:', error);
+        return {
+            entree: { total: 0, completed: 0, percent: 0 },
+            sortie: { total: 0, completed: 0, percent: 0 }
+        };
+    }
+}
+
+function getProgressColorDashboard(percent) {
+    if (percent === 0) return '#ef4444'; // 🔴 Rouge
+    if (percent < 100) return '#f97316'; // 🟠 Orange
+    return '#10b981'; // 🟢 Vert
+}
