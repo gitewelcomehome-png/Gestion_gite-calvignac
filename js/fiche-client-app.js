@@ -469,11 +469,9 @@ function initOngletEntree() {
     document.getElementById('regleArrivee').textContent = t(regleKey);
     // Note: Les selects n'ont pas d'attribut min, donc on ne l'applique pas
     
-    // Afficher le bloc arrivée anticipée si configuré
-    const arriveeTardive = currentLanguage === 'fr' ? giteInfo.arrivee_tardive : giteInfo.arrivee_tardive_en;
-    if (arriveeTardive) {
-        document.getElementById('arriveeAnticipaBlock').style.display = 'block';
-    }
+    // Toujours afficher le bloc arrivée anticipée (validation automatique selon les règles)
+    document.getElementById('arriveeAnticipaBlock').style.display = 'block';
+    console.log('✅ Bloc arrivée anticipée affiché');
     
     // Code d'entrée
     document.getElementById('codeEntree').textContent = giteInfo.code_acces || giteInfo.code_entree || '****';
@@ -845,11 +843,9 @@ function initOngletSortie() {
     document.getElementById('regleDepart').textContent = t(regleKey);
     // Note: Les selects n'ont pas d'attribut max, donc on ne l'applique pas
     
-    // Afficher le bloc départ tardif si configuré
-    const departTardif = currentLanguage === 'fr' ? giteInfo.depart_tardif : giteInfo.depart_tardif_en;
-    if (departTardif) {
-        document.getElementById('departTardifBlock').style.display = 'block';
-    }
+    // Toujours afficher le bloc départ tardif (validation automatique selon les règles)
+    document.getElementById('departTardifBlock').style.display = 'block';
+    console.log('✅ Bloc départ tardif affiché');
     
     // Instructions de sortie
     const instructions = currentLanguage === 'fr'
