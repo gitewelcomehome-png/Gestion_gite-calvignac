@@ -1224,13 +1224,20 @@ async function refreshDashboard() {
 
 async function updateDemandesClients() {
     try {
+        console.log('🔍 Chargement des demandes d\'horaires...');
+        
         const { data: demandes, error } = await supabaseClient
             .from('demandes_horaires')
             .select('*, reservations(nom, prenom, gite)')
             .eq('statut', 'en_attente')
             .order('created_at', { ascending: true });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Erreur chargement demandes:', error);
+            throw error;
+        }
+        
+        console.log('✅ Demandes chargées:', demandes?.length || 0);
         
         const container = document.getElementById('liste-demandes-clients');
         const badge = document.getElementById('badge-demandes-count');
@@ -1239,7 +1246,7 @@ async function updateDemandesClients() {
         if (!demandes || demandes.length === 0) {
             container.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>';
             badge.textContent = '0';
-            card.style.display = 'none';
+            card.style.display = 'block'; // Toujours afficher, même si vide
             return;
         }
         
