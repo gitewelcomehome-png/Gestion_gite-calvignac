@@ -745,6 +745,68 @@
             cursor: pointer;
             font-size: 0.875rem;
         }
+        
+        /* FAQ */
+        .faq-category-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.5rem;
+            background: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .faq-category-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .faq-item {
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1rem 0;
+        }
+        
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        
+        .faq-question {
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+        
+        .faq-question:hover {
+            color: var(--primary);
+        }
+        
+        .faq-toggle {
+            transition: transform 0.3s;
+            font-size: 1.2rem;
+        }
+        
+        .faq-item.open .faq-toggle {
+            transform: rotate(180deg);
+        }
+        
+        .faq-reponse {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+        
+        .faq-item.open .faq-reponse {
+            max-height: 500px;
+            padding-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -796,6 +858,10 @@
             <button class="tab-btn" data-tab="activites">
                 <span class="icon">🗺️</span>
                 <span class="label" data-i18n="tab_activites">Activités</span>
+            </button>
+            <button class="tab-btn" data-tab="faq">
+                <span class="icon">❓</span>
+                <span class="label" data-i18n="tab_faq">FAQ</span>
             </button>
         </div>
     </nav>
@@ -1230,6 +1296,35 @@
                     <!-- Filtres seront injectés dynamiquement -->
                 </div>
                 <div id="listeActivites"></div>
+            </div>
+        </div>
+        
+        <!-- Onglet FAQ -->
+        <div class="tab-content" id="tab-faq">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">❓ Questions fréquentes</h2>
+                    <p class="card-description">Trouvez rapidement des réponses à vos questions</p>
+                </div>
+                
+                <!-- Barre de recherche -->
+                <div style="margin-bottom: 1.5rem;">
+                    <input type="text" 
+                           id="faqSearch" 
+                           class="input" 
+                           placeholder="🔍 Rechercher une question..."
+                           style="width: 100%;">
+                </div>
+                
+                <!-- Filtres catégories -->
+                <div id="faqCategories" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <!-- Sera rempli dynamiquement -->
+                </div>
+                
+                <!-- Liste des FAQs -->
+                <div id="faqListe">
+                    <!-- Sera rempli dynamiquement -->
+                </div>
             </div>
         </div>
     </main>

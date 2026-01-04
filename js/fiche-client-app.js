@@ -51,6 +51,8 @@ const translations = {
         tab_pendant: 'Pendant',
         tab_sortie: 'Sortie',
         tab_activites: 'Activités',
+        tab_faq: 'FAQ',
+        tab_faq: 'FAQ',
         adresse_title: '📍 Adresse du gîte',
         ouvrir_maps: 'Ouvrir dans Google Maps',
         horaire_arrivee: '⏰ Horaire d\'arrivée',
@@ -100,6 +102,7 @@ const translations = {
         tab_pendant: 'During stay',
         tab_sortie: 'Check-out',
         tab_activites: 'Activities',
+        tab_faq: 'FAQ',
         adresse_title: '📍 Address',
         ouvrir_maps: 'Open in Google Maps',
         horaire_arrivee: '⏰ Check-in time',
@@ -327,6 +330,9 @@ function initializeUI() {
     
     // Onglet Activités
     initOngletActivites();
+    
+    // Onglet FAQ
+    initOngletFaq();
     
     // Appliquer les traductions
     updateTranslations();
@@ -1110,6 +1116,10 @@ function updateChecklistProgress(total, checked, progressId, progressTextId) {
 function initOngletActivites() {
     // Réutiliser la logique de decouvrir.js pour afficher la carte et les activités
     loadActivitesForClient();
+}
+
+function initOngletFaq() {
+    loadFaqData();
 }
 
 async function loadActivitesForClient() {
@@ -1936,6 +1946,119 @@ function updateBadge(tabId, count) {
     }
 }
 
+// ==================== FAQ ====================
+let allFaqs = [];
+let currentFaqCategory = 'tous';
+
+async function loadFaqData() {
+    const { data: faqs, error } = await supabase
+        .from('faq')
+        .select('*')
+        .eq('visible', true)
+        .in('gite', ['tous', normalizeGiteName(reservationData.gite)])
+        .order('ordre');
+    
+    if (error) {
+        console.error('Erreur chargement FAQs:', error);
+        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
+        return;
+    }
+    
+    allFaqs = faqs || [];
+    
+    if (allFaqs.length === 0) {
+        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">📋 Aucune FAQ disponible</p>';
+        return;
+    }
+    
+    // Créer les boutons de catégories
+    renderFaqCategories();
+    
+    // Afficher toutes les FAQs
+    displayFaqs(allFaqs);
+    
+    // Écouter la recherche
+    document.getElementById('faqSearch').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        if (searchTerm) {
+            const filtered = allFaqs.filter(faq => 
+                faq.question.toLowerCase().includes(searchTerm) ||
+                faq.reponse.toLowerCase().includes(searchTerm)
+            );
+            displayFaqs(filtered);
+        } else {
+            filterByCategory(currentFaqCategory);
+        }
+    });
+}
+
+function renderFaqCategories() {
+    const categories = [
+        { key: 'tous', label: '🏠 Tout', labelEn: '🏠 All' },
+        { key: 'arrivee', label: '🔑 Arrivée', labelEn: '🔑 Arrival' },
+        { key: 'depart', label: '👋 Départ', labelEn: '👋 Departure' },
+        { key: 'equipements', label: '🛋️ Équipements', labelEn: '🛋️ Equipment' },
+        { key: 'localisation', label: '📍 Localisation', labelEn: '📍 Location' },
+        { key: 'tarifs', label: '💰 Tarifs', labelEn: '💰 Pricing' },
+        { key: 'reglement', label: '📋 Règlement', labelEn: '📋 Rules' },
+        { key: 'autre', label: '❔ Autre', labelEn: '❔ Other' }
+    ];
+    
+    const container = document.getElementById('faqCategories');
+    container.innerHTML = categories.map(cat => {
+        const label = currentLanguage === 'fr' ? cat.label : cat.labelEn;
+        return `
+            <button class="faq-category-btn ${cat.key === 'tous' ? 'active' : ''}" 
+                    onclick="filterByCategory('${cat.key}')">
+                ${label}
+            </button>
+        `;
+    }).join('');
+}
+
+function filterByCategory(category) {
+    currentFaqCategory = category;
+    
+    // Mettre à jour les boutons actifs
+    document.querySelectorAll('.faq-category-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Filtrer les FAQs
+    const filtered = category === 'tous' 
+        ? allFaqs 
+        : allFaqs.filter(faq => faq.categorie === category);
+    
+    displayFaqs(filtered);
+}
+
+function displayFaqs(faqs) {
+    const container = document.getElementById('faqListe');
+    
+    if (faqs.length === 0) {
+        container.innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">🔍 Aucun résultat trouvé</p>';
+        return;
+    }
+    
+    container.innerHTML = faqs.map((faq, index) => `
+        <div class="faq-item" id="faq-${index}">
+            <div class="faq-question" onclick="toggleFaq(${index})">
+                <span>${faq.question}</span>
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-reponse">
+                ${faq.reponse}
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleFaq(index) {
+    const faqItem = document.getElementById(`faq-${index}`);
+    faqItem.classList.toggle('open');
+}
+
 // ==================== PWA INSTALL ====================
 let deferredPrompt;
 const pwaInstallBanner = document.getElementById('pwaInstallBanner');
@@ -2005,3 +2128,5 @@ window.openItineraire = openItineraire;
 window.trackActiviteConsultation = trackActiviteConsultation;
 window.initEtatDesLieux = initEtatDesLieux;
 window.initEvaluation = initEvaluation;
+window.filterByCategory = filterByCategory;
+window.toggleFaq = toggleFaq;
