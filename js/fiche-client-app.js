@@ -16,6 +16,13 @@ if (!window.ficheClientAppLoaded) {
         const { createClient } = window.supabase;
         window.ficheClientSupabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     }
+    
+    // Enregistrer Service Worker pour PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw-fiche-client.js')
+            .then(registration => console.log('SW registered:', registration.scope))
+            .catch(error => console.log('SW registration failed:', error));
+    }
 }
 
 // Référence Supabase (utiliser var pour éviter redéclaration)
@@ -1704,6 +1711,67 @@ function updateBadge(tabId, count) {
     } else {
         if (badge) badge.remove();
     }
+}
+
+// ==================== PWA INSTALL ====================
+let deferredPrompt;
+const pwaInstallBanner = document.getElementById('pwaInstallBanner');
+const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+const pwaDismissBtn = document.getElementById('pwaDismissBtn');
+
+// Écouter l'événement beforeinstallprompt
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Empêcher le prompt natif par défaut
+    e.preventDefault();
+    // Stocker l'événement pour l'utiliser plus tard
+    deferredPrompt = e;
+    
+    // Vérifier si l'utilisateur n'a pas déjà refusé
+    const dismissed = localStorage.getItem('pwa-install-dismissed');
+    const installed = localStorage.getItem('pwa-installed');
+    
+    if (!dismissed && !installed) {
+        // Afficher notre banner custom après 3 secondes
+        setTimeout(() => {
+            pwaInstallBanner.classList.add('show');
+        }, 3000);
+    }
+});
+
+// Installer l'app
+pwaInstallBtn?.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    
+    // Afficher le prompt natif
+    deferredPrompt.prompt();
+    
+    // Attendre que l'utilisateur réponde
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+        localStorage.setItem('pwa-installed', 'true');
+        showToast('✓ Application installée avec succès', 'success');
+    }
+    
+    // Réinitialiser le prompt
+    deferredPrompt = null;
+    pwaInstallBanner.classList.remove('show');
+});
+
+// Refuser le banner
+pwaDismissBtn?.addEventListener('click', () => {
+    pwaInstallBanner.classList.remove('show');
+    localStorage.setItem('pwa-install-dismissed', 'true');
+    
+    // Réafficher dans 7 jours
+    setTimeout(() => {
+        localStorage.removeItem('pwa-install-dismissed');
+    }, 7 * 24 * 60 * 60 * 1000);
+});
+
+// Détecter si l'app est déjà installée (mode standalone)
+if (window.matchMedia('(display-mode: standalone)').matches) {
+    localStorage.setItem('pwa-installed', 'true');
 }
 
 // Rendre les fonctions globales pour onclick

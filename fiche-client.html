@@ -677,6 +677,74 @@
         .tab-btn {
             position: relative;
         }
+        
+        /* PWA Install Banner */
+        .pwa-install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1rem;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+            z-index: 9998;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .pwa-install-banner.show {
+            display: flex;
+        }
+        
+        .pwa-banner-content {
+            flex: 1;
+        }
+        
+        .pwa-banner-title {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+        
+        .pwa-banner-text {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .pwa-banner-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .pwa-btn-install {
+            background: white;
+            color: var(--primary);
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .pwa-btn-dismiss {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.5);
+            padding: 0.625rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body>
@@ -684,6 +752,18 @@
     <div class="loading-screen" id="loadingScreen">
         <div class="spinner"></div>
         <p>Chargement de votre guide...</p>
+    </div>
+    
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" class="pwa-install-banner">
+        <div class="pwa-banner-content">
+            <div class="pwa-banner-title">📱 Installer l'application</div>
+            <div class="pwa-banner-text">Accédez rapidement à votre guide, même hors ligne</div>
+        </div>
+        <div class="pwa-banner-actions">
+            <button class="pwa-btn-install" id="pwaInstallBtn">Installer</button>
+            <button class="pwa-btn-dismiss" id="pwaDismissBtn">Plus tard</button>
+        </div>
     </div>
     
     <!-- Header -->
