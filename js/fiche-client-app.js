@@ -977,17 +977,14 @@ function initOngletFaq() {
 
 async function loadActivitesForClient() {
     const giteNormalized = normalizeGiteName(reservationData.gite);
-    console.log('🔍 Recherche activités pour gîte:', giteNormalized, '(original:', reservationData.gite + ')');
     
     // Essayer plusieurs variantes du nom pour maximiser les résultats
     const variantes = [
-        giteNormalized,              // trévoux
-        giteNormalized.toLowerCase(), // trévoux (déjà lowercase mais au cas où)
-        reservationData.gite,         // Trévoux (original)
-        reservationData.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') // trevoux (sans accent)
+        giteNormalized,
+        giteNormalized.toLowerCase(),
+        reservationData.gite,
+        reservationData.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     ];
-    
-    console.log('🔍 Variantes testées:', variantes);
     
     // Rechercher avec OR sur toutes les variantes
     const { data: activites, error } = await supabase
@@ -998,126 +995,53 @@ async function loadActivitesForClient() {
     
     if (error) {
         console.error('Erreur chargement activités:', error);
+        return;
     }
-    
-    console.log('Activités chargées:', activites);
-    
-    // Vérifier que giteInfo a des coordonnées valides
-    console.log('🔍 giteInfo complet:', giteInfo);
-    console.log('🔍 giteInfo.gps_lat:', giteInfo?.gps_lat, 'type:', typeof giteInfo?.gps_lat);
-    console.log('🔍 giteInfo.gps_lon:', giteInfo?.gps_lon, 'type:', typeof giteInfo?.gps_lon);
     
     const giteLat = parseFloat(giteInfo?.gps_lat || giteInfo?.latitude);
     const giteLon = parseFloat(giteInfo?.gps_lon || giteInfo?.longitude);
     
-    console.log('🔍 Après parseFloat - giteLat:', giteLat, 'giteLon:', giteLon);
-    console.log('🔍 isNaN giteLat:', isNaN(giteLat), 'isNaN giteLon:', isNaN(giteLon));
-    
     if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
-        console.error('❌ Coordonnées gîte manquantes ou invalides:', { 
-            gps_lat: giteInfo?.gps_lat, 
-            gps_lon: giteInfo?.gps_lon,
-            giteLat,
-            giteLon,
-            'isNaN giteLat': isNaN(giteLat),
-            'isNaN giteLon': isNaN(giteLon)
-        });
         document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
-        // Afficher quand même la liste des activités
         displayActivitesList(activites || []);
         return;
     }
     
-    console.log('✅ Coordonnées gîte valides:', giteLat, giteLon);
-    
-    // Si aucune activité
     if (!activites || activites.length === 0) {
-        console.warn('⚠️ Aucune activité trouvée pour ce gîte');
         document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
         displayActivitesList([]);
         return;
     }
     
-    console.log('📊 Activités avec coordonnées:', activites.filter(a => a.latitude && a.longitude).length, '/', activites.length);
-    
-    // Initialiser la carte Leaflet (une seule fois)
+    // NOUVELLE APPROCHE : iframe OpenStreetMap avec marqueurs
     const mapElement = document.getElementById('mapActivites');
-    console.log('🗺️ Élément carte trouvé:', mapElement ? 'OUI' : 'NON', mapElement);
-    console.log('🗺️ Leaflet disponible:', typeof L !== 'undefined' ? 'OUI' : 'NON');
-    console.log('🗺️ mapActivites existe déjà:', mapActivites ? 'OUI' : 'NON');
     
-    if (!mapActivites) {
-        console.log('🗺️ Initialisation carte avec coords:', giteLat, giteLon);
-        try {
-            // Première initialisation
-            mapActivites = L.map(mapElement).setView([giteLat, giteLon], 12);
-            console.log('✅ Carte Leaflet créée avec succès');
-            
-            // Ajouter les tuiles OpenStreetMap
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(mapActivites);
-            console.log('✅ Tuiles OpenStreetMap ajoutées');
-            
-            // Forcer le redimensionnement de la carte
-            setTimeout(() => {
-                mapActivites.invalidateSize();
-                console.log('✅ Carte redimensionnée');
-            }, 100);
-        } catch (error) {
-            console.error('❌ Erreur création carte Leaflet:', error);
-            document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Erreur d\'initialisation de la carte</p>';
-            displayActivitesList(activites || []);
-            return;
-        }
-    } else {
-        console.log('🗺️ Carte déjà existante, recentrage sur:', giteLat, giteLon);
-        // Carte déjà initialisée, juste recentrer
-        mapActivites.setView([giteLat, giteLon], 12);
-        // Supprimer les anciens marqueurs
-        mapActivites.eachLayer(layer => {
-            if (layer instanceof L.Marker) {
-                mapActivites.removeLayer(layer);
-            }
-        });
-        console.log('✅ Carte recentrée et marqueurs supprimés');
-    }
+    // Construire l'URL avec les marqueurs
+    const markers = activites
+        .filter(a => a.latitude && a.longitude)
+        .map(a => `&mlon=${a.longitude}&mlat=${a.latitude}`)
+        .join('');
     
-    const map = mapActivites;
-    console.log('🗺️ Objet map final:', map);
-    
-    // Marqueur du gîte
-    console.log('📍 Ajout marqueur gîte à:', giteLat, giteLon);
-    const giteMarker = L.marker([giteLat, giteLon], {
-        icon: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41]
-        })
-    }).addTo(map);
-    giteMarker.bindPopup(`<b>${reservationData.gite}</b><br>🏡 Votre gîte`);
-    console.log('✅ Marqueur gîte ajouté');
-    
-    // Marqueurs des activités
-    let markersAdded = 0;
-    activites.forEach((activite, index) => {
-        if (activite.latitude && activite.longitude) {
-            console.log(`📍 Ajout marqueur activité ${index + 1}:`, activite.nom, activite.latitude, activite.longitude);
-            const marker = L.marker([activite.latitude, activite.longitude]).addTo(map);
-            marker.bindPopup(`
-                <b>${activite.nom}</b><br>
-                ${activite.categorie || ''}<br>
-                ${activite.distance_km ? `${activite.distance_km.toFixed(1)} km` : ''}
-            `);
-            
-            marker.on('click', () => {
-                trackActiviteConsultation(activite.id, 'view');
-            });
-            markersAdded++;
-        }
-    });
-    console.log(`✅ ${markersAdded} marqueurs d'activités ajoutés`);
+    // Créer l'iframe avec la carte centrée sur le gîte
+    mapElement.innerHTML = `
+        <iframe 
+            width="100%" 
+            height="400" 
+            frameborder="0" 
+            scrolling="no" 
+            marginheight="0" 
+            marginwidth="0" 
+            src="https://www.openstreetmap.org/export/embed.html?bbox=${giteLon-0.1},${giteLat-0.1},${giteLon+0.1},${giteLat+0.1}&layer=mapnik&marker=${giteLat},${giteLon}" 
+            style="border: 1px solid #ccc; border-radius: 8px;">
+        </iframe>
+        <div style="text-align: center; margin-top: 0.5rem;">
+            <a href="https://www.openstreetmap.org/?mlat=${giteLat}&mlon=${giteLon}#map=13/${giteLat}/${giteLon}" 
+               target="_blank" 
+               style="color: var(--primary); font-size: 0.875rem;">
+                📍 Voir sur OpenStreetMap
+            </a>
+        </div>
+    `;
     
     // Liste des activités
     displayActivitesList(activites || []);
