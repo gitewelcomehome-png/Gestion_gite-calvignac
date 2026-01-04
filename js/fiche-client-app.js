@@ -972,10 +972,21 @@ async function loadActivitesForClient() {
     const giteNormalized = normalizeGiteName(reservationData.gite);
     console.log('🔍 Recherche activités pour gîte:', giteNormalized, '(original:', reservationData.gite + ')');
     
+    // Essayer plusieurs variantes du nom pour maximiser les résultats
+    const variantes = [
+        giteNormalized,              // trévoux
+        giteNormalized.toLowerCase(), // trévoux (déjà lowercase mais au cas où)
+        reservationData.gite,         // Trévoux (original)
+        reservationData.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') // trevoux (sans accent)
+    ];
+    
+    console.log('🔍 Variantes testées:', variantes);
+    
+    // Rechercher avec OR sur toutes les variantes
     const { data: activites, error } = await supabase
         .from('activites_gites')
         .select('*')
-        .eq('gite', giteNormalized)
+        .or(variantes.map((v, i) => `gite.eq.${v}`).join(','))
         .order('distance');
     
     if (error) {
@@ -1327,7 +1338,9 @@ async function submitRetourClient() {
 function formatTime(timeString) {
     if (!timeString || timeString === 'undefined' || timeString === 'null') return '';
     
-    const time = timeString.substring(0, 5);
+    // Remplacer le point par deux-points si nécessaire (18.00 -> 18:00)
+    const normalized = timeString.replace('.', ':');
+    const time = normalized.substring(0, 5);
     if (!time || !time.includes(':')) return timeString; // Retour sécurisé
     
     if (currentLanguage === 'en') {
