@@ -1303,7 +1303,7 @@ async function submitDemandeHoraire(type) {
         : document.getElementById('motifDepart')?.value || '';
     
     try {
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('demandes_horaires')
             .insert({
                 reservation_id: reservationData.id,
@@ -1317,8 +1317,20 @@ async function submitDemandeHoraire(type) {
                 statut: 'en_attente'
             });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Erreur Supabase:', error);
+            
+            // Message spécifique si la table n'existe pas
+            if (error.message && error.message.includes('relation') && error.message.includes('does not exist')) {
+                showToast('⚠️ Fonctionnalité non encore activée. Contactez le gestionnaire.');
+                console.warn('⚠️ La table demandes_horaires n\'existe pas encore. Exécutez sql/create_demandes_horaires_table.sql dans Supabase.');
+            } else {
+                showToast(t('erreur') || '❌ Erreur lors de l\'envoi');
+            }
+            return;
+        }
         
+        console.log('✅ Demande enregistrée:', data);
         showToast(t('demande_envoyee') || '✅ Demande envoyée avec succès !');
         
         // Cacher le formulaire
@@ -1328,8 +1340,8 @@ async function submitDemandeHoraire(type) {
             document.getElementById('formDepartTardif').style.display = 'none';
         }
     } catch (error) {
-        console.error('Erreur soumission demande:', error);
-        showToast(t('erreur') || '❌ Erreur lors de l\'envoi');
+        console.error('❌ Erreur inattendue:', error);
+        showToast('❌ Erreur technique');
     }
 }
 
