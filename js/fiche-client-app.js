@@ -1299,23 +1299,27 @@ async function submitDemandeHoraire(type) {
         : document.getElementById('heureDepartDemandee').value;
     
     const motif = type === 'arrivee_anticipee'
-        ? document.getElementById('motifArrivee').value
-        : document.getElementById('motifDepart').value;
+        ? document.getElementById('motifArrivee')?.value || ''
+        : document.getElementById('motifDepart')?.value || '';
     
     try {
         const { error } = await supabase
             .from('demandes_horaires')
             .insert({
                 reservation_id: reservationData.id,
-                type: type,
+                client_nom: reservationData.nom || '',
+                client_prenom: reservationData.prenom || '',
+                gite: reservationData.gite || '',
+                type: type === 'arrivee_anticipee' ? 'arrivee' : 'depart',
                 heure_demandee: heureDemandee,
-                motif: motif,
-                automatiquement_approuvable: calculateAutoApproval(type, heureDemandee)
+                date_debut: reservationData.dateDebut,
+                date_fin: reservationData.dateFin,
+                statut: 'en_attente'
             });
         
         if (error) throw error;
         
-        showToast(t('demande_envoyee'));
+        showToast(t('demande_envoyee') || '✅ Demande envoyée avec succès !');
         
         // Cacher le formulaire
         if (type === 'arrivee_anticipee') {
@@ -1324,8 +1328,8 @@ async function submitDemandeHoraire(type) {
             document.getElementById('formDepartTardif').style.display = 'none';
         }
     } catch (error) {
-        console.error(error);
-        showToast(t('erreur'));
+        console.error('Erreur soumission demande:', error);
+        showToast(t('erreur') || '❌ Erreur lors de l\'envoi');
     }
 }
 
