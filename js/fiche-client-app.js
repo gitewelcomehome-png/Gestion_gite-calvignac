@@ -17,8 +17,9 @@ if (!window.ficheClientAppLoaded) {
         window.ficheClientSupabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     }
     
-    // Enregistrer Service Worker pour PWA
-    if ('serviceWorker' in navigator) {
+    // Service Worker désactivé temporairement (404 sur Vercel)
+    // TODO: Résoudre le problème de déploiement du fichier sw-fiche-client.js
+    if (false && 'serviceWorker' in navigator) {
         // Force la mise à jour du SW à chaque chargement
         navigator.serviceWorker.register('/sw-fiche-client.js', {
             updateViaCache: 'none' // Ne JAMAIS mettre le SW en cache
@@ -1364,7 +1365,15 @@ function showError(message) {
 }
 
 function hideLoading() {
-    document.getElementById('loadingScreen').style.display = 'none';
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'none';
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.visibility = 'hidden';
+        console.log('🎉 Loading screen caché');
+    } else {
+        console.error('❌ Element loadingScreen non trouvé!');
+    }
 }
 
 // ==================== ÉTAT DES LIEUX ====================
