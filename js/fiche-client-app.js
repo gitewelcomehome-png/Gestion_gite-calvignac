@@ -359,6 +359,10 @@ function initOngletEntree() {
     }
     
     const selectElement = document.getElementById('heureArriveeDemandee');
+    if (!selectElement) {
+        console.warn('heureArriveeDemandee select not found');
+        return;
+    }
     selectElement.innerHTML = '';
     
     // Générer options de 6h à 23h par pas de 30 min
@@ -687,7 +691,8 @@ function initOngletPendant() {
         document.getElementById('contactsUrgenceContainer').innerHTML = contactsHTML;
     }
     
-    // Charger les commerces proximité
+    // Charger les événements de la semaine et commerces proximité
+    loadEvenementsSemaine();
     loadCommerces();
 }
 
@@ -1430,6 +1435,10 @@ async function submitRetourClient() {
             complementDiv.innerHTML = currentLanguage === 'fr'
                 ? '<strong>⚠️ Problème urgent ?</strong><br>La réponse par message n\'est pas instantanée.<br>Pour un problème à régler immédiatement :<br>📞 Téléphonez-nous ou 💬 Envoyez un WhatsApp'
                 : '<strong>⚠️ Urgent problem?</strong><br>Response by message is not instant.<br>For immediate assistance:<br>📞 Call us or 💬 Send a WhatsApp';
+        } else if (type === 'amelioration' || type === 'retour') {
+            complementDiv.innerHTML = currentLanguage === 'fr'
+                ? '<strong>🙏 Merci de votre retour !</strong><br>Nous ferons le maximum pour prendre en compte votre message et répondre au mieux aux besoins de nos clients.'
+                : '<strong>🙏 Thank you for your feedback!</strong><br>We will do our best to take your message into account and meet our clients\' needs.';
         } else {
             complementDiv.innerHTML = currentLanguage === 'fr'
                 ? '<strong>📨 Nous avons bien reçu votre message</strong><br>Nous vous répondrons dans les plus brefs délais.'
@@ -1457,15 +1466,23 @@ async function submitRetourClient() {
 
 // ==================== UTILITAIRES ====================
 function formatTime(timeString) {
-    if (!timeString) return '';
+    if (!timeString || timeString === 'undefined' || timeString === 'null') return '';
+    
     const time = timeString.substring(0, 5);
+    if (!time || !time.includes(':')) return timeString; // Retour sécurisé
     
     if (currentLanguage === 'en') {
         // Format 12h pour anglais (6:00 PM)
-        const [hours, minutes] = time.split(':');
-        const hour = parseInt(hours);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        const hour12 = hour === 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+        const parts = time.split(':');
+        if (parts.length !== 2) return time;
+        
+        const hours = parseInt(parts[0]);
+        const minutes = parts[1];
+        
+        if (isNaN(hours)) return time;
+        
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const hour12 = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours);
         return `${hour12}:${minutes} ${ampm}`;
     } else {
         // Format 24h pour français (18:00)
@@ -1695,80 +1712,117 @@ async function initEvaluation() {
 }
 
 // Commerces proximité
-async function loadCommerces() {
-    const commerces = [
-        {
-            icon: '🥖',
-            nom: 'Boulangerie du Village',
-            type: 'Boulangerie-Pâtisserie',
-            distance: 1.2,
-            lat: 45.941,
-            lng: 4.755,
-            horaires: 'Lun-Sam 7h-19h',
-            ferme: 'Dimanche'
-        },
-        {
-            icon: '🛒',
-            nom: 'Carrefour Market',
-            type: 'Supermarché',
-            distance: 2.3,
-            lat: 45.939,
-            lng: 4.757,
-            horaires: 'Lun-Sam 8h-20h, Dim 9h-13h',
-            ferme: null
-        },
-        {
-            icon: '🍕',
-            nom: 'La Bella Vita',
-            type: 'Restaurant Italien',
-            distance: 0.8,
-            lat: 45.942,
-            lng: 4.754,
-            horaires: 'Mar-Dim 12h-14h, 19h-22h',
-            ferme: 'Lundi'
-        },
-        {
-            icon: '☕',
-            nom: 'Café de la Place',
-            type: 'Café-Bar',
-            distance: 0.5,
-            lat: 45.943,
-            lng: 4.753,
-            horaires: 'Lun-Dim 7h-23h',
-            ferme: null
-        },
-        {
-            icon: '💊',
-            nom: 'Pharmacie Centrale',
-            type: 'Pharmacie',
-            distance: 1.5,
-            lat: 45.940,
-            lng: 4.756,
-            horaires: 'Lun-Ven 8h30-19h, Sam 9h-18h',
-            ferme: 'Dimanche'
-        }
-    ];
+async function loadEvenementsSemaine() {
+    const container = document.getElementById('evenementsSemaineContainer');
+    if (!container) return;
     
-    const container = document.getElementById('commercesContainer');
+    // Charger depuis la table activites_gites avec categorie 'Événement'
+    const { data: evenements, error } = await supabase
+        .from('activites_gites')
+        .select('*')
+        .eq('gite', normalizeGiteName(reservationData.gite))
+        .eq('categorie', 'Événement')
+        .order('date_debut');
     
-    container.innerHTML = commerces.map(commerce => `
-        <div class="commerce-item">
-            <div class="commerce-info">
-                <div class="commerce-name">${commerce.icon} ${commerce.nom}</div>
-                <div class="commerce-details">
-                    ${commerce.type} • ${commerce.horaires}
-                    ${commerce.ferme ? `<br><small style="color: var(--danger);">Fermé ${commerce.ferme}</small>` : ''}
+    if (error) {
+        console.error('Erreur chargement événements:', error);
+        return;
+    }
+    
+    if (!evenements || evenements.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    const listeContainer = container.querySelector('.evenements-liste');
+    
+    listeContainer.innerHTML = evenements.map(evt => {
+        const dateDebut = evt.date_debut ? new Date(evt.date_debut).toLocaleDateString(currentLanguage === 'fr' ? 'fr-FR' : 'en-US', { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long' 
+        }) : '';
+        
+        return `
+            <div class="card" style="margin-bottom: 1rem; cursor: pointer;" onclick="openActiviteModal(${JSON.stringify(evt).replace(/"/g, '&quot;')})">
+                <div style="display: flex; align-items: start; gap: 1rem;">
+                    <div style="font-size: 2rem;">📅</div>
+                    <div style="flex: 1;">
+                        <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem;">
+                            ${evt.nom}
+                        </h3>
+                        ${dateDebut ? `<div style="color: var(--primary); font-size: 0.875rem; margin-bottom: 0.5rem;">${dateDebut}</div>` : ''}
+                        <p style="color: var(--gray-600); font-size: 0.9rem;">
+                            ${(evt.description || '').substring(0, 100)}${(evt.description || '').length > 100 ? '...' : ''}
+                        </p>
+                    </div>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span class="commerce-distance">${commerce.distance} km</span>
-                <button class="btn btn-primary" onclick="openItineraire(${commerce.lat}, ${commerce.lng})" 
-                        style="padding: 0.5rem 1rem; font-size: 0.875rem;">
-                    🗺️
-                </button>
+        `;
+    }).join('');
+}
+
+async function loadCommerces() {
+    const container = document.getElementById('commercesContainer');
+    if (!container) return;
+    
+    // Charger depuis la table activites_gites avec categorie 'Commerce'
+    const { data: commerces, error } = await supabase
+        .from('activites_gites')
+        .select('*')
+        .eq('gite', normalizeGiteName(reservationData.gite))
+        .eq('categorie', 'Commerce')
+        .order('distance');
+    
+    if (error) {
+        console.error('Erreur chargement commerces:', error);
+        container.innerHTML = '<p style="padding: 1rem; text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
+        return;
+    }
+    
+    if (!commerces || commerces.length === 0) {
+        container.innerHTML = '<p style="padding: 1rem; text-align: center; color: var(--gray-600);">📋 Aucun commerce ajouté pour le moment</p>';
+        return;
+    }
+    
+    // Icones par type de commerce
+    const iconMap = {
+        'boulangerie': '🥖',
+        'supermarché': '🛒',
+        'restaurant': '🍽️',
+        'café': '☕',
+        'pharmacie': '💊',
+        'banque': '🏦',
+        'poste': '📮'
+    };
+    
+    container.innerHTML = commerces.map(commerce => {
+        const sousCategorie = (commerce.sous_categorie || '').toLowerCase();
+        const icon = iconMap[sousCategorie] || '🏪';
+        
+        return `
+            <div class="commerce-item">
+                <div class="commerce-info">
+                    <div class="commerce-name">${icon} ${commerce.nom}</div>
+                    <div class="commerce-details">
+                        ${commerce.sous_categorie || 'Commerce'}
+                        ${commerce.distance ? ` • ${commerce.distance.toFixed(1)} km` : ''}
+                        ${commerce.horaires ? `<br><small>${commerce.horaires}</small>` : ''}
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    ${commerce.distance ? `<span class="commerce-distance">${commerce.distance.toFixed(1)} km</span>` : ''}
+                    ${commerce.latitude && commerce.longitude ? `
+                        <button class="btn btn-primary" onclick="openItineraire(${commerce.latitude}, ${commerce.longitude})" 
+                                style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            🗺️
+                        </button>
+                    ` : ''}
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Modal Activité Détail
