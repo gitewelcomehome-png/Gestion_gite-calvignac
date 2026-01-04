@@ -140,8 +140,16 @@ function toggleActivityMarker(activiteId, show) {
     }
 }
 
+// Variables globales pour les coordonnées
+let currentGiteLat = null;
+let currentGiteLon = null;
+
 // Afficher la liste des activités avec sélecteurs (SANS marqueurs carte)
 function displayActivitesListInteractive(activites, giteLat, giteLon) {
+    // Sauvegarder les coordonnées du gîte
+    currentGiteLat = giteLat;
+    currentGiteLon = giteLon;
+    
     const listeContainer = document.getElementById('listeActivites');
     
     if (!activites || activites.length === 0) {
@@ -177,8 +185,8 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
                         <span class="activite-categorie">${activite.categorie || 'Autre'}</span>
                         <div class="activite-distance">📏 ${activite.distance.toFixed(1)} km</div>
                     </div>
-                    <button class="btn-show-map" onclick="toggleTravelInfo(${activite.id})">
-                        ⏱️ Voir durées
+                    <button class="btn-show-map" onclick="showActivityOnMap(${activite.latitude}, ${activite.longitude}, '${activite.nom.replace(/'/g, "\\'")}', ${activite.id})">
+                        📍 Voir sur carte
                     </button>
                 </div>
                 <div class="activite-travel" id="travel-${activite.id}" style="display: none;">
@@ -202,6 +210,89 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
     
     listeContainer.innerHTML = html;
 }
+
+// Afficher une activité sur la carte
+window.showActivityOnMap = function(actLat, actLon, actName, actId) {
+    const mapContainer = document.getElementById('mapActivites');
+    
+    // Calculer la bbox pour inclure le gîte et l'activité
+    const minLat = Math.min(currentGiteLat, actLat) - 0.005;
+    const maxLat = Math.max(currentGiteLat, actLat) + 0.005;
+    const minLon = Math.min(currentGiteLon, actLon) - 0.005;
+    const maxLon = Math.max(currentGiteLon, actLon) + 0.005;
+    
+    const bbox = `${minLon},${minLat},${maxLon},${maxLat}`;
+    
+    // Créer l'URL avec 2 marqueurs : utiliser umap ou URL directe OSM
+    // Note: OSM embed ne supporte qu'un seul marqueur, donc on centre entre les deux
+    const centerLat = (currentGiteLat + actLat) / 2;
+    const centerLon = (currentGiteLon + actLon) / 2;
+    
+    mapContainer.innerHTML = `
+        <iframe 
+            width="100%" 
+            height="400" 
+            frameborder="0" 
+            scrolling="no" 
+            marginheight="0" 
+            marginwidth="0" 
+            src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${actLat},${actLon}" 
+            style="border: 1px solid #10b981; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+        </iframe>
+        <div style="text-align: center; margin-top: 0.5rem;">
+            <strong style="color: #10b981;">📍 ${actName}</strong><br>
+            <a href="https://www.openstreetmap.org/?mlat=${actLat}&mlon=${actLon}#map=15/${actLat}/${actLon}&layers=N" 
+               target="_blank" 
+               style="color: var(--primary); font-size: 0.875rem; margin-right: 1rem;">
+                🗺️ Voir sur OpenStreetMap
+            </a>
+            <button onclick="resetMapToGite()" style="padding: 0.25rem 0.75rem; background: var(--gray-200); border: none; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                🏡 Retour gîte
+            </button>
+        </div>
+    `;
+    
+    // Afficher les temps de trajet
+    toggleTravelInfo(actId);
+    
+    // Marquer la card comme sélectionnée
+    document.querySelectorAll('.activite-card').forEach(card => card.classList.remove('selected'));
+    const card = document.querySelector(`[data-activite-id="${actId}"]`);
+    if (card) {
+        card.classList.add('selected');
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+};
+
+// Revenir à la vue du gîte
+window.resetMapToGite = function() {
+    const mapContainer = document.getElementById('mapActivites');
+    const zoom = 16;
+    const bbox = `${currentGiteLon-0.01},${currentGiteLat-0.01},${currentGiteLon+0.01},${currentGiteLat+0.01}`;
+    
+    mapContainer.innerHTML = `
+        <iframe 
+            width="100%" 
+            height="400" 
+            frameborder="0" 
+            scrolling="no" 
+            marginheight="0" 
+            marginwidth="0" 
+            src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${currentGiteLat},${currentGiteLon}" 
+            style="border: 1px solid #ccc; border-radius: 8px;">
+        </iframe>
+        <div style="text-align: center; margin-top: 0.5rem;">
+            <a href="https://www.openstreetmap.org/?mlat=${currentGiteLat}&mlon=${currentGiteLon}#map=${zoom}/${currentGiteLat}/${currentGiteLon}" 
+               target="_blank" 
+               style="color: var(--primary); font-size: 0.875rem;">
+                📍 Voir sur OpenStreetMap (zoom proche)
+            </a>
+        </div>
+    `;
+    
+    // Désélectionner toutes les cards
+    document.querySelectorAll('.activite-card').forEach(card => card.classList.remove('selected'));
+};
 
 // Afficher/masquer les temps de trajet
 window.toggleTravelInfo = function(activiteId) {
