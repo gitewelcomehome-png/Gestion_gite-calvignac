@@ -990,10 +990,8 @@ async function loadActivitesForClient() {
         return;
     }
     
-    // Iframe OpenStreetMap simple avec zoom 16 (très proche)
+    // Google Maps iframe avec marqueur gîte visible
     const mapElement = document.getElementById('mapActivites');
-    const zoom = 16;
-    const bbox = `${giteLon-0.01},${giteLat-0.01},${giteLon+0.01},${giteLat+0.01}`;
     
     mapElement.innerHTML = `
         <iframe 
@@ -1003,14 +1001,15 @@ async function loadActivitesForClient() {
             scrolling="no" 
             marginheight="0" 
             marginwidth="0" 
-            src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${giteLat},${giteLon}" 
+            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${giteLat},${giteLon}&zoom=16" 
             style="border: 1px solid #ccc; border-radius: 8px;">
         </iframe>
         <div style="text-align: center; margin-top: 0.5rem;">
-            <a href="https://www.openstreetmap.org/?mlat=${giteLat}&mlon=${giteLon}#map=${zoom}/${giteLat}/${giteLon}" 
+            <strong style="color: #ef4444;">🏡 Votre gîte</strong><br>
+            <a href="https://www.google.com/maps/search/?api=1&query=${giteLat},${giteLon}" 
                target="_blank" 
                style="color: var(--primary); font-size: 0.875rem;">
-                📍 Voir sur OpenStreetMap (zoom proche)
+                📍 Voir sur Google Maps
             </a>
         </div>
     `;

@@ -215,16 +215,7 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
 window.showActivityOnMap = function(actLat, actLon, actName, actId) {
     const mapContainer = document.getElementById('mapActivites');
     
-    // Calculer les bounds pour inclure les 2 points
-    const minLat = Math.min(currentGiteLat, actLat) - 0.002;
-    const maxLat = Math.max(currentGiteLat, actLat) + 0.002;
-    const minLon = Math.min(currentGiteLon, actLon) - 0.002;
-    const maxLon = Math.max(currentGiteLon, actLon) + 0.002;
-    
-    const bbox = `${minLon},${minLat},${maxLon},${maxLat}`;
-    
-    // Utiliser Google Maps qui supporte plusieurs marqueurs facilement
-    // Format: markers=label:G|lat,lon&markers=label:A|lat,lon
+    // Utiliser Google Maps Directions qui montre les 2 points (départ et arrivée)
     mapContainer.innerHTML = `
         <iframe 
             width="100%" 
@@ -233,15 +224,15 @@ window.showActivityOnMap = function(actLat, actLon, actName, actId) {
             scrolling="no" 
             marginheight="0" 
             marginwidth="0" 
-            src="https://maps.google.com/maps?q=${currentGiteLat},${currentGiteLon}+(Gîte)&q=${actLat},${actLon}+(${encodeURIComponent(actName)})&z=14&output=embed" 
+            src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&origin=${currentGiteLat},${currentGiteLon}&destination=${actLat},${actLon}&mode=driving" 
             style="border: 1px solid #10b981; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
         </iframe>
         <div style="text-align: center; margin-top: 0.5rem;">
-            <strong style="color: #10b981;">📍 ${actName}</strong> + <strong style="color: #ef4444;">🏡 Votre gîte</strong><br>
+            <strong style="color: #ef4444;">🏡 Gîte</strong> ➜ <strong style="color: #10b981;">📍 ${actName}</strong><br>
             <a href="https://www.google.com/maps/dir/${currentGiteLat},${currentGiteLon}/${actLat},${actLon}" 
                target="_blank" 
                style="color: var(--primary); font-size: 0.875rem; margin-right: 1rem;">
-                🗺️ Itinéraire Google Maps
+                🗺️ Ouvrir dans Google Maps
             </a>
             <button onclick="resetMapToGite()" style="padding: 0.25rem 0.75rem; background: var(--gray-200); border: none; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;">
                 🏡 Retour gîte seul
@@ -264,8 +255,6 @@ window.showActivityOnMap = function(actLat, actLon, actName, actId) {
 // Revenir à la vue du gîte
 window.resetMapToGite = function() {
     const mapContainer = document.getElementById('mapActivites');
-    const zoom = 16;
-    const bbox = `${currentGiteLon-0.01},${currentGiteLat-0.01},${currentGiteLon+0.01},${currentGiteLat+0.01}`;
     
     mapContainer.innerHTML = `
         <iframe 
@@ -275,14 +264,15 @@ window.resetMapToGite = function() {
             scrolling="no" 
             marginheight="0" 
             marginwidth="0" 
-            src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${currentGiteLat},${currentGiteLon}" 
+            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${currentGiteLat},${currentGiteLon}&zoom=16" 
             style="border: 1px solid #ccc; border-radius: 8px;">
         </iframe>
         <div style="text-align: center; margin-top: 0.5rem;">
-            <a href="https://www.openstreetmap.org/?mlat=${currentGiteLat}&mlon=${currentGiteLon}#map=${zoom}/${currentGiteLat}/${currentGiteLon}" 
+            <strong style="color: #ef4444;">🏡 Votre gîte</strong><br>
+            <a href="https://www.google.com/maps/search/?api=1&query=${currentGiteLat},${currentGiteLon}" 
                target="_blank" 
                style="color: var(--primary); font-size: 0.875rem;">
-                📍 Voir sur OpenStreetMap (zoom proche)
+                📍 Voir sur Google Maps
             </a>
         </div>
     `;
