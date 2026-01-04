@@ -3,7 +3,7 @@
  * Cache les ressources pour permettre l'accès offline
  */
 
-const CACHE_NAME = 'fiche-client-v2'; // Incrémenté pour forcer le rechargement
+const CACHE_NAME = 'fiche-client-v3'; // Incrémenté pour forcer le rechargement
 const urlsToCache = [
     '/fiche-client.html',
     '/js/fiche-client-app.js',
@@ -15,6 +15,9 @@ const urlsToCache = [
 
 // Installation - Mettre en cache les ressources
 self.addEventListener('install', event => {
+    // Forcer le nouveau SW à prendre le contrôle immédiatement
+    self.skipWaiting();
+    
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
@@ -26,6 +29,7 @@ self.addEventListener('install', event => {
 
 // Activation - Nettoyer les anciens caches
 self.addEventListener('activate', event => {
+    // Prendre le contrôle de tous les clients immédiatement
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -36,7 +40,7 @@ self.addEventListener('activate', event => {
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
