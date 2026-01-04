@@ -1392,9 +1392,12 @@ function switchTab(tabId) {
     document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
     document.getElementById(`tab-${tabId}`).classList.add('active');
     
-    // DÉTRUIRE et RECRÉER la carte à chaque affichage de l'onglet activités
+    // FORCER la visibilité de l'onglet AVANT la création de la carte
+    console.log('✅ Onglet changé vers:', tabId);
+    
+    // Si c'est l'onglet activités, attendre que le DOM soit visible
     if (tabId === 'activites') {
-        console.log('🗺️ Affichage onglet activités - DESTRUCTION + RECRÉATION de la carte...');
+        console.log('🗺️ Affichage onglet activités...');
         
         // Détruire la carte existante
         if (mapActivites) {
@@ -1407,11 +1410,14 @@ function switchTab(tabId) {
         const mapElement = document.getElementById('mapActivites');
         mapElement.innerHTML = '';
         
-        // Recréer après un petit délai
-        setTimeout(() => {
-            console.log('🆕 Recréation de la carte...');
-            initOngletActivites();
-        }, 100);
+        // Attendre 2 frames pour que le navigateur affiche l'onglet
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                console.log('🆕 Recréation carte après affichage onglet...');
+                console.log('📏 Dimensions conteneur:', mapElement.offsetWidth, 'x', mapElement.offsetHeight);
+                initOngletActivites();
+            });
+        });
     }
 }
 
