@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Insertion Problème</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/shared-config.js"></script>
+</head>
+<body>
+    <h1>Test Insertion problemes_signales</h1>
+    <button onclick="testInsert()">🧪 Tester Insertion</button>
+    <button onclick="testQuery()">🔍 Vérifier Table</button>
+    <pre id="result" style="background: #f5f5f5; padding: 20px; margin-top: 20px;"></pre>
+
+    <script>
+        const resultEl = document.getElementById('result');
+
+        async function testQuery() {
+            resultEl.textContent = '⏳ Chargement...';
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('problemes_signales')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) {
+                    resultEl.textContent = '❌ ERREUR:\n' + JSON.stringify(error, null, 2);
+                } else {
+                    resultEl.textContent = '✅ RÉSULTATS (' + (data?.length || 0) + ' lignes):\n\n' + 
+                        JSON.stringify(data, null, 2);
+                }
+            } catch (err) {
+                resultEl.textContent = '❌ EXCEPTION:\n' + err.message;
+            }
+        }
+
+        async function testInsert() {
+            resultEl.textContent = '⏳ Test insertion...';
+            
+            const testData = {
+                reservation_id: 999,
+                gite: 'Test Gîte',
+                type: 'demande',
+                urgence: 'moyenne',
+                description: 'Test insertion depuis page de debug',
+                statut: 'nouveau',
+                created_at: new Date().toISOString()
+            };
+            
+            console.log('📤 Envoi:', testData);
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('problemes_signales')
+                    .insert([testData])
+                    .select();
+                
+                if (error) {
+                    resultEl.textContent = '❌ ERREUR:\n' + JSON.stringify(error, null, 2);
+                    console.error('Erreur:', error);
+                } else {
+                    resultEl.textContent = '✅ SUCCÈS:\n\n' + JSON.stringify(data, null, 2);
+                    console.log('✅ Insertion OK:', data);
+                }
+            } catch (err) {
+                resultEl.textContent = '❌ EXCEPTION:\n' + err.message;
+                console.error('Exception:', err);
+            }
+        }
+
+        // Auto-query au chargement
+        window.addEventListener('load', testQuery);
+    </script>
+</body>
+</html>
