@@ -36,7 +36,7 @@ async function chargerInterventions() {
         troisSemaines.setDate(today.getDate() + 21);
         
         // Charger les ménages des 3 prochaines semaines
-        const { data: menages, error } = await window.supabase
+        const { data: menages, error } = await window.supabaseClient
             .from('cleaning_schedule')
             .select('*')
             .gte('date', today.toISOString().split('T')[0])
@@ -135,7 +135,7 @@ async function creerTacheAchats(e) {
     const description = document.getElementById('tache-achats-description').value;
     
     try {
-        const { error } = await window.supabase
+        const { error } = await window.supabaseClient
             .from('todos')
             .insert({
                 category: 'achats',
@@ -166,7 +166,7 @@ async function creerTacheTravaux(e) {
     const titreComplet = priorite === 'urgente' ? `🚨 URGENT: ${titre}` : titre;
     
     try {
-        const { error } = await window.supabase
+        const { error } = await window.supabaseClient
             .from('todos')
             .insert({
                 category: 'travaux',
@@ -202,7 +202,7 @@ const ARTICLES_DRAPS = [
 
 async function chargerStocksDraps() {
     try {
-        const { data: stocks, error } = await window.supabase
+        const { data: stocks, error } = await window.supabaseClient
             .from('stocks_draps')
             .select('*');
 
@@ -250,7 +250,7 @@ async function sauvegarderStocks(gite) {
             stocks[article.id] = parseInt(input.value) || 0;
         });
 
-        const { error } = await window.supabase
+        const { error } = await window.supabaseClient
             .from('stocks_draps')
             .upsert({
                 gite: gite,
@@ -283,7 +283,7 @@ async function envoyerRetourMenage(e) {
     const detailsDeroulement = document.getElementById('retour-details-deroulement').value;
     
     try {
-        const { error } = await window.supabase
+        const { error } = await window.supabaseClient
             .from('retours_menage')
             .insert({
                 gite: gite,
