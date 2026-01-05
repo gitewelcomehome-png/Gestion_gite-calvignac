@@ -460,7 +460,6 @@ window.deleteReservationById = deleteReservationById;
 window.updateReservationsList = updateReservationsList;
 window.generateWeekReservations = generateWeekReservations;
 window.getPlatformLogo = getPlatformLogo;
-window.autoSaveJSON = autoSaveJSON;
 
 // ==========================================
 // 🎯 INITIALISATION
