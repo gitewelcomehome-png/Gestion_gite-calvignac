@@ -165,11 +165,22 @@ async function syncCalendar(gite, platform, url) {
             const dateDebut = dateToLocalString(event.startDate.toJSDate());
             const dateFin = dateToLocalString(event.endDate.toJSDate());
             
+            // 🚫 IGNORER LES BLOCAGES MANUELS (pas des vraies réservations)
+            // Airbnb, Abritel etc. envoient des événements "Blocked" ou "Not available" pour les dates bloquées
+            const blockTerms = ['blocked', 'bloqué', 'not available', 'indisponible', 'unavailable'];
+            const isBlocked = blockTerms.some(term => summary.toLowerCase().includes(term));
+            
+            if (isBlocked) {
+                console.log(`🚫 Blocage ignoré (pas une réservation): ${gite} du ${dateDebut} au ${dateFin} - "${summary}"`);
+                skipped++;
+                continue;
+            }
+            
             // Nom du client (rarement disponible dans les iCal publics pour confidentialité)
             let nom = 'À COMPLÉTER';
             
             // Vérifier si le summary contient un vrai nom (pas juste "Réservé", "Busy", etc.)
-            const genericTerms = ['réservé', 'reserved', 'busy', 'occupé', 'not available', 'indisponible', 'blocked', 'bloqué'];
+            const genericTerms = ['réservé', 'reserved', 'busy', 'occupé'];
             const isGeneric = genericTerms.some(term => summary.toLowerCase().includes(term));
             
             if (summary && !isGeneric && summary.length > 3) {
