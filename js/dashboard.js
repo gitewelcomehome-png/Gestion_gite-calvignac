@@ -1553,6 +1553,10 @@ async function updateProblemesClients() {
                     .select('id, telephone, nom, prenom')
                     .in('id', reservationIds);
                 
+                if (resError) {
+                    console.error('❌ Erreur récupération reservations:', resError);
+                }
+                
                 if (!resError && reservations) {
                     // Créer un map pour lookup rapide
                     const resMap = {};
@@ -1665,7 +1669,7 @@ function renderProblemeCard(pb, isUrgent) {
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     ${pb.telephone ? `
-                        <button onclick="ouvrirReponseWhatsApp(${pb.id}, '${pb.telephone}', '${(pb.sujet || '').replace(/'/g, "\\'")}', '${pb.gite}', '${(pb.description || '').replace(/'/g, "\\'")}', '${pb.client_nom || 'Client'}')" 
+                        <button onclick="ouvrirReponseWhatsApp(${pb.id}, '${pb.telephone}', '${(pb.sujet || '').replace(/'/g, "\\'")}', '${pb.gite || ''}', '${(pb.description || '').replace(/'/g, "\\'")}', '${(pb.client_nom || 'Client').replace(/'/g, "\\'")}')" 
                                 style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3);"
                                 onmouseover="this.style.transform='scale(1.05)'"
                                 onmouseout="this.style.transform='scale(1)'">
