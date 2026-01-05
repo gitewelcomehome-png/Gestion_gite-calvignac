@@ -2171,9 +2171,12 @@ async function loadClientChecklists() {
         renderClientChecklist('sortie', templatesSortie || [], progressMap);
         
         console.log('✅ Checklists chargées:', {
+            gite: giteInfo.gite,
             entree: templatesEntree?.length || 0,
             sortie: templatesSortie?.length || 0,
-            completed: Object.keys(progressMap).length
+            completed: Object.keys(progressMap).length,
+            templatesEntree: templatesEntree,
+            templatesSortie: templatesSortie
         });
     } catch (error) {
         console.error('❌ Erreur loadClientChecklists:', error);
@@ -2181,15 +2184,20 @@ async function loadClientChecklists() {
 }
 
 function renderClientChecklist(type, templates, progressMap) {
+    console.log(`🎨 Render checklist ${type}:`, { templates, progressMap });
+    
     const containerId = type === 'entree' ? 'checklistEntreeContainer' : 'checklistSortieContainer';
     const progressBarId = type === 'entree' ? 'progressEntree' : 'progressSortie';
     const progressTextId = type === 'entree' ? 'progressEntreeText' : 'progressSortieText';
     
+    console.log(`🔍 Recherche container: ${containerId}`);
     const container = document.getElementById(containerId);
     if (!container) {
-        console.warn(`⚠️ Container ${containerId} introuvable`);
+        console.error(`❌ Container ${containerId} introuvable`);
         return;
     }
+    
+    console.log(`✅ Container trouvé:`, container);
     
     if (!templates || templates.length === 0) {
         container.innerHTML = '<p style="color: var(--gray-600); font-style: italic; text-align: center;">Aucun item configuré</p>';
