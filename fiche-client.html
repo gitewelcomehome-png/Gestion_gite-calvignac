@@ -1154,11 +1154,11 @@
             </button>
             <button class="tab-btn" data-tab="probleme">
                 <span class="icon">⚠️</span>
-                <span class="label" data-i18n="tab_probleme">Problème</span>
+                <span class="label" data-i18n="tab_probleme">Signaler</span>
             </button>
             <button class="tab-btn" data-tab="evaluation">
                 <span class="icon">⭐</span>
-                <span class="label" data-i18n="tab_evaluation">Évaluation</span>
+                <span class="label" data-i18n="tab_evaluation">Votre avis</span>
             </button>
             <button class="tab-btn" data-tab="faq">
                 <span class="icon">💬</span>
@@ -1482,116 +1482,6 @@
                 </div>
                 <div id="checklistSortieContainer" style="margin-top: 1rem;"></div>
             </div>
-            
-            <!-- ÉTAT DES LIEUX -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">📸 Signaler un problème</h2>
-                    <p class="card-description">Si vous constatez un dommage avant votre départ</p>
-                </div>
-                <form id="formEtatDesLieux">
-                    <div class="form-group">
-                        <label class="label">Description du problème</label>
-                        <textarea class="textarea" id="descriptionDommage" rows="4" placeholder="Décrivez le problème constaté..."></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="label">Ajouter des photos (optionnel)</label>
-                        <input type="file" id="photosInput" accept="image/*" multiple style="display: none;">
-                        <button type="button" class="btn btn-outline btn-full" onclick="document.getElementById('photosInput').click()">
-                            📷 Prendre / Choisir des photos
-                        </button>
-                        <div id="photosPreview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem; margin-top: 0.75rem;"></div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-full">
-                        Envoyer le signalement
-                    </button>
-                </form>
-            </div>
-            
-            <!-- ÉVALUATION DU SÉJOUR -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">⭐ Comment s'est passé votre séjour ?</h2>
-                </div>
-                <form id="formEvaluation">
-                    <div class="form-group">
-                        <label class="label">Propreté</label>
-                        <div class="rating-stars" data-rating-for="proprete">
-                            <span data-value="1">⭐</span>
-                            <span data-value="2">⭐</span>
-                            <span data-value="3">⭐</span>
-                            <span data-value="4">⭐</span>
-                            <span data-value="5">⭐</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="label">Confort</label>
-                        <div class="rating-stars" data-rating-for="confort">
-                            <span data-value="1">⭐</span>
-                            <span data-value="2">⭐</span>
-                            <span data-value="3">⭐</span>
-                            <span data-value="4">⭐</span>
-                            <span data-value="5">⭐</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="label">Équipements</label>
-                        <div class="rating-stars" data-rating-for="equipements">
-                            <span data-value="1">⭐</span>
-                            <span data-value="2">⭐</span>
-                            <span data-value="3">⭐</span>
-                            <span data-value="4">⭐</span>
-                            <span data-value="5">⭐</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="label">Communication</label>
-                        <div class="rating-stars" data-rating-for="communication">
-                            <span data-value="1">⭐</span>
-                            <span data-value="2">⭐</span>
-                            <span data-value="3">⭐</span>
-                            <span data-value="4">⭐</span>
-                            <span data-value="5">⭐</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="label">Un commentaire ?</label>
-                        <textarea class="textarea" id="commentaireEvaluation" rows="4" placeholder="Partagez votre expérience..."></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="label">Recommanderiez-vous ce gîte ?</label>
-                        <div class="radio-group">
-                            <div class="radio-item">
-                                <input type="radio" name="recommandation" value="oui_sans_hesiter" id="recoOui">
-                                <label for="recoOui">Oui, sans hésiter</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" name="recommandation" value="oui_probablement" id="recoProbable">
-                                <label for="recoProbable">Oui, probablement</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" name="recommandation" value="peut_etre" id="recoPeutEtre">
-                                <label for="recoPeutEtre">Peut-être</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" name="recommandation" value="non" id="recoNon">
-                                <label for="recoNon">Non</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-full">
-                        Envoyer mon avis
-                    </button>
-                </form>
-            </div>
         </div>
         
         <!-- Onglet ACTIVITÉS -->
@@ -1679,105 +1569,105 @@
                     <p class="card-description">Votre avis nous aide à améliorer nos services</p>
                 </div>
                 
-                <form id="formEvaluation" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <form id="formEvaluationSejour" style="display: flex; flex-direction: column; gap: 1.5rem;">
                     <!-- Note globale -->
                     <div class="form-group">
-                        <label class="label" style="font-size: 1.1rem; font-weight: 600;">Note globale</label>
-                        <div style="display: flex; gap: 0.5rem; justify-content: center; font-size: 2.5rem;">
-                            <span class="star-rating" data-rating="1">☆</span>
-                            <span class="star-rating" data-rating="2">☆</span>
-                            <span class="star-rating" data-rating="3">☆</span>
-                            <span class="star-rating" data-rating="4">☆</span>
-                            <span class="star-rating" data-rating="5">☆</span>
+                        <label class="label" style="font-size: 1.1rem; font-weight: 600;">✨ Note globale</label>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; font-size: 3rem;">
+                            <span class="star-rating" data-rating="1" data-field="noteGlobale">☆</span>
+                            <span class="star-rating" data-rating="2" data-field="noteGlobale">☆</span>
+                            <span class="star-rating" data-rating="3" data-field="noteGlobale">☆</span>
+                            <span class="star-rating" data-rating="4" data-field="noteGlobale">☆</span>
+                            <span class="star-rating" data-rating="5" data-field="noteGlobale">☆</span>
                         </div>
                         <input type="hidden" id="noteGlobale" required>
                     </div>
                     
-                    <!-- Critères détaillés -->
+                    <!-- Critères détaillés avec étoiles -->
                     <div class="form-group">
-                        <label class="label">Propreté</label>
-                        <select class="input" id="noteProprete" required>
-                            <option value="">Choisissez...</option>
-                            <option value="1">⭐ Très mauvais</option>
-                            <option value="2">⭐⭐ Mauvais</option>
-                            <option value="3">⭐⭐⭐ Correct</option>
-                            <option value="4">⭐⭐⭐⭐ Bien</option>
-                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                        </select>
+                        <label class="label">🧹 Propreté</label>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; font-size: 2rem;">
+                            <span class="star-rating" data-rating="1" data-field="noteProprete">☆</span>
+                            <span class="star-rating" data-rating="2" data-field="noteProprete">☆</span>
+                            <span class="star-rating" data-rating="3" data-field="noteProprete">☆</span>
+                            <span class="star-rating" data-rating="4" data-field="noteProprete">☆</span>
+                            <span class="star-rating" data-rating="5" data-field="noteProprete">☆</span>
+                        </div>
+                        <input type="hidden" id="noteProprete" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="label">Confort</label>
-                        <select class="input" id="noteConfort" required>
-                            <option value="">Choisissez...</option>
-                            <option value="1">⭐ Très mauvais</option>
-                            <option value="2">⭐⭐ Mauvais</option>
-                            <option value="3">⭐⭐⭐ Correct</option>
-                            <option value="4">⭐⭐⭐⭐ Bien</option>
-                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                        </select>
+                        <label class="label">🛋️ Confort</label>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; font-size: 2rem;">
+                            <span class="star-rating" data-rating="1" data-field="noteConfort">☆</span>
+                            <span class="star-rating" data-rating="2" data-field="noteConfort">☆</span>
+                            <span class="star-rating" data-rating="3" data-field="noteConfort">☆</span>
+                            <span class="star-rating" data-rating="4" data-field="noteConfort">☆</span>
+                            <span class="star-rating" data-rating="5" data-field="noteConfort">☆</span>
+                        </div>
+                        <input type="hidden" id="noteConfort" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="label">Emplacement</label>
-                        <select class="input" id="noteEmplacement" required>
-                            <option value="">Choisissez...</option>
-                            <option value="1">⭐ Très mauvais</option>
-                            <option value="2">⭐⭐ Mauvais</option>
-                            <option value="3">⭐⭐⭐ Correct</option>
-                            <option value="4">⭐⭐⭐⭐ Bien</option>
-                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                        </select>
+                        <label class="label">📍 Emplacement</label>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; font-size: 2rem;">
+                            <span class="star-rating" data-rating="1" data-field="noteEmplacement">☆</span>
+                            <span class="star-rating" data-rating="2" data-field="noteEmplacement">☆</span>
+                            <span class="star-rating" data-rating="3" data-field="noteEmplacement">☆</span>
+                            <span class="star-rating" data-rating="4" data-field="noteEmplacement">☆</span>
+                            <span class="star-rating" data-rating="5" data-field="noteEmplacement">☆</span>
+                        </div>
+                        <input type="hidden" id="noteEmplacement" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="label">Équipements</label>
-                        <select class="input" id="noteEquipements" required>
-                            <option value="">Choisissez...</option>
-                            <option value="1">⭐ Très mauvais</option>
-                            <option value="2">⭐⭐ Mauvais</option>
-                            <option value="3">⭐⭐⭐ Correct</option>
-                            <option value="4">⭐⭐⭐⭐ Bien</option>
-                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                        </select>
+                        <label class="label">🔧 Équipements</label>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; font-size: 2rem;">
+                            <span class="star-rating" data-rating="1" data-field="noteEquipements">☆</span>
+                            <span class="star-rating" data-rating="2" data-field="noteEquipements">☆</span>
+                            <span class="star-rating" data-rating="3" data-field="noteEquipements">☆</span>
+                            <span class="star-rating" data-rating="4" data-field="noteEquipements">☆</span>
+                            <span class="star-rating" data-rating="5" data-field="noteEquipements">☆</span>
+                        </div>
+                        <input type="hidden" id="noteEquipements" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="label">Rapport qualité/prix</label>
-                        <select class="input" id="noteRapportQP" required>
-                            <option value="">Choisissez...</option>
-                            <option value="1">⭐ Très mauvais</option>
-                            <option value="2">⭐⭐ Mauvais</option>
-                            <option value="3">⭐⭐⭐ Correct</option>
-                            <option value="4">⭐⭐⭐⭐ Bien</option>
-                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                        </select>
+                        <label class="label">💰 Rapport qualité/prix</label>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; font-size: 2rem;">
+                            <span class="star-rating" data-rating="1" data-field="noteRapportQP">☆</span>
+                            <span class="star-rating" data-rating="2" data-field="noteRapportQP">☆</span>
+                            <span class="star-rating" data-rating="3" data-field="noteRapportQP">☆</span>
+                            <span class="star-rating" data-rating="4" data-field="noteRapportQP">☆</span>
+                            <span class="star-rating" data-rating="5" data-field="noteRapportQP">☆</span>
+                        </div>
+                        <input type="hidden" id="noteRapportQP" required>
                     </div>
                     
                     <!-- Commentaire -->
                     <div class="form-group">
-                        <label class="label">Votre commentaire</label>
-                        <textarea class="textarea" id="commentaireEvaluation" rows="5" 
+                        <label class="label">💬 Votre commentaire</label>
+                        <textarea class="textarea" id="commentaireEvaluationSejour" rows="5" 
                                   placeholder="Partagez votre expérience..." required></textarea>
                     </div>
                     
                     <!-- Points positifs/négatifs -->
                     <div class="form-group">
-                        <label class="label">Points positifs</label>
-                        <textarea class="textarea" id="pointsPositifs" rows="3" 
+                        <label class="label">👍 Points positifs</label>
+                        <textarea class="textarea" id="pointsPositifsSejour" rows="3" 
                                   placeholder="Qu'avez-vous particulièrement apprécié ?"></textarea>
                     </div>
                     
                     <div class="form-group">
-                        <label class="label">Points à améliorer</label>
-                        <textarea class="textarea" id="pointsAmeliorer" rows="3" 
+                        <label class="label">🔧 Points à améliorer</label>
+                        <textarea class="textarea" id="pointsAmeliorerSejour" rows="3" 
                                   placeholder="Que pourrions-nous améliorer ?"></textarea>
                     </div>
                     
                     <!-- Recommandation -->
                     <div class="form-group">
-                        <label class="label">Recommanderiez-vous ce logement ?</label>
-                        <select class="input" id="recommandation" required>
+                        <label class="label">🎯 Recommanderiez-vous ce logement ?</label>
+                        <select class="input" id="recommandationSejour" required>
                             <option value="">Choisissez...</option>
                             <option value="oui">👍 Oui, sans hésiter</option>
                             <option value="peut-etre">🤔 Peut-être</option>

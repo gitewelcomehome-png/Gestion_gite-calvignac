@@ -2353,33 +2353,39 @@ async function submitProbleme(event) {
 
 function initStarRating() {
     const stars = document.querySelectorAll('.star-rating');
-    let selectedRating = 0;
+    const ratings = {}; // Stocke les notes par champ
     
     stars.forEach(star => {
+        const field = star.getAttribute('data-field');
+        
         // Survol
         star.addEventListener('mouseenter', function() {
             const rating = parseInt(this.getAttribute('data-rating'));
-            highlightStars(rating);
+            const fieldName = this.getAttribute('data-field');
+            highlightStarsForField(fieldName, rating);
         });
         
         // Clic
         star.addEventListener('click', function() {
-            selectedRating = parseInt(this.getAttribute('data-rating'));
-            document.getElementById('noteGlobale').value = selectedRating;
-            highlightStars(selectedRating, true);
+            const rating = parseInt(this.getAttribute('data-rating'));
+            const fieldName = this.getAttribute('data-field');
+            ratings[fieldName] = rating;
+            document.getElementById(fieldName).value = rating;
+            highlightStarsForField(fieldName, rating, true);
+            console.log(`⭐ ${fieldName}: ${rating}/5`);
+        });
+        
+        // Réinitialiser au départ de la souris
+        star.addEventListener('mouseleave', function() {
+            const fieldName = this.getAttribute('data-field');
+            const savedRating = ratings[fieldName] || 0;
+            highlightStarsForField(fieldName, savedRating, true);
         });
     });
     
-    // Réinitialiser au départ de la souris
-    const container = stars[0]?.parentElement;
-    if (container) {
-        container.addEventListener('mouseleave', function() {
-            highlightStars(selectedRating, true);
-        });
-    }
-    
-    function highlightStars(rating, permanent = false) {
-        stars.forEach(star => {
+    function highlightStarsForField(fieldName, rating, permanent = false) {
+        const fieldStars = document.querySelectorAll(`.star-rating[data-field="${fieldName}"]`);
+        fieldStars.forEach(star => {
             const starRating = parseInt(star.getAttribute('data-rating'));
             if (starRating <= rating) {
                 star.textContent = '★';
@@ -2401,8 +2407,14 @@ async function submitEvaluation(event) {
         console.log('📝 Envoi évaluation séjour...');
         
         const noteGlobale = document.getElementById('noteGlobale').value;
-        if (!noteGlobale) {
-            alert('Veuillez sélectionner une note globale en cliquant sur les étoiles.');
+        const noteProprete = document.getElementById('noteProprete').value;
+        const noteConfort = document.getElementById('noteConfort').value;
+        const noteEmplacement = document.getElementById('noteEmplacement').value;
+        const noteEquipements = document.getElementById('noteEquipements').value;
+        const noteRapportQP = document.getElementById('noteRapportQP').value;
+        
+        if (!noteGlobale || !noteProprete || !noteConfort || !noteEmplacement || !noteEquipements || !noteRapportQP) {
+            alert('Veuillez noter tous les critères en cliquant sur les étoiles.');
             return;
         }
         
@@ -2410,14 +2422,15 @@ async function submitEvaluation(event) {
             reservation_id: giteInfo.reservationId,
             gite: giteInfo.gite,
             note_globale: parseInt(noteGlobale),
-            note_proprete: parseInt(document.getElementById('noteProprete').value),
-            note_confort: parseInt(document.getElementById('noteConfort').value),
-            note_emplacement: parseInt(document.getElementById('noteEmplacement').value),
-            note_equipements: parseInt(document.getElementById('noteEquipements').value),
-            note_rapport_qp: parseInt(document.getElementById('noteRapportQP').value),
-            commentaire: document.getElementById('commentaireEvaluation').value,
-            points_positifs: document.getElementById('pointsPositifs').value,
-            points_ameliorer: document.getElementById('pointsAmeliorer').value,
+            note_proprete: parseInt(noteProprete),
+            note_confort: parseInt(noteConfort),
+            note_emplacement: parseInt(noteEmplacement),
+            note_equipements: parseInt(noteEquipements),
+            note_rapport_qp: parseInt(noteRapportQP),
+            commentaire: document.getElementById('commentaireEvaluationSejour').value,
+            points_positifs: document.getElementById('pointsPositifsSejour').value,
+            points_ameliorer: document.getElementById('pointsAmeliorerSejour').value,
+            recommandation: document.getElementById('recommandationSejour').value,
             recommandation: document.getElementById('recommandation').value,
             created_at: new Date().toISOString()
         };
@@ -2432,7 +2445,7 @@ async function submitEvaluation(event) {
         console.log('✅ Évaluation enregistrée:', data);
         
         // Masquer le formulaire et afficher la confirmation
-        document.getElementById('formEvaluation').style.display = 'none';
+        document.getElementById('formEvaluationSejour').style.display = 'none';
         document.getElementById('confirmationEvaluation').style.display = 'block';
         
     } catch (error) {
@@ -2456,7 +2469,7 @@ function initProblemeTab() {
 function initEvaluationTab() {
     initStarRating();
     
-    const form = document.getElementById('formEvaluation');
+    const form = document.getElementById('formEvaluationSejour');
     if (form) {
         form.removeEventListener('submit', submitEvaluation); // Éviter les doublons
         form.addEventListener('submit', submitEvaluation);
