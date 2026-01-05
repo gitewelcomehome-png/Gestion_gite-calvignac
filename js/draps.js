@@ -55,7 +55,8 @@ async function chargerStocks() {
             stocksActuels[stock.gite] = stock;
             
             // Remplir les champs (vérifier qu'ils existent)
-            const giteSlug = stock.gite.toLowerCase();
+            // Normaliser le nom (retirer les accents pour les IDs HTML)
+            const giteSlug = stock.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             const fields = [
                 { id: `stock-${giteSlug}-draps-grands`, value: stock.draps_plats_grands },
                 { id: `stock-${giteSlug}-draps-petits`, value: stock.draps_plats_petits },
