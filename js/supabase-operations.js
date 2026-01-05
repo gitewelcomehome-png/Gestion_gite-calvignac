@@ -97,8 +97,11 @@ async function getAllReservations(forceRefresh) {
         
         if (result.error) throw result.error;
         
+        console.log('📊 Données brutes Supabase:', result.data?.length, 'réservations');
+        
         // Convertir snake_case en camelCase pour compatibilité
-        const reservations = (result.data || []).map(function(r) {
+        const allMapped = (result.data || []).map(function(r) {
+            const nuits = window.calculateNights(r.date_debut, r.date_fin);
             return {
                 id: r.id,
                 gite: r.gite,
@@ -113,14 +116,20 @@ async function getAllReservations(forceRefresh) {
                 acompte: r.acompte,
                 restant: r.restant,
                 paiement: r.paiement,
-                nuits: window.calculateNights(r.date_debut, r.date_fin),
+                nuits: nuits,
                 timestamp: r.timestamp,
                 syncedFrom: r.synced_from
             };
-        }).filter(function(r) {
+        });
+        
+        console.log('🔢 Répartition nuits:', allMapped.map(r => `${r.nom}: ${r.nuits}n`));
+        
+        const reservations = allMapped.filter(function(r) {
             // Garder toutes les réservations réelles (>= 1 nuit)
             return r.nuits >= 1;
         });
+        
+        console.log('✅ Réservations après filtre:', reservations.length);
         
         // Mettre en cache
         window.CACHE.reservations = reservations;
