@@ -1387,7 +1387,8 @@ async function afficherGraphiqueTresorerieDashboard() {
 async function refreshDashboard() {
     updateDashboardHeader();
     await updateDashboardAlerts();
-    await updateDemandesClients(); // Nouvelle fonction
+    await updateDemandesClients();
+    await updateProblemesClients(); // Nouvelle fonction pour problèmes/retours
     await updateDashboardStats();
     await updateDashboardReservations();
     await updateDashboardMenages();
@@ -1523,16 +1524,155 @@ async function refuserDemandeHoraire(demandeId) {
     }
 }
 
+// ==========================================
+// 💬 RETOURS & PROBLÈMES CLIENTS
+// ==========================================
+
+async function updateProblemesClients() {
+    try {
+        console.log('🔍 Chargement des problèmes clients...');
+        
+        const { data: problemes, error } = await supabaseClient
+            .from('problemes_signales')
+            .select('*')
+            .is('traite', false) // Seulement les non traités
+            .order('created_at', { ascending: false });
+        
+        if (error) {
+            console.error('❌ Erreur chargement problèmes:', error);
+            throw error;
+        }
+        
+        console.log('✅ Problèmes chargés:', problemes?.length || 0);
+        
+        const container = document.getElementById('liste-problemes-clients');
+        const badge = document.getElementById('badge-problemes-count');
+        const card = document.getElementById('dashboard-problemes-clients');
+        
+        if (!problemes || problemes.length === 0) {
+            card.style.display = 'none'; // Cacher si aucun problème
+            return;
+        }
+        
+        // Afficher la carte et mettre à jour le badge
+        card.style.display = 'block';
+        badge.textContent = problemes.length;
+        
+        // Générer le HTML pour chaque problème
+        let html = '';
+        problemes.forEach(pb => {
+            const typeIcon = {
+                'demande': '🏠',
+                'retour': '💬',
+                'amelioration': '💡',
+                'probleme': '⚠️'
+            }[pb.type] || '📝';
+            
+            const urgenceColor = {
+                'faible': '#27ae60',
+                'moyenne': '#f39c12',
+                'haute': '#e74c3c'
+            }[pb.urgence] || '#95a5a6';
+            
+            const urgenceLabel = {
+                'faible': 'Faible',
+                'moyenne': 'Moyenne',
+                'haute': 'Haute'
+            }[pb.urgence] || 'Non défini';
+            
+            html += `
+                <div style="background: white; padding: 15px; border-radius: 10px; border-left: 5px solid ${urgenceColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <span style="font-size: 1.3rem;">${typeIcon}</span>
+                                <span style="font-weight: 700; font-size: 1.05rem; color: #2c3e50;">${pb.titre || 'Sans titre'}</span>
+                                <span style="background: ${urgenceColor}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                    ${urgenceLabel}
+                                </span>
+                            </div>
+                            ${pb.description ? `<p style="margin: 0 0 8px 0; color: #7f8c8d; font-size: 0.9rem; line-height: 1.5;">${pb.description}</p>` : ''}
+                            <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #95a5a6;">
+                                <span>📅 ${new Date(pb.created_at).toLocaleDateString('fr-FR', {day: '2-digit', month: 'short', year: 'numeric'})}</span>
+                                ${pb.client_nom ? `<span>👤 ${pb.client_nom}</span>` : ''}
+                                ${pb.gite ? `<span>🏠 ${pb.gite}</span>` : ''}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                            <button onclick="traiterProbleme(${pb.id})" 
+                                    style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);"
+                                    onmouseover="this.style.transform='scale(1.05)'"
+                                    onmouseout="this.style.transform='scale(1)'">
+                                ✓ Traité
+                            </button>
+                            <button onclick="supprimerProbleme(${pb.id})" 
+                                    style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;"
+                                    onmouseover="this.style.background='#c0392b'"
+                                    onmouseout="this.style.background='#e74c3c'">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+    } catch (err) {
+        console.error('❌ Erreur update problèmes clients:', err);
+    }
+}
+
+async function traiterProbleme(id) {
+    try {
+        const { error } = await supabaseClient
+            .from('problemes_signales')
+            .update({ traite: true })
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        showToast('✓ Problème marqué comme traité', 'success');
+        await updateProblemesClients();
+    } catch (err) {
+        console.error('Erreur traitement:', err);
+        alert('❌ Erreur lors du traitement');
+    }
+}
+
+async function supprimerProbleme(id) {
+    if (!confirm('Supprimer ce problème définitivement ?')) return;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('problemes_signales')
+            .delete()
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        showToast('✓ Problème supprimé', 'success');
+        await updateProblemesClients();
+    } catch (err) {
+        console.error('Erreur suppression:', err);
+        alert('❌ Erreur lors de la suppression');
+    }
+}
+
 // Exposer les fonctions dans le scope global pour les appels depuis HTML
 window.addTodoItem = addTodoItem;
 window.toggleTodo = toggleTodo;
 window.deleteTodo = deleteTodo;
+window.editTodo = editTodo;
 window.openEditReservation = openEditReservation;
 window.openFicheClient = openFicheClient;
 window.refreshDashboard = refreshDashboard;
 window.closeAddTodoModal = closeAddTodoModal;
 window.validerDemandeHoraire = validerDemandeHoraire;
 window.refuserDemandeHoraire = refuserDemandeHoraire;
+window.traiterProbleme = traiterProbleme;
+window.supprimerProbleme = supprimerProbleme;
 
 // =============================================
 // FONCTIONS CHECKLIST POUR DASHBOARD
