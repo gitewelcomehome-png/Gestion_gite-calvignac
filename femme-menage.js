@@ -39,9 +39,9 @@ async function chargerInterventions() {
         const { data: menages, error } = await window.supabaseClient
             .from('cleaning_schedule')
             .select('*')
-            .gte('date', today.toISOString().split('T')[0])
-            .lte('date', troisSemaines.toISOString().split('T')[0])
-            .order('date', { ascending: true });
+            .gte('scheduled_date', today.toISOString().split('T')[0])
+            .lte('scheduled_date', troisSemaines.toISOString().split('T')[0])
+            .order('scheduled_date', { ascending: true });
 
         if (error) throw error;
 
@@ -59,7 +59,7 @@ async function chargerInterventions() {
 
         let html = '';
         menages.forEach(menage => {
-            const date = new Date(menage.date);
+            const date = new Date(menage.scheduled_date);
             const dateFormatee = date.toLocaleDateString('fr-FR', { 
                 weekday: 'long', 
                 day: 'numeric', 
@@ -67,7 +67,7 @@ async function chargerInterventions() {
             });
             
             // Statut de validation
-            const validationBadge = menage.validated 
+            const validationBadge = menage.validated_by_company 
                 ? '<span style="background: #27AE60; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">✅ Validé</span>'
                 : '<span style="background: #F39C12; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">⏳ En attente validation</span>';
             
@@ -78,7 +78,7 @@ async function chargerInterventions() {
                         ${validationBadge}
                     </div>
                     <div class="menage-gite">🏠 ${menage.gite}</div>
-                    <div class="menage-heure">⏰ ${menage.heure_proposee || 'Horaire à confirmer'}</div>
+                    <div class="menage-heure">⏰ ${menage.time_of_day === 'morning' ? 'Matin (7h-12h)' : 'Après-midi (12h-17h)'}</div>
                     ${menage.notes ? `<div style="margin-top: 8px; color: #666; font-size: 0.9rem;">📝 ${menage.notes}</div>` : ''}
                 </div>
             `;
