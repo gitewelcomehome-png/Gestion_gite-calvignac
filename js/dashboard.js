@@ -95,7 +95,7 @@ async function updateDashboardAlerts() {
     }
     
     // Vérifier les retours de ménage en attente de validation
-    const { data: retoursMenage } = await supabase
+    const { data: retoursMenage } = await window.supabaseClient
         .from('retours_menage')
         .select('*')
         .eq('validated', false)
@@ -139,16 +139,23 @@ async function updateDashboardAlerts() {
     }
     
     let html = '';
-    alerts.forEach(alert => {
+    alerts.forEach((alert, index) => {
         const bgColor = alert.type === 'danger' ? '#E74C3C' : alert.type === 'warning' ? '#F39C12' : '#3498DB';
+        const alertId = `dashboard-alert-${index}`;
         html += `
-            <div style="background: ${bgColor}; color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer;" 
-                 onclick="(${alert.action.toString()})()">
+            <div id="${alertId}" style="background: ${bgColor}; color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer;">
                 <span style="font-size: 1.5rem;">${alert.icon}</span>
                 <span style="flex: 1; font-weight: 500;">${alert.message}</span>
                 <span style="font-size: 1.2rem;">→</span>
             </div>
         `;
+        // Attacher l'événement après le rendu
+        setTimeout(() => {
+            const element = document.getElementById(alertId);
+            if (element) {
+                element.onclick = alert.action;
+            }
+        }, 0);
     });
     container.innerHTML = html;
 }
@@ -2097,7 +2104,7 @@ async function afficherDetailsRetourMenage(retourId) {
 
 async function validerRetourMenage(retourId) {
     try {
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
             .from('retours_menage')
             .update({
                 validated: true,
