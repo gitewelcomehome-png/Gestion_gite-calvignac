@@ -168,9 +168,36 @@ async function syncCalendar(gite, platform, url) {
         
         // 🗑️ ÉTAPE 1 : Récupérer les réservations existantes de cette plateforme pour ce gîte
         const existingReservations = await getAllReservations();
-        const platformReservations = existingReservations.filter(r => 
-            r.gite === gite && r.syncedFrom === platform
-        );
+        
+        // Filtrer par gîte et plateforme (si le champ syncedFrom existe)
+        // Sinon, utiliser le site pour identifier les réservations de cette plateforme
+        const platformReservations = existingReservations.filter(r => {
+            if (r.gite !== gite) return false;
+            
+            // Vérifier si syncedFrom existe et correspond
+            if (r.syncedFrom) {
+                return r.syncedFrom === platform;
+            }
+            
+            // Fallback : utiliser le champ 'site' pour identifier la plateforme
+            const siteLower = (r.site || '').toLowerCase();
+            const platformLower = platform.toLowerCase();
+            
+            if (platformLower.includes('airbnb')) {
+                return siteLower.includes('airbnb');
+            } else if (platformLower.includes('abritel') || platformLower.includes('homelidays')) {
+                return siteLower.includes('abritel') || siteLower.includes('homelidays');
+            } else if (platformLower.includes('gites')) {
+                return siteLower.includes('gîtes de france') || siteLower.includes('gites de france');
+            }
+            
+            return false;
+        });
+        
+        console.log(`📋 Réservations existantes pour ${gite} / ${platform}: ${platformReservations.length}`);
+        platformReservations.forEach(r => {
+            console.log(`   • ${r.dateDebut} → ${r.dateFin} | ${r.nom} | Site: "${r.site}" | SyncedFrom: "${r.syncedFrom || 'NON DÉFINI'}"`);
+        });
         
         // Créer un Set des IDs de réservations trouvées dans le flux iCal
         const foundReservationIds = new Set();
