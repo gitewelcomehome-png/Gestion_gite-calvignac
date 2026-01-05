@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Vercel - Retours Ménage</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnostic Retours Ménage</h1>
+    <div id="results"></div>
+    
+    <script src="js/shared-config.js"></script>
+    <script>
+        async function diagnostic() {
+            const div = document.getElementById('results');
+            let html = '<h2>Tests en cours...</h2>';
+            
+            // Test 1: Vérifier supabaseClient
+            html += '<h3>1️⃣ Test Supabase Client</h3>';
+            if (window.supabaseClient) {
+                html += '<p class="success">✅ window.supabaseClient chargé</p>';
+            } else {
+                html += '<p class="error">❌ window.supabaseClient non défini</p>';
+                div.innerHTML = html;
+                return;
+            }
+            
+            // Test 2: Tester la table
+            html += '<h3>2️⃣ Test Table retours_menage</h3>';
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('retours_menage')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    if (error.code === '42P01') {
+                        html += '<p class="error">❌ TABLE N\'EXISTE PAS dans Supabase</p>';
+                        html += '<p>👉 Vous devez exécuter sql/create_retours_menage.sql dans Supabase SQL Editor</p>';
+                    } else {
+                        html += '<p class="error">❌ Erreur: ' + error.message + '</p>';
+                    }
+                } else {
+                    html += '<p class="success">✅ Table accessible</p>';
+                }
+            } catch (e) {
+                html += '<p class="error">❌ Exception: ' + e.message + '</p>';
+            }
+            
+            // Test 3: Compter les retours
+            html += '<h3>3️⃣ Comptage Retours</h3>';
+            try {
+                const { count: total } = await window.supabaseClient
+                    .from('retours_menage')
+                    .select('*', { count: 'exact', head: true });
+                
+                const { count: nonValides } = await window.supabaseClient
+                    .from('retours_menage')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('validated', false);
+                
+                html += '<p>Total retours: <strong>' + (total || 0) + '</strong></p>';
+                html += '<p>Retours non validés: <strong>' + (nonValides || 0) + '</strong></p>';
+                
+                if (nonValides === 0) {
+                    html += '<p class="error">⚠️ Aucun retour en attente → Les alertes ne s\'afficheront pas</p>';
+                }
+            } catch (e) {
+                html += '<p class="error">❌ Impossible de compter: ' + e.message + '</p>';
+            }
+            
+            // Test 4: Vérifier version dashboard.js
+            html += '<h3>4️⃣ Cache Dashboard</h3>';
+            const scripts = document.querySelectorAll('script[src*="dashboard.js"]');
+            if (scripts.length > 0) {
+                html += '<p>Script détecté: ' + scripts[0].src + '</p>';
+            }
+            html += '<p>👉 Rafraîchir avec <kbd>Ctrl+Shift+R</kbd> (Windows/Linux) ou <kbd>Cmd+Shift+R</kbd> (Mac)</p>';
+            
+            div.innerHTML = html;
+        }
+        
+        setTimeout(diagnostic, 500);
+    </script>
+</body>
+</html>
