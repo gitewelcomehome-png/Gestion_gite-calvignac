@@ -2149,9 +2149,10 @@ async function submitRetourDemande(event) {
                 .insert([{
                     reservation_id: formData.reservation_id,
                     gite: formData.gite,
-                    type: 'autre',
+                    type: 'probleme',
+                    sujet: formData.sujet,
                     urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
-                    description: `${formData.sujet}\n\n${formData.description}`,
+                    description: formData.description,
                     statut: 'nouveau',
                     created_at: formData.created_at
                 }])
@@ -2166,8 +2167,9 @@ async function submitRetourDemande(event) {
                     reservation_id: formData.reservation_id,
                     gite: formData.gite,
                     type: type, // demande, retour, amelioration
+                    sujet: formData.sujet,
                     urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
-                    description: `${formData.sujet}\n\n${formData.description}`,
+                    description: formData.description,
                     statut: 'nouveau',
                     created_at: formData.created_at
                 }])
@@ -2319,6 +2321,21 @@ function initProblemeTab() {
     if (typeSelect && urgenceGroup) {
         typeSelect.addEventListener('change', (e) => {
             urgenceGroup.style.display = e.target.value === 'probleme' ? 'block' : 'none';
+        });
+    }
+    
+    // Bouton pour créer une nouvelle demande après confirmation
+    const btnNouvelleDemande = document.getElementById('btnNouvelleDemande');
+    if (btnNouvelleDemande) {
+        btnNouvelleDemande.addEventListener('click', () => {
+            // Réinitialiser le formulaire
+            document.getElementById('formRetoursDemande').reset();
+            // Masquer la confirmation
+            document.getElementById('confirmationRetourDemande').style.display = 'none';
+            // Afficher le formulaire
+            document.getElementById('formRetoursDemande').style.display = 'flex';
+            // Masquer l'urgence par défaut
+            urgenceGroup.style.display = 'none';
         });
     }
 }

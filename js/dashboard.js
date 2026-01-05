@@ -1532,63 +1532,93 @@ async function updateProblemesClients() {
         card.style.display = 'block';
         badge.textContent = problemes.length;
         
-        // Générer le HTML pour chaque problème
+        // Séparer les problèmes urgents des autres
+        const problemesUrgents = problemes.filter(pb => pb.type === 'probleme');
+        const autresDemandes = problemes.filter(pb => pb.type !== 'probleme');
+        
         let html = '';
-        problemes.forEach(pb => {
-            const typeIcon = {
-                'demande': '🏠',
-                'retour': '💬',
-                'amelioration': '💡',
-                'probleme': '⚠️'
-            }[pb.type] || '📝';
-            
-            const urgenceColor = {
-                'faible': '#27ae60',
-                'moyenne': '#f39c12',
-                'haute': '#e74c3c'
-            }[pb.urgence] || '#95a5a6';
-            
-            const urgenceLabel = {
-                'faible': 'Faible',
-                'moyenne': 'Moyenne',
-                'haute': 'Haute'
-            }[pb.urgence] || 'Non défini';
-            
-            html += `
-                <div style="background: white; padding: 15px; border-radius: 10px; border-left: 5px solid ${urgenceColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                                <span style="font-size: 1.3rem;">${typeIcon}</span>
-                                <span style="font-weight: 700; font-size: 1.05rem; color: #2c3e50;">${pb.titre || 'Sans titre'}</span>
-                                <span style="background: ${urgenceColor}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
-                                    ${urgenceLabel}
-                                </span>
-                            </div>
-                            ${pb.description ? `<p style="margin: 0 0 8px 0; color: #7f8c8d; font-size: 0.9rem; line-height: 1.5;">${pb.description}</p>` : ''}
-                            <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #95a5a6;">
-                                <span>📅 ${new Date(pb.created_at).toLocaleDateString('fr-FR', {day: '2-digit', month: 'short', year: 'numeric'})}</span>
-                                ${pb.client_nom ? `<span>👤 ${pb.client_nom}</span>` : ''}
-                                ${pb.gite ? `<span>🏠 ${pb.gite}</span>` : ''}
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                            <button onclick="traiterProbleme(${pb.id})" 
-                                    style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);"
-                                    onmouseover="this.style.transform='scale(1.05)'"
-                                    onmouseout="this.style.transform='scale(1)'">
-                                ✓ Traité
-                            </button>
-                            <button onclick="supprimerProbleme(${pb.id})" 
-                                    style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;"
-                                    onmouseover="this.style.background='#c0392b'"
-                                    onmouseout="this.style.background='#e74c3c'">
-                                🗑️
-                            </button>
-                        </div>
+        
+        // Afficher d'abord les problèmes urgents
+        if (problemesUrgents.length > 0) {
+            html += '<div style="margin-bottom: 20px;"><h3 style="color: #e74c3c; font-size: 0.95rem; margin-bottom: 12px; font-weight: 700; text-transform: uppercase;">⚠️ Problèmes Urgents</h3>';
+            problemesUrgents.forEach(pb => {
+                html += renderProblemeCard(pb, true);
+            });
+            html += '</div>';
+        }
+        
+        // Puis les autres demandes
+        if (autresDemandes.length > 0) {
+            html += '<div><h3 style="color: #7f8c8d; font-size: 0.95rem; margin-bottom: 12px; font-weight: 700; text-transform: uppercase;">💬 Demandes & Retours</h3>';
+            autresDemandes.forEach(pb => {
+                html += renderProblemeCard(pb, false);
+            });
+            html += '</div>';
+        }
+        
+        container.innerHTML = html;
+        
+    } catch (err) {
+        console.error('❌ Erreur update problèmes clients:', err);
+    }
+}
+
+function renderProblemeCard(pb, isUrgent) {
+    const typeIcon = {
+        'demande': '🏠',
+        'retour': '💬',
+        'amelioration': '💡',
+        'probleme': '⚠️'
+    }[pb.type] || '📝';
+    
+    const urgenceColor = {
+        'faible': '#27ae60',
+        'moyenne': '#f39c12',
+        'haute': '#e74c3c'
+    }[pb.urgence] || '#95a5a6';
+    
+    const urgenceLabel = {
+        'faible': 'Faible',
+        'moyenne': 'Moyenne',
+        'haute': 'Haute'
+    }[pb.urgence] || 'Non défini';
+    
+    return `
+        <div style="background: white; padding: 15px; border-radius: 10px; border-left: 5px solid ${urgenceColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <span style="font-size: 1.3rem;">${typeIcon}</span>
+                        <span style="font-weight: 700; font-size: 1.05rem; color: #2c3e50;">${pb.sujet || 'Sans titre'}</span>
+                        <span style="background: ${urgenceColor}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                            ${urgenceLabel}
+                        </span>
+                    </div>
+                    ${pb.description ? `<p style="margin: 0 0 8px 0; color: #7f8c8d; font-size: 0.9rem; line-height: 1.5;">${pb.description.substring(0, 150)}${pb.description.length > 150 ? '...' : ''}</p>` : ''}
+                    <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #95a5a6;">
+                        <span>📅 ${new Date(pb.created_at).toLocaleDateString('fr-FR', {day: '2-digit', month: 'short', year: 'numeric'})}</span>
+                        ${pb.client_nom ? `<span>👤 ${pb.client_nom}</span>` : ''}
+                        ${pb.gite ? `<span>🏠 ${pb.gite}</span>` : ''}
                     </div>
                 </div>
-            `;
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <button onclick="traiterProbleme(${pb.id})" 
+                            style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                        ✓ Traité
+                    </button>
+                    <button onclick="supprimerProbleme(${pb.id})" 
+                            style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;"
+                            onmouseover="this.style.background='#c0392b'"
+                            onmouseout="this.style.background='#e74c3c'">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
         });
         
         container.innerHTML = html;
