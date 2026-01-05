@@ -1256,7 +1256,10 @@ function switchTab(tabId) {
     
     // Désactiver tous les onglets
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+        content.style.display = 'none'; // Force le masquage
+    });
     
     // Activer l'onglet sélectionné
     const button = document.querySelector(`[data-tab="${tabId}"]`);
@@ -1264,8 +1267,16 @@ function switchTab(tabId) {
     console.log(`🔍 Bouton trouvé:`, button ? 'OUI' : 'NON');
     console.log(`🔍 Contenu trouvé:`, content ? 'OUI' : 'NON');
     
-    if (button) button.classList.add('active');
-    if (content) content.classList.add('active');
+    if (button) {
+        button.classList.add('active');
+        console.log(`✅ Classe 'active' ajoutée au bouton`);
+    }
+    if (content) {
+        content.classList.add('active');
+        content.style.display = 'block'; // Force l'affichage
+        console.log(`✅ Classe 'active' + display:block ajoutés au contenu`);
+        console.log(`📏 Hauteur du contenu:`, content.offsetHeight, 'px');
+    }
     
     // Charger les activités
     if (tabId === 'activites') {
