@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Femme de Ménage - Gîtes Welcome Home</title>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card-title {
+            color: #667eea;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-subtitle {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+        }
+
+        .menage-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .menage-date {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .menage-gite {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .menage-heure {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stock-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stock-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .stock-item input {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stock-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧹 Espace Femme de Ménage</h1>
+            <p>Bienvenue ! Gérez vos interventions et remontez vos observations</p>
+        </div>
+
+        <!-- SECTION: Mes Interventions -->
+        <div class="card">
+            <h2 class="card-title">📅 Mes Interventions Prévues</h2>
+            <p class="section-subtitle">Vos prochains ménages planifiés</p>
+            <div id="interventions-list"></div>
+        </div>
+
+        <!-- SECTION: Créer une Tâche -->
+        <div class="card">
+            <h2 class="card-title">➕ Créer une Tâche</h2>
+            <p class="section-subtitle">Signalez des besoins d'achats ou de travaux</p>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTaskTab('achats')">🛒 Achats & Courses</button>
+                <button class="tab" onclick="switchTaskTab('travaux')">🔧 Travaux & Maintenance</button>
+            </div>
+
+            <div id="tab-achats" class="tab-content active">
+                <form id="form-tache-achats">
+                    <div class="form-group">
+                        <label for="tache-achats-titre">Titre de la tâche</label>
+                        <input type="text" id="tache-achats-titre" placeholder="Ex: Racheter du liquide vaisselle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tache-achats-gite">Gîte concerné</label>
+                        <select id="tache-achats-gite" required>
+                            <option value="">Sélectionner un gîte</option>
+                            <option value="Trévoux">Trévoux</option>
+                            <option value="Couzon">Couzon</option>
+                            <option value="Les deux">Les deux gîtes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tache-achats-description">Description (optionnel)</label>
+                        <textarea id="tache-achats-description" placeholder="Détails supplémentaires..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">➕ Créer la tâche d'achat</button>
+                </form>
+            </div>
+
+            <div id="tab-travaux" class="tab-content">
+                <form id="form-tache-travaux">
+                    <div class="form-group">
+                        <label for="tache-travaux-titre">Titre de la tâche</label>
+                        <input type="text" id="tache-travaux-titre" placeholder="Ex: Réparer le robinet qui fuit" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tache-travaux-gite">Gîte concerné</label>
+                        <select id="tache-travaux-gite" required>
+                            <option value="">Sélectionner un gîte</option>
+                            <option value="Trévoux">Trévoux</option>
+                            <option value="Couzon">Couzon</option>
+                            <option value="Les deux">Les deux gîtes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tache-travaux-priorite">Priorité</label>
+                        <select id="tache-travaux-priorite" required>
+                            <option value="normale">Normale</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tache-travaux-description">Description du problème</label>
+                        <textarea id="tache-travaux-description" placeholder="Décrivez le problème en détail..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning">🔧 Créer la tâche de travaux</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- SECTION: Mettre à jour les Stocks de Draps -->
+        <div class="card">
+            <h2 class="card-title">🛏️ Mettre à Jour les Stocks de Draps</h2>
+            <p class="section-subtitle">Actualisez les quantités après votre passage</p>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchStockTab('trevoux')">🏠 Trévoux</button>
+                <button class="tab" onclick="switchStockTab('couzon')">🏠 Couzon</button>
+            </div>
+
+            <div id="stock-trevoux" class="tab-content active">
+                <div class="stock-grid" id="stock-grid-trevoux"></div>
+                <button class="btn btn-success" onclick="sauvegarderStocks('trévoux')" style="margin-top: 20px;">💾 Sauvegarder Trévoux</button>
+            </div>
+
+            <div id="stock-couzon" class="tab-content">
+                <div class="stock-grid" id="stock-grid-couzon"></div>
+                <button class="btn btn-success" onclick="sauvegarderStocks('couzon')" style="margin-top: 20px;">💾 Sauvegarder Couzon</button>
+            </div>
+        </div>
+
+        <!-- SECTION: Faire un Retour après Ménage -->
+        <div class="card">
+            <h2 class="card-title">📝 Faire un Retour après Ménage</h2>
+            <p class="section-subtitle">Remontez l'état de la maison et le déroulement du ménage</p>
+            
+            <form id="form-retour-menage">
+                <div class="form-group">
+                    <label for="retour-gite">Gîte</label>
+                    <select id="retour-gite" required>
+                        <option value="">Sélectionner un gîte</option>
+                        <option value="Trévoux">Trévoux</option>
+                        <option value="Couzon">Couzon</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="retour-date">Date du ménage</label>
+                    <input type="date" id="retour-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="retour-etat-arrivee">État de la maison à votre arrivée</label>
+                    <select id="retour-etat-arrivee" required>
+                        <option value="">Sélectionner</option>
+                        <option value="propre">✅ Propre</option>
+                        <option value="sale">🧹 Sale (normal)</option>
+                        <option value="dégâts">⚠️ Dégâts constatés</option>
+                        <option value="autre">❓ Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="retour-details-etat">Détails sur l'état (optionnel)</label>
+                    <textarea id="retour-details-etat" placeholder="Ex: Beaucoup de vaisselle sale, taches sur le canapé..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="retour-deroulement">Comment s'est passé le ménage ?</label>
+                    <select id="retour-deroulement" required>
+                        <option value="">Sélectionner</option>
+                        <option value="bien">✅ Bien passé</option>
+                        <option value="problèmes">⚠️ Problèmes rencontrés</option>
+                        <option value="difficultés">❌ Difficultés importantes</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="retour-details-deroulement">Détails sur le déroulement</label>
+                    <textarea id="retour-details-deroulement" placeholder="Ex: RAS, tout s'est bien passé / Problème avec l'aspirateur / Temps insuffisant..."></textarea>
+                </div>
+
+                <button type="submit" class="btn">📤 Envoyer le Retour</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="femme-menage.js"></script>
+</body>
+</html>
