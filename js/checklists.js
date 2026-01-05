@@ -10,7 +10,7 @@ let currentTypeFilter = 'entree';
 // =============================================
 
 async function initChecklistsTab() {
-    console.log('📋 Initialisation onglet Check-lists');
+    // console.log('📋 Initialisation onglet Check-lists');
     
     // Listeners pour les filtres
     const giteSelect = document.getElementById('checklist-gite-select');
@@ -298,7 +298,7 @@ async function loadReservationsProgress() {
         let html = '';
         
         for (const resa of reservationsFiltered) {
-            console.log(`🔍 Recherche templates pour gîte: "${resa.gite}"`);
+            // console.log(`🔍 Recherche templates pour gîte: "${resa.gite}"`);
             
             // Récupérer tous les templates et progression
             const { data: templates, error: templatesError } = await supabaseClient
@@ -309,7 +309,7 @@ async function loadReservationsProgress() {
                 .order('type', { ascending: true })
                 .order('ordre', { ascending: true });
             
-            console.log(`📋 Templates trouvés pour ${resa.gite}:`, templates?.length || 0);
+            // console.log(`📋 Templates trouvés pour ${resa.gite}:`, templates?.length || 0);
             
             if (templatesError) {
                 console.error('Erreur templates:', templatesError);
@@ -644,4 +644,4 @@ async function loadChecklistDetailForReservation(reservationId) {
 // Exposer globalement
 window.toggleChecklistDetail = toggleChecklistDetail;
 
-console.log('✅ checklists.js chargé');
+// console.log('✅ checklists.js chargé');

@@ -1035,16 +1035,16 @@ async function updateFinancialIndicators() {
         if (simulationPrecedente.impot_revenu) {
             impotRevenuPrecedent = parseFloat(simulationPrecedente.impot_revenu);
         } else {
-            console.warn(`⚠️ Champ impot_revenu null ou undefined pour ${anneePrecedente}`);
+            // console.warn(`⚠️ Champ impot_revenu null ou undefined pour ${anneePrecedente}`);
         }
         
         if (simulationPrecedente.cotisations_urssaf) {
             urssafPrecedent = parseFloat(simulationPrecedente.cotisations_urssaf);
         } else {
-            console.warn(`⚠️ Champ cotisations_urssaf null ou undefined pour ${anneePrecedente}`);
+            // console.warn(`⚠️ Champ cotisations_urssaf null ou undefined pour ${anneePrecedente}`);
         }
     } else {
-        console.warn(`⚠️ Aucune simulation trouvée pour ${anneePrecedente}`);
+        // console.warn(`⚠️ Aucune simulation trouvée pour ${anneePrecedente}`);
     }
     
     // 4. Calculer l'IR de l'ANNÉE EN COURS (temps réel)
@@ -1093,7 +1093,7 @@ async function updateFinancialIndicators() {
         impotRevenuCourant = Math.max(0, impotParPart * nbParts);
         
     } else {
-        console.warn(`⚠️ Pas de simulation pour ${anneeActuelle}, calcul simplifié`);
+        // console.warn(`⚠️ Pas de simulation pour ${anneeActuelle}, calcul simplifié`);
         // Calcul simplifié sans salaires
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
         const quotient = resteApresURSSAF / 2; // Couple sans enfant
@@ -1577,9 +1577,9 @@ async function updateProblemesClients() {
         }
         
         // Debug amélioré : afficher directement les valeurs
-        console.log('🔍 DEBUG problèmes enrichis:');
+        // console.log('🔍 DEBUG problèmes enrichis:');
         problemes?.forEach(p => {
-            console.log(`  ➤ ID: ${p.id} | Sujet: "${p.sujet}" | Téléphone: ${p.telephone || '❌ NULL'} | Client: ${p.client_nom || '❌ NULL'} | Resa ID: ${p.reservation_id || '❌ NULL'}`);
+            // console.log(`  ➤ ID: ${p.id} | Sujet: "${p.sujet}" | Téléphone: ${p.telephone || '❌ NULL'} | Client: ${p.client_nom || '❌ NULL'} | Resa ID: ${p.reservation_id || '❌ NULL'}`);
         });
         
         // Séparer les problèmes urgents des autres
