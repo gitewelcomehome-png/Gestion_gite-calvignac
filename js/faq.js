@@ -93,10 +93,6 @@ function afficherFAQ() {
             </div>
         </div>
     `).join('');
-    
-    console.log('📝 [FAQ] HTML généré:', html.substring(0, 200) + '...');
-    container.innerHTML = html;
-    console.log('✅ [FAQ] HTML injecté dans le container');
 }
 
 function getCategorieIcon(categorie) {
