@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Insertion Problème</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        pre {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Insertion problemes_signales</h1>
+    <button onclick="testInsert()">🧪 Tester Insertion</button>
+    <button onclick="testQuery()">🔍 Vérifier Table</button>
+    <button onclick="deleteTest()">🗑️ Supprimer Tests</button>
+    <pre id="result">Cliquez sur un bouton pour commencer...</pre>
+
+    <script>
+        const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+        
+        const { createClient } = window.supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        const resultEl = document.getElementById('result');
+
+        async function testQuery() {
+            resultEl.textContent = '⏳ Chargement...';
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('problemes_signales')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) {
+                    resultEl.textContent = '❌ ERREUR:\n' + JSON.stringify(error, null, 2);
+                } else {
+                    resultEl.textContent = '✅ RÉSULTATS (' + (data?.length || 0) + ' lignes):\n\n' + 
+                        JSON.stringify(data, null, 2);
+                }
+            } catch (err) {
+                resultEl.textContent = '❌ EXCEPTION:\n' + err.message + '\n\n' + err.stack;
+            }
+        }
+
+        async function testInsert() {
+            resultEl.textContent = '⏳ Test insertion...';
+            
+            const testData = {
+                reservation_id: 999,
+                gite: 'Test Gîte',
+                type: 'demande',
+                urgence: 'moyenne',
+                description: 'Test insertion depuis page de debug - ' + new Date().toLocaleString(),
+                statut: 'nouveau',
+                created_at: new Date().toISOString()
+            };
+            
+            console.log('📤 Envoi:', testData);
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('problemes_signales')
+                    .insert([testData])
+                    .select();
+                
+                if (error) {
+                    resultEl.textContent = '❌ ERREUR:\n' + JSON.stringify(error, null, 2);
+                    console.error('Erreur:', error);
+                } else {
+                    resultEl.textContent = '✅ SUCCÈS - Insertion réussie!\n\n' + JSON.stringify(data, null, 2);
+                    console.log('✅ Insertion OK:', data);
+                }
+            } catch (err) {
+                resultEl.textContent = '❌ EXCEPTION:\n' + err.message + '\n\n' + err.stack;
+                console.error('Exception:', err);
+            }
+        }
+
+        async function deleteTest() {
+            if (!confirm('Supprimer toutes les lignes de test (reservation_id = 999) ?')) return;
+            
+            resultEl.textContent = '⏳ Suppression...';
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('problemes_signales')
+                    .delete()
+                    .eq('reservation_id', 999)
+                    .select();
+                
+                if (error) {
+                    resultEl.textContent = '❌ ERREUR:\n' + JSON.stringify(error, null, 2);
+                } else {
+                    resultEl.textContent = '✅ SUPPRIMÉ - ' + (data?.length || 0) + ' ligne(s) supprimée(s)\n\n' + 
+                        JSON.stringify(data, null, 2);
+                }
+            } catch (err) {
+                resultEl.textContent = '❌ EXCEPTION:\n' + err.message;
+            }
+        }
+
+        // Auto-query au chargement
+        window.addEventListener('load', testQuery);
+    </script>
+</body>
+</html>
