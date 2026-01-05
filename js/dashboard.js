@@ -1376,6 +1376,32 @@ async function refreshDashboard() {
     await updateFinancialIndicators();
     // Initialiser le modal si pas déjà fait
     initializeTodoModal();
+    initializeReponseWhatsappModal();
+}
+
+function initializeReponseWhatsappModal() {
+    const form = document.getElementById('formReponseWhatsapp');
+    if (form && !form.dataset.initialized) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('reponseProblemeId').value;
+            const telephone = document.getElementById('reponseTelephone').value;
+            const sujet = document.getElementById('reponseClientSujet').textContent.replace(/"/g, '');
+            const gite = document.getElementById('reponseClientGite').textContent.replace('📍 ', '');
+            repondreWhatsApp(id, telephone, sujet, gite);
+        });
+        form.dataset.initialized = 'true';
+    }
+    
+    // Fermer le modal en cliquant sur l'overlay
+    const modal = document.getElementById('reponseWhatsappModal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeReponseWhatsappModal();
+            }
+        });
+    }
 }
 
 // ==========================================
@@ -1604,11 +1630,11 @@ function renderProblemeCard(pb, isUrgent) {
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     ${pb.telephone ? `
-                        <button onclick="repondreWhatsApp(${pb.id}, '${pb.telephone}', '${(pb.sujet || '').replace(/'/g, "\\'")}', '${pb.gite}')" 
+                        <button onclick="ouvrirReponseWhatsApp(${pb.id}, '${pb.telephone}', '${(pb.sujet || '').replace(/'/g, "\\'")}', '${pb.gite}', '${(pb.description || '').replace(/'/g, "\\'")}', '${pb.client_nom || 'Client'}')" 
                                 style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3);"
                                 onmouseover="this.style.transform='scale(1.05)'"
                                 onmouseout="this.style.transform='scale(1)'">
-                            💬 WhatsApp
+                            💬 Répondre
                         </button>
                     ` : ''}
                     <button onclick="traiterProbleme(${pb.id})" 
@@ -1668,11 +1694,16 @@ async function supprimerProbleme(id) {
 }
 
 function repondreWhatsApp(id, telephone, sujet, gite) {
+    // Cette fonction est maintenant appelée depuis le formulaire
+    const message = document.getElementById('reponseMessage').value;
+    
+    if (!message.trim()) {
+        alert('Veuillez écrire un message avant d\'envoyer.');
+        return;
+    }
+    
     // Nettoyer le numéro de téléphone (enlever espaces, tirets, etc.)
     const telClean = telephone.replace(/[\s\-\(\)]/g, '');
-    
-    // Créer le message pré-rempli
-    const message = `Bonjour,\n\nNous avons bien reçu votre message concernant : "${sujet}"\n\nGîte : ${gite}\n\nNous revenons vers vous concernant votre demande.\n\nCordialement,\nL'équipe`;
     
     // Encoder le message pour l'URL
     const messageEncoded = encodeURIComponent(message);
@@ -1682,6 +1713,48 @@ function repondreWhatsApp(id, telephone, sujet, gite) {
     
     // Ouvrir dans un nouvel onglet
     window.open(whatsappUrl, '_blank');
+    
+    // Fermer le modal
+    closeReponseWhatsappModal();
+    
+    // Option : marquer comme traité après envoi
+    if (confirm('Marquer ce problème comme traité ?')) {
+        traiterProbleme(id);
+    }
+}
+
+function ouvrirReponseWhatsApp(id, telephone, sujet, gite, description, clientNom) {
+    // Afficher le modal
+    const modal = document.getElementById('reponseWhatsappModal');
+    modal.style.display = 'flex';
+    
+    // Remplir les infos
+    document.getElementById('reponseProblemeId').value = id;
+    document.getElementById('reponseTelephone').value = telephone;
+    document.getElementById('reponseClientNom').textContent = clientNom;
+    document.getElementById('reponseClientGite').textContent = `📍 ${gite}`;
+    document.getElementById('reponseClientSujet').textContent = `"${sujet}"`;
+    
+    // Message pré-rempli
+    const messagePrefill = `Bonjour,\n\nNous avons bien reçu votre message concernant : "${sujet}"\n\nGîte : ${gite}\n\n[Votre réponse ici]\n\nCordialement,\nL'équipe`;
+    document.getElementById('reponseMessage').value = messagePrefill;
+    
+    // Focus sur le textarea
+    setTimeout(() => {
+        const textarea = document.getElementById('reponseMessage');
+        textarea.focus();
+        // Placer le curseur sur "[Votre réponse ici]"
+        const pos = messagePrefill.indexOf('[Votre réponse ici]');
+        if (pos !== -1) {
+            textarea.setSelectionRange(pos, pos + '[Votre réponse ici]'.length);
+        }
+    }, 100);
+}
+
+function closeReponseWhatsappModal() {
+    const modal = document.getElementById('reponseWhatsappModal');
+    modal.style.display = 'none';
+    document.getElementById('formReponseWhatsapp').reset();
 }
 
 // Exposer les fonctions dans le scope global pour les appels depuis HTML
@@ -1698,6 +1771,8 @@ window.refuserDemandeHoraire = refuserDemandeHoraire;
 window.traiterProbleme = traiterProbleme;
 window.supprimerProbleme = supprimerProbleme;
 window.repondreWhatsApp = repondreWhatsApp;
+window.ouvrirReponseWhatsApp = ouvrirReponseWhatsApp;
+window.closeReponseWhatsappModal = closeReponseWhatsappModal;
 
 // =============================================
 // FONCTIONS CHECKLIST POUR DASHBOARD
