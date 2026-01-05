@@ -211,11 +211,9 @@ async function deleteReservationById(id) {
 
 async function updateReservationsList() {
     const reservations = await getAllReservations();
-    console.log('📅 updateReservationsList - Total réservations:', reservations.length);
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    console.log('📅 Date du jour (pour filtre):', today.toISOString().split('T')[0]);
     
     // Récupérer les validations de la société de ménage
     const { data: cleaningSchedules } = await supabase
@@ -238,13 +236,8 @@ async function updateReservationsList() {
         return dateFin > today;
     });
     
-    console.log('📅 Réservations futures (dateFin > aujourd\'hui):', active.length);
-    
     const container = document.getElementById('planning-container');
-    if (!container) {
-        console.warn('⚠️ Container planning-container non trouvé');
-        return;
-    }
+    if (!container) return;
     
     if (active.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation</p>';
@@ -252,17 +245,10 @@ async function updateReservationsList() {
     }
     
     // Organiser par gîte
-    console.log('📅 Gîtes uniques dans les réservations:', [...new Set(active.map(r => r.gite))]);
-    
     const byGite = {
         'Trévoux': active.filter(r => r.gite === 'Trévoux'),
         'Couzon': active.filter(r => r.gite === 'Couzon')
     };
-    
-    console.log('📅 Réservations par gîte:', {
-        'Trévoux': byGite['Trévoux'].length,
-        'Couzon': byGite['Couzon'].length
-    });
     
     // Trier par date
     byGite['Trévoux'].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
@@ -318,12 +304,7 @@ async function updateReservationsList() {
     });
     
     html += '</div>';
-    
-    console.log('📅 HTML généré, longueur:', html.length, 'caractères');
-    console.log('📅 Container innerHTML avant:', container.innerHTML.length);
     container.innerHTML = html;
-    console.log('📅 Container innerHTML après:', container.innerHTML.length);
-    console.log('📅 Container visible?', container.offsetHeight, 'px');
     
     // Scroller automatiquement vers la première semaine (semaine actuelle)
     setTimeout(() => {
