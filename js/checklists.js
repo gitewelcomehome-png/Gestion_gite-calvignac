@@ -263,15 +263,15 @@ async function loadReservationsProgress() {
     try {
         container.innerHTML = '<p style="color: var(--gray-600); font-style: italic;">Chargement des réservations...</p>';
         
-        // Récupérer les réservations en cours
+        // Récupérer SEULEMENT les réservations EN COURS (arrivées mais pas encore parties)
         const aujourdhui = new Date().toISOString().split('T')[0];
         
         const { data: reservations, error: resaError } = await supabaseClient
             .from('reservations')
             .select('*')
-            .gte('date_fin', aujourdhui)
-            .order('date_debut', { ascending: true })
-            .limit(20);
+            .lte('date_debut', aujourdhui)  // Déjà arrivés
+            .gte('date_fin', aujourdhui)    // Pas encore partis
+            .order('date_debut', { ascending: true });
         
         if (resaError) throw resaError;
         
@@ -279,7 +279,8 @@ async function loadReservationsProgress() {
             container.innerHTML = `
                 <div style="text-align: center; padding: 20px; color: var(--gray-600);">
                     <p style="font-size: 3rem; margin-bottom: 10px;">📅</p>
-                    <p>Aucune réservation en cours</p>
+                    <p>Aucune réservation en cours actuellement</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Les checklists s'affichent uniquement pour les séjours en cours</p>
                 </div>
             `;
             return;
@@ -292,14 +293,15 @@ async function loadReservationsProgress() {
             const progress = await getReservationChecklistProgress(resa.id, resa.gite);
             
             html += `
-                <div class="card" style="margin-bottom: 15px; padding: 15px;">
+                <div class="card" style="margin-bottom: 15px; padding: 15px; cursor: pointer;" onclick="toggleChecklistDetail(${resa.id})">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <div>
-                            <strong style="font-size: 1.1rem;">${resa.nom} ${resa.prenom}</strong>
+                            <strong style="font-size: 1.1rem;">${resa.nom_client}</strong>
                             <span style="color: var(--gray-600); margin-left: 10px;">${resa.gite}</span>
                         </div>
                         <div style="color: var(--gray-600); font-size: 0.9rem;">
                             ${formatDate(resa.date_debut)} → ${formatDate(resa.date_fin)}
+                            <span style="margin-left: 10px; color: #3498DB;">📋 Voir détail</span>
                         </div>
                     </div>
                     
@@ -328,6 +330,9 @@ async function loadReservationsProgress() {
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Détail des items (caché par défaut) -->
+                    <div id="checklist-detail-${resa.id}" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #e5e7eb;"></div>
                 </div>
             `;
         }
@@ -426,5 +431,130 @@ function showNotification(message, type = 'info') {
         alert(message);
     }
 }
+
+// =============================================
+// AFFICHAGE DÉTAIL CHECKLIST
+// =============================================
+
+async function toggleChecklistDetail(reservationId) {
+    const detailContainer = document.getElementById(`checklist-detail-${reservationId}`);
+    if (!detailContainer) return;
+    
+    // Toggle affichage
+    if (detailContainer.style.display === 'none') {
+        detailContainer.style.display = 'block';
+        await loadChecklistDetailForReservation(reservationId);
+    } else {
+        detailContainer.style.display = 'none';
+    }
+}
+
+async function loadChecklistDetailForReservation(reservationId) {
+    const detailContainer = document.getElementById(`checklist-detail-${reservationId}`);
+    if (!detailContainer) return;
+    
+    try {
+        detailContainer.innerHTML = '<p style="text-align: center; color: var(--gray-600);">Chargement...</p>';
+        
+        // Récupérer la réservation
+        const { data: reservations, error: resaError } = await supabaseClient
+            .from('reservations')
+            .select('*')
+            .eq('id', reservationId)
+            .single();
+        
+        if (resaError) throw resaError;
+        
+        const gite = reservations.gite;
+        
+        // Récupérer tous les templates pour ce gîte
+        const { data: templates, error: templatesError } = await supabaseClient
+            .from('checklist_templates')
+            .select('*')
+            .eq('gite', gite)
+            .eq('actif', true)
+            .order('type', { ascending: true })
+            .order('ordre', { ascending: true });
+        
+        if (templatesError) throw templatesError;
+        
+        // Récupérer la progression
+        const { data: progress, error: progressError } = await supabaseClient
+            .from('checklist_progress')
+            .select('*')
+            .eq('reservation_id', reservationId);
+        
+        if (progressError) throw progressError;
+        
+        // Créer un map pour accès rapide
+        const progressMap = {};
+        if (progress) {
+            progress.forEach(p => {
+                progressMap[p.template_id] = p.completed;
+            });
+        }
+        
+        // Séparer par type
+        const templatesEntree = templates.filter(t => t.type === 'entree');
+        const templatesSortie = templates.filter(t => t.type === 'sortie');
+        
+        let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">';
+        
+        // Colonne Entrée
+        html += '<div><h4 style="margin-bottom: 10px; color: #27AE60;">🚪 Check-list Entrée</h4>';
+        if (templatesEntree.length === 0) {
+            html += '<p style="color: var(--gray-600); font-style: italic;">Aucun item configuré</p>';
+        } else {
+            templatesEntree.forEach(t => {
+                const isChecked = progressMap[t.id] === true;
+                html += `
+                    <div style="padding: 10px; background: ${isChecked ? '#d1fae5' : '#f9fafb'}; border-radius: 6px; margin-bottom: 8px; border: 1px solid ${isChecked ? '#10b981' : '#e5e7eb'};">
+                        <div style="display: flex; align-items: start; gap: 10px;">
+                            <span style="font-size: 1.5rem;">${isChecked ? '✅' : '⬜'}</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: ${isChecked ? '600' : '400'};">${t.texte}</div>
+                                ${t.description ? `<div style="font-size: 0.85rem; color: var(--gray-600); margin-top: 4px;">${t.description}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        html += '</div>';
+        
+        // Colonne Sortie
+        html += '<div><h4 style="margin-bottom: 10px; color: #E74C3C;">🧳 Check-list Sortie</h4>';
+        if (templatesSortie.length === 0) {
+            html += '<p style="color: var(--gray-600); font-style: italic;">Aucun item configuré</p>';
+        } else {
+            templatesSortie.forEach(t => {
+                const isChecked = progressMap[t.id] === true;
+                html += `
+                    <div style="padding: 10px; background: ${isChecked ? '#d1fae5' : '#f9fafb'}; border-radius: 6px; margin-bottom: 8px; border: 1px solid ${isChecked ? '#10b981' : '#e5e7eb'};">
+                        <div style="display: flex; align-items: start; gap: 10px;">
+                            <span style="font-size: 1.5rem;">${isChecked ? '✅' : '⬜'}</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: ${isChecked ? '600' : '400'};">${t.texte}</div>
+                                ${t.description ? `<div style="font-size: 0.85rem; color: var(--gray-600); margin-top: 4px;">${t.description}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        html += '</div>';
+        
+        html += '</div>';
+        
+        detailContainer.innerHTML = html;
+        
+    } catch (error) {
+        console.error('❌ Erreur chargement détail:', error);
+        detailContainer.innerHTML = `<p style="color: #ef4444;">Erreur: ${error.message}</p>`;
+    }
+}
+
+// Exposer globalement
+window.toggleChecklistDetail = toggleChecklistDetail;
 
 console.log('✅ checklists.js chargé');
