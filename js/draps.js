@@ -160,10 +160,13 @@ async function analyserReservations() {
         };
 
         // Calculer combien de réservations peuvent être couvertes
-        calculerReservationsCouvertes(resaParGite);
+        const infosCouverture = calculerReservationsCouvertes(resaParGite);
         
-        // Calculer ce qu'il faut emmener dans chaque gîte
-        calculerAEmmener(resaParGite);
+        // Calculer ce qu'il faut emmener dans chaque gîte (jusqu'à la date limite)
+        calculerAEmmener(resaParGite, infosCouverture);
+        
+        // Créer tâche automatique si besoin
+        await creerTacheStockSiNecessaire(resaParGite, infosCouverture);
     } catch (error) {
         console.error('Erreur analyse réservations:', error);
     }
@@ -172,6 +175,7 @@ async function analyserReservations() {
 function calculerReservationsCouvertes(resaParGite) {
     const container = document.getElementById('reservations-couvertes');
     let html = '';
+    const infosCouverture = {};
 
     ['trévoux', 'couzon'].forEach(gite => {
         const stock = stocksActuels[gite] || {};
@@ -215,6 +219,14 @@ function calculerReservationsCouvertes(resaParGite) {
             '❌ Stock épuisé - Commander immédiatement' :
             `⚠️ Stock pour ${nbReservations} réservation${nbReservations > 1 ? 's' : ''} sur ${reservations.length}`;
         
+        // Stocker les infos de couverture
+        infosCouverture[gite] = {
+            nbReservationsCouvertes: nbReservations,
+            totalReservations: reservations.length,
+            dateLimite: dateJusqua,
+            reservations: reservations
+        };
+        
         html += `
             <div class="stat-box">
                 <h4>🏠 ${gite.charAt(0).toUpperCase() + gite.slice(1)}</h4>
@@ -231,37 +243,45 @@ function calculerReservationsCouvertes(resaParGite) {
     });
 
     container.innerHTML = html;
+    return infosCouverture;
 }
 
-function calculerAEmmener(resaParGite) {
+function calculerAEmmener(resaParGite, infosCouverture) {
     const container = document.getElementById('a-emmener');
     let html = '';
 
     ['trévoux', 'couzon'].forEach(gite => {
-        const prochaines = resaParGite[gite].slice(0, 3); // 3 prochaines réservations
+        const infos = infosCouverture[gite];
         const besoins = BESOINS_PAR_RESERVATION[gite];
         
-        if (prochaines.length === 0) {
+        if (!infos || infos.nbReservationsCouvertes === 0 || infos.reservations.length === 0) {
             html += `<div class="stat-box">
                 <h4>🏠 ${gite.charAt(0).toUpperCase() + gite.slice(1)}</h4>
-                <p style="color: #666; font-size: 13px;">Aucune réservation à venir</p>
+                <p style="color: #666; font-size: 13px;">Aucune réservation couverte par les stocks</p>
             </div>`;
             return;
         }
         
+        // Prendre toutes les réservations jusqu'à la date limite
+        const nbResa = Math.min(infos.nbReservationsCouvertes, infos.reservations.length);
+        const reservationsCouvertes = infos.reservations.slice(0, nbResa);
+        
         const total = {
-            draps_plats_grands: besoins.draps_plats_grands * prochaines.length,
-            draps_plats_petits: besoins.draps_plats_petits * prochaines.length,
-            housses_couettes_grandes: besoins.housses_couettes_grandes * prochaines.length,
-            housses_couettes_petites: besoins.housses_couettes_petites * prochaines.length,
-            taies_oreillers: besoins.taies_oreillers * prochaines.length,
-            serviettes: besoins.serviettes * prochaines.length,
-            tapis_bain: besoins.tapis_bain * prochaines.length
+            draps_plats_grands: besoins.draps_plats_grands * nbResa,
+            draps_plats_petits: besoins.draps_plats_petits * nbResa,
+            housses_couettes_grandes: besoins.housses_couettes_grandes * nbResa,
+            housses_couettes_petites: besoins.housses_couettes_petites * nbResa,
+            taies_oreillers: besoins.taies_oreillers * nbResa,
+            serviettes: besoins.serviettes * nbResa,
+            tapis_bain: besoins.tapis_bain * nbResa
         };
+        
+        const dateInfo = infos.dateLimite ? 
+            ` jusqu'au ${infos.dateLimite.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}` : '';
         
         html += `
             <div class="stat-box">
-                <h4>🏠 ${gite.charAt(0).toUpperCase() + gite.slice(1)} (${prochaines.length} prochaines résa)</h4>
+                <h4>🏠 ${gite.charAt(0).toUpperCase() + gite.slice(1)} (${nbResa} résa${dateInfo})</h4>
                 <ul style="font-size: 12px; line-height: 1.8; margin-top: 8px;">
                     <li>${total.draps_plats_grands} draps plats grands</li>
                     <li>${total.draps_plats_petits} draps plats petits</li>
@@ -276,6 +296,106 @@ function calculerAEmmener(resaParGite) {
     });
 
     container.innerHTML = html;
+}
+
+// ================================================================
+// CRÉATION AUTOMATIQUE DE TÂCHE SI STOCK FAIBLE
+// ================================================================
+
+async function creerTacheStockSiNecessaire(resaParGite, infosCouverture) {
+    try {
+        const today = new Date();
+        const uneSemaneFuture = new Date(today);
+        uneSemaneFuture.setDate(uneSemaneFuture.getDate() + 7);
+        
+        const troisSemainesFuture = new Date(today);
+        troisSemainesFuture.setDate(troisSemainesFuture.getDate() + 21);
+        
+        for (const gite of ['trévoux', 'couzon']) {
+            const infos = infosCouverture[gite];
+            
+            // Vérifier si on va manquer de stock dans une semaine
+            if (infos && infos.dateLimite && infos.dateLimite <= uneSemaneFuture) {
+                // Calculer les besoins pour les 3 prochaines semaines
+                const reservations3Semaines = resaParGite[gite].filter(r => {
+                    const dateDebut = new Date(r.date_debut);
+                    return dateDebut >= today && dateDebut <= troisSemainesFuture;
+                });
+                
+                if (reservations3Semaines.length > 0) {
+                    const besoins = BESOINS_PAR_RESERVATION[gite];
+                    const stock = stocksActuels[gite] || {};
+                    
+                    // Calculer ce qu'il faut commander
+                    const necessaire = {
+                        draps_plats_grands: besoins.draps_plats_grands * reservations3Semaines.length,
+                        draps_plats_petits: besoins.draps_plats_petits * reservations3Semaines.length,
+                        housses_couettes_grandes: besoins.housses_couettes_grandes * reservations3Semaines.length,
+                        housses_couettes_petites: besoins.housses_couettes_petites * reservations3Semaines.length,
+                        taies_oreillers: besoins.taies_oreillers * reservations3Semaines.length,
+                        serviettes: besoins.serviettes * reservations3Semaines.length,
+                        tapis_bain: besoins.tapis_bain * reservations3Semaines.length
+                    };
+                    
+                    const aCommander = {
+                        draps_plats_grands: Math.max(0, necessaire.draps_plats_grands - (stock.draps_plats_grands || 0)),
+                        draps_plats_petits: Math.max(0, necessaire.draps_plats_petits - (stock.draps_plats_petits || 0)),
+                        housses_couettes_grandes: Math.max(0, necessaire.housses_couettes_grandes - (stock.housses_couettes_grandes || 0)),
+                        housses_couettes_petites: Math.max(0, necessaire.housses_couettes_petites - (stock.housses_couettes_petites || 0)),
+                        taies_oreillers: Math.max(0, necessaire.taies_oreillers - (stock.taies_oreillers || 0)),
+                        serviettes: Math.max(0, necessaire.serviettes - (stock.serviettes || 0)),
+                        tapis_bain: Math.max(0, necessaire.tapis_bain - (stock.tapis_bain || 0))
+                    };
+                    
+                    // Construire le détail de la commande
+                    const details = [];
+                    if (aCommander.draps_plats_grands > 0) details.push(`${aCommander.draps_plats_grands} draps plats grands`);
+                    if (aCommander.draps_plats_petits > 0) details.push(`${aCommander.draps_plats_petits} draps plats petits`);
+                    if (aCommander.housses_couettes_grandes > 0) details.push(`${aCommander.housses_couettes_grandes} housses couette grandes`);
+                    if (aCommander.housses_couettes_petites > 0) details.push(`${aCommander.housses_couettes_petites} housses couette petites`);
+                    if (aCommander.taies_oreillers > 0) details.push(`${aCommander.taies_oreillers} taies d'oreillers`);
+                    if (aCommander.serviettes > 0) details.push(`${aCommander.serviettes} serviettes`);
+                    if (aCommander.tapis_bain > 0) details.push(`${aCommander.tapis_bain} tapis de bain`);
+                    
+                    if (details.length > 0) {
+                        const giteCapitalized = gite.charAt(0).toUpperCase() + gite.slice(1);
+                        const dateFormatee = troisSemainesFuture.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+                        
+                        const description = `⚠️ Stock insuffisant pour les 3 prochaines semaines (jusqu'au ${dateFormatee}).\n\n🛒 À commander :\n${details.map(d => `• ${d}`).join('\n')}\n\nℹ️ ${reservations3Semaines.length} réservation(s) prévue(s) pour ${giteCapitalized}.`;
+                        
+                        // Vérifier si une tâche similaire existe déjà (non complétée, créée récemment)
+                        const deuxJoursAvant = new Date(today);
+                        deuxJoursAvant.setDate(deuxJoursAvant.getDate() - 2);
+                        
+                        const { data: tachesExistantes } = await window.supabase
+                            .from('todos')
+                            .select('*')
+                            .eq('category', 'achats')
+                            .eq('gite', giteCapitalized)
+                            .eq('completed', false)
+                            .ilike('title', '%Commander draps%')
+                            .gte('created_at', deuxJoursAvant.toISOString());
+                        
+                        // Créer la tâche seulement si elle n'existe pas déjà
+                        if (!tachesExistantes || tachesExistantes.length === 0) {
+                            await window.supabase
+                                .from('todos')
+                                .insert({
+                                    category: 'achats',
+                                    title: `🛏️ Commander draps pour ${giteCapitalized}`,
+                                    description: description,
+                                    gite: giteCapitalized,
+                                    completed: false
+                                });
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Erreur création tâche automatique:', error);
+        // Ne pas bloquer l'affichage en cas d'erreur
+    }
 }
 
 // ================================================================
