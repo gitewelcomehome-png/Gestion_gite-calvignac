@@ -244,6 +244,10 @@
                 .then(r => r.text())
                 .then(html => {
                     document.getElementById(tabId).innerHTML = html;
+                    // Initialiser la FAQ après chargement du HTML
+                    if (tabId === 'tab-faq' && typeof window.initFAQ === 'function') {
+                        window.initFAQ();
+                    }
                 });
         }
     });
@@ -573,7 +577,15 @@
                 }
             }
             if (tabName === 'faq' && typeof initFAQ === 'function') {
-                initFAQ();
+                // S'assurer que le HTML est chargé avant d'initialiser
+                const checkFaqReady = () => {
+                    if (document.getElementById('faq-list')) {
+                        initFAQ();
+                    } else {
+                        setTimeout(checkFaqReady, 50);
+                    }
+                };
+                checkFaqReady();
             }
             if (tabName === 'fiches-clients' && typeof initFichesClients === 'function') {
                 initFichesClients();
