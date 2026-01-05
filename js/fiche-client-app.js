@@ -71,7 +71,8 @@ const translations = {
         tab_pendant: 'Pendant',
         tab_sortie: 'Sortie',
         tab_activites: 'Activités',
-        tab_faq: 'FAQ',
+        tab_probleme: 'Demandes',
+        tab_evaluation: 'Évaluation',
         tab_faq: 'FAQ',
         adresse_title: '📍 Adresse du gîte',
         ouvrir_maps: 'Ouvrir dans Google Maps',
@@ -122,6 +123,8 @@ const translations = {
         tab_pendant: 'During stay',
         tab_sortie: 'Check-out',
         tab_activites: 'Activities',
+        tab_probleme: 'Requests',
+        tab_evaluation: 'Review',
         tab_faq: 'FAQ',
         adresse_title: '📍 Address',
         ouvrir_maps: 'Open in Google Maps',
@@ -1276,6 +1279,22 @@ function switchTab(tabId) {
         content.style.display = 'block'; // Force l'affichage
         console.log(`✅ Classe 'active' + display:block ajoutés au contenu`);
         console.log(`📏 Hauteur du contenu:`, content.offsetHeight, 'px');
+        
+        // Debug style computed
+        const computed = window.getComputedStyle(content);
+        console.log(`🎨 Styles computed:`, {
+            display: computed.display,
+            visibility: computed.visibility,
+            opacity: computed.opacity,
+            position: computed.position,
+            zIndex: computed.zIndex,
+            top: computed.top,
+            left: computed.left,
+            transform: computed.transform
+        });
+        
+        // Scroll vers le contenu
+        content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     
     // Charger les activités
