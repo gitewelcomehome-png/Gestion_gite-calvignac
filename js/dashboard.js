@@ -1543,6 +1543,13 @@ async function updateProblemesClients() {
             throw error;
         }
         
+        console.log('🔍 DEBUG problèmes récupérés:', problemes?.map(p => ({
+            id: p.id,
+            sujet: p.sujet,
+            telephone: p.telephone,
+            reservation_id: p.reservation_id
+        })));
+        
         // Séparer les problèmes urgents des autres
         const problemesUrgents = problemes.filter(pb => pb.type === 'probleme');
         const autresDemandes = problemes.filter(pb => pb.type !== 'probleme');
@@ -1636,7 +1643,13 @@ function renderProblemeCard(pb, isUrgent) {
                                 onmouseout="this.style.transform='scale(1)'">
                             💬 Répondre
                         </button>
-                    ` : ''}
+                    ` : `
+                        <button disabled 
+                                style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 8px; cursor: not-allowed; font-weight: 600; font-size: 0.85rem;"
+                                title="Aucun numéro de téléphone">
+                            📞 Pas de tél
+                        </button>
+                    `}
                     <button onclick="traiterProbleme(${pb.id})" 
                             style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);"
                             onmouseover="this.style.transform='scale(1.05)'"
