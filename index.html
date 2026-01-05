@@ -28,6 +28,7 @@
     <script src="js/faq.js?v=2.1.1"></script>
     <script src="js/fiches-clients.js"></script>
     <script src="js/checklists.js"></script>
+    <script src="js/draps.js"></script>
     
     <!-- Chart.js pour les graphiques -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -238,6 +239,7 @@
             'tab-fiches-clients': 'tabs/tab-fiches-clients.html',
             'tab-decouvrir': 'tabs/tab-decouvrir.html',
             'tab-faq': 'tabs/tab-faq.html',
+            'tab-draps': 'tabs/tab-draps.html',
         };
         for (const [tabId, file] of Object.entries(tabFiles)) {
             fetch(file)
@@ -247,6 +249,10 @@
                     // Initialiser la FAQ après chargement du HTML
                     if (tabId === 'tab-faq' && typeof window.initFAQ === 'function') {
                         window.initFAQ();
+                    }
+                    // Initialiser Draps après chargement du HTML
+                    if (tabId === 'tab-draps' && typeof window.initDraps === 'function') {
+                        window.initDraps();
                     }
                 });
         }
@@ -290,6 +296,7 @@
             </button>
             <button class="nav-tab" data-tab="infos-gites">📝 Infos Pratiques</button>
             <button class="nav-tab" data-tab="checklists">📋 Check-lists</button>
+            <button class="nav-tab" data-tab="draps">🛏️ Gestion Draps</button>
             <button class="nav-tab" data-tab="decouvrir">🗺️ À Découvrir</button>
             <button class="nav-tab" data-tab="faq">❓ FAQ</button>
         </div>
@@ -301,6 +308,7 @@
         <div id="tab-reservations" class="tab-content"></div>
         <div id="tab-archives" class="tab-content"></div>
         <div id="tab-faq" class="tab-content"></div>
+        <div id="tab-draps" class="tab-content"></div>
         <div id="tab-statistiques" class="tab-content"></div>
         <div id="tab-charges" class="tab-content"></div>
         <div id="tab-menage" class="tab-content"></div>
@@ -586,6 +594,16 @@
                     }
                 };
                 checkFaqReady();
+            }
+            if (tabName === 'draps' && typeof initDraps === 'function') {
+                const checkDrapsReady = () => {
+                    if (document.getElementById('stock-trevoux-draps-grands')) {
+                        initDraps();
+                    } else {
+                        setTimeout(checkDrapsReady, 50);
+                    }
+                };
+                checkDrapsReady();
             }
             if (tabName === 'fiches-clients' && typeof initFichesClients === 'function') {
                 initFichesClients();
