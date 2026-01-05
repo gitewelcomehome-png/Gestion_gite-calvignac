@@ -2020,11 +2020,7 @@ async function loadClientChecklists() {
 }
 
 function renderClientChecklist(type, templates, progressMap) {
-    // // console.log(`🎨 Render checklist ${type}:`, { 
-        templatesCount: templates?.length,
-        templates: templates, 
-        progressMap: progressMap 
-    });
+    // console.log(`🎨 Render checklist ${type}: ...`);
     
     const containerId = type === 'entree' ? 'checklistEntreeContainer' : 'checklistSortieContainer';
     const progressBarId = type === 'entree' ? 'progressEntree' : 'progressSortie';
