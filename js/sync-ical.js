@@ -165,13 +165,35 @@ async function syncCalendar(gite, platform, url) {
             const dateDebut = dateToLocalString(event.startDate.toJSDate());
             const dateFin = dateToLocalString(event.endDate.toJSDate());
             
+            // � LOG DÉTAILLÉ pour déboguer
+            console.log(`📅 Événement iCal: "${summary}" | ${gite} | ${dateDebut} → ${dateFin}`);
+            
             // 🚫 IGNORER LES BLOCAGES MANUELS (pas des vraies réservations)
             // Airbnb, Abritel etc. envoient des événements "Blocked" ou "Not available" pour les dates bloquées
-            const blockTerms = ['blocked', 'bloqué', 'not available', 'indisponible', 'unavailable'];
-            const isBlocked = blockTerms.some(term => summary.toLowerCase().includes(term));
+            // Aussi ignorer les événements très courts (< 2 jours) qui sont souvent des blocages techniques
+            const blockTerms = [
+                'blocked', 'bloqué', 'bloque',
+                'not available', 'indisponible', 'unavailable',
+                'airbnb (not available)', 'airbnb blocked',
+                'préparation', 'preparation', 'cleaning', 'ménage',
+                'maintenance', 'travaux'
+            ];
+            const isBlocked = blockTerms.some(term => 
+                summary.toLowerCase().includes(term) || 
+                description.toLowerCase().includes(term)
+            );
+            
+            // Ignorer aussi les réservations de moins de 2 nuits (souvent des blocages techniques)
+            const nuits = calculateNights(dateDebut, dateFin);
             
             if (isBlocked) {
-                console.log(`🚫 Blocage ignoré (pas une réservation): ${gite} du ${dateDebut} au ${dateFin} - "${summary}"`);
+                console.log(`   🚫 → BLOCAGE IGNORÉ: "${summary}"`);
+                skipped++;
+                continue;
+            }
+            
+            if (nuits < 2) {
+                console.log(`   🚫 → DURÉE TROP COURTE IGNORÉE: ${nuits} nuit(s)`);
                 skipped++;
                 continue;
             }
@@ -328,8 +350,67 @@ async function updateBlockedDates() {
     }
 }
 
+// ==========================================
+// 🧹 NETTOYAGE DES BLOCAGES EXISTANTS
+// ==========================================
+
+/**
+ * Supprime les réservations qui sont en fait des blocages Airbnb
+ * À utiliser une fois pour nettoyer les données déjà importées
+ */
+async function cleanupBlockedReservations() {
+    try {
+        const reservations = await getAllReservations();
+        
+        const blockTerms = [
+            'blocked', 'bloqué', 'bloque',
+            'not available', 'indisponible',
+            'airbnb (not available)', 'airbnb blocked',
+            'préparation', 'preparation', 'cleaning',
+            '⚠️ client airbnb', '⚠️ client abritel'
+        ];
+        
+        const toDelete = [];
+        
+        for (const r of reservations) {
+            const nom = (r.nom || '').toLowerCase();
+            const isBlock = blockTerms.some(term => nom.includes(term));
+            
+            // Aussi vérifier les réservations très courtes (< 2 nuits) avec noms génériques
+            const nuits = calculateNights(r.dateDebut, r.dateFin);
+            const isShortGeneric = nuits < 2 && nom.includes('⚠️');
+            
+            if (isBlock || isShortGeneric) {
+                toDelete.push(r);
+            }
+        }
+        
+        if (toDelete.length === 0) {
+            console.log('✅ Aucun blocage à nettoyer');
+            return { deleted: 0 };
+        }
+        
+        console.log(`🧹 Nettoyage de ${toDelete.length} blocage(s)...`);
+        
+        for (const r of toDelete) {
+            await window.supabase
+                .from('reservations')
+                .delete()
+                .eq('id', r.id);
+            
+            console.log(`   ✓ Supprimé: ${r.gite} ${r.dateDebut} → ${r.dateFin} (${r.nom})`);
+        }
+        
+        return { deleted: toDelete.length };
+    } catch (error) {
+        console.error('Erreur nettoyage:', error);
+        throw error;
+    }
+}
+
 // Exporter les fonctions dans le scope global
 window.syncAllCalendars = syncAllCalendars;
 window.syncCalendar = syncCalendar;
 window.checkDateOverlap = checkDateOverlap;
 window.updateBlockedDates = updateBlockedDates;
+window.cleanupBlockedReservations = cleanupBlockedReservations;
