@@ -1285,6 +1285,11 @@ function switchTab(tabId) {
     if (tabId === 'activites') {
         initOngletActivites();
     }
+    
+    // Charger la FAQ
+    if (tabId === 'faq') {
+        initOngletFaq();
+    }
 }
 
 async function submitDemandeHoraire(type) {
