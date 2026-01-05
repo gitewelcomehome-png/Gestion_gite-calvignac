@@ -789,15 +789,33 @@ async function editTodo(id) {
         return;
     }
     
-    // Ouvrir le modal en mode édition
+    // Vérifier que le modal existe et l'initialiser si nécessaire
     const modal = document.getElementById('add-todo-modal');
+    if (!modal) {
+        console.error('❌ Modal add-todo-modal introuvable');
+        showToast('Erreur : interface non disponible', 'error');
+        return;
+    }
+    
+    // S'assurer que le modal est initialisé
+    if (!todoModalInitialized) {
+        initAddTodoModal();
+    }
+    
+    // Ouvrir le modal en mode édition
     const modalTitle = modal.querySelector('.modal-header h2');
-    modalTitle.textContent = '✏️ Modifier la tâche';
+    if (modalTitle) {
+        modalTitle.textContent = '✏️ Modifier la tâche';
+    }
     
     // Remplir le formulaire
-    document.getElementById('todo-title').value = todo.title || '';
-    document.getElementById('todo-description').value = todo.description || '';
-    document.getElementById('todo-gite').value = todo.gite || '';
+    const titleInput = document.getElementById('todo-title');
+    const descInput = document.getElementById('todo-description');
+    const giteSelect = document.getElementById('todo-gite');
+    
+    if (titleInput) titleInput.value = todo.title || '';
+    if (descInput) descInput.value = todo.description || '';
+    if (giteSelect) giteSelect.value = todo.gite || '';
     
     // Gérer la récurrence
     const isRecurrentCheckbox = document.getElementById('todo-is-recurrent');
