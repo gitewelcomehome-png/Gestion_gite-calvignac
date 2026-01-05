@@ -790,9 +790,9 @@ async function editTodo(id) {
     }
     
     // Vérifier que le modal existe et l'initialiser si nécessaire
-    const modal = document.getElementById('add-todo-modal');
+    const modal = document.getElementById('addTodoModal');
     if (!modal) {
-        console.error('❌ Modal add-todo-modal introuvable');
+        console.error('❌ Modal addTodoModal introuvable');
         showToast('Erreur : interface non disponible', 'error');
         return;
     }
@@ -809,17 +809,17 @@ async function editTodo(id) {
     }
     
     // Remplir le formulaire
-    const titleInput = document.getElementById('todo-title');
-    const descInput = document.getElementById('todo-description');
-    const giteSelect = document.getElementById('todo-gite');
+    const titleInput = document.getElementById('todoTitle');
+    const descInput = document.getElementById('todoDescription');
+    const giteSelect = document.getElementById('todoGite');
     
     if (titleInput) titleInput.value = todo.title || '';
     if (descInput) descInput.value = todo.description || '';
     if (giteSelect) giteSelect.value = todo.gite || '';
     
     // Gérer la récurrence
-    const isRecurrentCheckbox = document.getElementById('todo-is-recurrent');
-    const recurrentOptions = document.getElementById('todo-recurrent-options');
+    const isRecurrentCheckbox = document.getElementById('todoRecurrent');
+    const recurrentOptions = document.getElementById('recurrentOptions');
     
     if (isRecurrentCheckbox) {
         isRecurrentCheckbox.checked = todo.is_recurrent || false;
@@ -829,8 +829,8 @@ async function editTodo(id) {
     }
     
     if (todo.is_recurrent) {
-        const frequencySelect = document.getElementById('todo-frequency');
-        const daySelect = document.getElementById('todo-day-of-week');
+        const frequencySelect = document.getElementById('todoFrequency');
+        const daySelect = document.getElementById('todoWeekday');
         
         if (frequencySelect) frequencySelect.value = todo.frequency || 'weekly';
         if (daySelect && todo.frequency_detail?.day_of_week) {
@@ -844,7 +844,7 @@ async function editTodo(id) {
     submitBtn.onclick = async (e) => {
         e.preventDefault();
         
-        const title = document.getElementById('todo-title').value.trim();
+        const title = document.getElementById('todoTitle').value.trim();
         if (!title) {
             showToast('Le titre est obligatoire', 'error');
             return;
@@ -852,15 +852,15 @@ async function editTodo(id) {
         
         const updateData = {
             title: title,
-            description: document.getElementById('todo-description').value.trim(),
-            gite: document.getElementById('todo-gite').value || null
+            description: document.getElementById('todoDescription').value.trim(),
+            gite: document.getElementById('todoGite').value || null
         };
         
         // Si c'est une tâche récurrente, mettre à jour les options
         if (isRecurrentCheckbox?.checked) {
             updateData.is_recurrent = true;
-            updateData.frequency = document.getElementById('todo-frequency').value;
-            const dayOfWeek = document.getElementById('todo-day-of-week').value;
+            updateData.frequency = document.getElementById('todoFrequency').value;
+            const dayOfWeek = document.getElementById('todoWeekday').value;
             updateData.frequency_detail = { day_of_week: parseInt(dayOfWeek) };
             
             // Recalculer next_occurrence si le jour a changé
