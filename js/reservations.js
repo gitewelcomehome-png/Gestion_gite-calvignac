@@ -250,6 +250,13 @@ async function updateReservationsList() {
         'Couzon': active.filter(r => r.gite === 'Couzon')
     };
     
+    // Log temporaire pour debug
+    const gitesUniques = [...new Set(active.map(r => r.gite))];
+    if (gitesUniques.length > 2 || !gitesUniques.includes('Trévoux') || !gitesUniques.includes('Couzon')) {
+        console.warn('⚠️ Gîtes dans la BDD:', gitesUniques);
+        console.warn('⚠️ Trévoux:', byGite['Trévoux'].length, '| Couzon:', byGite['Couzon'].length);
+    }
+    
     // Trier par date
     byGite['Trévoux'].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     byGite['Couzon'].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
