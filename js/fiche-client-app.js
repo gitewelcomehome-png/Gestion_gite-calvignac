@@ -2154,7 +2154,7 @@ async function submitRetourDemande(event) {
                 description: `${formData.sujet}\n\n${formData.description}`
             });
             
-            const { data, error } = await supabaseClient
+            const { data, error } = await window.ficheClientSupabase
                 .from('problemes_signales')
                 .insert([{
                     reservation_id: formData.reservation_id,
@@ -2179,7 +2179,7 @@ async function submitRetourDemande(event) {
                 formData: formData
             });
             
-            const { data, error } = await supabaseClient
+            const { data, error } = await window.ficheClientSupabase
                 .from('problemes_signales')
                 .insert([{
                     reservation_id: formData.reservation_id,
@@ -2304,7 +2304,7 @@ async function submitEvaluation(event) {
             created_at: new Date().toISOString()
         };
         
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.ficheClientSupabase
             .from('evaluations_sejour')
             .insert([formData])
             .select();
