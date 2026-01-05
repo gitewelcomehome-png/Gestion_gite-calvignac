@@ -113,34 +113,36 @@ CREATE POLICY "Owner - Supprimer" ON retours_menage
 -- Owner uniquement
 -- ================================================================
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON stocks_draps;
-
-CREATE POLICY "Owner uniquement" ON stocks_draps
-    FOR ALL
-    USING (has_role('owner'));
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'stocks_draps') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON stocks_draps';
+        EXECUTE 'CREATE POLICY "Owner uniquement" ON stocks_draps FOR ALL USING (has_role(''owner''))';
+    END IF;
+END $$;
 
 -- ================================================================
 -- FICHES CLIENTS
 -- Owner uniquement (données personnelles sensibles)
 -- ================================================================
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON fiches_clients;
-
-CREATE POLICY "Owner uniquement" ON fiches_clients
-    FOR ALL
-    USING (has_role('owner'));
-
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON transactions_clients;
-
-CREATE POLICY "Owner uniquement" ON transactions_clients
-    FOR ALL
-    USING (has_role('owner'));
-
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON communications_clients;
-
-CREATE POLICY "Owner uniquement" ON communications_clients
-    FOR ALL
-    USING (has_role('owner'));
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'fiches_clients') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON fiches_clients';
+        EXECUTE 'CREATE POLICY "Owner uniquement" ON fiches_clients FOR ALL USING (has_role(''owner''))';
+    END IF;
+    
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'transactions_clients') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON transactions_clients';
+        EXECUTE 'CREATE POLICY "Owner uniquement" ON transactions_clients FOR ALL USING (has_role(''owner''))';
+    END IF;
+    
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'communications_clients') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON communications_clients';
+        EXECUTE 'CREATE POLICY "Owner uniquement" ON communications_clients FOR ALL USING (has_role(''owner''))';
+    END IF;
+END $$;
 
 -- ================================================================
 -- TODOS
@@ -148,18 +150,14 @@ CREATE POLICY "Owner uniquement" ON communications_clients
 -- Cleaner: Peut voir et modifier les tâches ménage
 -- ================================================================
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON todos;
-
-CREATE POLICY "Owner - Accès complet" ON todos
-    FOR ALL
-    USING (has_role('owner'));
-
-CREATE POLICY "Cleaner - Tâches ménage" ON todos
-    FOR ALL
-    USING (
-        has_role('cleaner') AND
-        type = 'menage'
-    );
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'todos') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON todos';
+        EXECUTE 'CREATE POLICY "Owner - Accès complet" ON todos FOR ALL USING (has_role(''owner''))';
+        EXECUTE 'CREATE POLICY "Cleaner - Tâches ménage" ON todos FOR ALL USING (has_role(''cleaner'') AND type = ''menage'')';
+    END IF;
+END $$;
 
 -- ================================================================
 -- CLEANING_SCHEDULES
@@ -180,43 +178,40 @@ END $$;
 -- INFOS_GITES (Publique en lecture, Owner en écriture)
 -- ================================================================
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON infos_gites;
-
-CREATE POLICY "Tous - Lecture" ON infos_gites
-    FOR SELECT
-    USING (auth.uid() IS NOT NULL);
-
-CREATE POLICY "Owner - Modification" ON infos_gites
-    FOR ALL
-    USING (has_role('owner'));
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'infos_gites') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON infos_gites';
+        EXECUTE 'CREATE POLICY "Tous - Lecture" ON infos_gites FOR SELECT USING (auth.uid() IS NOT NULL)';
+        EXECUTE 'CREATE POLICY "Owner - Modification" ON infos_gites FOR ALL USING (has_role(''owner''))';
+    END IF;
+END $$;
 
 -- ================================================================
 -- ACTIVITÉS (Publique en lecture, Owner en écriture)
 -- ================================================================
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON activites;
-
-CREATE POLICY "Tous - Lecture" ON activites
-    FOR SELECT
-    USING (auth.uid() IS NOT NULL);
-
-CREATE POLICY "Owner - Modification" ON activites
-    FOR ALL
-    USING (has_role('owner'));
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'activites') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON activites';
+        EXECUTE 'CREATE POLICY "Tous - Lecture" ON activites FOR SELECT USING (auth.uid() IS NOT NULL)';
+        EXECUTE 'CREATE POLICY "Owner - Modification" ON activites FOR ALL USING (has_role(''owner''))';
+    END IF;
+END $$;
 
 -- ================================================================
 -- FAQ (Publique en lecture, Owner en écriture)
 -- ================================================================
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON faq;
-
-CREATE POLICY "Tous - Lecture" ON faq
-    FOR SELECT
-    USING (auth.uid() IS NOT NULL);
-
-CREATE POLICY "Owner - Modification" ON faq
-    FOR ALL
-    USING (has_role('owner'));
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'faq') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON faq';
+        EXECUTE 'CREATE POLICY "Tous - Lecture" ON faq FOR SELECT USING (auth.uid() IS NOT NULL)';
+        EXECUTE 'CREATE POLICY "Owner - Modification" ON faq FOR ALL USING (has_role(''owner''))';
+    END IF;
+END $$;
 
 -- ================================================================
 -- COMMITS_LOG (Admin uniquement)
