@@ -1522,6 +1522,8 @@ async function updateProblemesClients() {
         const card = document.getElementById('dashboard-problemes-clients');
         
         if (!problemes || problemes.length === 0) {
+            container.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème signalé</p>';
+            badge.textContent = '0';
             card.style.display = 'none'; // Cacher si aucun problème
             return;
         }
