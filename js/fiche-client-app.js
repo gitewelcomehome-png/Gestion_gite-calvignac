@@ -1187,15 +1187,9 @@ function initializeEventListeners() {
     });
     
     // Navigation tabs
-    console.log('🔧 Initialisation des boutons d\'onglets...');
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    console.log(`📋 Nombre de boutons d'onglets trouvés: ${tabButtons.length}`);
-    
-    tabButtons.forEach((btn, index) => {
-        const tabId = btn.dataset.tab;
-        console.log(`  [${index}] Bouton "${tabId}" trouvé`);
+    document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            console.log(`👆 Clic sur onglet "${tabId}"`);
+            const tabId = btn.dataset.tab;
             switchTab(tabId);
         });
     });
@@ -1255,45 +1249,23 @@ function initializeEventListeners() {
 }
 
 function switchTab(tabId) {
-    console.log(`🔄 switchTab appelé avec tabId: "${tabId}"`);
-    
     // Désactiver tous les onglets
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
-        content.style.display = 'none'; // Force le masquage
+        content.style.display = 'none';
     });
     
     // Activer l'onglet sélectionné
     const button = document.querySelector(`[data-tab="${tabId}"]`);
     const content = document.getElementById(`tab-${tabId}`);
-    console.log(`🔍 Bouton trouvé:`, button ? 'OUI' : 'NON');
-    console.log(`🔍 Contenu trouvé:`, content ? 'OUI' : 'NON');
     
     if (button) {
         button.classList.add('active');
-        console.log(`✅ Classe 'active' ajoutée au bouton`);
     }
     if (content) {
         content.classList.add('active');
-        content.style.display = 'block'; // Force l'affichage
-        console.log(`✅ Classe 'active' + display:block ajoutés au contenu`);
-        console.log(`📏 Hauteur du contenu:`, content.offsetHeight, 'px');
-        
-        // Debug style computed
-        const computed = window.getComputedStyle(content);
-        console.log(`🎨 Styles computed:`, {
-            display: computed.display,
-            visibility: computed.visibility,
-            opacity: computed.opacity,
-            position: computed.position,
-            zIndex: computed.zIndex,
-            top: computed.top,
-            left: computed.left,
-            transform: computed.transform
-        });
-        
-        // Scroll vers le contenu
+        content.style.display = 'block';
         content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     
@@ -1301,8 +1273,6 @@ function switchTab(tabId) {
     if (tabId === 'activites') {
         initOngletActivites();
     }
-    
-    console.log(`✅ switchTab terminé pour "${tabId}"`);
 }
 
 async function submitDemandeHoraire(type) {
@@ -2327,45 +2297,32 @@ async function submitEvaluation(event) {
 // ============================================================================
 
 function initProblemeTab() {
-    console.log('🔔 Initialisation onglet Demandes...');
-    
     const form = document.getElementById('formRetoursDemande');
-    console.log('📋 Formulaire trouvé:', form ? 'OUI' : 'NON');
     
     if (form) {
-        form.removeEventListener('submit', submitRetourDemande); // Éviter les doublons
+        form.removeEventListener('submit', submitRetourDemande);
         form.addEventListener('submit', submitRetourDemande);
-        console.log('✅ Event submit attaché au formulaire');
     }
     
     // Gérer l'affichage du groupe urgence selon le type sélectionné
     const typeSelect = document.getElementById('typeRetourDemande');
     const urgenceGroup = document.getElementById('urgenceGroupDemande');
     
-    console.log('🔍 TypeSelect:', typeSelect ? 'trouvé' : 'non trouvé');
-    console.log('🔍 UrgenceGroup:', urgenceGroup ? 'trouvé' : 'non trouvé');
-    
     if (typeSelect && urgenceGroup) {
         typeSelect.addEventListener('change', (e) => {
             urgenceGroup.style.display = e.target.value === 'probleme' ? 'block' : 'none';
-            console.log(`🔄 Type changé: ${e.target.value}, urgence ${urgenceGroup.style.display}`);
         });
-        console.log('✅ Event change attaché au typeSelect');
     }
 }
 
 function initEvaluationTab() {
-    console.log('⭐ Initialisation onglet Évaluation...');
-    
     initStarRating();
     
     const form = document.getElementById('formEvaluationSejour');
-    console.log('📋 Formulaire évaluation trouvé:', form ? 'OUI' : 'NON');
     
     if (form) {
-        form.removeEventListener('submit', submitEvaluation); // Éviter les doublons
+        form.removeEventListener('submit', submitEvaluation);
         form.addEventListener('submit', submitEvaluation);
-        console.log('✅ Event submit évaluation attaché');
     }
 }
 window.toggleFaq = toggleFaq;
