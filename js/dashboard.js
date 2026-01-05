@@ -1651,6 +1651,14 @@ function renderProblemeCard(pb, isUrgent) {
     
     return `
         <div style="background: white; padding: 15px; border-radius: 10px; border-left: 5px solid ${urgenceColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px;">
+            <!-- En-tête avec nom client -->
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0;">
+                <span style="font-size: 1.2rem;">👤</span>
+                <span style="font-weight: 700; font-size: 1.1rem; color: #2c3e50;">${pb.client_nom || 'Client inconnu'}</span>
+                ${pb.gite ? `<span style="background: #667eea; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">${pb.gite}</span>` : ''}
+            </div>
+            
+            <!-- Contenu principal -->
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div style="flex: 1;">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
@@ -1663,13 +1671,11 @@ function renderProblemeCard(pb, isUrgent) {
                     ${pb.description ? `<p style="margin: 0 0 8px 0; color: #7f8c8d; font-size: 0.9rem; line-height: 1.5;">${pb.description.substring(0, 150)}${pb.description.length > 150 ? '...' : ''}</p>` : ''}
                     <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #95a5a6;">
                         <span>📅 ${new Date(pb.created_at).toLocaleDateString('fr-FR', {day: '2-digit', month: 'short', year: 'numeric'})}</span>
-                        ${pb.client_nom ? `<span>👤 ${pb.client_nom}</span>` : ''}
-                        ${pb.gite ? `<span>🏠 ${pb.gite}</span>` : ''}
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     ${pb.telephone ? `
-                        <button onclick="ouvrirReponseWhatsApp(${pb.id}, '${pb.telephone}', '${(pb.sujet || '').replace(/'/g, "\\'")}', '${pb.gite || ''}', '${(pb.description || '').replace(/'/g, "\\'")}', '${(pb.client_nom || 'Client').replace(/'/g, "\\'")}')" 
+                        <button onclick="toggleReponseWhatsApp(${pb.id})" 
                                 style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3);"
                                 onmouseover="this.style.transform='scale(1.05)'"
                                 onmouseout="this.style.transform='scale(1)'">
@@ -1696,6 +1702,24 @@ function renderProblemeCard(pb, isUrgent) {
                     </button>
                 </div>
             </div>
+            
+            <!-- Zone de réponse dépliable -->
+            ${pb.telephone ? `
+                <div id="reponse-${pb.id}" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #f0f0f0;">
+                    <form onsubmit="envoyerReponseWhatsApp(event, ${pb.id}, '${pb.telephone}', '${(pb.sujet || '').replace(/'/g, "\\'")}', '${pb.gite || ''}')">
+                        <label style="font-weight: 600; color: #2c3e50; margin-bottom: 8px; display: block;">Votre message</label>
+                        <textarea id="message-${pb.id}" rows="4" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; resize: vertical; font-family: inherit; margin-bottom: 10px;" placeholder="Écrivez votre réponse..." required>Bonjour,\n\nNous avons bien reçu votre message concernant : "${(pb.sujet || '').replace(/"/g, '&quot;')}"\n\nGîte : ${pb.gite || ''}\n\n[Votre réponse ici]</textarea>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" style="flex: 1; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <span style="font-size: 1.2rem;">💬</span> Envoyer via WhatsApp
+                            </button>
+                            <button type="button" onclick="toggleReponseWhatsApp(${pb.id})" style="background: #95a5a6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                Annuler
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            ` : ''}
         </div>
     `;
 }
@@ -1768,6 +1792,63 @@ function repondreWhatsApp(id, telephone, sujet, gite) {
     }
 }
 
+function toggleReponseWhatsApp(problemeId) {
+    const zone = document.getElementById(`reponse-${problemeId}`);
+    const textarea = document.getElementById(`message-${problemeId}`);
+    
+    if (zone.style.display === 'none' || !zone.style.display) {
+        // Ouvrir
+        zone.style.display = 'block';
+        
+        // Auto-sélectionner le placeholder
+        setTimeout(() => {
+            const message = textarea.value;
+            const start = message.indexOf('[Votre réponse ici]');
+            if (start !== -1) {
+                textarea.focus();
+                textarea.setSelectionRange(start, start + '[Votre réponse ici]'.length);
+            }
+        }, 100);
+    } else {
+        // Fermer
+        zone.style.display = 'none';
+    }
+}
+
+function envoyerReponseWhatsApp(event, problemeId, telephone, sujet, gite) {
+    event.preventDefault();
+    
+    const textarea = document.getElementById(`message-${problemeId}`);
+    const message = textarea.value;
+    
+    if (!telephone || !message) {
+        alert('❌ Informations manquantes');
+        return;
+    }
+    
+    // Nettoyer le numéro de téléphone pour WhatsApp
+    let tel = telephone.replace(/\s/g, '').replace(/\+/g, '');
+    
+    // Si commence par 0, remplacer par 33
+    if (tel.startsWith('0')) {
+        tel = '33' + tel.substring(1);
+    } else if (!tel.startsWith('33')) {
+        tel = '33' + tel;
+    }
+    
+    // Ouvrir WhatsApp
+    const url = `https://wa.me/${tel}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+    
+    // Fermer la zone de réponse
+    toggleReponseWhatsApp(problemeId);
+    
+    // Option : marquer comme traité après envoi
+    if (confirm('Marquer ce problème comme traité ?')) {
+        traiterProbleme(problemeId);
+    }
+}
+
 function ouvrirReponseWhatsApp(id, telephone, sujet, gite, description, clientNom) {
     // Afficher le modal
     const modal = document.getElementById('reponseWhatsappModal');
@@ -1818,6 +1899,8 @@ window.supprimerProbleme = supprimerProbleme;
 window.repondreWhatsApp = repondreWhatsApp;
 window.ouvrirReponseWhatsApp = ouvrirReponseWhatsApp;
 window.closeReponseWhatsappModal = closeReponseWhatsappModal;
+window.toggleReponseWhatsApp = toggleReponseWhatsApp;
+window.envoyerReponseWhatsApp = envoyerReponseWhatsApp;
 
 // =============================================
 // FONCTIONS CHECKLIST POUR DASHBOARD
