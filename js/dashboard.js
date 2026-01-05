@@ -1,5 +1,6 @@
 /**
  * Vue d'ensemble hebdomadaire : réservations, ménages, todos
+ * Version: 2.1.0 - Gestion problèmes clients
  */
 
 // ==========================================
@@ -156,21 +157,14 @@ async function updateDashboardStats() {
     
     // Filtrer les tâches visibles (mêmes règles que l'affichage)
     const now = new Date();
-    console.log('🕐 Debug tâches récurrentes - Heure actuelle:', now.toISOString());
-    console.log('📋 Total tâches non complétées:', todos?.length || 0);
-    
     const visibleTodos = todos?.filter(todo => {
         if (!todo.is_recurrent || !todo.next_occurrence) {
             return true; // Tâche normale ou récurrente sans date = visible
         }
         // Tâche récurrente : visible seulement si la date est passée
         const nextOcc = new Date(todo.next_occurrence);
-        const isVisible = nextOcc <= now;
-        console.log(`🔁 Tâche "${todo.title}" - Next: ${nextOcc.toISOString()} - Visible: ${isVisible ? '✅' : '❌'}`);
-        return isVisible;
+        return nextOcc <= now;
     }) || [];
-    
-    console.log('👁️ Tâches visibles:', visibleTodos.length);
     
     const reservationsTodos = visibleTodos.filter(t => t.category === 'reservations').length;
     const travauxTodos = visibleTodos.filter(t => t.category === 'travaux').length;
@@ -449,11 +443,7 @@ async function updateTodoList(category) {
         }
         // Tâche récurrente : visible seulement si la date est passée
         const nextOcc = new Date(todo.next_occurrence);
-        const isVisible = nextOcc <= now;
-        if (todo.category === category) {
-            console.log(`🔁 [${category}] "${todo.title}" - Next: ${nextOcc.toISOString()} vs Now: ${now.toISOString()} = ${isVisible ? 'VISIBLE ✅' : 'MASQUÉE ❌'}`);
-        }
-        return isVisible;
+        return nextOcc <= now;
     }) || [];
     
     if (visibleTodos.length > 0) {
@@ -900,8 +890,6 @@ function openEditReservation(id) {
 
 // Helper pour ouvrir la fiche client - VERSION SIMPLE
 function openFicheClient(reservationId) {
-    console.log('🎯 openFicheClient appelé avec ID:', reservationId);
-    
     // Appeler directement aperçuFicheClient qui marche déjà
     if (typeof window.aperçuFicheClient === 'function') {
         window.aperçuFicheClient(reservationId);
@@ -1039,14 +1027,6 @@ async function updateFinancialIndicators() {
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-    
-    console.log('📋 Résultat requête année précédente:', { 
-        data: simulationPrecedente, 
-        error: errorPrecedente,
-        impot_revenu: simulationPrecedente?.impot_revenu,
-        cotisations_urssaf: simulationPrecedente?.cotisations_urssaf,
-        benefice_imposable: simulationPrecedente?.benefice_imposable
-    });
     
     let impotRevenuPrecedent = 0;
     let urssafPrecedent = 0;
@@ -1404,8 +1384,6 @@ async function refreshDashboard() {
 
 async function updateDemandesClients() {
     try {
-        console.log('🔍 Chargement des demandes d\'horaires...');
-        
         const { data: demandes, error } = await supabaseClient
             .from('demandes_horaires')
             .select('*')
@@ -1416,8 +1394,6 @@ async function updateDemandesClients() {
             console.error('❌ Erreur chargement demandes:', error);
             throw error;
         }
-        
-        console.log('✅ Demandes chargées:', demandes?.length || 0);
         
         const container = document.getElementById('liste-demandes-clients');
         const badge = document.getElementById('badge-demandes-count');
@@ -1530,20 +1506,16 @@ async function refuserDemandeHoraire(demandeId) {
 
 async function updateProblemesClients() {
     try {
-        console.log('🔍 Chargement des problèmes clients...');
-        
         const { data: problemes, error } = await supabaseClient
             .from('problemes_signales')
             .select('*')
-            .is('traite', false) // Seulement les non traités
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(50);
         
         if (error) {
             console.error('❌ Erreur chargement problèmes:', error);
             throw error;
         }
-        
-        console.log('✅ Problèmes chargés:', problemes?.length || 0);
         
         const container = document.getElementById('liste-problemes-clients');
         const badge = document.getElementById('badge-problemes-count');
@@ -1625,10 +1597,12 @@ async function updateProblemesClients() {
 }
 
 async function traiterProbleme(id) {
+    if (!confirm('Marquer ce problème comme traité ?\n\nCela le supprimera de la liste.')) return;
+    
     try {
         const { error } = await supabaseClient
             .from('problemes_signales')
-            .update({ traite: true })
+            .delete()
             .eq('id', id);
         
         if (error) throw error;
