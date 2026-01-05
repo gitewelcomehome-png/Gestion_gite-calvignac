@@ -39,6 +39,7 @@ async function syncAllCalendars() {
     
     let totalAdded = 0;
     let totalSkipped = 0;
+    let totalDeleted = 0;
     let totalErrors = 0;
     
     function addMessage(text, type = 'info') {
@@ -58,7 +59,9 @@ async function syncAllCalendars() {
                 const result = await syncCalendar('Couzon', platform, url);
                 totalAdded += result.added;
                 totalSkipped += result.skipped;
-                addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées`, 'success');
+                totalDeleted += result.deleted;
+                const deletedMsg = result.deleted > 0 ? `, ${result.deleted} supprimées` : '';
+                addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées${deletedMsg}`, 'success');
             } catch (error) {
                 totalErrors++;
                 addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
@@ -73,7 +76,9 @@ async function syncAllCalendars() {
                 const result = await syncCalendar('Trévoux', platform, url);
                 totalAdded += result.added;
                 totalSkipped += result.skipped;
-                addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées`, 'success');
+                totalDeleted += result.deleted;
+                const deletedMsg = result.deleted > 0 ? `, ${result.deleted} supprimées` : '';
+                addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées${deletedMsg}`, 'success');
             } catch (error) {
                 totalErrors++;
                 addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
@@ -82,7 +87,13 @@ async function syncAllCalendars() {
         
         addMessage('', 'info');
         addMessage(`✓ Synchronisation terminée !`, 'success');
-        addMessage(`📊 Total: ${totalAdded} ajoutées, ${totalSkipped} ignorées, ${totalErrors} erreurs`, 'success');
+        const deletedMsg = totalDeleted > 0 ? `, ${totalDeleted} supprimées` : '';
+        addMessage(`📊 Total: ${totalAdded} ajoutées, ${totalSkipped} ignorées${deletedMsg}, ${totalErrors} erreurs`, 'success');
+        
+        if (totalDeleted > 0) {
+            addMessage('', 'info');
+            addMessage(`🗑️ ${totalDeleted} réservation(s) annulée(s) ont été supprimées automatiquement`, 'info');
+        }
         
         if (totalAdded > 0) {
             addMessage('', 'info');
@@ -153,6 +164,16 @@ async function syncCalendar(gite, platform, url) {
         
         let added = 0;
         let skipped = 0;
+        let deleted = 0;
+        
+        // 🗑️ ÉTAPE 1 : Récupérer les réservations existantes de cette plateforme pour ce gîte
+        const existingReservations = await getAllReservations();
+        const platformReservations = existingReservations.filter(r => 
+            r.gite === gite && r.syncedFrom === platform
+        );
+        
+        // Créer un Set des IDs de réservations trouvées dans le flux iCal
+        const foundReservationIds = new Set();
         
         for (const vevent of vevents) {
             const event = new ICAL.Event(vevent);
@@ -247,10 +268,23 @@ async function syncCalendar(gite, platform, url) {
                 }
             }
             
-            // Vérifier doublon
+            // Vérifier doublon ou mise à jour d'une réservation existante
+            const existingResa = platformReservations.find(r => 
+                r.dateDebut === dateDebut && r.dateFin === dateFin
+            );
+            
+            if (existingResa) {
+                // Marquer cette réservation comme toujours présente
+                foundReservationIds.add(existingResa.id);
+                console.log(`♻️ Réservation existante confirmée: ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
+                skipped++;
+                continue;
+            }
+            
+            // Vérifier chevauchement avec d'autres réservations (pas de cette plateforme)
             const hasOverlap = await checkDateOverlap(gite, dateDebut, dateFin);
             if (hasOverlap) {
-                console.log(`⏭️ Réservation ignorée (doublon détecté): ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
+                console.log(`⏭️ Réservation ignorée (chevauchement avec autre source): ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
                 skipped++;
                 continue;
             }
@@ -286,7 +320,22 @@ async function syncCalendar(gite, platform, url) {
             added++;
         }
         
-        return { added, skipped };
+        // 🗑️ ÉTAPE 2 : Supprimer les réservations qui ne sont plus dans le flux iCal (annulées)
+        for (const oldResa of platformReservations) {
+            if (!foundReservationIds.has(oldResa.id)) {
+                // Cette réservation n'existe plus dans le flux iCal → elle a été annulée
+                console.log(`🗑️ Suppression réservation annulée: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                
+                await window.supabase
+                    .from('reservations')
+                    .delete()
+                    .eq('id', oldResa.id);
+                
+                deleted++;
+            }
+        }
+        
+        return { added, skipped, deleted };
         
     } catch (error) {
         console.error(`Erreur sync ${gite} ${platform}:`, error);
