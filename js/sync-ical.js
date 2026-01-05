@@ -215,10 +215,14 @@ async function syncCalendar(gite, platform, url) {
             }
             
             // Vérifier doublon
-            if (await checkDateOverlap(gite, dateDebut, dateFin)) {
+            const hasOverlap = await checkDateOverlap(gite, dateDebut, dateFin);
+            if (hasOverlap) {
+                console.log(`⏭️ Réservation ignorée (doublon détecté): ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
                 skipped++;
                 continue;
             }
+            
+            console.log(`✅ Nouvelle réservation détectée: ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
             
             // Déterminer site
             let site;
@@ -277,10 +281,13 @@ async function checkDateOverlap(gite, dateDebut, dateFin, excludeId = null) {
         const rDebut = parseLocalDate(r.dateDebut);
         const rFin = parseLocalDate(r.dateFin);
         
-        // Vérifier chevauchement
-        if ((debut >= rDebut && debut < rFin) || 
-            (fin > rDebut && fin <= rFin) || 
-            (debut <= rDebut && fin >= rFin)) {
+        // Vérifier chevauchement RÉEL (pas juste date de début = date de fin précédente)
+        // Une réservation peut commencer le jour où une autre se termine (check-out 10h, check-in 16h)
+        // Chevauchement seulement si :
+        // - Le début de la nouvelle résa est strictement avant la fin de l'existante
+        // - ET la fin de la nouvelle résa est strictement après le début de l'existante
+        if ((debut < rFin && fin > rDebut)) {
+            console.log(`🔍 Chevauchement détecté: Nouvelle [${dateDebut} → ${dateFin}] vs Existante [${r.dateDebut} → ${r.dateFin}]`);
             return true;
         }
     }
