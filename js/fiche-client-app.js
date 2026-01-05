@@ -1184,9 +1184,15 @@ function initializeEventListeners() {
     });
     
     // Navigation tabs
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    console.log('🔧 Initialisation des boutons d\'onglets...');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    console.log(`📋 Nombre de boutons d'onglets trouvés: ${tabButtons.length}`);
+    
+    tabButtons.forEach((btn, index) => {
+        const tabId = btn.dataset.tab;
+        console.log(`  [${index}] Bouton "${tabId}" trouvé`);
         btn.addEventListener('click', () => {
-            const tabId = btn.dataset.tab;
+            console.log(`👆 Clic sur onglet "${tabId}"`);
             switchTab(tabId);
         });
     });
@@ -1246,18 +1252,27 @@ function initializeEventListeners() {
 }
 
 function switchTab(tabId) {
+    console.log(`🔄 switchTab appelé avec tabId: "${tabId}"`);
+    
     // Désactiver tous les onglets
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     
     // Activer l'onglet sélectionné
-    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-    document.getElementById(`tab-${tabId}`).classList.add('active');
+    const button = document.querySelector(`[data-tab="${tabId}"]`);
+    const content = document.getElementById(`tab-${tabId}`);
+    console.log(`🔍 Bouton trouvé:`, button ? 'OUI' : 'NON');
+    console.log(`🔍 Contenu trouvé:`, content ? 'OUI' : 'NON');
+    
+    if (button) button.classList.add('active');
+    if (content) content.classList.add('active');
     
     // Charger les activités
     if (tabId === 'activites') {
         initOngletActivites();
     }
+    
+    console.log(`✅ switchTab terminé pour "${tabId}"`);
 }
 
 async function submitDemandeHoraire(type) {
