@@ -572,8 +572,7 @@ function initOngletEntree() {
         parkingSection.style.display = 'none';
     }
     
-    // Checklist d'entrée
-    loadChecklist('entree', 'checklistEntreeContainer', 'progressEntree', 'progressEntreeText');
+    // Checklists chargées via loadClientChecklists() appelée au démarrage
 }
 
 function initOngletPendant() {
@@ -908,89 +907,10 @@ function initOngletSortie() {
         document.getElementById('instructionsSortie').textContent = '';
     }
     
-    // Checklist de sortie
-    loadChecklist('sortie', 'checklistSortieContainer', 'progressSortie', 'progressSortieText');
+    // Checklists chargées via loadClientChecklists()
 }
 
-async function loadChecklist(type, containerId, progressId, progressTextId) {
-    // Charger les items de la checklist
-    const { data: items } = await supabase
-        .from('checklists')
-        .select('*')
-        .eq('gite', normalizeGiteName(reservationData.gite))
-        .eq('type', type)
-        .eq('actif', true)
-        .order('ordre');
-    
-    // Charger les validations existantes
-    const { data: validations } = await supabase
-        .from('checklist_validations')
-        .select('*')
-        .eq('reservation_id', reservationData.id);
-    
-    const validationsMap = {};
-    validations?.forEach(v => {
-        validationsMap[v.checklist_id] = v.validated;
-    });
-    
-    const container = document.getElementById(containerId);
-    container.innerHTML = items.map(item => {
-        const isChecked = validationsMap[item.id] || false;
-        const itemText = currentLanguage === 'fr' ? item.item_fr : item.item_en;
-        
-        return `
-            <div class="checkbox-group ${isChecked ? 'checked' : ''}" data-checklist-id="${item.id}">
-                <input type="checkbox" class="checkbox" ${isChecked ? 'checked' : ''} 
-                       onchange="toggleChecklistItem(${item.id}, this.checked, '${type}')">
-                <label class="checkbox-label">
-                    ${itemText}
-                    ${item.obligatoire ? '<span style="color: var(--danger);">*</span>' : ''}
-                </label>
-            </div>
-        `;
-    }).join('');
-    
-    updateChecklistProgress(items.length, validations?.filter(v => v.validated).length || 0, progressId, progressTextId);
-}
-
-async function toggleChecklistItem(checklistId, validated, type) {
-    const parentDiv = document.querySelector(`[data-checklist-id="${checklistId}"]`);
-    if (validated) {
-        parentDiv.classList.add('checked');
-    } else {
-        parentDiv.classList.remove('checked');
-    }
-    
-    // Sauvegarder dans la base
-    await supabase
-        .from('checklist_validations')
-        .upsert({
-            reservation_id: reservationData.id,
-            checklist_id: checklistId,
-            validated: validated,
-            validated_at: validated ? new Date().toISOString() : null
-        });
-    
-    // Mettre à jour la progression
-    const container = type === 'entree' ? 'checklistEntreeContainer' : 'checklistSortieContainer';
-    const progressId = type === 'entree' ? 'progressEntree' : 'progressSortie';
-    const progressTextId = type === 'entree' ? 'progressEntreeText' : 'progressSortieText';
-    
-    const checkboxes = document.querySelectorAll(`#${container} .checkbox`);
-    const total = checkboxes.length;
-    const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
-    
-    updateChecklistProgress(total, checked, progressId, progressTextId);
-    
-    // Mettre à jour les badges
-    updateTabBadges();
-}
-
-function updateChecklistProgress(total, checked, progressId, progressTextId) {
-    const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
-    document.getElementById(progressId).style.width = `${percentage}%`;
-    document.getElementById(progressTextId).textContent = `${percentage}%`;
-}
+// ==================== ACTIVITÉS ====================
 
 function initOngletActivites() {
     // Réutiliser la logique de decouvrir.js pour afficher la carte et les activités
@@ -2181,7 +2101,6 @@ if (window.matchMedia('(display-mode: standalone)').matches) {
 }
 
 // Rendre les fonctions globales pour onclick
-window.toggleChecklistItem = toggleChecklistItem;
 window.toggleClientChecklistItem = toggleClientChecklistItem;
 window.copyToClipboard = copyToClipboard;
 window.openActiviteModal = openActiviteModal;
