@@ -32,16 +32,16 @@ if (!window.ficheClientAppLoaded) {
             // Recharger si un nouveau SW est en attente
             registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
-                console.log('🆕 New SW found!');
+                // // console.log('🆕 New SW found!');
                 
                 newWorker.addEventListener('statechange', () => {
                     if (newWorker.state === 'activated') {
-                        console.log('🟢 New SW activated! Reloading...');
+                        // // console.log('🟢 New SW activated! Reloading...');
                         window.location.reload();
                     }
                 });
             });
-        }).catch(error => console.log('❌ SW registration failed:', error));
+        }).catch(error => // console.log('❌ SW registration failed:', error));
     }
 }
 
@@ -259,7 +259,7 @@ async function loadReservationData() {
     }
     
     if (isExpired && debugMode) {
-        console.warn('⚠️ Mode DEBUG: Token expiré mais affiché quand même');
+        // // console.warn('⚠️ Mode DEBUG: Token expiré mais affiché quand même');
     }
     
     // Mettre à jour les stats d'accès
@@ -340,7 +340,7 @@ async function loadGiteInfo() {
                 giteInfo.heure_depart_validee = h.heure_validee;
             }
         });
-        console.log('✅ Horaires validées trouvées:', giteInfo.heure_arrivee_validee, giteInfo.heure_depart_validee);
+        // // console.log('✅ Horaires validées trouvées:', giteInfo.heure_arrivee_validee, giteInfo.heure_depart_validee);
     }
 }
 
@@ -411,12 +411,12 @@ function initOngletEntree() {
     
     // Horaire d'arrivée
     const heureArrivee = currentLanguage === 'fr' ? giteInfo.heure_arrivee : giteInfo.heure_arrivee_en;
-    console.log('🕒 Heure arrivée brute:', heureArrivee, 'Standard:', giteInfo.heure_arrivee_standard, 'Validée:', giteInfo.heure_arrivee_validee, 'Lang:', currentLanguage);
+    // // console.log('🕒 Heure arrivée brute:', heureArrivee, 'Standard:', giteInfo.heure_arrivee_standard, 'Validée:', giteInfo.heure_arrivee_validee, 'Lang:', currentLanguage);
     
     // ✅ PRIORITÉ: Heure validée > Heure configurée > Heure standard
     const heureArriveeEffective = giteInfo.heure_arrivee_validee || heureArrivee || giteInfo.heure_arrivee_standard || '17:00';
     const heureArriveeFormatted = formatTime(heureArriveeEffective);
-    console.log('🕒 Heure arrivée formatée:', heureArriveeFormatted);
+    // // console.log('🕒 Heure arrivée formatée:', heureArriveeFormatted);
     document.getElementById('heureArrivee').textContent = heureArriveeFormatted;
     
     // Générer les options de sélection horaire (toutes les 30 min)
@@ -432,7 +432,7 @@ function initOngletEntree() {
     
     const selectElement = document.getElementById('heureArriveeDemandee');
     if (!selectElement) {
-        console.warn('⚠️ heureArriveeDemandee select not found');
+        // // console.warn('⚠️ heureArriveeDemandee select not found');
         return;
     }
     selectElement.innerHTML = '';
@@ -1311,7 +1311,7 @@ async function submitDemandeHoraire(type) {
             
             if (checkError.message && checkError.message.includes('relation') && checkError.message.includes('does not exist')) {
                 showToast('⚠️ Fonctionnalité non encore activée. Contactez le gestionnaire.');
-                console.warn('⚠️ La table demandes_horaires n\'existe pas encore. Exécutez sql/migrate_demandes_horaires.sql dans Supabase.');
+                // // console.warn('⚠️ La table demandes_horaires n\'existe pas encore. Exécutez sql/migrate_demandes_horaires.sql dans Supabase.');
             } else {
                 showToast(t('erreur') || '❌ Erreur lors de la vérification');
             }
@@ -1336,7 +1336,7 @@ async function submitDemandeHoraire(type) {
                 .eq('id', existingDemandes[0].id);
             
             if (error) throw error;
-            console.log('✅ Demande mise à jour:', data);
+            // // console.log('✅ Demande mise à jour:', data);
             showToast('✅ Demande mise à jour avec succès !');
         } 
         // 3. Sinon, créer une nouvelle demande
@@ -1356,7 +1356,7 @@ async function submitDemandeHoraire(type) {
                 });
             
             if (error) throw error;
-            console.log('✅ Demande créée:', data);
+            // // console.log('✅ Demande créée:', data);
             showToast(t('demande_envoyee') || '✅ Demande envoyée avec succès !');
         }
         
@@ -1376,7 +1376,7 @@ function calculateAutoApproval(type, heureDemandee) {
     const [hours, minutes] = heureDemandee.split(':').map(Number);
     const requestedMinutes = hours * 60 + minutes;
     
-    console.log('🔍 Calculate auto-approval:', {type, heureDemandee, requestedMinutes, cleaningSchedule});
+    // // console.log('🔍 Calculate auto-approval:', {type, heureDemandee, requestedMinutes, cleaningSchedule});
     
     if (type === 'arrivee_anticipee') {
         // Règles pour l'arrivée anticipée
@@ -1952,17 +1952,17 @@ window.submitEvaluation = submitEvaluation;
 // =============================================
 
 async function loadClientChecklists() {
-    console.log('📋 Chargement checklists client...');
+    // // console.log('📋 Chargement checklists client...');
     
     if (!reservationData || !giteInfo) {
-        console.log('⚠️ Données manquantes pour checklists');
+        // // console.log('⚠️ Données manquantes pour checklists');
         return;
     }
     
     try {
         // Normaliser le nom du gîte (première lettre en majuscule)
         const giteNormalized = giteInfo.gite.charAt(0).toUpperCase() + giteInfo.gite.slice(1).toLowerCase();
-        console.log(`🏠 Gîte recherché: "${giteNormalized}" (original: "${giteInfo.gite}")`);
+        // // console.log(`🏠 Gîte recherché: "${giteNormalized}" (original: "${giteInfo.gite}")`);
         
         // Charger les templates du gîte
         const { data: templatesEntree, error: errorEntree } = await supabase
@@ -2011,7 +2011,7 @@ async function loadClientChecklists() {
         // Afficher checklist sortie
         renderClientChecklist('sortie', templatesSortie || [], progressMap);
         
-        console.log('✅ Checklists chargées:', {
+        // // console.log('✅ Checklists chargées:', {
             gite: giteInfo.gite,
             entree: templatesEntree?.length || 0,
             sortie: templatesSortie?.length || 0,
@@ -2025,7 +2025,7 @@ async function loadClientChecklists() {
 }
 
 function renderClientChecklist(type, templates, progressMap) {
-    console.log(`🎨 Render checklist ${type}:`, { 
+    // // console.log(`🎨 Render checklist ${type}:`, { 
         templatesCount: templates?.length,
         templates: templates, 
         progressMap: progressMap 
@@ -2035,14 +2035,14 @@ function renderClientChecklist(type, templates, progressMap) {
     const progressBarId = type === 'entree' ? 'progressEntree' : 'progressSortie';
     const progressTextId = type === 'entree' ? 'progressEntreeText' : 'progressSortieText';
     
-    console.log(`🔍 Recherche container: ${containerId}`);
+    // // console.log(`🔍 Recherche container: ${containerId}`);
     const container = document.getElementById(containerId);
     if (!container) {
         console.error(`❌ Container ${containerId} introuvable`);
         return;
     }
     
-    console.log(`✅ Container trouvé:`, container);
+    // // console.log(`✅ Container trouvé:`, container);
     
     if (!templates || templates.length === 0) {
         container.innerHTML = '<p style="color: var(--gray-600); font-style: italic; text-align: center;">Aucun item configuré</p>';
@@ -2120,7 +2120,7 @@ async function toggleClientChecklistItem(templateId, type) {
         
         if (upsertError) throw upsertError;
         
-        console.log(`✅ Checklist ${templateId} ${newCompleted ? 'cochée' : 'décochée'}`);
+        // // console.log(`✅ Checklist ${templateId} ${newCompleted ? 'cochée' : 'décochée'}`);
         
         // Recharger pour mettre à jour l'affichage
         await loadClientChecklists();
@@ -2196,7 +2196,7 @@ async function submitRetourDemande(event) {
         document.getElementById('confirmationRetourDemande').style.display = 'block';
         
         // Envoyer une notification (TODO: webhook admin)
-        console.log('🔔 Notification à envoyer:', {
+        // // console.log('🔔 Notification à envoyer:', {
             type: formData.type,
             urgence: formData.urgence,
             gite: formData.gite
@@ -2233,7 +2233,7 @@ function initStarRating() {
             ratings[fieldName] = rating;
             document.getElementById(fieldName).value = rating;
             highlightStarsForField(fieldName, rating, true);
-            console.log(`⭐ ${fieldName}: ${rating}/5`);
+            // // console.log(`⭐ ${fieldName}: ${rating}/5`);
         });
         
         // Réinitialiser au départ de la souris
@@ -2265,7 +2265,7 @@ async function submitEvaluation(event) {
     event.preventDefault();
     
     try {
-        console.log('📝 Envoi évaluation séjour...');
+        // // console.log('📝 Envoi évaluation séjour...');
         
         const noteGlobale = document.getElementById('noteGlobale').value;
         const noteProprete = document.getElementById('noteProprete').value;
@@ -2303,7 +2303,7 @@ async function submitEvaluation(event) {
         
         if (error) throw error;
         
-        console.log('✅ Évaluation enregistrée:', data);
+        // // console.log('✅ Évaluation enregistrée:', data);
         
         // Masquer le formulaire et afficher la confirmation
         document.getElementById('formEvaluationSejour').style.display = 'none';
