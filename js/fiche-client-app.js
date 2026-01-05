@@ -2282,30 +2282,45 @@ async function submitEvaluation(event) {
 // ============================================================================
 
 function initProblemeTab() {
+    console.log('🔔 Initialisation onglet Demandes...');
+    
     const form = document.getElementById('formRetoursDemande');
+    console.log('📋 Formulaire trouvé:', form ? 'OUI' : 'NON');
+    
     if (form) {
         form.removeEventListener('submit', submitRetourDemande); // Éviter les doublons
         form.addEventListener('submit', submitRetourDemande);
+        console.log('✅ Event submit attaché au formulaire');
     }
     
     // Gérer l'affichage du groupe urgence selon le type sélectionné
     const typeSelect = document.getElementById('typeRetourDemande');
     const urgenceGroup = document.getElementById('urgenceGroupDemande');
     
+    console.log('🔍 TypeSelect:', typeSelect ? 'trouvé' : 'non trouvé');
+    console.log('🔍 UrgenceGroup:', urgenceGroup ? 'trouvé' : 'non trouvé');
+    
     if (typeSelect && urgenceGroup) {
         typeSelect.addEventListener('change', (e) => {
             urgenceGroup.style.display = e.target.value === 'probleme' ? 'block' : 'none';
+            console.log(`🔄 Type changé: ${e.target.value}, urgence ${urgenceGroup.style.display}`);
         });
+        console.log('✅ Event change attaché au typeSelect');
     }
 }
 
 function initEvaluationTab() {
+    console.log('⭐ Initialisation onglet Évaluation...');
+    
     initStarRating();
     
     const form = document.getElementById('formEvaluationSejour');
+    console.log('📋 Formulaire évaluation trouvé:', form ? 'OUI' : 'NON');
+    
     if (form) {
         form.removeEventListener('submit', submitEvaluation); // Éviter les doublons
         form.addEventListener('submit', submitEvaluation);
+        console.log('✅ Event submit évaluation attaché');
     }
 }
 window.toggleFaq = toggleFaq;
