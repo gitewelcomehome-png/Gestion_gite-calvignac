@@ -1252,7 +1252,6 @@ async function sauvegarderSimulation(silencieux = false) {
     }
     
     const anneeValue = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
-    console.log('💾 Sauvegarde simulation pour année:', anneeValue);
     
     const data = {
         nom_simulation: nom,
@@ -1380,13 +1379,6 @@ async function sauvegarderSimulation(silencieux = false) {
         reste_apres_ir: parseFloat(document.getElementById('reste-vivre-final')?.textContent.replace(/[€\s]/g, '') || 0),
         trimestres_retraite: parseInt(document.getElementById('detail-trimestres')?.textContent || 0)
     };
-    
-    console.log('💾 Données calculées à sauvegarder:', {
-        annee: data.annee,
-        benefice_imposable: data.benefice_imposable,
-        cotisations_urssaf: data.cotisations_urssaf,
-        impot_revenu: data.impot_revenu
-    });
     
     // Vérifier si les données ont changé
     const dataString = JSON.stringify(data);
