@@ -170,7 +170,7 @@ async function syncCalendar(gite, platform, url) {
         const existingReservations = await getAllReservations();
         
         // Filtrer par gîte et plateforme (si le champ syncedFrom existe)
-        // Sinon, utiliser le site pour identifier les réservations de cette plateforme
+        // Sinon, utiliser plateforme pour identifier les réservations de cette source
         const platformReservations = existingReservations.filter(r => {
             if (r.gite !== gite) return false;
             
@@ -179,16 +179,16 @@ async function syncCalendar(gite, platform, url) {
                 return r.syncedFrom === platform;
             }
             
-            // Fallback : utiliser le champ 'site' pour identifier la plateforme
-            const siteLower = (r.site || '').toLowerCase();
+            // Fallback : utiliser le champ 'plateforme' pour identifier la source
+            const plateforme = (r.plateforme || '').toLowerCase();
             const platformLower = platform.toLowerCase();
             
             if (platformLower.includes('airbnb')) {
-                return siteLower.includes('airbnb');
+                return plateforme.includes('airbnb');
             } else if (platformLower.includes('abritel') || platformLower.includes('homelidays')) {
-                return siteLower.includes('abritel') || siteLower.includes('homelidays');
+                return plateforme.includes('abritel') || plateforme.includes('homelidays');
             } else if (platformLower.includes('gites')) {
-                return siteLower.includes('gîtes de france') || siteLower.includes('gites de france');
+                return plateforme.includes('gîtes de france') || plateforme.includes('gites de france');
             }
             
             return false;
@@ -196,7 +196,7 @@ async function syncCalendar(gite, platform, url) {
         
         console.log(`📋 Réservations existantes pour ${gite} / ${platform}: ${platformReservations.length}`);
         platformReservations.forEach(r => {
-            console.log(`   • ${r.dateDebut} → ${r.dateFin} | ${r.nom} | Site: "${r.site}" | SyncedFrom: "${r.syncedFrom || 'NON DÉFINI'}"`);
+            console.log(`   • ${r.dateDebut} → ${r.dateFin} | ${r.nomClient || r.nom} | Plateforme: "${r.plateforme}" | SyncedFrom: "${r.syncedFrom || 'NON DÉFINI'}"`);
         });
         
         // Créer un Set des IDs de réservations trouvées dans le flux iCal
