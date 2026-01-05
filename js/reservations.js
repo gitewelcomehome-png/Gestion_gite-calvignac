@@ -175,7 +175,7 @@ async function saveEditReservation(event) {
         };
         
         await updateReservation(id, updates);
-        await updateReservationsList();
+        await updateReservationsList(true); // Garder la position du scroll
         await updateStats();
         
         closeEditModal();
@@ -188,14 +188,14 @@ async function saveEditReservation(event) {
 
 async function updatePaiementStatus(id, newStatus) {
     await updateReservation(id, { paiement: newStatus });
-    await updateReservationsList();
+    await updateReservationsList(true); // Garder la position du scroll
     showToast('✓ Statut mis à jour');
 }
 
 async function deleteReservationById(id) {
     if (confirm('Supprimer cette réservation ?')) {
         await deleteReservation(id);
-        await updateReservationsList();
+        await updateReservationsList(true); // Garder la position du scroll
         await updateStats();
         await updateArchivesDisplay();
         showToast('✓ Réservation supprimée');
@@ -206,7 +206,10 @@ async function deleteReservationById(id) {
 // 📅 AFFICHAGE PLANNING PAR SEMAINE
 // ==========================================
 
-async function updateReservationsList() {
+async function updateReservationsList(keepScrollPosition = false) {
+    // Mémoriser la position du scroll si demandé
+    const scrollY = keepScrollPosition ? window.scrollY : null;
+    
     const reservations = await getAllReservations();
     
     const today = new Date();
@@ -303,13 +306,20 @@ async function updateReservationsList() {
     html += '</div>';
     container.innerHTML = html;
     
-    // Scroller automatiquement vers la première semaine (semaine actuelle)
-    setTimeout(() => {
-        const firstWeek = container.querySelector('.week-block');
-        if (firstWeek) {
-            firstWeek.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }, 100);
+    // Scroller automatiquement vers la première semaine SEULEMENT si on ne garde pas la position
+    if (!keepScrollPosition) {
+        setTimeout(() => {
+            const firstWeek = container.querySelector('.week-block');
+            if (firstWeek) {
+                firstWeek.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    } else {
+        // Restaurer la position du scroll
+        setTimeout(() => {
+            window.scrollTo(0, scrollY);
+        }, 50);
+    }
 }
 
 function generateWeekReservations(reservations, weekKey, cssClass, toutesReservations, validationMap = {}, today = null) {
