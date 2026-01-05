@@ -551,13 +551,13 @@
                 if (typeof updateArchivedTodos === 'function') updateArchivedTodos();
             }
             if (tabName === 'charges') {
-                console.log('💰 [SWITCH-TAB] Onglet Fiscalité activé, initialisation...');
+                // console.log('💰 [SWITCH-TAB] Onglet Fiscalité activé, initialisation...');
                 // Attendre que le HTML soit complètement chargé
                 setTimeout(() => {
                     if (typeof initFiscalite === 'function') {
                         initFiscalite();
                     } else {
-                        console.warn('⚠️ [SWITCH-TAB] initFiscalite non disponible');
+                        // console.warn('⚠️ [SWITCH-TAB] initFiscalite non disponible');
                     }
                 }, 100);
             }
@@ -3161,7 +3161,7 @@
             }
             
             if (evenementsValides.length === 0) {
-                console.error('❌ Aucun point avec coordonnées valides');
+                // console.error('❌ Aucun point avec coordonnées valides');
                 mapContainer.style.display = 'none';
                 return;
             }
