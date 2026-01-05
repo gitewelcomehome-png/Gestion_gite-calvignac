@@ -1,201 +1,150 @@
-# 🏡 Gestion Gîtes - Calvignac
+# 🏡 Gestion Gîtes Calvignac
 
-Application web de gestion complète pour les gîtes de Trévoux et Couzon.
+Application web de gestion complète pour locations de gîtes ruraux (Cottage, Barn, Shed).
 
-## 📋 Fonctionnalités
+## ✨ Fonctionnalités Principales
 
-### ✅ Gestion des Réservations
-- Calendrier interactif avec synchronisation iCal
-- Import automatique depuis Airbnb, Abritel, Gîtes de France
-- Suivi des clients et historique des séjours
-- Blocages et indisponibilités
+### 📊 Dashboard & Pilotage
+- Vue d'ensemble temps réel avec indicateurs clés
+- **Vision Globale** : CA mensuel/annuel, bénéfices, trésorerie
+- Alertes : Ménages à valider, travaux urgents, échéances fiscales
 
-### ✅ Gestion Financière
-- Suivi du chiffre d'affaires par gîte
-- Enregistrement des charges et dépenses
-- Graphiques et statistiques détaillées
-- Export des données comptables
+### 📅 Réservations
+- Synchronisation multi-plateformes (Booking, Airbnb, direct)
+- Calendrier interactif avec sync iCal
+- Gestion des arrivées/départs et taux d'occupation
 
-### ✅ Gestion du Ménage
-- Planning automatique des ménages
-- Affectation aux employés
-- Suivi des heures et des tâches
-- Historique complet
+### 🧹 Espace Femme de Ménage
+- Interface dédiée pour retours d'intervention
+- Photos et observations par gîte
+- Validation propriétaire avec historique
 
-### ✅ Découvrir (Activités & POIs)
-- **875 activités** répertoriées autour des gîtes
-  - 455 activités autour de Trévoux 🏰
-  - 420 activités autour de Couzon ⛰️
-- Carte interactive Google Maps
-- Filtres par catégorie:
-  - 🍽️ Restaurants
-  - 🏛️ Musées & Culture
-  - ☕ Cafés & Bars
-  - 🌳 Parcs & Nature
-  - 🎮 Sport & Loisirs
-- Calcul d'itinéraire depuis le gîte
-- Recherche par distance (1-50 km)
+### 💰 Gestion Financière
+- Charges & revenus par gîte
+- Fiscalité (URSSAF, IR) avec calculs automatiques
+- Suivi trésorerie et soldes bancaires
+- Statistiques détaillées (revenus, CA, taux occupation)
 
-### ✅ Archives & Statistiques
-- Historique complet des réservations
-- Analyse des performances par plateforme
-- Graphiques de tendances
-- Export des données
+### 👥 Fiches Clients
+- Historique complet des séjours
+- Communications et transactions
+- Notes et préférences personnalisées
 
-## 🗂️ Structure du Projet
+### 📋 Tâches Récurrentes
+- Travaux, entretien, échéances administratives
+- Mode récurrent avec gestion intelligente
+- Archive automatique des tâches validées
+
+## 🚀 Installation & Configuration
+
+### Prérequis
+- Compte Supabase (base de données PostgreSQL)
+- Hébergement web (Vercel recommandé)
+- URLs iCal des calendriers Booking/Airbnb
+
+### Étapes d'installation
+
+1. **Cloner le projet**
+```bash
+git clone https://github.com/gitewelcomehome-png/Gestion_gite-calvignac.git
+cd Gestion_gite-calvignac
+```
+
+2. **Configurer la base de données**
+```bash
+# Exécuter les scripts SQL dans l'ordre via Supabase Dashboard
+# Voir documentation/INSTALLATION_*.md pour détails
+cd sql/
+```
+
+3. **Configuration locale**
+```bash
+# Éditer js/shared-config.js avec vos clés Supabase et URLs iCal
+# ⚠️ NE JAMAIS committer les vraies clés (voir documentation sécurité)
+```
+
+4. **Déploiement**
+```bash
+# Via Vercel
+vercel --prod
+```
+
+## 📁 Structure du Projet
 
 ```
-Gestion_gite-calvignac/
-├── index.html                 # Application principale (SPA)
-├── tabs/                      # Modules de l'application
+/
+├── index.html                  # Page principale (dashboard)
+├── femme-menage.html          # Interface femme de ménage
+├── fiche-client.html          # PWA Fiches clients
+│
+├── js/                        # Scripts JavaScript
+│   ├── shared-config.js       # Configuration centralisée
+│   ├── dashboard.js           # Logique dashboard
+│   ├── reservations.js        # Gestion réservations
+│   ├── menage.js              # Espace ménage
+│   ├── charges.js             # Gestion financière
+│   ├── fiscalite-v2.js        # Calculs fiscaux
+│   └── fiches-clients.js      # CRM clients
+│
+├── tabs/                      # Composants UI (onglets)
+│   ├── tab-dashboard.html
 │   ├── tab-reservations.html
-│   ├── tab-charges.html
-│   ├── tab-menage.html
-│   ├── tab-decouvrir.html     # 🆕 Module Découvrir
-│   ├── tab-archives.html
-│   ├── tab-statistiques.html
-│   ├── tab-infos-gites.html
-│   ├── tab-gestion.html
-│   └── tab-sauvegarde.html
-├── js/                        # Logique JavaScript
-│   ├── shared-config.js       # Configuration Supabase
-│   ├── shared-utils.js        # Utilitaires communs
-│   ├── supabase-operations.js # Opérations DB
-│   ├── decouvrir.js           # 🆕 Logique Découvrir
-│   └── ...
-├── sql/                       # Schémas base de données
-│   ├── create_activites_table.sql
-│   ├── create_reservations_table.sql
-│   └── ...
-├── _archives/                 # Fichiers archivés
-│   ├── fichiers_test/
-│   ├── scripts_obsoletes/
-│   ├── documentation_obsolete/
-│   ├── RAPPORT_NETTOYAGE_28DEC.md
-│   └── GUIDE_CORRECTION_COORDONNEES.md
-└── vercel.json               # Configuration déploiement
-
+│   └── tab-menage.html
+│
+├── sql/                       # Scripts base de données
+│   ├── create_*.sql           # Création des tables
+│   └── fix_*.sql              # Corrections RLS
+│
+├── documentation/             # 📚 Guides complets
+│   ├── AUDIT_SECURITE.md      # ⚠️ Audit de sécurité
+│   ├── PLAN_COMMERCIALISATION.md  # 🎯 Plan d'action
+│   └── GUIDE_*.md             # Guides fonctionnels
+│
+└── _archives/                 # Fichiers obsolètes
 ```
-
-## 🚀 Déploiement
-
-### Vercel (Production)
-```bash
-# Déploiement automatique via GitHub
-git push origin main
-
-# ⚠️ Si auto-deploy ne fonctionne pas:
-# 1. Aller sur vercel.com/dashboard
-# 2. Sélectionner le projet
-# 3. Cliquer "Redeploy" manuellement
-```
-
-### Dev Container (Développement)
-```bash
-# Ouvrir dans VS Code avec Remote Containers
-# Le serveur HTTP démarre automatiquement
-
-# Ou manuellement:
-python3 -m http.server 8000
-# Puis ouvrir http://localhost:8000
-```
-
-## 🗄️ Base de Données (Supabase)
-
-### Tables Principales
-- `reservations_gites` - Réservations et calendrier
-- `charges_gites` - Charges et dépenses
-- `clients_gites` - Informations clients
-- `cleaning_schedule` - Planning ménages
-- `activites_gites` - **875 activités** autour des gîtes
-- `commits_log` - Historique des modifications
-
-### Configuration
-```javascript
-// js/shared-config.js
-const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
-const SUPABASE_KEY = 'eyJhbGci...';  // Clé publique "anon"
-```
-
-## ⚠️ Problèmes Connus
-
-### 🐛 Coordonnées Dupliquées (Priorité: CRITIQUE)
-**Statut**: Identifié - Correction en attente
-
-38 activités partagent les mêmes coordonnées GPS (45.9394, 4.7728), ce qui crée un "tas" de marqueurs empilés sur la carte.
-
-**Impact**:
-- ❌ Marqueurs illisibles sur la carte
-- ❌ Navigation difficile
-- ❌ Expérience utilisateur dégradée
-
-**Solutions disponibles**:
-1. Script automatique de géocodage (voir `_archives/GUIDE_CORRECTION_COORDONNEES.md`)
-2. Correction manuelle via Supabase
-3. Import batch depuis Excel/Sheets
-
-**Documentation**:
-- Rapport complet: `_archives/RAPPORT_NETTOYAGE_28DEC.md`
-- Guide correction: `_archives/GUIDE_CORRECTION_COORDONNEES.md`
-
-### ⚙️ Auto-deploy Vercel Instable
-**Workaround**: Redéployer manuellement depuis le dashboard Vercel après chaque push.
-
-### 🔄 Bouton "Dernier commit"
-**Statut**: Non fonctionnel - Nécessite table `commits_log` dans Supabase
-
-## 📊 Métriques
-
-- **Lignes de code**: ~3500 (index.html) + ~1000 (decouvrir.js)
-- **Activités**: 875 (455 Trévoux, 420 Couzon)
-- **Tables Supabase**: 8
-- **Modules**: 9 tabs
-- **Fichiers archivés**: 14
 
 ## 🛠️ Technologies
 
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
-- **Backend**: Supabase (PostgreSQL + API REST)
-- **Cartes**: Google Maps JavaScript API
-- **Graphiques**: Chart.js
-- **Calendrier**: FullCalendar
-- **Déploiement**: Vercel
-- **Version Control**: Git + GitHub
+- **Vanilla JavaScript** (ES6+)
+- **Bootstrap 5.3** - Design responsive
+- **Chart.js** - Graphiques
+- **FullCalendar** - Calendrier interactif
+- **Supabase** - Backend (PostgreSQL + Auth)
+- **Vercel** - Hébergement
 
-## 📝 Changelog
+## 📖 Documentation
 
-### v2.5.0 - 28/12/2025
-- ✅ Nettoyage complet du projet (14 fichiers archivés)
-- ✅ Module Découvrir: Panneau filtres à droite de la carte
-- ✅ Sélecteur de catégorie (Restaurant, Culture, Sport, etc.)
-- ✅ Slider distance max (1-50 km)
-- ✅ Suppression bande distance au-dessus de la carte
-- ✅ Titre "Événements" déplacé sous la carte
-- ✅ Identification et documentation du problème de coordonnées
-- ✅ 3 solutions proposées pour correction coordonnées
+Consultez [documentation/](documentation/) pour les guides complets :
+- [AUDIT_SECURITE.md](documentation/AUDIT_SECURITE.md) - Analyse sécurité
+- [PLAN_COMMERCIALISATION.md](documentation/PLAN_COMMERCIALISATION.md) - Roadmap
+- [GUIDE_COMPLET.md](documentation/GUIDE_COMPLET.md) - Guide utilisateur
+- [GUIDE_ESPACE_FEMME_MENAGE.md](documentation/GUIDE_ESPACE_FEMME_MENAGE.md)
 
-### v2.4.0 - 27/12/2025
-- Correction mapping colonnes DB (categorie, distance, telephone)
-- Ajout logs de débogage
-- Suppression fonctions dupliquées (138 lignes)
+## 🔒 Sécurité
 
-### v2.3.0 - 26/12/2025
-- Module Découvrir fonctionnel avec 875 activités
-- Filtres par catégorie (Restaurant, Musées, Cafés, etc.)
-- Carte Google Maps interactive
+### ⚠️ État : NON commercialisable
 
-## 👤 Auteur
+**Score** : 3/10 (voir [AUDIT_SECURITE.md](documentation/AUDIT_SECURITE.md))
 
-**Gîte Welcome Home**
-- Email: gite.welcomehome@gmail.com
-- GitHub: @gitewelcomehome-png
+**Vulnérabilités critiques** :
+- ❌ Clés API publiques
+- ❌ RLS désactivé
+- ❌ Pas d'authentification
+- ❌ Vulnérabilités XSS
 
-## 📄 License
+**Plan d'action** : 6-8 semaines, 4 phases
+- Phase 1 : RLS + Auth → Score 5/10
+- Phase 2 : Secrets → Score 6.5/10
+- Phase 3 : XSS → Score 8/10
+- Phase 4 : RGPD → Score 9/10
 
-Propriétaire - Tous droits réservés
+## 📊 Statistiques
+
+- **Lignes de code** : ~15 000
+- **Tables** : 15+
+- **Modules** : 8
+- **Version** : v5 (Jan 2026)
 
 ---
 
-**Dernière mise à jour**: 28 décembre 2025
-**Version**: 2.5.0
-**Statut**: ✅ Production (avec correctifs mineurs en attente)
+**Statut** : ✅ Fonctionnel | ⚠️ Sécurité en cours
