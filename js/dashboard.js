@@ -1572,13 +1572,11 @@ async function updateProblemesClients() {
             }
         }
         
-        console.log('🔍 DEBUG problèmes enrichis:', problemes?.map(p => ({
-            id: p.id,
-            sujet: p.sujet,
-            telephone: p.telephone,
-            client_nom: p.client_nom,
-            reservation_id: p.reservation_id
-        })));
+        // Debug amélioré : afficher directement les valeurs
+        console.log('🔍 DEBUG problèmes enrichis:');
+        problemes?.forEach(p => {
+            console.log(`  ➤ ID: ${p.id} | Sujet: "${p.sujet}" | Téléphone: ${p.telephone || '❌ NULL'} | Client: ${p.client_nom || '❌ NULL'} | Resa ID: ${p.reservation_id || '❌ NULL'}`);
+        });
         
         // Séparer les problèmes urgents des autres
         const problemesUrgents = problemes.filter(pb => pb.type === 'probleme');
