@@ -81,7 +81,8 @@ function afficherFAQ() {
     }
 
     console.log('✅ [FAQ] Génération HTML pour', faqFiltrees.length, 'questions');
-    container.innerHTML = faqFiltrees.map(question => `
+    
+    const html = faqFiltrees.map(question => `
         <div class="faq-item" data-id="${question.id}">
             <div class="faq-header" onclick="toggleFAQ(${question.id})">
                 <div class="faq-question">
@@ -108,6 +109,10 @@ function afficherFAQ() {
             </div>
         </div>
     `).join('');
+    
+    console.log('📝 [FAQ] HTML généré:', html.substring(0, 200) + '...');
+    container.innerHTML = html;
+    console.log('✅ [FAQ] HTML injecté dans le container');
 }
 
 function getCategorieIcon(categorie) {
