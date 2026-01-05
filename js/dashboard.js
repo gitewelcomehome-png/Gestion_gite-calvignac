@@ -154,9 +154,19 @@ async function updateDashboardStats() {
         .eq('completed', false)
         .is('archived_at', null);
     
-    const reservationsTodos = todos ? todos.filter(t => t.category === 'reservations').length : 0;
-    const travauxTodos = todos ? todos.filter(t => t.category === 'travaux').length : 0;
-    const achatsTodos = todos ? todos.filter(t => t.category === 'achats').length : 0;
+    // Filtrer les tâches visibles (mêmes règles que l'affichage)
+    const now = new Date();
+    const visibleTodos = todos?.filter(todo => {
+        if (!todo.is_recurrent || !todo.next_occurrence) {
+            return true; // Tâche normale ou récurrente sans date = visible
+        }
+        // Tâche récurrente : visible seulement si la date est passée
+        return new Date(todo.next_occurrence) <= now;
+    }) || [];
+    
+    const reservationsTodos = visibleTodos.filter(t => t.category === 'reservations').length;
+    const travauxTodos = visibleTodos.filter(t => t.category === 'travaux').length;
+    const achatsTodos = visibleTodos.filter(t => t.category === 'achats').length;
     
     // Mettre à jour les compteurs dans les titres
     const cleaningsEl = document.getElementById('dashboard-cleanings');
