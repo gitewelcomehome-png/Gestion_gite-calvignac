@@ -339,28 +339,12 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
     }
     
     let html = '';
-    weekReservations.forEach(async r => {
+    weekReservations.forEach(r => {
         const platformLogo = getPlatformLogo(r.site);
         
-        // Récupérer les horaires validées pour cette réservation
+        // Horaires par défaut (les horaires validées seront chargées dynamiquement si nécessaire)
         let horaireArrivee = '17:00';
         let horaireDepart = '10:00';
-        try {
-            const { data: horaires } = await supabaseClient
-                .from('demandes_horaires')
-                .select('*')
-                .eq('reservation_id', r.id)
-                .eq('statut', 'validee');
-            
-            if (horaires && horaires.length > 0) {
-                horaires.forEach(h => {
-                    if (h.type === 'arrivee') horaireArrivee = h.heure_validee;
-                    if (h.type === 'depart') horaireDepart = h.heure_validee;
-                });
-            }
-        } catch (err) {
-            // Ignorer silencieusement si la table n'existe pas encore
-        }
         
         // Récupérer l'état de validation du ménage
         const validation = validationMap[r.id];
