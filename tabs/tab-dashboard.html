@@ -136,19 +136,23 @@
         </div>
 
         <!-- Bénéfices & Trésorerie -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <!-- Bénéfice Année en Cours -->
-            <div class="card" style="background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%); color: white; padding: 24px; text-align: center; border-radius: 15px; box-shadow: 0 8px 16px rgba(39, 174, 96, 0.3);">
-                <div style="font-size: 0.85rem; opacity: 1; margin-bottom: 8px; font-weight: 500; color: #1a252f;">Bénéfice <span id="annee-benefice">2026</span></div>
-                <div id="dashboard-benefice-moyen" style="font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">-</div>
-                <div style="font-size: 0.7rem; opacity: 1; margin-top: 8px; color: #666;">CA - Total Charges</div>
-            </div>
-
-            <!-- Trésorerie Actuelle -->
-            <div class="card" style="background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%); color: white; padding: 24px; text-align: center; border-radius: 15px; box-shadow: 0 8px 16px rgba(52, 152, 219, 0.3);">
-                <div style="font-size: 0.85rem; opacity: 1; margin-bottom: 8px; font-weight: 500; color: #1a252f;">Trésorerie Actuelle</div>
-                <div id="dashboard-tresorerie" style="font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">-</div>
-                <div style="font-size: 0.7rem; opacity: 1; margin-top: 8px; color: #666;">Solde bancaire</div>
+        <div class="card" style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%); color: white; padding: 24px; border-radius: 15px; box-shadow: 0 8px 16px rgba(39, 174, 96, 0.3);">
+            <div style="font-size: 0.95rem; margin-bottom: 16px; font-weight: 600; color: #fff; text-align: center;">📈 Bénéfices & Trésorerie</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <!-- Bénéfice -->
+                <div style="text-align: center; background: rgba(255,255,255,0.15); padding: 16px; border-radius: 12px; backdrop-filter: blur(10px);">
+                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 6px;">Bénéfice <span id="annee-benefice">2026</span></div>
+                    <div id="dashboard-benefice-moyen" style="font-size: 1.8rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.15);">-</div>
+                    <div style="font-size: 0.65rem; opacity: 0.8; margin-top: 4px;">CA - Charges</div>
+                </div>
+                
+                <!-- Trésorerie -->
+                <div style="text-align: center; background: rgba(255,255,255,0.15); padding: 16px; border-radius: 12px; backdrop-filter: blur(10px);">
+                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 6px;">Trésorerie Actuelle</div>
+                    <div id="dashboard-tresorerie" style="font-size: 1.8rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.15);">-</div>
+                    <div style="font-size: 0.65rem; opacity: 0.8; margin-top: 4px;">Solde bancaire</div>
+                </div>
             </div>
         </div>
     </div>
