@@ -3,10 +3,8 @@
  * Interface dédiée pour la femme de ménage
  */
 
-// Configuration Supabase
-const SUPABASE_URL = 'https://pwjyatskjqziwjrxutyu.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3anlhdHNranF6aXdqcnh1dHl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ3NzMyNTAsImV4cCI6MjA1MDM0OTI1MH0.9b3GE8h_bPzGSVBn8d3YYVhQfJ_3Hh-Uh5pFRd6Bfto';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Utiliser le supabase déjà configuré globalement
+// (pas besoin de redéclarer)
 
 // ================================================================
 // CHARGEMENT INITIAL
@@ -31,16 +29,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function chargerInterventions() {
     try {
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         
-        // Charger les ménages planifiés (validés par la société)
-        const { data: menages, error } = await supabase
+        const troisSemaines = new Date(today);
+        troisSemaines.setDate(today.getDate() + 21);
+        
+        // Charger les ménages des 3 prochaines semaines
+        const { data: menages, error } = await window.supabase
             .from('cleaning_schedule')
             .select('*')
-            .gte('date', today)
-            .eq('validated', true)
-            .order('date', { ascending: true })
-            .limit(10);
+            .gte('date', today.toISOString().split('T')[0])
+            .lte('date', troisSemaines.toISOString().split('T')[0])
+            .order('date', { ascending: true });
 
         if (error) throw error;
 
@@ -50,7 +51,7 @@ async function chargerInterventions() {
             container.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">📭</div>
-                    <p>Aucune intervention prévue pour le moment</p>
+                    <p>Aucune intervention prévue dans les 3 prochaines semaines</p>
                 </div>
             `;
             return;
@@ -65,9 +66,17 @@ async function chargerInterventions() {
                 month: 'long' 
             });
             
+            // Statut de validation
+            const validationBadge = menage.validated 
+                ? '<span style="background: #27AE60; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">✅ Validé</span>'
+                : '<span style="background: #F39C12; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">⏳ En attente validation</span>';
+            
             html += `
                 <div class="menage-item">
-                    <div class="menage-date">${dateFormatee}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                        <div class="menage-date">${dateFormatee}</div>
+                        ${validationBadge}
+                    </div>
                     <div class="menage-gite">🏠 ${menage.gite}</div>
                     <div class="menage-heure">⏰ ${menage.heure_proposee || 'Horaire à confirmer'}</div>
                     ${menage.notes ? `<div style="margin-top: 8px; color: #666; font-size: 0.9rem;">📝 ${menage.notes}</div>` : ''}
@@ -110,6 +119,7 @@ function switchStockTab(gite) {
     document.getElementById(`stock-${gite}`).classList.add('active');
 }
 
+// Exporter les fonctions globalement
 window.switchTaskTab = switchTaskTab;
 window.switchStockTab = switchStockTab;
 
@@ -125,7 +135,7 @@ async function creerTacheAchats(e) {
     const description = document.getElementById('tache-achats-description').value;
     
     try {
-        const { error } = await supabase
+        const { error } = await window.supabase
             .from('todos')
             .insert({
                 category: 'achats',
@@ -156,7 +166,7 @@ async function creerTacheTravaux(e) {
     const titreComplet = priorite === 'urgente' ? `🚨 URGENT: ${titre}` : titre;
     
     try {
-        const { error } = await supabase
+        const { error } = await window.supabase
             .from('todos')
             .insert({
                 category: 'travaux',
@@ -192,7 +202,7 @@ const ARTICLES_DRAPS = [
 
 async function chargerStocksDraps() {
     try {
-        const { data: stocks, error } = await supabase
+        const { data: stocks, error } = await window.supabase
             .from('stocks_draps')
             .select('*');
 
@@ -240,7 +250,7 @@ async function sauvegarderStocks(gite) {
             stocks[article.id] = parseInt(input.value) || 0;
         });
 
-        const { error } = await supabase
+        const { error } = await window.supabase
             .from('stocks_draps')
             .upsert({
                 gite: gite,
@@ -273,7 +283,7 @@ async function envoyerRetourMenage(e) {
     const detailsDeroulement = document.getElementById('retour-details-deroulement').value;
     
     try {
-        const { error } = await supabase
+        const { error } = await window.supabase
             .from('retours_menage')
             .insert({
                 gite: gite,
