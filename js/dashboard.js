@@ -1228,8 +1228,6 @@ async function updateFinancialIndicators() {
     if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeAnnee);
     
     // 6. Trésorerie actuelle (dernier mois enregistré)
-    const moisActuel = new Date().getMonth() + 1;
-    
     const { data: soldeMois } = await supabase
         .from('suivi_soldes_bancaires')
         .select('solde')
