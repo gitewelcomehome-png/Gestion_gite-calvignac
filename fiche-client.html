@@ -1150,7 +1150,7 @@
             </button>
             <button class="tab-btn" data-tab="activites">
                 <span class="icon">🧭</span>
-                <span class="label" data-i18n="tab_activites">Activités</span>
+                <span class="label" data-i18n="tab_activites">Activités et commerces</span>
             </button>
             <button class="tab-btn" data-tab="probleme">
                 <span class="icon">🔔</span>
@@ -1347,68 +1347,6 @@
                 <div class="evenements-liste">
                     <!-- Sera rempli dynamiquement -->
                 </div>
-            </div>
-            
-            <!-- COMMERCES PROXIMITÉ -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">🛍️ Commerces à proximité</h2>
-                </div>
-                <div id="commercesContainer">
-                    <!-- Sera rempli dynamiquement -->
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title" data-i18n="vos_retours">💬 Demandes / Retours / Améliorations</h2>
-                    <p class="card-description" data-i18n="description_retours">
-                        N'hésitez pas à nous faire part de vos besoins ou suggestions
-                    </p>
-                </div>
-                <form id="formRetours">
-                    <div class="form-group">
-                        <label class="label" data-i18n="type">Type</label>
-                        <select class="select" id="typeRetour" required>
-                            <option value="demande" data-i18n-option="demande">🙋 Demande</option>
-                            <option value="retour" data-i18n-option="retour">💬 Retour</option>
-                            <option value="amelioration" data-i18n-option="amelioration">💡 Amélioration</option>
-                            <option value="probleme" data-i18n-option="probleme">⚠️ Problème</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="label" data-i18n="sujet">Sujet</label>
-                        <input type="text" class="input" id="sujetRetour" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="label" data-i18n="description">Description</label>
-                        <textarea class="textarea" id="descriptionRetour" rows="5" required></textarea>
-                    </div>
-                    
-                    <div class="form-group" id="urgenceGroup" style="display: none;">
-                        <label class="label" data-i18n="urgence">Niveau d'urgence</label>
-                        <div class="radio-group">
-                            <div class="radio-item">
-                                <input type="radio" name="urgence" value="basse" id="urgenceBasse">
-                                <label for="urgenceBasse" data-i18n="urgence_basse">Basse</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" name="urgence" value="normale" id="urgenceNormale" checked>
-                                <label for="urgenceNormale" data-i18n="urgence_normale">Normale</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" name="urgence" value="haute" id="urgenceHaute">
-                                <label for="urgenceHaute" data-i18n="urgence_haute">Haute</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-full">
-                        <span data-i18n="envoyer">Envoyer</span>
-                    </button>
-                </form>
             </div>
         </div>
         
