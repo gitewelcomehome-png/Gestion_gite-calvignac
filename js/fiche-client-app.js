@@ -216,6 +216,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         await loadCleaningSchedule();
         
+        await loadClientChecklists();
+        
         initializeUI();
         
         initializeEventListeners();
@@ -2180,6 +2182,7 @@ if (window.matchMedia('(display-mode: standalone)').matches) {
 
 // Rendre les fonctions globales pour onclick
 window.toggleChecklistItem = toggleChecklistItem;
+window.toggleClientChecklistItem = toggleClientChecklistItem;
 window.copyToClipboard = copyToClipboard;
 window.openActiviteModal = openActiviteModal;
 window.openItineraire = openItineraire;
@@ -2187,4 +2190,171 @@ window.trackActiviteConsultation = trackActiviteConsultation;
 window.initEtatDesLieux = initEtatDesLieux;
 window.initEvaluation = initEvaluation;
 window.filterByCategory = filterByCategory;
+
+// =============================================
+// GESTION DES CHECKLISTS CLIENT
+// =============================================
+
+async function loadClientChecklists() {
+    console.log('📋 Chargement checklists client...');
+    
+    if (!reservationData || !giteInfo) {
+        console.log('⚠️ Données manquantes pour checklists');
+        return;
+    }
+    
+    try {
+        // Charger les templates du gîte
+        const { data: templatesEntree, error: errorEntree } = await supabase
+            .from('checklist_templates')
+            .select('*')
+            .eq('gite', giteInfo.gite)
+            .eq('type', 'entree')
+            .eq('actif', true)
+            .order('ordre', { ascending: true });
+        
+        const { data: templatesSortie, error: errorSortie } = await supabase
+            .from('checklist_templates')
+            .select('*')
+            .eq('gite', giteInfo.gite)
+            .eq('type', 'sortie')
+            .eq('actif', true)
+            .order('ordre', { ascending: true });
+        
+        if (errorEntree || errorSortie) {
+            console.error('❌ Erreur chargement templates:', errorEntree || errorSortie);
+            return;
+        }
+        
+        // Charger la progression
+        const { data: progress, error: progressError } = await supabase
+            .from('checklist_progress')
+            .select('*')
+            .eq('reservation_id', reservationData.id);
+        
+        if (progressError) {
+            console.error('❌ Erreur chargement progression:', progressError);
+            return;
+        }
+        
+        // Map pour accès rapide
+        const progressMap = {};
+        if (progress) {
+            progress.forEach(p => {
+                progressMap[p.template_id] = p.completed;
+            });
+        }
+        
+        // Afficher checklist entrée
+        renderClientChecklist('entree', templatesEntree || [], progressMap);
+        
+        // Afficher checklist sortie
+        renderClientChecklist('sortie', templatesSortie || [], progressMap);
+        
+        console.log('✅ Checklists chargées:', {
+            entree: templatesEntree?.length || 0,
+            sortie: templatesSortie?.length || 0,
+            completed: Object.keys(progressMap).length
+        });
+    } catch (error) {
+        console.error('❌ Erreur loadClientChecklists:', error);
+    }
+}
+
+function renderClientChecklist(type, templates, progressMap) {
+    const containerId = type === 'entree' ? 'checklistEntreeContainer' : 'checklistSortieContainer';
+    const progressBarId = type === 'entree' ? 'progressEntree' : 'progressSortie';
+    const progressTextId = type === 'entree' ? 'progressEntreeText' : 'progressSortieText';
+    
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.warn(`⚠️ Container ${containerId} introuvable`);
+        return;
+    }
+    
+    if (!templates || templates.length === 0) {
+        container.innerHTML = '<p style="color: var(--gray-600); font-style: italic; text-align: center;">Aucun item configuré</p>';
+        return;
+    }
+    
+    // Calculer progression
+    const completed = templates.filter(t => progressMap[t.id] === true).length;
+    const total = templates.length;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    
+    // Mettre à jour barre de progression
+    const progressBar = document.getElementById(progressBarId);
+    const progressText = document.getElementById(progressTextId);
+    if (progressBar) progressBar.style.width = percent + '%';
+    if (progressText) progressText.textContent = `${completed}/${total} (${percent}%)`;
+    
+    // Générer HTML
+    let html = '';
+    templates.forEach(template => {
+        const isCompleted = progressMap[template.id] === true;
+        html += `
+            <div class="checkbox-item" style="margin-bottom: 0.75rem; padding: 1rem; background: ${isCompleted ? 'var(--gray-100)' : 'white'}; border: 2px solid ${isCompleted ? 'var(--success)' : 'var(--gray-200)'}; border-radius: 0.5rem; transition: all 0.3s;">
+                <label style="display: flex; align-items: start; gap: 0.75rem; cursor: pointer;">
+                    <input type="checkbox" ${isCompleted ? 'checked' : ''} 
+                           onchange="toggleClientChecklistItem(${template.id}, '${type}')"
+                           style="margin-top: 0.25rem; width: 1.25rem; height: 1.25rem; cursor: pointer;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: ${isCompleted ? '600' : '400'}; color: ${isCompleted ? 'var(--gray-700)' : 'var(--gray-900)'}; margin-bottom: 0.25rem;">
+                            ${template.texte}
+                        </div>
+                        ${template.description ? `<div style="font-size: 0.875rem; color: var(--gray-600);">${template.description}</div>` : ''}
+                    </div>
+                    ${isCompleted ? '<span style="font-size: 1.5rem;">✅</span>' : ''}
+                </label>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+async function toggleClientChecklistItem(templateId, type) {
+    if (!reservationData) {
+        console.error('❌ Pas de réservation');
+        return;
+    }
+    
+    try {
+        // Récupérer l'état actuel
+        const { data: existing, error: fetchError } = await supabase
+            .from('checklist_progress')
+            .select('*')
+            .eq('reservation_id', reservationData.id)
+            .eq('template_id', templateId)
+            .single();
+        
+        if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = pas trouvé (OK)
+            throw fetchError;
+        }
+        
+        const newCompleted = existing ? !existing.completed : true;
+        
+        // Upsert
+        const { error: upsertError } = await supabase
+            .from('checklist_progress')
+            .upsert({
+                reservation_id: reservationData.id,
+                template_id: templateId,
+                completed: newCompleted,
+                completed_at: newCompleted ? new Date().toISOString() : null
+            }, {
+                onConflict: 'reservation_id,template_id'
+            });
+        
+        if (upsertError) throw upsertError;
+        
+        console.log(`✅ Checklist ${templateId} ${newCompleted ? 'cochée' : 'décochée'}`);
+        
+        // Recharger pour mettre à jour l'affichage
+        await loadClientChecklists();
+    } catch (error) {
+        console.error('❌ Erreur toggle checklist:', error);
+        alert('Erreur lors de la sauvegarde. Veuillez réessayer.');
+    }
+}
 window.toggleFaq = toggleFaq;
