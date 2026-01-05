@@ -2013,14 +2013,7 @@ async function loadClientChecklists() {
         // Afficher checklist sortie
         renderClientChecklist('sortie', templatesSortie || [], progressMap);
         
-        // // console.log('✅ Checklists chargées:', {
-            gite: giteInfo.gite,
-            entree: templatesEntree?.length || 0,
-            sortie: templatesSortie?.length || 0,
-            completed: Object.keys(progressMap).length,
-            templatesEntree: templatesEntree,
-            templatesSortie: templatesSortie
-        });
+        // console.log('✅ Checklists chargées: ...');
     } catch (error) {
         console.error('❌ Erreur loadClientChecklists:', error);
     }
@@ -2198,11 +2191,7 @@ async function submitRetourDemande(event) {
         document.getElementById('confirmationRetourDemande').style.display = 'block';
         
         // Envoyer une notification (TODO: webhook admin)
-        // // console.log('🔔 Notification à envoyer:', {
-            type: formData.type,
-            urgence: formData.urgence,
-            gite: formData.gite
-        });
+        // console.log('🔔 Notification à envoyer: ...');
         
     } catch (error) {
         console.error('❌ Erreur envoi demande:', error);
