@@ -2146,6 +2146,14 @@ async function submitRetourDemande(event) {
         
         // Si c'est un problème, utiliser la table problemes_signales
         if (type === 'probleme') {
+            console.log('🔍 Insertion dans problemes_signales:', {
+                reservation_id: formData.reservation_id,
+                gite: formData.gite,
+                type: 'autre',
+                urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
+                description: `${formData.sujet}\n\n${formData.description}`
+            });
+            
             const { data, error } = await supabaseClient
                 .from('problemes_signales')
                 .insert([{
@@ -2159,13 +2167,36 @@ async function submitRetourDemande(event) {
                 }])
                 .select();
             
-            if (error) throw error;
-            console.log('✅ Problème signalé:', data);
+            if (error) {
+                console.error('❌ Erreur insertion probleme:', error);
+                throw error;
+            }
+            console.log('✅ Problème signalé avec succès:', data);
         } else {
-            // Pour les autres types, créer une table demandes_clients si nécessaire
-            // Pour l'instant, on log juste
-            console.log('✅ Demande/Retour enregistré:', formData);
-            // TODO: Créer table demandes_clients dans Supabase
+            // Pour demande, retour, amelioration : aussi dans problemes_signales
+            console.log('🔍 Insertion autre type dans problemes_signales:', {
+                type: type,
+                formData: formData
+            });
+            
+            const { data, error } = await supabaseClient
+                .from('problemes_signales')
+                .insert([{
+                    reservation_id: formData.reservation_id,
+                    gite: formData.gite,
+                    type: type, // demande, retour, amelioration
+                    urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
+                    description: `${formData.sujet}\n\n${formData.description}`,
+                    statut: 'nouveau',
+                    created_at: formData.created_at
+                }])
+                .select();
+            
+            if (error) {
+                console.error('❌ Erreur insertion demande/retour:', error);
+                throw error;
+            }
+            console.log('✅ Demande/Retour enregistré avec succès:', data);
         }
         
         // Masquer le formulaire et afficher la confirmation
