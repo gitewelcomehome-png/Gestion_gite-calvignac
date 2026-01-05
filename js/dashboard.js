@@ -425,6 +425,7 @@ async function updateDashboardMenages() {
     let html = '';
     cleanings.forEach(c => {
         const statusIcons = {
+            'validated': '✅',
             'pending_validation': '⏳',
             'refused': '❌',
             'pending': '✗'
@@ -436,20 +437,31 @@ async function updateDashboardMenages() {
             'pending': '#E74C3C'
         };
         
+        const statusLabels = {
+            'validated': 'Validé',
+            'pending_validation': 'En attente',
+            'refused': 'Refusé',
+            'pending': 'Non planifié'
+        };
+        
         const icon = statusIcons[c.status] || '❓';
         const color = statusColors[c.status] || '#999';
+        const statusLabel = statusLabels[c.status] || 'Inconnu';
         const timeIcon = c.time_of_day === 'morning' ? '🌅' : '🌆';
         const giteColor = c.gite === 'Trévoux' ? '#667eea' : '#f093fb';
         
         html += `
             <div style="border-left: 4px solid ${giteColor}; padding: 12px; margin-bottom: 8px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
+                <div style="flex: 1;">
                     <strong style="color: ${giteColor};">${c.gite}</strong>
                     <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
                         📅 ${formatDateFromObj(new Date(c.scheduled_date))} ${timeIcon}
                     </div>
                 </div>
-                <span style="font-size: 1.5rem; color: ${color};" title="${c.status}">${icon}</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.8rem; color: ${color}; font-weight: 600; background: ${color}22; padding: 4px 10px; border-radius: 12px;">${statusLabel}</span>
+                    <span style="font-size: 1.5rem; color: ${color};" title="${statusLabel}">${icon}</span>
+                </div>
             </div>
         `;
     });
