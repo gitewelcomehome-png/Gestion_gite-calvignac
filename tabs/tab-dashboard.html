@@ -307,7 +307,7 @@
 </div>
 
 <!-- Modal Réponse WhatsApp -->
-<div id="reponseWhatsappModal" class="modal-overlay" style="display: none;">
+<div id="reponseWhatsappModal" class="modal-overlay" style="display: none; align-items: flex-start; padding-top: 50px;">
     <div class="modal-content" style="max-width: 600px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin: 0; color: #2c3e50;">💬 Répondre au client</h2>
@@ -316,10 +316,11 @@
         
         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #25D366;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <strong style="color: #2c3e50;" id="reponseClientNom">Client</strong>
-                <span style="color: #7f8c8d; font-size: 0.9rem;" id="reponseClientGite">Gîte</span>
+                <span style="font-size: 1.1rem;">📍</span>
+                <strong style="color: #2c3e50; font-size: 1.05rem;" id="reponseClientNom">Client</strong>
+                <span style="background: #25D366; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;" id="reponseClientGite">Gîte</span>
             </div>
-            <div style="color: #7f8c8d; font-size: 0.9rem;" id="reponseClientSujet">Sujet de la demande</div>
+            <div style="color: #555; font-size: 0.9rem; margin-left: 30px;" id="reponseClientSujet">Sujet de la demande</div>
         </div>
         
         <form id="formReponseWhatsapp">
