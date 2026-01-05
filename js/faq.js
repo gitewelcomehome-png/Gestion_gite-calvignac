@@ -13,7 +13,13 @@ let categorieActive = 'all';
 // ================================================================
 
 async function initFAQ() {
+    console.log('🔍 [FAQ] Initialisation FAQ...');
+    const container = document.getElementById('faq-list');
+    console.log('🔍 [FAQ] Container faq-list:', container);
+    
     await chargerFAQ();
+    console.log('🔍 [FAQ] Données chargées:', faqData.length, 'questions');
+    
     afficherFAQ();
 }
 
@@ -47,7 +53,11 @@ async function chargerFAQ() {
 
 function afficherFAQ() {
     const container = document.getElementById('faq-list');
-    if (!container) return;
+    console.log('🔍 [FAQ] afficherFAQ - container:', container);
+    if (!container) {
+        console.error('❌ [FAQ] Container faq-list introuvable');
+        return;
+    }
 
     const faqFiltrees = categorieActive === 'all' 
         ? faqData 
