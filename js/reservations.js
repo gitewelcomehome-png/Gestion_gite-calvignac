@@ -211,8 +211,11 @@ async function deleteReservationById(id) {
 
 async function updateReservationsList() {
     const reservations = await getAllReservations();
+    console.log('📅 updateReservationsList - Total réservations:', reservations.length);
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    console.log('📅 Date du jour (pour filtre):', today.toISOString().split('T')[0]);
     
     // Récupérer les validations de la société de ménage
     const { data: cleaningSchedules } = await supabase
@@ -235,8 +238,13 @@ async function updateReservationsList() {
         return dateFin > today;
     });
     
+    console.log('📅 Réservations futures (dateFin > aujourd\'hui):', active.length);
+    
     const container = document.getElementById('planning-container');
-    if (!container) return; // Conteneur pas encore chargé
+    if (!container) {
+        console.warn('⚠️ Container planning-container non trouvé');
+        return;
+    }
     
     if (active.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation</p>';
