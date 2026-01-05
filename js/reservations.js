@@ -177,7 +177,6 @@ async function saveEditReservation(event) {
         await updateReservation(id, updates);
         await updateReservationsList();
         await updateStats();
-        await autoSaveJSON();
         
         closeEditModal();
         showToast('✓ Réservation modifiée', 'success');
@@ -190,7 +189,6 @@ async function saveEditReservation(event) {
 async function updatePaiementStatus(id, newStatus) {
     await updateReservation(id, { paiement: newStatus });
     await updateReservationsList();
-    await autoSaveJSON();
     showToast('✓ Statut mis à jour');
 }
 
@@ -200,7 +198,6 @@ async function deleteReservationById(id) {
         await updateReservationsList();
         await updateStats();
         await updateArchivesDisplay();
-        await autoSaveJSON();
         showToast('✓ Réservation supprimée');
     }
 }
@@ -438,21 +435,6 @@ function getPlatformLogo(platform) {
     }
 }
 
-async function autoSaveJSON() {
-    const reservations = await getAllReservations();
-    const backup = {
-        version: '1.0',
-        date: new Date().toISOString(),
-        reservations: reservations
-    };
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `AutoSave_Gites_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-}
 
 // ==========================================
 // 🌐 EXPORTS GLOBAUX
