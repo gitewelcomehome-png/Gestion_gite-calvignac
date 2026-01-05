@@ -275,12 +275,20 @@ async function loadReservationsProgress() {
         
         if (resaError) throw resaError;
         
-        if (!reservations || reservations.length === 0) {
+        // Filtrer les réservations d'un seul jour (phantoms)
+        const reservationsFiltered = reservations.filter(r => {
+            const dateDebut = new Date(r.date_debut);
+            const dateFin = new Date(r.date_fin);
+            const nuits = Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24));
+            return nuits > 1; // Exclure réservations d'une nuit ou moins
+        });
+        
+        if (!reservationsFiltered || reservationsFiltered.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 20px; color: var(--gray-600);">
                     <p style="font-size: 3rem; margin-bottom: 10px;">📅</p>
                     <p>Aucune réservation en cours actuellement</p>
-                    <p style="font-size: 0.9rem; margin-top: 10px;">Les checklists s'affichent uniquement pour les séjours en cours</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Les checklists s'affichent uniquement pour les séjours en cours (+ de 1 nuit)</p>
                 </div>
             `;
             return;
@@ -289,7 +297,7 @@ async function loadReservationsProgress() {
         // Pour chaque réservation, afficher la liste complète
         let html = '';
         
-        for (const resa of reservations) {
+        for (const resa of reservationsFiltered) {
             // Récupérer tous les templates et progression
             const { data: templates, error: templatesError } = await supabaseClient
                 .from('checklist_templates')
