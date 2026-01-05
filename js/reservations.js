@@ -245,16 +245,10 @@ async function updateReservationsList() {
     }
     
     // Organiser par gîte
-    console.log('🏠 Organisation par gîte...');
     const byGite = {
         'Trévoux': active.filter(r => r.gite === 'Trévoux'),
         'Couzon': active.filter(r => r.gite === 'Couzon')
     };
-    
-    // Log temporaire pour debug
-    const gitesUniques = [...new Set(active.map(r => r.gite))];
-    console.log('🏠 Gîtes trouvés:', gitesUniques);
-    console.log('🏠 Répartition: Trévoux =', byGite['Trévoux'].length, '| Couzon =', byGite['Couzon'].length);
     
     // Trier par date
     byGite['Trévoux'].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
