@@ -28,6 +28,8 @@ let stocksActuels = {
     'couzon': {}
 };
 
+let derniereSimulation = null; // Stocke les résultats de la dernière simulation
+
 // ================================================================
 // INITIALISATION
 // ================================================================
@@ -298,6 +300,75 @@ function calculerAEmmener(resaParGite, infosCouverture) {
     container.innerHTML = html;
 }
 
+function afficherAEmmenerDepuisSimulation() {
+    if (!derniereSimulation) return;
+    
+    const { resaParGite, dateLimit } = derniereSimulation;
+    const container = document.getElementById('a-emmener');
+    let html = '';
+
+    ['trévoux', 'couzon'].forEach(gite => {
+        const resas = resaParGite[gite];
+        const besoins = BESOINS_PAR_RESERVATION[gite];
+        const stock = stocksActuels[gite] || {};
+        
+        if (!resas || resas.length === 0) {
+            html += `<div class="stat-box">
+                <h4>🏠 ${gite.charAt(0).toUpperCase() + gite.slice(1)}</h4>
+                <p style="color: #666; font-size: 13px;">Aucune réservation dans la simulation</p>
+            </div>`;
+            return;
+        }
+        
+        const totalNecessaire = {
+            draps_plats_grands: besoins.draps_plats_grands * resas.length,
+            draps_plats_petits: besoins.draps_plats_petits * resas.length,
+            housses_couettes_grandes: besoins.housses_couettes_grandes * resas.length,
+            housses_couettes_petites: besoins.housses_couettes_petites * resas.length,
+            taies_oreillers: besoins.taies_oreillers * resas.length,
+            serviettes: besoins.serviettes * resas.length,
+            tapis_bain: besoins.tapis_bain * resas.length
+        };
+        
+        const aEmmener = {
+            draps_plats_grands: Math.max(0, totalNecessaire.draps_plats_grands - (stock.draps_plats_grands || 0)),
+            draps_plats_petits: Math.max(0, totalNecessaire.draps_plats_petits - (stock.draps_plats_petits || 0)),
+            housses_couettes_grandes: Math.max(0, totalNecessaire.housses_couettes_grandes - (stock.housses_couettes_grandes || 0)),
+            housses_couettes_petites: Math.max(0, totalNecessaire.housses_couettes_petites - (stock.housses_couettes_petites || 0)),
+            taies_oreillers: Math.max(0, totalNecessaire.taies_oreillers - (stock.taies_oreillers || 0)),
+            serviettes: Math.max(0, totalNecessaire.serviettes - (stock.serviettes || 0)),
+            tapis_bain: Math.max(0, totalNecessaire.tapis_bain - (stock.tapis_bain || 0))
+        };
+        
+        const totalAEmmener = Object.values(aEmmener).reduce((a, b) => a + b, 0);
+        const dateFormatee = new Date(dateLimit).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+        
+        html += `
+            <div class="stat-box">
+                <h4>🏠 ${gite.charAt(0).toUpperCase() + gite.slice(1)}</h4>
+                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                    ${resas.length} réservations jusqu'au ${dateFormatee}
+                </p>
+                ${totalAEmmener > 0 ? `
+                    <div class="list-items" style="text-align: left;">
+                        ${aEmmener.draps_plats_grands > 0 ? `<div>• Draps plats grands: <strong>${aEmmener.draps_plats_grands}</strong></div>` : ''}
+                        ${aEmmener.draps_plats_petits > 0 ? `<div>• Draps plats petits: <strong>${aEmmener.draps_plats_petits}</strong></div>` : ''}
+                        ${aEmmener.housses_couettes_grandes > 0 ? `<div>• Housses couette grandes: <strong>${aEmmener.housses_couettes_grandes}</strong></div>` : ''}
+                        ${aEmmener.housses_couettes_petites > 0 ? `<div>• Housses couette petites: <strong>${aEmmener.housses_couettes_petites}</strong></div>` : ''}
+                        ${aEmmener.taies_oreillers > 0 ? `<div>• Taies d'oreillers: <strong>${aEmmener.taies_oreillers}</strong></div>` : ''}
+                        ${aEmmener.serviettes > 0 ? `<div>• Serviettes: <strong>${aEmmener.serviettes}</strong></div>` : ''}
+                        ${aEmmener.tapis_bain > 0 ? `<div>• Tapis de bain: <strong>${aEmmener.tapis_bain}</strong></div>` : ''}
+                    </div>
+                ` : `
+                    <div style="color: #27AE60; font-weight: 600; margin-top: 10px;">✅ Stock suffisant</div>
+                `}
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
 // ================================================================
 // CRÉATION AUTOMATIQUE DE TÂCHE SI STOCK FAIBLE
 // ================================================================
@@ -427,6 +498,10 @@ async function simulerBesoins() {
         };
 
         afficherResultatsSimulation(resaParGite, dateLimit);
+        
+        // Sauvegarder la simulation et mettre à jour "À Emmener"
+        derniereSimulation = { resaParGite, dateLimit };
+        afficherAEmmenerDepuisSimulation();
     } catch (error) {
         console.error('Erreur simulation:', error);
         alert('❌ Erreur lors de la simulation');
@@ -536,6 +611,79 @@ function afficherResultatsSimulation(resaParGite, dateLimit) {
                     <div class="alert alert-success">
                         ✅ Stock suffisant pour toutes les réservations
                     </div>
+                `}
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// ================================================================
+// AFFICHAGE "À EMMENER" DEPUIS SIMULATION
+// ================================================================
+
+function afficherAEmmenerDepuisSimulation() {
+    if (!derniereSimulation) return;
+    
+    const { resaParGite, dateLimit } = derniereSimulation;
+    const container = document.getElementById('a-emmener');
+    let html = '';
+
+    ['trévoux', 'couzon'].forEach(gite => {
+        const resas = resaParGite[gite];
+        const besoins = BESOINS_PAR_RESERVATION[gite];
+        const stock = stocksActuels[gite] || {};
+        
+        if (!resas || resas.length === 0) {
+            html += `<div class="stat-box">
+                <h4>🏠 ${gite.charAt(0).toUpperCase() + gite.slice(1)}</h4>
+                <p style="color: #666; font-size: 13px;">Aucune réservation dans la simulation</p>
+            </div>`;
+            return;
+        }
+        
+        const totalNecessaire = {
+            draps_plats_grands: besoins.draps_plats_grands * resas.length,
+            draps_plats_petits: besoins.draps_plats_petits * resas.length,
+            housses_couettes_grandes: besoins.housses_couettes_grandes * resas.length,
+            housses_couettes_petites: besoins.housses_couettes_petites * resas.length,
+            taies_oreillers: besoins.taies_oreillers * resas.length,
+            serviettes: besoins.serviettes * resas.length,
+            tapis_bain: besoins.tapis_bain * resas.length
+        };
+        
+        const aEmmener = {
+            draps_plats_grands: Math.max(0, totalNecessaire.draps_plats_grands - (stock.draps_plats_grands || 0)),
+            draps_plats_petits: Math.max(0, totalNecessaire.draps_plats_petits - (stock.draps_plats_petits || 0)),
+            housses_couettes_grandes: Math.max(0, totalNecessaire.housses_couettes_grandes - (stock.housses_couettes_grandes || 0)),
+            housses_couettes_petites: Math.max(0, totalNecessaire.housses_couettes_petites - (stock.housses_couettes_petites || 0)),
+            taies_oreillers: Math.max(0, totalNecessaire.taies_oreillers - (stock.taies_oreillers || 0)),
+            serviettes: Math.max(0, totalNecessaire.serviettes - (stock.serviettes || 0)),
+            tapis_bain: Math.max(0, totalNecessaire.tapis_bain - (stock.tapis_bain || 0))
+        };
+        
+        const totalAEmmener = Object.values(aEmmener).reduce((a, b) => a + b, 0);
+        const dateFormatee = new Date(dateLimit).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+        
+        html += `
+            <div class="stat-box">
+                <h4>🏠 ${gite.charAt(0).toUpperCase() + gite.slice(1)}</h4>
+                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                    ${resas.length} réservations jusqu'au ${dateFormatee}
+                </p>
+                ${totalAEmmener > 0 ? `
+                    <div class="list-items" style="text-align: left;">
+                        ${aEmmener.draps_plats_grands > 0 ? `<div>• Draps plats grands: <strong>${aEmmener.draps_plats_grands}</strong></div>` : ''}
+                        ${aEmmener.draps_plats_petits > 0 ? `<div>• Draps plats petits: <strong>${aEmmener.draps_plats_petits}</strong></div>` : ''}
+                        ${aEmmener.housses_couettes_grandes > 0 ? `<div>• Housses couette grandes: <strong>${aEmmener.housses_couettes_grandes}</strong></div>` : ''}
+                        ${aEmmener.housses_couettes_petites > 0 ? `<div>• Housses couette petites: <strong>${aEmmener.housses_couettes_petites}</strong></div>` : ''}
+                        ${aEmmener.taies_oreillers > 0 ? `<div>• Taies d'oreillers: <strong>${aEmmener.taies_oreillers}</strong></div>` : ''}
+                        ${aEmmener.serviettes > 0 ? `<div>• Serviettes: <strong>${aEmmener.serviettes}</strong></div>` : ''}
+                        ${aEmmener.tapis_bain > 0 ? `<div>• Tapis de bain: <strong>${aEmmener.tapis_bain}</strong></div>` : ''}
+                    </div>
+                ` : `
+                    <div style="color: #27AE60; font-weight: 600; margin-top: 10px;">✅ Stock suffisant</div>
                 `}
             </div>
         `;
