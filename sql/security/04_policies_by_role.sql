@@ -222,14 +222,14 @@ CREATE POLICY "Owner - Modification" ON faq
 -- COMMITS_LOG (Admin uniquement)
 -- ================================================================
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON commits_log;
-O $$
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'commits_log') THEN
         EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON commits_log';
         EXECUTE 'CREATE POLICY "Admin uniquement" ON commits_log FOR ALL USING (has_role(''admin''))';
     END IF;
-END $$
+END $$;
+
 -- ================================================================
 -- VÉRIFICATION DES POLITIQUES
 -- ================================================================
