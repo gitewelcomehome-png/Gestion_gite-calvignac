@@ -118,8 +118,8 @@ async function getAllReservations(forceRefresh) {
                 syncedFrom: r.synced_from
             };
         }).filter(function(r) {
-            // Filtrer les réservations phantoms (1 nuit ou moins)
-            return r.nuits > 1;
+            // Garder toutes les réservations réelles (>= 1 nuit)
+            return r.nuits >= 1;
         });
         
         // Mettre en cache
