@@ -189,24 +189,43 @@ function calculerReservationsCouvertes(resaParGite) {
         ];
         
         const nbReservations = Math.min(...ratios.filter(r => r >= 0));
-        const nbResa = resaParGite[gite].length;
+        const reservations = resaParGite[gite];
         
-        const alertClass = nbReservations >= nbResa ? 'alert-success' : 
-                          nbReservations >= Math.ceil(nbResa / 2) ? 'alert-warning' : 
+        // Trouver jusqu'à quelle date on peut tenir
+        let dateJusqua = null;
+        let messageDate = '';
+        
+        if (nbReservations > 0 && reservations.length > 0) {
+            const indexDerniere = Math.min(nbReservations - 1, reservations.length - 1);
+            const derniereResa = reservations[indexDerniere];
+            if (derniereResa && derniereResa.date_fin) {
+                dateJusqua = new Date(derniereResa.date_fin);
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                messageDate = `📅 Vous pouvez tenir jusqu'au ${dateJusqua.toLocaleDateString('fr-FR', options)}`;
+            }
+        }
+        
+        const alertClass = nbReservations >= reservations.length ? 'alert-success' : 
+                          nbReservations >= Math.ceil(reservations.length / 2) ? 'alert-warning' : 
                           'alert-danger';
+        
+        const alertMessage = nbReservations >= reservations.length ? 
+            '✅ Stock suffisant pour toutes les réservations' : 
+            nbReservations === 0 ? 
+            '❌ Stock épuisé - Commander immédiatement' :
+            `⚠️ Stock pour ${nbReservations} réservation${nbReservations > 1 ? 's' : ''} sur ${reservations.length}`;
         
         html += `
             <div class="stat-box">
                 <h4>🏠 ${gite.charAt(0).toUpperCase() + gite.slice(1)}</h4>
                 <div class="value">${nbReservations} réservations</div>
                 <p style="font-size: 13px; color: #666; margin-top: 5px;">
-                    ${nbResa} réservations à venir
+                    ${reservations.length} réservations à venir
                 </p>
             </div>
             <div class="alert ${alertClass}">
-                ${nbReservations >= nbResa ? '✅ Stock suffisant' : 
-                  nbReservations >= Math.ceil(nbResa / 2) ? '⚠️ Stock limite' : 
-                  '❌ Stock insuffisant - Commander rapidement'}
+                <div>${alertMessage}</div>
+                ${messageDate ? `<div style="margin-top: 8px; font-weight: 600;">${messageDate}</div>` : ''}
             </div>
         `;
     });
