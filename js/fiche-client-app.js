@@ -2138,6 +2138,7 @@ async function submitRetourDemande(event) {
             sujet: document.getElementById('sujetRetourDemande').value,
             description: document.getElementById('descriptionRetourDemande').value,
             urgence: urgenceInput ? urgenceInput.value : 'normale',
+            telephone: giteInfo.telephone || null, // Récupérer le téléphone de la réservation
             statut: 'nouveau',
             created_at: new Date().toISOString()
         };
@@ -2153,6 +2154,7 @@ async function submitRetourDemande(event) {
                     sujet: formData.sujet,
                     urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
                     description: formData.description,
+                    telephone: formData.telephone,
                     statut: 'nouveau',
                     created_at: formData.created_at
                 }])
@@ -2170,6 +2172,7 @@ async function submitRetourDemande(event) {
                     sujet: formData.sujet,
                     urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
                     description: formData.description,
+                    telephone: formData.telephone,
                     statut: 'nouveau',
                     created_at: formData.created_at
                 }])

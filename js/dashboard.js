@@ -1517,46 +1517,47 @@ async function updateProblemesClients() {
             throw error;
         }
         
-        const container = document.getElementById('liste-problemes-clients');
-        const badge = document.getElementById('badge-problemes-count');
-        const card = document.getElementById('dashboard-problemes-clients');
-        
-        if (!problemes || problemes.length === 0) {
-            container.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème signalé</p>';
-            badge.textContent = '0';
-            card.style.display = 'none'; // Cacher si aucun problème
-            return;
-        }
-        
-        // Afficher la carte et mettre à jour le badge
-        card.style.display = 'block';
-        badge.textContent = problemes.length;
-        
         // Séparer les problèmes urgents des autres
         const problemesUrgents = problemes.filter(pb => pb.type === 'probleme');
         const autresDemandes = problemes.filter(pb => pb.type !== 'probleme');
         
-        let html = '';
+        // === CARD ROUGE : PROBLÈMES URGENTS ===
+        const containerUrgents = document.getElementById('liste-problemes-urgents');
+        const badgeUrgents = document.getElementById('badge-problemes-urgents-count');
+        const cardUrgents = document.getElementById('dashboard-problemes-urgents');
         
-        // Afficher d'abord les problèmes urgents
-        if (problemesUrgents.length > 0) {
-            html += '<div style="margin-bottom: 20px;"><h3 style="color: #e74c3c; font-size: 0.95rem; margin-bottom: 12px; font-weight: 700; text-transform: uppercase;">⚠️ Problèmes Urgents</h3>';
+        if (!problemesUrgents || problemesUrgents.length === 0) {
+            containerUrgents.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème urgent</p>';
+            badgeUrgents.textContent = '0';
+            cardUrgents.style.display = 'none';
+        } else {
+            cardUrgents.style.display = 'block';
+            badgeUrgents.textContent = problemesUrgents.length;
+            let htmlUrgents = '';
             problemesUrgents.forEach(pb => {
-                html += renderProblemeCard(pb, true);
+                htmlUrgents += renderProblemeCard(pb, true);
             });
-            html += '</div>';
+            containerUrgents.innerHTML = htmlUrgents;
         }
         
-        // Puis les autres demandes
-        if (autresDemandes.length > 0) {
-            html += '<div><h3 style="color: #7f8c8d; font-size: 0.95rem; margin-bottom: 12px; font-weight: 700; text-transform: uppercase;">💬 Demandes & Retours</h3>';
+        // === CARD BLEUE : DEMANDES & RETOURS ===
+        const containerDemandes = document.getElementById('liste-demandes-retours');
+        const badgeDemandes = document.getElementById('badge-demandes-retours-count');
+        const cardDemandes = document.getElementById('dashboard-demandes-retours');
+        
+        if (!autresDemandes || autresDemandes.length === 0) {
+            containerDemandes.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>';
+            badgeDemandes.textContent = '0';
+            cardDemandes.style.display = 'none';
+        } else {
+            cardDemandes.style.display = 'block';
+            badgeDemandes.textContent = autresDemandes.length;
+            let htmlDemandes = '';
             autresDemandes.forEach(pb => {
-                html += renderProblemeCard(pb, false);
+                htmlDemandes += renderProblemeCard(pb, false);
             });
-            html += '</div>';
+            containerDemandes.innerHTML = htmlDemandes;
         }
-        
-        container.innerHTML = html;
         
     } catch (err) {
         console.error('❌ Erreur update problèmes clients:', err);
@@ -1602,6 +1603,14 @@ function renderProblemeCard(pb, isUrgent) {
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    ${pb.telephone ? `
+                        <button onclick="repondreWhatsApp(${pb.id}, '${pb.telephone}', '${(pb.sujet || '').replace(/'/g, "\\'")}', '${pb.gite}')" 
+                                style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3);"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                            💬 WhatsApp
+                        </button>
+                    ` : ''}
                     <button onclick="traiterProbleme(${pb.id})" 
                             style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);"
                             onmouseover="this.style.transform='scale(1.05)'"
@@ -1658,6 +1667,23 @@ async function supprimerProbleme(id) {
     }
 }
 
+function repondreWhatsApp(id, telephone, sujet, gite) {
+    // Nettoyer le numéro de téléphone (enlever espaces, tirets, etc.)
+    const telClean = telephone.replace(/[\s\-\(\)]/g, '');
+    
+    // Créer le message pré-rempli
+    const message = `Bonjour,\n\nNous avons bien reçu votre message concernant : "${sujet}"\n\nGîte : ${gite}\n\nNous revenons vers vous concernant votre demande.\n\nCordialement,\nL'équipe`;
+    
+    // Encoder le message pour l'URL
+    const messageEncoded = encodeURIComponent(message);
+    
+    // Créer le lien WhatsApp
+    const whatsappUrl = `https://wa.me/${telClean}?text=${messageEncoded}`;
+    
+    // Ouvrir dans un nouvel onglet
+    window.open(whatsappUrl, '_blank');
+}
+
 // Exposer les fonctions dans le scope global pour les appels depuis HTML
 window.addTodoItem = addTodoItem;
 window.toggleTodo = toggleTodo;
@@ -1671,6 +1697,7 @@ window.validerDemandeHoraire = validerDemandeHoraire;
 window.refuserDemandeHoraire = refuserDemandeHoraire;
 window.traiterProbleme = traiterProbleme;
 window.supprimerProbleme = supprimerProbleme;
+window.repondreWhatsApp = repondreWhatsApp;
 
 // =============================================
 // FONCTIONS CHECKLIST POUR DASHBOARD
