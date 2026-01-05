@@ -250,16 +250,19 @@ async function sauvegarderStocks(gite) {
             stocks[article.id] = parseInt(input.value) || 0;
         });
 
+        // Convertir le nom du gîte pour la base de données (avec accents)
+        const giteDb = gite === 'trevoux' ? 'trévoux' : 'couzon';
+
         const { error } = await window.supabaseClient
             .from('stocks_draps')
             .upsert({
-                gite: gite,
+                gite: giteDb,
                 ...stocks
             }, { onConflict: 'gite' });
 
         if (error) throw error;
 
-        alert(`✅ Stocks de ${gite.charAt(0).toUpperCase() + gite.slice(1)} sauvegardés !`);
+        alert(`✅ Stocks de ${giteDb.charAt(0).toUpperCase() + giteDb.slice(1)} sauvegardés !`);
     } catch (error) {
         console.error('Erreur sauvegarde stocks:', error);
         alert('❌ Erreur lors de la sauvegarde des stocks');
