@@ -4,21 +4,20 @@
 <!-- Remplace l'ancien onglet Messagerie            -->
 <!-- ================================================ -->
 
-<div class="tab-content" id="faq-tab">
-    <div class="page-header">
-        <div class="header-title">
-            <h1>❓ FAQ - Questions Fréquentes</h1>
-            <p>Réponses aux questions courantes des clients</p>
-        </div>
-        <div class="header-actions">
-            <button class="btn-primary" onclick="ajouterQuestionFAQ()">
-                <i class="fas fa-plus"></i> Ajouter une Question
-            </button>
-            <button class="btn-secondary" onclick="exporterFAQHTML()">
-                <i class="fas fa-file-export"></i> Exporter en HTML
-            </button>
-        </div>
+<div class="page-header">
+    <div class="header-title">
+        <h1>❓ FAQ - Questions Fréquentes</h1>
+        <p>Réponses aux questions courantes des clients</p>
     </div>
+    <div class="header-actions">
+        <button class="btn-primary" onclick="ajouterQuestionFAQ()">
+            <i class="fas fa-plus"></i> Ajouter une Question
+        </button>
+        <button class="btn-secondary" onclick="exporterFAQHTML()">
+            <i class="fas fa-file-export"></i> Exporter en HTML
+        </button>
+    </div>
+</div>
 
     <!-- Barre de recherche -->
     <div class="search-section" style="margin-bottom: 20px;">
@@ -58,13 +57,12 @@
             <button class="chip" data-category="autre" onclick="filtrerFAQ('autre')">
                 ℹ️ Autre
             </button>
-        </div>
     </div>
+</div>
 
-    <!-- Liste des questions -->
-    <div id="faq-list" class="faq-container">
-        <!-- Les questions seront chargées ici -->
-    </div>
+<!-- Liste des questions -->
+<div id="faq-list" class="faq-container">
+    <!-- Les questions seront chargées ici -->
 </div>
 
 <!-- Modal Ajouter/Modifier Question -->
