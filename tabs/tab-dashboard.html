@@ -32,17 +32,29 @@
         </div>
     </div>
 
-    <!-- 💬 RETOURS & PROBLÈMES CLIENTS - Visible seulement si des demandes existent -->
-    <div id="dashboard-problemes-clients" class="card" style="margin-bottom: 25px; background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%); border: 3px solid #e74c3c; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3); border-radius: 12px;">
+    <!-- ⚠️ PROBLÈMES URGENTS UNIQUEMENT -->
+    <div id="dashboard-problemes-urgents" class="card" style="margin-bottom: 25px; background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%); border: 3px solid #e74c3c; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3); border-radius: 12px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
             <h2 style="margin: 0; font-size: 1.3rem; color: #c0392b; font-weight: 700;">
-                💬 RETOURS & PROBLÈMES CLIENTS
+                ⚠️ PROBLÈMES URGENTS
             </h2>
-            <span id="badge-problemes-count" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 6px 16px; border-radius: 25px; font-size: 1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4); animation: pulse 2s infinite;">0</span>
+            <span id="badge-problemes-urgents-count" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 6px 16px; border-radius: 25px; font-size: 1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4); animation: pulse 2s infinite;">0</span>
         </div>
-        <div id="liste-problemes-clients" style="display: flex; flex-direction: column; gap: 12px;">
-            <!-- Les problèmes seront chargés ici par JS -->
-            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème signalé</p>
+        <div id="liste-problemes-urgents" style="display: flex; flex-direction: column; gap: 12px;">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème urgent</p>
+        </div>
+    </div>
+
+    <!-- 💬 DEMANDES & RETOURS CLIENTS -->
+    <div id="dashboard-demandes-retours" class="card" style="margin-bottom: 25px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 3px solid #2196f3; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3); border-radius: 12px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h2 style="margin: 0; font-size: 1.3rem; color: #1976d2; font-weight: 700;">
+                💬 DEMANDES & RETOURS
+            </h2>
+            <span id="badge-demandes-retours-count" style="background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); color: white; padding: 6px 16px; border-radius: 25px; font-size: 1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(33, 150, 243, 0.4);">0</span>
+        </div>
+        <div id="liste-demandes-retours" style="display: flex; flex-direction: column; gap: 12px;">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>
         </div>
     </div>
 
