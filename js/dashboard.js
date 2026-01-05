@@ -487,13 +487,17 @@ async function updateTodoList(category) {
                         ${todo.is_recurrent && frequencyLabel ? `<span style="background: #E8DAEF; color: #7D3C98; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${frequencyLabel}</span>` : ''}
                     </div>
                 </div>
+                <button onclick="editTodo(${todo.id})" 
+                        style="background: #e3f2fd; border: 1px solid #90caf9; color: #1976d2; cursor: pointer; font-size: 1rem; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; transition: all 0.2s; line-height: 1;"
+                        onmouseover="this.style.background='#1976d2'; this.style.color='white';"
+                        onmouseout="this.style.background='#e3f2fd'; this.style.color='#1976d2';"
+                        title="Modifier">✏️</button>
                 <button onclick="deleteTodo(${todo.id})" 
                         style="background: #fee; border: 1px solid #fcc; color: #E74C3C; cursor: pointer; font-size: 1.3rem; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; transition: all 0.2s; line-height: 1;"
                         onmouseover="this.style.background='#E74C3C'; this.style.color='white';"
                         onmouseout="this.style.background='#fee'; this.style.color='#E74C3C';"
                         title="Supprimer">×</button>
-            </div>
-        `;
+            </div>`;
     });
     
     container.innerHTML = html;
@@ -769,6 +773,106 @@ async function deleteTodo(id) {
     // Recharger toutes les listes
     await updateTodoLists();
     await updateDashboardStats();
+}
+
+async function editTodo(id) {
+    // Récupérer la tâche
+    const { data: todo, error } = await supabase
+        .from('todos')
+        .select('*')
+        .eq('id', id)
+        .single();
+    
+    if (error || !todo) {
+        console.error('Erreur chargement tâche:', error);
+        showToast('Erreur lors du chargement', 'error');
+        return;
+    }
+    
+    // Ouvrir le modal en mode édition
+    const modal = document.getElementById('add-todo-modal');
+    const modalTitle = modal.querySelector('.modal-header h2');
+    modalTitle.textContent = '✏️ Modifier la tâche';
+    
+    // Remplir le formulaire
+    document.getElementById('todo-title').value = todo.title || '';
+    document.getElementById('todo-description').value = todo.description || '';
+    document.getElementById('todo-gite').value = todo.gite || '';
+    
+    // Gérer la récurrence
+    const isRecurrentCheckbox = document.getElementById('todo-is-recurrent');
+    const recurrentOptions = document.getElementById('todo-recurrent-options');
+    
+    if (isRecurrentCheckbox) {
+        isRecurrentCheckbox.checked = todo.is_recurrent || false;
+        if (recurrentOptions) {
+            recurrentOptions.style.display = todo.is_recurrent ? 'block' : 'none';
+        }
+    }
+    
+    if (todo.is_recurrent) {
+        const frequencySelect = document.getElementById('todo-frequency');
+        const daySelect = document.getElementById('todo-day-of-week');
+        
+        if (frequencySelect) frequencySelect.value = todo.frequency || 'weekly';
+        if (daySelect && todo.frequency_detail?.day_of_week) {
+            daySelect.value = todo.frequency_detail.day_of_week;
+        }
+    }
+    
+    // Modifier le bouton de soumission
+    const submitBtn = modal.querySelector('button[type="submit"]');
+    submitBtn.textContent = '💾 Enregistrer';
+    submitBtn.onclick = async (e) => {
+        e.preventDefault();
+        
+        const title = document.getElementById('todo-title').value.trim();
+        if (!title) {
+            showToast('Le titre est obligatoire', 'error');
+            return;
+        }
+        
+        const updateData = {
+            title: title,
+            description: document.getElementById('todo-description').value.trim(),
+            gite: document.getElementById('todo-gite').value || null
+        };
+        
+        // Si c'est une tâche récurrente, mettre à jour les options
+        if (isRecurrentCheckbox?.checked) {
+            updateData.is_recurrent = true;
+            updateData.frequency = document.getElementById('todo-frequency').value;
+            const dayOfWeek = document.getElementById('todo-day-of-week').value;
+            updateData.frequency_detail = { day_of_week: parseInt(dayOfWeek) };
+            
+            // Recalculer next_occurrence si le jour a changé
+            if (todo.frequency_detail?.day_of_week !== parseInt(dayOfWeek) || 
+                todo.frequency !== updateData.frequency) {
+                updateData.next_occurrence = calculateNextOccurrence(
+                    updateData.frequency, 
+                    updateData.frequency_detail
+                );
+            }
+        }
+        
+        const { error: updateError } = await supabase
+            .from('todos')
+            .update(updateData)
+            .eq('id', id);
+        
+        if (updateError) {
+            console.error('Erreur mise à jour:', updateError);
+            showToast('Erreur lors de la mise à jour', 'error');
+            return;
+        }
+        
+        showToast('✓ Tâche modifiée', 'success');
+        closeAddTodoModal();
+        await updateTodoList(todo.category);
+        await updateDashboardStats();
+    };
+    
+    modal.style.display = 'flex';
 }
 
 // Helper pour ouvrir l'édition d'une réservation
