@@ -117,6 +117,9 @@ async function getAllReservations(forceRefresh) {
                 timestamp: r.timestamp,
                 syncedFrom: r.synced_from
             };
+        }).filter(function(r) {
+            // Filtrer les réservations phantoms (1 nuit ou moins)
+            return r.nuits > 1;
         });
         
         // Mettre en cache
