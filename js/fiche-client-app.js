@@ -2123,11 +2123,15 @@ async function loadClientChecklists() {
     }
     
     try {
+        // Normaliser le nom du gîte (première lettre en majuscule)
+        const giteNormalized = giteInfo.gite.charAt(0).toUpperCase() + giteInfo.gite.slice(1).toLowerCase();
+        console.log(`🏠 Gîte recherché: "${giteNormalized}" (original: "${giteInfo.gite}")`);
+        
         // Charger les templates du gîte
         const { data: templatesEntree, error: errorEntree } = await supabase
             .from('checklist_templates')
             .select('*')
-            .eq('gite', giteInfo.gite)
+            .eq('gite', giteNormalized)
             .eq('type', 'entree')
             .eq('actif', true)
             .order('ordre', { ascending: true });
@@ -2135,7 +2139,7 @@ async function loadClientChecklists() {
         const { data: templatesSortie, error: errorSortie } = await supabase
             .from('checklist_templates')
             .select('*')
-            .eq('gite', giteInfo.gite)
+            .eq('gite', giteNormalized)
             .eq('type', 'sortie')
             .eq('actif', true)
             .order('ordre', { ascending: true });
@@ -2184,7 +2188,11 @@ async function loadClientChecklists() {
 }
 
 function renderClientChecklist(type, templates, progressMap) {
-    console.log(`🎨 Render checklist ${type}:`, { templates, progressMap });
+    console.log(`🎨 Render checklist ${type}:`, { 
+        templatesCount: templates?.length,
+        templates: templates, 
+        progressMap: progressMap 
+    });
     
     const containerId = type === 'entree' ? 'checklistEntreeContainer' : 'checklistSortieContainer';
     const progressBarId = type === 'entree' ? 'progressEntree' : 'progressSortie';
