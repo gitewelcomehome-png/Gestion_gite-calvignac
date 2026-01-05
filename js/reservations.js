@@ -311,7 +311,12 @@ async function updateReservationsList() {
     });
     
     html += '</div>';
+    
+    console.log('📅 HTML généré, longueur:', html.length, 'caractères');
+    console.log('📅 Container innerHTML avant:', container.innerHTML.length);
     container.innerHTML = html;
+    console.log('📅 Container innerHTML après:', container.innerHTML.length);
+    console.log('📅 Container visible?', container.offsetHeight, 'px');
     
     // Scroller automatiquement vers la première semaine (semaine actuelle)
     setTimeout(() => {
