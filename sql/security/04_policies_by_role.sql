@@ -42,23 +42,32 @@ CREATE POLICY "Cleaner - Lecture seule" ON reservations
 -- Owner uniquement (données financières sensibles)
 -- ================================================================
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON charges;
+-- CHARGES
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'charges') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON charges';
+        EXECUTE 'CREATE POLICY "Owner uniquement" ON charges FOR ALL USING (has_role(''owner''))';
+    END IF;
+END $$;
 
-CREATE POLICY "Owner uniquement" ON charges
-    FOR ALL
-    USING (has_role('owner'));
+-- FISCALITE
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'fiscalite') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON fiscalite';
+        EXECUTE 'CREATE POLICY "Owner uniquement" ON fiscalite FOR ALL USING (has_role(''owner''))';
+    END IF;
+END $$;
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON fiscalite;
-
-CREATE POLICY "Owner uniquement" ON fiscalite
-    FOR ALL
-    USING (has_role('owner'));
-
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON soldes_bancaires;
-
-CREATE POLICY "Owner uniquement" ON soldes_bancaires
-    FOR ALL
-    USING (has_role('owner'));
+-- SOLDES BANCAIRES
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'soldes_bancaires') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON soldes_bancaires';
+        EXECUTE 'CREATE POLICY "Owner uniquement" ON soldes_bancaires FOR ALL USING (has_role(''owner''))';
+    END IF;
+END $$;
 
 -- ================================================================
 -- RETOURS MÉNAGE
@@ -158,15 +167,14 @@ CREATE POLICY "Cleaner - Tâches ménage" ON todos
 -- Cleaner: Lecture seule
 -- ================================================================
 
-DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON cleaning_schedules;
-
-CREATE POLICY "Owner - Accès complet" ON cleaning_schedules
-    FOR ALL
-    USING (has_role('owner'));
-
-CREATE POLICY "Cleaner - Lecture seule" ON cleaning_schedules
-    FOR SELECT
-    USING (has_role('cleaner'));
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'cleaning_schedules') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON cleaning_schedules';
+        EXECUTE 'CREATE POLICY "Owner - Accès complet" ON cleaning_schedules FOR ALL USING (has_role(''owner''))';
+        EXECUTE 'CREATE POLICY "Cleaner - Lecture seule" ON cleaning_schedules FOR SELECT USING (has_role(''cleaner''))';
+    END IF;
+END $$;
 
 -- ================================================================
 -- INFOS_GITES (Publique en lecture, Owner en écriture)
@@ -215,11 +223,13 @@ CREATE POLICY "Owner - Modification" ON faq
 -- ================================================================
 
 DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON commits_log;
-
-CREATE POLICY "Admin uniquement" ON commits_log
-    FOR ALL
-    USING (has_role('admin'));
-
+O $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'commits_log') THEN
+        EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON commits_log';
+        EXECUTE 'CREATE POLICY "Admin uniquement" ON commits_log FOR ALL USING (has_role(''admin''))';
+    END IF;
+END $$
 -- ================================================================
 -- VÉRIFICATION DES POLITIQUES
 -- ================================================================
