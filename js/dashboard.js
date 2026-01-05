@@ -1619,14 +1619,6 @@ function renderProblemeCard(pb, isUrgent) {
         </div>
     `;
 }
-        });
-        
-        container.innerHTML = html;
-        
-    } catch (err) {
-        console.error('❌ Erreur update problèmes clients:', err);
-    }
-}
 
 async function traiterProbleme(id) {
     if (!confirm('Marquer ce problème comme traité ?\n\nCela le supprimera de la liste.')) return;
