@@ -2132,13 +2132,13 @@ async function submitRetourDemande(event) {
         const urgenceInput = document.querySelector('input[name="urgenceDemande"]:checked');
         
         const formData = {
-            reservation_id: giteInfo.reservationId,
+            reservation_id: reservationData.id, // ✅ FIX: Utiliser reservationData.id au lieu de giteInfo.reservationId
             gite: giteInfo.gite,
             type: type,
             sujet: document.getElementById('sujetRetourDemande').value,
             description: document.getElementById('descriptionRetourDemande').value,
             urgence: urgenceInput ? urgenceInput.value : 'normale',
-            telephone: giteInfo.telephone || null, // Récupérer le téléphone de la réservation
+            telephone: reservationData.telephone || null, // ✅ FIX: Utiliser reservationData.telephone
             statut: 'nouveau',
             created_at: new Date().toISOString()
         };
