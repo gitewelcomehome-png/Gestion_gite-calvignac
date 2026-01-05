@@ -286,53 +286,128 @@ async function loadReservationsProgress() {
             return;
         }
         
-        // Pour chaque réservation, calculer la progression
+        // Pour chaque réservation, afficher la liste complète
         let html = '';
         
         for (const resa of reservations) {
-            const progress = await getReservationChecklistProgress(resa.id, resa.gite);
+            // Récupérer tous les templates et progression
+            const { data: templates, error: templatesError } = await supabaseClient
+                .from('checklist_templates')
+                .select('*')
+                .eq('gite', resa.gite)
+                .eq('actif', true)
+                .order('type', { ascending: true })
+                .order('ordre', { ascending: true });
+            
+            if (templatesError) {
+                console.error('Erreur templates:', templatesError);
+                continue;
+            }
+            
+            const { data: progress, error: progressError } = await supabaseClient
+                .from('checklist_progress')
+                .select('*')
+                .eq('reservation_id', resa.id);
+            
+            if (progressError) {
+                console.error('Erreur progress:', progressError);
+                continue;
+            }
+            
+            // Map pour accès rapide
+            const progressMap = {};
+            if (progress) {
+                progress.forEach(p => {
+                    progressMap[p.template_id] = p.completed;
+                });
+            }
+            
+            // Séparer par type
+            const templatesEntree = templates.filter(t => t.type === 'entree');
+            const templatesSortie = templates.filter(t => t.type === 'sortie');
+            
+            // Calculer progression
+            const completedEntree = templatesEntree.filter(t => progressMap[t.id] === true).length;
+            const completedSortie = templatesSortie.filter(t => progressMap[t.id] === true).length;
+            const percentEntree = templatesEntree.length > 0 ? Math.round((completedEntree / templatesEntree.length) * 100) : 0;
+            const percentSortie = templatesSortie.length > 0 ? Math.round((completedSortie / templatesSortie.length) * 100) : 0;
             
             html += `
-                <div class="card" style="margin-bottom: 15px; padding: 15px; cursor: pointer;" onclick="toggleChecklistDetail(${resa.id})">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div class="card" style="margin-bottom: 20px; padding: 20px;">
+                    <!-- En-tête réservation -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #e5e7eb;">
                         <div>
-                            <strong style="font-size: 1.1rem;">${resa.nom_client}</strong>
-                            <span style="color: var(--gray-600); margin-left: 10px;">${resa.gite}</span>
+                            <strong style="font-size: 1.2rem;">${resa.nom_client}</strong>
+                            <span style="color: var(--gray-600); margin-left: 15px; font-size: 1.1rem;">${resa.gite}</span>
                         </div>
-                        <div style="color: var(--gray-600); font-size: 0.9rem;">
+                        <div style="color: var(--gray-600); font-size: 0.95rem;">
                             ${formatDate(resa.date_debut)} → ${formatDate(resa.date_fin)}
-                            <span style="margin-left: 10px; color: #3498DB;">📋 Voir détail</span>
                         </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <!-- Entrée -->
+                    <!-- Résumé progression -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                         <div>
-                            <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                <span class="checklist-status-badge" style="background: ${getProgressColor(progress.entree.percent)};"></span>
-                                <strong>🚪 Entrée</strong>
-                                <span style="margin-left: auto; font-weight: 600;">${progress.entree.completed}/${progress.entree.total}</span>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span class="checklist-status-badge" style="background: ${getProgressColor(percentEntree)};"></span>
+                                <strong style="font-size: 1rem;">🚪 Entrée</strong>
+                                <span style="margin-left: auto; font-weight: 700; font-size: 1.1rem;">${completedEntree}/${templatesEntree.length}</span>
                             </div>
                             <div class="checklist-progress-bar">
-                                <div class="checklist-progress-fill" style="width: ${progress.entree.percent}%; background: ${getProgressColor(progress.entree.percent)};"></div>
+                                <div class="checklist-progress-fill" style="width: ${percentEntree}%; background: ${getProgressColor(percentEntree)};"></div>
                             </div>
                         </div>
                         
-                        <!-- Sortie -->
                         <div>
-                            <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                <span class="checklist-status-badge" style="background: ${getProgressColor(progress.sortie.percent)};"></span>
-                                <strong>🧳 Sortie</strong>
-                                <span style="margin-left: auto; font-weight: 600;">${progress.sortie.completed}/${progress.sortie.total}</span>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span class="checklist-status-badge" style="background: ${getProgressColor(percentSortie)};"></span>
+                                <strong style="font-size: 1rem;">🧳 Sortie</strong>
+                                <span style="margin-left: auto; font-weight: 700; font-size: 1.1rem;">${completedSortie}/${templatesSortie.length}</span>
                             </div>
                             <div class="checklist-progress-bar">
-                                <div class="checklist-progress-fill" style="width: ${progress.sortie.percent}%; background: ${getProgressColor(progress.sortie.percent)};"></div>
+                                <div class="checklist-progress-fill" style="width: ${percentSortie}%; background: ${getProgressColor(percentSortie)};"></div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Détail des items (caché par défaut) -->
-                    <div id="checklist-detail-${resa.id}" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #e5e7eb;"></div>
+                    <!-- Liste détaillée des items -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <!-- Colonne Entrée -->
+                        <div>
+                            ${templatesEntree.length === 0 ? '<p style="color: var(--gray-600); font-style: italic;">Aucun item configuré</p>' : templatesEntree.map(t => {
+                                const isChecked = progressMap[t.id] === true;
+                                return `
+                                    <div style="padding: 10px; background: ${isChecked ? '#d1fae5' : '#fff'}; border-radius: 6px; margin-bottom: 8px; border: 2px solid ${isChecked ? '#10b981' : '#e5e7eb'};">
+                                        <div style="display: flex; align-items: start; gap: 10px;">
+                                            <span style="font-size: 1.3rem;">${isChecked ? '✅' : '❌'}</span>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: ${isChecked ? '600' : '400'}; color: ${isChecked ? '#059669' : '#6b7280'};">${t.texte}</div>
+                                                ${t.description ? `<div style="font-size: 0.85rem; color: var(--gray-600); margin-top: 4px;">${t.description}</div>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        
+                        <!-- Colonne Sortie -->
+                        <div>
+                            ${templatesSortie.length === 0 ? '<p style="color: var(--gray-600); font-style: italic;">Aucun item configuré</p>' : templatesSortie.map(t => {
+                                const isChecked = progressMap[t.id] === true;
+                                return `
+                                    <div style="padding: 10px; background: ${isChecked ? '#d1fae5' : '#fff'}; border-radius: 6px; margin-bottom: 8px; border: 2px solid ${isChecked ? '#10b981' : '#e5e7eb'};">
+                                        <div style="display: flex; align-items: start; gap: 10px;">
+                                            <span style="font-size: 1.3rem;">${isChecked ? '✅' : '❌'}</span>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: ${isChecked ? '600' : '400'}; color: ${isChecked ? '#059669' : '#6b7280'};">${t.texte}</div>
+                                                ${t.description ? `<div style="font-size: 0.85rem; color: var(--gray-600); margin-top: 4px;">${t.description}</div>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
                 </div>
             `;
         }
