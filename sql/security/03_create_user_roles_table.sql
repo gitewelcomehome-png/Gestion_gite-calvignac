@@ -115,7 +115,10 @@ COMMENT ON FUNCTION get_user_roles IS 'Récupérer tous les rôles de l''utilisa
 -- ================================================================
 
 -- Voir la structure de la table
-\d user_roles
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_name = 'user_roles'
+ORDER BY ordinal_position;
 
 -- Lister les politiques
 SELECT 
