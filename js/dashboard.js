@@ -1,6 +1,6 @@
 /**
  * Vue d'ensemble hebdomadaire : réservations, ménages, todos
- * Version: 2.1.1 - Fix display card problèmes
+ * Version: 2.2.0 - Gestion problèmes clients
  */
 
 // ==========================================
@@ -1521,24 +1521,16 @@ async function updateProblemesClients() {
         const badge = document.getElementById('badge-problemes-count');
         const card = document.getElementById('dashboard-problemes-clients');
         
-        console.log('🔍 DEBUG problèmes:', {
-            countProblemes: problemes?.length || 0,
-            cardExists: !!card,
-            cardDisplay: card?.style.display
-        });
-        
         if (!problemes || problemes.length === 0) {
             container.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème signalé</p>';
             badge.textContent = '0';
             card.style.display = 'none'; // Cacher si aucun problème
-            console.log('✅ Card cachée (aucun problème)');
             return;
         }
         
         // Afficher la carte et mettre à jour le badge
         card.style.display = 'block';
         badge.textContent = problemes.length;
-        console.log('✅ Card affichée avec', problemes.length, 'problème(s)');
         
         // Générer le HTML pour chaque problème
         let html = '';
