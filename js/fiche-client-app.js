@@ -2128,8 +2128,6 @@ async function submitRetourDemande(event) {
     event.preventDefault();
     
     try {
-        console.log('📤 Envoi demande/retour...');
-        
         const type = document.getElementById('typeRetourDemande').value;
         const urgenceInput = document.querySelector('input[name="urgenceDemande"]:checked');
         
@@ -2146,14 +2144,6 @@ async function submitRetourDemande(event) {
         
         // Si c'est un problème, utiliser la table problemes_signales
         if (type === 'probleme') {
-            console.log('🔍 Insertion dans problemes_signales:', {
-                reservation_id: formData.reservation_id,
-                gite: formData.gite,
-                type: 'autre',
-                urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
-                description: `${formData.sujet}\n\n${formData.description}`
-            });
-            
             const { data, error } = await window.ficheClientSupabase
                 .from('problemes_signales')
                 .insert([{
@@ -2167,18 +2157,9 @@ async function submitRetourDemande(event) {
                 }])
                 .select();
             
-            if (error) {
-                console.error('❌ Erreur insertion probleme:', error);
-                throw error;
-            }
-            console.log('✅ Problème signalé avec succès:', data);
+            if (error) throw error;
         } else {
             // Pour demande, retour, amelioration : aussi dans problemes_signales
-            console.log('🔍 Insertion autre type dans problemes_signales:', {
-                type: type,
-                formData: formData
-            });
-            
             const { data, error } = await window.ficheClientSupabase
                 .from('problemes_signales')
                 .insert([{
@@ -2192,11 +2173,7 @@ async function submitRetourDemande(event) {
                 }])
                 .select();
             
-            if (error) {
-                console.error('❌ Erreur insertion demande/retour:', error);
-                throw error;
-            }
-            console.log('✅ Demande/Retour enregistré avec succès:', data);
+            if (error) throw error;
         }
         
         // Masquer le formulaire et afficher la confirmation
