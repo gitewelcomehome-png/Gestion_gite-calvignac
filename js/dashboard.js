@@ -433,8 +433,6 @@ async function updateTodoLists() {
 
 async function updateTodoList(category) {
     
-    const now = new Date().toISOString();
-    
     const { data: todos } = await supabase
         .from('todos')
         .select('*')
