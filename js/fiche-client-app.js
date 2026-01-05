@@ -1272,7 +1272,11 @@ function switchTab(tabId) {
     if (content) {
         content.classList.add('active');
         content.style.display = 'block';
-        content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Scroll manuel pour éviter que le contenu soit caché sous le header
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     }
     
     // Charger les activités
