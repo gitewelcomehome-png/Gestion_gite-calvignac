@@ -757,27 +757,38 @@ async function toggleTodo(id, completed) {
             
             showToast('✓ Tâche terminée, prochaine occurrence créée', 'success');
         } else {
-            // Si coché (non récurrente), archiver la tâche
-            // Si décoché, restaurer
-            const updateData = completed ? 
-                { completed: true, archived_at: new Date().toISOString() } : 
-                { completed: false, archived_at: null };
-            
-            
-            const { error } = await supabase
-                .from('todos')
-                .update(updateData)
-                .eq('id', id);
-            
-            
-            if (error) {
-                console.error('❌ Erreur mise à jour todo:', error);
-                showToast('Erreur lors de la mise à jour', 'error');
-                await updateTodoList(todo.category);
-                return;
+            // Si coché (non récurrente), SUPPRIMER la tâche définitivement
+            // Si décoché, restaurer (mais ne devrait pas arriver)
+            if (completed) {
+                const { error } = await supabase
+                    .from('todos')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) {
+                    console.error('❌ Erreur suppression todo:', error);
+                    showToast('Erreur lors de la suppression', 'error');
+                    await updateTodoList(todo.category);
+                    return;
+                }
+                
+                showToast('✓ Tâche terminée et supprimée', 'success');
+            } else {
+                // Décocher = restaurer
+                const { error } = await supabase
+                    .from('todos')
+                    .update({ completed: false, archived_at: null })
+                    .eq('id', id);
+                
+                if (error) {
+                    console.error('❌ Erreur mise à jour todo:', error);
+                    showToast('Erreur lors de la restauration', 'error');
+                    await updateTodoList(todo.category);
+                    return;
+                }
+                
+                showToast('↺ Tâche réactivée', 'success');
             }
-            
-            showToast(completed ? '✓ Tâche terminée' : '↺ Tâche réactivée', 'success');
         }
         
         // Recharger la liste correspondante
@@ -2104,18 +2115,15 @@ async function afficherDetailsRetourMenage(retourId) {
 
 async function validerRetourMenage(retourId) {
     try {
+        // Supprimer le retour au lieu de le marquer validé
         const { error } = await window.supabaseClient
             .from('retours_menage')
-            .update({
-                validated: true,
-                validated_at: new Date().toISOString(),
-                validated_by: 'Propriétaire'
-            })
+            .delete()
             .eq('id', retourId);
 
         if (error) throw error;
 
-        alert('✅ Retour validé avec succès !');
+        alert('✅ Retour validé et supprimé avec succès !');
         fermerModalRetourMenage();
         
         // Recharger les alertes

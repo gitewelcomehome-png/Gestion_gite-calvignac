@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Retours Ménage</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test Debug Retours Ménage</h1>
+    <div id="results"></div>
+    
+    <script src="js/shared-config.js"></script>
+    <script>
+        async function testRetours() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>⏳ Test en cours...</p>';
+            
+            try {
+                // Test 1: Vérifier si window.supabaseClient existe
+                results.innerHTML += '<p>✅ window.supabaseClient existe: ' + (!!window.supabaseClient) + '</p>';
+                
+                // Test 2: Essayer de requêter la table
+                const { data, error } = await window.supabaseClient
+                    .from('retours_menage')
+                    .select('*')
+                    .eq('validated', false);
+                
+                if (error) {
+                    results.innerHTML += '<p>❌ Erreur: ' + error.message + '</p>';
+                    results.innerHTML += '<p>Code: ' + error.code + '</p>';
+                    results.innerHTML += '<p>Details: ' + JSON.stringify(error.details) + '</p>';
+                } else {
+                    results.innerHTML += '<p>✅ Requête réussie!</p>';
+                    results.innerHTML += '<p>Nombre de retours: ' + (data ? data.length : 0) + '</p>';
+                    if (data && data.length > 0) {
+                        results.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    } else {
+                        results.innerHTML += '<p>ℹ️ Aucun retour trouvé (validated=false)</p>';
+                    }
+                }
+                
+                // Test 3: Vérifier tous les retours (sans filtre)
+                const { data: allData, error: allError } = await window.supabaseClient
+                    .from('retours_menage')
+                    .select('*');
+                
+                if (allError) {
+                    results.innerHTML += '<p>❌ Erreur (tous): ' + allError.message + '</p>';
+                } else {
+                    results.innerHTML += '<p>✅ Total retours (avec et sans validation): ' + (allData ? allData.length : 0) + '</p>';
+                    if (allData && allData.length > 0) {
+                        results.innerHTML += '<pre>' + JSON.stringify(allData, null, 2) + '</pre>';
+                    }
+                }
+                
+            } catch (err) {
+                results.innerHTML += '<p>❌ Exception: ' + err.message + '</p>';
+                console.error(err);
+            }
+        }
+        
+        // Attendre que shared-config.js charge supabaseClient
+        setTimeout(testRetours, 1000);
+    </script>
+</body>
+</html>
