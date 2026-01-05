@@ -298,6 +298,8 @@ async function loadReservationsProgress() {
         let html = '';
         
         for (const resa of reservationsFiltered) {
+            console.log(`🔍 Recherche templates pour gîte: "${resa.gite}"`);
+            
             // Récupérer tous les templates et progression
             const { data: templates, error: templatesError } = await supabaseClient
                 .from('checklist_templates')
@@ -306,6 +308,8 @@ async function loadReservationsProgress() {
                 .eq('actif', true)
                 .order('type', { ascending: true })
                 .order('ordre', { ascending: true });
+            
+            console.log(`📋 Templates trouvés pour ${resa.gite}:`, templates?.length || 0);
             
             if (templatesError) {
                 console.error('Erreur templates:', templatesError);
