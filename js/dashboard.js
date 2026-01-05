@@ -156,13 +156,21 @@ async function updateDashboardStats() {
     
     // Filtrer les tâches visibles (mêmes règles que l'affichage)
     const now = new Date();
+    console.log('🕐 Debug tâches récurrentes - Heure actuelle:', now.toISOString());
+    console.log('📋 Total tâches non complétées:', todos?.length || 0);
+    
     const visibleTodos = todos?.filter(todo => {
         if (!todo.is_recurrent || !todo.next_occurrence) {
             return true; // Tâche normale ou récurrente sans date = visible
         }
         // Tâche récurrente : visible seulement si la date est passée
-        return new Date(todo.next_occurrence) <= now;
+        const nextOcc = new Date(todo.next_occurrence);
+        const isVisible = nextOcc <= now;
+        console.log(`🔁 Tâche "${todo.title}" - Next: ${nextOcc.toISOString()} - Visible: ${isVisible ? '✅' : '❌'}`);
+        return isVisible;
     }) || [];
+    
+    console.log('👁️ Tâches visibles:', visibleTodos.length);
     
     const reservationsTodos = visibleTodos.filter(t => t.category === 'reservations').length;
     const travauxTodos = visibleTodos.filter(t => t.category === 'travaux').length;
@@ -436,12 +444,18 @@ async function updateTodoList(category) {
         .order('created_at', { ascending: true });
     
     // Filtrer les tâches dont la date d'occurrence est passée ou inexistante
+    const now = new Date();
     const visibleTodos = todos?.filter(todo => {
         if (!todo.is_recurrent || !todo.next_occurrence) {
             return true; // Tâche normale ou récurrente sans date = visible
         }
         // Tâche récurrente : visible seulement si la date est passée
-        return new Date(todo.next_occurrence) <= new Date();
+        const nextOcc = new Date(todo.next_occurrence);
+        const isVisible = nextOcc <= now;
+        if (todo.category === category) {
+            console.log(`🔁 [${category}] "${todo.title}" - Next: ${nextOcc.toISOString()} vs Now: ${now.toISOString()} = ${isVisible ? 'VISIBLE ✅' : 'MASQUÉE ❌'}`);
+        }
+        return isVisible;
     }) || [];
     
     if (visibleTodos.length > 0) {
