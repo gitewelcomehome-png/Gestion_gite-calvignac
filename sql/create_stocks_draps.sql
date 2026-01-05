@@ -23,7 +23,7 @@ COMMENT ON COLUMN stocks_draps.draps_plats_grands IS 'Nombre de draps plats pour
 COMMENT ON COLUMN stocks_draps.draps_plats_petits IS 'Nombre de draps plats pour lits simples';
 COMMENT ON COLUMN stocks_draps.housses_couettes_grandes IS 'Nombre de housses de couette grandes';
 COMMENT ON COLUMN stocks_draps.housses_couettes_petites IS 'Nombre de housses de couette petites';
-COMMENT ON COLUMN stocks_draps.taies_oreillers IS 'Nombre de taies d\'oreillers';
+COMMENT ON COLUMN stocks_draps.taies_oreillers IS 'Nombre de taies d''oreillers';
 COMMENT ON COLUMN stocks_draps.serviettes IS 'Nombre de serviettes';
 COMMENT ON COLUMN stocks_draps.tapis_bain IS 'Nombre de tapis de bain';
 

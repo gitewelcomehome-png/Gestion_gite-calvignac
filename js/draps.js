@@ -54,15 +54,24 @@ async function chargerStocks() {
         data.forEach(stock => {
             stocksActuels[stock.gite] = stock;
             
-            // Remplir les champs
+            // Remplir les champs (vérifier qu'ils existent)
             const giteSlug = stock.gite.toLowerCase();
-            document.getElementById(`stock-${giteSlug}-draps-grands`).value = stock.draps_plats_grands || 0;
-            document.getElementById(`stock-${giteSlug}-draps-petits`).value = stock.draps_plats_petits || 0;
-            document.getElementById(`stock-${giteSlug}-housses-grandes`).value = stock.housses_couettes_grandes || 0;
-            document.getElementById(`stock-${giteSlug}-housses-petites`).value = stock.housses_couettes_petites || 0;
-            document.getElementById(`stock-${giteSlug}-taies`).value = stock.taies_oreillers || 0;
-            document.getElementById(`stock-${giteSlug}-serviettes`).value = stock.serviettes || 0;
-            document.getElementById(`stock-${giteSlug}-tapis`).value = stock.tapis_bain || 0;
+            const fields = [
+                { id: `stock-${giteSlug}-draps-grands`, value: stock.draps_plats_grands },
+                { id: `stock-${giteSlug}-draps-petits`, value: stock.draps_plats_petits },
+                { id: `stock-${giteSlug}-housses-grandes`, value: stock.housses_couettes_grandes },
+                { id: `stock-${giteSlug}-housses-petites`, value: stock.housses_couettes_petites },
+                { id: `stock-${giteSlug}-taies`, value: stock.taies_oreillers },
+                { id: `stock-${giteSlug}-serviettes`, value: stock.serviettes },
+                { id: `stock-${giteSlug}-tapis`, value: stock.tapis_bain }
+            ];
+            
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (element) {
+                    element.value = field.value || 0;
+                }
+            });
         });
     } catch (error) {
         console.error('Erreur chargement stocks:', error);
@@ -138,8 +147,8 @@ async function analyserReservations() {
         const { data: reservations, error } = await window.supabase
             .from('reservations')
             .select('*')
-            .gte('arrivee', today)
-            .order('arrivee', { ascending: true });
+            .gte('date_debut', today)
+            .order('date_debut', { ascending: true });
 
         if (error) throw error;
 
@@ -265,9 +274,9 @@ async function simulerBesoins() {
         const { data: reservations, error } = await window.supabase
             .from('reservations')
             .select('*')
-            .gte('arrivee', today)
-            .lte('arrivee', dateLimit)
-            .order('arrivee', { ascending: true });
+            .gte('date_debut', today)
+            .lte('date_debut', dateLimit)
+            .order('date_debut', { ascending: true });
 
         if (error) throw error;
 
