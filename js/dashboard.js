@@ -973,6 +973,7 @@ async function updateFinancialIndicators() {
     
     const anneeActuelle = new Date().getFullYear();
     const anneePrecedente = anneeActuelle - 1;
+    const moisActuel = new Date().getMonth() + 1; // 1-12
     
     // 1. Calculer le bénéfice RÉEL de l'année en cours
     const reservations = await getAllReservations();
@@ -984,14 +985,33 @@ async function updateFinancialIndicators() {
         return dateDebut.getFullYear() === anneeActuelle;
     });
     
+    // Filtrer par mois actuel
+    const reservationsMois = reservations.filter(r => {
+        const dateDebut = parseLocalDate(r.dateDebut);
+        return dateDebut.getFullYear() === anneeActuelle && 
+               dateDebut.getMonth() + 1 === moisActuel;
+    });
+    
     const chargesAnnee = charges.filter(c => {
         if (!c.date) return false;
         const dateCharge = new Date(c.date);
         return dateCharge.getFullYear() === anneeActuelle;
     });
     
-    // Calculer CA
+    // Calculer CA année
     const caAnnee = reservationsAnnee.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
+    
+    // Calculer CA mois
+    const caMois = reservationsMois.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
+    
+    // Mettre à jour l'affichage des CA
+    const caMoisEl = document.getElementById('dashboard-ca-mois');
+    const caAnneeEl = document.getElementById('dashboard-ca-annee');
+    const anneeCAEl = document.getElementById('annee-ca');
+    
+    if (caMoisEl) caMoisEl.textContent = formatCurrency(caMois);
+    if (caAnneeEl) caAnneeEl.textContent = formatCurrency(caAnnee);
+    if (anneeCAEl) anneeCAEl.textContent = anneeActuelle;
     
     // Récupérer le Total Charges depuis la simulation fiscale de l'année en cours
     const { data: simFiscale } = await supabase
