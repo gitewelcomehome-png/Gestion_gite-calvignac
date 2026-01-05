@@ -645,6 +645,9 @@ function calculateNextOccurrence(frequency, frequencyDetail) {
             break;
     }
     
+    // Toujours mettre à minuit pour être visible dès le début de la journée
+    next.setHours(0, 0, 0, 0);
+    
     return next.toISOString();
 }
 
