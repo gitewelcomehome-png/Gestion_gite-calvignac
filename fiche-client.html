@@ -1122,46 +1122,56 @@
     </div>
     
     <!-- Header -->
-    <header class="header">
-        <div class="logo" id="giteName">Gîte</div>
-        <div class="language-switch">
-            <button class="language-btn active" data-lang="fr">FR</button>
-            <button class="language-btn" data-lang="en">EN</button>
-            <button class="btn btn-outline" id="btnShare" style="margin-left: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem;">
-                🔗
-            </button>
+    <header class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <!-- Nom du client -->
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <h1 style="color: white; font-size: 1.8rem; font-weight: 700; margin: 0 0 0.25rem 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);" id="clientName">Bienvenue</h1>
+                <p style="color: rgba(255,255,255,0.9); font-size: 0.95rem; margin: 0;" id="giteName">Votre séjour</p>
+            </div>
+            
+            <!-- Contrôles -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <div class="language-switch">
+                    <button class="language-btn active" data-lang="fr">FR</button>
+                    <button class="language-btn" data-lang="en">EN</button>
+                </div>
+                <button class="btn btn-outline" id="btnShare" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; backdrop-filter: blur(10px);">
+                    🔗 Partager
+                </button>
+            </div>
         </div>
     </header>
     
     <!-- Tab Navigation -->
-    <nav class="tab-navigation">
+    <nav class="tab-navigation" style="box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
         <div class="tabs-list">
             <button class="tab-btn active" data-tab="entree">
-                <span class="icon">�</span>
+                <span class="icon" style="font-size: 1.5rem;">🏠</span>
                 <span class="label" data-i18n="tab_entree">Entrée</span>
             </button>
             <button class="tab-btn" data-tab="pendant">
-                <span class="icon">✨</span>
+                <span class="icon" style="font-size: 1.5rem;">✨</span>
                 <span class="label" data-i18n="tab_pendant">Pendant</span>
             </button>
             <button class="tab-btn" data-tab="sortie">
-                <span class="icon">🧳</span>
+                <span class="icon" style="font-size: 1.5rem;">🧳</span>
                 <span class="label" data-i18n="tab_sortie">Sortie</span>
             </button>
             <button class="tab-btn" data-tab="activites">
-                <span class="icon">🧭</span>
+                <span class="icon" style="font-size: 1.5rem;">📍</span>
                 <span class="label" data-i18n="tab_activites">Activités et commerces</span>
             </button>
             <button class="tab-btn" data-tab="probleme">
-                <span class="icon">🔔</span>
+                <span class="icon" style="font-size: 1.5rem;">💬</span>
                 <span class="label" data-i18n="tab_probleme">Demandes</span>
             </button>
             <button class="tab-btn" data-tab="evaluation">
-                <span class="icon">⭐</span>
+                <span class="icon" style="font-size: 1.5rem;">⭐</span>
                 <span class="label" data-i18n="tab_evaluation">Évaluation</span>
             </button>
             <button class="tab-btn" data-tab="faq">
-                <span class="icon">💬</span>
+                <span class="icon" style="font-size: 1.5rem;">❓</span>
                 <span class="label" data-i18n="tab_faq">FAQ</span>
             </button>
         </div>

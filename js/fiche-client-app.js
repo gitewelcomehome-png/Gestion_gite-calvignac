@@ -367,8 +367,14 @@ async function loadCleaningSchedule() {
 }
 
 function initializeUI() {
+    // Nom du client dans l'en-tête
+    const clientNameEl = document.getElementById('clientName');
+    if (clientNameEl && reservationData.nom) {
+        clientNameEl.textContent = `Bienvenue ${reservationData.nom} !`;
+    }
+    
     // Titre du gîte
-    document.getElementById('giteName').textContent = `🏡 ${reservationData.gite}`;
+    document.getElementById('giteName').textContent = `${reservationData.gite}`;
     
     // Onglet Entrée
     initOngletEntree();
