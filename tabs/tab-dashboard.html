@@ -32,6 +32,19 @@
         </div>
     </div>
 
+    <!-- 💬 RETOURS & PROBLÈMES CLIENTS - Visible seulement si des demandes existent -->
+    <div id="dashboard-problemes-clients" class="card" style="display: none; margin-bottom: 25px; background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%); border: 3px solid #e74c3c; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3); border-radius: 12px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h2 style="margin: 0; font-size: 1.3rem; color: #c0392b; font-weight: 700;">
+                💬 RETOURS & PROBLÈMES CLIENTS
+            </h2>
+            <span id="badge-problemes-count" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 6px 16px; border-radius: 25px; font-size: 1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4); animation: pulse 2s infinite;">0</span>
+        </div>
+        <div id="liste-problemes-clients" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Les problèmes seront chargés ici par JS -->
+        </div>
+    </div>
+
     <style>
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
