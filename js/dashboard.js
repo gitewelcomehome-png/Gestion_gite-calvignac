@@ -94,6 +94,43 @@ async function updateDashboardAlerts() {
         });
     }
     
+    // Vérifier les retours de ménage en attente de validation
+    const { data: retoursMenage } = await supabase
+        .from('retours_menage')
+        .select('*')
+        .eq('validated', false)
+        .order('created_at', { ascending: false });
+    
+    if (retoursMenage && retoursMenage.length > 0) {
+        retoursMenage.forEach(retour => {
+            const dateFormatee = new Date(retour.date_menage).toLocaleDateString('fr-FR', { 
+                day: 'numeric', 
+                month: 'short' 
+            });
+            
+            const etatIcon = {
+                'propre': '✅',
+                'sale': '🧹',
+                'dégâts': '⚠️',
+                'autre': '❓'
+            }[retour.etat_arrivee] || '📝';
+            
+            const deroulementIcon = {
+                'bien': '✅',
+                'problèmes': '⚠️',
+                'difficultés': '❌'
+            }[retour.deroulement] || '📝';
+            
+            alerts.push({
+                type: retour.deroulement === 'bien' ? 'info' : 'warning',
+                icon: '🧹',
+                message: `Retour ménage ${retour.gite} du ${dateFormatee} : ${etatIcon} ${deroulementIcon}`,
+                action: () => afficherDetailsRetourMenage(retour.id),
+                retourId: retour.id
+            });
+        });
+    }
+    
     // Afficher les alertes
     const container = document.getElementById('dashboard-alerts');
     if (alerts.length === 0) {
@@ -1965,3 +2002,131 @@ function getProgressColorDashboard(percent) {
     if (percent < 100) return '#f97316'; // 🟠 Orange
     return '#10b981'; // 🟢 Vert
 }
+
+// ==========================================
+// 🧹 RETOURS MÉNAGE - AFFICHAGE ET VALIDATION
+// ==========================================
+
+async function afficherDetailsRetourMenage(retourId) {
+    try {
+        const { data: retour, error } = await supabase
+            .from('retours_menage')
+            .select('*')
+            .eq('id', retourId)
+            .single();
+
+        if (error) throw error;
+
+        const dateFormatee = new Date(retour.date_menage).toLocaleDateString('fr-FR', { 
+            weekday: 'long',
+            day: 'numeric', 
+            month: 'long',
+            year: 'numeric'
+        });
+
+        const etatLabels = {
+            'propre': '✅ Propre',
+            'sale': '🧹 Sale (normal)',
+            'dégâts': '⚠️ Dégâts constatés',
+            'autre': '❓ Autre'
+        };
+
+        const deroulementLabels = {
+            'bien': '✅ Bien passé',
+            'problèmes': '⚠️ Problèmes rencontrés',
+            'difficultés': '❌ Difficultés importantes'
+        };
+
+        const modalContent = `
+            <div style="padding: 20px;">
+                <h2 style="color: #667eea; margin-bottom: 20px;">🧹 Retour Ménage</h2>
+                
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="font-weight: 600; margin-bottom: 8px;">🏠 ${retour.gite}</div>
+                    <div style="color: #666;">📅 ${dateFormatee}</div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #333; margin-bottom: 10px;">État de la maison à l'arrivée</h3>
+                    <div style="padding: 15px; background: #fff; border-left: 4px solid #667eea; border-radius: 8px;">
+                        <div style="font-weight: 600; margin-bottom: 8px;">${etatLabels[retour.etat_arrivee]}</div>
+                        ${retour.details_etat ? `<div style="color: #666; font-size: 0.95rem;">${retour.details_etat}</div>` : ''}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #333; margin-bottom: 10px;">Déroulement du ménage</h3>
+                    <div style="padding: 15px; background: #fff; border-left: 4px solid ${retour.deroulement === 'bien' ? '#27AE60' : '#F39C12'}; border-radius: 8px;">
+                        <div style="font-weight: 600; margin-bottom: 8px;">${deroulementLabels[retour.deroulement]}</div>
+                        ${retour.details_deroulement ? `<div style="color: #666; font-size: 0.95rem;">${retour.details_deroulement}</div>` : ''}
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="validerRetourMenage(${retourId})" class="btn" style="flex: 1; background: linear-gradient(135deg, #27AE60 0%, #229954 100%); color: white; padding: 15px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                        ✅ Valider ce retour
+                    </button>
+                    <button onclick="fermerModalRetourMenage()" class="btn" style="flex: 1; background: #ddd; color: #333; padding: 15px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Créer ou réutiliser la modal
+        let modal = document.getElementById('modal-retour-menage');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modal-retour-menage';
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+            document.body.appendChild(modal);
+        }
+
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 20px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                ${modalContent}
+            </div>
+        `;
+        modal.style.display = 'flex';
+
+    } catch (error) {
+        console.error('Erreur affichage retour:', error);
+        alert('❌ Erreur lors de l\'affichage du retour');
+    }
+}
+
+async function validerRetourMenage(retourId) {
+    try {
+        const { error } = await supabase
+            .from('retours_menage')
+            .update({
+                validated: true,
+                validated_at: new Date().toISOString(),
+                validated_by: 'Propriétaire'
+            })
+            .eq('id', retourId);
+
+        if (error) throw error;
+
+        alert('✅ Retour validé avec succès !');
+        fermerModalRetourMenage();
+        
+        // Recharger les alertes
+        await updateDashboardAlerts();
+        
+    } catch (error) {
+        console.error('Erreur validation retour:', error);
+        alert('❌ Erreur lors de la validation du retour');
+    }
+}
+
+function fermerModalRetourMenage() {
+    const modal = document.getElementById('modal-retour-menage');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+window.afficherDetailsRetourMenage = afficherDetailsRetourMenage;
+window.validerRetourMenage = validerRetourMenage;
+window.fermerModalRetourMenage = fermerModalRetourMenage;
