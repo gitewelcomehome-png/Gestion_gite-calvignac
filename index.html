@@ -539,10 +539,7 @@
                 refreshDashboard();
             }
             if (tabName === 'reservations' && typeof updateReservationsList === 'function') {
-                console.log('📅 [SWITCHTAB] Appel updateReservationsList');
                 updateReservationsList();
-            } else if (tabName === 'reservations') {
-                console.warn('⚠️ [SWITCHTAB] updateReservationsList non disponible, typeof:', typeof updateReservationsList);
             }
             if (tabName === 'statistiques') {
                 if (typeof populateYearFilter === 'function') populateYearFilter();
