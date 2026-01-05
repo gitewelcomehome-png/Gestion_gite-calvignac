@@ -1543,10 +1543,40 @@ async function updateProblemesClients() {
             throw error;
         }
         
-        console.log('🔍 DEBUG problèmes récupérés:', problemes?.map(p => ({
+        // Enrichir avec les données de réservation (téléphone, nom client)
+        if (problemes && problemes.length > 0) {
+            const reservationIds = [...new Set(problemes.map(p => p.reservation_id).filter(Boolean))];
+            
+            if (reservationIds.length > 0) {
+                const { data: reservations, error: resError } = await supabaseClient
+                    .from('reservations')
+                    .select('id, telephone, nom, prenom')
+                    .in('id', reservationIds);
+                
+                if (!resError && reservations) {
+                    // Créer un map pour lookup rapide
+                    const resMap = {};
+                    reservations.forEach(r => {
+                        resMap[r.id] = r;
+                    });
+                    
+                    // Enrichir les problèmes avec les données de réservation
+                    problemes.forEach(pb => {
+                        if (pb.reservation_id && resMap[pb.reservation_id]) {
+                            const res = resMap[pb.reservation_id];
+                            if (!pb.telephone) pb.telephone = res.telephone;
+                            if (!pb.client_nom) pb.client_nom = `${res.prenom || ''} ${res.nom || ''}`.trim();
+                        }
+                    });
+                }
+            }
+        }
+        
+        console.log('🔍 DEBUG problèmes enrichis:', problemes?.map(p => ({
             id: p.id,
             sujet: p.sujet,
             telephone: p.telephone,
+            client_nom: p.client_nom,
             reservation_id: p.reservation_id
         })));
         
