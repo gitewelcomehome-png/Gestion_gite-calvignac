@@ -147,7 +147,7 @@ END $$;
 -- ================================================================
 -- TODOS
 -- Owner: Accès complet
--- Cleaner: Peut voir et modifier les tâches ménage
+-- Cleaner: Lecture seule (la colonne 'type' n'existe pas encore)
 -- ================================================================
 
 DO $$
@@ -155,7 +155,8 @@ BEGIN
     IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'todos') THEN
         EXECUTE 'DROP POLICY IF EXISTS "Temp: Utilisateurs authentifiés - Accès complet" ON todos';
         EXECUTE 'CREATE POLICY "Owner - Accès complet" ON todos FOR ALL USING (has_role(''owner''))';
-        EXECUTE 'CREATE POLICY "Cleaner - Tâches ménage" ON todos FOR ALL USING (has_role(''cleaner'') AND type = ''menage'')';
+        -- Cleaner en lecture seule (pas de filtre par type pour l'instant)
+        EXECUTE 'CREATE POLICY "Cleaner - Lecture seule" ON todos FOR SELECT USING (has_role(''cleaner''))';
     END IF;
 END $$;
 
