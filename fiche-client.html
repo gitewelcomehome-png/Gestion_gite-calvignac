@@ -1153,8 +1153,8 @@
                 <span class="label" data-i18n="tab_activites">Activités</span>
             </button>
             <button class="tab-btn" data-tab="probleme">
-                <span class="icon">⚠️</span>
-                <span class="label" data-i18n="tab_probleme">Signaler</span>
+                <span class="icon">🔔</span>
+                <span class="label" data-i18n="tab_probleme">Demande</span>
             </button>
             <button class="tab-btn" data-tab="evaluation">
                 <span class="icon">⭐</span>
@@ -1498,63 +1498,64 @@
             </div>
         </div>
         
-        <!-- Onglet SIGNALER UN PROBLÈME -->
+        <!-- Onglet DEMANDE -->
         <div class="tab-content" id="tab-probleme">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">⚠️ Signaler un problème</h2>
-                    <p class="card-description">Un souci pendant votre séjour ? Prévenez-nous immédiatement</p>
+                    <h2 class="card-title">💬 Demandes / Retours / Améliorations</h2>
+                    <p class="card-description">N'hésitez pas à nous faire part de vos besoins ou suggestions</p>
                 </div>
                 
-                <form id="formProbleme" style="display: flex; flex-direction: column; gap: 1rem;">
+                <form id="formRetoursDemande" style="display: flex; flex-direction: column; gap: 1rem;">
                     <div class="form-group">
-                        <label class="label">Type de problème</label>
-                        <select class="input" id="typeProbleme" required>
-                            <option value="">Sélectionnez...</option>
-                            <option value="equipement">🔧 Équipement défaillant</option>
-                            <option value="proprete">🧹 Problème de propreté</option>
-                            <option value="chauffage">🌡️ Chauffage / Climatisation</option>
-                            <option value="eau">💧 Problème d'eau</option>
-                            <option value="electricite">⚡ Problème électrique</option>
-                            <option value="wifi">📶 Problème WiFi</option>
-                            <option value="nuisance">🔊 Nuisance sonore</option>
-                            <option value="securite">🚨 Problème de sécurité</option>
-                            <option value="autre">❓ Autre</option>
+                        <label class="label">Type</label>
+                        <select class="input" id="typeRetourDemande" required>
+                            <option value="demande">🙋 Demande</option>
+                            <option value="retour">💬 Retour</option>
+                            <option value="amelioration">💡 Amélioration</option>
+                            <option value="probleme">⚠️ Problème</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label class="label">Urgence</label>
-                        <select class="input" id="urgenceProbleme" required>
-                            <option value="faible">🟢 Faible - Peut attendre</option>
-                            <option value="moyenne">🟠 Moyenne - À traiter rapidement</option>
-                            <option value="haute">🔴 Haute - Urgent</option>
-                        </select>
+                        <label class="label">Sujet</label>
+                        <input type="text" class="input" id="sujetRetourDemande" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="label">Description détaillée</label>
-                        <textarea class="textarea" id="descriptionProbleme" rows="5" 
-                                  placeholder="Décrivez le problème en détail..." required></textarea>
+                        <label class="label">Description</label>
+                        <textarea class="textarea" id="descriptionRetourDemande" rows="5" required></textarea>
                     </div>
                     
-                    <div class="form-group">
-                        <label class="label">Votre téléphone (pour vous recontacter rapidement)</label>
-                        <input type="tel" class="input" id="telProbleme" 
-                               placeholder="+33 6 12 34 56 78">
+                    <div class="form-group" id="urgenceGroupDemande" style="display: none;">
+                        <label class="label">Niveau d'urgence</label>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="urgenceDemande" value="basse" style="width: auto;">
+                                <span>🟢 Basse</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="urgenceDemande" value="normale" checked style="width: auto;">
+                                <span>🟠 Normale</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="urgenceDemande" value="haute" style="width: auto;">
+                                <span>🔴 Haute</span>
+                            </label>
+                        </div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary btn-full">
-                        📤 Envoyer le signalement
+                        📤 Envoyer
                     </button>
                 </form>
                 
-                <div id="confirmationProbleme" style="display: none;">
+                <div id="confirmationRetourDemande" style="display: none;">
                     <div class="alert alert-success">
                         <span>✅</span>
                         <div>
-                            <strong>Signalement envoyé !</strong>
-                            <p>Nous avons bien reçu votre signalement et allons le traiter rapidement. Vous recevrez une réponse par SMS/email.</p>
+                            <strong>Message envoyé !</strong>
+                            <p>Nous avons bien reçu votre message et y répondrons rapidement.</p>
                         </div>
                     </div>
                 </div>

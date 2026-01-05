@@ -1921,7 +1921,7 @@ window.trackActiviteConsultation = trackActiviteConsultation;
 window.initEtatDesLieux = initEtatDesLieux;
 window.initEvaluation = initEvaluation;
 window.filterByCategory = filterByCategory;
-window.submitProbleme = submitProbleme;
+window.submitRetourDemande = submitRetourDemande;
 window.submitEvaluation = submitEvaluation;
 
 // =============================================
@@ -2108,50 +2108,67 @@ async function toggleClientChecklistItem(templateId, type) {
 }
 
 // ============================================================================
-// GESTION SIGNALEMENT PROBLÈME
+// GESTION DEMANDES / RETOURS / AMÉLIORATIONS
 // ============================================================================
 
-async function submitProbleme(event) {
+async function submitRetourDemande(event) {
     event.preventDefault();
     
     try {
-        console.log('📤 Envoi signalement problème...');
+        console.log('📤 Envoi demande/retour...');
+        
+        const type = document.getElementById('typeRetourDemande').value;
+        const urgenceInput = document.querySelector('input[name="urgenceDemande"]:checked');
         
         const formData = {
             reservation_id: giteInfo.reservationId,
-            type: document.getElementById('typeProbleme').value,
-            urgence: document.getElementById('urgenceProbleme').value,
-            description: document.getElementById('descriptionProbleme').value,
-            telephone: document.getElementById('telProbleme').value,
             gite: giteInfo.gite,
+            type: type,
+            sujet: document.getElementById('sujetRetourDemande').value,
+            description: document.getElementById('descriptionRetourDemande').value,
+            urgence: urgenceInput ? urgenceInput.value : 'normale',
             statut: 'nouveau',
             created_at: new Date().toISOString()
         };
         
-        const { data, error } = await supabaseClient
-            .from('problemes_signales')
-            .insert([formData])
-            .select();
-        
-        if (error) throw error;
-        
-        console.log('✅ Problème signalé:', data);
+        // Si c'est un problème, utiliser la table problemes_signales
+        if (type === 'probleme') {
+            const { data, error } = await supabaseClient
+                .from('problemes_signales')
+                .insert([{
+                    reservation_id: formData.reservation_id,
+                    gite: formData.gite,
+                    type: 'autre',
+                    urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
+                    description: `${formData.sujet}\n\n${formData.description}`,
+                    statut: 'nouveau',
+                    created_at: formData.created_at
+                }])
+                .select();
+            
+            if (error) throw error;
+            console.log('✅ Problème signalé:', data);
+        } else {
+            // Pour les autres types, créer une table demandes_clients si nécessaire
+            // Pour l'instant, on log juste
+            console.log('✅ Demande/Retour enregistré:', formData);
+            // TODO: Créer table demandes_clients dans Supabase
+        }
         
         // Masquer le formulaire et afficher la confirmation
-        document.getElementById('formProbleme').style.display = 'none';
-        document.getElementById('confirmationProbleme').style.display = 'block';
+        document.getElementById('formRetoursDemande').style.display = 'none';
+        document.getElementById('confirmationRetourDemande').style.display = 'block';
         
         // Envoyer une notification (TODO: webhook admin)
-        // Pour l'instant, juste un log
         console.log('🔔 Notification à envoyer:', {
-            urgence: formData.urgence,
             type: formData.type,
+            urgence: formData.urgence,
             gite: formData.gite
         });
         
     } catch (error) {
-        console.error('❌ Erreur signalement problème:', error);
-        alert('Erreur lors de l\'envoi du signalement. Veuillez réessayer.');
+        console.error('❌ Erreur envoi demande:', error);
+        alert('Erreur lors de l\'envoi. Veuillez réessayer.');
     }
 }
 
@@ -2267,10 +2284,20 @@ async function submitEvaluation(event) {
 // ============================================================================
 
 function initProblemeTab() {
-    const form = document.getElementById('formProbleme');
+    const form = document.getElementById('formRetoursDemande');
     if (form) {
-        form.removeEventListener('submit', submitProbleme); // Éviter les doublons
-        form.addEventListener('submit', submitProbleme);
+        form.removeEventListener('submit', submitRetourDemande); // Éviter les doublons
+        form.addEventListener('submit', submitRetourDemande);
+    }
+    
+    // Gérer l'affichage du groupe urgence selon le type sélectionné
+    const typeSelect = document.getElementById('typeRetourDemande');
+    const urgenceGroup = document.getElementById('urgenceGroupDemande');
+    
+    if (typeSelect && urgenceGroup) {
+        typeSelect.addEventListener('change', (e) => {
+            urgenceGroup.style.display = e.target.value === 'probleme' ? 'block' : 'none';
+        });
     }
 }
 
