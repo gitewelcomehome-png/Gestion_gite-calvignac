@@ -41,7 +41,9 @@ if (!window.ficheClientAppLoaded) {
                     }
                 });
             });
-        }).catch(error => // console.log('❌ SW registration failed:', error));
+        }).catch(error => {
+            // console.log('❌ SW registration failed:', error)
+        });
     }
 }
 
