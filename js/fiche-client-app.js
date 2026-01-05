@@ -933,6 +933,10 @@ function initOngletActivites() {
 }
 
 function initOngletFaq() {
+    if (!reservationData) {
+        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
+        return;
+    }
     loadFaqData();
 }
 
@@ -1775,6 +1779,11 @@ let allFaqs = [];
 let currentFaqCategory = 'tous';
 
 async function loadFaqData() {
+    if (!reservationData || !reservationData.gite) {
+        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Données de réservation non disponibles</p>';
+        return;
+    }
+    
     const { data: faqs, error } = await supabase
         .from('faq')
         .select('*')
