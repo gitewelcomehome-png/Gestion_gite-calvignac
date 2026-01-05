@@ -382,6 +382,10 @@ function initializeUI() {
     // Onglet FAQ
     initOngletFaq();
     
+    // ✅ Nouveaux onglets: Problème et Évaluation
+    initProblemeTab();
+    initEvaluationTab();
+    
     // Appliquer les traductions
     updateTranslations();
 }
@@ -2109,6 +2113,8 @@ window.trackActiviteConsultation = trackActiviteConsultation;
 window.initEtatDesLieux = initEtatDesLieux;
 window.initEvaluation = initEvaluation;
 window.filterByCategory = filterByCategory;
+window.submitProbleme = submitProbleme;
+window.submitEvaluation = submitEvaluation;
 
 // =============================================
 // GESTION DES CHECKLISTS CLIENT
@@ -2290,6 +2296,170 @@ async function toggleClientChecklistItem(templateId, type) {
     } catch (error) {
         console.error('❌ Erreur toggle checklist:', error);
         alert('Erreur lors de la sauvegarde. Veuillez réessayer.');
+    }
+}
+
+// ============================================================================
+// GESTION SIGNALEMENT PROBLÈME
+// ============================================================================
+
+async function submitProbleme(event) {
+    event.preventDefault();
+    
+    try {
+        console.log('📤 Envoi signalement problème...');
+        
+        const formData = {
+            reservation_id: giteInfo.reservationId,
+            type: document.getElementById('typeProbleme').value,
+            urgence: document.getElementById('urgenceProbleme').value,
+            description: document.getElementById('descriptionProbleme').value,
+            telephone: document.getElementById('telProbleme').value,
+            gite: giteInfo.gite,
+            statut: 'nouveau',
+            created_at: new Date().toISOString()
+        };
+        
+        const { data, error } = await supabaseClient
+            .from('problemes_signales')
+            .insert([formData])
+            .select();
+        
+        if (error) throw error;
+        
+        console.log('✅ Problème signalé:', data);
+        
+        // Masquer le formulaire et afficher la confirmation
+        document.getElementById('formProbleme').style.display = 'none';
+        document.getElementById('confirmationProbleme').style.display = 'block';
+        
+        // Envoyer une notification (TODO: webhook admin)
+        // Pour l'instant, juste un log
+        console.log('🔔 Notification à envoyer:', {
+            urgence: formData.urgence,
+            type: formData.type,
+            gite: formData.gite
+        });
+        
+    } catch (error) {
+        console.error('❌ Erreur signalement problème:', error);
+        alert('Erreur lors de l\'envoi du signalement. Veuillez réessayer.');
+    }
+}
+
+// ============================================================================
+// GESTION ÉVALUATION SÉJOUR
+// ============================================================================
+
+function initStarRating() {
+    const stars = document.querySelectorAll('.star-rating');
+    let selectedRating = 0;
+    
+    stars.forEach(star => {
+        // Survol
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            highlightStars(rating);
+        });
+        
+        // Clic
+        star.addEventListener('click', function() {
+            selectedRating = parseInt(this.getAttribute('data-rating'));
+            document.getElementById('noteGlobale').value = selectedRating;
+            highlightStars(selectedRating, true);
+        });
+    });
+    
+    // Réinitialiser au départ de la souris
+    const container = stars[0]?.parentElement;
+    if (container) {
+        container.addEventListener('mouseleave', function() {
+            highlightStars(selectedRating, true);
+        });
+    }
+    
+    function highlightStars(rating, permanent = false) {
+        stars.forEach(star => {
+            const starRating = parseInt(star.getAttribute('data-rating'));
+            if (starRating <= rating) {
+                star.textContent = '★';
+                star.style.color = permanent ? '#fbbf24' : '#fcd34d';
+                star.style.cursor = 'pointer';
+            } else {
+                star.textContent = '☆';
+                star.style.color = '#d1d5db';
+                star.style.cursor = 'pointer';
+            }
+        });
+    }
+}
+
+async function submitEvaluation(event) {
+    event.preventDefault();
+    
+    try {
+        console.log('📝 Envoi évaluation séjour...');
+        
+        const noteGlobale = document.getElementById('noteGlobale').value;
+        if (!noteGlobale) {
+            alert('Veuillez sélectionner une note globale en cliquant sur les étoiles.');
+            return;
+        }
+        
+        const formData = {
+            reservation_id: giteInfo.reservationId,
+            gite: giteInfo.gite,
+            note_globale: parseInt(noteGlobale),
+            note_proprete: parseInt(document.getElementById('noteProprete').value),
+            note_confort: parseInt(document.getElementById('noteConfort').value),
+            note_emplacement: parseInt(document.getElementById('noteEmplacement').value),
+            note_equipements: parseInt(document.getElementById('noteEquipements').value),
+            note_rapport_qp: parseInt(document.getElementById('noteRapportQP').value),
+            commentaire: document.getElementById('commentaireEvaluation').value,
+            points_positifs: document.getElementById('pointsPositifs').value,
+            points_ameliorer: document.getElementById('pointsAmeliorer').value,
+            recommandation: document.getElementById('recommandation').value,
+            created_at: new Date().toISOString()
+        };
+        
+        const { data, error } = await supabaseClient
+            .from('evaluations_sejour')
+            .insert([formData])
+            .select();
+        
+        if (error) throw error;
+        
+        console.log('✅ Évaluation enregistrée:', data);
+        
+        // Masquer le formulaire et afficher la confirmation
+        document.getElementById('formEvaluation').style.display = 'none';
+        document.getElementById('confirmationEvaluation').style.display = 'block';
+        
+    } catch (error) {
+        console.error('❌ Erreur évaluation:', error);
+        alert('Erreur lors de l\'envoi de l\'évaluation. Veuillez réessayer.');
+    }
+}
+
+// ============================================================================
+// INITIALISATION DES NOUVEAUX ONGLETS
+// ============================================================================
+
+function initProblemeTab() {
+    const form = document.getElementById('formProbleme');
+    if (form) {
+        form.removeEventListener('submit', submitProbleme); // Éviter les doublons
+        form.addEventListener('submit', submitProbleme);
+    }
+}
+
+function initEvaluationTab() {
+    initStarRating();
+    
+    const form = document.getElementById('formEvaluation');
+    if (form) {
+        form.removeEventListener('submit', submitEvaluation); // Éviter les doublons
+        form.addEventListener('submit', submitEvaluation);
     }
 }
 window.toggleFaq = toggleFaq;
