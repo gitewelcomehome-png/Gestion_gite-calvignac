@@ -1550,7 +1550,7 @@ async function updateProblemesClients() {
             if (reservationIds.length > 0) {
                 const { data: reservations, error: resError } = await supabaseClient
                     .from('reservations')
-                    .select('id, telephone, nom, prenom')
+                    .select('id, telephone, nom_client')
                     .in('id', reservationIds);
                 
                 if (resError) {
@@ -1569,7 +1569,7 @@ async function updateProblemesClients() {
                         if (pb.reservation_id && resMap[pb.reservation_id]) {
                             const res = resMap[pb.reservation_id];
                             if (!pb.telephone) pb.telephone = res.telephone;
-                            if (!pb.client_nom) pb.client_nom = `${res.prenom || ''} ${res.nom || ''}`.trim();
+                            if (!pb.client_nom) pb.client_nom = res.nom_client || '';
                         }
                     });
                 }
