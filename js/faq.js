@@ -63,7 +63,11 @@ function afficherFAQ() {
         ? faqData 
         : faqData.filter(q => q.categorie === categorieActive);
 
+    console.log('🔍 [FAQ] categorieActive:', categorieActive);
+    console.log('🔍 [FAQ] faqFiltrees:', faqFiltrees.length, 'questions');
+
     if (faqFiltrees.length === 0) {
+        console.log('⚠️ [FAQ] Aucune question filtrée');
         container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-question-circle"></i>
@@ -76,6 +80,7 @@ function afficherFAQ() {
         return;
     }
 
+    console.log('✅ [FAQ] Génération HTML pour', faqFiltrees.length, 'questions');
     container.innerHTML = faqFiltrees.map(question => `
         <div class="faq-item" data-id="${question.id}">
             <div class="faq-header" onclick="toggleFAQ(${question.id})">
