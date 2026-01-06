@@ -234,9 +234,7 @@ async function updateDashboardStats() {
 // ==========================================
 
 async function updateDashboardReservations() {
-    console.log('📅 updateDashboardReservations() début');
     const reservations = await getAllReservations();
-    console.log('📅 Réservations récupérées:', reservations?.length || 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -283,7 +281,6 @@ async function updateDashboardReservations() {
     }).sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     
     const container = document.getElementById('dashboard-reservations');
-    console.log('📅 Container trouvé:', !!container, 'Filtrées:', filtered.length);
     if (!container) return;
     
     if (filtered.length === 0) {
@@ -397,9 +394,7 @@ async function updateDashboardReservations() {
         `;
     }
     
-    console.log('📅 Génération HTML...', html.length, 'caractères');
     window.SecurityUtils.setInnerHTML(container, html);
-    console.log('📅 HTML injecté dans container');
 }
 
 // ==========================================
@@ -423,9 +418,7 @@ async function updateDashboardMenages() {
         .lte('scheduled_date', weekEnd.toISOString().split('T')[0])
         .order('scheduled_date', { ascending: true });
     
-    console.log('🧹 Ménages récupérés:', cleanings?.length || 0);
     const container = document.getElementById('dashboard-menages');
-    console.log('🧹 Container trouvé:', !!container);
     if (!container) return;
     
     if (!cleanings || cleanings.length === 0) {
@@ -1463,22 +1456,17 @@ async function afficherGraphiqueTresorerieDashboard() {
 // ==========================================
 
 async function refreshDashboard() {
-    console.log('📊 refreshDashboard() démarré');
     updateDashboardHeader();
     await updateDashboardAlerts();
     await updateDemandesClients();
-    await updateProblemesClients(); // Nouvelle fonction pour problèmes/retours
+    await updateProblemesClients();
     await updateDashboardStats();
-    console.log('📅 Chargement réservations...');
     await updateDashboardReservations();
-    console.log('🧹 Chargement ménages...');
     await updateDashboardMenages();
     await updateTodoLists();
     await updateFinancialIndicators();
-    // Initialiser le modal si pas déjà fait
     initializeTodoModal();
     initializeReponseWhatsappModal();
-    console.log('✅ refreshDashboard() terminé');
 }
 
 function initializeReponseWhatsappModal() {
