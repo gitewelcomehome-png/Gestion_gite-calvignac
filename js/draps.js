@@ -474,7 +474,10 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture) {
 // ================================================================
 
 async function simulerBesoins() {
+    console.log('🔮 simulerBesoins() appelée');
     const dateLimit = document.getElementById('date-simulation').value;
+    console.log('📅 Date limite:', dateLimit);
+    
     if (!dateLimit) {
         alert('⚠️ Veuillez sélectionner une date');
         return;
@@ -482,7 +485,9 @@ async function simulerBesoins() {
 
     try {
         const today = new Date().toISOString().split('T')[0];
-        const { data: reservations, error } = await window.supabase
+        console.log('📊 Requête Supabase de', today, 'à', dateLimit);
+        
+        const { data: reservations, error } = await window.supabaseClient
             .from('reservations')
             .select('*')
             .gte('date_debut', today)
@@ -490,6 +495,8 @@ async function simulerBesoins() {
             .order('date_debut', { ascending: true });
 
         if (error) throw error;
+        
+        console.log('✅ Réservations récupérées:', reservations?.length);
 
         // Grouper par gîte
         const resaParGite = {
@@ -503,8 +510,8 @@ async function simulerBesoins() {
         derniereSimulation = { resaParGite, dateLimit };
         afficherAEmmenerDepuisSimulation();
     } catch (error) {
-        console.error('Erreur simulation:', error);
-        alert('❌ Erreur lors de la simulation');
+        console.error('❌ Erreur simulation:', error);
+        alert('❌ Erreur lors de la simulation: ' + error.message);
     }
 }
 
