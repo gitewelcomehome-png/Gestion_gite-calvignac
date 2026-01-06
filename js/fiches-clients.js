@@ -512,7 +512,7 @@ function openModalValidation(demandeId, action) {
                     ${motifHtml}
                     ${autoApprouvableHtml}
                 </div>
-            `;
+            `);
             
             document.getElementById('actionsDemande').style.display = 'flex';
             document.getElementById('formRefus').style.display = 'none';
