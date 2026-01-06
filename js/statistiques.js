@@ -545,8 +545,20 @@ async function updateAllCharts(filteredReservations = null) {
 }
 
 // Exporter les fonctions dans le scope global
+// ==========================================
+// 📅 GESTION FORMULAIRE DONNÉES HISTORIQUES
+// ==========================================
+
+function toggleHistoricalDataForm() {
+    const form = document.getElementById('historicalDataForm');
+    if (form) {
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
 window.updatePlatformCounters = updatePlatformCounters;
 window.updateAdvancedStats = updateAdvancedStats;
 window.populateYearFilter = populateYearFilter;
 window.filterStatsByYear = filterStatsByYear;
 window.updateAllCharts = updateAllCharts;
+window.toggleHistoricalDataForm = toggleHistoricalDataForm;
