@@ -578,9 +578,18 @@ async function updateTodoList(category) {
             visibility: todoStyles.visibility,
             opacity: todoStyles.opacity,
             height: todoStyles.height,
-            width: todoStyles.width,
-            background: todoStyles.background
+            width: todoStyles.width
         });
+        
+        // Vérifier si le HTML est toujours là après 1 seconde
+        setTimeout(() => {
+            console.log(`[updateTodoList] ⏱️ Vérification après 1s pour ${category}:`);
+            console.log(`  - container.children.length:`, container.children.length);
+            console.log(`  - container.innerHTML.length:`, container.innerHTML.length);
+            if (container.children.length === 0) {
+                console.error(`[updateTodoList] ❌ LES TODOS ONT DISPARU !`);
+            }
+        }, 1000);
     }
 }
 
