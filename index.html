@@ -363,6 +363,10 @@
                 .then(r => r.text())
                 .then(html => {
                     window.SecurityUtils.setInnerHTML(document.getElementById(tabId), html);
+                    // Initialiser le Dashboard après chargement du HTML
+                    if (tabId === 'tab-dashboard' && typeof refreshDashboard === 'function') {
+                        refreshDashboard();
+                    }
                     // Initialiser la FAQ après chargement du HTML
                     if (tabId === 'tab-faq' && typeof window.initFAQ === 'function') {
                         window.initFAQ();
