@@ -10,8 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- 🔒 PHASE 2 SÉCURITÉ: Configuration locale optionnelle -->
+    <script src="config.local.js" onerror="console.log('ℹ️ config.local.js non trouvé (normal en production)')"></script>
+    
     <!-- Scripts modulaires de l'application -->
     <script src="js/shared-config.js"></script>
+    <!-- 🔒 PHASE 1 SÉCURITÉ: Authentification obligatoire -->
+    <script src="js/auth.js"></script>
     <script src="js/shared-utils.js"></script>
     <script src="js/supabase-operations.js"></script>
     <script src="js/dashboard.js?v=2.6.1"></script>
@@ -63,6 +68,115 @@
             text-align: center;
             margin-bottom: 40px;
             color: white;
+        }
+        
+        /* Menu utilisateur dropdown */
+        .user-menu-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        
+        .user-menu-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.95);
+            border: 2px solid rgba(102,126,234,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .user-menu-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            border-color: rgba(102,126,234,0.5);
+        }
+        
+        .user-menu-info {
+            text-align: right;
+        }
+        
+        .user-menu-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+        
+        .user-menu-role {
+            font-size: 0.75rem;
+            color: #667eea;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .user-menu-icon {
+            width: 20px;
+            height: 20px;
+            color: #667eea;
+            transition: transform 0.3s;
+        }
+        
+        .user-menu-button.open .user-menu-icon {
+            transform: rotate(180deg);
+        }
+        
+        .user-menu-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            overflow: hidden;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .user-menu-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .user-menu-item {
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+            color: #1f2937;
+            border: none;
+            width: 100%;
+            text-align: left;
+            background: none;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 500;
+        }
+        
+        .user-menu-item:hover {
+            background: #f3f4f6;
+        }
+        
+        .user-menu-item.logout {
+            color: #dc2626;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .user-menu-item.logout:hover {
+            background: #fef2f2;
         }
         
         h1 {
@@ -262,13 +376,36 @@
     </body>
     <div class="container">
         <header style="position: relative;">
-            <!-- Menu Actions en haut à droite -->
-            <div style="position: absolute; top: 0; right: 0;">
-                <select onchange="handleQuickAction(this.value); this.value='';" style="padding: 12px 16px; border-radius: 10px; background: rgba(255,255,255,0.25); color: white; border: 2px solid rgba(255,255,255,0.4); font-weight: 600; cursor: pointer; font-size: 0.95rem; font-family: 'Work Sans', sans-serif; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    <option value="" style="background: #1f2937; color: white;">⚙️ Actions</option>
-                    <option value="ical" style="background: #1f2937; color: white;">⚙️ Config iCal</option>
-                    <option value="archives" style="background: #1f2937; color: white;">📦 Archives</option>
-                </select>
+            <!-- Menu utilisateur dropdown -->
+            <div class="user-menu-container">
+                <div class="user-menu-button" id="userMenuButton" onclick="toggleUserMenu()">
+                    <div class="user-menu-info">
+                        <div id="userName" class="user-menu-name">Chargement...</div>
+                        <div id="userRole" class="user-menu-role"></div>
+                    </div>
+                    <svg class="user-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                
+                <div class="user-menu-dropdown" id="userMenuDropdown">
+                    <button class="user-menu-item" onclick="handleQuickAction('ical'); toggleUserMenu();">
+                        <span>⚙️</span>
+                        <span>Config iCal</span>
+                    </button>
+                    <button class="user-menu-item" onclick="handleQuickAction('archives'); toggleUserMenu();">
+                        <span>📦</span>
+                        <span>Archives</span>
+                    </button>
+                    <button class="user-menu-item logout" onclick="logout()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Déconnexion</span>
+                    </button>
+                </div>
             </div>
             
             <svg width="48" height="48" viewBox="0 0 48 48" style="display: inline-block; vertical-align: middle; margin-right: 12px;">
@@ -4236,6 +4373,9 @@
     <!-- Chargement dynamique des onglets -->
     <script>
     document.addEventListener('DOMContentLoaded', async function() {
+        // 🔐 L'affichage utilisateur est maintenant géré par auth.js dans updateUI()
+        // après le chargement des rôles depuis Supabase
+        
         const tabFiles = {
             'tab-gestion': '/tabs/tab-gestion.html',
             'tab-reservations': '/tabs/tab-reservations.html',
@@ -4289,6 +4429,28 @@
         if (firstTab && typeof window.switchTab === 'function') {
             window.switchTab('dashboard');
             firstTab.classList.add('active');
+        }
+    });
+    
+    // Gestion du menu utilisateur dropdown
+    function toggleUserMenu() {
+        const button = document.getElementById('userMenuButton');
+        const dropdown = document.getElementById('userMenuDropdown');
+        
+        button.classList.toggle('open');
+        dropdown.classList.toggle('open');
+    }
+    
+    // Fermer le menu si on clique ailleurs
+    document.addEventListener('click', function(e) {
+        const menu = document.querySelector('.user-menu-container');
+        if (menu && !menu.contains(e.target)) {
+            const button = document.getElementById('userMenuButton');
+            const dropdown = document.getElementById('userMenuDropdown');
+            if (button && dropdown) {
+                button.classList.remove('open');
+                dropdown.classList.remove('open');
+            }
         }
     });
     </script>
