@@ -135,7 +135,7 @@ async function updateDashboardAlerts() {
     const container = document.getElementById('dashboard-alerts');
     if (!container) return;
     if (alerts.length === 0) {
-        container.innerHTML = '';
+        window.SecurityUtils.setInnerHTML(container, '');
         return;
     }
     
@@ -158,7 +158,7 @@ async function updateDashboardAlerts() {
             }
         }, 0);
     });
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ==========================================
@@ -284,7 +284,7 @@ async function updateDashboardReservations() {
     if (!container) return;
     
     if (filtered.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation dans les 7 prochains jours</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation dans les 7 prochains jours</p>');
         return;
     }
     
@@ -422,7 +422,7 @@ async function updateDashboardMenages() {
     if (!container) return;
     
     if (!cleanings || cleanings.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun ménage prévu cette semaine</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucun ménage prévu cette semaine</p>');
         return;
     }
     
@@ -1516,7 +1516,7 @@ async function updateDemandesClients() {
         if (!container || !badge || !card) return;
         
         if (!demandes || demandes.length === 0) {
-            container.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>';
+            window.SecurityUtils.setInnerHTML(container, '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>');
             badge.textContent = '0';
             card.style.display = 'none'; // Cacher si aucune demande
             return;
@@ -1560,7 +1560,7 @@ async function updateDemandesClients() {
             `;
         });
         
-        container.innerHTML = html;
+        window.SecurityUtils.setInnerHTML(container, html);
     } catch (err) {
         console.error('Erreur chargement demandes:', err);
     }
@@ -1684,7 +1684,7 @@ async function updateProblemesClients() {
         if (!containerUrgents || !badgeUrgents || !cardUrgents) return;
         
         if (!problemesUrgents || problemesUrgents.length === 0) {
-            containerUrgents.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème urgent</p>';
+            window.SecurityUtils.setInnerHTML(containerUrgents, '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème urgent</p>');
             badgeUrgents.textContent = '0';
             cardUrgents.style.display = 'none';
         } else {
@@ -1694,7 +1694,7 @@ async function updateProblemesClients() {
             problemesUrgents.forEach(pb => {
                 htmlUrgents += renderProblemeCard(pb, true);
             });
-            containerUrgents.innerHTML = htmlUrgents;
+            window.SecurityUtils.setInnerHTML(containerUrgents, htmlUrgents);
         }
         
         // === CARD BLEUE : DEMANDES & RETOURS ===
@@ -1703,7 +1703,7 @@ async function updateProblemesClients() {
         const cardDemandes = document.getElementById('dashboard-demandes-retours');
         
         if (!autresDemandes || autresDemandes.length === 0) {
-            containerDemandes.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>';
+            window.SecurityUtils.setInnerHTML(containerDemandes, '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>');
             badgeDemandes.textContent = '0';
             cardDemandes.style.display = 'none';
         } else {
@@ -1713,7 +1713,7 @@ async function updateProblemesClients() {
             autresDemandes.forEach(pb => {
                 htmlDemandes += renderProblemeCard(pb, false);
             });
-            containerDemandes.innerHTML = htmlDemandes;
+            window.SecurityUtils.setInnerHTML(containerDemandes, htmlDemandes);
         }
         
     } catch (err) {
@@ -2137,11 +2137,11 @@ async function afficherDetailsRetourMenage(retourId) {
             document.body.appendChild(modal);
         }
 
-        modal.innerHTML = `
+        window.SecurityUtils.setInnerHTML(modal, `
             <div style="background: white; border-radius: 20px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
                 ${modalContent}
             </div>
-        `;
+        `);
         modal.style.display = 'flex';
 
     } catch (error) {
