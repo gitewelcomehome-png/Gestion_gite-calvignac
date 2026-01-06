@@ -48,6 +48,7 @@ export function setInnerHTML(element, html, config = {}) {
         const trustedConfig = {
             ALLOW_DATA_ATTR: true,
             KEEP_CONTENT: true,
+            ADD_TAGS: ['style'],  // Autoriser explicitement <style>
             // Pour le contenu trusted, autoriser les scripts (ce sont NOS fichiers)
             // mais bloquer quand même les event handlers dangereux pour la cohérence
             FORBID_ATTR: ['onerror', 'onload']
