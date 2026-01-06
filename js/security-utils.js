@@ -43,15 +43,15 @@ export function setInnerHTML(element, html, config = {}) {
     }
     
     // Pour le contenu "trusted" (fichiers HTML statiques du projet), 
-    // être plus permissif tout en gardant une protection de base
+    // être beaucoup plus permissif (autorise presque tout sauf scripts dangereux)
     if (config.trusted) {
         const trustedConfig = {
-            ADD_TAGS: ['style'],  // Autoriser <style> pour CSS inline
-            ADD_ATTR: ['contenteditable', 'draggable', 'hidden', 'tabindex', 'aria-label', 'aria-hidden', 'role'],
+            ALLOWED_TAGS: null,  // null = autoriser tous les tags sauf ceux dans FORBID_TAGS
+            ALLOWED_ATTR: null,  // null = autoriser tous les attributs sauf ceux dans FORBID_ATTR
             ALLOW_DATA_ATTR: true,
             KEEP_CONTENT: true,
-            FORBID_ATTR: ['onerror', 'onload'],  // Toujours bloquer les dangereux
-            FORBID_TAGS: ['script']  // Toujours bloquer <script>
+            FORBID_ATTR: ['onerror', 'onload'],  // Bloquer seulement les dangereux
+            FORBID_TAGS: ['script', 'object', 'embed', 'applet', 'iframe']  // Bloquer l'exécution de code externe
         };
         element.innerHTML = DOMPurify.sanitize(html, trustedConfig);
     } else {
