@@ -61,18 +61,22 @@ export function setInnerHTML(element, html, config = {}) {
             scripts.push(match[1]); // Contenu du script
         }
         
+        console.log(`🔧 [setInnerHTML] Scripts trouvés: ${scripts.length}`);
+        
         // Injecter le HTML nettoyé
         element.innerHTML = DOMPurify.sanitize(html, trustedConfig);
         
         // Exécuter les scripts extraits (nécessaire car innerHTML ne les exécute pas)
-        scripts.forEach(scriptContent => {
+        scripts.forEach((scriptContent, index) => {
             if (scriptContent.trim()) {
                 try {
+                    console.log(`🔧 [setInnerHTML] Exécution script ${index + 1}/${scripts.length}...`);
                     const script = document.createElement('script');
                     script.textContent = scriptContent;
                     element.appendChild(script);
+                    console.log(`✅ [setInnerHTML] Script ${index + 1} exécuté`);
                 } catch (err) {
-                    console.error('Erreur exécution script inline:', err);
+                    console.error(`❌ [setInnerHTML] Erreur script ${index + 1}:`, err);
                 }
             }
         });
