@@ -542,7 +542,7 @@ async function updateTodoList(category) {
                 <input type="checkbox" onchange="toggleTodo(${todo.id}, this.checked)" 
                        style="width: 20px; height: 20px; cursor: pointer; margin-top: 3px; flex-shrink: 0;">
                 <div style="flex: 1;">
-                    <div style="font-weight: 500; font-size: 0.95rem; margin-bottom: 6px; line-height: 1.4;">
+                    <div style="font-weight: 500; font-size: 0.95rem; margin-bottom: 6px; line-height: 1.4; color: #2c3e50;">
                         ${todo.title}
                         ${recurrentBadge}
                     </div>
@@ -569,26 +569,17 @@ async function updateTodoList(category) {
     container.innerHTML = html;
     console.log(`[updateTodoList] ✅ innerHTML injecté, container.children.length:`, container.children.length);
     
-    // Vérifier les styles du container
-    const styles = window.getComputedStyle(container);
-    console.log(`[updateTodoList] 🎨 Styles container:`, {
-        display: styles.display,
-        visibility: styles.visibility,
-        opacity: styles.opacity,
-        height: styles.height,
-        overflow: styles.overflow,
-        position: styles.position
-    });
-    
-    // Vérifier le parent
-    const parent = container.parentElement;
-    if (parent) {
-        const parentStyles = window.getComputedStyle(parent);
-        console.log(`[updateTodoList] 🎨 Styles parent (${parent.tagName}#${parent.id}):`, {
-            display: parentStyles.display,
-            visibility: parentStyles.visibility,
-            opacity: parentStyles.opacity,
-            height: parentStyles.height
+    // Vérifier les styles des todos injectées
+    if (container.children.length > 0) {
+        const firstTodo = container.children[0];
+        const todoStyles = window.getComputedStyle(firstTodo);
+        console.log(`[updateTodoList] 🎨 Styles première todo:`, {
+            display: todoStyles.display,
+            visibility: todoStyles.visibility,
+            opacity: todoStyles.opacity,
+            height: todoStyles.height,
+            width: todoStyles.width,
+            background: todoStyles.background
         });
     }
 }
