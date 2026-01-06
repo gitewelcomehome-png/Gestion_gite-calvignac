@@ -1462,6 +1462,16 @@ async function refreshDashboard() {
     await updateFinancialIndicators();
     initializeTodoModal();
     initializeReponseWhatsappModal();
+    
+    // Attacher le bouton Actualiser (SecurityUtils supprime les onclick)
+    const btnActualiser = document.querySelector('#tab-dashboard button');
+    if (btnActualiser && btnActualiser.textContent.includes('Actualiser')) {
+        console.log('✅ Bouton Actualiser attaché');
+        btnActualiser.addEventListener('click', function(e) {
+            e.preventDefault();
+            updateFinancialIndicators();
+        });
+    }
 }
 
 function initializeReponseWhatsappModal() {
