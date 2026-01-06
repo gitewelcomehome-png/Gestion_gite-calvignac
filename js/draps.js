@@ -35,8 +35,18 @@ let derniereSimulation = null; // Stocke les résultats de la dernière simulati
 // ================================================================
 
 async function initDraps() {
+    console.log('🎬 initDraps() appelée');
     await chargerStocks();
     await analyserReservations();
+    
+    // Attacher les événements onclick (car SecurityUtils les supprime)
+    const btnCalculer = document.querySelector('#tab-draps button.btn-primary');
+    if (btnCalculer) {
+        console.log('✅ Bouton Calculer trouvé, attachement onclick');
+        btnCalculer.onclick = simulerBesoins;
+    } else {
+        console.error('❌ Bouton Calculer non trouvé');
+    }
 }
 
 window.initDraps = initDraps;
