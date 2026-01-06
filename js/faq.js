@@ -75,13 +75,13 @@ function afficherFAQ() {
                     ${question.gite !== 'tous' ? `<span class="badge">${question.gite}</span>` : ''}
                 </div>
                 <div class="faq-actions">
-                    <button class="btn-icon" data-action="modifier-question" data-question-id="${question.id}" title="Modifier">
-                        <i class="fas fa-edit"></i>
+                    <button class="btn-icon" data-action="modifier-question" data-question-id="${question.id}" title="Modifier" style="font-size: 18px;">
+                        ✏️
                     </button>
-                    <button class="btn-icon" data-action="supprimer-question" data-question-id="${question.id}" title="Supprimer">
-                        <i class="fas fa-trash"></i>
+                    <button class="btn-icon" data-action="supprimer-question" data-question-id="${question.id}" title="Supprimer" style="font-size: 18px;">
+                        🗑️
                     </button>
-                    <i class="fas fa-chevron-down"></i>
+                    <span style="font-size: 18px;">▼</span>
                 </div>
             </div>
             <div class="faq-body">
@@ -159,13 +159,13 @@ window.rechercherFAQ = function(terme) {
                         ${q.gite !== 'tous' ? `<span style="background: #e0e0e0; padding: 4px 8px; border-radius: 6px; font-size: 12px;">${q.gite}</span>` : ''}
                     </div>
                     <div class="faq-actions">
-                        <button class="btn-icon" data-action="modifier-question" data-question-id="${q.id}" title="Modifier">
+                        <button class="btn-icon" data-action="modifier-question" data-question-id="${q.id}" title="Modifier" style="font-size: 18px;">
                             ✏️
                         </button>
-                        <button class="btn-icon" data-action="supprimer-question" data-question-id="${q.id}" title="Supprimer">
+                        <button class="btn-icon" data-action="supprimer-question" data-question-id="${q.id}" title="Supprimer" style="font-size: 18px;">
                             🗑️
                         </button>
-                        <span class="faq-toggle">▼</span>
+                        <span class="faq-toggle" style="font-size: 18px;">▼</span>
                     </div>
                 </div>
                 <div class="faq-body">
