@@ -1063,4 +1063,12 @@ window.toggleBloc = function(titleElement) {
     const bloc = titleElement.closest('.fiscal-bloc');
     bloc.classList.toggle('collapsed');
 }
+
+// Attacher les événements aux titres collapsibles
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.fiscal-bloc-title')) {
+        const title = e.target.closest('.fiscal-bloc-title');
+        window.toggleBloc(title);
+    }
+});
 </script>
