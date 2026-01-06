@@ -3,6 +3,43 @@
  * Phase 4 - Application des règles de validation
  */
 
+// Fonction pour standardiser un numéro de téléphone français
+function standardizeFrenchPhone(phone) {
+    if (!phone) return '';
+    
+    // Nettoyer le numéro : garder uniquement chiffres, + et espaces
+    let cleaned = phone.replace(/[^0-9+\s]/g, '').trim();
+    
+    // Si vide, retourner vide
+    if (!cleaned) return '';
+    
+    // Retirer tous les espaces pour traiter
+    let digitsOnly = cleaned.replace(/\s/g, '');
+    
+    // Si commence par +33, reformater
+    if (digitsOnly.startsWith('+33')) {
+        digitsOnly = '0' + digitsOnly.substring(3);
+    } else if (digitsOnly.startsWith('33')) {
+        digitsOnly = '0' + digitsOnly.substring(2);
+    }
+    
+    // Vérifier que c'est un numéro français valide (10 chiffres commençant par 0)
+    if (digitsOnly.length === 10 && digitsOnly.startsWith('0')) {
+        // Formater : 06 12 34 56 78
+        return digitsOnly.substring(0, 2) + ' ' + 
+               digitsOnly.substring(2, 4) + ' ' + 
+               digitsOnly.substring(4, 6) + ' ' + 
+               digitsOnly.substring(6, 8) + ' ' + 
+               digitsOnly.substring(8, 10);
+    }
+    
+    // Si format international déjà, garder tel quel
+    if (cleaned.startsWith('+')) return cleaned;
+    
+    // Sinon retourner le nettoyé
+    return cleaned;
+}
+
 // Fonction pour initialiser la validation des infos pratiques
 window.initValidationInfosPratiques = function() {
     if (!window.ValidationUtils) {
@@ -10,28 +47,59 @@ window.initValidationInfosPratiques = function() {
         return;
     }
     
-    console.log('🛡️ Initialisation filtrage temps réel infos pratiques (SANS blocage soumission)...');
+    console.log('🛡️ Initialisation filtrage + standardisation téléphone infos pratiques...');
     
-    // FILTRAGE SIMPLE TÉLÉPHONE (sans validation stricte pour ne pas bloquer la sauvegarde)
+    // STANDARDISATION TÉLÉPHONE FRANÇAIS
     const infos_telephone = document.getElementById('infos_telephone');
     if (infos_telephone) {
-        console.log('✅ Filtrage téléphone FR');
+        console.log('✅ Standardisation téléphone FR activée');
+        
+        // Filtrage temps réel pendant la saisie
         infos_telephone.addEventListener('input', function(e) {
+            // Autoriser uniquement chiffres, +, espaces, tirets
             this.value = this.value.replace(/[^0-9+\- ]/g, '');
-            if (this.value.length > 14) this.value = this.value.substring(0, 14);
+            // Limiter à 20 caractères max
+            if (this.value.length > 20) this.value = this.value.substring(0, 20);
+        });
+        
+        // Standardisation au format français quand on quitte le champ
+        infos_telephone.addEventListener('blur', function(e) {
+            if (this.value.trim()) {
+                const standardized = standardizeFrenchPhone(this.value);
+                this.value = standardized;
+                console.log('📞 Téléphone standardisé:', standardized);
+            }
         });
     }
     
     const infos_telephone_en = document.getElementById('infos_telephone_en');
     if (infos_telephone_en) {
-        console.log('✅ Filtrage téléphone EN');
+        console.log('✅ Standardisation téléphone EN activée');
+        
+        // Filtrage temps réel
         infos_telephone_en.addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9+\- ]/g, '');
-            if (this.value.length > 14) this.value = this.value.substring(0, 14);
+            if (this.value.length > 20) this.value = this.value.substring(0, 20);
+        });
+        
+        // Standardisation format international
+        infos_telephone_en.addEventListener('blur', function(e) {
+            if (this.value.trim()) {
+                let cleaned = this.value.replace(/[^0-9+]/g, '');
+                // Forcer format international si numéro français
+                if (cleaned.startsWith('0') && cleaned.length === 10) {
+                    this.value = '+33 ' + cleaned.substring(1);
+                } else if (cleaned.startsWith('33') && !cleaned.startsWith('+')) {
+                    this.value = '+' + cleaned;
+                } else {
+                    this.value = cleaned.startsWith('+') ? cleaned : '+' + cleaned;
+                }
+                console.log('📞 Téléphone EN standardisé:', this.value);
+            }
         });
     }
     
-    console.log('✅ Filtrage infos pratiques activé (sauvegarde non bloquée)');
+    console.log('✅ Filtrage + standardisation téléphone activés');
 };
 
 // Attendre que ValidationUtils soit chargé
