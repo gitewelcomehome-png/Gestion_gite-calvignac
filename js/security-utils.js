@@ -21,8 +21,10 @@ export function sanitizeHTML(dirty, config = {}) {
     
     const defaultConfig = {
         ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'small', 'button', 'img'],
-        ALLOWED_ATTR: ['href', 'title', 'target', 'style', 'class', 'onclick', 'onmouseover', 'onmouseout', 'type', 'data-activite-id', 'src', 'alt'],
-        ALLOW_DATA_ATTR: true
+        ALLOWED_ATTR: ['href', 'title', 'target', 'style', 'class', 'type', 'data-activite-id', 'src', 'alt', 'onclick', 'onmouseover', 'onmouseout'],
+        ALLOW_DATA_ATTR: true,
+        // ⚠️ Bloquer les event handlers dangereux
+        FORBID_ATTR: ['onerror', 'onload']
     };
     
     return DOMPurify.sanitize(dirty, { ...defaultConfig, ...config });
