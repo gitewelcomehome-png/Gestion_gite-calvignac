@@ -68,17 +68,17 @@ function afficherFAQ() {
 
     container.innerHTML = faqFiltrees.map(question => `
         <div class="faq-item" data-id="${question.id}">
-            <div class="faq-header" onclick="toggleFAQ(${question.id})">
+            <div class="faq-header" data-action="toggle-faq" data-question-id="${question.id}">
                 <div class="faq-question">
                     <span class="faq-badge ${question.categorie}">${getCategorieIcon(question.categorie)}</span>
                     <h3>${question.question}</h3>
                     ${question.gite !== 'tous' ? `<span class="badge">${question.gite}</span>` : ''}
                 </div>
-                <div class="faq-actions" onclick="event.stopPropagation()">
-                    <button class="btn-icon" onclick="modifierQuestion(${question.id})" title="Modifier">
+                <div class="faq-actions">
+                    <button class="btn-icon" data-action="modifier-question" data-question-id="${question.id}" title="Modifier">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-icon" onclick="supprimerQuestion(${question.id})" title="Supprimer">
+                    <button class="btn-icon" data-action="supprimer-question" data-question-id="${question.id}" title="Supprimer">
                         <i class="fas fa-trash"></i>
                     </button>
                     <i class="fas fa-chevron-down"></i>
@@ -152,17 +152,17 @@ window.rechercherFAQ = function(terme) {
     faqFiltrees.forEach(q => {
         html += `
             <div class="faq-item" data-id="${q.id}">
-                <div class="faq-header" onclick="toggleFAQ(${q.id})">
+                <div class="faq-header" data-action="toggle-faq" data-question-id="${q.id}">
                     <div class="faq-question">
                         <span class="faq-badge ${q.categorie}">${getCategorieIcon(q.categorie)} ${q.categorie}</span>
                         <h3>${q.question}</h3>
                         ${q.gite !== 'tous' ? `<span style="background: #e0e0e0; padding: 4px 8px; border-radius: 6px; font-size: 12px;">${q.gite}</span>` : ''}
                     </div>
                     <div class="faq-actions">
-                        <button class="btn-icon" onclick="event.stopPropagation(); modifierQuestion(${q.id})" title="Modifier">
+                        <button class="btn-icon" data-action="modifier-question" data-question-id="${q.id}" title="Modifier">
                             ✏️
                         </button>
-                        <button class="btn-icon" onclick="event.stopPropagation(); supprimerQuestion(${q.id})" title="Supprimer">
+                        <button class="btn-icon" data-action="supprimer-question" data-question-id="${q.id}" title="Supprimer">
                             🗑️
                         </button>
                         <span class="faq-toggle">▼</span>
