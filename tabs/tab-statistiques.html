@@ -252,3 +252,30 @@
                     </div>
                 </div>
             </div>
+<script>
+// Fonction pour déplier/replier la section graphiques
+window.toggleSlide = function(slideId) {
+    const slide = document.getElementById(slideId);
+    const icon = document.getElementById(slideId + '-icon');
+    
+    if (slide.style.display === 'none') {
+        slide.style.display = 'block';
+        icon.textContent = '▲';
+    } else {
+        slide.style.display = 'none';
+        icon.textContent = '▼';
+    }
+};
+
+// Event delegation pour les clics sur les titres dépliables
+document.addEventListener('click', function(e) {
+    const target = e.target.closest('[onclick*="toggleSlide"]');
+    if (target && target.onclick) {
+        e.preventDefault();
+        const match = target.getAttribute('onclick').match(/toggleSlide\('([^']+)'\)/);
+        if (match) {
+            window.toggleSlide(match[1]);
+        }
+    }
+});
+</script>
