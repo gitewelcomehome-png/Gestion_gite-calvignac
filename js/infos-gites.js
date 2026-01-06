@@ -937,6 +937,45 @@ window.selectGiteInfos = async function(gite) {
 };
 
 function sauvegarderDonneesInfos() {
+    // Validation des champs critiques si ValidationUtils disponible
+    if (window.ValidationUtils) {
+        const emailField = document.getElementById('infos_email');
+        const telephoneField = document.getElementById('infos_telephone');
+        const gpsLatField = document.getElementById('infos_gpsLat');
+        const gpsLonField = document.getElementById('infos_gpsLon');
+        
+        // Valider email si rempli
+        if (emailField?.value && !window.ValidationUtils.validate(emailField.value, 'email').valid) {
+            console.warn('⚠️ Email invalide, sauvegarde annulée');
+            if (typeof showNotification === 'function') {
+                showNotification('❌ Email invalide', 'error');
+            }
+            return;
+        }
+        
+        // Valider téléphone si rempli
+        if (telephoneField?.value && !window.ValidationUtils.validate(telephoneField.value, 'phone').valid) {
+            console.warn('⚠️ Téléphone invalide, sauvegarde annulée');
+            if (typeof showNotification === 'function') {
+                showNotification('❌ Téléphone invalide (format: 06 12 34 56 78)', 'error');
+            }
+            return;
+        }
+        
+        // Valider coordonnées GPS si remplies
+        if (gpsLatField?.value || gpsLonField?.value) {
+            const lat = parseFloat(gpsLatField?.value);
+            const lon = parseFloat(gpsLonField?.value);
+            if (isNaN(lat) || lat < -90 || lat > 90 || isNaN(lon) || lon < -180 || lon > 180) {
+                console.warn('⚠️ Coordonnées GPS invalides, sauvegarde annulée');
+                if (typeof showNotification === 'function') {
+                    showNotification('❌ Coordonnées GPS invalides', 'error');
+                }
+                return;
+            }
+        }
+    }
+    
     const formData = {
         // Section 1: Base (FR)
         adresse: document.getElementById('infos_adresse')?.value || '',

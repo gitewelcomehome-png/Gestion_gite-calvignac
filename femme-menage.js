@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await chargerInterventions();
     await chargerStocksDraps();
     
+    // Validation temps réel
+    if (window.ValidationUtils) {
+        window.ValidationUtils.attachRealtimeValidation('tache-achats-titre', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('tache-travaux-titre', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('retour-date', 'date', { required: true });
+    }
+    
     // Formulaires
     document.getElementById('form-tache-achats').addEventListener('submit', creerTacheAchats);
     document.getElementById('form-tache-travaux').addEventListener('submit', creerTacheTravaux);
@@ -130,6 +137,19 @@ window.switchStockTab = switchStockTab;
 async function creerTacheAchats(e) {
     e.preventDefault();
     
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const rules = {
+            'tache-achats-titre': { type: 'text', required: true }
+        };
+        
+        const validation = window.ValidationUtils.validateForm(e.target, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire tâche achats invalide:', validation.errors);
+            return;
+        }
+    }
+    
     const titre = document.getElementById('tache-achats-titre').value;
     const gite = document.getElementById('tache-achats-gite').value;
     const description = document.getElementById('tache-achats-description').value;
@@ -157,6 +177,19 @@ async function creerTacheAchats(e) {
 
 async function creerTacheTravaux(e) {
     e.preventDefault();
+    
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const rules = {
+            'tache-travaux-titre': { type: 'text', required: true }
+        };
+        
+        const validation = window.ValidationUtils.validateForm(e.target, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire tâche travaux invalide:', validation.errors);
+            return;
+        }
+    }
     
     const titre = document.getElementById('tache-travaux-titre').value;
     const gite = document.getElementById('tache-travaux-gite').value;
@@ -277,6 +310,19 @@ window.sauvegarderStocks = sauvegarderStocks;
 
 async function envoyerRetourMenage(e) {
     e.preventDefault();
+    
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const rules = {
+            'retour-date': { type: 'date', required: true }
+        };
+        
+        const validation = window.ValidationUtils.validateForm(e.target, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire retour ménage invalide:', validation.errors);
+            return;
+        }
+    }
     
     const gite = document.getElementById('retour-gite').value;
     const date = document.getElementById('retour-date').value;
