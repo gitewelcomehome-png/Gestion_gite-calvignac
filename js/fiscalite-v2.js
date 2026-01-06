@@ -335,7 +335,7 @@ function ajouterProduitAccueil() {
         </select>
         <input type="number" step="0.01" placeholder="Montant €" id="produits-montant-${id}">
         <button type="button" onclick="supprimerItem('produits-${id}')">×</button>
-    `;
+    `);
     container.appendChild(item);
 }
 

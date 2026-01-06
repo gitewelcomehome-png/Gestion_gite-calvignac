@@ -28,7 +28,7 @@ export async function afficherHorairesClients() {
                 <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
                 <p>Erreur chargement des horaires</p>
             </div>
-        `;
+        `);
         return;
     }
     

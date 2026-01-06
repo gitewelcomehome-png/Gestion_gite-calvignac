@@ -133,6 +133,7 @@ async function updateDashboardAlerts() {
     
     // Afficher les alertes
     const container = document.getElementById('dashboard-alerts');
+    if (!container) return;
     if (alerts.length === 0) {
         container.innerHTML = '';
         return;

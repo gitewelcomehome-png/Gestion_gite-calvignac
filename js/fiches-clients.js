@@ -827,7 +827,7 @@ async function loadChecklistItemsConfig(type, gite) {
                     <button class="btn btn-sm btn-danger" onclick="deleteChecklistItem(${item.id}, '${type}', '${gite}')">🗑️</button>
                 </div>
             </div>
-        `).join('');
+        `).join(''));
         
     } catch (error) {
         console.error('Erreur:', error);
