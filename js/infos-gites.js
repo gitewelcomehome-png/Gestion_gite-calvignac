@@ -603,7 +603,7 @@ function rechercherEvenements() {
                 💡 <strong>Astuce :</strong> Les offices de tourisme de Trévoux et Lyon proposent des guides gratuits avec les événements du mois.
             </p>
         </div>
-    `;
+    `);
 }
 
 function clearAllData() {

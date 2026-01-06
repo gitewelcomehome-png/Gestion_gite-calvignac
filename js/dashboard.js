@@ -393,7 +393,8 @@ async function updateDashboardReservations() {
         `;
     }
     
-    container.innerHTML = html;
+    if (!container) return;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ==========================================
@@ -1676,6 +1677,8 @@ async function updateProblemesClients() {
         const containerUrgents = document.getElementById('liste-problemes-urgents');
         const badgeUrgents = document.getElementById('badge-problemes-urgents-count');
         const cardUrgents = document.getElementById('dashboard-problemes-urgents');
+        
+        if (!containerUrgents || !badgeUrgents || !cardUrgents) return;
         
         if (!problemesUrgents || problemesUrgents.length === 0) {
             containerUrgents.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème urgent</p>';
