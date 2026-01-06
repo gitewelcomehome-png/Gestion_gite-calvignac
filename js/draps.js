@@ -244,7 +244,7 @@ function calculerReservationsCouvertes(resaParGite) {
         `;
     });
 
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
     return infosCouverture;
 }
 
@@ -297,7 +297,7 @@ function calculerAEmmener(resaParGite, infosCouverture) {
         `;
     });
 
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 function afficherAEmmenerDepuisSimulation() {
@@ -366,7 +366,7 @@ function afficherAEmmenerDepuisSimulation() {
         `;
     });
 
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ================================================================
@@ -616,7 +616,7 @@ function afficherResultatsSimulation(resaParGite, dateLimit) {
         `;
     });
 
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ================================================================
@@ -689,5 +689,5 @@ function afficherAEmmenerDepuisSimulation() {
         `;
     });
 
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }

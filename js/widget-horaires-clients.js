@@ -23,7 +23,7 @@ export async function afficherHorairesClients() {
     
     if (errorDemandes) {
         console.error('Erreur chargement demandes:', errorDemandes);
-        container.innerHTML = `
+        window.SecurityUtils.setInnerHTML(container, `
             <div style="text-align: center; padding: 30px; color: #999;">
                 <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
                 <p>Erreur chargement des horaires</p>
@@ -53,7 +53,7 @@ export async function afficherHorairesClients() {
     const demandesValides = demandes.filter(d => reservationsMap[d.reservation_id]);
     
     if (demandesValides.length === 0) {
-        container.innerHTML = `
+        window.SecurityUtils.setInnerHTML(container, `
             <div style="text-align: center; padding: 30px; color: #999;">
                 <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
                 <p>Aucune demande horaire validée récente</p>
@@ -62,7 +62,7 @@ export async function afficherHorairesClients() {
         return;
     }
     
-    container.innerHTML = `
+    window.SecurityUtils.setInnerHTML(container, `
         <div style="display: flex; flex-direction: column; gap: 15px;">
             ${demandesValides.map(demande => {
                 const reservation = reservationsMap[demande.reservation_id];

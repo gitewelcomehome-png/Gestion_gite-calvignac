@@ -145,7 +145,7 @@ async function populateYearFilter() {
     
     const select = document.getElementById('yearFilterStats');
     if (!select) return;
-    select.innerHTML = '';
+    window.SecurityUtils.setInnerHTML(select, '');
     
     sortedYears.forEach(year => {
         const option = document.createElement('option');

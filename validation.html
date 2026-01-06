@@ -509,7 +509,7 @@
             });
             
             html += '</div>';
-            banner.innerHTML = html;
+            window.SecurityUtils.setInnerHTML(banner, html);
             banner.style.display = 'block';
         }
 
@@ -655,7 +655,7 @@
                 displayNotifications(allMenages);
                 
                 if (sortedWeeks.length === 0) {
-                    container.innerHTML = `
+                    window.SecurityUtils.setInnerHTML(container, `
                         <div class="week-card">
                             <div class="empty-state">
                                 <div class="empty-state-icon">📭</div>
@@ -698,11 +698,11 @@
                     `;
                 });
 
-                container.innerHTML = html;
+                window.SecurityUtils.setInnerHTML(container, html);
 
             } catch (error) {
                 console.error('Erreur:', error);
-                container.innerHTML = `
+                window.SecurityUtils.setInnerHTML(container, `
                     <div class="week-card">
                         <div class="empty-state">
                             <div class="empty-state-icon">❌</div>
