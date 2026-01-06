@@ -365,8 +365,12 @@
                     window.SecurityUtils.setInnerHTML(document.getElementById(tabId), html);
                     // Initialiser le Dashboard après chargement du HTML
                     if (tabId === 'tab-dashboard' && typeof refreshDashboard === 'function') {
+                        console.log('✅ HTML dashboard chargé, initialisation dans 200ms...');
                         // Attendre que le DOM soit complètement mis à jour
-                        setTimeout(() => refreshDashboard(), 100);
+                        setTimeout(() => {
+                            console.log('🔄 Appel refreshDashboard()...');
+                            refreshDashboard();
+                        }, 200);
                     }
                     // Initialiser la FAQ après chargement du HTML
                     if (tabId === 'tab-faq' && typeof window.initFAQ === 'function') {
