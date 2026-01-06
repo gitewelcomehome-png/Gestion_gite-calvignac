@@ -486,6 +486,7 @@ async function updateTodoLists() {
 }
 
 async function updateTodoList(category) {
+    console.log(`[updateTodoList] Category: ${category}`);
     
     const { data: todos } = await supabase
         .from('todos')
@@ -495,21 +496,28 @@ async function updateTodoList(category) {
         .is('archived_at', null) // Seulement les tâches non archivées
         .order('created_at', { ascending: true });
     
+    console.log(`[updateTodoList] Todos récupérées pour ${category}:`, todos?.length || 0, todos);
+    
     // Filtrer les tâches dont la date d'occurrence est passée ou inexistante
     const now = new Date();
+    console.log(`[updateTodoList] Date actuelle:`, now);
+    
     const visibleTodos = todos?.filter(todo => {
         if (!todo.is_recurrent || !todo.next_occurrence) {
+            console.log(`[updateTodoList] Todo ${todo.id} "${todo.title}" visible (non récurrente ou sans next_occurrence)`);
             return true; // Tâche normale ou récurrente sans date = visible
         }
         // Tâche récurrente : visible seulement si la date est passée
         const nextOcc = new Date(todo.next_occurrence);
-        return nextOcc <= now;
+        const visible = nextOcc <= now;
+        console.log(`[updateTodoList] Todo ${todo.id} "${todo.title}" récurrente, next_occurrence: ${todo.next_occurrence}, visible: ${visible}`);
+        return visible;
     }) || [];
     
-    if (visibleTodos.length > 0) {
-    }
+    console.log(`[updateTodoList] Todos visibles pour ${category}:`, visibleTodos.length, visibleTodos);
     
     const container = document.getElementById(`todo-${category}`);
+    console.log(`[updateTodoList] Container #todo-${category}:`, container ? 'trouvé' : 'NON TROUVÉ');
     
     if (!container) return;
     
