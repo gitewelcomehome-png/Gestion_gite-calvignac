@@ -11,8 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- 🔒 PHASE 2 SÉCURITÉ: Configuration sécurisée -->
-    <!-- IMPORTANT: config.local.js DOIT être chargé AVANT config.js -->
-    <script src="config.local.js"></script>
+    <!-- config.local.js est optionnel (uniquement en développement local) -->
+    <script src="config.local.js" onerror="console.log('⚠️ config.local.js non trouvé (normal en production)')"></script>
     <script src="config.js"></script>
     
     <!-- Scripts modulaires de l'application -->
