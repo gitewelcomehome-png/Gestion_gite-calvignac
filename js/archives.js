@@ -13,7 +13,7 @@ async function updateArchivesDisplay() {
     archives.sort((a, b) => parseLocalDate(b.dateFin) - parseLocalDate(a.dateFin));
     
     if (archives.length === 0) {
-        section.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune archive</p>';
+        window.SecurityUtils.setInnerHTML(section, '<p style="text-align: center; color: #999; padding: 40px;">Aucune archive</p>');
         return;
     }
     
@@ -40,7 +40,7 @@ async function updateArchivesDisplay() {
     });
     
     html += '</div>';
-    section.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(section, html);
 }
 
 // ==========================================
@@ -113,7 +113,7 @@ async function updateArchivedTodos() {
         html += '</div>';
     });
     
-    section.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(section, html);
 }
 
 async function restoreTodo(id) {
