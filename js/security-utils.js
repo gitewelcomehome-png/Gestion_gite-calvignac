@@ -41,7 +41,22 @@ export function setInnerHTML(element, html, config = {}) {
         console.error('setInnerHTML: élément null');
         return;
     }
-    element.innerHTML = sanitizeHTML(html, config);
+    
+    // Pour le contenu "trusted" (fichiers HTML statiques du projet), 
+    // être plus permissif tout en gardant une protection de base
+    if (config.trusted) {
+        const trustedConfig = {
+            ADD_TAGS: ['style'],  // Autoriser <style> pour CSS inline
+            ADD_ATTR: ['contenteditable', 'draggable', 'hidden', 'tabindex', 'aria-label', 'aria-hidden', 'role'],
+            ALLOW_DATA_ATTR: true,
+            KEEP_CONTENT: true,
+            FORBID_ATTR: ['onerror', 'onload'],  // Toujours bloquer les dangereux
+            FORBID_TAGS: ['script']  // Toujours bloquer <script>
+        };
+        element.innerHTML = DOMPurify.sanitize(html, trustedConfig);
+    } else {
+        element.innerHTML = sanitizeHTML(html, config);
+    }
 }
 
 /**
