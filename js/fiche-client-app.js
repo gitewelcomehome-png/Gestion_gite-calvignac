@@ -437,7 +437,7 @@ function initOngletEntree() {
         // // console.warn('⚠️ heureArriveeDemandee select not found');
         return;
     }
-    selectElement.innerHTML = '';
+    window.SecurityUtils.setInnerHTML(selectElement, '');
     
     // Déterminer l'heure minimum selon le ménage
     const heureMinArrivee = !cleaningScheduleAvant || cleaningScheduleAvant.time_of_day !== 'afternoon' ? 13 : 17;
@@ -544,7 +544,7 @@ function initOngletEntree() {
         const encodedText = encodeURIComponent(wifiString);
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedText}`;
         
-        qrContainer.innerHTML = `
+        window.SecurityUtils.setInnerHTML(qrContainer, `
             <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem; text-align: center;">
                 ${currentLanguage === 'fr' ? '📱 Scannez pour vous connecter' : '📱 Scan to connect'}
             </p>
@@ -581,7 +581,7 @@ function initOngletEntree() {
     
     const parkingSection = document.getElementById('parkingSection');
     if (parkingHTML) {
-        document.getElementById('parkingInfo').innerHTML = parkingHTML;
+        window.SecurityUtils.setInnerHTML(document.getElementById('parkingInfo'), parkingHTML);
         parkingSection.style.display = 'block';
     } else {
         parkingSection.style.display = 'none';
@@ -620,7 +620,7 @@ function initOngletPendant() {
     
     const chauffageSection = document.getElementById('chauffageSection');
     if (chauffageHTML) {
-        document.getElementById('chauffageInfo').innerHTML = chauffageHTML;
+        window.SecurityUtils.setInnerHTML(document.getElementById('chauffageInfo'), chauffageHTML);
         chauffageSection.style.display = 'block';
     } else {
         chauffageSection.style.display = 'none';
@@ -670,7 +670,7 @@ function initOngletPendant() {
     
     const cuisineSection = document.getElementById('cuisineSection');
     if (cuisineHTML) {
-        document.getElementById('cuisineInfo').innerHTML = cuisineHTML;
+        window.SecurityUtils.setInnerHTML(document.getElementById('cuisineInfo'), cuisineHTML);
         cuisineSection.style.display = 'block';
     } else {
         cuisineSection.style.display = 'none';
@@ -704,7 +704,7 @@ function initOngletPendant() {
     
     const dechetsSection = document.getElementById('dechetsSection');
     if (dechetsHTML) {
-        document.getElementById('dechetsInfo').innerHTML = dechetsHTML;
+        window.SecurityUtils.setInnerHTML(document.getElementById('dechetsInfo'), dechetsHTML);
         dechetsSection.style.display = 'block';
     } else {
         dechetsSection.style.display = 'none';
@@ -713,7 +713,7 @@ function initOngletPendant() {
     // Équipements
     if (giteInfo.equipements && giteInfo.equipements.length > 0) {
         const container = document.getElementById('equipementsContainer');
-        container.innerHTML = giteInfo.equipements.map(eq => {
+        window.SecurityUtils.setInnerHTML(container, giteInfo.equipements.map(eq => {
             const nom = currentLanguage === 'fr' ? eq.nom_fr : eq.nom_en;
             return `
                 <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-bottom: 1px solid var(--gray-200);">
@@ -776,7 +776,7 @@ function initOngletPendant() {
     }
     
     if (contactsHTML) {
-        document.getElementById('contactsUrgenceContainer').innerHTML = contactsHTML;
+        window.SecurityUtils.setInnerHTML(document.getElementById('contactsUrgenceContainer'), contactsHTML);
     }
     
     // Charger les événements de la semaine et commerces proximité
@@ -824,7 +824,7 @@ function initOngletSortie() {
     
     const selectDepartElement = document.getElementById('heureDepartDemandee');
     if (selectDepartElement) {
-        selectDepartElement.innerHTML = '';
+        window.SecurityUtils.setInnerHTML(selectDepartElement, '');
         
         // Générer options de 10h jusqu'à l'heure max (incluse)
         for (let h = 10; h <= heureMaxDepart; h++) {
@@ -917,7 +917,7 @@ function initOngletSortie() {
     }
     
     if (instructionsHTML) {
-        document.getElementById('instructionsSortie').innerHTML = instructionsHTML;
+        window.SecurityUtils.setInnerHTML(document.getElementById('instructionsSortie'), instructionsHTML);
     } else {
         document.getElementById('instructionsSortie').textContent = '';
     }
@@ -934,7 +934,7 @@ function initOngletActivites() {
 
 function initOngletFaq() {
     if (!reservationData) {
-        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
+        window.SecurityUtils.setInnerHTML(document.getElementById('faqListe'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
         return;
     }
     loadFaqData();
@@ -965,19 +965,19 @@ async function loadActivitesForClient() {
     const giteLon = parseFloat(giteInfo?.gps_lon || giteInfo?.longitude);
     
     if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
-        document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
+        window.SecurityUtils.setInnerHTML(document.getElementById('mapActivites'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
         return;
     }
     
     if (!activites || activites.length === 0) {
-        document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
+        window.SecurityUtils.setInnerHTML(document.getElementById('mapActivites'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
         return;
     }
     
     // Google Maps iframe avec marqueur gîte visible
     const mapElement = document.getElementById('mapActivites');
     
-    mapElement.innerHTML = `
+    window.SecurityUtils.setInnerHTML(mapElement, `
         <iframe 
             width="100%" 
             height="400" 
@@ -1006,7 +1006,7 @@ function displayActivitesList(activites) {
     const listeContainer = document.getElementById('listeActivites');
     
     if (!activites || activites.length === 0) {
-        listeContainer.innerHTML = `
+        window.SecurityUtils.setInnerHTML(listeContainer, `
             <div class="card" style="text-align: center; padding: 2rem;">
                 <p style="color: var(--gray-600); font-size: 1.125rem;">
                     ${currentLanguage === 'fr' 
@@ -1102,7 +1102,7 @@ function displayActivitesList(activites) {
         return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; // Défaut
     };
     
-    listeContainer.innerHTML = activites.map(activite => {
+    window.SecurityUtils.setInnerHTML(listeContainer, activites.map(activite => {
         const icon = getIconForType(activite.type || activite.categorie);
         const gradient = getGradientForType(activite.type || activite.categorie);
         const hasCoords = activite.latitude && activite.longitude;
@@ -1455,15 +1455,15 @@ async function submitRetourClient() {
         complementDiv.style.cssText = 'background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; border-left: 3px solid var(--primary);';
         
         if (type === 'probleme') {
-            complementDiv.innerHTML = currentLanguage === 'fr'
+            window.SecurityUtils.setInnerHTML(complementDiv, currentLanguage === 'fr'
                 ? '<strong>⚠️ Problème urgent ?</strong><br>La réponse par message n\'est pas instantanée.<br>Pour un problème à régler immédiatement :<br>📞 Téléphonez-nous ou 💬 Envoyez un WhatsApp'
                 : '<strong>⚠️ Urgent problem?</strong><br>Response by message is not instant.<br>For immediate assistance:<br>📞 Call us or 💬 Send a WhatsApp';
         } else if (type === 'amelioration' || type === 'retour') {
-            complementDiv.innerHTML = currentLanguage === 'fr'
+            window.SecurityUtils.setInnerHTML(complementDiv, currentLanguage === 'fr'
                 ? '<strong>🙏 Merci de votre retour !</strong><br>Nous ferons le maximum pour prendre en compte votre message et répondre au mieux aux besoins de nos clients.'
                 : '<strong>🙏 Thank you for your feedback!</strong><br>We will do our best to take your message into account and meet our clients\' needs.';
         } else {
-            complementDiv.innerHTML = currentLanguage === 'fr'
+            window.SecurityUtils.setInnerHTML(complementDiv, currentLanguage === 'fr'
                 ? '<strong>📨 Nous avons bien reçu votre message</strong><br>Nous vous répondrons dans les plus brefs délais.'
                 : '<strong>📨 We received your message</strong><br>We will respond as soon as possible.';
         }
@@ -1534,7 +1534,7 @@ function showToast(message, type = 'info') {
 }
 
 function showError(message) {
-    document.getElementById('loadingScreen').innerHTML = `
+    window.SecurityUtils.setInnerHTML(document.getElementById('loadingScreen'), `
         <div style="text-align: center; padding: 2rem;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
             <p style="font-size: 1.25rem; color: var(--danger);">${message}</p>
@@ -1579,7 +1579,7 @@ async function loadEvenementsSemaine() {
     container.style.display = 'block';
     const listeContainer = container.querySelector('.evenements-liste');
     
-    listeContainer.innerHTML = evenements.map(evt => {
+    window.SecurityUtils.setInnerHTML(listeContainer, evenements.map(evt => {
         // Note: date_debut n'existe pas dans activites_gites
         // Les événements sont affichés par ordre alphabétique
         
@@ -1615,12 +1615,12 @@ async function loadCommerces() {
     
     if (error) {
         console.error('Erreur chargement commerces:', error);
-        container.innerHTML = '<p style="padding: 1rem; text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="padding: 1rem); text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
         return;
     }
     
     if (!commerces || commerces.length === 0) {
-        container.innerHTML = '<p style="padding: 1rem; text-align: center; color: var(--gray-600);">📋 Aucun commerce ajouté pour le moment</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="padding: 1rem); text-align: center; color: var(--gray-600);">📋 Aucun commerce ajouté pour le moment</p>';
         return;
     }
     
@@ -1635,7 +1635,7 @@ async function loadCommerces() {
         'poste': '📮'
     };
     
-    container.innerHTML = commerces.map(commerce => {
+    window.SecurityUtils.setInnerHTML(container, commerces.map(commerce => {
         const sousCategorie = (commerce.sous_categorie || '').toLowerCase();
         const icon = iconMap[sousCategorie] || '🏪';
         
@@ -1780,7 +1780,7 @@ let currentFaqCategory = 'tous';
 
 async function loadFaqData() {
     if (!reservationData || !reservationData.gite) {
-        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Données de réservation non disponibles</p>';
+        window.SecurityUtils.setInnerHTML(document.getElementById('faqListe'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">⏳ Données de réservation non disponibles</p>';
         return;
     }
     
@@ -1793,14 +1793,14 @@ async function loadFaqData() {
     
     if (error) {
         console.error('Erreur chargement FAQs:', error);
-        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
+        window.SecurityUtils.setInnerHTML(document.getElementById('faqListe'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
         return;
     }
     
     allFaqs = faqs || [];
     
     if (allFaqs.length === 0) {
-        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">📋 Aucune FAQ disponible</p>';
+        window.SecurityUtils.setInnerHTML(document.getElementById('faqListe'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">📋 Aucune FAQ disponible</p>';
         return;
     }
     
@@ -1838,7 +1838,7 @@ function renderFaqCategories() {
     ];
     
     const container = document.getElementById('faqCategories');
-    container.innerHTML = categories.map(cat => {
+    window.SecurityUtils.setInnerHTML(container, categories.map(cat => {
         const label = currentLanguage === 'fr' ? cat.label : cat.labelEn;
         return `
             <button class="faq-category-btn ${cat.key === 'tous' ? 'active' : ''}" 
@@ -1870,11 +1870,11 @@ function displayFaqs(faqs) {
     const container = document.getElementById('faqListe');
     
     if (faqs.length === 0) {
-        container.innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">🔍 Aucun résultat trouvé</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">🔍 Aucun résultat trouvé</p>';
         return;
     }
     
-    container.innerHTML = faqs.map((faq, index) => `
+    window.SecurityUtils.setInnerHTML(container, faqs.map((faq, index) => `
         <div class="faq-item" id="faq-${index}">
             <div class="faq-question" onclick="toggleFaq(${index})">
                 <span>${faq.question}</span>
@@ -2050,7 +2050,7 @@ function renderClientChecklist(type, templates, progressMap) {
     // // console.log(`✅ Container trouvé:`, container);
     
     if (!templates || templates.length === 0) {
-        container.innerHTML = '<p style="color: var(--gray-600); font-style: italic; text-align: center;">Aucun item configuré</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="color: var(--gray-600)); font-style: italic; text-align: center;">Aucun item configuré</p>';
         return;
     }
     
@@ -2087,7 +2087,7 @@ function renderClientChecklist(type, templates, progressMap) {
         `;
     });
     
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 async function toggleClientChecklistItem(templateId, type) {
