@@ -339,7 +339,7 @@ async function genererPlanningMenage() {
             </button>
         </div>
     </div>`;
-    menageDiv.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(menageDiv, html);
     
     // Préparer les données Excel mais ne pas télécharger automatiquement
     window.planningMenageData = planning.map(p => ({
@@ -574,8 +574,7 @@ async function afficherPlanningParSemaine() {
     const menagePlanning = document.getElementById('menagePlanningWeeks');
     if (menagePlanning) {
         console.log('✅ Conteneur trouvé, insertion HTML...');
-        // Utilisation directe de innerHTML car HTML généré par le code, pas par utilisateur
-        menagePlanning.innerHTML = html;
+        window.SecurityUtils.setInnerHTML(menagePlanning, html);
         console.log('✅ HTML inséré !');
         
         // Vérifier le résultat

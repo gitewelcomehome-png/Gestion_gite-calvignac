@@ -105,7 +105,7 @@ function showSimpleModal(reservation, ficheUrl, token) {
     
     const hasPhone = reservation.telephone && reservation.telephone.trim() !== '';
     
-    modal.innerHTML = `
+    window.SecurityUtils.setInnerHTML(modal, `
         <div style="background: white; border-radius: 16px; padding: 30px; max-width: 450px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
             <div style="text-align: center; margin-bottom: 25px;">
                 <div style="font-size: 3rem; margin-bottom: 10px;">📄</div>
