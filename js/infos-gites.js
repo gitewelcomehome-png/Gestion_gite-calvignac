@@ -42,7 +42,7 @@ async function genererPageClient(reservationId) {
     // Créer un modal de choix personnalisé
     const choixModal = document.createElement('div');
     choixModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;';
-    choixModal.innerHTML = `
+    window.SecurityUtils.setInnerHTML(choixModal, `
         <div style="background: white; padding: 30px; border-radius: 20px; max-width: 550px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
             <h2 style="margin-bottom: 20px; color: #667eea;">📱 Envoyer les infos au client</h2>
             <p style="margin-bottom: 10px; font-size: 1.1rem;"><strong>${reservation.nom}</strong></p>
@@ -532,7 +532,7 @@ function rechercherEvenements() {
     const resultatDiv = document.getElementById('evenementsResultat');
     if (!resultatDiv) return;
     
-    resultatDiv.innerHTML = `
+    window.SecurityUtils.setInnerHTML(resultatDiv, `
         <div style="padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white; margin-top: 20px;">
             <h3 style="margin-bottom: 20px; font-size: 1.5rem;">🎭 Guide des Événements & Sorties</h3>
             
