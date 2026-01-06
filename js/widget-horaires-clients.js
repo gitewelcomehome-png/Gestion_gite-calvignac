@@ -112,7 +112,7 @@ export async function afficherHorairesClients() {
                 `;
             }).filter(Boolean).join('')}
         </div>
-    `;
+    `);
 }
 
 /**

@@ -468,7 +468,8 @@ async function updateDashboardMenages() {
         `;
     });
     
-    container.innerHTML = html;
+    if (!container) return;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ==========================================
@@ -1511,6 +1512,8 @@ async function updateDemandesClients() {
         const container = document.getElementById('liste-demandes-clients');
         const badge = document.getElementById('badge-demandes-count');
         const card = document.getElementById('dashboard-demandes-clients');
+        
+        if (!container || !badge || !card) return;
         
         if (!demandes || demandes.length === 0) {
             container.innerHTML = '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>';
