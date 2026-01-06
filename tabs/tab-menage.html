@@ -86,9 +86,15 @@
 
 .cleaning-week-body {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr !important;
     gap: 0;
     border: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+    .cleaning-week-body {
+        grid-template-columns: 1fr !important;
+    }
 }
 
 .cleaning-column {
