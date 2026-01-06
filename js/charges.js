@@ -40,7 +40,7 @@ async function updateChargesDisplay() {
     // Liste des charges
     const chargesList = document.getElementById('chargesList');
     if (charges.length === 0) {
-        chargesList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Aucune charge enregistrée</p>';
+        window.SecurityUtils.setInnerHTML(chargesList, '<p style="text-align: center; color: #999; padding: 20px;">Aucune charge enregistrée</p>');
         return;
     }
     
@@ -63,7 +63,7 @@ async function updateChargesDisplay() {
         `;
     });
     
-    chargesList.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(chargesList, html);
 }
 
 async function deleteChargeById(id) {
@@ -330,7 +330,7 @@ async function displayHistoricalYearsList() {
     const container = document.getElementById('historicalYearsList');
     
     if (data.length === 0) {
-        container.innerHTML = '<p style="color: #999; font-style: italic;">Aucune donnée historique enregistrée</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="color: #999; font-style: italic;">Aucune donnée historique enregistrée</p>');
         return;
     }
     
@@ -361,7 +361,7 @@ async function displayHistoricalYearsList() {
     });
     html += '</div>';
     
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 async function updateStats() {
@@ -479,7 +479,7 @@ function generateYearComparisonCheckboxes(reservations, historicalData) {
         `;
     });
     
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ==========================================
