@@ -68,9 +68,8 @@ const categoryMapping = {
 // ==================== HELPER: HTML ESCAPING ====================
 function escapeHtml(text) {
     if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    // Utiliser SecurityUtils pour sanitiser le texte
+    return window.SecurityUtils.sanitizeText(text);
 }
 
 // Helper pour échapper les attributs onclick
@@ -348,11 +347,11 @@ function afficherListePOIs(pois) {
     if (!container) return;
     
     if (pois.length === 0) {
-        container.innerHTML = `
+        window.SecurityUtils.setInnerHTML(container, `
             <p style="text-align: center; color: #999; padding: 40px; font-size: 1.1rem;">
                 📭 Aucun point d'intérêt enregistré pour ce gîte
             </p>
-        `;
+        `);
         return;
     }
     
@@ -400,7 +399,7 @@ function afficherListePOIs(pois) {
         `;
     }).join('');
     
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ==================== ZOOMER SUR UN POI ====================
@@ -432,7 +431,7 @@ async function chargerActivites() {
     try {
         // Mettre à jour le compteur
         const counter = document.getElementById('activitesCounter');
-        if (counter) counter.innerHTML = '⏳ Chargement...';
+        if (counter) window.SecurityUtils.setInnerHTML(counter, '⏳ Chargement...');
 
         const { data, error } = await window.supabaseClient
             .from('activites_gites')
@@ -462,7 +461,7 @@ async function chargerActivites() {
             const totalCouzon = window.activitesParGite['Couzon'].length;
             const total = totalTrevoux + totalCouzon;
             if (counter) {
-                counter.innerHTML = `✅ ${total} activités (🏰 ${totalTrevoux} • ⛰️ ${totalCouzon})`;
+                window.SecurityUtils.setInnerHTML(counter, `✅ ${total} activités (🏰 ${totalTrevoux} • ⛰️ ${totalCouzon})`);
             }
         }
         
@@ -488,7 +487,7 @@ async function chargerActivites() {
     } catch (error) {
         console.error('Erreur chargement activités:', error);
         const counter = document.getElementById('activitesCounter');
-        if (counter) counter.innerHTML = '❌ Erreur';
+        if (counter) window.SecurityUtils.setInnerHTML(counter, '❌ Erreur');
         showNotification('❌ Erreur lors du chargement des activités', 'error');
     }
 }
@@ -566,7 +565,7 @@ function afficherToutesLesActivites() {
     ];
     
     if (toutesActivites.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune activité enregistrée. Cliquez sur un gîte pour commencer.</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucune activité enregistrée. Cliquez sur un gîte pour commencer.</p>');
         return;
     }
     
@@ -628,7 +627,7 @@ function afficherToutesLesActivites() {
         html += '</div>';
     });
     
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ==================== AFFICHER LES ACTIVITÉS ====================
@@ -644,7 +643,7 @@ function afficherActivites(gite) {
     const activites = window.activitesParGite[gite] || [];
     
     if (activites.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%); border-radius: 16px; border: 2px dashed #ef4444;"><div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div><p style="color: #ef4444; font-size: 1.2rem; font-weight: 600;">Aucune activité enregistrée pour ce gîte</p></div>';
+        window.SecurityUtils.setInnerHTML(container, '<div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%); border-radius: 16px; border: 2px dashed #ef4444;"><div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div><p style="color: #ef4444; font-size: 1.2rem; font-weight: 600;">Aucune activité enregistrée pour ce gîte</p></div>');
         return;
     }
     
@@ -734,7 +733,7 @@ function afficherActivites(gite) {
         html += `</div></div>`;
     });
     
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ==================== SUPPRIMER UNE ACTIVITÉ ====================
@@ -800,10 +799,10 @@ async function filtrerActivitesParCategorie(motCle) {
     
     if (filtrees.length === 0) {
         const lieu = gite || 'les gîtes';
-        container.innerHTML = `<p style="text-align: center; color: #999; padding: 40px;">Aucune activité "${motCle}" trouvée pour ${lieu}. 
+        window.SecurityUtils.setInnerHTML(container, `<p style="text-align: center; color: #999; padding: 40px;">Aucune activité "${motCle}" trouvée pour ${lieu}. 
         <br><br><button onclick="chargerActivites()" class="btn" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">
         🔄 Recharger les activités
-        </button></p>`;
+        </button></p>`);
         return;
     }
     
@@ -941,7 +940,7 @@ function afficherActivitesFiltrées(activites, titre) {
         html += `</div></div>`;
     });
     
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ==================== MODIFIER UNE ACTIVITÉ ====================
