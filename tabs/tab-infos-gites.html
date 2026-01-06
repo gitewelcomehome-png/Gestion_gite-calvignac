@@ -57,12 +57,12 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Téléphone urgence 🇫🇷 <span style="color: #ef4444;">*</span></label>
-                                <input type="tel" id="infos_telephone" class="form-control" placeholder="06 12 34 56 78" pattern="[0-9+\- ]*" required>
+                                <input type="tel" id="infos_telephone" class="form-control" placeholder="06 12 34 56 78">
                                 <small style="color: var(--gray); font-style: italic;">Joignable 24h/24 pendant le séjour</small>
                             </div>
                             <div style="display: none;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Emergency Phone 🇬🇧 <span style="color: #ef4444;">*</span></label>
-                                <input type="tel" id="infos_telephone_en" class="form-control" placeholder="+33 6 12 34 56 78" pattern="[0-9+\- ]*" required>
+                                <input type="tel" id="infos_telephone_en" class="form-control" placeholder="+33 6 12 34 56 78">
                                 <small style="color: var(--gray); font-style: italic;">Available 24/7 during stay</small>
                             </div>
                         </div>
@@ -83,11 +83,11 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Email contact 🇫🇷 <span style="color: #ef4444;">*</span></label>
-                                <input type="email" id="infos_email" class="form-control" placeholder="contact@gite-trevoux.fr" required>
+                                <input type="email" id="infos_email" class="form-control" placeholder="contact@gite-trevoux.fr">
                             </div>
                             <div style="display: none;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Contact Email 🇬🇧 <span style="color: #ef4444;">*</span></label>
-                                <input type="email" id="infos_email_en" class="form-control" placeholder="contact@gite-trevoux.fr" required>
+                                <input type="email" id="infos_email_en" class="form-control" placeholder="contact@gite-trevoux.fr">
                             </div>
                         </div>
                     </div>
@@ -104,11 +104,11 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nom du réseau WiFi (SSID) <span style="color: #ef4444;">*</span></label>
-                                <input type="text" id="infos_wifiSSID" class="form-control" required placeholder="Gite_Trevoux_5G" oninput="updateQRCodeWifi()">
+                                <input type="text" id="infos_wifiSSID" class="form-control" placeholder="Gite_Trevoux_5G" oninput="updateQRCodeWifi()">
                             </div>
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Mot de passe WiFi <span style="color: #ef4444;">*</span></label>
-                                <input type="text" id="infos_wifiPassword" class="form-control" required placeholder="MonMotDePasse2024" oninput="updateQRCodeWifi()">
+                                <input type="text" id="infos_wifiPassword" class="form-control" placeholder="MonMotDePasse2024" oninput="updateQRCodeWifi()">
                             </div>
                         </div>
 
@@ -212,7 +212,7 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Heure d'arrivée <span style="color: #ef4444;">*</span></label>
-                                    <select id="infos_heureArrivee" class="form-control" required>
+                                    <select id="infos_heureArrivee" class="form-control">
                                         <option value="">-- Sélectionner --</option>
                                         <option value="À partir de 14h00">À partir de 14h00</option>
                                         <option value="À partir de 14h30">À partir de 14h30</option>
@@ -526,7 +526,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Heure de départ <span style="color: #ef4444;">*</span></label>
-                                <select id="infos_heureDepart" class="form-control" required>
+                                <select id="infos_heureDepart" class="form-control">
                                     <option value="">-- Sélectionner --</option>
                                     <option value="Avant 9h00">Avant 9h00</option>
                                     <option value="Avant 9h30">Avant 9h30</option>
@@ -594,7 +594,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             </div>
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Montant de la caution</label>
-                                <input type="text" id="infos_caution" class="form-control" placeholder="500€" pattern="[0-9€ ]*">
+                                <input type="text" id="infos_caution" class="form-control" placeholder="500€">
                             </div>
                         </div>
                     </div>
