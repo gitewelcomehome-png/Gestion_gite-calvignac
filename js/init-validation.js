@@ -10,56 +10,28 @@ window.initValidationInfosPratiques = function() {
         return;
     }
     
-    console.log('🛡️ Initialisation validation infos pratiques...');
+    console.log('🛡️ Initialisation filtrage temps réel infos pratiques (SANS blocage soumission)...');
     
-    // Téléphone (obligatoire - champ d'urgence)
+    // FILTRAGE SIMPLE TÉLÉPHONE (sans validation stricte pour ne pas bloquer la sauvegarde)
     const infos_telephone = document.getElementById('infos_telephone');
     if (infos_telephone) {
-        console.log('✅ Attaching validation to infos_telephone');
-        window.ValidationUtils.attachRealtimeValidation('infos_telephone', 'phone', { required: true });
-    } else {
-        console.error('❌ infos_telephone not found!');
+        console.log('✅ Filtrage téléphone FR');
+        infos_telephone.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9+\- ]/g, '');
+            if (this.value.length > 14) this.value = this.value.substring(0, 14);
+        });
     }
     
     const infos_telephone_en = document.getElementById('infos_telephone_en');
     if (infos_telephone_en) {
-        console.log('✅ Attaching validation to infos_telephone_en');
-        window.ValidationUtils.attachRealtimeValidation('infos_telephone_en', 'phone', { required: true });
+        console.log('✅ Filtrage téléphone EN');
+        infos_telephone_en.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9+\- ]/g, '');
+            if (this.value.length > 14) this.value = this.value.substring(0, 14);
+        });
     }
     
-    // Email (obligatoire)
-    const infos_email = document.getElementById('infos_email');
-    if (infos_email) {
-        console.log('✅ Attaching validation to infos_email');
-        window.ValidationUtils.attachRealtimeValidation('infos_email', 'email', { required: true });
-    } else {
-        console.error('❌ infos_email not found!');
-    }
-    
-    const infos_email_en = document.getElementById('infos_email_en');
-    if (infos_email_en) {
-        console.log('✅ Attaching validation to infos_email_en');
-        window.ValidationUtils.attachRealtimeValidation('infos_email_en', 'email', { required: true });
-    }
-    
-    // Heures (texte avec format heure attendu)
-    const infos_heureArrivee = document.getElementById('infos_heureArrivee');
-    if (infos_heureArrivee) {
-        console.log('✅ Attaching validation to infos_heureArrivee');
-        window.ValidationUtils.attachRealtimeValidation('infos_heureArrivee', 'hours', { required: true });
-    } else {
-        console.error('❌ infos_heureArrivee not found!');
-    }
-
-    const infos_heureDepart = document.getElementById('infos_heureDepart');
-    if (infos_heureDepart) {
-        console.log('✅ Attaching validation to infos_heureDepart');
-        window.ValidationUtils.attachRealtimeValidation('infos_heureDepart', 'hours', { required: true });
-    } else {
-        console.error('❌ infos_heureDepart not found!');
-    }
-    
-    console.log('✅ Validation infos pratiques initialisée');
+    console.log('✅ Filtrage infos pratiques activé (sauvegarde non bloquée)');
 };
 
 // Attendre que ValidationUtils soit chargé
