@@ -234,7 +234,9 @@ async function updateDashboardStats() {
 // ==========================================
 
 async function updateDashboardReservations() {
+    console.log('📅 updateDashboardReservations() début');
     const reservations = await getAllReservations();
+    console.log('📅 Réservations récupérées:', reservations?.length || 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -281,6 +283,7 @@ async function updateDashboardReservations() {
     }).sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     
     const container = document.getElementById('dashboard-reservations');
+    console.log('📅 Container trouvé:', !!container, 'Filtrées:', filtered.length);
     if (!container) return;
     
     if (filtered.length === 0) {
@@ -402,6 +405,7 @@ async function updateDashboardReservations() {
 // ==========================================
 
 async function updateDashboardMenages() {
+    console.log('🧹 updateDashboardMenages() début');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -416,7 +420,9 @@ async function updateDashboardMenages() {
         .gte('scheduled_date', weekStart.toISOString().split('T')[0])
         .lte('scheduled_date', weekEnd.toISOString().split('T')[0])
         .order('scheduled_date', { ascending: true });
-    
+    ole.log('🧹 Ménages récupérés:', cleanings?.length || 0);
+    const container = document.getElementById('dashboard-menages');
+    console.log('🧹 Container trouvé:', !!container
     const container = document.getElementById('dashboard-menages');
     if (!container) return;
     
