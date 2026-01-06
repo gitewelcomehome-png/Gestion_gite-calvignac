@@ -1186,6 +1186,14 @@ async function trackActiviteConsultation(activiteId, action) {
 
 // ==================== EVENT LISTENERS ====================
 function initializeEventListeners() {
+    // Validation temps réel pour formulaires
+    if (window.ValidationUtils) {
+        window.ValidationUtils.attachRealtimeValidation('heureArriveeDemandee', 'hours', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('heureDepartDemandee', 'hours', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('sujetRetour', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('descriptionRetour', 'text', { required: true });
+    }
+    
     // Changement de langue
     document.querySelectorAll('.language-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1297,6 +1305,22 @@ function switchTab(tabId) {
 }
 
 async function submitDemandeHoraire(type) {
+    const heureFieldId = type === 'arrivee_anticipee' ? 'heureArriveeDemandee' : 'heureDepartDemandee';
+    const formId = type === 'arrivee_anticipee' ? 'formArriveeAnticipee' : 'formDepartTardif';
+    
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const form = document.getElementById(formId);
+        const rules = {};
+        rules[heureFieldId] = { type: 'hours', required: true };
+        
+        const validation = window.ValidationUtils.validateForm(form, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire horaire invalide:', validation.errors);
+            return;
+        }
+    }
+    
     const heureDemandee = type === 'arrivee_anticipee' 
         ? document.getElementById('heureArriveeDemandee').value
         : document.getElementById('heureDepartDemandee').value;
@@ -1422,6 +1446,21 @@ function calculateAutoApproval(type, heureDemandee) {
 }
 
 async function submitRetourClient() {
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const form = document.getElementById('formRetours');
+        const rules = {
+            sujetRetour: { type: 'text', required: true },
+            descriptionRetour: { type: 'text', required: true }
+        };
+        
+        const validation = window.ValidationUtils.validateForm(form, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire retour invalide:', validation.errors);
+            return;
+        }
+    }
+    
     const type = document.getElementById('typeRetour').value;
     const sujet = document.getElementById('sujetRetour').value;
     const description = document.getElementById('descriptionRetour').value;

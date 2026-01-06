@@ -80,9 +80,29 @@ window.initChargeForm = function() {
     const chargeForm = document.getElementById('chargeForm');
     if (!chargeForm || chargeForm._initialized) return;
     
+    // Validation temps réel
+    if (window.ValidationUtils) {
+        window.ValidationUtils.attachRealtimeValidation('chargeNom', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('chargeMontant', 'amount', { required: true });
+    }
+    
     chargeForm._initialized = true;
     chargeForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        // Validation avec ValidationUtils
+        if (window.ValidationUtils) {
+            const rules = {
+                chargeNom: { type: 'text', required: true },
+                chargeMontant: { type: 'amount', required: true }
+            };
+            
+            const validation = window.ValidationUtils.validateForm(this, rules);
+            if (!validation.valid) {
+                console.warn('❌ Formulaire charge invalide:', validation.errors);
+                return;
+            }
+        }
         
         const charge = {
             gite: document.getElementById('chargeGite').value,

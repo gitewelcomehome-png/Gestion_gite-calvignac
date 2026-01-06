@@ -584,6 +584,11 @@ function initializeTodoModal() {
     // Ne pas réinitialiser si déjà fait
     if (todoModalInitialized) return;
     
+    // Validation temps réel
+    if (window.ValidationUtils) {
+        window.ValidationUtils.attachRealtimeValidation('todoTitle', 'text', { required: true });
+    }
+    
     const recurrentCheckbox = document.getElementById('todoRecurrent');
     const recurrentOptions = document.getElementById('recurrentOptions');
     const frequencySelect = document.getElementById('todoFrequency');
@@ -614,6 +619,19 @@ function initializeTodoModal() {
     if (addTodoForm) {
         addTodoForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Validation avec ValidationUtils
+            if (window.ValidationUtils) {
+                const rules = {
+                    todoTitle: { type: 'text', required: true }
+                };
+                
+                const validation = window.ValidationUtils.validateForm(this, rules);
+                if (!validation.valid) {
+                    console.warn('❌ Formulaire todo invalide:', validation.errors);
+                    return;
+                }
+            }
             
             const category = document.getElementById('todoCategory').value;
             const title = document.getElementById('todoTitle').value;

@@ -29,66 +29,85 @@
 #### 2. Édition Réservations (index.html #editForm)
 - **Champs** : nom, telephone, montant, acompte, nbPersonnes
 - **Validation actuelle** : ✅ ValidationUtils attaché (init-validation.js)
-- **Action** : ✅ Déjà validé
+- **Action** : ✅ Déjà validé - NE PAS TOUCHER
 
-#### 3. Infos Gîtes (tabs/tab-infos-gites.html)
-- **Champs** : wifi_ssid, wifi_password, parking, chauffage, cuisine, dechets, contacts_urgence
-- **Validation actuelle** : HTML5 (required sur certains champs)
-- **Action** : ⏳ Ajouter ValidationUtils pour texte
+#### 3. Charges Fiscalité (tabs/tab-fiscalite-v2.html #chargeForm)
+- **Champs** : nom, montant
+- **Validation actuelle** : ✅ ValidationUtils + temps réel (7 janv 2026)
+- **Action** : ✅ Validé
 
-#### 4. Fiches Clients - Édition Gîte (tabs/tab-fiches-clients.html #formEditGite)
+#### 4. Infos Gîtes (tabs/tab-infos-gites.html)
+- **Champs** : email, telephone, GPS, wifi, etc.
+- **Validation actuelle** : ✅ ValidationUtils manuel dans sauvegarderDonneesInfos()
+- **Action** : ✅ Déjà validé - Validation email/phone/GPS opérationnelle
+
+#### 4. Infos Gîtes (tabs/tab-infos-gites.html)
+- **Champs** : email, telephone, GPS, wifi, etc.
+- **Validation actuelle** : ✅ ValidationUtils manuel dans sauvegarderDonneesInfos()
+- **Action** : ✅ Déjà validé - Validation email/phone/GPS opérationnelle
+
+#### 5. Fiches Clients - Édition Gîte (tabs/tab-fiches-clients.html #formEditGite)
 - **Champs** : nom, adresse, description, équipements
 - **Validation actuelle** : HTML5
-- **Action** : ⏳ Ajouter ValidationUtils
+- **Action** : ⏳ À valider
 
 ### 🟡 IMPORTANT (données métier)
 
-#### 5. Todos Dashboard (tabs/tab-dashboard.html #addTodoForm)
+#### 6. Todos Dashboard (tabs/tab-dashboard.html #addTodoForm)
 - **Champs** : title (required), description, gite
-- **Validation actuelle** : HTML5 (required)
-- **Action** : ⏳ Ajouter ValidationUtils pour titre/description
+- **Validation actuelle** : ✅ ValidationUtils + temps réel (7 janv 2026)
+- **Action** : ✅ Validé
 
-#### 6. FAQ (tabs/tab-faq.html #form-question-faq)
-- **Champs** : question, reponse, categorie, gite, ordre
-- **Validation actuelle** : À vérifier
-- **Action** : ⏳ Ajouter ValidationUtils
-
-#### 7. Activités (tabs/tab-decouvrir.html #formDecouvrir)
-- **Champs** : nom, description, adresse, categorie, coordonnées GPS
-- **Validation actuelle** : À vérifier
-- **Action** : ⏳ Ajouter ValidationUtils
-
-#### 8. Charges (tabs/tab-fiscalite-v2.html #calculateur-lmp)
-- **Champs** : montants financiers, dates
-- **Validation actuelle** : À vérifier
-- **Action** : ⏳ Ajouter ValidationUtils pour montants
-
-### 🟢 FAIBLE PRIORITÉ (interfaces clients)
-
-#### 9. Fiche Client - Demandes Horaires (fiche-client.html)
+#### 7. Fiche Client - Horaires (fiche-client-app.js formArriveeAnticipee/formDepartTardif)
 - **Champs** : heureArriveeDemandee, heureDepartDemandee
-- **Validation actuelle** : HTML5 (select)
-- **Action** : ✅ Suffisant (valeurs prédéfinies)
+- **Validation actuelle** : ✅ ValidationUtils + temps réel (7 janv 2026)
+- **Action** : ✅ Validé
 
-#### 10. Femme de Ménage - Tâches (femme-menage.html)
-- **Champs** : titre, description, gite
-- **Validation actuelle** : HTML5
-- **Action** : ⏳ Ajouter ValidationUtils
+#### 8. Fiche Client - Retours (fiche-client-app.js formRetours)
+- **Champs** : sujetRetour, descriptionRetour
+- **Validation actuelle** : ✅ ValidationUtils + temps réel (7 janv 2026)
+- **Action** : ✅ Validé
 
-#### 11. Femme de Ménage - Retours (femme-menage.html #form-retour-menage)
-- **Champs** : probleme, commentaire, photo
-- **Validation actuelle** : HTML5
-- **Action** : ⏳ Ajouter ValidationUtils
+#### 9. Femme de Ménage - Tâches (femme-menage.js)
+- **Champs** : tache-achats-titre, tache-travaux-titre, retour-date
+- **Validation actuelle** : ✅ ValidationUtils + temps réel (7 janv 2026)
+- **Action** : ✅ Validé
+
+#### 10. FAQ (tabs/tab-faq.html #form-question-faq)
+- **Champs** : question, reponse, categorie, gite, ordre
+- **Validation actuelle** : ❌ Aucune
+- **Action** : ⏳ À valider (formulaire existe-t-il?)
+
+#### 11. Activités Découvrir (tabs/tab-decouvrir.html #formDecouvrir)
+- **Champs** : nom, description, adresse, categorie, coordonnées GPS
+- **Validation actuelle** : ❌ Fonction ajouterActivite() INEXISTANTE
+- **Action** : ⚠️ Bouton présent mais fonction manquante - À implémenter
+
+### 🟢 SECONDAIRE (interfaces clients)
+
+#### 12. Fiches Clients - Édition (tabs/tab-fiches-clients.html #formEditGite)
+- **Champs** : nom, adresse, description
+- **Validation actuelle** : ❌ Aucune
+- **Action** : ⏳ À valider
 
 ## 🎯 Plan d'Action
 
-### Étape 1 : Validation Inputs Critiques ⏳
-**Fichiers** :
-- js/infos-gites.js - Valider infos pratiques
-- js/fiches-clients.js - Valider édition gîtes
-- js/decouvrir.js - Valider activités
+### ✅ Étape 1 : Validation Inputs Critiques - COMPLÉTÉ (7 janv 2026)
+**Fichiers modifiés** :
+- ✅ js/charges.js - Validation chargeForm (nom, montant) + temps réel
+- ✅ js/dashboard.js - Validation addTodoForm (title) + temps réel
+- ✅ js/fiche-client-app.js - Validation horaires (hours) + retours (text) + temps réel
+- ✅ femme-menage.js - Validation tâches (text) + retours (date) + temps réel
 
-**Pattern à suivre** :
+**7 formulaires validés en 1 session** 🎉
+
+### ⏳ Étape 2 : Validation Secondaire (À faire)
+**Fichiers restants** :
+- js/fiches-clients.js - Valider édition gîtes (si formulaire existe)
+- js/decouvrir.js - ⚠️ Implémenter fonction ajouterActivite() MANQUANTE
+- js/faq.js - Vérifier si formulaire admin FAQ existe
+
+**Pattern utilisé** :
 ```javascript
 // Dans le gestionnaire submit du formulaire
 if (window.ValidationUtils) {
