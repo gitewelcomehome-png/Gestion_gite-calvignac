@@ -3,18 +3,18 @@
 // ==========================================
 
 // Configuration fuseau horaire
-const TIMEZONE = 'Europe/Paris';
+const TIMEZONE = window.APP_CONFIG?.TIMEZONE || 'Europe/Paris';
 
-// Configuration Supabase - Chargée depuis config.local.js (dev) ou variables d'env (prod)
+// Configuration Supabase - Chargée depuis config.js
 const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL;
 const SUPABASE_KEY = window.APP_CONFIG?.SUPABASE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.error('❌ Configuration Supabase manquante - vérifiez config.local.js ou variables d\'environnement');
-    throw new Error('SUPABASE_URL et SUPABASE_KEY requis');
+    console.error('❌ Configuration Supabase non chargée');
+    console.error('APP_CONFIG:', window.APP_CONFIG);
+} else {
+    console.log('✅ Configuration Supabase chargée');
 }
-
-console.log('✅ Configuration Supabase chargée');
 
 // Initialiser Supabase (une seule fois)
 // Note: window.supabase est la bibliothèque chargée depuis le CDN
