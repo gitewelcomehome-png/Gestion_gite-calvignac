@@ -983,7 +983,8 @@ async function updateFinancialIndicators() {
     
     // 1. Calculer le bénéfice RÉEL de l'année en cours
     const reservations = await getAllReservations();
-    const charges = await getAllCharges();
+    // Note: Table 'charges' n'existe plus, remplacée par historical_data dans l'onglet Charges
+    // const charges = await getAllCharges();
     
     // Filtrer par année actuelle
     const reservationsAnnee = reservations.filter(r => {
