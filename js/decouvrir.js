@@ -944,6 +944,153 @@ function afficherActivitesFiltrées(activites, titre) {
 }
 
 // ==================== MODIFIER UNE ACTIVITÉ ====================
+// ==================== MODAL ACTIVITÉ ====================
+function ouvrirModalActivite(modeModification = false, positionY = null) {
+    const modal = document.getElementById('modalActivite');
+    const overlay = document.getElementById('modalOverlay');
+    const btnSave = document.getElementById('btnSaveActivite');
+    const titre = document.getElementById('modalTitle');
+    
+    if (modeModification) {
+        titre.textContent = '✏️ Modifier une Activité';
+        btnSave.textContent = '💾 Enregistrer les modifications';
+    } else {
+        titre.textContent = '➕ Ajouter une Activité';
+        btnSave.textContent = '➕ Ajouter cette activité';
+        // Réinitialiser le formulaire
+        document.getElementById('formDecouvrir').reset();
+        window.activiteEnCoursDeModification = null;
+    }
+    
+    modal.style.display = 'block';
+    overlay.style.display = 'block';
+    
+    // Positionner la modale si nécessaire
+    if (positionY) {
+        modal.style.top = `${positionY}px`;
+        modal.style.transform = 'translate(-50%, -50%)';
+    }
+}
+
+function fermerModalActivite() {
+    const modal = document.getElementById('modalActivite');
+    const overlay = document.getElementById('modalOverlay');
+    
+    modal.style.display = 'none';
+    overlay.style.display = 'none';
+    
+    // Réinitialiser
+    document.getElementById('formDecouvrir').reset();
+    window.activiteEnCoursDeModification = null;
+}
+
+function afficherTypeRestoSiRestaurant() {
+    const categorie = document.getElementById('activite_categorie').value;
+    const typeRestoDiv = document.getElementById('typeRestoDiv');
+    
+    if (typeRestoDiv) {
+        typeRestoDiv.style.display = categorie === 'Restaurant' ? 'block' : 'none';
+    }
+}
+
+// ==================== AJOUTER ACTIVITÉ ====================
+async function ajouterActivite() {
+    try {
+        // Validation avec ValidationUtils
+        const form = document.getElementById('formDecouvrir');
+        if (window.ValidationUtils) {
+            const rules = {
+                'activite_nom': { type: 'text', required: true },
+                'activite_adresse': { type: 'text', required: true }
+            };
+            
+            const validation = window.ValidationUtils.validateForm(form, rules);
+            if (!validation.valid) {
+                console.warn('❌ Formulaire activité invalide:', validation.errors);
+                showNotification('❌ Veuillez remplir tous les champs requis', 'error');
+                return;
+            }
+        }
+        
+        const gite = document.getElementById('decouvrir_gite')?.value || 'Trévoux';
+        const nom = document.getElementById('activite_nom').value;
+        const categorie = document.getElementById('activite_categorie').value;
+        const description = document.getElementById('activite_description').value;
+        const adresse = document.getElementById('activite_adresse').value;
+        const latitude = parseFloat(document.getElementById('activite_latitude').value) || null;
+        const longitude = parseFloat(document.getElementById('activite_longitude').value) || null;
+        const distance = parseFloat(document.getElementById('activite_distance').value) || null;
+        const note = parseFloat(document.getElementById('activite_note').value) || null;
+        const avis = parseInt(document.getElementById('activite_avis').value) || null;
+        const prix = document.getElementById('activite_prix').value || null;
+        const telephone = document.getElementById('activite_telephone').value || null;
+        const website = document.getElementById('activite_website').value || null;
+        const typeResto = document.getElementById('activite_type_resto')?.value || null;
+        
+        // Mode modification ou ajout ?
+        if (window.activiteEnCoursDeModification) {
+            // MODIFICATION
+            const { error } = await window.supabaseClient
+                .from('activites_gites')
+                .update({
+                    nom,
+                    categorie,
+                    description,
+                    adresse,
+                    latitude,
+                    longitude,
+                    distance,
+                    note,
+                    avis,
+                    prix,
+                    telephone,
+                    website,
+                    type_resto: typeResto,
+                    gite
+                })
+                .eq('id', window.activiteEnCoursDeModification);
+            
+            if (error) throw error;
+            
+            showNotification('✅ Activité modifiée', 'success');
+            window.activiteEnCoursDeModification = null;
+        } else {
+            // AJOUT
+            const { error } = await window.supabaseClient
+                .from('activites_gites')
+                .insert({
+                    nom,
+                    categorie,
+                    description,
+                    adresse,
+                    latitude,
+                    longitude,
+                    distance,
+                    note,
+                    avis,
+                    prix,
+                    telephone,
+                    website,
+                    type_resto: typeResto,
+                    gite
+                });
+            
+            if (error) throw error;
+            
+            showNotification('✅ Activité ajoutée', 'success');
+        }
+        
+        // Fermer la modale et recharger
+        fermerModalActivite();
+        await chargerActivites();
+        
+    } catch (error) {
+        console.error('Erreur ajout/modification activité:', error);
+        showNotification('❌ Erreur : ' + error.message, 'error');
+    }
+}
+
+// ==================== MODIFIER ACTIVITÉ ====================
 async function modifierActivite(id) {
     try {
         // Récupérer l'élément de l'activité
@@ -1019,6 +1166,10 @@ window.filtrerActivitesParCategorie = filtrerActivitesParCategorie;
 window.afficherToutesActivites = afficherToutesActivites;
 window.afficherActivitesFiltrées = afficherActivitesFiltrées;
 window.modifierActivite = modifierActivite;
+window.ajouterActivite = ajouterActivite;
+window.ouvrirModalActivite = ouvrirModalActivite;
+window.fermerModalActivite = fermerModalActivite;
+window.afficherTypeRestoSiRestaurant = afficherTypeRestoSiRestaurant;
 window.escapeHtml = escapeHtml;
 window.escapeForOnclick = escapeForOnclick;
 

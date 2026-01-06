@@ -92,7 +92,7 @@ function afficherFAQ() {
                 </div>
             </div>
         </div>
-    `).join('');
+    `).join(''));
 }
 
 function getCategorieIcon(categorie) {
