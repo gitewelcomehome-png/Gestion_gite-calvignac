@@ -999,12 +999,6 @@ async function updateFinancialIndicators() {
                dateDebut.getMonth() + 1 === moisActuel;
     });
     
-    const chargesAnnee = charges.filter(c => {
-        if (!c.date) return false;
-        const dateCharge = new Date(c.date);
-        return dateCharge.getFullYear() === anneeActuelle;
-    });
-    
     // Calculer CA année
     const caAnnee = reservationsAnnee.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
     
