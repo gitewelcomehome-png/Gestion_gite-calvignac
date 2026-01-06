@@ -2,18 +2,31 @@
 // CONFIGURATION GLOBALE ET CONSTANTES
 // ==========================================
 
+// Initialiser APP_CONFIG s'il n'existe pas déjà
+if (typeof window.APP_CONFIG === 'undefined') {
+    window.APP_CONFIG = {
+        TIMEZONE: 'Europe/Paris',
+        SUPABASE_URL: 'https://ivqiisnudabxemcxxyru.supabase.co',
+        SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4'
+    };
+    console.log('✅ Configuration par défaut chargée');
+}
+
 // Configuration fuseau horaire
-const TIMEZONE = 'Europe/Paris';
+const TIMEZONE = window.APP_CONFIG.TIMEZONE;
 
 // Configuration Supabase
-const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+const SUPABASE_URL = window.APP_CONFIG.SUPABASE_URL;
+const SUPABASE_KEY = window.APP_CONFIG.SUPABASE_KEY;
+
+console.log('✅ Config OK:', { hasUrl: !!SUPABASE_URL, hasKey: !!SUPABASE_KEY });
 
 // Initialiser Supabase (une seule fois)
 // Note: window.supabase est la bibliothèque chargée depuis le CDN
 if (typeof window.supabaseClient === 'undefined') {
     const { createClient } = window.supabase;
     window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log('✅ Client Supabase initialisé');
 }
 
 // Variables globales pour les charts
@@ -22,8 +35,8 @@ window.gitesChartInstance = null;
 window.platformsChartInstance = null;
 window.profitChartInstance = null;
 
-// Configuration iCal par défaut
-const DEFAULT_ICAL_CONFIGS = {
+// Configuration iCal par défaut (depuis window.APP_CONFIG)
+const DEFAULT_ICAL_CONFIGS = window.APP_CONFIG?.DEFAULT_ICAL_CONFIGS || {
     couzon: {
         airbnb: 'https://www.airbnb.fr/calendar/ical/13366259.ics?s=d2cd55cf08b32b26b639189d5d4bf93e',
         abritel: 'http://www.homelidays.com/icalendar/d31158afb72048aabba35b3188771598.ics',
