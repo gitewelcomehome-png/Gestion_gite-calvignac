@@ -4,3 +4,7 @@ package-lock.json
 *.log
 .vscode/
 .env
+
+# 🔒 PHASE 2 SÉCURITÉ: Fichiers de configuration locale (contiennent les clés API)
+config.local.js
+.env.local
