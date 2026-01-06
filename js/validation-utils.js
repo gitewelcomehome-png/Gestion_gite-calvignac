@@ -73,6 +73,14 @@ const ValidationRules = {
         sanitize: (value) => value.replace(/\s/g, '')
     },
     
+    // Horaires (ex: "15h00", "À partir de 15h00", "Avant 10h00")
+    hours: {
+        pattern: /^[0-9h:. àÀpartideéèvnPàéèêôùûüïABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'-]+$/,
+        message: 'Format horaire invalide',
+        maxLength: 100,
+        sanitize: (value) => value.trim()
+    },
+    
     // URLs
     url: {
         pattern: /^https?:\/\/.+/,
@@ -258,6 +266,18 @@ export function attachRealtimeValidation(fieldId, ruleType, options = {}) {
             // Bloquer aussi au keypress pour une réaction instantanée
             const char = String.fromCharCode(e.which || e.keyCode);
             if (!/[0-9+\- ]/.test(char)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    } else if (ruleType === 'hours') {
+        // Pour les horaires: autoriser lettres, chiffres, h, :, espace, point
+        field.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9h:. àÀpartideéèvnPàéèêôùûüïABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'-]/g, '');
+        });
+        field.addEventListener('keypress', function(e) {
+            const char = String.fromCharCode(e.which || e.keyCode);
+            if (!/[0-9h:. àÀpartideéèvnPàéèêôùûüïABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'-]/.test(char)) {
                 e.preventDefault();
                 return false;
             }
