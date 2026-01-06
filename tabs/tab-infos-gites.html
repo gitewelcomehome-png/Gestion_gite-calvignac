@@ -57,12 +57,12 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Téléphone urgence 🇫🇷 <span style="color: #ef4444;">*</span></label>
-                                <input type="tel" id="infos_telephone" class="form-control" placeholder="06 12 34 56 78" pattern="[0-9+\s.-]*" required>
+                                <input type="tel" id="infos_telephone" class="form-control" placeholder="06 12 34 56 78" pattern="[0-9+ .-]*" required>
                                 <small style="color: var(--gray); font-style: italic;">Joignable 24h/24 pendant le séjour</small>
                             </div>
                             <div style="display: none;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Emergency Phone 🇬🇧 <span style="color: #ef4444;">*</span></label>
-                                <input type="tel" id="infos_telephone_en" class="form-control" placeholder="+33 6 12 34 56 78" pattern="[0-9+\s.-]*" required>
+                                <input type="tel" id="infos_telephone_en" class="form-control" placeholder="+33 6 12 34 56 78" pattern="[0-9+ .-]*" required>
                                 <small style="color: var(--gray); font-style: italic;">Available 24/7 during stay</small>
                             </div>
                         </div>
@@ -574,7 +574,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             </div>
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Montant de la caution</label>
-                                <input type="text" id="infos_caution" class="form-control" placeholder="500€" pattern="[0-9€\s]*">
+                                <input type="text" id="infos_caution" class="form-control" placeholder="500€" pattern="[0-9€ ]*">
                             </div>
                         </div>
                     </div>
