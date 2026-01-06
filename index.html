@@ -761,14 +761,9 @@
                 initChecklistsTab();
             }
             if (tabName === 'dashboard') {
-                // Rafraîchir le header avec la vraie date
-                if (typeof refreshDashboard === 'function') {
-                    // Vérifier que le HTML est chargé
-                    const dashboardContainer = document.getElementById('dashboard-reservations');
-                    if (dashboardContainer) {
-                        refreshDashboard();
-                    }
-                }
+                // Dashboard est déjà initialisé après le chargement du HTML (ligne ~375)
+                // Pas besoin de le rafraîchir ici pour éviter les appels multiples
+                
                 // Charger le widget horaires clients
                 import('./js/widget-horaires-clients.js').then(module => {
                     if (module.afficherHorairesClients) {
