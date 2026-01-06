@@ -500,14 +500,17 @@ function openModalValidation(demandeId, action) {
             const typeLabel = demande.type === 'arrivee_anticipee' ? 'Arrivée anticipée' : 'Départ tardif';
             
             document.getElementById('titreDemande').textContent = `${typeLabel} - ${demande.reservation.nom_client}`;
+            
+            const motifHtml = demande.motif ? `<p><strong>Motif:</strong> ${demande.motif}</p>` : '';
+            const autoApprouvableHtml = demande.automatiquement_approuvable ? 
+                '<p style="color: var(--success);">✅ Cette demande respecte les règles automatiques</p>' : '';
+            
             window.SecurityUtils.setInnerHTML(document.getElementById('detailsDemande'), `
                 <div style="background: var(--gray-100); padding: 15px; border-radius: 8px;">
                     <p><strong>Gîte:</strong> ${demande.reservation.gite}</p>
                     <p><strong>Heure demandée:</strong> ${formatTime(demande.heure_demandee)}</p>
-                    ${demande.motif ? `<p><strong>Motif:</strong> ${escapeHtml(demande.motif)}</p>` : ''}
-                    ${demande.automatiquement_approuvable ? `
-                        <p style="color: var(--success);">✅ Cette demande respecte les règles automatiques</p>
-                    ` : ''}
+                    ${motifHtml}
+                    ${autoApprouvableHtml}
                 </div>
             `;
             
