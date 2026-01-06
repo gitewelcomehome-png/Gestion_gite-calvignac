@@ -68,7 +68,7 @@ function displayFilteredReservations(reservations) {
     const container = document.getElementById('planning-container');
     
     if (reservations.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun résultat</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucun résultat</p>');
         return;
     }
     

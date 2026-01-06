@@ -57,7 +57,7 @@ async function updateArchivedTodos() {
     const section = document.getElementById('archivedTodosSection');
     
     if (!todos || todos.length === 0) {
-        section.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune tâche archivée</p>';
+        window.SecurityUtils.setInnerHTML(section, '<p style="text-align: center; color: #999; padding: 40px;">Aucune tâche archivée</p>');
         return;
     }
     
