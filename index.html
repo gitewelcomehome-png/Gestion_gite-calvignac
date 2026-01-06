@@ -362,7 +362,26 @@
             fetch(file)
                 .then(r => r.text())
                 .then(html => {
-                    window.SecurityUtils.setInnerHTML(document.getElementById(tabId), html);
+                    const targetElement = document.getElementById(tabId);
+                    console.log(`📄 Chargement ${tabId}:`, {
+                        fichier: file,
+                        htmlLength: html.length,
+                        targetFound: !!targetElement,
+                        targetId: tabId
+                    });
+                    
+                    if (!targetElement) {
+                        console.error(`❌ Element #${tabId} introuvable dans le DOM!`);
+                        return;
+                    }
+                    
+                    window.SecurityUtils.setInnerHTML(targetElement, html);
+                    
+                    console.log(`✅ HTML injecté dans #${tabId}, vérification contenu...`);
+                    if (tabId === 'tab-dashboard') {
+                        const testContainer = document.getElementById('dashboard-reservations');
+                        console.log(`🔍 Test immédiat: dashboard-reservations existe?`, !!testContainer);
+                    }
                     // Initialiser le Dashboard après chargement du HTML
                     if (tabId === 'tab-dashboard' && typeof refreshDashboard === 'function') {
                         console.log('✅ HTML dashboard chargé, vérification DOM...');
