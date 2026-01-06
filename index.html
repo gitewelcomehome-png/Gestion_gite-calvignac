@@ -735,6 +735,12 @@
                 if (typeof chargerActivitesEtSorties === 'function') {
                     chargerActivitesEtSorties();
                 }
+                // Initialiser la validation après le chargement du contenu
+                setTimeout(() => {
+                    if (typeof initValidationInfosPratiques === 'function') {
+                        initValidationInfosPratiques();
+                    }
+                }, 200);
             }
             if (tabName === 'faq' && typeof initFAQ === 'function') {
                 // S'assurer que le HTML est chargé avant d'initialiser
