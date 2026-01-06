@@ -519,13 +519,18 @@ async function updateTodoList(category) {
     const container = document.getElementById(`todo-${category}`);
     console.log(`[updateTodoList] Container #todo-${category}:`, container ? 'trouvé' : 'NON TROUVÉ');
     
-    if (!container) return;
+    if (!container) {
+        console.error(`[updateTodoList] ❌ Container non trouvé, abandon`);
+        return;
+    }
     
     if (!visibleTodos || visibleTodos.length === 0) {
+        console.log(`[updateTodoList] Aucune todo visible, affichage message vide`);
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>';
         return;
     }
     
+    console.log(`[updateTodoList] Construction HTML pour ${visibleTodos.length} todos...`);
     let html = '';
     visibleTodos.forEach(todo => {
         const recurrentBadge = todo.is_recurrent ? '<span style="background: #9B59B6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px;">🔁 Récurrent</span>' : '';
@@ -560,7 +565,9 @@ async function updateTodoList(category) {
             </div>`;
     });
     
+    console.log(`[updateTodoList] HTML construit (${html.length} caractères), injection dans container...`);
     container.innerHTML = html;
+    console.log(`[updateTodoList] ✅ innerHTML injecté, container.children.length:`, container.children.length);
 }
 
 async function addTodoItem(category) {
