@@ -365,7 +365,8 @@
                     window.SecurityUtils.setInnerHTML(document.getElementById(tabId), html);
                     // Initialiser le Dashboard après chargement du HTML
                     if (tabId === 'tab-dashboard' && typeof refreshDashboard === 'function') {
-                        refreshDashboard();
+                        // Attendre que le DOM soit complètement mis à jour
+                        setTimeout(() => refreshDashboard(), 100);
                     }
                     // Initialiser la FAQ après chargement du HTML
                     if (tabId === 'tab-faq' && typeof window.initFAQ === 'function') {
@@ -691,9 +692,7 @@
             if (activeBtn) activeBtn.classList.add('active');
             
             // Initialiser les fonctionnalités spécifiques à chaque onglet
-            if (tabName === 'dashboard' && typeof refreshDashboard === 'function') {
-                refreshDashboard();
-            }
+            // Note: dashboard est initialisé après le chargement du HTML (voir ligne ~368)
             if (tabName === 'reservations' && typeof updateReservationsList === 'function') {
                 updateReservationsList();
             }
@@ -758,7 +757,11 @@
             if (tabName === 'dashboard') {
                 // Rafraîchir le header avec la vraie date
                 if (typeof refreshDashboard === 'function') {
-                    refreshDashboard();
+                    // Vérifier que le HTML est chargé
+                    const dashboardContainer = document.getElementById('dashboard-reservations');
+                    if (dashboardContainer) {
+                        refreshDashboard();
+                    }
                 }
                 // Charger le widget horaires clients
                 import('./js/widget-horaires-clients.js').then(module => {
