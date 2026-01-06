@@ -33,15 +33,17 @@ window.APP_CONFIG.DEFAULT_ICAL_CONFIGS = {
         console.log('🔧 Mode développement : Configuration locale chargée');
         window.APP_CONFIG.SUPABASE_URL = window.LOCAL_CONFIG.SUPABASE_URL;
         window.APP_CONFIG.SUPABASE_KEY = window.LOCAL_CONFIG.SUPABASE_KEY;
-    } else if (typeof VERCEL_ENV !== 'undefined') {
-        // Production Vercel (variables injectées au build)
-        console.log('🚀 Mode production : Variables Vercel');
-        window.APP_CONFIG.SUPABASE_URL = VERCEL_SUPABASE_URL;
-        window.APP_CONFIG.SUPABASE_KEY = VERCEL_SUPABASE_KEY;
+    } else if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        // Production Vercel
+        // Note: Pour un site statique, on utilise les clés publiques Supabase (anon key)
+        // C'est sécurisé car RLS protège les données
+        console.log('🚀 Mode production : Configuration Vercel');
+        window.APP_CONFIG.SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        window.APP_CONFIG.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
     } else {
-        // ❌ Aucune configuration disponible
-        console.error('❌ Configuration manquante : créez config.local.js en local ou configurez les variables Vercel');
-        throw new Error('Configuration Supabase requise');
+        // ❌ Local sans config.local.js
+        console.error('❌ Configuration manquante : créez config.local.js');
+        throw new Error('config.local.js requis en développement');
     }
     
     console.log('✅ Configuration chargée:', {
