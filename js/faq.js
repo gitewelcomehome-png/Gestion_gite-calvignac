@@ -75,13 +75,13 @@ function afficherFAQ() {
                     ${question.gite !== 'tous' ? `<span class="badge">${question.gite}</span>` : ''}
                 </div>
                 <div class="faq-actions">
-                    <button class="btn-icon" data-action="modifier-question" data-question-id="${question.id}" title="Modifier" style="font-size: 18px;">
-                        ✏️
+                    <button class="btn-icon" data-action="modifier-question" data-question-id="${question.id}" title="Modifier" style="background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+                        Modifier
                     </button>
-                    <button class="btn-icon" data-action="supprimer-question" data-question-id="${question.id}" title="Supprimer" style="font-size: 18px;">
-                        🗑️
+                    <button class="btn-icon" data-action="supprimer-question" data-question-id="${question.id}" title="Supprimer" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+                        Supprimer
                     </button>
-                    <span style="font-size: 18px;">▼</span>
+                    <span style="font-size: 20px; margin-left: 10px; color: #667eea;">▼</span>
                 </div>
             </div>
             <div class="faq-body">
@@ -159,13 +159,13 @@ window.rechercherFAQ = function(terme) {
                         ${q.gite !== 'tous' ? `<span style="background: #e0e0e0; padding: 4px 8px; border-radius: 6px; font-size: 12px;">${q.gite}</span>` : ''}
                     </div>
                     <div class="faq-actions">
-                        <button class="btn-icon" data-action="modifier-question" data-question-id="${q.id}" title="Modifier" style="font-size: 18px;">
-                            ✏️
+                        <button class="btn-icon" data-action="modifier-question" data-question-id="${q.id}" title="Modifier" style="background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            Modifier
                         </button>
-                        <button class="btn-icon" data-action="supprimer-question" data-question-id="${q.id}" title="Supprimer" style="font-size: 18px;">
-                            🗑️
+                        <button class="btn-icon" data-action="supprimer-question" data-question-id="${q.id}" title="Supprimer" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            Supprimer
                         </button>
-                        <span class="faq-toggle" style="font-size: 18px;">▼</span>
+                        <span class="faq-toggle" style="font-size: 20px; margin-left: 10px; color: #667eea;">▼</span>
                     </div>
                 </div>
                 <div class="faq-body">
