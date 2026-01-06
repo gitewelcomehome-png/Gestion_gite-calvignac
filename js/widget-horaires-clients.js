@@ -58,7 +58,7 @@ export async function afficherHorairesClients() {
                 <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
                 <p>Aucune demande horaire validée récente</p>
             </div>
-        `;
+        `);
         return;
     }
     

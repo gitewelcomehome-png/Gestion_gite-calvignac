@@ -724,7 +724,7 @@ function afficherResultats(data) {
                 <button onclick="exporterPDF()" class="btn btn-secondary">📄 Exporter PDF</button>
             </div>
         </div>
-    `;
+    `);
     
     resultatDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
