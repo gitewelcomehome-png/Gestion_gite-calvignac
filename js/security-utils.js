@@ -66,8 +66,6 @@ export function setInnerHTML(element, html, config = {}) {
             styles.push(match[1]);
         }
         
-        console.log(`🔧 [setInnerHTML] Scripts: ${scripts.length}, Styles: ${styles.length}`);
-        
         // Injecter le HTML nettoyé
         element.innerHTML = DOMPurify.sanitize(html, trustedConfig);
         
@@ -77,7 +75,6 @@ export function setInnerHTML(element, html, config = {}) {
                 const style = document.createElement('style');
                 style.textContent = styleContent;
                 element.appendChild(style);
-                console.log(`✅ [setInnerHTML] Style ${index + 1} injecté`);
             }
         });
         
@@ -85,11 +82,9 @@ export function setInnerHTML(element, html, config = {}) {
         scripts.forEach((scriptContent, index) => {
             if (scriptContent.trim()) {
                 try {
-                    console.log(`🔧 [setInnerHTML] Exécution script ${index + 1}/${scripts.length}...`);
                     const script = document.createElement('script');
                     script.textContent = scriptContent;
                     element.appendChild(script);
-                    console.log(`✅ [setInnerHTML] Script ${index + 1} exécuté`);
                 } catch (err) {
                     console.error(`❌ [setInnerHTML] Erreur script ${index + 1}:`, err);
                 }
