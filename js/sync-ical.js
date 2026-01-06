@@ -40,7 +40,7 @@ async function syncAllCalendars() {
     if (syncBtn) syncBtn.disabled = true;
     if (syncProgress) {
         syncProgress.style.display = 'block';
-        syncMessages.innerHTML = '';
+        window.SecurityUtils.setInnerHTML(syncMessages, '');
     }
     
     let totalAdded = 0;
@@ -52,7 +52,7 @@ async function syncAllCalendars() {
         if (!syncMessages) return;
         const msg = document.createElement('div');
         msg.className = `progress-item ${type}`;
-        msg.innerHTML = type === 'info' ? `<span class="spinner"></span> ${text}` : `✓ ${text}`;
+        window.SecurityUtils.setInnerHTML(msg, type === 'info' ? `<span class="spinner"></span> ${text}` : `✓ ${text}`);
         syncMessages.appendChild(msg);
     }
     
@@ -136,7 +136,7 @@ async function syncAllCalendars() {
                 syncStatus.style.background = '#f8d7da';
                 syncStatusIcon.textContent = '🚨';
                 const errorDetails = window.SYNC_ERRORS.map(e => `${e.gite} ${e.platform}`).join(', ');
-                syncStatusText.innerHTML = `<strong>⚠️ ${totalErrors} flux iCal en échec</strong><br><small>${errorDetails}</small><br><small style="color: #721c24;">🔧 Allez dans ⚙️ Paramètres iCal pour mettre à jour les URLs</small>`;
+                window.SecurityUtils.setInnerHTML(syncStatusText, `<strong>⚠️ ${totalErrors} flux iCal en échec</strong><br><small>${errorDetails}</small><br><small style="color: #721c24;">🔧 Allez dans ⚙️ Paramètres iCal pour mettre à jour les URLs</small>`);
             } else {
                 syncStatus.style.background = '#d4edda';
                 syncStatusIcon.textContent = '✓';
