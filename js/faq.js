@@ -206,6 +206,12 @@ window.ajouterQuestionFAQ = function() {
     document.getElementById('question-id').value = '';
     document.getElementById('question-visible').checked = true;
     document.getElementById('modal-question-faq').style.display = 'block';
+    
+    // Validation temps réel
+    if (window.ValidationUtils) {
+        window.ValidationUtils.attachRealtimeValidation('question-titre', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('question-reponse', 'text', { required: true });
+    }
 };
 
 window.modifierQuestion = async function(id) {
@@ -229,6 +235,22 @@ window.fermerModalQuestion = function() {
 };
 
 window.sauvegarderQuestionFAQ = async function() {
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const form = document.getElementById('form-question-faq');
+        const rules = {
+            'question-titre': { type: 'text', required: true },
+            'question-reponse': { type: 'text', required: true }
+        };
+        
+        const validation = window.ValidationUtils.validateForm(form, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire FAQ invalide:', validation.errors);
+            showNotification('❌ Veuillez remplir tous les champs requis', 'error');
+            return;
+        }
+    }
+    
     const id = document.getElementById('question-id').value;
     const data = {
         categorie: document.getElementById('question-categorie').value,
