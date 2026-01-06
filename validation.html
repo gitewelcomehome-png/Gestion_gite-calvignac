@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Ménages - Entreprise</title>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .week-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #ecf0f1;
+        }
+
+        .week-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .week-dates {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .gites-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .gite-column {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .gite-column.trevoux {
+            border-left: 4px solid #FF6B6B;
+        }
+
+        .gite-column.couzon {
+            border-left: 4px solid #4ECDC4;
+        }
+
+        .gite-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .menage-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s;
+        }
+
+        .menage-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .menage-item.validated {
+            border-left-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .menage-item.pending {
+            border-left-color: #f39c12;
+        }
+
+        .menage-date {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+
+        .menage-client {
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .menage-period {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 5px;
+        }
+
+        .time-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .time-btn {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .time-btn:hover {
+            border-color: #3498db;
+        }
+
+        .time-btn.selected {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .date-selector {
+            margin-bottom: 10px;
+        }
+
+        .date-selector label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .date-selector input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-validate {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-propose {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-waiting {
+            background: #d1ecf1;
+            color: #0c5460;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .status-validated {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-refused {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-modified {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .notifications-banner {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .notification-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .notification-item.refused {
+            background: #fff5f5;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .notification-item.validated {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .notification-details {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .notification-reason {
+            background: rgba(0,0,0,0.05);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-style: italic;
+            color: #555;
+        }
+
+        .notification-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .banner-header {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-count {
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .gites-container {
+                grid-template-columns: 1fr;
+            }
+            .notification-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧹 Validation des Ménages</h1>
+            <p>Entreprise de ménage - Valider ou proposer d'autres dates</p>
+        </div>
+
+        <div id="notificationsBanner" style="display: none;"></div>
+
+        <div id="planningContainer">
+            <div class="week-card">
+                <div class="empty-state">
+                    <div class="empty-state-icon">⏳</div>
+                    <h2>Chargement...</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <span id="toastIcon" style="font-size: 1.5rem;">✓</span>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // Configuration Supabase
+        const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const messageEl = document.getElementById('toastMessage');
+
+            icon.textContent = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+            messageEl.textContent = message;
+            
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function displayNotifications(menages) {
+            const banner = document.getElementById('notificationsBanner');
+            
+            // Calculer la date limite (dans 2 semaines)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const twoWeeksLater = new Date(today);
+            twoWeeksLater.setDate(today.getDate() + 14);
+            
+            // Filtrer les notifications des 2 prochaines semaines uniquement
+            const menagesDeuxSemaines = menages.filter(m => {
+                const menageDate = m.scheduledDate;
+                return menageDate >= today && menageDate <= twoWeeksLater;
+            });
+            
+            // Afficher UNIQUEMENT les refusés (à corriger)
+            const notifications = menagesDeuxSemaines.filter(m => m.status === 'refused');
+            
+            if (notifications.length === 0) {
+                banner.style.display = 'none';
+                return;
+            }
+            
+            let html = '<div class="notifications-banner">';
+            html += '<div class="banner-header">';
+            html += '<span>🔔 Refus à corriger (2 prochaines semaines)</span>';
+            html += `<span class="notification-count">${notifications.length}</span>`;
+            html += '</div>';
+            
+            notifications.forEach(menageInfo => {
+                const menageDate = menageInfo.scheduledDate;
+                const day = menageDate.getDate();
+                const month = menageDate.getMonth() + 1;
+                const year = menageDate.getFullYear();
+                const dateFormatted = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+                
+                html += `<div class="notification-item refused">`;
+                html += `<span class="notification-icon">❌</span>`;
+                html += '<div class="notification-content">';
+                html += `<div class="notification-title">Refusé par le propriétaire</div>`;
+                html += `<div class="notification-details">`;
+                html += `<strong>${menageInfo.reservation.gite}</strong> - ${menageInfo.reservation.nom || 'Client'} - `;
+                html += `Ménage du ${dateFormatted}`;
+                html += `</div>`;
+                
+                if (menageInfo.cleaning?.notes) {
+                    html += `<div class="notification-reason">💬 Raison : ${menageInfo.cleaning.notes}</div>`;
+                }
+                
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            html += '</div>';
+            banner.innerHTML = html;
+            banner.style.display = 'block';
+        }
+
+        function parseLocalDate(dateStr) {
+            const [day, month, year] = dateStr.split('/');
+            return new Date(year, month - 1, day);
+        }
+
+        function getWeekNumber(date) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(), 0, 1);
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        async function loadPlanning() {
+            const container = document.getElementById('planningContainer');
+            
+            try {
+                // Récupérer toutes les réservations futures
+                const { data: reservations, error: resError } = await supabaseClient
+                    .from('reservations')
+                    .select('*')
+                    .order('date_fin', { ascending: true });
+
+                if (resError) throw resError;
+
+                // Récupérer tous les ménages planifiés
+                const { data: cleaningSchedules, error: cleanError } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .select('*');
+
+                if (cleanError) throw cleanError;
+
+                // Organiser par semaine
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const weeks = {};
+                
+                reservations.forEach(res => {
+                    const dateFin = new Date(res.date_fin);
+                    
+                    if (dateFin < today) return; // Ignorer le passé
+
+                    // Trouver le cleaning_schedule correspondant
+                    const cleaning = cleaningSchedules?.find(c => c.reservation_id === res.id);
+                    
+                    // Parser scheduled_date sans décalage horaire UTC
+                    let scheduledDate;
+                    if (cleaning?.scheduled_date) {
+                        const [year, month, day] = cleaning.scheduled_date.split('-');
+                        scheduledDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    } else {
+                        scheduledDate = dateFin;
+                    }
+                    
+                    // Trouver le lundi de la semaine
+                    const dayOfWeek = scheduledDate.getDay();
+                    const monday = new Date(scheduledDate);
+                    monday.setDate(scheduledDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+                    monday.setHours(0, 0, 0, 0);
+                    
+                    const weekKey = monday.toISOString().split('T')[0];
+                    
+                    if (!weeks[weekKey]) {
+                        const sunday = new Date(monday);
+                        sunday.setDate(monday.getDate() + 6);
+                        
+                        weeks[weekKey] = {
+                            monday,
+                            sunday,
+                            weekNumber: getWeekNumber(monday),
+                            trevoux: [],
+                            couzon: []
+                        };
+                    }
+                    
+                    // Trouver la prochaine réservation pour définir la période disponible
+                    // Filtrer, trier par date et prendre la plus proche
+                    const nextRes = reservations
+                        .filter(r => r.gite === res.gite && new Date(r.date_debut) >= dateFin)
+                        .sort((a, b) => new Date(a.date_debut) - new Date(b.date_debut))[0];
+                    
+                    const menageInfo = {
+                        reservation: res,
+                        cleaning: cleaning,
+                        dateFin: dateFin,
+                        scheduledDate: scheduledDate,
+                        nextReservationDate: nextRes ? new Date(nextRes.date_debut) : null,
+                        timeOfDay: cleaning?.time_of_day || 'afternoon',
+                        status: cleaning?.status || 'pending',
+                        validated: cleaning?.validated_by_company || false
+                    };
+                    
+                    if (res.gite.toLowerCase().includes('trévoux') || res.gite.toLowerCase().includes('trevoux')) {
+                        weeks[weekKey].trevoux.push(menageInfo);
+                    } else {
+                        weeks[weekKey].couzon.push(menageInfo);
+                    }
+                });
+
+                // Générer HTML
+                const sortedWeeks = Object.keys(weeks).sort();
+                
+                // Collecter tous les ménages pour les notifications
+                const allMenages = [];
+                Object.values(weeks).forEach(week => {
+                    allMenages.push(...week.trevoux);
+                    allMenages.push(...week.couzon);
+                });
+                
+                // Calculer la date limite (dans 2 semaines) - réutilisation de today déjà déclaré
+                const twoWeeksLater = new Date(today);
+                twoWeeksLater.setDate(today.getDate() + 14);
+                
+                // Filtrer les ménages des 2 prochaines semaines uniquement
+                const menagesDeuxSemaines = allMenages.filter(m => {
+                    const menageDate = m.scheduledDate;
+                    return menageDate >= today && menageDate <= twoWeeksLater;
+                });
+                
+                // Compter nouveaux ménages (pending) et modifications en attente (pending_validation)
+                // uniquement pour les 2 prochaines semaines
+                const nbNew = menagesDeuxSemaines.filter(m => m.status === 'pending').length;
+                const nbModified = menagesDeuxSemaines.filter(m => m.status === 'pending_validation').length;
+                
+                // Mettre à jour le titre de l'onglet avec compteurs
+                const totalNotifications = nbNew + nbModified;
+                if (totalNotifications > 0) {
+                    let title = '(';
+                    if (nbNew > 0) title += `🆕${nbNew}`;
+                    if (nbNew > 0 && nbModified > 0) title += ' ';
+                    if (nbModified > 0) title += `✏️${nbModified}`;
+                    title += ') Validation Ménage';
+                    document.title = title;
+                } else {
+                    document.title = 'Validation Ménage';
+                }
+
+                // Afficher les notifications
+                displayNotifications(allMenages);
+                
+                if (sortedWeeks.length === 0) {
+                    container.innerHTML = `
+                        <div class="week-card">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📭</div>
+                                <h2>Aucun ménage à planifier</h2>
+                                <p>Tous les ménages sont à jour</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                sortedWeeks.forEach(weekKey => {
+                    const week = weeks[weekKey];
+                    const weekDisplay = `${week.monday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} - ${week.sunday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}`;
+                    
+                    html += `
+                        <div class="week-card">
+                            <div class="week-header">
+                                <div class="week-title">Semaine ${week.weekNumber}</div>
+                                <div class="week-dates">${weekDisplay}</div>
+                            </div>
+                            <div class="gites-container">
+                                <div class="gite-column trevoux">
+                                    <div class="gite-header">🏡 Trévoux</div>
+                                    ${week.trevoux.length > 0 ? 
+                                        week.trevoux.map(m => generateMenageHTML(m)).join('') :
+                                        '<p style="color: #999; padding: 20px; text-align: center;">Aucun ménage</p>'
+                                    }
+                                </div>
+                                <div class="gite-column couzon">
+                                    <div class="gite-header">⛰️ Couzon</div>
+                                    ${week.couzon.length > 0 ? 
+                                        week.couzon.map(m => generateMenageHTML(m)).join('') :
+                                        '<p style="color: #999; padding: 20px; text-align: center;">Aucun ménage</p>'
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                container.innerHTML = `
+                    <div class="week-card">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">❌</div>
+                            <h2>Erreur de chargement</h2>
+                            <p>${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function generateMenageHTML(menage) {
+            const { reservation, cleaning, dateFin, scheduledDate, nextReservationDate, timeOfDay, status, validated } = menage;
+            
+            const statusBadge = validated ? 
+                '<span class="status-badge status-validated">✓ Validé par le client</span>' :
+                status === 'pending_validation' ?
+                '<span class="status-badge status-waiting">⏰ En attente validation client</span>' :
+                status === 'refused' ?
+                '<span class="status-badge status-refused">✗ Refusé</span>' :
+                '<span class="status-badge status-pending">⏳ En attente</span>';
+            
+            // Récupérer raison du refus si elle existe
+            const refusalReason = cleaning?.notes && status === 'refused' ? cleaning.notes : null;
+            
+            // Formater dates sans décalage UTC
+            const minDate = `${dateFin.getFullYear()}-${String(dateFin.getMonth() + 1).padStart(2, '0')}-${String(dateFin.getDate()).padStart(2, '0')}`;
+            const maxDate = nextReservationDate ? `${nextReservationDate.getFullYear()}-${String(nextReservationDate.getMonth() + 1).padStart(2, '0')}-${String(nextReservationDate.getDate()).padStart(2, '0')}` : null;
+            const scheduledDateISO = `${scheduledDate.getFullYear()}-${String(scheduledDate.getMonth() + 1).padStart(2, '0')}-${String(scheduledDate.getDate()).padStart(2, '0')}`;
+            
+            const periodText = nextReservationDate ?
+                `🚪 Départ: ${dateFin.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} | 🔑 Entrée suivante: ${nextReservationDate.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}` :
+                `🚪 Départ: ${dateFin.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}`;
+
+            const dateInputId = `date-${reservation.id}`;
+            const morningId = `morning-${reservation.id}`;
+            const afternoonId = `afternoon-${reservation.id}`;
+            const formId = `form-${reservation.id}`;
+
+            return `
+                <div class="menage-item ${validated ? 'validated' : status}">
+                    ${statusBadge}
+                    <div class="menage-date">
+                        📅 ${scheduledDate.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
+                        ${timeOfDay === 'morning' ? '🌅 Matin' : '🌇 Après-midi'}
+                    </div>
+                    <div class="menage-period">📍 ${periodText}</div>
+                    
+                    ${refusalReason ? `
+                        <div class="refusal-reason" style="background: #ffebee; padding: 10px; margin: 10px 0; border-left: 3px solid #f44336; border-radius: 4px;">
+                            <strong>❌ Refusé par le client :</strong>
+                            <p style="margin: 5px 0 0 0;">${refusalReason}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${!validated && status !== 'pending_validation' ? `
+                        <div id="${formId}" style="display: none;">
+                            <div class="date-selector">
+                                <label>Choisir une date :</label>
+                                <input 
+                                    type="date" 
+                                    id="${dateInputId}"
+                                    value="${scheduledDateISO}"
+                                    min="${minDate}"
+                                    ${maxDate ? `max="${maxDate}"` : ''}
+                                    onchange="checkDateForMorning(${reservation.id}, '${minDate}')"
+                                    data-departure-date="${minDate}"
+                                />
+                            </div>
+                            
+                            <div class="time-selector">
+                                <button 
+                                    type="button" 
+                                    class="time-btn ${timeOfDay === 'morning' ? 'selected' : ''}" 
+                                    id="${morningId}"
+                                    onclick="selectTime(${reservation.id}, 'morning')"
+                                >
+                                    🌅 Matin
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="time-btn ${timeOfDay === 'afternoon' ? 'selected' : ''}"
+                                    id="${afternoonId}"
+                                    onclick="selectTime(${reservation.id}, 'afternoon')"
+                                >
+                                    🌇 Après-midi
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="actions" id="actions-${reservation.id}">
+                            <button class="btn btn-validate" onclick="validateMenage(${reservation.id})" id="btn-validate-${reservation.id}">
+                                ✓ Valider
+                            </button>
+                            <button class="btn btn-propose" onclick="showProposeForm(${reservation.id})">
+                                📝 Modifier la date
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="actions">
+                            <button class="btn btn-cancel" onclick="cancelValidation(${reservation.id})">
+                                ↩️ Annuler validation
+                            </button>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        let selectedTimes = {};
+        
+        function showProposeForm(reservationId) {
+            const form = document.getElementById(`form-${reservationId}`);
+            const btnValidate = document.getElementById(`btn-validate-${reservationId}`);
+            const btnPropose = document.querySelector(`#actions-${reservationId} .btn-propose`);
+            
+            if (form) {
+                form.style.display = 'block';
+                // Cacher le bouton Valider, changer le texte et l'action du bouton Modifier
+                if (btnValidate) btnValidate.style.display = 'none';
+                if (btnPropose) {
+                    btnPropose.textContent = '📝 Proposer cette date';
+                    btnPropose.onclick = () => proposeMenage(reservationId);
+                }
+                
+                // Vérifier si on peut proposer le matin
+                const dateInput = document.getElementById(`date-${reservationId}`);
+                checkDateForMorning(reservationId, dateInput.dataset.departureDate);
+            }
+        }
+
+        function checkDateForMorning(reservationId, departureDate) {
+            const dateInput = document.getElementById(`date-${reservationId}`);
+            const morningBtn = document.getElementById(`morning-${reservationId}`);
+            const selectedDate = dateInput.value;
+            
+            // Si la date sélectionnée = date de départ, bloquer le matin
+            if (selectedDate === departureDate) {
+                morningBtn.disabled = true;
+                morningBtn.style.opacity = '0.5';
+                morningBtn.style.cursor = 'not-allowed';
+                morningBtn.title = 'Matin impossible le jour du départ';
+                
+                // Forcer l'après-midi
+                selectTime(reservationId, 'afternoon');
+            } else {
+                morningBtn.disabled = false;
+                morningBtn.style.opacity = '1';
+                morningBtn.style.cursor = 'pointer';
+                morningBtn.title = '';
+            }
+        }
+        
+        function selectTime(reservationId, timeOfDay) {
+            selectedTimes[reservationId] = timeOfDay;
+            
+            const morningBtn = document.getElementById(`morning-${reservationId}`);
+            const afternoonBtn = document.getElementById(`afternoon-${reservationId}`);
+            
+            if (timeOfDay === 'morning') {
+                morningBtn.classList.add('selected');
+                afternoonBtn.classList.remove('selected');
+            } else {
+                morningBtn.classList.remove('selected');
+                afternoonBtn.classList.add('selected');
+            }
+        }
+
+        async function validateMenage(reservationId) {
+            const dateInput = document.getElementById(`date-${reservationId}`);
+            
+            // Si le formulaire est caché, utiliser les valeurs actuelles
+            const form = document.getElementById(`form-${reservationId}`);
+            let scheduledDate, timeOfDay;
+            
+            if (form && form.style.display === 'none') {
+                // Valider la proposition actuelle
+                scheduledDate = dateInput.value;
+                timeOfDay = selectedTimes[reservationId] || 'afternoon';
+            } else {
+                // Utiliser les valeurs du formulaire
+                scheduledDate = dateInput.value;
+                timeOfDay = selectedTimes[reservationId] || 'afternoon';
+            }
+            
+            if (!scheduledDate) {
+                showToast('Veuillez sélectionner une date', 'error');
+                return;
+            }
+            
+            try {
+                // Récupérer les infos de la réservation pour le gite
+                const { data: reservation, error: resError } = await supabaseClient
+                    .from('reservations')
+                    .select('gite, date_fin, date_debut')
+                    .eq('id', reservationId)
+                    .single();
+                
+                if (resError) throw resError;
+                
+                const { error } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .upsert({
+                        reservation_id: reservationId,
+                        gite: reservation.gite,
+                        scheduled_date: scheduledDate,
+                        time_of_day: timeOfDay,
+                        status: 'validated',
+                        validated_by_company: true,
+                        proposed_date: null,
+                        reservation_end: reservation.date_fin
+                    }, { onConflict: 'reservation_id' });
+                
+                if (error) throw error;
+                
+                showToast('✓ Ménage validé !', 'success');
+                await loadPlanning();
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur: ' + error.message, 'error');
+            }
+        }
+
+        async function proposeMenage(reservationId) {
+            const dateInput = document.getElementById(`date-${reservationId}`);
+            const scheduledDate = dateInput.value;
+            const timeOfDay = selectedTimes[reservationId] || 'afternoon';
+            
+            if (!scheduledDate) {
+                showToast('Veuillez sélectionner une date', 'error');
+                return;
+            }
+            
+            try {
+                // Récupérer les infos de la réservation pour le gite
+                const { data: reservation, error: resError } = await supabaseClient
+                    .from('reservations')
+                    .select('gite, date_fin, date_debut')
+                    .eq('id', reservationId)
+                    .single();
+                
+                if (resError) throw resError;
+                
+                const dataToPropose = {
+                    reservation_id: reservationId,
+                    gite: reservation.gite,
+                    scheduled_date: scheduledDate,
+                    time_of_day: timeOfDay,
+                    status: 'pending_validation',
+                    validated_by_company: false
+                };
+                
+                console.log('📤 Données à proposer:', dataToPropose);
+                
+                const { data, error } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .upsert(dataToPropose, { onConflict: 'reservation_id' });
+                
+                if (error) {
+                    console.error('❌ Erreur Supabase:', error);
+                    throw error;
+                }
+                
+                console.log('✅ Proposition envoyée:', data);
+                
+                showToast('📝 Proposition envoyée !', 'success');
+                await loadPlanning();
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur: ' + error.message, 'error');
+            }
+        }
+
+        async function cancelValidation(reservationId) {
+            if (!confirm('Annuler la validation ?')) return;
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .update({
+                        status: 'pending',
+                        validated_by_company: false
+                    })
+                    .eq('reservation_id', reservationId);
+                
+                if (error) throw error;
+                
+                showToast('↩️ Validation annulée', 'success');
+                await loadPlanning();
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur: ' + error.message, 'error');
+            }
+        }
+
+        // Charger au démarrage
+        loadPlanning();
+
+        // Recharger toutes les 30 secondes
+        setInterval(loadPlanning, 30000);
+    </script>
+</body>
+</html>
