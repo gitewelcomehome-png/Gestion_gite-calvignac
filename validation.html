@@ -551,6 +551,9 @@
                 
                 const weeks = {};
                 
+                console.log('🔍 DEBUG: Nombre de réservations:', reservations.length);
+                console.log('🔍 DEBUG: Nombre de cleaning_schedules:', cleaningSchedules?.length);
+                
                 reservations.forEach(res => {
                     const dateFin = new Date(res.date_fin);
                     
@@ -559,13 +562,18 @@
                     // Trouver le cleaning_schedule correspondant
                     const cleaning = cleaningSchedules?.find(c => c.reservation_id === res.id);
                     
+                    console.log(`📋 Réservation ${res.id} (${res.gite}) - date_fin: ${res.date_fin}`);
+                    console.log(`   ➡️ cleaning.scheduled_date: ${cleaning?.scheduled_date || 'AUCUN'}`);
+                    
                     // Parser scheduled_date sans décalage horaire UTC
                     let scheduledDate;
                     if (cleaning?.scheduled_date) {
                         const [year, month, day] = cleaning.scheduled_date.split('-');
                         scheduledDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                        console.log(`   ➡️ scheduledDate parsée: ${scheduledDate.toLocaleDateString('fr-FR')}`);
                     } else {
                         scheduledDate = dateFin;
+                        console.log(`   ➡️ Utilisation date_fin par défaut: ${scheduledDate.toLocaleDateString('fr-FR')}`);
                     }
                     
                     // Trouver le lundi de la semaine
