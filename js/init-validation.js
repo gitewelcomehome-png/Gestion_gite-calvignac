@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!validation.valid) {
                 e.preventDefault();
                 console.warn('❌ Formulaire invalide:', validation.errors);
-                alert('Veuillez corriger les erreurs dans le formulaire');
+                // Les erreurs sont déjà affichées sous chaque champ par validateForm()
                 return false;
             }
             
