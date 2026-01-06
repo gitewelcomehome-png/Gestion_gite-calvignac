@@ -1536,6 +1536,13 @@
         }
         
         function genererMenageCard(m) {
+            console.log('🎴 genererMenageCard:', {
+                nom: m.reservation.nom,
+                date_fin: m.reservation.date_fin || m.reservation.dateFin,
+                dateMenage: m.dateMenage.toLocaleDateString('fr-FR'),
+                nextArrivee: m.nextArrivee?.toLocaleDateString('fr-FR') || 'aucune'
+            });
+            
             const statusClass = m.validated ? 'validated' : m.status === 'pending_validation' ? 'pending-validation' : '';
             const statusBadge = m.validated ? 
                 '<span class="menage-status status-validated">✓ Validé</span>' :
