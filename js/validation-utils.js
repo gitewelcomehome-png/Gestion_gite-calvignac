@@ -261,23 +261,38 @@ export function attachRealtimeValidation(fieldId, ruleType, options = {}) {
             // Autoriser UNIQUEMENT chiffres, +, espace, tiret
             // Pas de lettres du tout !
             this.value = this.value.replace(/[^0-9+\- ]/g, '');
+            // Limiter à 14 caractères (format international: +33 6 12 34 56 78 = 14 car)
+            if (this.value.length > 14) {
+                this.value = this.value.substring(0, 14);
+            }
         });
         field.addEventListener('keypress', function(e) {
             // Bloquer aussi au keypress pour une réaction instantanée
             const char = String.fromCharCode(e.which || e.keyCode);
-            if (!/[0-9+\- ]/.test(char)) {
+            const currentLength = e.target.value.length;
+            if (!/[0-9+\- ]/.test(char) || currentLength >= 14) {
                 e.preventDefault();
                 return false;
             }
         });
     } else if (ruleType === 'hours') {
-        // Pour les horaires: autoriser lettres, chiffres, h, :, espace, point
+        // Pour les horaires: autoriser chiffres, h, :, espace et lettres françaises
+        const allowedChars = /[^0-9h:. àÀâÂäÄéèêëÉÈÊËïîÏÎôöÔÖùûüÙÛÜçÇa-zA-Z'-]/g;
+        const allowedCharsTest = /[0-9h:. àÀâÂäÄéèêëÉÈÊËïîÏÎôöÔÖùûüÙÛÜçÇa-zA-Z'-]/;
+        
         field.addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9h:. àÀpartideéèvnPàéèêôùûüïABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'-]/g, '');
+            const before = this.value;
+            this.value = this.value.replace(allowedChars, '');
+            if (this.value.length > 100) {
+                this.value = this.value.substring(0, 100);
+            }
+            if (before !== this.value) {
+                console.log('🚫 Caractères invalides bloqués dans horaires');
+            }
         });
         field.addEventListener('keypress', function(e) {
             const char = String.fromCharCode(e.which || e.keyCode);
-            if (!/[0-9h:. àÀpartideéèvnPàéèêôùûüïABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'-]/.test(char)) {
+            if (!allowedCharsTest.test(char)) {
                 e.preventDefault();
                 return false;
             }
