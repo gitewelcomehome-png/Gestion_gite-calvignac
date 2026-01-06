@@ -63,7 +63,7 @@ function initMapActivites(giteLat, giteLon, activites) {
     }
     
     // S'assurer que le conteneur est vide
-    mapContainer.innerHTML = '';
+    window.SecurityUtils.setInnerHTML(mapContainer, '');
     
     // Créer la carte avec zoom plus proche (16 au lieu de 12)
     mapActivitesInstance = L.map(mapContainer).setView([giteLat, giteLon], 16);
@@ -153,11 +153,11 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
     const listeContainer = document.getElementById('listeActivites');
     
     if (!activites || activites.length === 0) {
-        listeContainer.innerHTML = `
+        window.SecurityUtils.setInnerHTML(listeContainer, `
             <div class="card" style="text-align: center; padding: 2rem; color: var(--gray-600);">
                 ℹ️ Aucune activité configurée pour ce gîte
             </div>
-        `;
+        `);
         return;
     }
     
@@ -208,7 +208,7 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
         `;
     });
     
-    listeContainer.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(listeContainer, html);
 }
 
 // Afficher une activité sur la carte
@@ -216,7 +216,7 @@ window.showActivityOnMap = function(actLat, actLon, actName, actId) {
     const mapContainer = document.getElementById('mapActivites');
     
     // Utiliser Google Maps Directions qui montre les 2 points (départ et arrivée)
-    mapContainer.innerHTML = `
+    window.SecurityUtils.setInnerHTML(mapContainer, `
         <iframe 
             width="100%" 
             height="400" 
@@ -256,7 +256,7 @@ window.showActivityOnMap = function(actLat, actLon, actName, actId) {
 window.resetMapToGite = function() {
     const mapContainer = document.getElementById('mapActivites');
     
-    mapContainer.innerHTML = `
+    window.SecurityUtils.setInnerHTML(mapContainer, `
         <iframe 
             width="100%" 
             height="400" 
