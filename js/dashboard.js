@@ -1455,18 +1455,22 @@ async function afficherGraphiqueTresorerieDashboard() {
 // ==========================================
 
 async function refreshDashboard() {
+    console.log('📊 refreshDashboard() démarré');
     updateDashboardHeader();
     await updateDashboardAlerts();
     await updateDemandesClients();
     await updateProblemesClients(); // Nouvelle fonction pour problèmes/retours
     await updateDashboardStats();
+    console.log('📅 Chargement réservations...');
     await updateDashboardReservations();
+    console.log('🧹 Chargement ménages...');
     await updateDashboardMenages();
     await updateTodoLists();
     await updateFinancialIndicators();
     // Initialiser le modal si pas déjà fait
     initializeTodoModal();
     initializeReponseWhatsappModal();
+    console.log('✅ refreshDashboard() terminé');
 }
 
 function initializeReponseWhatsappModal() {
