@@ -1141,6 +1141,9 @@ function updateProgressInfos() {
     if (progressText) progressText.textContent = Math.round(percent) + '%';
 }
 
+// Auto-save avec debounce
+let autoSaveTimeout = null;
+
 window.sauvegarderInfosGiteComplet = function(event) {
     if (event) event.preventDefault();
     sauvegarderDonneesInfos();
@@ -1148,6 +1151,55 @@ window.sauvegarderInfosGiteComplet = function(event) {
         showNotification('✓ Informations sauvegardées pour ' + currentGiteInfos, 'success');
     }
 };
+
+function autoSaveInfos() {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(() => {
+        sauvegarderDonneesInfos();
+        // Toast discret
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+        toast.textContent = '💾 Sauvegardé';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1500);
+    }, 800); // Attendre 800ms après la dernière frappe
+}
+
+function attachAutoSave() {
+    const form = document.getElementById('infosGiteForm');
+    if (!form) return;
+    
+    // Tous les inputs, textareas, selects
+    const fields = form.querySelectorAll('input, textarea, select');
+    fields.forEach(field => {
+        // Pour inputs/textareas: sauvegarder après arrêt de frappe
+        if (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA') {
+            field.addEventListener('input', autoSaveInfos);
+            field.addEventListener('blur', () => {
+                clearTimeout(autoSaveTimeout);
+                sauvegarderDonneesInfos();
+            });
+        }
+        // Pour selects: sauvegarder immédiatement
+        if (field.tagName === 'SELECT') {
+            field.addEventListener('change', () => {
+                clearTimeout(autoSaveTimeout);
+                sauvegarderDonneesInfos();
+            });
+        }
+    });
+    
+    console.log('✅ Auto-save activé sur', fields.length, 'champs');
+}
+
+// Attacher auto-save quand le tab est chargé
+if (typeof chargerDonneesInfos !== 'undefined') {
+    const originalChargerDonneesInfos = chargerDonneesInfos;
+    chargerDonneesInfos = async function() {
+        await originalChargerDonneesInfos();
+        setTimeout(attachAutoSave, 500);
+    };
+}
 
 window.resetGiteInfosQuick = async function() {
     if (!confirm(`⚠️ ATTENTION !\n\nVoulez-vous vraiment effacer TOUTES les informations du gîte ${currentGiteInfos} ?\n\n✓ Ceci supprimera :\n- Adresse et coordonnées\n- Informations WiFi\n- Instructions d'arrivée\n- Équipements\n- Toutes les autres données\n\n❌ Cette action est IRRÉVERSIBLE !\n\nCliquez sur OK pour confirmer la suppression.`)) {
