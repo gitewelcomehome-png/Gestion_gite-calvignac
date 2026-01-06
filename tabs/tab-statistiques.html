@@ -218,7 +218,7 @@
                 
                 <!-- Section Graphiques dans un slide collapsible -->
                 <div style="margin-top: 30px; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
-                    <div onclick="toggleSlide('slide-graphiques')" style="cursor: pointer; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
+                    <div data-slide-target="slide-graphiques" style="cursor: pointer; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
                         <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">
                             📊 Graphiques Comparatifs
                         </h3>
@@ -269,12 +269,11 @@ window.toggleSlide = function(slideId) {
 
 // Event delegation pour les clics sur les titres dépliables
 document.addEventListener('click', function(e) {
-    const target = e.target.closest('[onclick*="toggleSlide"]');
-    if (target && target.onclick) {
-        e.preventDefault();
-        const match = target.getAttribute('onclick').match(/toggleSlide\('([^']+)'\)/);
-        if (match) {
-            window.toggleSlide(match[1]);
+    const target = e.target.closest('[data-slide-target]');
+    if (target) {
+        const slideId = target.getAttribute('data-slide-target');
+        if (slideId) {
+            window.toggleSlide(slideId);
         }
     }
 });
