@@ -486,51 +486,31 @@ async function updateTodoLists() {
 }
 
 async function updateTodoList(category) {
-    console.log(`[updateTodoList] Category: ${category}`);
-    
     const { data: todos } = await supabase
         .from('todos')
         .select('*')
         .eq('category', category)
-        .eq('completed', false) // Seulement les tâches non complétées
-        .is('archived_at', null) // Seulement les tâches non archivées
+        .eq('completed', false)
+        .is('archived_at', null)
         .order('created_at', { ascending: true });
     
-    console.log(`[updateTodoList] Todos récupérées pour ${category}:`, todos?.length || 0, todos);
-    
-    // Filtrer les tâches dont la date d'occurrence est passée ou inexistante
     const now = new Date();
-    console.log(`[updateTodoList] Date actuelle:`, now);
-    
     const visibleTodos = todos?.filter(todo => {
         if (!todo.is_recurrent || !todo.next_occurrence) {
-            console.log(`[updateTodoList] Todo ${todo.id} "${todo.title}" visible (non récurrente ou sans next_occurrence)`);
-            return true; // Tâche normale ou récurrente sans date = visible
+            return true;
         }
-        // Tâche récurrente : visible seulement si la date est passée
         const nextOcc = new Date(todo.next_occurrence);
-        const visible = nextOcc <= now;
-        console.log(`[updateTodoList] Todo ${todo.id} "${todo.title}" récurrente, next_occurrence: ${todo.next_occurrence}, visible: ${visible}`);
-        return visible;
+        return nextOcc <= now;
     }) || [];
     
-    console.log(`[updateTodoList] Todos visibles pour ${category}:`, visibleTodos.length, visibleTodos);
-    
     const container = document.getElementById(`todo-${category}`);
-    console.log(`[updateTodoList] Container #todo-${category}:`, container ? 'trouvé' : 'NON TROUVÉ');
-    
-    if (!container) {
-        console.error(`[updateTodoList] ❌ Container non trouvé, abandon`);
-        return;
-    }
+    if (!container) return;
     
     if (!visibleTodos || visibleTodos.length === 0) {
-        console.log(`[updateTodoList] Aucune todo visible, affichage message vide`);
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>';
         return;
     }
     
-    console.log(`[updateTodoList] Construction HTML pour ${visibleTodos.length} todos...`);
     let html = '';
     visibleTodos.forEach(todo => {
         const recurrentBadge = todo.is_recurrent ? '<span style="background: #9B59B6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px;">🔁 Récurrent</span>' : '';
@@ -565,32 +545,7 @@ async function updateTodoList(category) {
             </div>`;
     });
     
-    console.log(`[updateTodoList] HTML construit (${html.length} caractères), injection dans container...`);
     container.innerHTML = html;
-    console.log(`[updateTodoList] ✅ innerHTML injecté, container.children.length:`, container.children.length);
-    
-    // Vérifier les styles des todos injectées
-    if (container.children.length > 0) {
-        const firstTodo = container.children[0];
-        const todoStyles = window.getComputedStyle(firstTodo);
-        console.log(`[updateTodoList] 🎨 Styles première todo:`, {
-            display: todoStyles.display,
-            visibility: todoStyles.visibility,
-            opacity: todoStyles.opacity,
-            height: todoStyles.height,
-            width: todoStyles.width
-        });
-        
-        // Vérifier si le HTML est toujours là après 1 seconde
-        setTimeout(() => {
-            console.log(`[updateTodoList] ⏱️ Vérification après 1s pour ${category}:`);
-            console.log(`  - container.children.length:`, container.children.length);
-            console.log(`  - container.innerHTML.length:`, container.innerHTML.length);
-            if (container.children.length === 0) {
-                console.error(`[updateTodoList] ❌ LES TODOS ONT DISPARU !`);
-            }
-        }, 1000);
-    }
 }
 
 async function addTodoItem(category) {
