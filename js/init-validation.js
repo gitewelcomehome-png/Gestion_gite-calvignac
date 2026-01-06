@@ -55,26 +55,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // FORMULAIRE INFOS PRATIQUES
     // ==========================================
     
-    // Téléphone
+    // Téléphone (obligatoire - champ d'urgence)
     const infos_telephone = document.getElementById('infos_telephone');
     if (infos_telephone) {
-        window.ValidationUtils.attachRealtimeValidation('infos_telephone', 'phone', { required: false });
+        window.ValidationUtils.attachRealtimeValidation('infos_telephone', 'phone', { required: true });
     }
     
     const infos_telephone_en = document.getElementById('infos_telephone_en');
     if (infos_telephone_en) {
-        window.ValidationUtils.attachRealtimeValidation('infos_telephone_en', 'phone', { required: false });
+        window.ValidationUtils.attachRealtimeValidation('infos_telephone_en', 'phone', { required: true });
     }
     
-    // Email
+    // Email (obligatoire)
     const infos_email = document.getElementById('infos_email');
     if (infos_email) {
-        window.ValidationUtils.attachRealtimeValidation('infos_email', 'email', { required: false });
+        window.ValidationUtils.attachRealtimeValidation('infos_email', 'email', { required: true });
     }
     
     const infos_email_en = document.getElementById('infos_email_en');
     if (infos_email_en) {
-        window.ValidationUtils.attachRealtimeValidation('infos_email_en', 'email', { required: false });
+        window.ValidationUtils.attachRealtimeValidation('infos_email_en', 'email', { required: true });
     }
     
     // Heures (texte avec format heure attendu)
