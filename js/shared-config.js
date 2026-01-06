@@ -2,19 +2,24 @@
 // CONFIGURATION GLOBALE ET CONSTANTES
 // ==========================================
 
-// Configuration fuseau horaire
-const TIMEZONE = window.APP_CONFIG?.TIMEZONE || 'Europe/Paris';
-
-// Configuration Supabase - Chargée depuis config.js
-const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL;
-const SUPABASE_KEY = window.APP_CONFIG?.SUPABASE_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.error('❌ Configuration Supabase non chargée');
-    console.error('APP_CONFIG:', window.APP_CONFIG);
-} else {
-    console.log('✅ Configuration Supabase chargée');
+// Initialiser APP_CONFIG s'il n'existe pas déjà
+if (typeof window.APP_CONFIG === 'undefined') {
+    window.APP_CONFIG = {
+        TIMEZONE: 'Europe/Paris',
+        SUPABASE_URL: 'https://ivqiisnudabxemcxxyru.supabase.co',
+        SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4'
+    };
+    console.log('✅ Configuration par défaut chargée');
 }
+
+// Configuration fuseau horaire
+const TIMEZONE = window.APP_CONFIG.TIMEZONE;
+
+// Configuration Supabase
+const SUPABASE_URL = window.APP_CONFIG.SUPABASE_URL;
+const SUPABASE_KEY = window.APP_CONFIG.SUPABASE_KEY;
+
+console.log('✅ Config OK:', { hasUrl: !!SUPABASE_URL, hasKey: !!SUPABASE_KEY });
 
 // Initialiser Supabase (une seule fois)
 // Note: window.supabase est la bibliothèque chargée depuis le CDN
