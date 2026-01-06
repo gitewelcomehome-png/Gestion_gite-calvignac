@@ -41,9 +41,23 @@ async function initDraps() {
     
     // Attacher les événements onclick (car SecurityUtils les supprime)
     const btnCalculer = document.querySelector('#tab-draps button.btn-primary');
+    console.log('🔍 Boutons trouvés:', document.querySelectorAll('#tab-draps button').length);
+    console.log('🔍 Bouton spécifique:', btnCalculer);
+    
     if (btnCalculer) {
         console.log('✅ Bouton Calculer trouvé, attachement onclick');
-        btnCalculer.onclick = simulerBesoins;
+        btnCalculer.addEventListener('click', function(e) {
+            console.log('🖱️ CLIC DÉTECTÉ sur bouton Calculer !');
+            e.preventDefault();
+            simulerBesoins();
+        });
+        
+        // Test direct
+        btnCalculer.onclick = function(e) {
+            console.log('🖱️ ONCLICK DÉCLENCHÉ !');
+            e.preventDefault();
+            simulerBesoins();
+        };
     } else {
         console.error('❌ Bouton Calculer non trouvé');
     }
