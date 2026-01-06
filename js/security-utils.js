@@ -43,14 +43,14 @@ export function setInnerHTML(element, html, config = {}) {
     }
     
     // Pour le contenu "trusted" (fichiers HTML statiques du projet), 
-    // utiliser la config par défaut de DOMPurify (très permissive) en bloquant seulement le dangereux
+    // autoriser tout (y compris <script> et <style>) car c'est du contenu contrôlé
     if (config.trusted) {
         const trustedConfig = {
-            // Ne pas spécifier ALLOWED_TAGS/ALLOWED_ATTR = utiliser les defaults permissifs de DOMPurify
             ALLOW_DATA_ATTR: true,
             KEEP_CONTENT: true,
-            FORBID_TAGS: ['script', 'object', 'embed', 'applet'],  // Bloquer l'exécution de code
-            FORBID_ATTR: ['onerror', 'onload']  // Bloquer les event handlers dangereux
+            // Pour le contenu trusted, autoriser les scripts (ce sont NOS fichiers)
+            // mais bloquer quand même les event handlers dangereux pour la cohérence
+            FORBID_ATTR: ['onerror', 'onload']
         };
         element.innerHTML = DOMPurify.sanitize(html, trustedConfig);
     } else {
