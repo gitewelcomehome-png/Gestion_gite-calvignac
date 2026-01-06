@@ -307,7 +307,7 @@
             
             if (error) {
                 console.error('Erreur chargement commit:', error);
-                tooltip.innerHTML = '<div style="color: #e74c3c;">❌ Erreur de chargement</div>';
+                window.SecurityUtils.setInnerHTML(tooltip, '<div style="color: #e74c3c;">❌ Erreur de chargement</div>');
                 return;
             }
             
@@ -322,20 +322,20 @@
                     minute: '2-digit'
                 });
                 
-                tooltip.innerHTML = `
+                window.SecurityUtils.setInnerHTML(tooltip, `
                     <strong>📌 Commit :</strong> ${commit.commit_ref}<br>
                     <strong>📅 Date :</strong> ${dateStr}<br>
                     <strong>💬 Résumé :</strong><br>
                     <div style="margin-top: 6px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-size: 0.9em;">
                         ${commit.resume}
                     </div>
-                `;
+                `);
             } else {
-                tooltip.innerHTML = '<div style="color: #999;">Aucun commit enregistré</div>';
+                window.SecurityUtils.setInnerHTML(tooltip, '<div style="color: #999;">Aucun commit enregistré</div>');
             }
         } catch (err) {
             console.error('Erreur:', err);
-            tooltip.innerHTML = '<div style="color: #e74c3c;">❌ Erreur</div>';
+            window.SecurityUtils.setInnerHTML(tooltip, '<div style="color: #e74c3c;">❌ Erreur</div>');
         }
     }
     
@@ -362,7 +362,7 @@
             fetch(file)
                 .then(r => r.text())
                 .then(html => {
-                    document.getElementById(tabId).innerHTML = html;
+                    window.SecurityUtils.setInnerHTML(document.getElementById(tabId), html);
                     // Initialiser la FAQ après chargement du HTML
                     if (tabId === 'tab-faq' && typeof window.initFAQ === 'function') {
                         window.initFAQ();
@@ -848,7 +848,7 @@
             archives.sort((a, b) => parseLocalDate(b.dateFin) - parseLocalDate(a.dateFin));
             
             if (archives.length === 0) {
-                section.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune archive</p>';
+                window.SecurityUtils.setInnerHTML(section, '<p style="text-align: center; color: #999; padding: 40px;">Aucune archive</p>');
                 return;
             }
             
@@ -875,7 +875,7 @@
             });
             
             html += '</div>';
-            section.innerHTML = html;
+            window.SecurityUtils.setInnerHTML(section, html);
         }
         
         async function updateStats() {
@@ -993,7 +993,7 @@
                 `;
             });
             
-            container.innerHTML = html;
+            window.SecurityUtils.setInnerHTML(container, html);
         }
         
         // ==========================================
@@ -1061,7 +1061,7 @@
             // Liste des charges
             const chargesList = document.getElementById('chargesList');
             if (charges.length === 0) {
-                chargesList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Aucune charge enregistrée</p>';
+                window.SecurityUtils.setInnerHTML(chargesList, '<p style="text-align: center; color: #999; padding: 20px;">Aucune charge enregistrée</p>');
                 return;
             }
             
@@ -1084,7 +1084,7 @@
                 `;
             });
             
-            chargesList.innerHTML = html;
+            window.SecurityUtils.setInnerHTML(chargesList, html);
         }
         
         async function deleteChargeById(id) {
@@ -1324,7 +1324,7 @@
             const container = document.getElementById('historicalYearsList');
             
             if (data.length === 0) {
-                container.innerHTML = '<p style="color: #999; font-style: italic;">Aucune donnée historique enregistrée</p>';
+                window.SecurityUtils.setInnerHTML(container, '<p style="color: #999; font-style: italic;">Aucune donnée historique enregistrée</p>');
                 return;
             }
             
@@ -1355,7 +1355,7 @@
             });
             html += '</div>';
             
-            container.innerHTML = html;
+            window.SecurityUtils.setInnerHTML(container, html);
         }
         
         // ==========================================
@@ -1719,7 +1719,7 @@
                     `;
                 });
                 
-                document.getElementById('menagePlanningWeeks').innerHTML = html;
+                window.SecurityUtils.setInnerHTML(document.getElementById('menagePlanningWeeks'), html);
                 
             } catch (err) {
                 console.error('❌ Erreur affichage planning:', err);
@@ -2133,7 +2133,7 @@
             
             html += '</div>';
             
-            document.getElementById('menagePlanning').innerHTML = html;
+            window.SecurityUtils.setInnerHTML(document.getElementById('menagePlanning'), html);
         }
         
         function generateCleaningItemHTML(menageInfo) {
@@ -2909,12 +2909,12 @@
             const container = document.getElementById('activitesParCategorie');
             
             if (activitesFiltrees.length === 0) {
-                container.innerHTML = `
+                window.SecurityUtils.setInnerHTML(container, `
                     <div style="text-align: center; padding: 40px; background: #fff3cd; border-radius: 12px; border-left: 4px solid #f59e0b;">
                         <h3 style="color: #856404; margin-bottom: 10px;">Aucun résultat pour "${categorieRecherchee}"</h3>
                         <p style="color: #666;">Essayez d'ajouter des activités de cette catégorie manuellement ci-dessous.</p>
                     </div>
-                `;
+                `);
                 return;
                 return;
             }
@@ -2980,7 +2980,7 @@
             });
             
             html += '</div></div>';
-            container.innerHTML = html;
+            window.SecurityUtils.setInnerHTML(container, html);
             
             showNotification(`✓ ${activitesFiltrees.length} activité(s) trouvée(s) pour "${categorieRecherchee}"`, 'success');
         }
@@ -3172,7 +3172,7 @@
             window.allEvenements = genererEvenementsSemaine(gite);
             
             if (window.allEvenements.length === 0) {
-                evenementsDiv.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun événement trouvé pour ce gîte</p>';
+                window.SecurityUtils.setInnerHTML(evenementsDiv, '<p style="text-align: center; color: #999; padding: 40px;">Aucun événement trouvé pour ce gîte</p>');
                 showNotification('⚠️ Aucun événement trouvé', 'warning');
                 mapDiv.style.display = 'none';
                 return;
@@ -3204,7 +3204,7 @@
             const gite = document.getElementById('decouvrir_gite').value;
             
             if (evenementsFiltres.length === 0) {
-                evenementsDiv.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun événement trouvé dans ce rayon</p>';
+                window.SecurityUtils.setInnerHTML(evenementsDiv, '<p style="text-align: center; color: #999; padding: 40px;">Aucun événement trouvé dans ce rayon</p>');
                 return;
             }
             
@@ -3231,7 +3231,7 @@
                 `;
             });
             
-            evenementsDiv.innerHTML = html;
+            window.SecurityUtils.setInnerHTML(evenementsDiv, html);
         }
         
         // Variables globales pour la carte
@@ -3373,7 +3373,7 @@
                     
                 } catch (error) {
                     console.error('❌ Erreur création carte:', error);
-                    mapContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Erreur lors du chargement de la carte</p>';
+                    window.SecurityUtils.setInnerHTML(mapContainer, '<p style="text-align: center; padding: 40px; color: #999;">Erreur lors du chargement de la carte</p>');
                     return;
                 }
             }
@@ -4245,10 +4245,10 @@
                 animation: slideIn 0.3s ease;
             `;
             
-            notification.innerHTML = `
+            window.SecurityUtils.setInnerHTML(notification, `
                 <span style="font-size: 1.2rem;">${icons[type] || icons.info}</span>
                 <span>${message}</span>
-            `;
+            `);
             
             // Ajouter au conteneur
             container.appendChild(notification);
@@ -4396,7 +4396,7 @@
                 .then(r => r.text())
                 .then(html => {
                     const container = document.getElementById(tabId);
-                    if (container) container.innerHTML = html;
+                    if (container) window.SecurityUtils.setInnerHTML(container, html);
                 })
                 .catch(err => console.error(`Erreur chargement ${file}:`, err));
         });
