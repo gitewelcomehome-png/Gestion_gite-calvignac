@@ -48,26 +48,40 @@ export function setInnerHTML(element, html, config = {}) {
         const trustedConfig = {
             ALLOW_DATA_ATTR: true,
             KEEP_CONTENT: true,
-            ADD_TAGS: ['style'],  // Autoriser explicitement <style>
-            // Pour le contenu trusted, autoriser les scripts (ce sont NOS fichiers)
-            // mais bloquer quand même les event handlers dangereux pour la cohérence
             FORBID_ATTR: ['onerror', 'onload']
         };
         
-        // Extraire les scripts avant sanitization (DOMPurify les garde mais ils ne s'exécutent pas via innerHTML)
+        // Extraire les scripts ET les styles avant sanitization
         const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+        const styleRegex = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
         const scripts = [];
+        const styles = [];
         let match;
+        
         while ((match = scriptRegex.exec(html)) !== null) {
-            scripts.push(match[1]); // Contenu du script
+            scripts.push(match[1]);
         }
         
-        console.log(`🔧 [setInnerHTML] Scripts trouvés: ${scripts.length}`);
+        while ((match = styleRegex.exec(html)) !== null) {
+            styles.push(match[1]);
+        }
+        
+        console.log(`🔧 [setInnerHTML] Scripts: ${scripts.length}, Styles: ${styles.length}`);
         
         // Injecter le HTML nettoyé
         element.innerHTML = DOMPurify.sanitize(html, trustedConfig);
         
-        // Exécuter les scripts extraits (nécessaire car innerHTML ne les exécute pas)
+        // Injecter les styles extraits
+        styles.forEach((styleContent, index) => {
+            if (styleContent.trim()) {
+                const style = document.createElement('style');
+                style.textContent = styleContent;
+                element.appendChild(style);
+                console.log(`✅ [setInnerHTML] Style ${index + 1} injecté`);
+            }
+        });
+        
+        // Exécuter les scripts extraits
         scripts.forEach((scriptContent, index) => {
             if (scriptContent.trim()) {
                 try {
