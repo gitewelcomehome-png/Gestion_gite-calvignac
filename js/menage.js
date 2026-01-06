@@ -466,15 +466,24 @@ async function afficherPlanningParSemaine() {
                 .sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut))[0];
             
             try {
+                // Formater les dates sans décalage UTC
+                const scheduledDateStr = `${dateMenage.getFullYear()}-${String(dateMenage.getMonth() + 1).padStart(2, '0')}-${String(dateMenage.getDate()).padStart(2, '0')}`;
+                const reservationEndStr = `${dateFin.getFullYear()}-${String(dateFin.getMonth() + 1).padStart(2, '0')}-${String(dateFin.getDate()).padStart(2, '0')}`;
+                let nextResDateStr = null;
+                if (nextRes) {
+                    const nextResDate = parseLocalDate(nextRes.dateFin);
+                    nextResDateStr = `${nextResDate.getFullYear()}-${String(nextResDate.getMonth() + 1).padStart(2, '0')}-${String(nextResDate.getDate()).padStart(2, '0')}`;
+                }
+                
                 await window.supabaseClient.from('cleaning_schedule').upsert({
                     reservation_id: r.id,
                     gite: r.gite,
-                    scheduled_date: dateMenage.toISOString().split('T')[0],
+                    scheduled_date: scheduledDateStr,
                     time_of_day: calculatedTimeOfDay,
                     status: 'pending',
                     validated_by_company: false,
-                    reservation_end: dateFin.toISOString().split('T')[0],
-                    reservation_start_after: nextRes ? parseLocalDate(nextRes.dateFin).toISOString().split('T')[0] : null
+                    reservation_end: reservationEndStr,
+                    reservation_start_after: nextResDateStr
                 }, { onConflict: 'reservation_id' });
             } catch (err) {
                 console.error('Erreur upsert:', err);
