@@ -1059,7 +1059,7 @@
 </style>
 
 <script>
-function toggleBloc(titleElement) {
+window.toggleBloc = function(titleElement) {
     const bloc = titleElement.closest('.fiscal-bloc');
     bloc.classList.toggle('collapsed');
 }
