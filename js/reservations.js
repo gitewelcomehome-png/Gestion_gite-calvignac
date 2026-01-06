@@ -111,7 +111,7 @@ function displayFilteredReservations(reservations) {
     });
     
     html += '</div>';
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 // ==========================================
@@ -240,7 +240,7 @@ async function updateReservationsList(keepScrollPosition = false) {
     if (!container) return;
     
     if (active.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation</p>');
         return;
     }
     
@@ -304,7 +304,7 @@ async function updateReservationsList(keepScrollPosition = false) {
     });
     
     html += '</div>';
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
     
     // Scroller automatiquement vers la première semaine SEULEMENT si on ne garde pas la position
     if (!keepScrollPosition) {
