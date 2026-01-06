@@ -250,16 +250,50 @@ export function attachRealtimeValidation(fieldId, ruleType, options = {}) {
     // Validation à la saisie pour bloquer caractères invalides
     if (ruleType === 'phone') {
         field.addEventListener('input', function(e) {
-            // Autoriser uniquement chiffres, +, espace, -, .
-            this.value = this.value.replace(/[^\d+\s.-]/g, '');
+            // Autoriser UNIQUEMENT chiffres, +, espace, tiret
+            // Pas de lettres du tout !
+            this.value = this.value.replace(/[^0-9+\- ]/g, '');
+        });
+        field.addEventListener('keypress', function(e) {
+            // Bloquer aussi au keypress pour une réaction instantanée
+            const char = String.fromCharCode(e.which || e.keyCode);
+            if (!/[0-9+\- ]/.test(char)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    } else if (ruleType === 'email') {
+        // Pour email, pas de filtrage de saisie mais validation stricte au blur
+        field.addEventListener('input', function(e) {
+            // Nettoyer les espaces au début/fin
+            this.value = this.value.trim();
         });
     } else if (ruleType === 'amount' || ruleType === 'integer') {
         field.addEventListener('input', function(e) {
             // Autoriser uniquement chiffres et . pour montant
             if (ruleType === 'amount') {
                 this.value = this.value.replace(/[^\d.]/g, '');
+                // Limiter à un seul point décimal
+                const parts = this.value.split('.');
+                if (parts.length > 2) {
+                    this.value = parts[0] + '.' + parts.slice(1).join('');
+                }
             } else {
                 this.value = this.value.replace(/[^\d]/g, '');
+            }
+        });
+        field.addEventListener('keypress', function(e) {
+            const char = String.fromCharCode(e.which || e.keyCode);
+            if (ruleType === 'amount') {
+                if (!/[\d.]/.test(char)) {
+                    e.preventDefault();
+                    return false;
+                }
+            } else {
+                if (!/\d/.test(char)) {
+                    e.preventDefault();
+                    return false;
+                }
             }
         });
     }
