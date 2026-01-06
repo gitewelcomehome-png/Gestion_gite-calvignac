@@ -10,53 +10,12 @@
         <p>Réponses aux questions courantes des clients</p>
     </div>
     <div class="header-actions">
-        <button class="btn-primary" onclick="ajouterQuestionFAQ()">
+        <button class="btn-primary" data-action="ajouter-question">
             <i class="fas fa-plus"></i> Ajouter une Question
         </button>
-        <button class="btn-secondary" onclick="exporterFAQHTML()">
+        <button class="btn-secondary" data-action="exporter-html">
             <i class="fas fa-file-export"></i> Exporter en HTML
         </button>
-    </div>
-</div>
-
-    <!-- Barre de recherche -->
-    <div class="search-section" style="margin-bottom: 20px;">
-        <div class="search-box" style="max-width: 600px; margin: 0 auto;">
-            <input type="text" 
-                   id="faq-search" 
-                   placeholder="🔍 Rechercher une question..."
-                   oninput="rechercherFAQ(this.value)"
-                   style="width: 100%; padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 50px; font-size: 16px; transition: all 0.3s;">
-        </div>
-    </div>
-
-    <!-- Filtres par catégorie -->
-    <div class="filters-section" style="margin-bottom: 20px;">
-        <div class="filter-chips">
-            <button class="chip active" data-category="all" onclick="filtrerFAQ('all')">
-                Toutes
-            </button>
-            <button class="chip" data-category="arrivee" onclick="filtrerFAQ('arrivee')">
-                🔑 Arrivée
-            </button>
-            <button class="chip" data-category="depart" onclick="filtrerFAQ('depart')">
-                🚪 Départ
-            </button>
-            <button class="chip" data-category="equipements" onclick="filtrerFAQ('equipements')">
-                🏠 Équipements
-            </button>
-            <button class="chip" data-category="localisation" onclick="filtrerFAQ('localisation')">
-                📍 Localisation
-            </button>
-            <button class="chip" data-category="tarifs" onclick="filtrerFAQ('tarifs')">
-                💰 Tarifs
-            </button>
-            <button class="chip" data-category="reglement" onclick="filtrerFAQ('reglement')">
-                📋 Règlement
-            </button>
-            <button class="chip" data-category="autre" onclick="filtrerFAQ('autre')">
-                ℹ️ Autre
-            </button>
     </div>
 </div>
 
@@ -134,11 +93,44 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn-secondary" onclick="fermerModalQuestion()">Annuler</button>
-            <button class="btn-primary" onclick="sauvegarderQuestionFAQ()">Enregistrer</button>
+            <button class="btn-secondary" data-action="fermer-modal">Annuler</button>
+            <button class="btn-primary" data-action="sauvegarder-question">Enregistrer</button>
         </div>
     </div>
 </div>
+
+<script>
+// Event delegation pour les boutons FAQ
+document.addEventListener('click', function(e) {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    
+    const actionType = action.getAttribute('data-action');
+    
+    switch(actionType) {
+        case 'ajouter-question':
+            if (typeof window.ajouterQuestionFAQ === 'function') {
+                window.ajouterQuestionFAQ();
+            }
+            break;
+        case 'exporter-html':
+            if (typeof window.exporterFAQHTML === 'function') {
+                window.exporterFAQHTML();
+            }
+            break;
+        case 'fermer-modal':
+            if (typeof window.fermerModalQuestion === 'function') {
+                window.fermerModalQuestion();
+            }
+            break;
+        case 'sauvegarder-question':
+            if (typeof window.sauvegarderQuestionFAQ === 'function') {
+                window.sauvegarderQuestionFAQ();
+            }
+            break;
+    }
+});
+</script>
 
 <style>
 /* Boutons */
