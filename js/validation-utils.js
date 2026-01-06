@@ -247,6 +247,23 @@ export function attachRealtimeValidation(fieldId, ruleType, options = {}) {
     const field = document.getElementById(fieldId);
     if (!field) return;
     
+    // Validation à la saisie pour bloquer caractères invalides
+    if (ruleType === 'phone') {
+        field.addEventListener('input', function(e) {
+            // Autoriser uniquement chiffres, +, espace, -, .
+            this.value = this.value.replace(/[^\d+\s.-]/g, '');
+        });
+    } else if (ruleType === 'amount' || ruleType === 'integer') {
+        field.addEventListener('input', function(e) {
+            // Autoriser uniquement chiffres et . pour montant
+            if (ruleType === 'amount') {
+                this.value = this.value.replace(/[^\d.]/g, '');
+            } else {
+                this.value = this.value.replace(/[^\d]/g, '');
+            }
+        });
+    }
+    
     field.addEventListener('blur', function() {
         const result = validateValue(this.value, ruleType, options);
         if (!result.valid) {
