@@ -152,15 +152,52 @@ async function syncAllCalendars() {
  * @returns {Promise<{added: number, skipped: number}>} - Résultat de la synchronisation
  */
 async function syncCalendar(gite, platform, url) {
-    // Utiliser corsproxy.io au lieu de allorigins (plus fiable)
-    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+    // Essayer plusieurs proxies CORS en cascade
+    const proxies = [
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+    ];
+    
+    let text;
+    let lastError;
+    
+    // Essayer chaque proxy jusqu'à ce qu'un fonctionne
+    for (const proxyUrl of proxies) {
+        try {
+            console.log(`🔄 Tentative avec proxy: ${proxyUrl.split('?')[0]}`);
+            const response = await fetch(proxyUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            text = await response.text();
+            
+            // Vérifier que c'est bien du iCal, pas une page d'erreur HTML
+            if (!text.includes('BEGIN:VCALENDAR')) {
+                throw new Error('Réponse invalide (pas de VCALENDAR)');
+            }
+            
+            console.log(`✅ Proxy réussi: ${proxyUrl.split('?')[0]}`);
+            break; // Proxy fonctionne, sortir de la boucle
+        } catch (err) {
+            lastError = err;
+            console.warn(`⚠️ Proxy échoué: ${proxyUrl.split('?')[0]} - ${err.message}`);
+            continue; // Essayer le prochain proxy
+        }
+    }
+    
+    // Si aucun proxy n'a fonctionné
+    if (!text) {
+        throw new Error(`Tous les proxies ont échoué. Dernière erreur: ${lastError?.message}`);
+    }
     
     try {
-        const response = await fetch(proxyUrl);
-        const text = await response.text();
         const jcalData = ICAL.parse(text);
         const comp = new ICAL.Component(jcalData);
         const vevents = comp.getAllSubcomponents('vevent');
+        
+        console.log(`🔍 ========== DÉBUT ANALYSE iCal ${gite} / ${platform} ==========`);
+        console.log(`📊 Nombre total d'événements dans le flux: ${vevents.length}`);
         
         let added = 0;
         let skipped = 0;
@@ -201,6 +238,17 @@ async function syncCalendar(gite, platform, url) {
         
         // Créer un Set des IDs de réservations trouvées dans le flux iCal
         const foundReservationIds = new Set();
+        
+        // 🔍 AFFICHER TOUS LES ÉVÉNEMENTS BRUTS AVANT FILTRAGE
+        console.log(`\n📋 LISTE COMPLÈTE DES ÉVÉNEMENTS (avant filtrage):`);
+        vevents.forEach((vevent, index) => {
+            const event = new ICAL.Event(vevent);
+            const summary = event.summary || '';
+            const dateDebut = dateToLocalString(event.startDate.toJSDate());
+            const dateFin = dateToLocalString(event.endDate.toJSDate());
+            console.log(`   ${index + 1}. "${summary}" | ${dateDebut} → ${dateFin}`);
+        });
+        console.log(`\n🔄 DÉBUT DU TRAITEMENT:\n`);
         
         for (const vevent of vevents) {
             const event = new ICAL.Event(vevent);
