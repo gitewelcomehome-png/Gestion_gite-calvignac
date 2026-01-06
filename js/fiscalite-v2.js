@@ -287,7 +287,7 @@ function ajouterTravaux() {
     const item = document.createElement('div');
     item.className = 'liste-item';
     item.id = `travaux-${id}`;
-    item.innerHTML = `
+    window.SecurityUtils.setInnerHTML(item, `
         <input type="text" placeholder="Description" id="travaux-desc-${id}">
         <select id="travaux-gite-${id}">
             <option value="couzon">Couzon</option>
@@ -296,7 +296,7 @@ function ajouterTravaux() {
         </select>
         <input type="number" step="0.01" placeholder="Montant €" id="travaux-montant-${id}">
         <button type="button" onclick="supprimerItem('travaux-${id}')">×</button>
-    `;
+    `);
     container.appendChild(item);
     // Les événements sont gérés automatiquement par la délégation sur le formulaire
 }
@@ -307,7 +307,7 @@ function ajouterFraisDivers() {
     const item = document.createElement('div');
     item.className = 'liste-item';
     item.id = `frais-${id}`;
-    item.innerHTML = `
+    window.SecurityUtils.setInnerHTML(item, `
         <input type="text" placeholder="Description" id="frais-desc-${id}">
         <select id="frais-gite-${id}">
             <option value="couzon">Couzon</option>
@@ -316,7 +316,7 @@ function ajouterFraisDivers() {
         </select>
         <input type="number" step="0.01" placeholder="Montant €" id="frais-montant-${id}">
         <button type="button" onclick="supprimerItem('frais-${id}')">×</button>
-    `;
+    `);
     container.appendChild(item);
 }
 
@@ -326,7 +326,7 @@ function ajouterProduitAccueil() {
     const item = document.createElement('div');
     item.className = 'liste-item';
     item.id = `produits-${id}`;
-    item.innerHTML = `
+    window.SecurityUtils.setInnerHTML(item, `
         <input type="text" placeholder="Description" id="produits-desc-${id}">
         <select id="produits-gite-${id}">
             <option value="couzon">Couzon</option>
@@ -617,7 +617,7 @@ function calculerFiscalite(event) {
 function afficherResultats(data) {
     const resultatDiv = document.getElementById('resultats-fiscalite');
     resultatDiv.style.display = 'block';
-    resultatDiv.innerHTML = `
+    window.SecurityUtils.setInnerHTML(resultatDiv, `
         <div id="resultats-content" style="background: linear-gradient(135deg, var(--primary) 0%, #2980b9 100%); color: white; padding: 25px; border-radius: 15px;">
             <h3 style="text-align: center; font-size: 1.8rem; margin-bottom: 20px;">📊 RÉSULTATS FISCAUX LMP</h3>
             
@@ -749,7 +749,7 @@ async function chargerListeAnnees() {
         const selector = document.getElementById('annee_selector');
         if (!selector) return;
         
-        selector.innerHTML = '';
+        window.SecurityUtils.setInnerHTML(selector, '');
         
         // Si aucune année, créer l'année actuelle
         if (anneesUniques.length === 0) {
@@ -821,9 +821,9 @@ async function chargerAnnee(annee) {
         if (parseInt(annee) === anneeActuelle) {
             
             // Vider les listes de travaux, frais divers et produits d'accueil
-            document.getElementById('travaux-liste').innerHTML = '';
-            document.getElementById('frais-divers-liste').innerHTML = '';
-            document.getElementById('produits-accueil-liste').innerHTML = '';
+            window.SecurityUtils.setInnerHTML(document.getElementById('travaux-liste'), '');
+            window.SecurityUtils.setInnerHTML(document.getElementById('frais-divers-liste'), '');
+            window.SecurityUtils.setInnerHTML(document.getElementById('produits-accueil-liste'), '');
             travauxCounter = 0;
             fraisDiversCounter = 0;
             produitsCounter = 0;
@@ -1181,9 +1181,9 @@ function chargerDonneesFormulaire(data) {
     }
     
     // Restaurer les listes dynamiques
-    document.getElementById('travaux-liste').innerHTML = '';
-    document.getElementById('frais-divers-liste').innerHTML = '';
-    document.getElementById('produits-accueil-liste').innerHTML = '';
+    window.SecurityUtils.setInnerHTML(document.getElementById('travaux-liste'), '');
+    window.SecurityUtils.setInnerHTML(document.getElementById('frais-divers-liste'), '');
+    window.SecurityUtils.setInnerHTML(document.getElementById('produits-accueil-liste'), '');
     travauxCounter = 0;
     fraisDiversCounter = 0;
     produitsCounter = 0;
@@ -1226,7 +1226,7 @@ function chargerDonneesFormulaire(data) {
     
     // Restaurer les crédits
     if (document.getElementById('credits-liste-container')) {
-        document.getElementById('credits-liste-container').innerHTML = '';
+        window.SecurityUtils.setInnerHTML(document.getElementById('credits-liste-container'), '');
         creditsCounter = 0;
         
         if (data.credits_liste) {
@@ -1552,9 +1552,9 @@ async function chargerDerniereSimulation() {
         // Restaurer les listes dynamiques
         
         // Réinitialiser les conteneurs
-        document.getElementById('travaux-liste').innerHTML = '';
-        document.getElementById('frais-divers-liste').innerHTML = '';
-        document.getElementById('produits-accueil-liste').innerHTML = '';
+        window.SecurityUtils.setInnerHTML(document.getElementById('travaux-liste'), '');
+        window.SecurityUtils.setInnerHTML(document.getElementById('frais-divers-liste'), '');
+        window.SecurityUtils.setInnerHTML(document.getElementById('produits-accueil-liste'), '');
         travauxCounter = 0;
         fraisDiversCounter = 0;
         produitsCounter = 0;
@@ -1601,7 +1601,7 @@ async function chargerDerniereSimulation() {
             // Réinitialiser le conteneur des crédits
             const creditsContainer = document.getElementById('credits-liste');
             if (creditsContainer) {
-                creditsContainer.innerHTML = '';
+                window.SecurityUtils.setInnerHTML(creditsContainer, '');
                 creditsCounter = 0;
                 credits.forEach(item => {
                     ajouterCredit();
@@ -1636,9 +1636,9 @@ async function chargerDerniereSimulation() {
 
 function nouvelleSimulation() {
     document.getElementById('calculateur-lmp').reset();
-    document.getElementById('travaux-liste').innerHTML = '';
-    document.getElementById('frais-divers-liste').innerHTML = '';
-    document.getElementById('produits-accueil-liste').innerHTML = '';
+    window.SecurityUtils.setInnerHTML(document.getElementById('travaux-liste'), '');
+    window.SecurityUtils.setInnerHTML(document.getElementById('frais-divers-liste'), '');
+    window.SecurityUtils.setInnerHTML(document.getElementById('produits-accueil-liste'), '');
     document.getElementById('resultats-fiscalite').style.display = 'none';
     travauxCounter = 0;
     fraisDiversCounter = 0;
@@ -1733,12 +1733,12 @@ function ajouterCredit() {
     const item = document.createElement('div');
     item.className = 'credit-item';
     item.id = `credit-${id}`;
-    item.innerHTML = `
+    window.SecurityUtils.setInnerHTML(item, `
         <input type="text" placeholder="Description du crédit" id="credit-desc-${id}">
         <input type="number" step="0.01" placeholder="Mensualité €" id="credit-mensuel-${id}">
         <input type="number" step="0.01" placeholder="Capital restant €" id="credit-capital-${id}">
         <button type="button" onclick="supprimerCredit('credit-${id}')">×</button>
-    `;
+    `);
     container.appendChild(item);
     calculerResteAVivre();
 }
@@ -1931,13 +1931,13 @@ function genererTableauSoldes() {
     const mois = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
                   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
     
-    tbody.innerHTML = '';
+    window.SecurityUtils.setInnerHTML(tbody, '');
     
     mois.forEach((nomMois, index) => {
         const numeroMois = index + 1;
         const row = document.createElement('tr');
         row.style.borderBottom = '1px solid #ddd';
-        row.innerHTML = `
+        window.SecurityUtils.setInnerHTML(row, `
             <td style="padding: 10px; font-weight: 500;">${nomMois} ${annee}</td>
             <td style="padding: 10px; text-align: center;">
                 <input type="number" 
