@@ -510,6 +510,8 @@ async function updateTodoList(category) {
     
     const container = document.getElementById(`todo-${category}`);
     
+    if (!container) return;
+    
     if (!visibleTodos || visibleTodos.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>';
         return;
