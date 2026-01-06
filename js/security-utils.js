@@ -20,8 +20,8 @@ export function sanitizeHTML(dirty, config = {}) {
     if (!dirty) return '';
     
     const defaultConfig = {
-        ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'small', 'button', 'img'],
-        ALLOWED_ATTR: ['href', 'title', 'target', 'style', 'class', 'type', 'data-activite-id', 'src', 'alt', 'onclick', 'onmouseover', 'onmouseout'],
+        ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'small', 'button', 'img', 'input', 'textarea', 'select', 'option', 'label', 'form', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'section', 'article', 'nav', 'header', 'footer', 'aside', 'main', 'figure', 'figcaption', 'canvas', 'svg', 'path', 'circle', 'rect', 'line', 'polygon', 'polyline'],
+        ALLOWED_ATTR: ['href', 'title', 'target', 'style', 'class', 'type', 'data-activite-id', 'src', 'alt', 'onclick', 'onmouseover', 'onmouseout', 'id', 'name', 'value', 'placeholder', 'required', 'disabled', 'checked', 'selected', 'for', 'min', 'max', 'step', 'pattern', 'maxlength', 'minlength', 'rows', 'cols', 'readonly', 'autocomplete', 'multiple', 'size'],
         ALLOW_DATA_ATTR: true,
         // ⚠️ Bloquer les event handlers dangereux
         FORBID_ATTR: ['onerror', 'onload']
