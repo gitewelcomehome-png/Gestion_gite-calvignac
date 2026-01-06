@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Test Security Utils</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            padding: 40px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { 
+            color: #667eea; 
+            margin-bottom: 10px; 
+            font-size: 2rem;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+        .test-section { 
+            margin-bottom: 40px; 
+            padding: 20px; 
+            background: #f8f9fa; 
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        h2 { 
+            color: #333; 
+            margin-bottom: 15px; 
+            font-size: 1.3rem;
+        }
+        .test-case { 
+            margin: 15px 0; 
+            padding: 15px; 
+            background: white; 
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+        .test-title { 
+            font-weight: 600; 
+            color: #333; 
+            margin-bottom: 8px;
+        }
+        .test-result { 
+            padding: 10px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            font-size: 0.9rem;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .demo-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin: 10px 0;
+            transition: border-color 0.3s;
+        }
+        .demo-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .input-error {
+            border-color: #dc3545 !important;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .stat-card {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Test Security Utils</h1>
+        <p class="subtitle">Phase 3 - Protection XSS & Validation</p>
+
+        <!-- Section 1: Sanitization XSS -->
+        <div class="test-section">
+            <h2>🧹 Test 1: Sanitization XSS</h2>
+            
+            <div class="test-case">
+                <div class="test-title">Test script malveillant</div>
+                <div id="test-xss-result" class="test-result info">En attente...</div>
+            </div>
+
+            <div class="test-case">
+                <div class="test-title">Test HTML avec attributs dangereux</div>
+                <div id="test-html-result" class="test-result info">En attente...</div>
+            </div>
+
+            <div class="test-case">
+                <div class="test-title">Test iframe injection</div>
+                <div id="test-iframe-result" class="test-result info">En attente...</div>
+            </div>
+
+            <button onclick="runXSSTests()">🧪 Lancer tests XSS</button>
+        </div>
+
+        <!-- Section 2: Validation données -->
+        <div class="test-section">
+            <h2>✅ Test 2: Validation des données</h2>
+            
+            <div class="test-case">
+                <div class="test-title">Emails</div>
+                <div id="test-email-result" class="test-result info">En attente...</div>
+            </div>
+
+            <div class="test-case">
+                <div class="test-title">Téléphones</div>
+                <div id="test-phone-result" class="test-result info">En attente...</div>
+            </div>
+
+            <div class="test-case">
+                <div class="test-title">Montants</div>
+                <div id="test-amount-result" class="test-result info">En attente...</div>
+            </div>
+
+            <button onclick="runValidationTests()">🧪 Lancer tests validation</button>
+        </div>
+
+        <!-- Section 3: Formulaire interactif -->
+        <div class="test-section">
+            <h2>📝 Test 3: Validation formulaire en direct</h2>
+            
+            <form id="demoForm">
+                <input type="email" class="demo-input" placeholder="Email" name="email" id="demoEmail">
+                <input type="tel" class="demo-input" placeholder="Téléphone (ex: 0612345678)" name="phone" id="demoPhone">
+                <input type="text" class="demo-input" placeholder="Montant (ex: 150.50)" name="amount" id="demoAmount">
+                <button type="button" onclick="validateDemoForm()">✅ Valider</button>
+                <button type="button" onclick="resetDemoForm()">🔄 Réinitialiser</button>
+            </form>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-passed">0</div>
+                <div class="stat-label">Tests réussis</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-failed">0</div>
+                <div class="stat-label">Tests échoués</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-total">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charger security-utils -->
+    <script type="module">
+        import * as SecurityUtils from './js/security-utils.js';
+        
+        // Rendre disponible globalement pour les tests
+        window.SecurityUtils = SecurityUtils;
+        
+        console.log('✅ Security Utils chargé:', SecurityUtils);
+        console.log('🛡️ Fonctions disponibles:', Object.keys(SecurityUtils));
+    </script>
+
+    <script>
+        let passed = 0;
+        let failed = 0;
+
+        function updateStats() {
+            document.getElementById('stat-passed').textContent = passed;
+            document.getElementById('stat-failed').textContent = failed;
+            document.getElementById('stat-total').textContent = passed + failed;
+        }
+
+        function showResult(elementId, isSuccess, message) {
+            const el = document.getElementById(elementId);
+            el.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            el.textContent = `${isSuccess ? '✅' : '❌'} ${message}`;
+            
+            if (isSuccess) passed++;
+            else failed++;
+            updateStats();
+        }
+
+        function runXSSTests() {
+            passed = 0;
+            failed = 0;
+
+            // Test 1: Script injection
+            const maliciousScript = '<img src=x onerror="alert(\'XSS\')"> <script>alert("hack")</script>';
+            const sanitized1 = window.SecurityUtils.sanitizeHTML(maliciousScript);
+            const safe1 = !sanitized1.includes('<script>') && !sanitized1.includes('onerror');
+            showResult('test-xss-result', safe1, safe1 ? 'Script bloqué avec succès' : 'DANGER: Script non bloqué!');
+
+            // Test 2: Attributs dangereux
+            const maliciousHTML = '<a href="javascript:alert(1)">Click</a><div onclick="alert(2)">Test</div>';
+            const sanitized2 = window.SecurityUtils.sanitizeHTML(maliciousHTML);
+            const safe2 = !sanitized2.includes('javascript:') && !sanitized2.includes('onclick');
+            showResult('test-html-result', safe2, safe2 ? 'Attributs dangereux supprimés' : 'DANGER: Attributs non bloqués!');
+
+            // Test 3: Iframe injection
+            const maliciousIframe = '<iframe src="evil.com"></iframe><embed src="bad.swf">';
+            const sanitized3 = window.SecurityUtils.sanitizeHTML(maliciousIframe);
+            const safe3 = !sanitized3.includes('<iframe') && !sanitized3.includes('<embed');
+            showResult('test-iframe-result', safe3, safe3 ? 'Iframes/embeds bloqués' : 'DANGER: Iframes non bloqués!');
+        }
+
+        function runValidationTests() {
+            // Test emails
+            const emails = [
+                { value: 'test@example.com', valid: true },
+                { value: 'invalid-email', valid: false },
+                { value: 'test@', valid: false },
+                { value: '@example.com', valid: false }
+            ];
+            const emailResults = emails.map(e => window.SecurityUtils.validateEmail(e.value) === e.valid);
+            const emailPass = emailResults.every(r => r);
+            showResult('test-email-result', emailPass, 
+                emailPass ? '4/4 tests réussis' : `${emailResults.filter(r => r).length}/4 tests réussis`);
+
+            // Test téléphones
+            const phones = [
+                { value: '0612345678', valid: true },
+                { value: '06 12 34 56 78', valid: true },
+                { value: '+33612345678', valid: true },
+                { value: '123', valid: false },
+                { value: 'abcd', valid: false }
+            ];
+            const phoneResults = phones.map(p => window.SecurityUtils.validatePhone(p.value) === p.valid);
+            const phonePass = phoneResults.every(r => r);
+            showResult('test-phone-result', phonePass, 
+                phonePass ? '5/5 tests réussis' : `${phoneResults.filter(r => r).length}/5 tests réussis`);
+
+            // Test montants
+            const amounts = [
+                { value: '150', valid: true },
+                { value: '150.50', valid: true },
+                { value: '0', valid: true },
+                { value: '-50', valid: false },
+                { value: 'abc', valid: false },
+                { value: '150.555', valid: false } // Trop de décimales
+            ];
+            const amountResults = amounts.map(a => window.SecurityUtils.validateAmount(a.value) === a.valid);
+            const amountPass = amountResults.every(r => r);
+            showResult('test-amount-result', amountPass, 
+                amountPass ? '6/6 tests réussis' : `${amountResults.filter(r => r).length}/6 tests réussis`);
+        }
+
+        function validateDemoForm() {
+            const email = document.getElementById('demoEmail');
+            const phone = document.getElementById('demoPhone');
+            const amount = document.getElementById('demoAmount');
+
+            // Clear previous errors
+            [email, phone, amount].forEach(input => window.SecurityUtils.clearInputError(input));
+
+            let isValid = true;
+
+            // Validate email
+            if (!window.SecurityUtils.validateEmail(email.value)) {
+                window.SecurityUtils.markInputError(email, 'Email invalide');
+                isValid = false;
+            }
+
+            // Validate phone
+            if (!window.SecurityUtils.validatePhone(phone.value)) {
+                window.SecurityUtils.markInputError(phone, 'Téléphone invalide (ex: 0612345678)');
+                isValid = false;
+            }
+
+            // Validate amount
+            if (!window.SecurityUtils.validateAmount(amount.value)) {
+                window.SecurityUtils.markInputError(amount, 'Montant invalide (nombre positif, max 2 décimales)');
+                isValid = false;
+            }
+
+            if (isValid) {
+                alert('✅ Formulaire valide !');
+            }
+        }
+
+        function resetDemoForm() {
+            document.getElementById('demoForm').reset();
+            [document.getElementById('demoEmail'), document.getElementById('demoPhone'), document.getElementById('demoAmount')]
+                .forEach(input => window.SecurityUtils.clearInputError(input));
+        }
+    </script>
+</body>
+</html>

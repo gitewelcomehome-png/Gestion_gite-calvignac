@@ -462,12 +462,21 @@ async function syncCalendar(gite, platform, url) {
                 }
                 
                 // Vérifier si la réservation est enrichie
-                const isEnriched = 
-                    (oldResa.nom && !oldResa.nom.includes('Client') && !oldResa.nom.includes('BOOKED') && !oldResa.nom.includes('Reserved')) ||
-                    oldResa.email ||
-                    oldResa.telephone ||
-                    oldResa.personnes > 0 ||
-                    (oldResa.montant && oldResa.montant > 0);
+                const hasCustomName = oldResa.nom && !oldResa.nom.includes('Client') && !oldResa.nom.includes('BOOKED') && !oldResa.nom.includes('Reserved');
+                const hasEmail = !!oldResa.email;
+                const hasPhone = !!oldResa.telephone;
+                const hasPeople = oldResa.personnes > 0;
+                const hasAmount = oldResa.montant && oldResa.montant > 0;
+                
+                const isEnriched = hasCustomName || hasEmail || hasPhone || hasPeople || hasAmount;
+                
+                console.log(`🔍 ANALYSE ENRICHISSEMENT: ${oldResa.nom}`);
+                console.log(`   - Nom personnalisé: ${hasCustomName} (nom="${oldResa.nom}")`);
+                console.log(`   - Email: ${hasEmail} (email="${oldResa.email}")`);
+                console.log(`   - Téléphone: ${hasPhone} (tel="${oldResa.telephone}")`);
+                console.log(`   - Personnes: ${hasPeople} (personnes=${oldResa.personnes})`);
+                console.log(`   - Montant: ${hasAmount} (montant=${oldResa.montant})`);
+                console.log(`   => ENRICHIE: ${isEnriched}`);
                 
                 if (isEnriched) {
                     console.log(`🔒 Conservation réservation enrichie (non supprimée): ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
