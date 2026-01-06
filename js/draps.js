@@ -39,25 +39,17 @@ async function initDraps() {
     await chargerStocks();
     await analyserReservations();
     
-    // Attacher les événements onclick (car SecurityUtils les supprime)
-    const btnCalculer = document.querySelector('#tab-draps button.btn-primary');
-    console.log('🔍 Boutons trouvés:', document.querySelectorAll('#tab-draps button').length);
-    console.log('🔍 Bouton spécifique:', btnCalculer);
-    
-    if (btnCalculer) {
-        console.log('✅ Bouton Calculer trouvé, attachement onclick');
+    // Attacher l'événement au bouton Calculer (celui après #date-simulation)
+    const dateInput = document.getElementById('date-simulation');
+    if (dateInput && dateInput.nextElementSibling) {
+        const btnCalculer = dateInput.nextElementSibling;
+        console.log('✅ Bouton Calculer trouvé:', btnCalculer.textContent);
+        
         btnCalculer.addEventListener('click', function(e) {
-            console.log('🖱️ CLIC DÉTECTÉ sur bouton Calculer !');
+            console.log('🖱️ CLIC DÉTECTÉ !');
             e.preventDefault();
             simulerBesoins();
         });
-        
-        // Test direct
-        btnCalculer.onclick = function(e) {
-            console.log('🖱️ ONCLICK DÉCLENCHÉ !');
-            e.preventDefault();
-            simulerBesoins();
-        };
     } else {
         console.error('❌ Bouton Calculer non trouvé');
     }
