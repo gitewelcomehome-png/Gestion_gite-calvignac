@@ -644,6 +644,13 @@ function telechargerPlanningMenage() {
     showToast('✓ Planning Excel téléchargé !');
 }
 
+/**
+ * Ouvre la page espace femme de ménage
+ */
+function ouvrirPageFemmeMenage() {
+    window.open('femme-menage.html', '_blank');
+}
+
 // Exporter les fonctions dans le scope global
 window.calculerDateMenage = calculerDateMenage;
 window.isJourFerie = isJourFerie;
@@ -652,3 +659,4 @@ window.genererPlanningMenage = genererPlanningMenage;
 window.afficherPlanningParSemaine = afficherPlanningParSemaine;
 window.generateCleaningItemHTML = generateCleaningItemHTML;
 window.telechargerPlanningMenage = telechargerPlanningMenage;
+window.ouvrirPageFemmeMenage = ouvrirPageFemmeMenage;
