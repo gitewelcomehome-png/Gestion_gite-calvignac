@@ -519,11 +519,18 @@ async function afficherPlanningParSemaine() {
     // Générer le HTML
     let html = '<div style="margin-top: 20px;">';
     
+    console.log('🧹 GÉNÉRATION PLANNING MÉNAGE');
+    console.log('📊 Nombre de semaines:', sortedWeeks.length);
+    
     sortedWeeks.forEach((weekKey, index) => {
         const week = weeks[weekKey];
         const monday = week.monday;
         const sunday = new Date(monday);
         sunday.setDate(monday.getDate() + 6);
+        
+        console.log(`\n📅 Semaine ${index + 1}:`, weekKey);
+        console.log('  🏡 Trévoux:', week.trevoux.length, 'ménages');
+        console.log('  ⛰️ Couzon:', week.couzon.length, 'ménages');
         
         // Calculer le vrai numéro de semaine de l'année
         const weekNumber = `S${getWeekNumber(monday)}`;
@@ -557,10 +564,27 @@ async function afficherPlanningParSemaine() {
     
     html += '</div>';
     
+    console.log('\n📝 HTML généré, longueur:', html.length, 'caractères');
+    
     const menagePlanning = document.getElementById('menagePlanningWeeks');
     if (menagePlanning) {
+        console.log('✅ Conteneur trouvé, insertion HTML...');
         // Utilisation directe de innerHTML car HTML généré par le code, pas par utilisateur
         menagePlanning.innerHTML = html;
+        console.log('✅ HTML inséré !');
+        
+        // Vérifier le résultat
+        setTimeout(() => {
+            const weekBodies = document.querySelectorAll('.cleaning-week-body');
+            console.log('🔍 Vérification: nombre de .cleaning-week-body trouvés:', weekBodies.length);
+            weekBodies.forEach((body, i) => {
+                const style = window.getComputedStyle(body);
+                console.log(`  Semaine ${i + 1}: grid-template-columns =`, style.gridTemplateColumns);
+                console.log(`  Semaine ${i + 1}: display =`, style.display);
+            });
+        }, 100);
+    } else {
+        console.error('❌ ERREUR: Conteneur #menagePlanningWeeks non trouvé !');
     }
 }
 
