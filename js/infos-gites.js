@@ -89,7 +89,7 @@ async function genererPageClient(reservationId) {
                 </span>
             </div>
         </div>
-    `;
+    `);
     document.body.appendChild(choixModal);
 }
 
