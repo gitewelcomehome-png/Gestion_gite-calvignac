@@ -10,10 +10,18 @@ class AuthManager {
     constructor() {
         this.currentUser = null;
         this.userRoles = [];
+        this.isRedirecting = false; // Flag pour éviter les redirections multiples
         this.init();
     }
 
     async init() {
+        // Éviter l'initialisation multiple
+        if (window._authManagerInitialized) {
+            console.log('⚠️ AuthManager déjà initialisé');
+            return;
+        }
+        window._authManagerInitialized = true;
+        
         await this.checkAuthState();
         this.setupAuthListener();
     }
@@ -165,12 +173,19 @@ class AuthManager {
      * Rediriger vers la page de connexion
      */
     redirectToLogin() {
+        // Protection contre les redirections multiples
+        if (this.isRedirecting) {
+            console.log('⚠️ Redirection déjà en cours, ignorée');
+            return;
+        }
+        
         // Ne pas rediriger si déjà sur la page de login
         if (window.location.pathname.includes('login.html')) {
             return;
         }
         
         console.log('🔐 Redirection vers login...');
+        this.isRedirecting = true;
         window.location.href = '/login.html';
     }
 
@@ -181,9 +196,12 @@ class AuthManager {
         console.log('✅ Authentifié:', this.currentUser.email);
         console.log('📋 Rôles:', this.userRoles);
         
-        // Rediriger depuis login vers dashboard
-        if (window.location.pathname.includes('login.html')) {
+        // Rediriger depuis login vers dashboard (UNE SEULE FOIS)
+        if (window.location.pathname.includes('login.html') && !this.isRedirecting) {
+            console.log('🏠 Redirection vers index...');
+            this.isRedirecting = true;
             window.location.href = '/index.html';
+            return; // Sortir immédiatement
         }
         
         // Afficher les informations utilisateur dans l'interface
@@ -308,5 +326,13 @@ async function logout() {
 window.getCurrentUser = getCurrentUser;
 window.hasRole = hasRole;
 window.logout = logout;
+
+// Instancier l'AuthManager de manière sécurisée (une seule fois)
+if (typeof window !== 'undefined' && !window.authManager) {
+    console.log('✅ Création instance AuthManager...');
+    window.authManager = new AuthManager();
+} else {
+    console.log('⚠️ AuthManager déjà instancié');
+}
 
 console.log('✅ AuthManager chargé');

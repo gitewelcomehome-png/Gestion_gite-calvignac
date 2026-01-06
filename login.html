@@ -268,12 +268,26 @@
             }
         }
 
-        // Vérifier si déjà connecté
+        // Vérifier si déjà connecté (avec protection contre boucle)
         (async () => {
-            const { data: { session } } = await window.supabaseClient.auth.getSession();
-            if (session) {
-                console.log('✅ Déjà authentifié, redirection...');
-                window.location.href = '/index.html';
+            // Éviter les vérifications multiples
+            if (window._loginCheckDone) {
+                console.log('⚠️ Vérification login déjà faite');
+                return;
+            }
+            window._loginCheckDone = true;
+            
+            try {
+                const { data: { session } } = await window.supabaseClient.auth.getSession();
+                if (session && session.user) {
+                    console.log('✅ Déjà authentifié, redirection...');
+                    // Petit délai pour éviter les conflits
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Erreur vérification session:', error);
             }
         })();
 
