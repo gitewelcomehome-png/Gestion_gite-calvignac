@@ -19,6 +19,46 @@
     </div>
 </div>
 
+<!-- Barre de recherche -->
+<div class="search-section" style="margin-bottom: 20px;">
+    <div class="search-box" style="max-width: 600px; margin: 0 auto;">
+        <input type="text" 
+               id="faq-search" 
+               placeholder="🔍 Rechercher une question..."
+               style="width: 100%; padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 50px; font-size: 16px; transition: all 0.3s;">
+    </div>
+</div>
+
+<!-- Filtres par catégorie -->
+<div class="filters-section" style="margin-bottom: 20px;">
+    <div class="filter-chips">
+        <button class="chip active" data-category="all" data-action="filtrer-faq">
+            Toutes
+        </button>
+        <button class="chip" data-category="arrivee" data-action="filtrer-faq">
+            🔑 Arrivée
+        </button>
+        <button class="chip" data-category="depart" data-action="filtrer-faq">
+            🚪 Départ
+        </button>
+        <button class="chip" data-category="equipements" data-action="filtrer-faq">
+            🏠 Équipements
+        </button>
+        <button class="chip" data-category="localisation" data-action="filtrer-faq">
+            📍 Localisation
+        </button>
+        <button class="chip" data-category="tarifs" data-action="filtrer-faq">
+            💰 Tarifs
+        </button>
+        <button class="chip" data-category="reglement" data-action="filtrer-faq">
+            📋 Règlement
+        </button>
+        <button class="chip" data-category="autre" data-action="filtrer-faq">
+            ℹ️ Autre
+        </button>
+    </div>
+</div>
+
 <!-- Liste des questions -->
 <div id="faq-list" class="faq-container">
     <!-- Les questions seront chargées ici -->
@@ -128,8 +168,27 @@ document.addEventListener('click', function(e) {
                 window.sauvegarderQuestionFAQ();
             }
             break;
+        case 'filtrer-faq':
+            const category = action.getAttribute('data-category');
+            if (typeof window.filtrerFAQ === 'function') {
+                window.filtrerFAQ(category);
+            }
+            // Gérer les classes active
+            document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+            action.classList.add('active');
+            break;
     }
 });
+
+// Event delegation pour la recherche
+const searchInput = document.getElementById('faq-search');
+if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+        if (typeof window.rechercherFAQ === 'function') {
+            window.rechercherFAQ(e.target.value);
+        }
+    });
+}
 </script>
 
 <style>
