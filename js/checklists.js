@@ -44,7 +44,7 @@ async function loadChecklistItems() {
     if (!container) return;
     
     try {
-        container.innerHTML = '<p style="color: var(--gray-600); font-style: italic;">Chargement...</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="color: var(--gray-600); font-style: italic;">Chargement...</p>');
         
         const { data, error } = await supabaseClient
             .from('checklist_templates')
@@ -57,12 +57,12 @@ async function loadChecklistItems() {
         if (error) throw error;
         
         if (!data || data.length === 0) {
-            container.innerHTML = `
+            window.SecurityUtils.setInnerHTML(container, `
                 <div style="text-align: center; padding: 20px; color: var(--gray-600);">
                     <p style="font-size: 3rem; margin-bottom: 10px;">📋</p>
                     <p>Aucun item pour <strong>${currentGiteFilter}</strong> - <strong>${currentTypeFilter === 'entree' ? 'Entrée' : 'Sortie'}</strong></p>
                 </div>
-            `;
+            `);
             return;
         }
         
@@ -100,11 +100,11 @@ async function loadChecklistItems() {
             `;
         });
         
-        container.innerHTML = html;
+        window.SecurityUtils.setInnerHTML(container, html);
         
     } catch (error) {
         console.error('❌ Erreur chargement items:', error);
-        container.innerHTML = `<p style="color: #ef4444;">Erreur: ${error.message}</p>`;
+        window.SecurityUtils.setInnerHTML(container, `<p style="color: #ef4444;">Erreur: ${error.message}</p>`);
     }
 }
 
@@ -261,7 +261,7 @@ async function loadReservationsProgress() {
     if (!container) return;
     
     try {
-        container.innerHTML = '<p style="color: var(--gray-600); font-style: italic;">Chargement des réservations...</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="color: var(--gray-600); font-style: italic;">Chargement des réservations...</p>');
         
         // Récupérer SEULEMENT les réservations EN COURS (arrivées mais pas encore parties)
         const aujourdhui = new Date().toISOString().split('T')[0];
@@ -284,13 +284,13 @@ async function loadReservationsProgress() {
         });
         
         if (!reservationsFiltered || reservationsFiltered.length === 0) {
-            container.innerHTML = `
+            window.SecurityUtils.setInnerHTML(container, `
                 <div style="text-align: center; padding: 20px; color: var(--gray-600);">
                     <p style="font-size: 3rem; margin-bottom: 10px;">📅</p>
                     <p>Aucune réservation en cours actuellement</p>
                     <p style="font-size: 0.9rem; margin-top: 10px;">Les checklists s'affichent uniquement pour les séjours en cours (+ de 1 nuit)</p>
                 </div>
-            `;
+            `);
             return;
         }
         
@@ -424,11 +424,11 @@ async function loadReservationsProgress() {
             `;
         }
         
-        container.innerHTML = html;
+        window.SecurityUtils.setInnerHTML(container, html);
         
     } catch (error) {
         console.error('❌ Erreur chargement réservations:', error);
-        container.innerHTML = `<p style="color: #ef4444;">Erreur: ${error.message}</p>`;
+        window.SecurityUtils.setInnerHTML(container, `<p style="color: #ef4444;">Erreur: ${error.message}</p>`);
     }
 }
 
@@ -541,7 +541,7 @@ async function loadChecklistDetailForReservation(reservationId) {
     if (!detailContainer) return;
     
     try {
-        detailContainer.innerHTML = '<p style="text-align: center; color: var(--gray-600);">Chargement...</p>';
+        window.SecurityUtils.setInnerHTML(detailContainer, '<p style="text-align: center; color: var(--gray-600);">Chargement...</p>');
         
         // Récupérer la réservation
         const { data: reservations, error: resaError } = await supabaseClient
@@ -633,11 +633,11 @@ async function loadChecklistDetailForReservation(reservationId) {
         
         html += '</div>';
         
-        detailContainer.innerHTML = html;
+        window.SecurityUtils.setInnerHTML(detailContainer, html);
         
     } catch (error) {
         console.error('❌ Erreur chargement détail:', error);
-        detailContainer.innerHTML = `<p style="color: #ef4444;">Erreur: ${error.message}</p>`;
+        window.SecurityUtils.setInnerHTML(detailContainer, `<p style="color: #ef4444;">Erreur: ${error.message}</p>`);
     }
 }
 
