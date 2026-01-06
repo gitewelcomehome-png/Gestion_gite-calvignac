@@ -35,7 +35,7 @@ let derniereSimulation = null; // Stocke les résultats de la dernière simulati
 // ================================================================
 
 async function initDraps() {
-    console.log('🎬 initDraps() appelée');
+    // console.log('🎬 initDraps() appelée');
     await chargerStocks();
     await analyserReservations();
     
@@ -43,7 +43,7 @@ async function initDraps() {
     const dateInput = document.getElementById('date-simulation');
     if (dateInput && dateInput.nextElementSibling) {
         const btnCalculer = dateInput.nextElementSibling;
-        console.log('✅ Bouton Calculer trouvé:', btnCalculer.textContent);
+        // console.log('✅ Bouton Calculer trouvé:', btnCalculer.textContent);
         
         btnCalculer.addEventListener('click', function(e) {
             console.log('🖱️ CLIC DÉTECTÉ !');

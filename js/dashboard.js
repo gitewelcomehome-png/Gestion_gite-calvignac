@@ -402,7 +402,7 @@ async function updateDashboardReservations() {
 // ==========================================
 
 async function updateDashboardMenages() {
-    console.log('🧹 updateDashboardMenages() début');
+    // console.log('🧹 updateDashboardMenages() début');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -1477,7 +1477,7 @@ async function refreshDashboard() {
     // Attacher le bouton Actualiser (SecurityUtils supprime les onclick)
     const btnActualiser = document.querySelector('#tab-dashboard button');
     if (btnActualiser && btnActualiser.textContent.includes('Actualiser')) {
-        console.log('✅ Bouton Actualiser attaché');
+        // console.log('✅ Bouton Actualiser attaché');
         btnActualiser.addEventListener('click', function(e) {
             e.preventDefault();
             updateFinancialIndicators();
