@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    console.log('🛡️ Initialisation validation des formulaires...');
+    // console.log('🛡️ Initialisation validation des formulaires...');
     
     // ==========================================
     // FORMULAIRE ÉDITION RÉSERVATION
@@ -150,5 +150,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }, true); // capture = true pour s'exécuter en premier
     }
     
-    console.log('✅ Validation formulaires initialisée');
+    // console.log('✅ Validation formulaires initialisée');
 });

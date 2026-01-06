@@ -81,8 +81,7 @@ class AuthManager {
      */
     setupAuthListener() {
         window.supabaseClient.auth.onAuthStateChange((event, session) => {
-            console.log('Auth event:', event);
-            
+        // console.log('Auth event:', event);
             if (event === 'SIGNED_IN' && session) {
                 this.currentUser = session.user;
                 this.loadUserRoles().then(() => this.onAuthSuccess());
@@ -193,8 +192,8 @@ class AuthManager {
      * Actions après authentification réussie
      */
     onAuthSuccess() {
-        console.log('✅ Authentifié:', this.currentUser.email);
-        console.log('📋 Rôles:', this.userRoles);
+        // console.log('✅ Authentifié:', this.currentUser.email);
+        // console.log('📋 Rôles:', this.userRoles);
         
         // Rediriger depuis login vers dashboard (UNE SEULE FOIS)
         if (window.location.pathname.includes('login.html') && !this.isRedirecting) {
