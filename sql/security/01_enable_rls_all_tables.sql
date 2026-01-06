@@ -11,35 +11,29 @@
 -- avant d'exécuter ce script, sinon l'application cessera de fonctionner !
 
 -- ================================================================
--- ÉTAPE 1: ACTIVER RLS SUR LES TABLES PRINCIPALES
+-- ÉTAPE 1: ACTIVER RLS SUR TOUTES LES TABLES AUTOMATIQUEMENT
 -- ================================================================
 
--- Tables de réservations et planning
-ALTER TABLE IF EXISTS reservations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS cleaning_schedules ENABLE ROW LEVEL SECURITY;
-
--- Tables financières
-ALTER TABLE IF EXISTS charges ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS fiscalite ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS soldes_bancaires ENABLE ROW LEVEL SECURITY;
-
--- Tables ménage et linge
-ALTER TABLE IF EXISTS retours_menage ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS stocks_draps ENABLE ROW LEVEL SECURITY;
-
--- Tables clients
-ALTER TABLE IF EXISTS fiches_clients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS transactions_clients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS communications_clients ENABLE ROW LEVEL SECURITY;
-
--- Tables gestion
-ALTER TABLE IF EXISTS todos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS infos_gites ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS activites ENABLE ROW LEVEL SECURITY;
-
--- Tables support
-ALTER TABLE IF EXISTS faq ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS commits_log ENABLE ROW LEVEL SECURITY;
+DO $$
+DECLARE
+    table_record RECORD;
+    tables_count INTEGER := 0;
+BEGIN
+    -- Boucle sur toutes les tables du schéma public
+    FOR table_record IN 
+        SELECT tablename 
+        FROM pg_tables 
+        WHERE schemaname = 'public'
+    LOOP
+        -- Activer RLS sur chaque table
+        EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', table_record.tablename);
+        
+        tables_count := tables_count + 1;
+        RAISE NOTICE 'RLS activé sur: %', table_record.tablename;
+    END LOOP;
+    
+    RAISE NOTICE '✅ RLS activé sur % tables', tables_count;
+END $$;
 
 -- ================================================================
 -- ÉTAPE 2: VÉRIFICATION POST-ACTIVATION
