@@ -37,12 +37,12 @@ window.initValidationInfosPratiques = function() {
     // Heures (texte avec format heure attendu)
     const infos_heureArrivee = document.getElementById('infos_heureArrivee');
     if (infos_heureArrivee) {
-        window.ValidationUtils.attachRealtimeValidation('infos_heureArrivee', 'text', { required: false });
+        window.ValidationUtils.attachRealtimeValidation('infos_heureArrivee', 'hours', { required: true });
     }
-    
+
     const infos_heureDepart = document.getElementById('infos_heureDepart');
     if (infos_heureDepart) {
-        window.ValidationUtils.attachRealtimeValidation('infos_heureDepart', 'text', { required: false });
+        window.ValidationUtils.attachRealtimeValidation('infos_heureDepart', 'hours', { required: true });
     }
     
     console.log('✅ Validation infos pratiques initialisée');
