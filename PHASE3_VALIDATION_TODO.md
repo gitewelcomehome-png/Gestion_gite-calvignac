@@ -75,20 +75,20 @@
 
 #### 10. FAQ (tabs/tab-faq.html #form-question-faq)
 - **Champs** : question, reponse, categorie, gite, ordre
-- **Validation actuelle** : ❌ Aucune
-- **Action** : ⏳ À valider (formulaire existe-t-il?)
+- **Validation actuelle** : ✅ ValidationUtils + temps réel (7 janv 2026)
+- **Action** : ✅ Validé
 
 #### 11. Activités Découvrir (tabs/tab-decouvrir.html #formDecouvrir)
-- **Champs** : nom, description, adresse, categorie, coordonnées GPS
-- **Validation actuelle** : ❌ Fonction ajouterActivite() INEXISTANTE
-- **Action** : ⚠️ Bouton présent mais fonction manquante - À implémenter
+- **Champs** : nom, adresse, telephone, website, coordonnées GPS
+- **Validation actuelle** : ✅ ValidationUtils + GPS + temps réel (7 janv 2026)
+- **Action** : ✅ Validé
 
 ### 🟢 SECONDAIRE (interfaces clients)
 
 #### 12. Fiches Clients - Édition (tabs/tab-fiches-clients.html #formEditGite)
-- **Champs** : nom, adresse, description
-- **Validation actuelle** : ❌ Aucune
-- **Action** : ⏳ À valider
+- **Champs** : adresse, wifi, heures arrivée/départ
+- **Validation actuelle** : ✅ ValidationUtils + temps réel (7 janv 2026)
+- **Action** : ✅ Validé
 
 ## 🎯 Plan d'Action
 
@@ -101,11 +101,13 @@
 
 **7 formulaires validés en 1 session** 🎉
 
-### ⏳ Étape 2 : Validation Secondaire (À faire)
-**Fichiers restants** :
-- js/fiches-clients.js - Valider édition gîtes (si formulaire existe)
-- js/decouvrir.js - ⚠️ Implémenter fonction ajouterActivite() MANQUANTE
-- js/faq.js - Vérifier si formulaire admin FAQ existe
+### ✅ Étape 2 : Validation Secondaire - COMPLÉTÉ (7 janv 2026)
+**Fichiers modifiés** :
+- ✅ js/fiches-clients.js - Validation formEditGite (adresse, horaires) + temps réel
+- ✅ js/faq.js - Validation form-question-faq (question, réponse) + temps réel
+- ✅ js/decouvrir.js - Validation formDecouvrir (nom, adresse, tel, url, GPS) + temps réel
+
+**13 formulaires validés au total** 🎉🎉
 
 **Pattern utilisé** :
 ```javascript
@@ -159,10 +161,10 @@ window.ValidationUtils.attachRealtimeValidation('inputId', 'ruleType', { require
 ## 📊 Métriques
 
 - **Formulaires totaux** : 15+
-- **Formulaires validés** : 2 (login, editForm)
-- **Formulaires à valider** : 9 (prioritaires)
+- **Formulaires validés** : ✅ 13 (100% des formulaires critiques)
+- **Formulaires à valider** : 0 🎉
 - **innerHTML sécurisés** : 63+
-- **innerHTML restants** : 3 (boutons statiques)
+- **innerHTML restants** : 3 (boutons statiques, pas de risque)
 
 ## 🎓 Règles de Validation Disponibles
 
@@ -180,15 +182,15 @@ window.ValidationUtils.attachRealtimeValidation('inputId', 'ruleType', { require
 
 ## 🚀 Prochaines Étapes
 
-1. ⏳ Valider formulaires infos-gites
-2. ⏳ Valider formulaires fiches-clients  
-3. ⏳ Valider formulaires decouvrir
-4. ⏳ Valider formulaires FAQ
-5. ⏳ Valider formulaires femme-menage
+1. ✅ Valider formulaires infos-gites → FAIT
+2. ✅ Valider formulaires fiches-clients → FAIT
+3. ✅ Valider formulaires decouvrir → FAIT
+4. ✅ Valider formulaires FAQ → FAIT
+5. ✅ Valider formulaires femme-menage → FAIT
 6. ⏳ Ajouter CSP headers dans vercel.json
 7. ⏳ Audit final sécurité
 
 ---
 
-**Score Sécurité Actuel** : 7/10 → 8/10 (après validation complète)
+**Score Sécurité Actuel** : 8/10 → 8.5/10 (après CSP headers)
 

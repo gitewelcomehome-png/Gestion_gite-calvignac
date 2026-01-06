@@ -951,6 +951,14 @@ function ouvrirModalActivite(modeModification = false, positionY = null) {
     const btnSave = document.getElementById('btnSaveActivite');
     const titre = document.getElementById('modalTitle');
     
+    // Validation temps réel
+    if (window.ValidationUtils && !modeModification) {
+        window.ValidationUtils.attachRealtimeValidation('activite_nom', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('activite_adresse', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('activite_telephone', 'phone', { required: false });
+        window.ValidationUtils.attachRealtimeValidation('activite_website', 'url', { required: false });
+    }
+    
     if (modeModification) {
         titre.textContent = '✏️ Modifier une Activité';
         btnSave.textContent = '💾 Enregistrer les modifications';
@@ -1001,7 +1009,9 @@ async function ajouterActivite() {
         if (window.ValidationUtils) {
             const rules = {
                 'activite_nom': { type: 'text', required: true },
-                'activite_adresse': { type: 'text', required: true }
+                'activite_adresse': { type: 'text', required: true },
+                'activite_telephone': { type: 'phone', required: false },
+                'activite_website': { type: 'url', required: false }
             };
             
             const validation = window.ValidationUtils.validateForm(form, rules);
@@ -1009,6 +1019,18 @@ async function ajouterActivite() {
                 console.warn('❌ Formulaire activité invalide:', validation.errors);
                 showNotification('❌ Veuillez remplir tous les champs requis', 'error');
                 return;
+            }
+            
+            // Validation GPS si remplie
+            const lat = document.getElementById('activite_latitude').value;
+            const lon = document.getElementById('activite_longitude').value;
+            if (lat || lon) {
+                const latNum = parseFloat(lat);
+                const lonNum = parseFloat(lon);
+                if (isNaN(latNum) || latNum < -90 || latNum > 90 || isNaN(lonNum) || lonNum < -180 || lonNum > 180) {
+                    showNotification('❌ Coordonnées GPS invalides', 'error');
+                    return;
+                }
             }
         }
         

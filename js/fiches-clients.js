@@ -12,6 +12,13 @@ let currentGiteEdit = null;
 async function initFichesClients() {
     console.log('Initialisation du module Fiches Clients');
     
+    // Validation temps réel pour formulaire édition gîte
+    if (window.ValidationUtils) {
+        window.ValidationUtils.attachRealtimeValidation('editAdresse', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('editHeureArrivee', 'hours', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('editHeureDepart', 'hours', { required: true });
+    }
+    
     // Attendre que supabaseClient soit disponible
     if (typeof window.supabaseClient === 'undefined') {
         console.log('⏳ Attente du chargement de Supabase...');
@@ -751,6 +758,24 @@ async function editGiteInfo(gite) {
 
 async function saveGiteInfo(event) {
     event.preventDefault();
+    
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const form = event.target;
+        const rules = {
+            'editAdresse': { type: 'text', required: true },
+            'editWifiSsid': { type: 'text', required: false },
+            'editHeureArrivee': { type: 'hours', required: true },
+            'editHeureDepart': { type: 'hours', required: true }
+        };
+        
+        const validation = window.ValidationUtils.validateForm(form, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire gîte invalide:', validation.errors);
+            showNotification('❌ Veuillez corriger les erreurs', 'error');
+            return false;
+        }
+    }
     
     const giteId = document.getElementById('editGiteId').value;
     
