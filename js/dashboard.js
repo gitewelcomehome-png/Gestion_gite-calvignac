@@ -420,10 +420,10 @@ async function updateDashboardMenages() {
         .gte('scheduled_date', weekStart.toISOString().split('T')[0])
         .lte('scheduled_date', weekEnd.toISOString().split('T')[0])
         .order('scheduled_date', { ascending: true });
-    ole.log('🧹 Ménages récupérés:', cleanings?.length || 0);
+    
+    console.log('🧹 Ménages récupérés:', cleanings?.length || 0);
     const container = document.getElementById('dashboard-menages');
-    console.log('🧹 Container trouvé:', !!container
-    const container = document.getElementById('dashboard-menages');
+    console.log('🧹 Container trouvé:', !!container);
     if (!container) return;
     
     if (!cleanings || cleanings.length === 0) {
