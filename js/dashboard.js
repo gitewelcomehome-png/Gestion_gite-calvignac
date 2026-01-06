@@ -397,7 +397,9 @@ async function updateDashboardReservations() {
         `;
     }
     
+    console.log('📅 Génération HTML...', html.length, 'caractères');
     window.SecurityUtils.setInnerHTML(container, html);
+    console.log('📅 HTML injecté dans container');
 }
 
 // ==========================================
