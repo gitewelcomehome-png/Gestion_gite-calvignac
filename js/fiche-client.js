@@ -141,7 +141,7 @@ function showSimpleModal(reservation, ficheUrl, token) {
                 Fermer
             </button>
         </div>
-    `;
+    `);
     
     document.body.appendChild(modal);
     
