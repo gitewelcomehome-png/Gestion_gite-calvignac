@@ -114,7 +114,7 @@ async function loadFichesStats() {
 // ==================== LISTE DES RÉSERVATIONS ====================
 async function loadFichesClientList() {
     const container = document.getElementById('listeFichesContainer');
-    container.innerHTML = '<p style="text-align: center; padding: 40px;">Chargement...</p>';
+    window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; padding: 40px;">Chargement...</p>');
     
     try {
         // Récupérer les filtres
@@ -170,16 +170,16 @@ async function loadFichesClientList() {
         
         // Afficher les résultats
         if (filteredReservations.length === 0) {
-            container.innerHTML = `
+            window.SecurityUtils.setInnerHTML(container, `
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
                     <p style="color: var(--gray-600);">Aucune réservation trouvée</p>
                 </div>
-            `;
+            `);
             return;
         }
         
-        container.innerHTML = filteredReservations.map(resa => {
+        window.SecurityUtils.setInnerHTML(container, filteredReservations.map(resa => {
             const hasFiche = resa.token && resa.token.length > 0;
             const isExpired = hasFiche && new Date(resa.token[0].expires_at) < new Date();
             const accessCount = hasFiche ? resa.token[0].access_count : 0;
@@ -248,15 +248,15 @@ async function loadFichesClientList() {
                     </div>
                 </div>
             `;
-        }).join('');
+        }).join(''));
         
     } catch (error) {
         console.error('Erreur lors du chargement des fiches:', error);
-        container.innerHTML = `
+        window.SecurityUtils.setInnerHTML(container, `
             <div class="error-message">
                 ⚠️ Erreur lors du chargement des données
             </div>
-        `;
+        `);
     }
 }
 
@@ -381,7 +381,7 @@ Vous y trouverez toutes les informations nécessaires (codes, horaires, activit�
 // ==================== DEMANDES HORAIRES ====================
 async function loadDemandesHoraires() {
     const container = document.getElementById('demandesHorairesContainer');
-    container.innerHTML = '<p style="text-align: center; padding: 40px;">Chargement...</p>';
+    window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; padding: 40px;">Chargement...</p>');
     
     try {
         const { data: demandes, error } = await window.supabaseClient
@@ -395,12 +395,12 @@ async function loadDemandesHoraires() {
         if (error) throw error;
         
         if (!demandes || demandes.length === 0) {
-            container.innerHTML = `
+            window.SecurityUtils.setInnerHTML(container, `
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-size: 3rem; margin-bottom: 20px;">⏰</div>
                     <p style="color: var(--gray-600);">Aucune demande horaire</p>
                 </div>
-            `;
+            `);
             return;
         }
         
@@ -429,11 +429,11 @@ async function loadDemandesHoraires() {
             html += refused.map(d => renderDemandeCard(d, 'refused')).join('');
         }
         
-        container.innerHTML = html;
+        window.SecurityUtils.setInnerHTML(container, html);
         
     } catch (error) {
         console.error('Erreur lors du chargement des demandes:', error);
-        container.innerHTML = `<div class="error-message">⚠️ Erreur de chargement</div>`;
+        window.SecurityUtils.setInnerHTML(container, `<div class="error-message">⚠️ Erreur de chargement</div>`);
     }
 }
 
@@ -500,7 +500,7 @@ function openModalValidation(demandeId, action) {
             const typeLabel = demande.type === 'arrivee_anticipee' ? 'Arrivée anticipée' : 'Départ tardif';
             
             document.getElementById('titreDemande').textContent = `${typeLabel} - ${demande.reservation.nom_client}`;
-            document.getElementById('detailsDemande').innerHTML = `
+            window.SecurityUtils.setInnerHTML(document.getElementById('detailsDemande'), `
                 <div style="background: var(--gray-100); padding: 15px; border-radius: 8px;">
                     <p><strong>Gîte:</strong> ${demande.reservation.gite}</p>
                     <p><strong>Heure demandée:</strong> ${formatTime(demande.heure_demandee)}</p>
@@ -583,7 +583,7 @@ async function refuserDemande() {
 // ==================== RETOURS CLIENTS ====================
 async function loadRetoursClients() {
     const container = document.getElementById('retoursClientsContainer');
-    container.innerHTML = '<p style="text-align: center; padding: 40px;">Chargement...</p>';
+    window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; padding: 40px;">Chargement...</p>');
     
     try {
         const { data: retours, error } = await window.supabaseClient
@@ -597,16 +597,16 @@ async function loadRetoursClients() {
         if (error) throw error;
         
         if (!retours || retours.length === 0) {
-            container.innerHTML = `
+            window.SecurityUtils.setInnerHTML(container, `
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-size: 3rem; margin-bottom: 20px;">💬</div>
                     <p style="color: var(--gray-600);">Aucun retour client</p>
                 </div>
-            `;
+            `);
             return;
         }
         
-        container.innerHTML = retours.map(retour => {
+        window.SecurityUtils.setInnerHTML(container, retours.map(retour => {
             const typeEmoji = {
                 'demande': '🙋',
                 'retour': '💬',
@@ -660,11 +660,11 @@ async function loadRetoursClients() {
                     `}
                 </div>
             `;
-        }).join('');
+        }).join(''));
         
     } catch (error) {
         console.error('Erreur lors du chargement des retours:', error);
-        container.innerHTML = `<div class="error-message">⚠️ Erreur de chargement</div>`;
+        window.SecurityUtils.setInnerHTML(container, `<div class="error-message">⚠️ Erreur de chargement</div>`);
     }
 }
 
@@ -812,7 +812,7 @@ async function loadChecklistItemsConfig(type, gite) {
         
         if (error) throw error;
         
-        container.innerHTML = (items || []).map(item => `
+        window.SecurityUtils.setInnerHTML(container, (items || []).map(item => `
             <div class="checklist-item-config draggable" data-id="${item.id}">
                 <div style="flex: 1;">
                     <div style="font-weight: 600;">${item.item_fr}</div>
@@ -828,7 +828,7 @@ async function loadChecklistItemsConfig(type, gite) {
         
     } catch (error) {
         console.error('Erreur:', error);
-        container.innerHTML = '<p class="error-message">Erreur de chargement</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p class="error-message">Erreur de chargement</p>');
     }
 }
 
@@ -900,9 +900,8 @@ async function deleteChecklistItem(itemId, type, gite) {
 // ==================== UTILITAIRES ====================
 function escapeHtml(text) {
     if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    // Utiliser SecurityUtils pour sanitiser le texte (retire tous les tags HTML)
+    return window.SecurityUtils.sanitizeText(text);
 }
 
 function formatTime(timeString) {
