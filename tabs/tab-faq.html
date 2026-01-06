@@ -146,6 +146,7 @@ document.addEventListener('click', function(e) {
     if (!action) return;
     
     const actionType = action.getAttribute('data-action');
+    const questionId = action.getAttribute('data-question-id');
     
     switch(actionType) {
         case 'ajouter-question':
@@ -176,6 +177,24 @@ document.addEventListener('click', function(e) {
             // Gérer les classes active
             document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
             action.classList.add('active');
+            break;
+        case 'toggle-faq':
+            e.stopPropagation();
+            if (typeof window.toggleFAQ === 'function' && questionId) {
+                window.toggleFAQ(parseInt(questionId));
+            }
+            break;
+        case 'modifier-question':
+            e.stopPropagation();
+            if (typeof window.modifierQuestion === 'function' && questionId) {
+                window.modifierQuestion(parseInt(questionId));
+            }
+            break;
+        case 'supprimer-question':
+            e.stopPropagation();
+            if (typeof window.supprimerQuestion === 'function' && questionId) {
+                window.supprimerQuestion(parseInt(questionId));
+            }
             break;
     }
 });
