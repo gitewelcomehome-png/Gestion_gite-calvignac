@@ -376,16 +376,14 @@ async function syncCalendar(gite, platform, url) {
                 // Marquer cette réservation comme toujours présente
                 foundReservationIds.add(existingResa.id);
                 
-                // 🔒 PROTECTION ABSOLUE : Ne JAMAIS écraser une réservation modifiée/enrichie
-                const isEnriched = 
-                    (existingResa.nom && !existingResa.nom.includes('Client') && !existingResa.nom.includes('BOOKED') && !existingResa.nom.includes('Reserved')) || // Nom personnalisé
-                    existingResa.email ||                                          // Email renseigné
-                    existingResa.telephone ||                                      // Téléphone renseigné
-                    existingResa.personnes > 0 ||                                  // Nombre de personnes
-                    (existingResa.montant && existingResa.montant > 0);            // Montant renseigné
+                // 🔒 PROTECTION ABSOLUE : Ne JAMAIS écraser une réservation avec nom personnalisé
+                const hasCustomName = existingResa.nom && 
+                    !existingResa.nom.includes('Client') && 
+                    !existingResa.nom.includes('BOOKED') && 
+                    !existingResa.nom.includes('Reserved');
                 
-                if (isEnriched) {
-                    console.log(`🔒 Réservation protégée (données enrichies): ${gite} du ${dateDebut} au ${dateFin} - ${existingResa.nom}`);
+                if (hasCustomName) {
+                    console.log(`🔒 Réservation protégée (nom personnalisé): ${gite} du ${dateDebut} au ${dateFin} - ${existingResa.nom}`);
                 } else {
                     console.log(`♻️ Réservation existante confirmée: ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
                 }
@@ -461,25 +459,18 @@ async function syncCalendar(gite, platform, url) {
                     continue;
                 }
                 
-                // Vérifier si la réservation est enrichie
-                const hasCustomName = oldResa.nom && !oldResa.nom.includes('Client') && !oldResa.nom.includes('BOOKED') && !oldResa.nom.includes('Reserved');
-                const hasEmail = !!oldResa.email;
-                const hasPhone = !!oldResa.telephone;
-                const hasPeople = oldResa.personnes > 0;
-                const hasAmount = oldResa.montant && oldResa.montant > 0;
+                // 🔒 Vérifier si la réservation a un nom personnalisé (= protégée)
+                const hasCustomName = oldResa.nom && 
+                    !oldResa.nom.includes('Client') && 
+                    !oldResa.nom.includes('BOOKED') && 
+                    !oldResa.nom.includes('Reserved');
                 
-                const isEnriched = hasCustomName || hasEmail || hasPhone || hasPeople || hasAmount;
+                console.log(`🔍 ANALYSE PROTECTION: ${oldResa.nom}`);
+                console.log(`   - Nom personnalisé: ${hasCustomName}`);
+                console.log(`   => PROTÉGÉE: ${hasCustomName}`);
                 
-                console.log(`🔍 ANALYSE ENRICHISSEMENT: ${oldResa.nom}`);
-                console.log(`   - Nom personnalisé: ${hasCustomName} (nom="${oldResa.nom}")`);
-                console.log(`   - Email: ${hasEmail} (email="${oldResa.email}")`);
-                console.log(`   - Téléphone: ${hasPhone} (tel="${oldResa.telephone}")`);
-                console.log(`   - Personnes: ${hasPeople} (personnes=${oldResa.personnes})`);
-                console.log(`   - Montant: ${hasAmount} (montant=${oldResa.montant})`);
-                console.log(`   => ENRICHIE: ${isEnriched}`);
-                
-                if (isEnriched) {
-                    console.log(`🔒 Conservation réservation enrichie (non supprimée): ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                if (hasCustomName) {
+                    console.log(`🔒 Conservation réservation avec nom personnalisé: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
                     continue;
                 }
                 
