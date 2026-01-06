@@ -911,10 +911,9 @@ async function creerNouvelleAnnee() {
         .from('simulations_fiscales')
         .select('id')
         .eq('annee', nouvelleAnnee)
-        .limit(1)
-        .single();
+        .limit(1);
     
-    if (existing) {
+    if (existing && existing.length > 0) {
         showToast(`L'année ${nouvelleAnnee} existe déjà`, 'warning');
         return;
     }
