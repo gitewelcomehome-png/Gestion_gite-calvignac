@@ -281,6 +281,7 @@ async function updateDashboardReservations() {
     }).sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     
     const container = document.getElementById('dashboard-reservations');
+    if (!container) return;
     
     if (filtered.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation dans les 7 prochains jours</p>';
@@ -393,7 +394,6 @@ async function updateDashboardReservations() {
         `;
     }
     
-    if (!container) return;
     window.SecurityUtils.setInnerHTML(container, html);
 }
 
@@ -418,6 +418,7 @@ async function updateDashboardMenages() {
         .order('scheduled_date', { ascending: true });
     
     const container = document.getElementById('dashboard-menages');
+    if (!container) return;
     
     if (!cleanings || cleanings.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun ménage prévu cette semaine</p>';
@@ -468,7 +469,6 @@ async function updateDashboardMenages() {
         `;
     });
     
-    if (!container) return;
     window.SecurityUtils.setInnerHTML(container, html);
 }
 
