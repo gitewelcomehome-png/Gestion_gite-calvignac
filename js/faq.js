@@ -54,7 +54,7 @@ function afficherFAQ() {
         : faqData.filter(q => q.categorie === categorieActive);
 
     if (faqFiltrees.length === 0) {
-        container.innerHTML = `
+        window.SecurityUtils.setInnerHTML(container, `
             <div class="empty-state">
                 <i class="fas fa-question-circle"></i>
                 <p>Aucune question dans cette catégorie</p>
@@ -62,11 +62,11 @@ function afficherFAQ() {
                     Ajouter une question
                 </button>
             </div>
-        `;
+        `);
         return;
     }
 
-    container.innerHTML = faqFiltrees.map(question => `
+    window.SecurityUtils.setInnerHTML(container, faqFiltrees.map(question => `
         <div class="faq-item" data-id="${question.id}">
             <div class="faq-header" data-action="toggle-faq" data-question-id="${question.id}">
                 <div class="faq-question">
@@ -144,7 +144,7 @@ window.rechercherFAQ = function(terme) {
     
     // Afficher résultats
     if (faqFiltrees.length === 0) {
-        container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Aucun résultat trouvé pour "' + terme + '"</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; padding: 40px; color: #999;">Aucun résultat trouvé pour "' + terme + '"</p>');
         return;
     }
     
@@ -175,7 +175,7 @@ window.rechercherFAQ = function(terme) {
         `;
     });
     
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 };
 
 window.filtrerFAQ = function(categorie) {

@@ -507,7 +507,7 @@ async function updateTodoList(category) {
     if (!container) return;
     
     if (!visibleTodos || visibleTodos.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>';
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>');
         return;
     }
     
@@ -545,7 +545,7 @@ async function updateTodoList(category) {
             </div>`;
     });
     
-    container.innerHTML = html;
+    window.SecurityUtils.setInnerHTML(container, html);
 }
 
 async function addTodoItem(category) {
