@@ -52,7 +52,30 @@ export function setInnerHTML(element, html, config = {}) {
             // mais bloquer quand même les event handlers dangereux pour la cohérence
             FORBID_ATTR: ['onerror', 'onload']
         };
+        
+        // Extraire les scripts avant sanitization (DOMPurify les garde mais ils ne s'exécutent pas via innerHTML)
+        const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+        const scripts = [];
+        let match;
+        while ((match = scriptRegex.exec(html)) !== null) {
+            scripts.push(match[1]); // Contenu du script
+        }
+        
+        // Injecter le HTML nettoyé
         element.innerHTML = DOMPurify.sanitize(html, trustedConfig);
+        
+        // Exécuter les scripts extraits (nécessaire car innerHTML ne les exécute pas)
+        scripts.forEach(scriptContent => {
+            if (scriptContent.trim()) {
+                try {
+                    const script = document.createElement('script');
+                    script.textContent = scriptContent;
+                    element.appendChild(script);
+                } catch (err) {
+                    console.error('Erreur exécution script inline:', err);
+                }
+            }
+        });
     } else {
         element.innerHTML = sanitizeHTML(html, config);
     }
