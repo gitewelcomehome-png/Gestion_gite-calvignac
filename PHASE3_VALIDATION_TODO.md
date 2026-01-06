@@ -140,23 +140,21 @@ window.ValidationUtils.attachRealtimeValidation('inputId', 'ruleType', { require
 ### Étape 3 : Sanitization Outputs
 **Déjà fait** : ✅ SecurityUtils.setInnerHTML() sur tous les innerHTML
 
-### Étape 4 : CSP Headers
+### Étape 4 : CSP Headers - ✅ COMPLÉTÉ (7 janv 2026)
 **Fichier** : vercel.json
-```json
-{
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co"
-        }
-      ]
-    }
-  ]
-}
-```
+
+**En-têtes de sécurité ajoutés** :
+- ✅ Content-Security-Policy : Contrôle des sources autorisées
+  * Scripts : 'self', inline, jsdelivr.net, unpkg.com, Google Maps
+  * Styles : 'self', inline, Google Fonts
+  * Images : 'self', data:, https:, blob:
+  * Connexions : 'self', Supabase, Google Maps
+  * Workers : 'self', blob: (pour Service Worker)
+- ✅ X-Content-Type-Options : nosniff (anti-MIME sniffing)
+- ✅ X-Frame-Options : SAMEORIGIN (anti-clickjacking)
+- ✅ X-XSS-Protection : mode=block
+- ✅ Referrer-Policy : strict-origin-when-cross-origin
+- ✅ Permissions-Policy : Géolocalisation uniquement
 
 ## 📊 Métriques
 
@@ -187,10 +185,10 @@ window.ValidationUtils.attachRealtimeValidation('inputId', 'ruleType', { require
 3. ✅ Valider formulaires decouvrir → FAIT
 4. ✅ Valider formulaires FAQ → FAIT
 5. ✅ Valider formulaires femme-menage → FAIT
-6. ⏳ Ajouter CSP headers dans vercel.json
+6. ✅ Ajouter CSP headers dans vercel.json → FAIT (7 janv 2026)
 7. ⏳ Audit final sécurité
 
 ---
 
-**Score Sécurité Actuel** : 8/10 → 8.5/10 (après CSP headers)
+**Score Sécurité Actuel** : 🎯 **8.5/10** ⬆️ (8/10 → 8.5/10)
 
