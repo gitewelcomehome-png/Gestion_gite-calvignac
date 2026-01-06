@@ -212,7 +212,18 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Heure d'arrivée <span style="color: #ef4444;">*</span></label>
-                                    <input type="text" id="infos_heureArrivee" class="form-control" placeholder="À partir de 15h00">
+                                    <select id="infos_heureArrivee" class="form-control" required>
+                                        <option value="">-- Sélectionner --</option>
+                                        <option value="À partir de 14h00">À partir de 14h00</option>
+                                        <option value="À partir de 14h30">À partir de 14h30</option>
+                                        <option value="À partir de 15h00">À partir de 15h00</option>
+                                        <option value="À partir de 15h30">À partir de 15h30</option>
+                                        <option value="À partir de 16h00">À partir de 16h00</option>
+                                        <option value="À partir de 16h30">À partir de 16h30</option>
+                                        <option value="À partir de 17h00">À partir de 17h00</option>
+                                        <option value="À partir de 17h30">À partir de 17h30</option>
+                                        <option value="À partir de 18h00">À partir de 18h00</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Arrivée tardive possible ?</label>
@@ -515,7 +526,16 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Heure de départ <span style="color: #ef4444;">*</span></label>
-                                <input type="text" id="infos_heureDepart" class="form-control" placeholder="Avant 10h00">
+                                <select id="infos_heureDepart" class="form-control" required>
+                                    <option value="">-- Sélectionner --</option>
+                                    <option value="Avant 9h00">Avant 9h00</option>
+                                    <option value="Avant 9h30">Avant 9h30</option>
+                                    <option value="Avant 10h00">Avant 10h00</option>
+                                    <option value="Avant 10h30">Avant 10h30</option>
+                                    <option value="Avant 11h00">Avant 11h00</option>
+                                    <option value="Avant 11h30">Avant 11h30</option>
+                                    <option value="Avant 12h00">Avant 12h00</option>
+                                </select>
                             </div>
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Départ tardif possible ?</label>
@@ -606,7 +626,18 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             <div style="display: grid; gap: 15px;">
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Arrival Time</label>
-                                    <input type="text" id="infos_heureArrivee_en" class="form-control" placeholder="From 3:00 PM">
+                                    <select id="infos_heureArrivee_en" class="form-control">
+                                        <option value="">-- Select --</option>
+                                        <option value="From 2:00 PM">From 2:00 PM</option>
+                                        <option value="From 2:30 PM">From 2:30 PM</option>
+                                        <option value="From 3:00 PM">From 3:00 PM</option>
+                                        <option value="From 3:30 PM">From 3:30 PM</option>
+                                        <option value="From 4:00 PM">From 4:00 PM</option>
+                                        <option value="From 4:30 PM">From 4:30 PM</option>
+                                        <option value="From 5:00 PM">From 5:00 PM</option>
+                                        <option value="From 5:30 PM">From 5:30 PM</option>
+                                        <option value="From 6:00 PM">From 6:00 PM</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Late Arrival Possible?</label>
@@ -770,7 +801,16 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                             <div style="display: grid; gap: 15px;">
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Check-out Time</label>
-                                    <input type="text" id="infos_heureDepart_en" class="form-control" placeholder="Before 10:00 AM">
+                                    <select id="infos_heureDepart_en" class="form-control">
+                                        <option value="">-- Select --</option>
+                                        <option value="Before 9:00 AM">Before 9:00 AM</option>
+                                        <option value="Before 9:30 AM">Before 9:30 AM</option>
+                                        <option value="Before 10:00 AM">Before 10:00 AM</option>
+                                        <option value="Before 10:30 AM">Before 10:30 AM</option>
+                                        <option value="Before 11:00 AM">Before 11:00 AM</option>
+                                        <option value="Before 11:30 AM">Before 11:30 AM</option>
+                                        <option value="Before 12:00 PM">Before 12:00 PM</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Late Check-out Possible?</label>
