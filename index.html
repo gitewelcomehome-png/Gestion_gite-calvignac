@@ -367,7 +367,8 @@
                         console.error(`❌ Element #${tabId} introuvable dans le DOM!`);
                         return;
                     }
-                    window.SecurityUtils.setInnerHTML(targetElement, html);
+                    // Contenu trusted (fichiers HTML statiques du projet)
+                    window.SecurityUtils.setInnerHTML(targetElement, html, { trusted: true });
                     // Initialiser le Dashboard après chargement du HTML
                     if (tabId === 'tab-dashboard' && typeof refreshDashboard === 'function') {
                         // Attendre que le DOM soit rendu
