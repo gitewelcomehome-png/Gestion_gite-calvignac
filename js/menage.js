@@ -559,7 +559,8 @@ async function afficherPlanningParSemaine() {
     
     const menagePlanning = document.getElementById('menagePlanningWeeks');
     if (menagePlanning) {
-        window.SecurityUtils.setInnerHTML(menagePlanning, html, { trusted: true });
+        // Utilisation directe de innerHTML car HTML généré par le code, pas par utilisateur
+        menagePlanning.innerHTML = html;
     }
 }
 
