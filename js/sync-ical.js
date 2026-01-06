@@ -303,7 +303,20 @@ async function syncCalendar(gite, platform, url) {
             if (existingResa) {
                 // Marquer cette réservation comme toujours présente
                 foundReservationIds.add(existingResa.id);
-                console.log(`♻️ Réservation existante confirmée: ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
+                
+                // 🔒 PROTECTION : Ne PAS écraser si la réservation a été enrichie manuellement
+                const isEnriched = 
+                    (existingResa.nom && !existingResa.nom.includes('Client')) || // Nom personnalisé
+                    existingResa.email ||                                          // Email renseigné
+                    existingResa.telephone ||                                      // Téléphone renseigné
+                    existingResa.personnes > 0 ||                                  // Nombre de personnes
+                    (existingResa.montant && existingResa.montant > 0);            // Montant renseigné
+                
+                if (isEnriched) {
+                    console.log(`🔒 Réservation protégée (données enrichies): ${gite} du ${dateDebut} au ${dateFin} - ${existingResa.nom}`);
+                } else {
+                    console.log(`♻️ Réservation existante confirmée: ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
+                }
                 skipped++;
                 continue;
             }
