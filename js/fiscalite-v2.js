@@ -1954,7 +1954,7 @@ function genererTableauSoldes() {
                        placeholder="Notes optionnelles..."
                        style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 6px;">
             </td>
-        `;
+        `);
         tbody.appendChild(row);
     });
 }
