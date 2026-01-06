@@ -16,12 +16,18 @@ async function syncAllCalendars() {
     // Recharger les configs depuis localStorage
     window.ICAL_CONFIGS = getIcalConfigs();
     
+    // Réinitialiser les erreurs
+    window.SYNC_ERRORS = [];
+    
     const syncBtn = document.getElementById('syncBtn');
     const syncProgress = document.getElementById('syncProgress');
     const syncMessages = document.getElementById('syncMessages');
     const syncStatus = document.getElementById('syncStatus');
     const syncStatusIcon = document.getElementById('syncStatusIcon');
     const syncStatusText = document.getElementById('syncStatusText');
+    
+    // Réinitialiser les erreurs
+    window.SYNC_ERRORS = [];
     
     // Afficher le statut
     if (syncStatus) {
@@ -64,6 +70,8 @@ async function syncAllCalendars() {
                 addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées${deletedMsg}`, 'success');
             } catch (error) {
                 totalErrors++;
+                if (!window.SYNC_ERRORS) window.SYNC_ERRORS = [];
+                window.SYNC_ERRORS.push({ gite: 'Couzon', platform, error: error.message || 'Erreur inconnue' });
                 addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
             }
         }
@@ -81,6 +89,8 @@ async function syncAllCalendars() {
                 addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées${deletedMsg}`, 'success');
             } catch (error) {
                 totalErrors++;
+                if (!window.SYNC_ERRORS) window.SYNC_ERRORS = [];
+                window.SYNC_ERRORS.push({ gite: 'Trévoux', platform, error: error.message || 'Erreur inconnue' });
                 addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
             }
         }
@@ -101,6 +111,18 @@ async function syncAllCalendars() {
             addMessage(`💡 Allez dans "Réservations" et cliquez "⚠️ Compléter" pour ajouter les noms`, 'info');
         }
         
+        // 🚨 Afficher une alerte détaillée si des flux iCal sont en échec
+        if (totalErrors > 0 && window.SYNC_ERRORS.length > 0) {
+            addMessage('', 'info');
+            addMessage('🚨 FLUX iCAL EN ÉCHEC:', 'error');
+            window.SYNC_ERRORS.forEach(err => {
+                addMessage(`  • ${err.gite} - ${err.platform}: ${err.error}`, 'error');
+            });
+            addMessage('', 'info');
+            addMessage('🔧 SOLUTION: Les URLs iCal ne fonctionnent plus.', 'error');
+            addMessage('   Allez dans ⚙️ Paramètres iCal pour les mettre à jour avec les nouvelles URLs de vos comptes Airbnb/Abritel.', 'error');
+        }
+        
         await updateReservationsList();
         await updateStats();
         
@@ -111,9 +133,10 @@ async function syncAllCalendars() {
             const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
             
             if (totalErrors > 0) {
-                syncStatus.style.background = '#fff3cd';
-                syncStatusIcon.textContent = '⚠️';
-                syncStatusText.textContent = `Synchronisation effectuée avec ${totalErrors} erreur(s) - ${dateStr} à ${timeStr}`;
+                syncStatus.style.background = '#f8d7da';
+                syncStatusIcon.textContent = '🚨';
+                const errorDetails = window.SYNC_ERRORS.map(e => `${e.gite} ${e.platform}`).join(', ');
+                syncStatusText.innerHTML = `<strong>⚠️ ${totalErrors} flux iCal en échec</strong><br><small>${errorDetails}</small><br><small style="color: #721c24;">🔧 Allez dans ⚙️ Paramètres iCal pour mettre à jour les URLs</small>`;
             } else {
                 syncStatus.style.background = '#d4edda';
                 syncStatusIcon.textContent = '✓';
@@ -232,6 +255,7 @@ async function syncCalendar(gite, platform, url) {
         });
         
         console.log(`📋 Réservations existantes pour ${gite} / ${platform}: ${platformReservations.length}`);
+        console.log(`🔍 DEBUG - Total réservations ${gite}: ${existingReservations.filter(r => r.gite === gite).length}`);
         platformReservations.forEach(r => {
             console.log(`   • ${r.dateDebut} → ${r.dateFin} | ${r.nomClient || r.nom} | Plateforme: "${r.plateforme}" | SyncedFrom: "${r.syncedFrom || 'NON DÉFINI'}"`);
         });
@@ -352,9 +376,9 @@ async function syncCalendar(gite, platform, url) {
                 // Marquer cette réservation comme toujours présente
                 foundReservationIds.add(existingResa.id);
                 
-                // 🔒 PROTECTION : Ne PAS écraser si la réservation a été enrichie manuellement
+                // 🔒 PROTECTION ABSOLUE : Ne JAMAIS écraser une réservation modifiée/enrichie
                 const isEnriched = 
-                    (existingResa.nom && !existingResa.nom.includes('Client')) || // Nom personnalisé
+                    (existingResa.nom && !existingResa.nom.includes('Client') && !existingResa.nom.includes('BOOKED') && !existingResa.nom.includes('Reserved')) || // Nom personnalisé
                     existingResa.email ||                                          // Email renseigné
                     existingResa.telephone ||                                      // Téléphone renseigné
                     existingResa.personnes > 0 ||                                  // Nombre de personnes
@@ -370,7 +394,7 @@ async function syncCalendar(gite, platform, url) {
             }
             
             // Vérifier chevauchement avec d'autres réservations (pas de cette plateforme)
-            const hasOverlap = await checkDateOverlap(gite, dateDebut, dateFin);
+            const hasOverlap = await checkDateOverlap(gite, dateDebut, dateFin, null, platform);
             if (hasOverlap) {
                 console.log(`⏭️ Réservation ignorée (chevauchement avec autre source): ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
                 skipped++;
@@ -408,20 +432,85 @@ async function syncCalendar(gite, platform, url) {
             added++;
         }
         
-        // 🗑️ ÉTAPE 2 : Supprimer les réservations qui ne sont plus dans le flux iCal (annulées)
+        // 🗑️ ÉTAPE 2 : Détecter les réservations annulées (plus dans le flux iCal)
+        // ⚠️ PROTECTION : Ne jamais supprimer automatiquement - demander confirmation
+        // ⚠️ PROTECTION : Ne jamais supprimer les réservations enrichies
+        // ⚠️ PROTECTION : Ne jamais supprimer les réservations d'une AUTRE plateforme
+        
+        const canceledReservations = [];
+        
         for (const oldResa of platformReservations) {
             if (!foundReservationIds.has(oldResa.id)) {
-                // Cette réservation n'existe plus dans le flux iCal → elle a été annulée
-                console.log(`🗑️ Suppression réservation annulée: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                // 🛡️ SÉCURITÉ : Vérifier que cette réservation appartient VRAIMENT à cette plateforme
+                const resaPlatform = (oldResa.syncedFrom || oldResa.plateforme || '').toLowerCase();
+                const currentPlatform = platform.toLowerCase();
                 
-                await window.supabase
-                    .from('reservations')
-                    .delete()
-                    .eq('id', oldResa.id);
+                let belongsToThisPlatform = false;
+                if (currentPlatform.includes('airbnb')) {
+                    belongsToThisPlatform = resaPlatform.includes('airbnb');
+                } else if (currentPlatform.includes('abritel') || currentPlatform.includes('homelidays')) {
+                    belongsToThisPlatform = resaPlatform.includes('abritel') || resaPlatform.includes('homelidays');
+                } else if (currentPlatform.includes('gites')) {
+                    belongsToThisPlatform = resaPlatform.includes('gites') || resaPlatform.includes('gîtes');
+                } else {
+                    belongsToThisPlatform = resaPlatform === currentPlatform;
+                }
                 
-                deleted++;
+                if (!belongsToThisPlatform) {
+                    console.log(`🛡️ PROTECTION: Réservation d'une autre plateforme (${resaPlatform}) - NON supprimée: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                    continue;
+                }
+                
+                // Vérifier si la réservation est enrichie
+                const isEnriched = 
+                    (oldResa.nom && !oldResa.nom.includes('Client') && !oldResa.nom.includes('BOOKED') && !oldResa.nom.includes('Reserved')) ||
+                    oldResa.email ||
+                    oldResa.telephone ||
+                    oldResa.personnes > 0 ||
+                    (oldResa.montant && oldResa.montant > 0);
+                
+                if (isEnriched) {
+                    console.log(`🔒 Conservation réservation enrichie (non supprimée): ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                    continue;
+                }
+                
+                // ⚠️ Cette réservation a été annulée (plus dans le flux iCal)
+                console.log(`⚠️ Réservation annulée détectée: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                canceledReservations.push(oldResa);
             }
         }
+        
+        // 🚨 Si des annulations détectées, demander confirmation avant suppression
+        if (canceledReservations.length > 0) {
+            console.log(`\n🚨 ${canceledReservations.length} réservation(s) annulée(s) détectée(s) pour ${gite} / ${platform}`);
+            
+            const confirmMsg = canceledReservations.map(r => 
+                `• ${r.dateDebut} → ${r.dateFin} : ${r.nom}`
+            ).join('\n');
+            
+            const userConfirm = confirm(
+                `🚨 RÉSERVATIONS ANNULÉES DÉTECTÉES\n\n` +
+                `${canceledReservations.length} réservation(s) ne sont plus dans le flux iCal ${platform}:\n\n` +
+                `${confirmMsg}\n\n` +
+                `Voulez-vous les SUPPRIMER de la base de données?\n\n` +
+                `⚠️ Cette action est irréversible!`
+            );
+            
+            if (userConfirm) {
+                for (const oldResa of canceledReservations) {
+                    await window.supabase
+                        .from('reservations')
+                        .delete()
+                        .eq('id', oldResa.id);
+                    
+                    console.log(`✅ Supprimée: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                    deleted++;
+                }
+            } else {
+                console.log(`❌ Suppression annulée par l'utilisateur - ${canceledReservations.length} réservation(s) conservée(s)`);
+            }
+        }
+
         
         return { added, skipped, deleted };
         
@@ -439,7 +528,7 @@ async function syncCalendar(gite, platform, url) {
  * @param {number|null} excludeId - ID de réservation à exclure de la vérification
  * @returns {Promise<boolean>} - true si chevauchement détecté
  */
-async function checkDateOverlap(gite, dateDebut, dateFin, excludeId = null) {
+async function checkDateOverlap(gite, dateDebut, dateFin, excludeId = null, excludePlatform = null) {
     const reservations = await getAllReservations();
     const debut = parseLocalDate(dateDebut);
     const fin = parseLocalDate(dateFin);
@@ -447,6 +536,9 @@ async function checkDateOverlap(gite, dateDebut, dateFin, excludeId = null) {
     for (const r of reservations) {
         if (r.id === excludeId) continue;
         if (r.gite !== gite) continue;
+        
+        // Ignorer les réservations de la même plateforme (permet back-to-back)
+        if (excludePlatform && r.syncedFrom === excludePlatform) continue;
         
         const rDebut = parseLocalDate(r.dateDebut);
         const rFin = parseLocalDate(r.dateFin);
