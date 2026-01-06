@@ -67,7 +67,7 @@ window.initValidationInfosPratiques = function() {
             if (this.value.trim()) {
                 const standardized = standardizeFrenchPhone(this.value);
                 this.value = standardized;
-                console.log('📞 Téléphone standardisé:', standardized);
+                // console.log('📞 Téléphone standardisé:', standardized);
             }
         });
     }

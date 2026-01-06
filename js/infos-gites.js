@@ -1228,7 +1228,7 @@ function attachAutoSave() {
         }
     });
     
-    console.log('✅ Auto-save activé sur', fields.length, 'champs');
+    // console.log('✅ Auto-save activé sur', fields.length, 'champs');
 }
 
 // Attacher auto-save quand le tab est chargé
