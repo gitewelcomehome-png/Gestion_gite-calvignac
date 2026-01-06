@@ -568,6 +568,29 @@ async function updateTodoList(category) {
     console.log(`[updateTodoList] HTML construit (${html.length} caractères), injection dans container...`);
     container.innerHTML = html;
     console.log(`[updateTodoList] ✅ innerHTML injecté, container.children.length:`, container.children.length);
+    
+    // Vérifier les styles du container
+    const styles = window.getComputedStyle(container);
+    console.log(`[updateTodoList] 🎨 Styles container:`, {
+        display: styles.display,
+        visibility: styles.visibility,
+        opacity: styles.opacity,
+        height: styles.height,
+        overflow: styles.overflow,
+        position: styles.position
+    });
+    
+    // Vérifier le parent
+    const parent = container.parentElement;
+    if (parent) {
+        const parentStyles = window.getComputedStyle(parent);
+        console.log(`[updateTodoList] 🎨 Styles parent (${parent.tagName}#${parent.id}):`, {
+            display: parentStyles.display,
+            visibility: parentStyles.visibility,
+            opacity: parentStyles.opacity,
+            height: parentStyles.height
+        });
+    }
 }
 
 async function addTodoItem(category) {
