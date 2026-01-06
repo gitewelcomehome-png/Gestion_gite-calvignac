@@ -206,6 +206,31 @@ class AuthManager {
             userRolesElement.textContent = this.userRoles.join(', ');
         }
         
+        // 🆕 Mettre à jour le widget utilisateur dans le header
+        if (this.currentUser) {
+            const userNameElement = document.getElementById('userName');
+            const userRoleElement = document.getElementById('userRole');
+            
+            if (userNameElement) {
+                // Extraire le prénom de l'email
+                const emailName = this.currentUser.email.split('@')[0];
+                const displayName = emailName.charAt(0).toUpperCase() + emailName.slice(1).replace(/[._-]/g, ' ');
+                userNameElement.textContent = displayName;
+            }
+            
+            if (userRoleElement) {
+                let roleDisplay = '⚠️ Aucun rôle';
+                if (this.userRoles && this.userRoles.length > 0) {
+                    if (this.userRoles.includes('owner') || this.userRoles.includes('admin')) {
+                        roleDisplay = '🔧 Admin';
+                    } else if (this.userRoles.includes('cleaner')) {
+                        roleDisplay = '👤 User';
+                    }
+                }
+                userRoleElement.textContent = roleDisplay;
+            }
+        }
+        
         // Masquer les fonctionnalités selon les rôles
         this.applyRoleBasedUI();
     }
