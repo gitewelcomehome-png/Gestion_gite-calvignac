@@ -536,9 +536,12 @@ ON cleaning_schedule FOR ALL
 USING (
     organization_id IN (SELECT * FROM get_current_user_organization_ids())
     AND (
-        role IN ('owner', 'admin', 'manager') FROM organization_members
-        WHERE organization_id = cleaning_schedule.organization_id
-        AND user_id = auth.uid()
+        EXISTS (
+            SELECT 1 FROM organization_members
+            WHERE organization_id = cleaning_schedule.organization_id
+            AND user_id = auth.uid()
+            AND role IN ('owner', 'admin', 'manager')
+        )
         OR assigned_to = auth.uid()
     )
 );
