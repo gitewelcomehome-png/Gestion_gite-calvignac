@@ -321,7 +321,8 @@ async function updateDashboardReservations() {
             badgeColor = '#9B59B6';
         }
         
-        const giteColor = r.gite === 'Trevoux' ? '#667eea' : '#f093fb';
+        const gite = await window.gitesManager.getByName(r.gite) || await window.gitesManager.getById(r.gite_id);
+        const giteColor = gite ? gite.color : '#667eea';
         const paiementIcon = r.paiement === 'Soldé' ? '✅' : r.paiement === 'Acompte reçu' ? '⏳' : '❌';
         
         // Calculer jours avant arrivée
@@ -452,7 +453,8 @@ async function updateDashboardMenages() {
         const color = statusColors[c.status] || '#999';
         const statusLabel = statusLabels[c.status] || 'Inconnu';
         const timeIcon = c.time_of_day === 'morning' ? '🌅' : '🌆';
-        const giteColor = c.gite === 'Trevoux' ? '#667eea' : '#f093fb';
+const gite = await window.gitesManager.getByName(c.gite) || await window.gitesManager.getById(c.gite_id);
+        const giteColor = gite ? gite.color : '#667eea';
         
         html += `
             <div style="border-left: 4px solid ${giteColor}; padding: 12px; margin-bottom: 8px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
@@ -528,7 +530,7 @@ async function updateTodoList(category) {
                     </div>
                     ${todo.description ? `<div style="font-size: 0.85rem; color: #6c757d; margin-bottom: 8px; line-height: 1.5;">${todo.description}</div>` : ''}
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        ${todo.gite ? `<span style="background: ${todo.gite === 'Trevoux' ? '#667eea' : '#f093fb'}; color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${todo.gite}</span>` : ''}
+                        ${todo.gite ? `<span class="gite-badge" data-gite="${todo.gite}" style="background: var(--gite-color, #667eea); color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${todo.gite}</span>` : ''}
                         ${todo.is_recurrent && frequencyLabel ? `<span style="background: #E8DAEF; color: #7D3C98; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${frequencyLabel}</span>` : ''}
                     </div>
                 </div>
