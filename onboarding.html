@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenue - Gestion Gîtes</title>
+    <link rel="stylesheet" href="css/icons.css">
     <style>
         * {
             margin: 0;
@@ -169,19 +170,35 @@
 
         .icon-picker {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
             margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
         }
 
         .icon-option {
-            font-size: 24px;
-            padding: 10px;
+            padding: 12px;
             border: 2px solid #e0e0e0;
+            background: white;
             border-radius: 8px;
             cursor: pointer;
             text-align: center;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-option svg {
+            width: 40px;
+            height: 40px;
+            stroke: #2D3436;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
         }
 
         .icon-option:hover {
@@ -460,6 +477,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.local.js" onerror="console.log('config.local.js non trouvé')"></script>
     <script src="js/shared-config.js"></script>
+    <script src="js/icons.js"></script>
     
     <script>
         let currentStep = 1;
@@ -595,14 +613,32 @@
                 <div class="form-group">
                     <label>Icône</label>
                     <div class="icon-picker">
-                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})">🏠</div>
-                        <div class="icon-option selected" onclick="selectIcon(this, ${giteCounter})">🏰</div>
-                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})">⛰️</div>
-                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})">🏡</div>
-                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})">🏘️</div>
-                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})">🏔️</div>
+                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})" data-icon="maison">
+                            ${getIcon('gite', 'maison')}
+                        </div>
+                        <div class="icon-option selected" onclick="selectIcon(this, ${giteCounter})" data-icon="chalet">
+                            ${getIcon('gite', 'chalet')}
+                        </div>
+                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})" data-icon="appartement">
+                            ${getIcon('gite', 'appartement')}
+                        </div>
+                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})" data-icon="villa">
+                            ${getIcon('gite', 'villa')}
+                        </div>
+                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})" data-icon="manoir">
+                            ${getIcon('gite', 'manoir')}
+                        </div>
+                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})" data-icon="grange">
+                            ${getIcon('gite', 'grange')}
+                        </div>
+                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})" data-icon="tiny-house">
+                            ${getIcon('gite', 'tiny-house')}
+                        </div>
+                        <div class="icon-option" onclick="selectIcon(this, ${giteCounter})" data-icon="dome">
+                            ${getIcon('gite', 'dome')}
+                        </div>
                     </div>
-                    <input type="hidden" class="gite-icon" value="🏰">
+                    <input type="hidden" class="gite-icon" value="chalet">
                 </div>
 
                 <div class="form-group">
@@ -640,7 +676,9 @@
             const card = element.closest('.gite-card');
             card.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('selected'));
             element.classList.add('selected');
-            card.querySelector('.gite-icon').value = element.textContent;
+            // Récupérer le nom de l'icône depuis data-icon
+            const iconName = element.dataset.icon || 'chalet';
+            card.querySelector('.gite-icon').value = iconName;
         }
 
         function selectColor(element, giteId) {
