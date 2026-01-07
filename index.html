@@ -923,33 +923,37 @@
                 // Pour les données historiques, on ne peut pas compter les réservations individuelles
                 totalReservations = '-';
                 const statTotalEl = document.getElementById('statTotal');
-                const statTrevouxEl = document.getElementById('statTrevoux');
-                const statCouzonEl = document.getElementById('statCouzon');
                 if (statTotalEl) statTotalEl.textContent = totalReservations;
-                if (statTrevouxEl) statTrevouxEl.textContent = '-';
-                if (statCouzonEl) statCouzonEl.textContent = '-';
+                
+                // Mettre à jour dynamiquement pour N gîtes
+                const gites = await window.gitesManager.getAll();
+                gites.forEach(g => {
+                    const statEl = document.getElementById(`stat${g.slug}`);
+                    if (statEl) statEl.textContent = '-';
+                });
             } else {
-                // Utiliser les réservations automatiques
+                // Utiliser les réservations automatiques (dynamique N gîtes)
                 const filteredReservations = reservations.filter(r => {
                     const year = parseLocalDate(r.dateDebut).getFullYear();
                     return year === selectedYear;
                 });
                 
-                const trevoux = filteredReservations.filter(r => isTrevoux(r.gite));
-                const couzon = filteredReservations.filter(r => isCouzon(r.gite));
+                const gites = await window.gitesManager.getAll();
+                caTotal = 0;
+                totalReservations = 0;
                 
-                const caTrevoux = trevoux.reduce((sum, r) => sum + r.montant, 0);
-                const caCouzon = couzon.reduce((sum, r) => sum + r.montant, 0);
-                caTotal = caTrevoux + caCouzon;
-                
-                totalReservations = trevoux.length + couzon.length;
+                gites.forEach(gite => {
+                    const reservationsGite = filteredReservations.filter(r => r.gite_id === gite.id || r.gite === gite.name);
+                    const caGite = reservationsGite.reduce((sum, r) => sum + r.montant, 0);
+                    caTotal += caGite;
+                    totalReservations += reservationsGite.length;
+                    
+                    const statEl = document.getElementById(`stat${gite.slug}`);
+                    if (statEl) statEl.textContent = reservationsGite.length;
+                });
                 
                 const statTotalEl = document.getElementById('statTotal');
-                const statTrevouxEl = document.getElementById('statTrevoux');
-                const statCouzonEl = document.getElementById('statCouzon');
                 if (statTotalEl) statTotalEl.textContent = totalReservations;
-                if (statTrevouxEl) statTrevouxEl.textContent = trevoux.length;
-                if (statCouzonEl) statCouzonEl.textContent = couzon.length;
                 
                 // Mettre à jour les compteurs par plateforme et statistiques avancées
                 updatePlatformCounters(filteredReservations);
@@ -2578,33 +2582,24 @@
         // supprimerActivite, modifierActivite, filtrerActivitesParCategorie, etc.
         
         // Sélectionner un gîte pour "À Découvrir"
-        function selectGiteDecouvrir(gite) {
-            document.getElementById('decouvrir_gite').value = gite;
+        async function selectGiteDecouvrir(giteName) {
+            document.getElementById('decouvrir_gite').value = giteName;
             document.getElementById('formDecouvrir').style.display = 'block';
             
             // Mettre à jour les styles des boutons de sélection de gîte
-            const boutonTrevoux = document.querySelector('[onclick*="selectGiteDecouvrir(\'Trevoux\')"]');
-            const boutonCouzon = document.querySelector('[onclick*="selectGiteDecouvrir(\'Couzon\')"]');
-            
-            if (gite === 'Trevoux') {
-                if (boutonTrevoux) {
-                    boutonTrevoux.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                    boutonTrevoux.style.color = 'white';
+            const gites = await window.gitesManager.getAll();
+            gites.forEach(g => {
+                const bouton = document.querySelector(`[onclick*="selectGiteDecouvrir('${g.name}')"]`);
+                if (bouton) {
+                    if (g.name === giteName) {
+                        bouton.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                        bouton.style.color = 'white';
+                    } else {
+                        bouton.style.background = 'white';
+                        bouton.style.color = '#FF6B6B';
+                    }
                 }
-                if (boutonCouzon) {
-                    boutonCouzon.style.background = 'white';
-                    boutonCouzon.style.color = '#FF6B6B';
-                }
-            } else {
-                if (boutonCouzon) {
-                    boutonCouzon.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                    boutonCouzon.style.color = 'white';
-                }
-                if (boutonTrevoux) {
-                    boutonTrevoux.style.background = 'white';
-                    boutonTrevoux.style.color = '#FF6B6B';
-                }
-            }
+            });
             
             // Masquer le message de gîte sélectionné
             const alertInfo = document.querySelector('#formDecouvrir .alert.alert-info');
@@ -2625,13 +2620,16 @@
         }
         
         // Fonction pour géocoder une adresse (convertir adresse → coordonnées GPS)
-        async function geocodeAddress(address, gite) {
+        async function geocodeAddress(address, giteName) {
             try {
                 // Si l'adresse est vide, utiliser les coordonnées du gîte
                 if (!address || address.trim() === '') {
-                    return gite === 'Trevoux' 
-                        ? { lat: 45.9394, lng: 4.7728 }
-                        : { lat: 45.8442, lng: 4.8365 };
+                    const gite = await window.gitesManager.getByName(giteName);
+                    if (gite) {
+                        return await window.gitesManager.getCoordinates(gite.id);
+                    }
+                    // Fallback si gîte introuvable
+                    return { lat: 45.9, lng: 4.8 };
                 }
                 
                 // Utiliser Nominatim (OpenStreetMap) pour le géocodage
@@ -2648,9 +2646,8 @@
                 
                 if (!response.ok) {
                     // Utiliser coordonnées par défaut
-                    return gite === 'Trevoux' 
-                        ? { lat: 45.9394, lng: 4.7728 }
-                        : { lat: 45.8442, lng: 4.8365 };
+                    const gite = await window.gitesManager.getByName(giteName);
+                    return gite ? await window.gitesManager.getCoordinates(gite.id) : { lat: 45.9, lng: 4.8 };
                 }
                 
                 const data = await response.json();
@@ -2663,14 +2660,12 @@
                 }
                 
                 // Si le géocodage échoue, coordonnées par défaut du gîte
-                return gite === 'Trevoux' 
-                    ? { lat: 45.9394, lng: 4.7728 }
-                    : { lat: 45.8442, lng: 4.8365 };
+                const gite = await window.gitesManager.getByName(giteName);
+                return gite ? await window.gitesManager.getCoordinates(gite.id) : { lat: 45.9, lng: 4.8 };
             } catch (error) {
                 console.error('Erreur géocodage:', address, error);
-                return gite === 'Trevoux' 
-                    ? { lat: 45.9394, lng: 4.7728 }
-                    : { lat: 45.8442, lng: 4.8365 };
+                const gite = await window.gitesManager.getByName(giteName);
+                return gite ? await window.gitesManager.getCoordinates(gite.id) : { lat: 45.9, lng: 4.8 };
             }
         }
         
