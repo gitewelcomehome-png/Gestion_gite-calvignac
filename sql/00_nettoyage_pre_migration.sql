@@ -30,36 +30,48 @@ ORDER BY gite;
 -- ÉTAPE 2: NORMALISATION "Trévoux" → "Trevoux"
 -- ----------------------------------------------------------------
 
--- Dans reservations
-UPDATE reservations 
-SET gite = 'Trevoux'
-WHERE gite = 'Trévoux';
+DO $$
+DECLARE
+    res_count INT;
+    clean_count INT;
+BEGIN
+    -- Dans reservations
+    UPDATE reservations 
+    SET gite = 'Trevoux'
+    WHERE gite = 'Trévoux';
+    GET DIAGNOSTICS res_count = ROW_COUNT;
+    RAISE NOTICE '✅ reservations: % lignes Trévoux → Trevoux', res_count;
 
-RAISE NOTICE '✅ reservations: Trévoux → Trevoux normalisé';
-
--- Dans cleaning_schedule
-UPDATE cleaning_schedule 
-SET gite = 'Trevoux'
-WHERE gite = 'Trévoux';
-
-RAISE NOTICE '✅ cleaning_schedule: Trévoux → Trevoux normalisé';
+    -- Dans cleaning_schedule
+    UPDATE cleaning_schedule 
+    SET gite = 'Trevoux'
+    WHERE gite = 'Trévoux';
+    GET DIAGNOSTICS clean_count = ROW_COUNT;
+    RAISE NOTICE '✅ cleaning_schedule: % lignes Trévoux → Trevoux', clean_count;
+END $$;
 
 -- ----------------------------------------------------------------
 -- ÉTAPE 3: NORMALISATION "Le Rive Droite" → "Couzon"
 -- ----------------------------------------------------------------
 
--- "Le Rive Droite" est l'ancien nom de "Couzon"
-UPDATE reservations 
-SET gite = 'Couzon'
-WHERE gite = 'Le Rive Droite';
+DO $$
+DECLARE
+    res_count INT;
+    clean_count INT;
+BEGIN
+    -- "Le Rive Droite" est l'ancien nom de "Couzon"
+    UPDATE reservations 
+    SET gite = 'Couzon'
+    WHERE gite = 'Le Rive Droite';
+    GET DIAGNOSTICS res_count = ROW_COUNT;
+    RAISE NOTICE '✅ reservations: % lignes Le Rive Droite → Couzon', res_count;
 
-RAISE NOTICE '✅ reservations: Le Rive Droite → Couzon normalisé';
-
-UPDATE cleaning_schedule 
-SET gite = 'Couzon'
-WHERE gite = 'Le Rive Droite';
-
-RAISE NOTICE '✅ cleaning_schedule: Le Rive Droite → Couzon normalisé';
+    UPDATE cleaning_schedule 
+    SET gite = 'Couzon'
+    WHERE gite = 'Le Rive Droite';
+    GET DIAGNOSTICS clean_count = ROW_COUNT;
+    RAISE NOTICE '✅ cleaning_schedule: % lignes Le Rive Droite → Couzon', clean_count;
+END $$;
 
 -- ----------------------------------------------------------------
 -- ÉTAPE 4: VÉRIFICATION POST-NETTOYAGE
