@@ -648,9 +648,9 @@
                 const orgEmail = document.getElementById('org-email').value;
                 const orgPhone = document.getElementById('org-phone').value;
 
-                const { data: session } = await window.supabaseClient.auth.getSession();
-                if (!session.session) {
-                    throw new Error('Session expirée');
+                // Utiliser la session stockée lors du signup
+                if (!userSession) {
+                    throw new Error('Session expirée. Veuillez recommencer.');
                 }
 
                 // Créer slug depuis nom
@@ -717,7 +717,7 @@
                     .from('organization_members')
                     .insert([{
                         organization_id: org.id,
-                        user_id: session.session.user.id,
+                        user_id: userSession.user.id,
                         role: 'owner'
                     }]);
 
