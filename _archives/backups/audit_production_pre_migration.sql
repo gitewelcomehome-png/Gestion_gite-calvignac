@@ -13,12 +13,6 @@
 SELECT 'reservations' as table_name, COUNT(*) as count FROM reservations
 UNION ALL
 SELECT 'cleaning_schedule', COUNT(*) FROM cleaning_schedule
-UNION ALL
-SELECT 'stocks_draps', COUNT(*) FROM stocks_draps 
-    WHERE EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'stocks_draps')
-UNION ALL
-SELECT 'charges', COUNT(*) FROM charges 
-    WHERE EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'charges')
 ORDER BY table_name;
 
 -- ----------------------------------------------------------------
@@ -64,10 +58,10 @@ ORDER BY gite, status;
 
 SELECT 
     'PÉRIODE RÉSERVATIONS' as metric,
-    MIN(check_in) as premiere_reservation,
-    MAX(check_out) as derniere_reservation,
+    MIN(date_debut) as premiere_reservation,
+    MAX(date_fin) as derniere_reservation,
     COUNT(*) as total_reservations,
-    COUNT(DISTINCT client_name) as clients_uniques
+    COUNT(DISTINCT nom_client) as clients_uniques
 FROM reservations;
 
 -- ----------------------------------------------------------------
@@ -79,7 +73,7 @@ SELECT
     gite,
     COUNT(*) as count
 FROM reservations 
-WHERE check_in >= CURRENT_DATE - INTERVAL '30 days'
+WHERE date_debut >= CURRENT_DATE - INTERVAL '30 days'
 GROUP BY gite;
 
 -- ----------------------------------------------------------------
@@ -96,7 +90,7 @@ SELECT
     'RÉSERVATIONS SANS CLIENT' as metric,
     COUNT(*) as count
 FROM reservations 
-WHERE client_name IS NULL OR client_name = '';
+WHERE nom_client IS NULL OR nom_client = '';
 
 SELECT 
     'MÉNAGES SANS GÎTE' as metric,
