@@ -95,7 +95,7 @@ async function updateArchivedTodos() {
                         <div style="flex: 1;">
                             <div style="font-weight: 600; text-decoration: line-through; color: #666;">${todo.title}</div>
                             ${todo.description ? `<div style="font-size: 0.85rem; color: #888; margin-top: 4px;">${todo.description}</div>` : ''}
-                            ${todo.gite ? `<span style="background: ${todo.gite === 'Trevoux' ? '#667eea' : '#f093fb'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; display: inline-block; margin-top: 6px;">${todo.gite}</span>` : ''}
+                            ${todo.gite ? `<span class="gite-badge" data-gite="${todo.gite}" style="background: var(--gite-color, #667eea); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; display: inline-block; margin-top: 6px;">${todo.gite}</span>` : ''}
                             <div style="font-size: 0.75rem; color: #999; margin-top: 8px;">
                                 ✅ Terminé le ${formatDate(archivedDate)}
                             </div>
