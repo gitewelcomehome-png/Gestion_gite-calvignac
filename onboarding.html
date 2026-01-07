@@ -470,11 +470,12 @@
         
         // Vérifier si déjà connecté
         async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                // Déjà connecté, rediriger vers dashboard
-                window.location.href = 'index.html';
-            }
+            // TEMPORAIRE: Désactivé pour permettre nouvelle inscription
+            // const { data: { session } } = await supabase.auth.getSession();
+            // if (session) {
+            //     // Déjà connecté, rediriger vers dashboard
+            //     window.location.href = 'index.html';
+            // }
         }
         checkAuth();
 
