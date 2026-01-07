@@ -623,7 +623,7 @@ async function afficherToutesLesActivites() {
         html += `
             <div style="margin-bottom: 40px; border: 3px solid #667eea; border-radius: 16px; padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);">
                 <h4 style="color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 10px; font-size: 1.4rem; margin-bottom: 20px; text-align: center;">
-                    ${gite === 'Trevoux' ? '🏰' : '⛰️'} ${gite} <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activitesGite.length}</span>
+                    ${gite.icon} ${gite.name} <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activitesGite.length}</span>
                 </h4>
         `;
         

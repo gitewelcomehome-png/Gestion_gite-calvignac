@@ -916,17 +916,20 @@ window.selectGiteInfos = async function(gite) {
     // Changer le gîte
     currentGiteInfos = gite;
     
-    // Mettre à jour l'UI des boutons
-    const btnTrevoux = document.getElementById('btnTrevoux');
-    const btnCouzon = document.getElementById('btnCouzon');
-    if (btnTrevoux) {
-        btnTrevoux.style.background = gite === 'Trevoux' ? 'white' : 'rgba(255,255,255,0.2)';
-        btnTrevoux.style.color = gite === 'Trevoux' ? '#667eea' : 'white';
-    }
-    if (btnCouzon) {
-        btnCouzon.style.background = gite === 'Couzon' ? 'white' : 'rgba(255,255,255,0.2)';
-        btnCouzon.style.color = gite === 'Couzon' ? '#667eea' : 'white';
-    }
+    // Mettre à jour l'UI des boutons dynamiquement
+    const gites = await window.gitesManager.getAll();
+    gites.forEach(g => {
+        const btn = document.getElementById(`btn${g.name}`);
+        if (btn) {
+            if (g.name === gite) {
+                btn.style.background = 'white';
+                btn.style.color = '#667eea';
+            } else {
+                btn.style.background = 'rgba(255,255,255,0.2)';
+                btn.style.color = 'white';
+            }
+        }
+    });
     
     // Charger les données du nouveau gîte
     await chargerDonneesInfos();
