@@ -55,12 +55,21 @@ async function chargerInterventions() {
         const container = document.getElementById('interventions-list');
         
         if (!menages || menages.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📭</div>
-                    <p>Aucune intervention prévue dans les 3 prochaines semaines</p>
-                </div>
-            `;
+            if (window.SecurityUtils) {
+                window.SecurityUtils.setInnerHTML(container, `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Aucune intervention prévue dans les 3 prochaines semaines</p>
+                    </div>
+                `, { trusted: true });
+            } else {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Aucune intervention prévue dans les 3 prochaines semaines</p>
+                    </div>
+                `;
+            }
             return;
         }
 
@@ -91,14 +100,27 @@ async function chargerInterventions() {
             `;
         });
 
-        container.innerHTML = html;
+        if (window.SecurityUtils) {
+            window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+        } else {
+            container.innerHTML = html;
+        }
     } catch (error) {
         console.error('Erreur chargement interventions:', error);
-        document.getElementById('interventions-list').innerHTML = `
-            <div class="alert alert-warning">
-                ⚠️ Erreur lors du chargement des interventions
-            </div>
-        `;
+        const errorContainer = document.getElementById('interventions-list');
+        if (window.SecurityUtils) {
+            window.SecurityUtils.setInnerHTML(errorContainer, `
+                <div class="alert alert-warning">
+                    ⚠️ Erreur lors du chargement des interventions
+                </div>
+            `, { trusted: true });
+        } else {
+            errorContainer.innerHTML = `
+                <div class="alert alert-warning">
+                    ⚠️ Erreur lors du chargement des interventions
+                </div>
+            `;
+        }
     }
 }
 
@@ -271,7 +293,11 @@ function afficherGrilleStock(gite, stocks) {
         `;
     });
 
-    container.innerHTML = html;
+    if (window.SecurityUtils) {
+        window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+    } else {
+        container.innerHTML = html;
+    }
 }
 
 async function sauvegarderStocks(gite) {
