@@ -41,7 +41,6 @@ USING (
         WHERE user_id = auth.uid() 
         AND role = 'femme_menage'
     )
-    AND status IN ('confirmed', 'ongoing')
 );
 
 -- ================================================================
