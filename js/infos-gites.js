@@ -370,8 +370,8 @@ function telechargerPageHTML(reservation) {
             // Charger les activités selon le gîte
             const restaurants = JSON.parse(localStorage.getItem('restaurants') || '{}');
             const activites = JSON.parse(localStorage.getItem('activites') || '{}');
-            const restaurantsGite = reservation.gite === 'Trevoux' ? restaurants.trevoux : restaurants.couzon;
-            const activitesGite = reservation.gite === 'Trevoux' ? activites.trevoux : activites.couzon;
+            const restaurantsGite = restaurants[reservation.gite] || restaurants[reservation.gite_id] || '';
+            const activitesGite = activites[reservation.gite] || activites[reservation.gite_id] || '';
             const lyon = localStorage.getItem('activitesLyon') || '';
             const dombes = localStorage.getItem('activitesDombes') || '';
             const parcsZoo = localStorage.getItem('parcsZoo') || '';

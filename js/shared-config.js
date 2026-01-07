@@ -50,10 +50,8 @@ const DEFAULT_ICAL_CONFIGS = window.APP_CONFIG?.DEFAULT_ICAL_CONFIGS || {
 };
 
 // Coordonnées GPS des gîtes
-const GITES_COORDS = {
-    'Trevoux': { lat: 45.93638229370117, lng: 4.791853904724121 },
-    'Couzon': { lat: 45.84257125854492, lng: 4.831059455871582 }
-};
+// ⚠️ DEPRECATED: Utiliser window.gitesManager.getCoordinates() à la place
+const GITES_COORDS = {};
 
 // Système de cache intelligent
 const CACHE = {

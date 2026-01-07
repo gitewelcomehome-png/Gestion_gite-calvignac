@@ -67,19 +67,24 @@ export async function afficherHorairesClients() {
             ${demandesValides.map(demande => {
                 const reservation = reservationsMap[demande.reservation_id];
                 if (!reservation) return '';
+                const gite = await window.gitesManager.getByName(reservation.gite) || await window.gitesManager.getById(reservation.gite_id);
+                const giteColor = gite ? gite.color : '#667eea';
+                const giteIcon = gite ? gite.icon : '🏡';
+                const giteName = gite ? gite.name : reservation.gite;
+                
                 const typeLabel = demande.type === 'arrivee_anticipee' ? '🕐 Arrivée' : '🕐 Départ';
                 return `
                     <div style="
                         background: white;
                         border-radius: 12px;
                         padding: 20px;
-                        border-left: 4px solid ${reservation.gite === 'Trevoux' ? '#667eea' : '#f093fb'};
+                        border-left: 4px solid ${giteColor};
                         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                     ">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
                             <div>
                                 <div style="font-size: 1.2rem; font-weight: 700; color: #333; margin-bottom: 5px;">
-                                    ${reservation.gite === 'Trevoux' ? '🏡' : '⛰️'} ${reservation.gite} - ${reservation.nom}
+                                    ${giteIcon} ${giteName} - ${reservation.nom}
                                 </div>
                                 <div style="color: #666; font-size: 0.95rem;">
                                     ${formatDateCourt(reservation.date_debut)} → ${formatDateCourt(reservation.date_fin)}

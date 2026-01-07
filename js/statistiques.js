@@ -41,30 +41,23 @@ function updatePlatformCounters(reservations) {
 async function updateAdvancedStats(reservations) {
     // Utiliser directement les réservations passées (déjà filtrées si nécessaire)
     
-    // Taux d'occupation
-    const trevoux = reservations.filter(r => isTrevoux(r.gite));
-    const couzon = reservations.filter(r => isCouzon(r.gite));
-    
-    const joursOccupesTrevoux = trevoux.reduce((sum, r) => {
-        const debut = parseLocalDate(r.dateDebut);
-        const fin = parseLocalDate(r.dateFin);
-        return sum + Math.round((fin - debut) / (1000 * 60 * 60 * 24));
-    }, 0);
-    
-    const joursOccupesCouzon = couzon.reduce((sum, r) => {
-        const debut = parseLocalDate(r.dateDebut);
-        const fin = parseLocalDate(r.dateFin);
-        return sum + Math.round((fin - debut) / (1000 * 60 * 60 * 24));
-    }, 0);
-    
+    // Taux d'occupation (dynamique pour N gîtes)
+    const gites = await window.gitesManager.getAll();
     const joursAnnee = 365;
-    const tauxTrevoux = ((joursOccupesTrevoux / joursAnnee) * 100).toFixed(1);
-    const tauxCouzon = ((joursOccupesCouzon / joursAnnee) * 100).toFixed(1);
     
-    const elTrevoux = document.getElementById('tauxTrevoux');
-    const elCouzon = document.getElementById('tauxCouzon');
-    if (elTrevoux) elTrevoux.textContent = tauxTrevoux + '%';
-    if (elCouzon) elCouzon.textContent = tauxCouzon + '%';
+    gites.forEach(gite => {
+        const reservationsGite = reservations.filter(r => r.gite_id === gite.id || r.gite === gite.name);
+        
+        const joursOccupes = reservationsGite.reduce((sum, r) => {
+            const debut = parseLocalDate(r.dateDebut);
+            const fin = parseLocalDate(r.dateFin);
+            return sum + Math.round((fin - debut) / (1000 * 60 * 60 * 24));
+        }, 0);
+        
+        const taux = ((joursOccupes / joursAnnee) * 100).toFixed(1);
+        const el = document.getElementById(`taux${gite.slug}`);
+        if (el) el.textContent = taux + '%';
+    });
     
     // Prix moyen par nuit
     let totalMontant = 0;
@@ -174,23 +167,25 @@ async function filterStatsByYear() {
     updatePlatformCounters(filteredReservations);
     updateAdvancedStats(filteredReservations);
     
-    const trevoux = filteredReservations.filter(r => isTrevoux(r.gite));
-    const couzon = filteredReservations.filter(r => isCouzon(r.gite));
+    // Calcul dynamique pour N gîtes
+    const gites = await window.gitesManager.getAll();
+    let caTotal = 0;
+    let totalReservations = 0;
     
-    const caTrevoux = trevoux.reduce((sum, r) => sum + r.montant, 0);
-    const caCouzon = couzon.reduce((sum, r) => sum + r.montant, 0);
-    const caTotal = caTrevoux + caCouzon;
-    
-    const totalReservations = trevoux.length + couzon.length;
+    gites.forEach(gite => {
+        const reservationsGite = filteredReservations.filter(r => r.gite_id === gite.id || r.gite === gite.name);
+        const caGite = reservationsGite.reduce((sum, r) => sum + r.montant, 0);
+        caTotal += caGite;
+        totalReservations += reservationsGite.length;
+        
+        const elGite = document.getElementById(`stat${gite.slug}`);
+        if (elGite) elGite.textContent = reservationsGite.length;
+    });
     
     const elTotal = document.getElementById('statTotal');
-    const elTrevoux = document.getElementById('statTrevoux');
-    const elCouzon = document.getElementById('statCouzon');
     const elCA = document.getElementById('statCA');
     
     if (elTotal) elTotal.textContent = totalReservations;
-    if (elTrevoux) elTrevoux.textContent = trevoux.length;
-    if (elCouzon) elCouzon.textContent = couzon.length;
     if (elCA) elCA.textContent = caTotal.toFixed(0) + ' €';
     
     await updateAllCharts(filteredReservations);
