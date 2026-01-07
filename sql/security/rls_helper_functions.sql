@@ -7,7 +7,7 @@
 
 -- Fonction qui vérifie si l'utilisateur actuel a un rôle donné
 -- SECURITY DEFINER permet de contourner RLS
-CREATE OR REPLACE FUNCTION auth.user_has_role(required_role TEXT)
+CREATE OR REPLACE FUNCTION public.user_has_role(required_role TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -23,7 +23,7 @@ END;
 $$;
 
 -- Fonction qui retourne TRUE si l'utilisateur est admin
-CREATE OR REPLACE FUNCTION auth.is_admin()
+CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -39,7 +39,7 @@ END;
 $$;
 
 -- Fonction qui retourne TRUE si l'utilisateur est femme de ménage
-CREATE OR REPLACE FUNCTION auth.is_femme_menage()
+CREATE OR REPLACE FUNCTION public.is_femme_menage()
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -62,7 +62,7 @@ $$;
 --                    Cela contourne RLS et évite la récursion infinie
 -- 
 -- Utilisation dans les policies:
---   USING (auth.is_admin())
---   USING (auth.user_has_role('admin'))
+--   USING (public.is_admin())
+--   USING (public.user_has_role('admin'))
 -- 
 -- ================================================================
