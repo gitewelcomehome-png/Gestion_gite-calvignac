@@ -99,6 +99,111 @@ class GitesManager {
     }
 
     /**
+     * Obtenir les coordonnées GPS d'un gîte
+     */
+    getCoordinates(giteId) {
+        const gite = this.getById(giteId);
+        if (!gite || !gite.latitude || !gite.longitude) return null;
+        return {
+            lat: parseFloat(gite.latitude),
+            lng: parseFloat(gite.longitude)
+        };
+    }
+
+    /**
+     * Obtenir les coordonnées par slug
+     */
+    getCoordinatesBySlug(slug) {
+        const gite = this.getBySlug(slug);
+        if (!gite || !gite.latitude || !gite.longitude) return null;
+        return {
+            lat: parseFloat(gite.latitude),
+            lng: parseFloat(gite.longitude)
+        };
+    }
+
+    /**
+     * Obtenir les coordonnées par nom (pour compatibilité ancien code)
+     */
+    getCoordinatesByName(name) {
+        const gite = this.gites.find(g => 
+            g.name.toLowerCase() === name.toLowerCase() ||
+            g.slug.toLowerCase() === name.toLowerCase().replace(/\s+/g, '-')
+        );
+        if (!gite || !gite.latitude || !gite.longitude) return null;
+        return {
+            lat: parseFloat(gite.latitude),
+            lng: parseFloat(gite.longitude)
+        };
+    }
+
+    /**
+     * Obtenir settings JSONB d'un gîte
+     */
+    getSettings(giteId) {
+        const gite = this.getById(giteId);
+        return gite?.settings || {};
+    }
+
+    /**
+     * Obtenir besoins draps depuis settings
+     */
+    getLinenNeeds(giteId) {
+        const settings = this.getSettings(giteId);
+        return settings.linen_needs || {};
+    }
+
+    /**
+     * Obtenir sources iCal d'un gîte
+     */
+    getIcalSources(giteId) {
+        const gite = this.getById(giteId);
+        return gite?.ical_sources || {};
+    }
+
+    /**
+     * Obtenir TOUTES les sources iCal (tous gîtes)
+     */
+    getAllIcalSources() {
+        const sources = {};
+        this.gites.forEach(g => {
+            if (g.ical_sources && Object.keys(g.ical_sources).length > 0) {
+                sources[g.id] = g.ical_sources;
+            }
+        });
+        return sources;
+    }
+
+    /**
+     * Créer un <select> HTML dynamique avec les gîtes
+     */
+    createSelect(selectedGiteId = null, options = {}) {
+        const select = document.createElement('select');
+        select.className = options.className || 'gite-select';
+        if (options.id) select.id = options.id;
+        if (options.name) select.name = options.name;
+        
+        // Option vide optionnelle
+        if (options.includeEmpty) {
+            const emptyOption = document.createElement('option');
+            emptyOption.value = '';
+            emptyOption.textContent = options.emptyText || '-- Sélectionner un gîte --';
+            select.appendChild(emptyOption);
+        }
+        
+        // Options des gîtes
+        this.gites.forEach(g => {
+            const option = document.createElement('option');
+            option.value = g.id;
+            option.textContent = `${this.getIcon(g.id)} ${g.name}`;
+            if (g.id === selectedGiteId) option.selected = true;
+            select.appendChild(option);
+        });
+        
+        return select;
+    }
+
+    /**
      * Obtenir la couleur d'un gîte (pour graphiques, badges, etc.)
      */
     getColor(giteId) {
