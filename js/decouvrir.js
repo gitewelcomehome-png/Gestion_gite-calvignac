@@ -13,12 +13,12 @@ let directionsRenderer = null;
 
 // Initialisation des activités par gîte (important pour les filtres)
 if (!window.activitesParGite) {
-    window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
+    window.activitesParGite = { 'Trevoux': [], 'Couzon': [] };
 }
 
 // Coordonnées des gîtes
 const gitesCoordinates = {
-    'Trévoux': { lat: 45.9423, lng: 4.7681 },
+    'Trevoux': { lat: 45.9423, lng: 4.7681 },
     'Couzon': { lat: 45.8456, lng: 4.8234 }
 };
 
@@ -85,8 +85,8 @@ function escapeForOnclick(text) {
 // ==================== INITIALISATION GOOGLE MAPS ====================
 function initGoogleMap() {
     const giteInput = document.getElementById('decouvrir_gite');
-    const giteActuel = giteInput ? giteInput.value : 'Trévoux';
-    const centerCoords = gitesCoordinates[giteActuel] || gitesCoordinates['Trévoux'];
+    const giteActuel = giteInput ? giteInput.value : 'Trevoux';
+    const centerCoords = gitesCoordinates[giteActuel] || gitesCoordinates['Trevoux'];
     
     // Créer la carte
     googleMap = new google.maps.Map(document.getElementById('googleMap'), {
@@ -282,7 +282,7 @@ function ajouterMarqueurPOI(poi, giteActuel) {
 // ==================== CALCULER ITINÉRAIRE ====================
 function calculerItineraire(destLat, destLng, nomDestination) {
     const giteInput = document.getElementById('decouvrir_gite');
-    const giteActuel = giteInput ? giteInput.value : 'Trévoux';
+    const giteActuel = giteInput ? giteInput.value : 'Trevoux';
     const origin = gitesCoordinates[giteActuel];
     const destination = { lat: parseFloat(destLat), lng: parseFloat(destLng) };
     
@@ -309,7 +309,7 @@ function calculerItineraire(destLat, destLng, nomDestination) {
 // ==================== CENTRER SUR LE GÎTE ====================
 function centrerCarteGite() {
     const giteInput = document.getElementById('decouvrir_gite');
-    const giteActuel = giteInput ? giteInput.value : 'Trévoux';
+    const giteActuel = giteInput ? giteInput.value : 'Trevoux';
     const coords = gitesCoordinates[giteActuel];
     
     if (coords && googleMap) {
@@ -441,7 +441,7 @@ async function chargerActivites() {
         if (error) throw error;
         
         if (data) {
-            window.activitesParGite = { 'Trévoux': [], 'Couzon': [] };
+            window.activitesParGite = { 'Trevoux': [], 'Couzon': [] };
             data.forEach(act => {
                 // Mapper les noms de colonnes pour compatibilité (DB utilise categorie, distance, telephone)
                 if (act.latitude !== undefined && act.lat === undefined) act.lat = act.latitude;
@@ -457,7 +457,7 @@ async function chargerActivites() {
             });
             
             // Mettre à jour le compteur
-            const totalTrevoux = window.activitesParGite['Trévoux'].length;
+            const totalTrevoux = window.activitesParGite['Trevoux'].length;
             const totalCouzon = window.activitesParGite['Couzon'].length;
             const total = totalTrevoux + totalCouzon;
             if (counter) {
@@ -560,7 +560,7 @@ function afficherToutesLesActivites() {
     if (!container) return;
     
     const toutesActivites = [
-        ...(window.activitesParGite['Trévoux'] || []),
+        ...(window.activitesParGite['Trevoux'] || []),
         ...(window.activitesParGite['Couzon'] || [])
     ];
     
@@ -572,14 +572,14 @@ function afficherToutesLesActivites() {
     let html = `<h3 style="color: white; font-size: 1.6rem; margin-bottom: 24px; text-align: center; padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">✨ Toutes les activités <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${toutesActivites.length}</span></h3>`;
     
     // Grouper par gîte
-    ['Trévoux', 'Couzon'].forEach(gite => {
+    ['Trevoux', 'Couzon'].forEach(gite => {
         const activitesGite = window.activitesParGite[gite] || [];
         if (activitesGite.length === 0) return;
         
         html += `
             <div style="margin-bottom: 40px; border: 3px solid #667eea; border-radius: 16px; padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);">
                 <h4 style="color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 10px; font-size: 1.4rem; margin-bottom: 20px; text-align: center;">
-                    ${gite === 'Trévoux' ? '🏰' : '⛰️'} ${gite} <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activitesGite.length}</span>
+                    ${gite === 'Trevoux' ? '🏰' : '⛰️'} ${gite} <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activitesGite.length}</span>
                 </h4>
         `;
         
@@ -769,7 +769,7 @@ async function filtrerActivitesParCategorie(motCle) {
     
     // Vérifier si les activités sont chargées, sinon les charger
     if (!window.activitesParGite || 
-        (window.activitesParGite['Trévoux'].length === 0 && window.activitesParGite['Couzon'].length === 0)) {
+        (window.activitesParGite['Trevoux'].length === 0 && window.activitesParGite['Couzon'].length === 0)) {
         showNotification('⏳ Chargement des activités...', 'info');
         await chargerActivites();
     }
@@ -784,7 +784,7 @@ async function filtrerActivitesParCategorie(motCle) {
     } else {
         // Sinon, chercher dans les deux gîtes
         activites = [
-            ...(window.activitesParGite['Trévoux'] || []),
+            ...(window.activitesParGite['Trevoux'] || []),
             ...(window.activitesParGite['Couzon'] || [])
         ];
         titre = `${motCle} - Tous les gîtes`;
@@ -821,7 +821,7 @@ async function afficherToutesActivites() {
     
     // Vérifier si les activités sont chargées, sinon les charger
     if (!window.activitesParGite || 
-        (window.activitesParGite['Trévoux'].length === 0 && window.activitesParGite['Couzon'].length === 0)) {
+        (window.activitesParGite['Trevoux'].length === 0 && window.activitesParGite['Couzon'].length === 0)) {
         showNotification('⏳ Chargement des activités...', 'info');
         await chargerActivites();
         return; // chargerActivites() appelera déjà afficherToutesLesActivites()
@@ -837,7 +837,7 @@ async function afficherToutesActivites() {
     } else {
         // Sinon, afficher les deux gîtes
         activites = [
-            ...(window.activitesParGite['Trévoux'] || []),
+            ...(window.activitesParGite['Trevoux'] || []),
             ...(window.activitesParGite['Couzon'] || [])
         ];
         titre = 'Toutes les activités - Tous les gîtes';
@@ -1034,7 +1034,7 @@ async function ajouterActivite() {
             }
         }
         
-        const gite = document.getElementById('decouvrir_gite')?.value || 'Trévoux';
+        const gite = document.getElementById('decouvrir_gite')?.value || 'Trevoux';
         const nom = document.getElementById('activite_nom').value;
         const categorie = document.getElementById('activite_categorie').value;
         const description = document.getElementById('activite_description').value;

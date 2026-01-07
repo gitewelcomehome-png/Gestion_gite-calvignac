@@ -8,6 +8,9 @@
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- 🏢 MULTI-TENANT: Gestionnaire dynamique des gîtes -->
+    <script src="js/gites-manager.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -308,7 +311,7 @@
                         <label for="tache-achats-gite">Gîte concerné</label>
                         <select id="tache-achats-gite" required>
                             <option value="">Sélectionner un gîte</option>
-                            <option value="Trévoux">Trévoux</option>
+                            <option value="Trevoux">Trevoux</option>
                             <option value="Couzon">Couzon</option>
                             <option value="Les deux">Les deux gîtes</option>
                         </select>
@@ -331,7 +334,7 @@
                         <label for="tache-travaux-gite">Gîte concerné</label>
                         <select id="tache-travaux-gite" required>
                             <option value="">Sélectionner un gîte</option>
-                            <option value="Trévoux">Trévoux</option>
+                            <option value="Trevoux">Trevoux</option>
                             <option value="Couzon">Couzon</option>
                             <option value="Les deux">Les deux gîtes</option>
                         </select>
@@ -358,13 +361,13 @@
             <p class="section-subtitle">Actualisez les quantités après votre passage</p>
             
             <div class="tabs">
-                <button class="tab active" onclick="switchStockTab('trevoux')">🏠 Trévoux</button>
+                <button class="tab active" onclick="switchStockTab('trevoux')">🏠 Trevoux</button>
                 <button class="tab" onclick="switchStockTab('couzon')">🏠 Couzon</button>
             </div>
 
             <div id="stock-trevoux" class="tab-content active">
                 <div class="stock-grid" id="stock-grid-trevoux"></div>
-                <button class="btn btn-success" onclick="sauvegarderStocks('trevoux')" style="margin-top: 20px;">💾 Sauvegarder Trévoux</button>
+                <button class="btn btn-success" onclick="sauvegarderStocks('trevoux')" style="margin-top: 20px;">💾 Sauvegarder Trevoux</button>
             </div>
 
             <div id="stock-couzon" class="tab-content">
@@ -383,7 +386,7 @@
                     <label for="retour-gite">Gîte</label>
                     <select id="retour-gite" required>
                         <option value="">Sélectionner un gîte</option>
-                        <option value="Trévoux">Trévoux</option>
+                        <option value="Trevoux">Trevoux</option>
                         <option value="Couzon">Couzon</option>
                     </select>
                 </div>

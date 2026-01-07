@@ -358,7 +358,7 @@ async function genererPlanningMenage() {
 }
 
 /**
- * Affiche le planning de ménage organisé par semaines avec colonnes Trévoux/Couzon
+ * Affiche le planning de ménage organisé par semaines avec colonnes Trevoux/Couzon
  */
 async function afficherPlanningParSemaine() {
     const reservations = await getAllReservations();
@@ -511,7 +511,7 @@ async function afficherPlanningParSemaine() {
         }
         
         // Ajouter dans la bonne colonne
-        if (r.gite.toLowerCase().includes('trévoux') || r.gite.toLowerCase().includes('trevoux')) {
+        if (r.gite.toLowerCase().includes('trevoux') || r.gite.toLowerCase().includes('trevoux')) {
             weeks[weekKey].trevoux.push(menageInfo);
         } else {
             weeks[weekKey].couzon.push(menageInfo);
@@ -534,7 +534,7 @@ async function afficherPlanningParSemaine() {
         sunday.setDate(monday.getDate() + 6);
         
         // console.log(`\n📅 Semaine ${index + 1}:`, weekKey);
-        // console.log('  🏡 Trévoux:', week.trevoux.length, 'ménages');
+        // console.log('  🏡 Trevoux:', week.trevoux.length, 'ménages');
         // console.log('  ⛰️ Couzon:', week.couzon.length, 'ménages');
         
         // Calculer le vrai numéro de semaine de l'année
@@ -549,7 +549,7 @@ async function afficherPlanningParSemaine() {
                 </div>
                 <div class="cleaning-week-body">
                     <div class="cleaning-column">
-                        <div class="cleaning-column-header">🏡 Trévoux</div>
+                        <div class="cleaning-column-header">🏡 Trevoux</div>
                         ${week.trevoux.length > 0 ? 
                             week.trevoux.map(m => generateCleaningItemHTML(m)).join('') :
                             '<div class="cleaning-item empty">Aucun ménage prévu</div>'

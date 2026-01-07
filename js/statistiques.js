@@ -332,7 +332,7 @@ async function updateAllCharts(filteredReservations = null) {
         window.gitesChartInstance = new Chart(ctx2, {
             type: 'doughnut',
             data: {
-                labels: ['Trévoux', 'Couzon'],
+                labels: ['Trevoux', 'Couzon'],
                 datasets: [{
                     data: [trevoux.length, couzon.length],
                     backgroundColor: ['#667eea', '#f093fb'],
@@ -429,7 +429,7 @@ async function updateAllCharts(filteredReservations = null) {
                 (simFiscale.cfe_couzon || 0) +
                 (simFiscale.commissions_couzon || 0);
             
-            // Trévoux (sans amortissement)
+            // Trevoux (sans amortissement)
             const chargesTrevoux = 
                 getAnnual(simFiscale.internet_trevoux, simFiscale.internet_trevoux_type) +
                 getAnnual(simFiscale.eau_trevoux, simFiscale.eau_trevoux_type) +
@@ -460,9 +460,9 @@ async function updateAllCharts(filteredReservations = null) {
             const fraisDivers = (simFiscale.frais_divers_liste || []).reduce((sum, item) => sum + item.montant, 0);
             const produitsAccueil = (simFiscale.produits_accueil_liste || []).reduce((sum, item) => sum + item.montant, 0);
             
-            // Crédit Trévoux
+            // Crédit Trevoux
             const creditTrevoux = (simFiscale.credits_liste || [])
-                .filter(c => c.nom && c.nom.toLowerCase().includes('trévoux'))
+                .filter(c => c.nom && c.nom.toLowerCase().includes('trevoux'))
                 .reduce((sum, c) => sum + (c.mensualite * 12), 0);
             
             totalChargesAnnee = chargesCouzon + chargesTrevoux + fraisPro + travaux + fraisDivers + produitsAccueil + creditTrevoux;

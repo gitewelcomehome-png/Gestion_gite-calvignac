@@ -263,7 +263,7 @@ async function chargerStocksDraps() {
 
         if (error) throw error;
 
-        const stocksTrevoux = stocks?.find(s => s.gite === 'trévoux') || {};
+        const stocksTrevoux = stocks?.find(s => s.gite === 'trevoux') || {};
         const stocksCouzon = stocks?.find(s => s.gite === 'couzon') || {};
 
         // Afficher les grilles
@@ -310,7 +310,7 @@ async function sauvegarderStocks(gite) {
         });
 
         // Convertir le nom du gîte pour la base de données (avec accents)
-        const giteDb = gite === 'trevoux' ? 'trévoux' : 'couzon';
+        const giteDb = gite === 'trevoux' ? 'trevoux' : 'couzon';
 
         const { error } = await window.supabaseClient
             .from('stocks_draps')

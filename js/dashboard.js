@@ -321,7 +321,7 @@ async function updateDashboardReservations() {
             badgeColor = '#9B59B6';
         }
         
-        const giteColor = r.gite === 'Trévoux' ? '#667eea' : '#f093fb';
+        const giteColor = r.gite === 'Trevoux' ? '#667eea' : '#f093fb';
         const paiementIcon = r.paiement === 'Soldé' ? '✅' : r.paiement === 'Acompte reçu' ? '⏳' : '❌';
         
         // Calculer jours avant arrivée
@@ -452,7 +452,7 @@ async function updateDashboardMenages() {
         const color = statusColors[c.status] || '#999';
         const statusLabel = statusLabels[c.status] || 'Inconnu';
         const timeIcon = c.time_of_day === 'morning' ? '🌅' : '🌆';
-        const giteColor = c.gite === 'Trévoux' ? '#667eea' : '#f093fb';
+        const giteColor = c.gite === 'Trevoux' ? '#667eea' : '#f093fb';
         
         html += `
             <div style="border-left: 4px solid ${giteColor}; padding: 12px; margin-bottom: 8px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
@@ -528,7 +528,7 @@ async function updateTodoList(category) {
                     </div>
                     ${todo.description ? `<div style="font-size: 0.85rem; color: #6c757d; margin-bottom: 8px; line-height: 1.5;">${todo.description}</div>` : ''}
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        ${todo.gite ? `<span style="background: ${todo.gite === 'Trévoux' ? '#667eea' : '#f093fb'}; color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${todo.gite}</span>` : ''}
+                        ${todo.gite ? `<span style="background: ${todo.gite === 'Trevoux' ? '#667eea' : '#f093fb'}; color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${todo.gite}</span>` : ''}
                         ${todo.is_recurrent && frequencyLabel ? `<span style="background: #E8DAEF; color: #7D3C98; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${frequencyLabel}</span>` : ''}
                     </div>
                 </div>
@@ -1054,7 +1054,7 @@ async function updateFinancialIndicators() {
             (simFiscale.cfe_couzon || 0) +
             (simFiscale.commissions_couzon || 0);
         
-        // Trévoux (sans amortissement)
+        // Trevoux (sans amortissement)
         const chargesTrevoux = (
             simFiscale.internet_trevoux || 0) * (simFiscale.internet_trevoux_type === 'mensuel' ? 12 : 1) +
             (simFiscale.eau_trevoux || 0) * (simFiscale.eau_trevoux_type === 'mensuel' ? 12 : 1) +
@@ -1085,9 +1085,9 @@ async function updateFinancialIndicators() {
         const fraisDivers = (simFiscale.frais_divers_liste || []).reduce((sum, item) => sum + item.montant, 0);
         const produitsAccueil = (simFiscale.produits_accueil_liste || []).reduce((sum, item) => sum + item.montant, 0);
         
-        // Crédit Trévoux
+        // Crédit Trevoux
         const creditTrevoux = (simFiscale.credits_liste || [])
-            .filter(c => c.nom && c.nom.toLowerCase().includes('trévoux'))
+            .filter(c => c.nom && c.nom.toLowerCase().includes('trevoux'))
             .reduce((sum, c) => sum + (c.mensualite * 12), 0);
         
         totalChargesAnnee = chargesCouzon + chargesTrevoux + fraisPro + travaux + fraisDivers + produitsAccueil + creditTrevoux;
@@ -1274,7 +1274,7 @@ async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
         for (let mois = 0; mois < 12; mois++) {
             const nomMois = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'][mois];
             
-            // 1. Calculer le CA du mois (toutes les réservations Trévoux + Couzon)
+            // 1. Calculer le CA du mois (toutes les réservations Trevoux + Couzon)
             const reservationsDuMois = reservations.filter(r => {
                 const dateDebut = parseLocalDate(r.dateDebut);
                 return dateDebut.getFullYear() === anneeActuelle && dateDebut.getMonth() === mois;

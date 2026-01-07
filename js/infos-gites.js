@@ -370,8 +370,8 @@ function telechargerPageHTML(reservation) {
             // Charger les activités selon le gîte
             const restaurants = JSON.parse(localStorage.getItem('restaurants') || '{}');
             const activites = JSON.parse(localStorage.getItem('activites') || '{}');
-            const restaurantsGite = reservation.gite === 'Trévoux' ? restaurants.trevoux : restaurants.couzon;
-            const activitesGite = reservation.gite === 'Trévoux' ? activites.trevoux : activites.couzon;
+            const restaurantsGite = reservation.gite === 'Trevoux' ? restaurants.trevoux : restaurants.couzon;
+            const activitesGite = reservation.gite === 'Trevoux' ? activites.trevoux : activites.couzon;
             const lyon = localStorage.getItem('activitesLyon') || '';
             const dombes = localStorage.getItem('activitesDombes') || '';
             const parcsZoo = localStorage.getItem('parcsZoo') || '';
@@ -570,7 +570,7 @@ function rechercherEvenements() {
                 <div>
                     <strong>❄️ Hiver (Déc - Fév)</strong>
                     <ul style="margin-left: 20px; margin-top: 5px;">
-                        <li>Marchés de Noël (Trévoux, Lyon)</li>
+                        <li>Marchés de Noël (Trevoux, Lyon)</li>
                         <li>Patinoire éphémère à Lyon</li>
                         <li>Fête des Lumières de Lyon (8 décembre)</li>
                     </ul>
@@ -594,13 +594,13 @@ function rechercherEvenements() {
                 </a>
                 
                 <a href="https://www.tripadvisor.fr/Attractions-g187265-Activities-Trevoux_Ain_Auvergne_Rhone_Alpes.html" target="_blank" style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; text-decoration: none; color: white; display: block;">
-                    <strong>⭐ TripAdvisor Trévoux</strong><br>
+                    <strong>⭐ TripAdvisor Trevoux</strong><br>
                     <small>Activités et avis voyageurs</small>
                 </a>
             </div>
             
             <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.9;">
-                💡 <strong>Astuce :</strong> Les offices de tourisme de Trévoux et Lyon proposent des guides gratuits avec les événements du mois.
+                💡 <strong>Astuce :</strong> Les offices de tourisme de Trevoux et Lyon proposent des guides gratuits avec les événements du mois.
             </p>
         </div>
     `);
@@ -905,7 +905,7 @@ window.loadInfosGiteFromSupabase = loadInfosGiteFromSupabase;
 // ==========================================
 
 // Variable globale pour le gîte actuellement sélectionné
-let currentGiteInfos = 'Trévoux';
+let currentGiteInfos = 'Trevoux';
 const DB_KEY_INFOS = 'gites_infos_pratiques_complet';
 
 // Sélection du gîte
@@ -920,8 +920,8 @@ window.selectGiteInfos = async function(gite) {
     const btnTrevoux = document.getElementById('btnTrevoux');
     const btnCouzon = document.getElementById('btnCouzon');
     if (btnTrevoux) {
-        btnTrevoux.style.background = gite === 'Trévoux' ? 'white' : 'rgba(255,255,255,0.2)';
-        btnTrevoux.style.color = gite === 'Trévoux' ? '#667eea' : 'white';
+        btnTrevoux.style.background = gite === 'Trevoux' ? 'white' : 'rgba(255,255,255,0.2)';
+        btnTrevoux.style.color = gite === 'Trevoux' ? '#667eea' : 'white';
     }
     if (btnCouzon) {
         btnCouzon.style.background = gite === 'Couzon' ? 'white' : 'rgba(255,255,255,0.2)';
@@ -1553,4 +1553,4 @@ window.toggleLanguage = function() {
 window.sauvegarderDonneesInfos = sauvegarderDonneesInfos;
 window.chargerDonneesInfos = chargerDonneesInfos;
 window.updateProgressInfos = updateProgressInfos;
-window.currentGiteInfos = 'Trévoux';
+window.currentGiteInfos = 'Trevoux';

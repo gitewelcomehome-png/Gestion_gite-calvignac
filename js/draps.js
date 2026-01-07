@@ -3,7 +3,7 @@
 // ================================================================
 
 const BESOINS_PAR_RESERVATION = {
-    'trévoux': {
+    'trevoux': {
         draps_plats_grands: 6,
         draps_plats_petits: 3,
         housses_couettes_grandes: 6,
@@ -24,7 +24,7 @@ const BESOINS_PAR_RESERVATION = {
 };
 
 let stocksActuels = {
-    'trévoux': {},
+    'trevoux': {},
     'couzon': {}
 };
 
@@ -105,7 +105,7 @@ async function chargerStocks() {
 async function sauvegarderStocks() {
     try {
         const stocksTrevoux = {
-            gite: 'trévoux',
+            gite: 'trevoux',
             draps_plats_grands: parseInt(document.getElementById('stock-trevoux-draps-grands').value) || 0,
             draps_plats_petits: parseInt(document.getElementById('stock-trevoux-draps-petits').value) || 0,
             housses_couettes_grandes: parseInt(document.getElementById('stock-trevoux-housses-grandes').value) || 0,
@@ -128,7 +128,7 @@ async function sauvegarderStocks() {
             updated_at: new Date().toISOString()
         };
 
-        // Upsert pour Trévoux
+        // Upsert pour Trevoux
         const { error: errorT } = await window.supabase
             .from('stocks_draps')
             .upsert(stocksTrevoux, { onConflict: 'gite' });
@@ -173,7 +173,7 @@ async function analyserReservations() {
 
         // Normaliser les noms de gîtes
         const resaParGite = {
-            'trévoux': reservations.filter(r => r.gite && r.gite.toLowerCase().includes('trévoux')),
+            'trevoux': reservations.filter(r => r.gite && (r.gite.toLowerCase().includes('trevoux') || r.gite === 'Trevoux')),
             'couzon': reservations.filter(r => r.gite && r.gite.toLowerCase().includes('couzon'))
         };
 
@@ -195,7 +195,7 @@ function calculerReservationsCouvertes(resaParGite) {
     let html = '';
     const infosCouverture = {};
 
-    ['trévoux', 'couzon'].forEach(gite => {
+    ['trevoux', 'couzon'].forEach(gite => {
         const stock = stocksActuels[gite] || {};
         const besoins = BESOINS_PAR_RESERVATION[gite];
         
@@ -268,7 +268,7 @@ function calculerAEmmener(resaParGite, infosCouverture) {
     const container = document.getElementById('a-emmener');
     let html = '';
 
-    ['trévoux', 'couzon'].forEach(gite => {
+    ['trevoux', 'couzon'].forEach(gite => {
         const infos = infosCouverture[gite];
         const besoins = BESOINS_PAR_RESERVATION[gite];
         
@@ -323,7 +323,7 @@ function afficherAEmmenerDepuisSimulation() {
     const container = document.getElementById('a-emmener');
     let html = '';
 
-    ['trévoux', 'couzon'].forEach(gite => {
+    ['trevoux', 'couzon'].forEach(gite => {
         const resas = resaParGite[gite];
         const besoins = BESOINS_PAR_RESERVATION[gite];
         const stock = stocksActuels[gite] || {};
@@ -398,7 +398,7 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture) {
         const troisSemainesFuture = new Date(today);
         troisSemainesFuture.setDate(troisSemainesFuture.getDate() + 21);
         
-        for (const gite of ['trévoux', 'couzon']) {
+        for (const gite of ['trevoux', 'couzon']) {
             const infos = infosCouverture[gite];
             
             // Vérifier si on va manquer de stock dans une semaine
@@ -516,7 +516,7 @@ async function simulerBesoins() {
 
         // Grouper par gîte
         const resaParGite = {
-            'trévoux': reservations.filter(r => r.gite && r.gite.toLowerCase().includes('trévoux')),
+            'trevoux': reservations.filter(r => r.gite && r.gite.toLowerCase().includes('trevoux')),
             'couzon': reservations.filter(r => r.gite && r.gite.toLowerCase().includes('couzon'))
         };
 
@@ -537,7 +537,7 @@ function afficherResultatsSimulation(resaParGite, dateLimit) {
     const container = document.getElementById('resultats-simulation');
     let html = `<h3 style="margin-bottom: 15px;">Besoins jusqu'au ${new Date(dateLimit).toLocaleDateString('fr-FR')}</h3>`;
 
-    ['trévoux', 'couzon'].forEach(gite => {
+    ['trevoux', 'couzon'].forEach(gite => {
         const resas = resaParGite[gite];
         const besoins = BESOINS_PAR_RESERVATION[gite];
         const stock = stocksActuels[gite] || {};
@@ -653,7 +653,7 @@ function afficherAEmmenerDepuisSimulation() {
     const container = document.getElementById('a-emmener');
     let html = '';
 
-    ['trévoux', 'couzon'].forEach(gite => {
+    ['trevoux', 'couzon'].forEach(gite => {
         const resas = resaParGite[gite];
         const besoins = BESOINS_PAR_RESERVATION[gite];
         const stock = stocksActuels[gite] || {};

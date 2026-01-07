@@ -8,6 +8,9 @@
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- 🏢 MULTI-TENANT: Gestionnaire dynamique des gîtes -->
+    <script src="js/gites-manager.js"></script>
+    
     <!-- 🛡️ PHASE 3 SÉCURITÉ: Protection XSS -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
     <script type="module" src="js/security-utils.js"></script>
@@ -614,7 +617,7 @@
                         validated: cleaning?.validated_by_company || false
                     };
                     
-                    if (res.gite.toLowerCase().includes('trévoux') || res.gite.toLowerCase().includes('trevoux')) {
+                    if (res.gite.toLowerCase().includes('trevoux') || res.gite.toLowerCase().includes('trevoux')) {
                         weeks[weekKey].trevoux.push(menageInfo);
                     } else {
                         weeks[weekKey].couzon.push(menageInfo);
@@ -688,7 +691,7 @@
                             </div>
                             <div class="gites-container">
                                 <div class="gite-column trevoux">
-                                    <div class="gite-header">🏡 Trévoux</div>
+                                    <div class="gite-header">🏡 Trevoux</div>
                                     ${week.trevoux.length > 0 ? 
                                         week.trevoux.map(m => generateMenageHTML(m)).join('') :
                                         '<p style="color: #999; padding: 20px; text-align: center;">Aucun ménage</p>'
