@@ -534,7 +534,16 @@
                     return;
                 }
 
-                userSession = data.session;
+                // Sauvegarder session OU user (selon config email)
+                userSession = data.session || { user: data.user };
+                
+                console.log('✅ Compte créé:', { hasSession: !!data.session, hasUser: !!data.user });
+                
+                if (!data.user) {
+                    showError('Erreur lors de la création du compte');
+                    return;
+                }
+                
                 showStep(2);
 
             } else if (currentStep === 2) {
