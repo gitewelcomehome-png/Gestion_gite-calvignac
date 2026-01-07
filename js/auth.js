@@ -46,6 +46,18 @@ class AuthManager {
             if (session && session.user) {
                 this.currentUser = session.user;
                 await this.loadUserRoles();
+                
+                // Vérifier si l'onboarding est terminé (sauf sur page onboarding)
+                const isOnOnboardingPage = window.location.pathname.includes('onboarding.html');
+                if (!isOnOnboardingPage) {
+                    const onboardingComplete = await this.checkOnboardingComplete();
+                    if (!onboardingComplete) {
+                        console.log('⚠️ Onboarding incomplet, redirection...');
+                        window.location.href = 'onboarding.html';
+                        return;
+                    }
+                }
+                
                 this.onAuthSuccess();
             } else {
                 this.redirectToLogin();
@@ -57,6 +69,32 @@ class AuthManager {
                 console.error('Erreur checkAuthState:', error);
             }
             this.redirectToLogin();
+        }
+    }
+
+    /**
+     * Vérifier si l'utilisateur a terminé l'onboarding
+     */
+    async checkOnboardingComplete() {
+        try {
+            // Vérifier si l'utilisateur appartient à une organization
+            const { data, error } = await window.supabaseClient
+                .from('organization_members')
+                .select('organization_id')
+                .eq('user_id', this.currentUser.id)
+                .limit(1);
+            
+            if (error) {
+                console.error('Erreur vérification onboarding:', error);
+                return false;
+            }
+            
+            const hasOrganization = data && data.length > 0;
+            console.log('✅ Onboarding terminé:', hasOrganization);
+            return hasOrganization;
+        } catch (error) {
+            console.error('Erreur checkOnboardingComplete:', error);
+            return false;
         }
     }
 
