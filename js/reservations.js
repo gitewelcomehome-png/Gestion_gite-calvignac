@@ -244,15 +244,13 @@ async function updateReservationsList(keepScrollPosition = false) {
         return;
     }
     
-    // Organiser par gîte
-    const byGite = {
-        'Trevoux': active.filter(r => r.gite === 'Trevoux'),
-        'Couzon': active.filter(r => r.gite === 'Couzon')
-    };
-    
-    // Trier par date
-    byGite['Trevoux'].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
-    byGite['Couzon'].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
+    // Organiser par gîte (dynamique)
+    const byGite = {};
+    gites.forEach(g => {
+        byGite[g.id] = active.filter(r => r.gite_id === g.id);
+        // Trier par date
+        byGite[g.id].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
+    });
     
     // Obtenir toutes les semaines à afficher (basé sur la date de DÉBUT uniquement)
     const allWeeks = new Set();
@@ -266,16 +264,15 @@ async function updateReservationsList(keepScrollPosition = false) {
         return a - b;
     });
     
-    // Générer le HTML avec en-têtes sticky par gîte
+    // Générer le HTML avec en-têtes sticky par gîte (dynamique)
     let html = '<div class="planning-weeks">';
     
-    // En-têtes sticky
-    html += `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; position: sticky; top: 0; z-index: 100; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <div class="gite-label trevoux-label" style="margin: 0; border-radius: 0;">🏠 Trevoux</div>
-            <div class="gite-label couzon-label" style="margin: 0; border-radius: 0;">🏠 Couzon</div>
-        </div>
-    `;
+    // En-têtes sticky dynamiques
+    html += `<div style="display: grid; grid-template-columns: repeat(${gites.length}, 1fr); position: sticky; top: 0; z-index: 100; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+    gites.forEach(g => {
+        html += `<div class="gite-label" style="margin: 0; border-radius: 0; background: ${g.color}; color: white;">${g.icon} ${g.name}</div>`;
+    });
+    html += '</div>';
     
     sortedWeeks.forEach(weekNum => {
         // weekNum est déjà un nombre (résultat de getWeekNumber)
@@ -290,14 +287,16 @@ async function updateReservationsList(keepScrollPosition = false) {
                     <div class="week-dates-small">${formatDateShort(weekDates.start)} - ${formatDateShort(weekDates.end)}</div>
                 </div>
                 
-                <div class="week-content-grid" style="border-top: none;">
-                    <div class="gite-column-inline">
-                        ${generateWeekReservations(byGite['Trevoux'], weekNum, 'trevoux', active, validationMap, today)}
-                    </div>
-                    
-                    <div class="gite-column-inline">
-                        ${generateWeekReservations(byGite['Couzon'], weekNum, 'couzon', active, validationMap, today)}
-                    </div>
+                <div class="week-content-grid" style="border-top: none; grid-template-columns: repeat(${gites.length}, 1fr);">`;
+        
+        // Générer colonnes pour chaque gîte
+        gites.forEach(g => {
+            html += `<div class="gite-column-inline">
+                ${generateWeekReservations(byGite[g.id], weekNum, g.slug, active, validationMap, today)}
+            </div>`;
+        });
+        
+        html += `
                 </div>
             </div>
         `;
