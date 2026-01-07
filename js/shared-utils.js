@@ -69,15 +69,19 @@ function getMonthYear(dateStr) {
 
 // ==========================================
 // HELPER POUR LES NOMS DE GÎTES
+// ⚠️ DEPRECATED: Ces fonctions ne sont plus utilisées
+// Utiliser: r.gite_id === gite.id ou r.gite === gite.name
 // ==========================================
 
 function isCouzon(giteName) {
+    console.warn('⚠️ isCouzon() deprecated - Use r.gite === gite.name or r.gite_id === gite.id');
     if (!giteName) return false;
     const normalized = giteName.toLowerCase().trim();
     return normalized === 'couzon' || normalized === 'couzon-au-mont-d\'or' || normalized.startsWith('couzon');
 }
 
 function isTrevoux(giteName) {
+    console.warn('⚠️ isTrevoux() deprecated - Use r.gite === gite.name or r.gite_id === gite.id');
     if (!giteName) return false;
     const normalized = giteName.toLowerCase().trim();
     return normalized === 'trevoux' || normalized === 'trevoux';
