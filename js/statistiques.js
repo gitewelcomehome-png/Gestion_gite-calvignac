@@ -314,11 +314,16 @@ async function updateAllCharts(filteredReservations = null) {
         });
     }
     
-    // Graphique répartition par gîte
+    // Graphique répartition par gîte (dynamique)
     const selectedYear = parseInt(document.getElementById('yearFilterStats')?.value || new Date().getFullYear());
     const currentReservations = reservationsForStats;
-    const trevoux = currentReservations.filter(r => isTrevoux(r.gite));
-    const couzon = currentReservations.filter(r => isCouzon(r.gite));
+    const gites = await window.gitesManager.getAll();
+    
+    const labels = gites.map(g => g.name);
+    const data = gites.map(g => {
+        return currentReservations.filter(r => r.gite_id === g.id || r.gite === g.name).length;
+    });
+    const colors = gites.map(g => g.color);
     
     const ctx2 = document.getElementById('gitesChart')?.getContext('2d');
     if (ctx2) {
@@ -327,10 +332,10 @@ async function updateAllCharts(filteredReservations = null) {
         window.gitesChartInstance = new Chart(ctx2, {
             type: 'doughnut',
             data: {
-                labels: ['Trevoux', 'Couzon'],
+                labels: labels,
                 datasets: [{
-                    data: [trevoux.length, couzon.length],
-                    backgroundColor: ['#667eea', '#f093fb'],
+                    data: data,
+                    backgroundColor: colors,
                     borderWidth: 0
                 }]
             },

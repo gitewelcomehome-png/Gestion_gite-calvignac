@@ -412,27 +412,28 @@ async function updateStats() {
         if (statTrevouxEl) statTrevouxEl.textContent = '-';
         if (statCouzonEl) statCouzonEl.textContent = '-';
     } else {
-        // Utiliser les réservations automatiques
+        // Utiliser les réservations automatiques (dynamique pour N gîtes)
         const filteredReservations = reservations.filter(r => {
             const year = parseLocalDate(r.dateDebut).getFullYear();
             return year === selectedYear;
         });
         
-        const trevoux = filteredReservations.filter(r => isTrevoux(r.gite));
-        const couzon = filteredReservations.filter(r => isCouzon(r.gite));
+        const gites = await window.gitesManager.getAll();
+        caTotal = 0;
+        totalReservations = 0;
         
-        const caTrevoux = trevoux.reduce((sum, r) => sum + r.montant, 0);
-        const caCouzon = couzon.reduce((sum, r) => sum + r.montant, 0);
-        caTotal = caTrevoux + caCouzon;
-        
-        totalReservations = trevoux.length + couzon.length;
+        gites.forEach(gite => {
+            const reservationsGite = filteredReservations.filter(r => r.gite_id === gite.id || r.gite === gite.name);
+            const caGite = reservationsGite.reduce((sum, r) => sum + r.montant, 0);
+            caTotal += caGite;
+            totalReservations += reservationsGite.length;
+            
+            const statEl = document.getElementById(`stat${gite.slug}`);
+            if (statEl) statEl.textContent = reservationsGite.length;
+        });
         
         const statTotalEl = document.getElementById('statTotal');
-        const statTrevouxEl = document.getElementById('statTrevoux');
-        const statCouzonEl = document.getElementById('statCouzon');
         if (statTotalEl) statTotalEl.textContent = totalReservations;
-        if (statTrevouxEl) statTrevouxEl.textContent = trevoux.length;
-        if (statCouzonEl) statCouzonEl.textContent = couzon.length;
         
         // Mettre à jour les compteurs par plateforme et statistiques avancées
         updatePlatformCounters(filteredReservations);
