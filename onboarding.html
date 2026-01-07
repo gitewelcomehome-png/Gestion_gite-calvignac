@@ -466,11 +466,8 @@
         let gitesData = [];
         let userSession = null;
 
-        // Initialiser Supabase
-        const supabase = window.supabase.createClient(
-            window.LOCAL_CONFIG?.SUPABASE_URL || window.SUPABASE_CONFIG.url,
-            window.LOCAL_CONFIG?.SUPABASE_KEY || window.SUPABASE_CONFIG.key
-        );
+        // Utiliser le client Supabase déjà initialisé par shared-config.js
+        const supabase = window.supabase;
 
         // Vérifier si déjà connecté
         async function checkAuth() {
