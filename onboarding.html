@@ -524,7 +524,7 @@
                 }
 
                 // Créer le compte
-                const { data, error } = await window.supabase.auth.signUp({
+                const { data, error } = await window.supabaseClient.auth.signUp({
                     email: email,
                     password: password
                 });
@@ -648,7 +648,7 @@
                 const orgEmail = document.getElementById('org-email').value;
                 const orgPhone = document.getElementById('org-phone').value;
 
-                const { data: session } = await window.supabase.auth.getSession();
+                const { data: session } = await window.supabaseClient.auth.getSession();
                 if (!session.session) {
                     throw new Error('Session expirée');
                 }
@@ -659,7 +659,7 @@
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/(^-|-$)/g, '');
 
-                const { data: org, error: orgError } = await window.supabase
+                const { data: org, error: orgError } = await window.supabaseClient
                     .from('organizations')
                     .insert([{
                         name: orgName,
@@ -706,14 +706,14 @@
                     return;
                 }
 
-                const { error: gitesError } = await window.supabase
+                const { error: gitesError } = await window.supabaseClient
                     .from('gites')
                     .insert(gitesToInsert);
 
                 if (gitesError) throw gitesError;
 
                 // 3. Créer le member (owner)
-                const { error: memberError } = await window.supabase
+                const { error: memberError } = await window.supabaseClient
                     .from('organization_members')
                     .insert([{
                         organization_id: org.id,
