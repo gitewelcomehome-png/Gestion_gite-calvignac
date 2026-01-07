@@ -274,7 +274,6 @@ FOR SELECT
 TO anon
 USING (
     expires_at > NOW()
-    AND used_at IS NULL
 );
 
 -- ================================================================
