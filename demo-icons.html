@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bibliothèque d'Icônes - Gestion Gîtes</title>
+    <link rel="stylesheet" href="css/icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section h2 {
+            color: #2D3436;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .icon-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .icon-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .icon-card .icon-container {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-card .icon-container svg {
+            width: 56px;
+            height: 56px;
+            stroke: #2D3436;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .icon-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2D3436;
+            text-align: center;
+            text-transform: capitalize;
+        }
+
+        .icon-code {
+            font-size: 11px;
+            color: #636e72;
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .usage-example {
+            background: #2D3436;
+            color: #55efc4;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .usage-example .comment {
+            color: #b2bec3;
+        }
+
+        .usage-example .keyword {
+            color: #fdcb6e;
+        }
+
+        .usage-example .string {
+            color: #ff7675;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .section h2 {
+                font-size: 1.4rem;
+            }
+
+            .icon-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Bibliothèque d'Icônes SVG</h1>
+
+        <!-- Types d'Hébergement -->
+        <div class="section">
+            <h2>🏠 Types d'Hébergement <span class="badge">8 icônes</span></h2>
+            <div class="icon-grid" id="gite-icons"></div>
+        </div>
+
+        <!-- Services & Gestion -->
+        <div class="section">
+            <h2>⚙️ Services & Gestion <span class="badge">8 icônes</span></h2>
+            <div class="icon-grid" id="service-icons"></div>
+        </div>
+
+        <!-- Infos Voyageurs -->
+        <div class="section">
+            <h2>ℹ️ Infos Voyageurs <span class="badge">6 icônes</span></h2>
+            <div class="icon-grid" id="info-icons"></div>
+        </div>
+
+        <!-- Exemples d'utilisation -->
+        <div class="section">
+            <h2>💻 Exemples d'utilisation</h2>
+            
+            <h3 style="color: #2D3436; margin: 20px 0 10px 0;">1. Insérer une icône dans le HTML</h3>
+            <div class="usage-example">
+<span class="comment">// Dans votre JavaScript</span>
+<span class="keyword">const</span> iconHTML = getIcon(<span class="string">'gite'</span>, <span class="string">'maison'</span>);
+document.getElementById(<span class="string">'container'</span>).innerHTML = iconHTML;
+            </div>
+
+            <h3 style="color: #2D3436; margin: 20px 0 10px 0;">2. Créer un élément avec icône</h3>
+            <div class="usage-example">
+<span class="comment">// Créer un élément DOM complet</span>
+<span class="keyword">const</span> iconElement = createIconElement(<span class="string">'gite'</span>, <span class="string">'chalet'</span>, <span class="string">'my-custom-class'</span>);
+document.body.appendChild(iconElement);
+            </div>
+
+            <h3 style="color: #2D3436; margin: 20px 0 10px 0;">3. Lister toutes les icônes disponibles</h3>
+            <div class="usage-example">
+<span class="comment">// Obtenir les noms de toutes les icônes d'une catégorie</span>
+<span class="keyword">const</span> giteNames = getIconNames(<span class="string">'gite'</span>);
+console.log(giteNames);
+<span class="comment">// ['maison', 'appartement', 'villa', 'chalet', 'manoir', ...]</span>
+            </div>
+
+            <h3 style="color: #2D3436; margin: 20px 0 10px 0;">4. Utiliser dans un template string</h3>
+            <div class="usage-example">
+<span class="comment">// Dans une template string</span>
+<span class="keyword">const</span> html = `
+    &lt;div class="card"&gt;
+        &lt;div class="icon-container"&gt;
+            ${getIcon(<span class="string">'service'</span>, <span class="string">'dashboard'</span>)}
+        &lt;/div&gt;
+        &lt;h3&gt;Tableau de bord&lt;/h3&gt;
+    &lt;/div&gt;
+`;
+            </div>
+        </div>
+
+        <!-- Fichiers requis -->
+        <div class="section">
+            <h2>📦 Fichiers requis</h2>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <p style="margin-bottom: 10px; color: #2D3436;"><strong>CSS :</strong></p>
+                <code style="background: white; padding: 8px 12px; border-radius: 6px; display: inline-block; margin-bottom: 15px;">
+                    &lt;link rel="stylesheet" href="css/icons.css"&gt;
+                </code>
+                
+                <p style="margin: 15px 0 10px 0; color: #2D3436;"><strong>JavaScript :</strong></p>
+                <code style="background: white; padding: 8px 12px; border-radius: 6px; display: inline-block;">
+                    &lt;script src="js/icons.js"&gt;&lt;/script&gt;
+                </code>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/icons.js"></script>
+    <script>
+        // Afficher les icônes de gîtes
+        const giteGrid = document.getElementById('gite-icons');
+        const giteNames = getIconNames('gite');
+        giteNames.forEach(name => {
+            const card = document.createElement('div');
+            card.className = 'icon-card';
+            card.innerHTML = `
+                <div class="icon-container">
+                    ${getIcon('gite', name)}
+                </div>
+                <div class="icon-name">${name}</div>
+                <div class="icon-code">getIcon('gite', '${name}')</div>
+            `;
+            giteGrid.appendChild(card);
+        });
+
+        // Afficher les icônes de services
+        const serviceGrid = document.getElementById('service-icons');
+        const serviceNames = getIconNames('service');
+        serviceNames.forEach(name => {
+            const card = document.createElement('div');
+            card.className = 'icon-card';
+            card.innerHTML = `
+                <div class="icon-container">
+                    ${getIcon('service', name)}
+                </div>
+                <div class="icon-name">${name}</div>
+                <div class="icon-code">getIcon('service', '${name}')</div>
+            `;
+            serviceGrid.appendChild(card);
+        });
+
+        // Afficher les icônes d'infos
+        const infoGrid = document.getElementById('info-icons');
+        const infoNames = getIconNames('info');
+        infoNames.forEach(name => {
+            const card = document.createElement('div');
+            card.className = 'icon-card';
+            card.innerHTML = `
+                <div class="icon-container">
+                    ${getIcon('info', name)}
+                </div>
+                <div class="icon-name">${name}</div>
+                <div class="icon-code">getIcon('info', '${name}')</div>
+            `;
+            infoGrid.appendChild(card);
+        });
+
+        // Copier le code au clic
+        document.querySelectorAll('.icon-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const code = card.querySelector('.icon-code').textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    const originalBg = card.style.background;
+                    card.style.background = '#55efc4';
+                    setTimeout(() => {
+                        card.style.background = originalBg;
+                    }, 300);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
