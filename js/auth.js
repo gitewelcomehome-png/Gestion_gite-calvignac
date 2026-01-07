@@ -34,7 +34,11 @@ class AuthManager {
             const { data: { session }, error } = await window.supabaseClient.auth.getSession();
             
             if (error) {
-                console.error('Erreur vérification auth:', error);
+                if (window.logger) {
+                    window.logger.error('Erreur vérification auth', error);
+                } else {
+                    console.error('Erreur vérification auth:', error);
+                }
                 this.redirectToLogin();
                 return;
             }
@@ -47,7 +51,11 @@ class AuthManager {
                 this.redirectToLogin();
             }
         } catch (error) {
-            console.error('Erreur checkAuthState:', error);
+            if (window.logger) {
+                window.logger.error('Erreur checkAuthState', error);
+            } else {
+                console.error('Erreur checkAuthState:', error);
+            }
             this.redirectToLogin();
         }
     }
@@ -63,7 +71,11 @@ class AuthManager {
                 .eq('user_id', this.currentUser.id);
             
             if (error) {
-                console.error('Erreur chargement rôles:', error);
+                if (window.logger) {
+                    window.logger.error('Erreur chargement rôles', error);
+                } else {
+                    console.error('Erreur chargement rôles:', error);
+                }
                 this.userRoles = [];
                 return;
             }
@@ -71,7 +83,11 @@ class AuthManager {
             this.userRoles = data ? data.map(r => r.role) : [];
             console.log('✅ Rôles utilisateur:', this.userRoles);
         } catch (error) {
-            console.error('Erreur loadUserRoles:', error);
+            if (window.logger) {
+                window.logger.error('Erreur loadUserRoles', error);
+            } else {
+                console.error('Erreur loadUserRoles:', error);
+            }
             this.userRoles = [];
         }
     }
@@ -100,6 +116,14 @@ class AuthManager {
      */
     async login(email, password) {
         try {
+            // Vérifier rate limiting
+            if (window.loginLimiter) {
+                const check = window.loginLimiter.canAttempt(email);
+                if (!check.allowed) {
+                    return { success: false, error: check.message };
+                }
+            }
+            
             const { data, error } = await window.supabaseClient.auth.signInWithPassword({
                 email: email.trim(),
                 password: password
@@ -111,11 +135,29 @@ class AuthManager {
             
             this.currentUser = data.user;
             await this.loadUserRoles();
+            
+            // Succès: réinitialiser le rate limiter
+            if (window.loginLimiter) {
+                window.loginLimiter.reset(email);
+            }
+            
+            // Définir l'utilisateur dans le logger
+            if (window.logger) {
+                window.logger.setUser(data.user.id, data.user.email);
+            }
+            
             this.onAuthSuccess();
             
             return { success: true, data };
         } catch (error) {
-            console.error('Erreur login:', error);
+            if (window.logger) {
+                window.logger.warn('Tentative de connexion échouée', {
+                    email: email.trim(),
+                    error: error.message
+                });
+            } else {
+                console.error('Erreur login:', error);
+            }
             return { success: false, error: error.message };
         }
     }
@@ -132,7 +174,11 @@ class AuthManager {
             this.userRoles = [];
             this.redirectToLogin();
         } catch (error) {
-            console.error('Erreur logout:', error);
+            if (window.logger) {
+                window.logger.error('Erreur logout', error);
+            } else {
+                console.error('Erreur logout:', error);
+            }
             // Forcer la redirection même en cas d'erreur
             this.redirectToLogin();
         }
