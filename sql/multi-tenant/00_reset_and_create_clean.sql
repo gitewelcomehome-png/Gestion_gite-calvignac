@@ -68,7 +68,10 @@ DROP FUNCTION IF EXISTS verify_migration() CASCADE;
 DROP FUNCTION IF EXISTS verify_multi_tenant_columns() CASCADE;
 DROP FUNCTION IF EXISTS verify_rls_enabled() CASCADE;
 
-RAISE NOTICE '✅ Toutes les tables supprimées';
+DO $$
+BEGIN
+    RAISE NOTICE '✅ Toutes les tables supprimées';
+END $$;
 
 -- ================================================================
 -- ÉTAPE 2: CRÉER LES NOUVELLES TABLES PROPRES
