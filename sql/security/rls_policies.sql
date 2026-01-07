@@ -329,12 +329,12 @@ USING (
 );
 
 -- ================================================================
--- 13. TABLE: faq_questions
+-- 13. TABLE: faq
 -- ================================================================
 
 -- Policy: Admins accès complet
-CREATE POLICY "admin_full_access_faq_questions"
-ON faq_questions
+CREATE POLICY "admin_full_access_faq"
+ON faq
 FOR ALL
 TO authenticated
 USING (
@@ -346,8 +346,8 @@ USING (
 );
 
 -- Policy: Lecture publique des FAQ (pour clients)
-CREATE POLICY "public_read_faq_questions"
-ON faq_questions
+CREATE POLICY "public_read_faq"
+ON faq
 FOR SELECT
 TO authenticated, anon
 USING (true);
