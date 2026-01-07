@@ -486,14 +486,35 @@
 
         // Le client Supabase est déjà disponible via window.supabase (shared-config.js)
         
-        // Vérifier si déjà connecté
+        // Vérifier si l'utilisateur a déjà terminé l'onboarding
         async function checkAuth() {
-            // TEMPORAIRE: Désactivé pour permettre nouvelle inscription
-            // const { data: { session } } = await supabase.auth.getSession();
-            // if (session) {
-            //     // Déjà connecté, rediriger vers dashboard
-            //     window.location.href = 'index.html';
-            // }
+            try {
+                const { data: { session } } = await window.supabaseClient.auth.getSession();
+                
+                if (session && session.user) {
+                    // Vérifier si l'utilisateur a une organization
+                    const { data, error } = await window.supabaseClient
+                        .from('organization_members')
+                        .select('organization_id')
+                        .eq('user_id', session.user.id)
+                        .limit(1);
+                    
+                    if (!error && data && data.length > 0) {
+                        // Onboarding déjà terminé, rediriger vers dashboard
+                        console.log('✅ Onboarding déjà terminé, redirection vers dashboard');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    
+                    // Utilisateur connecté mais onboarding incomplet
+                    console.log('ℹ️ Utilisateur connecté, onboarding à terminer');
+                    // Passer directement à l'étape 2
+                    userSession = session;
+                    showStep(2);
+                }
+            } catch (error) {
+                console.error('Erreur vérification auth:', error);
+            }
         }
         checkAuth();
 
