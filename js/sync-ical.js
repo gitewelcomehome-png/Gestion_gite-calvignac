@@ -76,12 +76,12 @@ async function syncAllCalendars() {
             }
         }
         
-        addMessage('Synchronisation Trévoux...', 'info');
+        addMessage('Synchronisation Trevoux...', 'info');
         for (const [platform, url] of Object.entries(window.ICAL_CONFIGS.trevoux)) {
             if (!url) continue;
             try {
                 addMessage(`  • ${platform}...`, 'info');
-                const result = await syncCalendar('Trévoux', platform, url);
+                const result = await syncCalendar('Trevoux', platform, url);
                 totalAdded += result.added;
                 totalSkipped += result.skipped;
                 totalDeleted += result.deleted;
@@ -90,7 +90,7 @@ async function syncAllCalendars() {
             } catch (error) {
                 totalErrors++;
                 if (!window.SYNC_ERRORS) window.SYNC_ERRORS = [];
-                window.SYNC_ERRORS.push({ gite: 'Trévoux', platform, error: error.message || 'Erreur inconnue' });
+                window.SYNC_ERRORS.push({ gite: 'Trevoux', platform, error: error.message || 'Erreur inconnue' });
                 addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
             }
         }
@@ -169,7 +169,7 @@ async function syncAllCalendars() {
 
 /**
  * Synchronise un calendrier iCal spécifique
- * @param {string} gite - Nom du gîte ('Couzon' ou 'Trévoux')
+ * @param {string} gite - Nom du gîte ('Couzon' ou 'Trevoux')
  * @param {string} platform - Nom de la plateforme (ex: 'Airbnb', 'Abritel')
  * @param {string} url - URL du flux iCal
  * @returns {Promise<{added: number, skipped: number}>} - Résultat de la synchronisation

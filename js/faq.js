@@ -398,7 +398,7 @@ window.exporterFAQHTML = function() {
 <body>
     <div class="header">
         <h1>❓ Questions Fréquentes</h1>
-        <p>Welcome Home - Gîtes Trévoux & Calvignac</p>
+        <p>Welcome Home - Gîtes Trevoux & Calvignac</p>
     </div>
 `;
 

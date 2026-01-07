@@ -80,7 +80,7 @@ function isCouzon(giteName) {
 function isTrevoux(giteName) {
     if (!giteName) return false;
     const normalized = giteName.toLowerCase().trim();
-    return normalized === 'trévoux' || normalized === 'trevoux';
+    return normalized === 'trevoux' || normalized === 'trevoux';
 }
 
 // ==========================================

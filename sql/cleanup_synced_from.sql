@@ -11,7 +11,7 @@ SELECT
     synced_from,
     plateforme
 FROM reservations 
-WHERE gite = 'Trévoux'
+WHERE gite = 'Trevoux'
   AND date_fin >= '2026-01-01'
 ORDER BY date_debut;
 
@@ -19,7 +19,7 @@ ORDER BY date_debut;
 -- 2. SUPPRIMER TOUTES LES RÉSERVATIONS TRÉVOUX 2026+
 -- ==========================================
 DELETE FROM reservations 
-WHERE gite = 'Trévoux'
+WHERE gite = 'Trevoux'
   AND date_fin >= '2026-01-01';
 
 -- ==========================================
@@ -27,7 +27,7 @@ WHERE gite = 'Trévoux'
 -- ==========================================
 SELECT COUNT(*) as "Réservations restantes"
 FROM reservations 
-WHERE gite = 'Trévoux'
+WHERE gite = 'Trevoux'
   AND date_fin >= '2026-01-01';
 
 -- ==========================================

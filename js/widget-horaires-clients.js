@@ -73,13 +73,13 @@ export async function afficherHorairesClients() {
                         background: white;
                         border-radius: 12px;
                         padding: 20px;
-                        border-left: 4px solid ${reservation.gite === 'Trévoux' ? '#667eea' : '#f093fb'};
+                        border-left: 4px solid ${reservation.gite === 'Trevoux' ? '#667eea' : '#f093fb'};
                         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                     ">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
                             <div>
                                 <div style="font-size: 1.2rem; font-weight: 700; color: #333; margin-bottom: 5px;">
-                                    ${reservation.gite === 'Trévoux' ? '🏡' : '⛰️'} ${reservation.gite} - ${reservation.nom}
+                                    ${reservation.gite === 'Trevoux' ? '🏡' : '⛰️'} ${reservation.gite} - ${reservation.nom}
                                 </div>
                                 <div style="color: #666; font-size: 0.95rem;">
                                     ${formatDateCourt(reservation.date_debut)} → ${formatDateCourt(reservation.date_fin)}

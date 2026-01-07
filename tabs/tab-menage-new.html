@@ -435,7 +435,7 @@ async function afficherPlanningMenageNew() {
                 };
             }
             
-            if (m.reservation.gite.toLowerCase().includes('trévoux')) {
+            if (m.reservation.gite.toLowerCase().includes('trevoux')) {
                 weeks[key].trevoux.push(m);
             } else {
                 weeks[key].couzon.push(m);
@@ -459,7 +459,7 @@ async function afficherPlanningMenageNew() {
                     </div>
                     <div class="week-grid">
                         <div class="gite-column">
-                            <div class="gite-header trevoux">🏡 Trévoux</div>
+                            <div class="gite-header trevoux">🏡 Trevoux</div>
                             ${w.trevoux.length > 0 ? w.trevoux.map(genererMenageCard).join('') : '<div class="empty-column">Aucun ménage</div>'}
                         </div>
                         <div class="gite-column">

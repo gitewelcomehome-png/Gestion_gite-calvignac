@@ -2,7 +2,7 @@
    CHECKLISTS.JS - Gestion des Check-lists
    ================================================ */
 
-let currentGiteFilter = 'Trévoux';
+let currentGiteFilter = 'Trevoux';
 let currentTypeFilter = 'entree';
 
 // =============================================

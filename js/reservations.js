@@ -246,12 +246,12 @@ async function updateReservationsList(keepScrollPosition = false) {
     
     // Organiser par gîte
     const byGite = {
-        'Trévoux': active.filter(r => r.gite === 'Trévoux'),
+        'Trevoux': active.filter(r => r.gite === 'Trevoux'),
         'Couzon': active.filter(r => r.gite === 'Couzon')
     };
     
     // Trier par date
-    byGite['Trévoux'].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
+    byGite['Trevoux'].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     byGite['Couzon'].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     
     // Obtenir toutes les semaines à afficher (basé sur la date de DÉBUT uniquement)
@@ -272,7 +272,7 @@ async function updateReservationsList(keepScrollPosition = false) {
     // En-têtes sticky
     html += `
         <div style="display: grid; grid-template-columns: 1fr 1fr; position: sticky; top: 0; z-index: 100; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <div class="gite-label trevoux-label" style="margin: 0; border-radius: 0;">🏠 Trévoux</div>
+            <div class="gite-label trevoux-label" style="margin: 0; border-radius: 0;">🏠 Trevoux</div>
             <div class="gite-label couzon-label" style="margin: 0; border-radius: 0;">🏠 Couzon</div>
         </div>
     `;
@@ -292,7 +292,7 @@ async function updateReservationsList(keepScrollPosition = false) {
                 
                 <div class="week-content-grid" style="border-top: none;">
                     <div class="gite-column-inline">
-                        ${generateWeekReservations(byGite['Trévoux'], weekNum, 'trevoux', active, validationMap, today)}
+                        ${generateWeekReservations(byGite['Trevoux'], weekNum, 'trevoux', active, validationMap, today)}
                     </div>
                     
                     <div class="gite-column-inline">

@@ -291,7 +291,7 @@ function ajouterTravaux() {
         <input type="text" placeholder="Description" id="travaux-desc-${id}">
         <select id="travaux-gite-${id}">
             <option value="couzon">Couzon</option>
-            <option value="trevoux">Trévoux</option>
+            <option value="trevoux">Trevoux</option>
             <option value="commun">Commun</option>
         </select>
         <input type="number" step="0.01" placeholder="Montant €" id="travaux-montant-${id}">
@@ -311,7 +311,7 @@ function ajouterFraisDivers() {
         <input type="text" placeholder="Description" id="frais-desc-${id}">
         <select id="frais-gite-${id}">
             <option value="couzon">Couzon</option>
-            <option value="trevoux">Trévoux</option>
+            <option value="trevoux">Trevoux</option>
             <option value="commun">Commun</option>
         </select>
         <input type="number" step="0.01" placeholder="Montant €" id="frais-montant-${id}">
@@ -330,7 +330,7 @@ function ajouterProduitAccueil() {
         <input type="text" placeholder="Description" id="produits-desc-${id}">
         <select id="produits-gite-${id}">
             <option value="couzon">Couzon</option>
-            <option value="trevoux">Trévoux</option>
+            <option value="trevoux">Trevoux</option>
             <option value="commun">Commun</option>
         </select>
         <input type="number" step="0.01" placeholder="Montant €" id="produits-montant-${id}">
@@ -536,10 +536,10 @@ function calculerFiscalite(event) {
     // CRÉDIT TRÉVOUX (depuis la liste des crédits)
     const creditsListe = getCreditsList();
     const creditTrevoux = creditsListe
-        .filter(c => c.nom && c.nom.toLowerCase().includes('trévoux'))
+        .filter(c => c.nom && c.nom.toLowerCase().includes('trevoux'))
         .reduce((sum, c) => sum + (c.mensualite * 12), 0);
     
-    // CALCUL FINAL : Couzon + Trévoux + Pro + Travaux + Frais Divers + Produits + Crédit Trévoux
+    // CALCUL FINAL : Couzon + Trevoux + Pro + Travaux + Frais Divers + Produits + Crédit Trevoux
     // EXCLURE : Résidence principale et Véhicule
     const totalCharges = chargesCouzon + chargesTrevoux + fraisPro + travaux + fraisDivers + produitsAccueil + creditTrevoux;
     
@@ -633,7 +633,7 @@ function afficherResultats(data) {
                     <span>${data.chargesCouzon.toFixed(2)} €</span>
                 </div>
                 <div class="resultat-ligne">
-                    <span>• Charges Trévoux :</span>
+                    <span>• Charges Trevoux :</span>
                     <span>${data.chargesTrevoux.toFixed(2)} €</span>
                 </div>
                 <div class="resultat-ligne">
@@ -966,7 +966,7 @@ async function creerNouvelleAnnee() {
             copropriete_couzon: anneePrecedente.copropriete_couzon,
             copropriete_couzon_type: anneePrecedente.copropriete_couzon_type,
             
-            // Copier les frais fixes de Trévoux
+            // Copier les frais fixes de Trevoux
             internet_trevoux: anneePrecedente.internet_trevoux,
             internet_trevoux_type: anneePrecedente.internet_trevoux_type,
             eau_trevoux: anneePrecedente.eau_trevoux,
@@ -1096,7 +1096,7 @@ function chargerDonneesFormulaire(data) {
     document.getElementById('copropriete_couzon').value = data.copropriete_couzon || '';
     document.getElementById('copropriete_couzon_type').value = data.copropriete_couzon_type || 'mensuel';
     
-    // Trévoux
+    // Trevoux
     document.getElementById('internet_trevoux').value = data.internet_trevoux || '';
     document.getElementById('internet_trevoux_type').value = data.internet_trevoux_type || 'mensuel';
     document.getElementById('eau_trevoux').value = data.eau_trevoux || '';
@@ -1283,7 +1283,7 @@ async function sauvegarderSimulation(silencieux = false) {
         copropriete_couzon: parseFloat(document.getElementById('copropriete_couzon').value || 0),
         copropriete_couzon_type: document.getElementById('copropriete_couzon_type').value,
         
-        // Trévoux
+        // Trevoux
         internet_trevoux: parseFloat(document.getElementById('internet_trevoux').value || 0),
         internet_trevoux_type: document.getElementById('internet_trevoux_type').value,
         eau_trevoux: parseFloat(document.getElementById('eau_trevoux').value || 0),
@@ -1465,7 +1465,7 @@ async function chargerDerniereSimulation() {
         document.getElementById('copropriete_couzon').value = data.copropriete_couzon || '';
         document.getElementById('copropriete_couzon_type').value = data.copropriete_couzon_type || 'mensuel';
         
-        // Trévoux
+        // Trevoux
         document.getElementById('internet_trevoux').value = data.internet_trevoux || '';
         document.getElementById('internet_trevoux_type').value = data.internet_trevoux_type || 'mensuel';
         document.getElementById('eau_trevoux').value = data.eau_trevoux || '';

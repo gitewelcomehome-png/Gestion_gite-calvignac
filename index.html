@@ -15,6 +15,8 @@
     
     <!-- Scripts modulaires de l'application -->
     <script src="js/shared-config.js"></script>
+    <!-- 🏢 MULTI-TENANT: Gestionnaire dynamique des gîtes -->
+    <script src="js/gites-manager.js"></script>
     <!-- 🔒 PHASE 1 SÉCURITÉ: Authentification obligatoire -->
     <script src="js/auth.js"></script>
     <!-- 🛡️ PHASE 3 SÉCURITÉ: Protection XSS -->
@@ -438,7 +440,7 @@
                 <circle cx="35" cy="36" r="2" fill="white" opacity="0.6"/>
             </svg>
             <h1 style="display: inline-block; vertical-align: middle;">Gestion gîtes</h1>
-            <p class="subtitle">Trévoux & Couzon - Synchronisation iCal automatique</p>
+            <p class="subtitle">Trevoux & Couzon - Synchronisation iCal automatique</p>
         </header>
         
         <!-- Navigation -->
@@ -785,11 +787,11 @@
                 });
             }
             if (tabName === 'decouvrir') {
-                // Pré-sélectionner Trévoux si aucun gîte n'est sélectionné
+                // Pré-sélectionner Trevoux si aucun gîte n'est sélectionné
                 const giteInput = document.getElementById('decouvrir_gite');
                 if (!giteInput || !giteInput.value) {
                     if (typeof selectGiteDecouvrir === 'function') {
-                        selectGiteDecouvrir('Trévoux');
+                        selectGiteDecouvrir('Trevoux');
                     }
                 } else {
                     // Si un gîte est déjà sélectionné, charger les événements
@@ -1901,7 +1903,7 @@
                 }
                 
                 // Ajouter dans la bonne colonne
-                if (r.gite.toLowerCase().includes('trévoux') || r.gite.toLowerCase().includes('trevoux')) {
+                if (r.gite.toLowerCase().includes('trevoux') || r.gite.toLowerCase().includes('trevoux')) {
                     weeks[weekKey].trevoux.push(menageInfo);
                 } else {
                     weeks[weekKey].couzon.push(menageInfo);
@@ -1932,7 +1934,7 @@
                         </div>
                         <div class="cleaning-week-body">
                             <div class="cleaning-column">
-                                <div class="cleaning-column-header">🏡 Trévoux</div>
+                                <div class="cleaning-column-header">🏡 Trevoux</div>
                                 ${week.trevoux.length > 0 ? 
                                     week.trevoux.map(m => generateCleaningItemHTML(m)).join('') :
                                     '<div class="cleaning-item empty">Aucun ménage prévu</div>'
@@ -2301,12 +2303,12 @@
         
         // Informations complètes des gîtes
         const GITES_INFOS = {
-            'Trévoux': {
-                nom: 'Gîte de Trévoux',
+            'Trevoux': {
+                nom: 'Gîte de Trevoux',
                 emoji: '🏰',
                 couleur_principale: '#667eea',
                 couleur_secondaire: '#764ba2',
-                adresse: '2 Grande Rue, 01600 Trévoux',
+                adresse: '2 Grande Rue, 01600 Trevoux',
                 code_acces: '1234A',
                 wifi_nom: 'Gite_Trevoux',
                 wifi_mdp: 'BienvenueTrevoux2024',
@@ -2319,7 +2321,7 @@
                     {
                         titre: '🔑 Accès au Logement',
                         contenu: `
-                            <p><strong>Adresse :</strong> 2 Grande Rue, 01600 Trévoux</p>
+                            <p><strong>Adresse :</strong> 2 Grande Rue, 01600 Trevoux</p>
                             <p><strong>Code d'accès :</strong></p>
                             <div class="highlight">1234A</div>
                             <p>Le boîtier à code est situé à gauche de la porte d'entrée.</p>
@@ -2362,7 +2364,7 @@
                             <p>• Boulangerie Chazelle (100m)</p>
                             <p>• Supermarché Carrefour City (200m)</p>
                             <p>• Pharmacie (150m)</p>
-                            <p>• Château-Fort de Trévoux (400m)</p>
+                            <p>• Château-Fort de Trevoux (400m)</p>
                         `
                     },
                     {
@@ -2371,7 +2373,7 @@
                             <p><strong>Pompiers :</strong> 18</p>
                             <p><strong>SAMU :</strong> 15</p>
                             <p><strong>Police :</strong> 17</p>
-                            <p><strong>Hôpital le plus proche :</strong> Centre Hospitalier de Trévoux (1km)</p>
+                            <p><strong>Hôpital le plus proche :</strong> Centre Hospitalier de Trevoux (1km)</p>
                         `
                     }
                 ]
@@ -2456,7 +2458,7 @@
         
         // Stocker les activités par gîte
         let activitesParGite = {
-            'Trévoux': [],
+            'Trevoux': [],
             'Couzon': []
         };
         
@@ -2550,10 +2552,10 @@
                 document.getElementById('activite_longitude').value = coords.lng;
                 
                 // Calculer et afficher les distances pour les deux gîtes
-                const distTrevoux = calculerDistance(window.GITES_COORDS['Trévoux'].lat, window.GITES_COORDS['Trévoux'].lng, coords.lat, coords.lng);
+                const distTrevoux = calculerDistance(window.GITES_COORDS['Trevoux'].lat, window.GITES_COORDS['Trevoux'].lng, coords.lat, coords.lng);
                 const distCouzon = calculerDistance(window.GITES_COORDS['Couzon'].lat, window.GITES_COORDS['Couzon'].lng, coords.lat, coords.lng);
                 
-                showNotification(`✓ Coordonnées trouvées : ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}\n📏 Distance Trévoux: ${distTrevoux}km | Couzon: ${distCouzon}km`, 'success');
+                showNotification(`✓ Coordonnées trouvées : ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}\n📏 Distance Trevoux: ${distTrevoux}km | Couzon: ${distCouzon}km`, 'success');
             } else {
                 showNotification('❌ Impossible de trouver les coordonnées pour cette adresse', 'error');
             }
@@ -2581,10 +2583,10 @@
             document.getElementById('formDecouvrir').style.display = 'block';
             
             // Mettre à jour les styles des boutons de sélection de gîte
-            const boutonTrevoux = document.querySelector('[onclick*="selectGiteDecouvrir(\'Trévoux\')"]');
+            const boutonTrevoux = document.querySelector('[onclick*="selectGiteDecouvrir(\'Trevoux\')"]');
             const boutonCouzon = document.querySelector('[onclick*="selectGiteDecouvrir(\'Couzon\')"]');
             
-            if (gite === 'Trévoux') {
+            if (gite === 'Trevoux') {
                 if (boutonTrevoux) {
                     boutonTrevoux.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
                     boutonTrevoux.style.color = 'white';
@@ -2627,7 +2629,7 @@
             try {
                 // Si l'adresse est vide, utiliser les coordonnées du gîte
                 if (!address || address.trim() === '') {
-                    return gite === 'Trévoux' 
+                    return gite === 'Trevoux' 
                         ? { lat: 45.9394, lng: 4.7728 }
                         : { lat: 45.8442, lng: 4.8365 };
                 }
@@ -2646,7 +2648,7 @@
                 
                 if (!response.ok) {
                     // Utiliser coordonnées par défaut
-                    return gite === 'Trévoux' 
+                    return gite === 'Trevoux' 
                         ? { lat: 45.9394, lng: 4.7728 }
                         : { lat: 45.8442, lng: 4.8365 };
                 }
@@ -2661,12 +2663,12 @@
                 }
                 
                 // Si le géocodage échoue, coordonnées par défaut du gîte
-                return gite === 'Trévoux' 
+                return gite === 'Trevoux' 
                     ? { lat: 45.9394, lng: 4.7728 }
                     : { lat: 45.8442, lng: 4.8365 };
             } catch (error) {
                 console.error('Erreur géocodage:', address, error);
-                return gite === 'Trévoux' 
+                return gite === 'Trevoux' 
                     ? { lat: 45.9394, lng: 4.7728 }
                     : { lat: 45.8442, lng: 4.8365 };
             }
@@ -2833,16 +2835,16 @@
                 const joursSemaine = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
                 
                 // Événements récurrents selon le gîte
-                if (gite === 'Trévoux') {
-                    // Marché de Trévoux - tous les samedis
+                if (gite === 'Trevoux') {
+                    // Marché de Trevoux - tous les samedis
                     const samedi = new Date(startOfWeek);
                     samedi.setDate(startOfWeek.getDate() + 5); // Samedi
                     evenements.push({
-                        titre: 'Marché de Trévoux',
+                        titre: 'Marché de Trevoux',
                         date: `Samedi ${samedi.getDate()}/${samedi.getMonth() + 1} - 8h à 13h`,
                         dateDebut: samedi,
                         dateFin: new Date(samedi.getTime() + 5 * 60 * 60 * 1000), // +5h
-                        lieu: 'Place de la Terrasse, Trévoux',
+                        lieu: 'Place de la Terrasse, Trevoux',
                         description: 'Marché hebdomadaire avec produits locaux, fromages, fruits et légumes frais',
                         lien: 'https://www.ville-trevoux.fr',
                         icone: '🛒',
@@ -2862,7 +2864,7 @@
                                 date: `Mercredi au dimanche - 14h à 18h`,
                                 dateDebut: jour,
                                 dateFin: endOfWeek,
-                                lieu: 'Montée du Château, Trévoux',
+                                lieu: 'Montée du Château, Trevoux',
                                 description: 'Monument Historique classé en 1913. Découvrez l\'histoire du Parlement de Dombes',
                                 lien: 'https://www.ain-tourisme.com',
                                 icone: '🏰',
@@ -2882,7 +2884,7 @@
                         date: `Vendredi ${vendredi.getDate()}/${vendredi.getMonth() + 1} - 20h30`,
                         dateDebut: vendredi,
                         dateFin: new Date(vendredi.getTime() + 2 * 60 * 60 * 1000),
-                        lieu: 'Église Saint-Symphorien, Trévoux',
+                        lieu: 'Église Saint-Symphorien, Trevoux',
                         description: 'Concert de musique classique avec l\'ensemble Les Cordes de l\'Ain',
                         lien: 'https://www.ville-trevoux.fr/culture',
                         icone: '🎵',
@@ -2900,7 +2902,7 @@
                         date: `Mercredi ${mercredi.getDate()}/${mercredi.getMonth() + 1} - 14h à 16h`,
                         dateDebut: mercredi,
                         dateFin: new Date(mercredi.getTime() + 2 * 60 * 60 * 1000),
-                        lieu: 'Médiathèque de Trévoux',
+                        lieu: 'Médiathèque de Trevoux',
                         description: 'Atelier de création manuelle pour les 6-12 ans. Inscription gratuite.',
                         lien: 'https://www.mediatheque-trevoux.fr',
                         icone: '🎨',
@@ -3061,7 +3063,7 @@
         
         // Coordonnées des gîtes
         const giteCoords = {
-            'Trévoux': { lat: 45.9396, lng: 4.7733 },
+            'Trevoux': { lat: 45.9396, lng: 4.7733 },
             'Couzon': { lat: 45.8439, lng: 4.8288 }
         };
         
@@ -3339,7 +3341,7 @@
             });
             
             const giteInput = document.getElementById('decouvrir_gite');
-            const gite = giteInput ? giteInput.value : 'Trévoux';
+            const gite = giteInput ? giteInput.value : 'Trevoux';
             
             if (categorie === 'tous') {
                 // Afficher toutes les activités
@@ -3479,7 +3481,7 @@
                     
                     if (error) throw error;
                     
-                    showNotification(`✓ Activité ajoutée dans Trévoux et Couzon !`, 'success');
+                    showNotification(`✓ Activité ajoutée dans Trevoux et Couzon !`, 'success');
                     
                     // Fermer la modale après ajout
                     fermerModalActivite();
