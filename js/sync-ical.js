@@ -57,41 +57,36 @@ async function syncAllCalendars() {
     }
     
     try {
-        addMessage('Synchronisation Couzon...', 'info');
-        for (const [platform, url] of Object.entries(window.ICAL_CONFIGS.couzon)) {
-            if (!url) continue;
-            try {
-                addMessage(`  • ${platform}...`, 'info');
-                const result = await syncCalendar('Couzon', platform, url);
-                totalAdded += result.added;
-                totalSkipped += result.skipped;
-                totalDeleted += result.deleted;
-                const deletedMsg = result.deleted > 0 ? `, ${result.deleted} supprimées` : '';
-                addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées${deletedMsg}`, 'success');
-            } catch (error) {
-                totalErrors++;
-                if (!window.SYNC_ERRORS) window.SYNC_ERRORS = [];
-                window.SYNC_ERRORS.push({ gite: 'Couzon', platform, error: error.message || 'Erreur inconnue' });
-                addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
-            }
-        }
+        // 🚀 DYNAMIQUE : Boucler sur tous les gîtes depuis GitesManager
+        const gites = await window.gitesManager.getAll();
         
-        addMessage('Synchronisation Trevoux...', 'info');
-        for (const [platform, url] of Object.entries(window.ICAL_CONFIGS.trevoux)) {
-            if (!url) continue;
-            try {
-                addMessage(`  • ${platform}...`, 'info');
-                const result = await syncCalendar('Trevoux', platform, url);
-                totalAdded += result.added;
-                totalSkipped += result.skipped;
-                totalDeleted += result.deleted;
-                const deletedMsg = result.deleted > 0 ? `, ${result.deleted} supprimées` : '';
-                addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées${deletedMsg}`, 'success');
-            } catch (error) {
-                totalErrors++;
-                if (!window.SYNC_ERRORS) window.SYNC_ERRORS = [];
-                window.SYNC_ERRORS.push({ gite: 'Trevoux', platform, error: error.message || 'Erreur inconnue' });
-                addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
+        for (const gite of gites) {
+            addMessage(`Synchronisation ${gite.name}...`, 'info');
+            
+            // Récupérer les sources iCal depuis la BDD (JSONB)
+            const icalSources = await window.gitesManager.getIcalSources(gite.id);
+            
+            if (!icalSources || Object.keys(icalSources).length === 0) {
+                addMessage(`  ℹ️ Aucune source iCal configurée`, 'info');
+                continue;
+            }
+            
+            for (const [platform, url] of Object.entries(icalSources)) {
+                if (!url) continue;
+                try {
+                    addMessage(`  • ${platform}...`, 'info');
+                    const result = await syncCalendar(gite.id, platform, url);
+                    totalAdded += result.added;
+                    totalSkipped += result.skipped;
+                    totalDeleted += result.deleted;
+                    const deletedMsg = result.deleted > 0 ? `, ${result.deleted} supprimées` : '';
+                    addMessage(`  ✓ ${platform}: ${result.added} ajoutées, ${result.skipped} ignorées${deletedMsg}`, 'success');
+                } catch (error) {
+                    totalErrors++;
+                    if (!window.SYNC_ERRORS) window.SYNC_ERRORS = [];
+                    window.SYNC_ERRORS.push({ gite: gite.name, platform, error: error.message || 'Erreur inconnue' });
+                    addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
+                }
             }
         }
         
@@ -169,12 +164,15 @@ async function syncAllCalendars() {
 
 /**
  * Synchronise un calendrier iCal spécifique
- * @param {string} gite - Nom du gîte ('Couzon' ou 'Trevoux')
+ * @param {string} giteId - UUID du gîte
  * @param {string} platform - Nom de la plateforme (ex: 'Airbnb', 'Abritel')
  * @param {string} url - URL du flux iCal
- * @returns {Promise<{added: number, skipped: number}>} - Résultat de la synchronisation
+ * @returns {Promise<{added: number, skipped: number, deleted: number}>} - Résultat de la synchronisation
  */
-async function syncCalendar(gite, platform, url) {
+async function syncCalendar(giteId, platform, url) {
+    // Récupérer le gîte pour logs
+    const gite = await window.gitesManager.getById(giteId);
+    const giteName = gite ? gite.name : 'Inconnu';
     // Essayer plusieurs proxies CORS en cascade
     const proxies = [
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
@@ -219,7 +217,7 @@ async function syncCalendar(gite, platform, url) {
         const comp = new ICAL.Component(jcalData);
         const vevents = comp.getAllSubcomponents('vevent');
         
-        console.log(`🔍 ========== DÉBUT ANALYSE iCal ${gite} / ${platform} ==========`);
+        console.log(`🔍 ========== DÉBUT ANALYSE iCal ${giteName} / ${platform} ==========`);
         console.log(`📊 Nombre total d'événements dans le flux: ${vevents.length}`);
         
         let added = 0;
@@ -229,10 +227,9 @@ async function syncCalendar(gite, platform, url) {
         // 🗑️ ÉTAPE 1 : Récupérer les réservations existantes de cette plateforme pour ce gîte
         const existingReservations = await getAllReservations();
         
-        // Filtrer par gîte et plateforme (si le champ syncedFrom existe)
-        // Sinon, utiliser plateforme pour identifier les réservations de cette source
+        // Filtrer par gîte (UUID) et plateforme
         const platformReservations = existingReservations.filter(r => {
-            if (r.gite !== gite) return false;
+            if (r.gite_id !== giteId) return false;
             
             // Vérifier si syncedFrom existe et correspond
             if (r.syncedFrom) {
@@ -254,8 +251,8 @@ async function syncCalendar(gite, platform, url) {
             return false;
         });
         
-        console.log(`📋 Réservations existantes pour ${gite} / ${platform}: ${platformReservations.length}`);
-        console.log(`🔍 DEBUG - Total réservations ${gite}: ${existingReservations.filter(r => r.gite === gite).length}`);
+        console.log(`📋 Réservations existantes pour ${giteName} / ${platform}: ${platformReservations.length}`);
+        console.log(`🔍 DEBUG - Total réservations ${giteName}: ${existingReservations.filter(r => r.gite_id === giteId).length}`);
         platformReservations.forEach(r => {
             console.log(`   • ${r.dateDebut} → ${r.dateFin} | ${r.nomClient || r.nom} | Plateforme: "${r.plateforme}" | SyncedFrom: "${r.syncedFrom || 'NON DÉFINI'}"`);
         });
@@ -285,8 +282,8 @@ async function syncCalendar(gite, platform, url) {
             const dateDebut = dateToLocalString(event.startDate.toJSDate());
             const dateFin = dateToLocalString(event.endDate.toJSDate());
             
-            // � LOG DÉTAILLÉ pour déboguer
-            console.log(`📅 Événement iCal: "${summary}" | ${gite} | ${dateDebut} → ${dateFin}`);
+            // 📋 LOG DÉTAILLÉ pour déboguer
+            console.log(`📅 Événement iCal: "${summary}" | ${giteName} | ${dateDebut} → ${dateFin}`);
             
             // 🚫 IGNORER LES BLOCAGES MANUELS (pas des vraies réservations)
             // Airbnb, Abritel etc. envoient des événements "Blocked" ou "Not available" pour les dates bloquées
@@ -383,23 +380,23 @@ async function syncCalendar(gite, platform, url) {
                     !existingResa.nom.includes('Reserved');
                 
                 if (hasCustomName) {
-                    console.log(`🔒 Réservation protégée (nom personnalisé): ${gite} du ${dateDebut} au ${dateFin} - ${existingResa.nom}`);
+                    console.log(`🔒 Réservation protégée (nom personnalisé): ${giteName} du ${dateDebut} au ${dateFin} - ${existingResa.nom}`);
                 } else {
-                    console.log(`♻️ Réservation existante confirmée: ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
+                    console.log(`♻️ Réservation existante confirmée: ${giteName} du ${dateDebut} au ${dateFin} - ${nom}`);
                 }
                 skipped++;
                 continue;
             }
             
             // Vérifier chevauchement avec d'autres réservations (pas de cette plateforme)
-            const hasOverlap = await checkDateOverlap(gite, dateDebut, dateFin, null, platform);
+            const hasOverlap = await checkDateOverlap(giteId, dateDebut, dateFin, null, platform);
             if (hasOverlap) {
-                console.log(`⏭️ Réservation ignorée (chevauchement avec autre source): ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
+                console.log(`⏭️ Réservation ignorée (chevauchement avec autre source): ${giteName} du ${dateDebut} au ${dateFin} - ${nom}`);
                 skipped++;
                 continue;
             }
             
-            console.log(`✅ Nouvelle réservation détectée: ${gite} du ${dateDebut} au ${dateFin} - ${nom}`);
+            console.log(`✅ Nouvelle réservation détectée: ${giteName} du ${dateDebut} au ${dateFin} - ${nom}`);
             
             // Déterminer site
             let site;
@@ -409,7 +406,7 @@ async function syncCalendar(gite, platform, url) {
             else site = platform;
             
             const reservation = {
-                gite: gite,
+                gite_id: giteId,
                 nom: nom,
                 telephone: '', // Téléphone vide, à remplir manuellement
                 provenance: '',
@@ -455,7 +452,7 @@ async function syncCalendar(gite, platform, url) {
                 }
                 
                 if (!belongsToThisPlatform) {
-                    console.log(`🛡️ PROTECTION: Réservation d'une autre plateforme (${resaPlatform}) - NON supprimée: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                    console.log(`🛡️ PROTECTION: Réservation d'une autre plateforme (${resaPlatform}) - NON supprimée: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
                     continue;
                 }
                 
@@ -470,19 +467,19 @@ async function syncCalendar(gite, platform, url) {
                 console.log(`   => PROTÉGÉE: ${hasCustomName}`);
                 
                 if (hasCustomName) {
-                    console.log(`🔒 Conservation réservation avec nom personnalisé: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                    console.log(`🔒 Conservation réservation avec nom personnalisé: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
                     continue;
                 }
                 
                 // ⚠️ Cette réservation a été annulée (plus dans le flux iCal)
-                console.log(`⚠️ Réservation annulée détectée: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                console.log(`⚠️ Réservation annulée détectée: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
                 canceledReservations.push(oldResa);
             }
         }
         
         // 🚨 Si des annulations détectées, demander confirmation avant suppression
         if (canceledReservations.length > 0) {
-            console.log(`\n🚨 ${canceledReservations.length} réservation(s) annulée(s) détectée(s) pour ${gite} / ${platform}`);
+            console.log(`\n🚨 ${canceledReservations.length} réservation(s) annulée(s) détectée(s) pour ${giteName} / ${platform}`);
             
             const confirmMsg = canceledReservations.map(r => 
                 `• ${r.dateDebut} → ${r.dateFin} : ${r.nom}`
@@ -503,7 +500,7 @@ async function syncCalendar(gite, platform, url) {
                         .delete()
                         .eq('id', oldResa.id);
                     
-                    console.log(`✅ Supprimée: ${gite} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                    console.log(`✅ Supprimée: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
                     deleted++;
                 }
             } else {
@@ -522,20 +519,21 @@ async function syncCalendar(gite, platform, url) {
 
 /**
  * Vérifie les chevauchements de dates pour un gîte donné
- * @param {string} gite - Nom du gîte
+ * @param {string} giteId - UUID du gîte
  * @param {string} dateDebut - Date de début (format YYYY-MM-DD)
  * @param {string} dateFin - Date de fin (format YYYY-MM-DD)
  * @param {number|null} excludeId - ID de réservation à exclure de la vérification
+ * @param {string|null} excludePlatform - Plateforme à exclure pour permettre back-to-back
  * @returns {Promise<boolean>} - true si chevauchement détecté
  */
-async function checkDateOverlap(gite, dateDebut, dateFin, excludeId = null, excludePlatform = null) {
+async function checkDateOverlap(giteId, dateDebut, dateFin, excludeId = null, excludePlatform = null) {
     const reservations = await getAllReservations();
     const debut = parseLocalDate(dateDebut);
     const fin = parseLocalDate(dateFin);
     
     for (const r of reservations) {
         if (r.id === excludeId) continue;
-        if (r.gite !== gite) continue;
+        if (r.gite_id !== giteId) continue;
         
         // Ignorer les réservations de la même plateforme (permet back-to-back)
         if (excludePlatform && r.syncedFrom === excludePlatform) continue;
@@ -562,12 +560,12 @@ async function checkDateOverlap(gite, dateDebut, dateFin, excludeId = null, excl
  * Utilisé dans le formulaire de réservation
  */
 async function updateBlockedDates() {
-    const gite = document.getElementById('gite').value;
-    if (!gite) return;
+    const giteId = document.getElementById('gite').value;
+    if (!giteId) return;
     
     const reservations = await getAllReservations();
     const blockedDates = reservations
-        .filter(r => r.gite === gite && new Date(r.dateFin) >= new Date())
+        .filter(r => r.gite_id === giteId && new Date(r.dateFin) >= new Date())
         .map(r => `${formatDate(r.dateDebut)} - ${formatDate(r.dateFin)}`)
         .join(', ');
     
