@@ -34,13 +34,13 @@ CREATE POLICY "femme_menage_read_reservations"
 ON reservations
 FOR SELECT
 TO authenticated
-USING (
-    EXISTS (
-        SELECT 1 FROM user_roles 
-        WHERE user_id = auth.uid() 
-        AND role = 'femme_menage'
-    )
-);public.is_femme_menage()-- Policy: Admins accès complet
+USING (public.is_femme_menage());
+
+-- ================================================================
+-- 2. TABLE: cleaning_schedule
+-- ================================================================
+
+-- Policy: Admins accès complet
 DROP POLICY IF EXISTS "admin_full_access_cleaning_schedule" ON cleaning_schedule;
 CREATE POLICY "admin_full_access_cleaning_schedule"
 ON cleaning_schedule
