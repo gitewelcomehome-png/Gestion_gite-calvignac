@@ -723,8 +723,13 @@
 
                 if (memberError) throw memberError;
 
-                // Succès !
+                // Succès ! Connexion automatique
                 showStep(4);
+                
+                // Redirection automatique après 2 secondes
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
 
             } catch (error) {
                 console.error('Erreur lors de la configuration:', error);
@@ -733,6 +738,7 @@
         }
 
         function goToDashboard() {
+            // Redirection immédiate
             window.location.href = 'index.html';
         }
     </script>
