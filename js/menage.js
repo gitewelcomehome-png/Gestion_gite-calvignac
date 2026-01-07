@@ -23,7 +23,7 @@ function calculerDateMenage(reservation, toutesReservations) {
     
     // Vérifier s'il y a une arrivée le jour du départ
     const arriveeMemejour = toutesReservations.find(r => 
-        r.gite === reservation.gite && 
+        r.gite_id === reservation.gite_id && 
         r.id !== reservation.id &&
         parseLocalDate(r.dateDebut || r.date_debut).toDateString() === departDate.toDateString()
     );
@@ -38,7 +38,7 @@ function calculerDateMenage(reservation, toutesReservations) {
             menageDate.setDate(menageDate.getDate() + 1);
             
             const arriveeLundi = toutesReservations.find(r => 
-                r.gite === reservation.gite && 
+                r.gite_id === reservation.gite_id && 
                 r.id !== reservation.id &&
                 parseLocalDate(r.dateDebut || r.date_debut).toDateString() === menageDate.toDateString()
             );
@@ -57,7 +57,7 @@ function calculerDateMenage(reservation, toutesReservations) {
             dimancheDate.setDate(dimancheDate.getDate() + 1);
             
             const resaSamediOuDimanche = toutesReservations.find(r =>
-                r.gite === reservation.gite &&
+                r.gite_id === reservation.gite_id &&
                 r.id !== reservation.id &&
                 (parseLocalDate(r.dateDebut || r.date_debut).toDateString() === samediDate.toDateString() ||
                  parseLocalDate(r.dateDebut || r.date_debut).toDateString() === dimancheDate.toDateString())
@@ -71,7 +71,7 @@ function calculerDateMenage(reservation, toutesReservations) {
                 menageDate.setDate(menageDate.getDate() + 2);
                 
                 const arriveeLundi = toutesReservations.find(r => 
-                    r.gite === reservation.gite && 
+                    r.gite_id === reservation.gite_id && 
                     r.id !== reservation.id &&
                     parseLocalDate(r.dateDebut || r.date_debut).toDateString() === menageDate.toDateString()
                 );
@@ -96,7 +96,7 @@ function calculerDateMenage(reservation, toutesReservations) {
             vendrediDate.setDate(vendrediDate.getDate() + joursAajouter);
             
             const resaAvantVendredi = toutesReservations.find(r =>
-                r.gite === reservation.gite &&
+                r.gite_id === reservation.gite_id &&
                 r.id !== reservation.id &&
                 (parseLocalDate(r.dateDebut || r.date_debut) < vendrediDate)
             );
@@ -109,7 +109,7 @@ function calculerDateMenage(reservation, toutesReservations) {
                 menageDate.setDate(menageDate.getDate() + joursAajouter);
                 
                 const arriveeVendredi = toutesReservations.find(r =>
-                    r.gite === reservation.gite &&
+                    r.gite_id === reservation.gite_id &&
                     r.id !== reservation.id &&
                     parseLocalDate(r.dateDebut || r.date_debut).toDateString() === menageDate.toDateString()
                 );
@@ -253,7 +253,7 @@ async function genererPlanningMenage() {
         
         // Vérifier enchainement
         const arriveeMemejour = relevant.find(resa => 
-            resa.gite === r.gite && 
+            resa.gite_id === r.gite_id && 
             resa.id !== r.id &&
             parseLocalDate(resa.dateDebut).toDateString() === departDate.toDateString()
         );
@@ -261,7 +261,7 @@ async function genererPlanningMenage() {
         planning.push({
             date: menageDate,
             heure: heure,
-            gite: r.gite,
+            gite_id: r.gite_id,
             clientName: r.nom,
             departDate: departDate,
             enchainement: arriveeMemejour ? true : false
@@ -275,7 +275,7 @@ async function genererPlanningMenage() {
     
     // Sauvegarder les dates calculées dans cleaning_schedule (uniquement si inexistant ou pending)
     for (const p of planning) {
-        const reservation = relevant.find(r => r.nom === p.clientName && r.gite === p.gite);
+        const reservation = relevant.find(r => r.nom === p.clientName && r.gite_id === p.gite_id);
         if (!reservation) continue;
         
         try {
@@ -454,8 +454,7 @@ async function afficherPlanningParSemaine() {
         if (!weeks[weekKey]) {
             weeks[weekKey] = {
                 monday: monday,
-                trevoux: [],
-                couzon: []
+                gitesMenages: {} // Structure dynamique par gite_id
             };
         }
         
@@ -477,7 +476,7 @@ async function afficherPlanningParSemaine() {
                 
                 await window.supabaseClient.from('cleaning_schedule').upsert({
                     reservation_id: r.id,
-                    gite: r.gite,
+                    gite_id: r.gite_id,
                     scheduled_date: scheduledDateStr,
                     time_of_day: calculatedTimeOfDay,
                     status: 'pending',
@@ -503,19 +502,19 @@ async function afficherPlanningParSemaine() {
         
         // Chercher la réservation suivante pour ce gîte
         const nextReservation = reservations
-            .filter(next => next.gite === r.gite && parseLocalDate(next.dateDebut) > dateFin)
+            .filter(next => next.gite_id === r.gite_id && parseLocalDate(next.dateDebut) > dateFin)
             .sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut))[0];
         
         if (nextReservation) {
             menageInfo.reservationStartAfter = parseLocalDate(nextReservation.dateDebut);
         }
         
-        // Ajouter dans la bonne colonne
-        if (r.gite.toLowerCase().includes('trevoux') || r.gite.toLowerCase().includes('trevoux')) {
-            weeks[weekKey].trevoux.push(menageInfo);
-        } else {
-            weeks[weekKey].couzon.push(menageInfo);
+        // Ajouter dans la bonne colonne (dynamique par gite_id)
+        const giteId = r.gite_id;
+        if (!weeks[weekKey].gitesMenages[giteId]) {
+            weeks[weekKey].gitesMenages[giteId] = [];
         }
+        weeks[weekKey].gitesMenages[giteId].push(menageInfo);
     }
     
     // Trier les semaines
@@ -533,13 +532,26 @@ async function afficherPlanningParSemaine() {
         const sunday = new Date(monday);
         sunday.setDate(monday.getDate() + 6);
         
-        // console.log(`\n📅 Semaine ${index + 1}:`, weekKey);
-        // console.log('  🏡 Trevoux:', week.trevoux.length, 'ménages');
-        // console.log('  ⛰️ Couzon:', week.couzon.length, 'ménages');
-        
         // Calculer le vrai numéro de semaine de l'année
         const weekNumber = `S${getWeekNumber(monday)}`;
         const weekDisplay = `${monday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} - ${sunday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}`;
+        
+        // Générer colonnes dynamiquement pour chaque gîte
+        let columnsHTML = '';
+        gites.forEach(gite => {
+            const menages = week.gitesMenages[gite.id] || [];
+            columnsHTML += `
+                <div class="cleaning-column">
+                    <div class="cleaning-column-header" style="background: ${gite.color}; color: white;">
+                        ${gite.icon} ${gite.name}
+                    </div>
+                    ${menages.length > 0 ? 
+                        menages.map(m => generateCleaningItemHTML(m)).join('') :
+                        '<div class="cleaning-item empty">Aucun ménage prévu</div>'
+                    }
+                </div>
+            `;
+        });
         
         html += `
             <div class="cleaning-week-table">
@@ -547,21 +559,8 @@ async function afficherPlanningParSemaine() {
                     <div class="week-number-big">${weekNumber}</div>
                     <div class="week-dates-small">${weekDisplay}</div>
                 </div>
-                <div class="cleaning-week-body">
-                    <div class="cleaning-column">
-                        <div class="cleaning-column-header">🏡 Trevoux</div>
-                        ${week.trevoux.length > 0 ? 
-                            week.trevoux.map(m => generateCleaningItemHTML(m)).join('') :
-                            '<div class="cleaning-item empty">Aucun ménage prévu</div>'
-                        }
-                    </div>
-                    <div class="cleaning-column">
-                        <div class="cleaning-column-header couzon">⛰️ Couzon</div>
-                        ${week.couzon.length > 0 ? 
-                            week.couzon.map(m => generateCleaningItemHTML(m)).join('') :
-                            '<div class="cleaning-item empty">Aucun ménage prévu</div>'
-                        }
-                    </div>
+                <div class="cleaning-week-body" style="grid-template-columns: repeat(${gites.length}, 1fr);">
+                    ${columnsHTML}
                 </div>
             </div>
         `;
