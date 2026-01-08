@@ -722,10 +722,14 @@
                 }
 
                 // Créer slug depuis nom
-                const slug = orgName.toLowerCase()
+                let baseSlug = orgName.toLowerCase()
                     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/(^-|-$)/g, '');
+
+                // Ajouter un identifiant unique court pour éviter les conflits
+                const uniqueId = Math.random().toString(36).substring(2, 8);
+                const slug = `${baseSlug}-${uniqueId}`;
 
                 const { data: org, error: orgError } = await window.supabaseClient
                     .from('organizations')
@@ -738,7 +742,10 @@
                     .select()
                     .single();
 
-                if (orgError) throw orgError;
+                if (orgError) {
+                    console.error('Erreur création organization:', orgError);
+                    throw new Error(`Impossible de créer l'organization: ${orgError.message}`);
+                }
 
                 // 2. Créer les gîtes
                 const gitesCards = document.querySelectorAll('.gite-card');
@@ -753,10 +760,14 @@
                     const capacity = parseInt(card.querySelector('.gite-capacity').value) || 4;
                     const address = card.querySelector('.gite-address').value;
 
-                    const giteSlug = name.toLowerCase()
+                    // Générer slug unique pour chaque gîte
+                    let baseGiteSlug = name.toLowerCase()
                         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                         .replace(/[^a-z0-9]+/g, '-')
                         .replace(/(^-|-$)/g, '');
+                    
+                    const giteUniqueId = Math.random().toString(36).substring(2, 8);
+                    const giteSlug = `${baseGiteSlug}-${giteUniqueId}`;
 
                     gitesToInsert.push({
                         organization_id: org.id,
@@ -778,7 +789,10 @@
                     .from('gites')
                     .insert(gitesToInsert);
 
-                if (gitesError) throw gitesError;
+                if (gitesError) {
+                    console.error('Erreur création gîtes:', gitesError);
+                    throw new Error(`Impossible de créer les gîtes: ${gitesError.message}`);
+                }
 
                 // 3. Créer le member (owner)
                 const { error: memberError } = await window.supabaseClient
@@ -789,7 +803,10 @@
                         role: 'owner'
                     }]);
 
-                if (memberError) throw memberError;
+                if (memberError) {
+                    console.error('Erreur création member:', memberError);
+                    throw new Error(`Impossible d'ajouter le membre: ${memberError.message}`);
+                }
 
                 // Succès ! Connexion automatique
                 showStep(4);
