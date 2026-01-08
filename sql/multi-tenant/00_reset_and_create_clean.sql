@@ -664,3 +664,17 @@ BEGIN
     RAISE NOTICE '   → Créer votre organization + gîtes';
     RAISE NOTICE '==================================================';
 END $$;
+
+-- ================================================================
+-- FORCER LE RELOAD DU SCHÉMA POSTGREST
+-- ================================================================
+
+NOTIFY pgrst, 'reload schema';
+
+DO $$
+BEGIN
+    RAISE NOTICE '';
+    RAISE NOTICE '⏳ Reload schéma PostgREST en cours...';
+    RAISE NOTICE '⏳ Attendre 10 secondes avant d''utiliser l''onboarding';
+    RAISE NOTICE '';
+END $$;

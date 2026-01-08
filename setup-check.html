@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification Setup</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .status.checking {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn:hover { background: #5568d3; }
+        .btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        .info {
+            background: #e0e7ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #3730a3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Vérification Setup Base de Données</h1>
+        
+        <div id="status" class="status checking">
+            ⏳ Vérification en cours...
+        </div>
+
+        <div class="info">
+            <strong>Instructions :</strong><br>
+            1. Exécute le script SQL dans Supabase<br>
+            2. Attends le message de succès<br>
+            3. Clique sur "Vérifier" ci-dessous<br>
+            4. Si ✅ vert, continue vers l'onboarding
+        </div>
+
+        <button id="checkBtn" class="btn" onclick="checkSetup()">
+            🔍 Vérifier le setup
+        </button>
+
+        <button id="goBtn" class="btn" onclick="location.href='onboarding.html'" style="display:none; background:#48bb78;">
+            ✅ Continuer vers l'onboarding
+        </button>
+    </div>
+
+    <script src="js/shared-config.js"></script>
+    <script>
+        async function checkSetup() {
+            const statusEl = document.getElementById('status');
+            const checkBtn = document.getElementById('checkBtn');
+            const goBtn = document.getElementById('goBtn');
+
+            statusEl.className = 'status checking';
+            statusEl.textContent = '⏳ Vérification de la fonction insert_onboarding_data...';
+            checkBtn.disabled = true;
+
+            try {
+                // Test d'appel à la fonction avec des données bidon
+                const { data, error } = await window.supabaseClient.rpc('insert_onboarding_data', {
+                    p_user_id: '00000000-0000-0000-0000-000000000000',
+                    p_org_name: 'test',
+                    p_org_slug: 'test-check',
+                    p_org_email: 'test@test.com',
+                    p_org_phone: '',
+                    p_gites: []
+                });
+
+                // Si on obtient une réponse (même une erreur SQL), c'est que la fonction existe
+                if (error && error.code === 'PGRST204') {
+                    // 404 - fonction n'existe pas
+                    statusEl.className = 'status error';
+                    statusEl.innerHTML = `
+                        ❌ <strong>Fonction introuvable</strong><br><br>
+                        Solutions:<br>
+                        1. Réexécute le script SQL complet<br>
+                        2. Attends 30 secondes<br>
+                        3. Restart le projet Supabase (Settings → Restart)<br>
+                        4. Revérifier
+                    `;
+                    checkBtn.disabled = false;
+                } else {
+                    // Fonction existe (peu importe le résultat)
+                    statusEl.className = 'status success';
+                    statusEl.innerHTML = `
+                        ✅ <strong>Setup OK !</strong><br><br>
+                        La fonction insert_onboarding_data existe et est accessible.<br>
+                        Tu peux continuer vers l'onboarding.
+                    `;
+                    goBtn.style.display = 'block';
+                    checkBtn.style.display = 'none';
+                }
+
+            } catch (err) {
+                statusEl.className = 'status error';
+                statusEl.innerHTML = `
+                    ❌ <strong>Erreur:</strong> ${err.message}<br><br>
+                    Vérifie que le script SQL a bien été exécuté.
+                `;
+                checkBtn.disabled = false;
+            }
+        }
+
+        // Vérification automatique au chargement
+        window.addEventListener('load', () => {
+            setTimeout(checkSetup, 1000);
+        });
+    </script>
+</body>
+</html>
