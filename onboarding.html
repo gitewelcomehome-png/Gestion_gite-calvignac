@@ -725,46 +725,73 @@
                     .replace(/(^-|-$)/g, '');
                 const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`;
 
-                // Préparer gîtes
-                const gitesCards = document.querySelectorAll('.gite-card');
-                const gitesData = [];
+                // 1. Créer organization (colonnes minimales d'abord)
+                let orgResult = await window.supabaseClient
+                    .from('organizations')
+                    .insert([{ name: orgName, slug: slug }])
+                    .select()
+                    .single();
 
-                gitesCards.forEach(card => {
+                if (orgResult.error) throw new Error(`Organization: ${orgResult.error.message}`);
+                
+                // Update avec les colonnes optionnelles
+                await window.supabaseClient
+                    .from('organizations')
+                    .update({ email: orgEmail, phone: orgPhone })
+                    .eq('id', orgResult.data.id);
+
+                const orgId = orgResult.data.id;
+
+                // 2. Créer gîtes un par un
+                const gitesCards = document.querySelectorAll('.gite-card');
+                for (const card of gitesCards) {
                     const name = card.querySelector('.gite-name').value;
-                    if (!name) return;
+                    if (!name) continue;
 
                     let baseGiteSlug = name.toLowerCase()
                         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                         .replace(/[^a-z0-9]+/g, '-')
                         .replace(/(^-|-$)/g, '');
                     
-                    gitesData.push({
+                    const giteData = {
+                        organization_id: orgId,
                         name: name,
-                        slug: `${baseGiteSlug}-${Math.random().toString(36).substring(2, 8)}`,
-                        icon: card.querySelector('.gite-icon').value,
-                        color: card.querySelector('.gite-color').value,
-                        capacity: parseInt(card.querySelector('.gite-capacity').value) || 4,
-                        address: card.querySelector('.gite-address').value
-                    });
-                });
+                        slug: `${baseGiteSlug}-${Math.random().toString(36).substring(2, 8)}`
+                    };
 
-                if (gitesData.length === 0) {
-                    alert('Veuillez ajouter au moins un gîte');
-                    return;
+                    let giteResult = await window.supabaseClient
+                        .from('gites')
+                        .insert([giteData])
+                        .select()
+                        .single();
+
+                    if (giteResult.error) {
+                        console.warn('Erreur gîte:', giteResult.error);
+                        continue;
+                    }
+
+                    // Update détails du gîte
+                    await window.supabaseClient
+                        .from('gites')
+                        .update({
+                            icon: card.querySelector('.gite-icon').value,
+                            color: card.querySelector('.gite-color').value,
+                            capacity: parseInt(card.querySelector('.gite-capacity').value) || 4,
+                            address: card.querySelector('.gite-address').value
+                        })
+                        .eq('id', giteResult.data.id);
                 }
 
-                // Appel RPC
-                const { data, error } = await window.supabaseClient.rpc('insert_onboarding_data', {
-                    p_user_id: userSession.user.id,
-                    p_org_name: orgName,
-                    p_org_slug: slug,
-                    p_org_email: orgEmail,
-                    p_org_phone: orgPhone,
-                    p_gites: gitesData
-                });
+                // 3. Créer member owner
+                const memberResult = await window.supabaseClient
+                    .from('organization_members')
+                    .insert([{
+                        organization_id: orgId,
+                        user_id: userSession.user.id,
+                        role: 'owner'
+                    }]);
 
-                if (error) throw error;
-                if (!data.success) throw new Error(data.error);
+                if (memberResult.error) throw new Error(`Member: ${memberResult.error.message}`);
 
                 console.log('✅ Onboarding terminé');
                 showStep(4);
