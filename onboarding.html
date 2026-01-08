@@ -749,24 +749,34 @@
                 }
 
                 // 1. Créer organization
+                console.log('🚀 Étape 1: Création organization...');
                 const { data: org, error: orgError } = await window.supabaseClient
                     .from('organizations')
-                    .insert({ name: orgName, slug, email: orgEmail, phone: orgPhone })
+                    .insert({ name: orgName, slug, email: orgEmail || null, phone: orgPhone || null })
                     .select()
                     .single();
 
-                if (orgError) throw new Error(`Org: ${orgError.message}`);
+                if (orgError) {
+                    console.error('❌ Erreur org:', orgError);
+                    throw new Error(`Organization: ${orgError.message}`);
+                }
                 console.log('✅ Organization créée:', org.id);
 
                 // 2. Créer gîtes
+                console.log('🚀 Étape 2: Création gîtes...');
+                let gitesCount = 0;
                 for (const gite of gitesData) {
                     const { error: giteError } = await window.supabaseClient
                         .from('gites')
                         .insert({ ...gite, organization_id: org.id });
                     
-                    if (giteError) console.warn('⚠️ Gîte ignoré:', giteError.message);
+                    if (giteError) {
+                        console.warn('⚠️ Gîte ignoré:', giteError.message);
+                    } else {
+                        gitesCount++;
+                    }
                 }
-                console.log('✅ Gîtes créés');
+                console.log(`✅ ${gitesCount} gîte(s) créé(s)`);
 
                 // 3. Créer membership owner
                 const { error: memberError } = await window.supabaseClient
