@@ -81,7 +81,7 @@ END $$;
 -- TABLE: organizations (Tenant principal)
 -- ----------------------------------------------------------------
 
-CREATE TABLE organizations (
+CREATE TABLE IF NOT EXISTS organizations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
@@ -109,7 +109,7 @@ COMMENT ON COLUMN organizations.subscription_status IS 'État abonnement: trial,
 -- TABLE: gites (Propriétés gérées par organization)
 -- ----------------------------------------------------------------
 
-CREATE TABLE gites (
+CREATE TABLE IF NOT EXISTS gites (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
@@ -148,7 +148,7 @@ COMMENT ON COLUMN gites.settings IS 'Config spécifique: besoins draps, horaires
 -- TABLE: organization_members (Utilisateurs + rôles)
 -- ----------------------------------------------------------------
 
-CREATE TABLE organization_members (
+CREATE TABLE IF NOT EXISTS organization_members (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -174,7 +174,7 @@ COMMENT ON COLUMN organization_members.permissions IS 'Permissions granulaires p
 -- TABLE: reservations (Réservations de gîtes)
 -- ----------------------------------------------------------------
 
-CREATE TABLE reservations (
+CREATE TABLE IF NOT EXISTS reservations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     gite_id UUID NOT NULL REFERENCES gites(id) ON DELETE CASCADE,
@@ -225,7 +225,7 @@ COMMENT ON COLUMN reservations.synced_from IS 'Plateforme source si ical/api';
 -- TABLE: cleaning_schedule (Planning ménage)
 -- ----------------------------------------------------------------
 
-CREATE TABLE cleaning_schedule (
+CREATE TABLE IF NOT EXISTS cleaning_schedule (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     gite_id UUID NOT NULL REFERENCES gites(id) ON DELETE CASCADE,
@@ -260,7 +260,7 @@ COMMENT ON COLUMN cleaning_schedule.week_number IS 'Numéro semaine pour afficha
 -- TABLE: cleaning_reports (Retours ménage)
 -- ----------------------------------------------------------------
 
-CREATE TABLE cleaning_reports (
+CREATE TABLE IF NOT EXISTS cleaning_reports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     gite_id UUID NOT NULL REFERENCES gites(id) ON DELETE CASCADE,
@@ -300,7 +300,7 @@ COMMENT ON COLUMN cleaning_reports.issues_found IS 'Problèmes détectés';
 -- TABLE: linen_stocks (Stocks draps/linge)
 -- ----------------------------------------------------------------
 
-CREATE TABLE linen_stocks (
+CREATE TABLE IF NOT EXISTS linen_stocks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     gite_id UUID NOT NULL REFERENCES gites(id) ON DELETE CASCADE,
@@ -336,7 +336,7 @@ COMMENT ON COLUMN linen_stocks.item_type IS 'Type article normalisé (anglais, s
 -- TABLE: expenses (Charges/dépenses)
 -- ----------------------------------------------------------------
 
-CREATE TABLE expenses (
+CREATE TABLE IF NOT EXISTS expenses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     gite_id UUID REFERENCES gites(id) ON DELETE SET NULL,
@@ -377,7 +377,7 @@ COMMENT ON COLUMN expenses.gite_id IS 'NULL = charge globale organization';
 -- TABLE: practical_info (Infos pratiques pour guests)
 -- ----------------------------------------------------------------
 
-CREATE TABLE practical_info (
+CREATE TABLE IF NOT EXISTS practical_info (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     gite_id UUID REFERENCES gites(id) ON DELETE CASCADE,
