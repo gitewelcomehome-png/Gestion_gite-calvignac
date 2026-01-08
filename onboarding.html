@@ -725,24 +725,26 @@
                     .replace(/(^-|-$)/g, '');
                 const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`;
 
-                // 1. Créer organization (colonnes minimales d'abord)
+                // 1. Créer organization (toutes colonnes en une fois)
                 let orgResult = await window.supabaseClient
                     .from('organizations')
-                    .insert([{ name: orgName, slug: slug }])
+                    .insert([{ 
+                        name: orgName, 
+                        slug: slug,
+                        email: orgEmail || null,
+                        phone: orgPhone || null
+                    }])
                     .select()
                     .single();
 
-                if (orgResult.error) throw new Error(`Organization: ${orgResult.error.message}`);
-                
-                // Update avec les colonnes optionnelles
-                await window.supabaseClient
-                    .from('organizations')
-                    .update({ email: orgEmail, phone: orgPhone })
-                    .eq('id', orgResult.data.id);
+                if (orgResult.error) {
+                    console.error('Erreur détaillée:', orgResult.error);
+                    throw new Error(`Impossible de créer l'organization: ${orgResult.error.message || orgResult.error.details || 'Erreur inconnue'}`);
+                }
 
                 const orgId = orgResult.data.id;
 
-                // 2. Créer gîtes un par un
+                // 2. Créer gîtes un par un (toutes colonnes)
                 const gitesCards = document.querySelectorAll('.gite-card');
                 for (const card of gitesCards) {
                     const name = card.querySelector('.gite-name').value;
@@ -756,7 +758,11 @@
                     const giteData = {
                         organization_id: orgId,
                         name: name,
-                        slug: `${baseGiteSlug}-${Math.random().toString(36).substring(2, 8)}`
+                        slug: `${baseGiteSlug}-${Math.random().toString(36).substring(2, 8)}`,
+                        icon: card.querySelector('.gite-icon').value || 'home',
+                        color: card.querySelector('.gite-color').value || '#667eea',
+                        capacity: parseInt(card.querySelector('.gite-capacity').value) || 4,
+                        address: card.querySelector('.gite-address').value || null
                     };
 
                     let giteResult = await window.supabaseClient
@@ -769,17 +775,6 @@
                         console.warn('Erreur gîte:', giteResult.error);
                         continue;
                     }
-
-                    // Update détails du gîte
-                    await window.supabaseClient
-                        .from('gites')
-                        .update({
-                            icon: card.querySelector('.gite-icon').value,
-                            color: card.querySelector('.gite-color').value,
-                            capacity: parseInt(card.querySelector('.gite-capacity').value) || 4,
-                            address: card.querySelector('.gite-address').value
-                        })
-                        .eq('id', giteResult.data.id);
                 }
 
                 // 3. Créer member owner
