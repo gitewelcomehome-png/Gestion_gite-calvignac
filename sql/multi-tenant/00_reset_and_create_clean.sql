@@ -520,6 +520,10 @@ CREATE POLICY "Users see their organizations"
 ON organizations FOR SELECT
 USING (id IN (SELECT * FROM get_current_user_organization_ids()));
 
+CREATE POLICY "New users can create organization"
+ON organizations FOR INSERT
+WITH CHECK (true);  -- Tout user authentifié peut créer une org
+
 CREATE POLICY "Owners update their organization"
 ON organizations FOR UPDATE
 USING (
@@ -534,6 +538,10 @@ CREATE POLICY "Members see organization gites"
 ON gites FOR SELECT
 USING (organization_id IN (SELECT * FROM get_current_user_organization_ids()));
 
+CREATE POLICY "Users can create gites during onboarding"
+ON gites FOR INSERT
+WITH CHECK (true);  -- Tout user authentifié peut créer des gîtes
+
 CREATE POLICY "Admins manage gites"
 ON gites FOR ALL
 USING (
@@ -544,6 +552,10 @@ USING (
 );
 
 -- ORGANIZATION_MEMBERS --
+CREATE POLICY "Users can join as owner during onboarding"
+ON organization_members FOR INSERT
+WITH CHECK (user_id = auth.uid() AND role = 'owner');  -- Seulement son propre user comme owner
+
 CREATE POLICY "Members see organization members"
 ON organization_members FOR SELECT
 USING (organization_id IN (SELECT * FROM get_current_user_organization_ids()));

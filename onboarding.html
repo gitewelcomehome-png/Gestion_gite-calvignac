@@ -748,29 +748,33 @@
                     });
                 }
 
-                console.log('📤 Envoi des données via RPC...');
+                // 1. Créer organization
+                const { data: org, error: orgError } = await window.supabaseClient
+                    .from('organizations')
+                    .insert({ name: orgName, slug, email: orgEmail, phone: orgPhone })
+                    .select()
+                    .single();
 
-                // APPEL RPC FUNCTION (BYPASS RLS COMPLÈTEMENT)
-                const { data, error } = await window.supabaseClient.rpc('insert_onboarding_data', {
-                    p_user_id: userSession.user.id,
-                    p_org_name: orgName,
-                    p_org_slug: slug,
-                    p_org_email: orgEmail || null,
-                    p_org_phone: orgPhone || null,
-                    p_gites: gitesData
-                });
+                if (orgError) throw new Error(`Org: ${orgError.message}`);
+                console.log('✅ Organization créée:', org.id);
 
-                if (error) {
-                    console.error('❌ Erreur RPC:', error);
-                    throw new Error(`Erreur serveur: ${error.message}`);
+                // 2. Créer gîtes
+                for (const gite of gitesData) {
+                    const { error: giteError } = await window.supabaseClient
+                        .from('gites')
+                        .insert({ ...gite, organization_id: org.id });
+                    
+                    if (giteError) console.warn('⚠️ Gîte ignoré:', giteError.message);
                 }
+                console.log('✅ Gîtes créés');
 
-                if (!data || !data.success) {
-                    console.error('❌ Fonction a échoué:', data);
-                    throw new Error(data?.error || 'Erreur inconnue');
-                }
+                // 3. Créer membership owner
+                const { error: memberError } = await window.supabaseClient
+                    .from('organization_members')
+                    .insert({ organization_id: org.id, user_id: userSession.user.id, role: 'owner' });
 
-                console.log('✅ Onboarding terminé - Organization ID:', data.organization_id);
+                if (memberError) throw new Error(`Member: ${memberError.message}`);
+                console.log('✅ Membership créé');
                 showStep(4);
                 setTimeout(() => window.location.href = 'index.html', 2000);
 
