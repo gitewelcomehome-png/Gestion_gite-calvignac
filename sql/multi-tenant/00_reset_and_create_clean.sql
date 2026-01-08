@@ -98,8 +98,8 @@ CREATE TABLE IF NOT EXISTS organizations (
     CONSTRAINT organizations_slug_check CHECK (slug ~ '^[a-z0-9-]+$')
 );
 
-CREATE INDEX idx_organizations_slug ON organizations(slug);
-CREATE INDEX idx_organizations_status ON organizations(subscription_status);
+CREATE INDEX IF NOT EXISTS idx_organizations_slug ON organizations(slug);
+CREATE INDEX IF NOT EXISTS idx_organizations_status ON organizations(subscription_status);
 
 COMMENT ON TABLE organizations IS 'Tenants - Chaque client a son organization';
 COMMENT ON COLUMN organizations.slug IS 'Identifiant URL-friendly unique';
@@ -136,9 +136,9 @@ CREATE TABLE IF NOT EXISTS gites (
     CONSTRAINT gites_color_check CHECK (color ~ '^#[0-9a-f]{6}$')
 );
 
-CREATE INDEX idx_gites_organization ON gites(organization_id);
-CREATE INDEX idx_gites_slug ON gites(organization_id, slug);
-CREATE INDEX idx_gites_active ON gites(organization_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_gites_organization ON gites(organization_id);
+CREATE INDEX IF NOT EXISTS idx_gites_slug ON gites(organization_id, slug);
+CREATE INDEX IF NOT EXISTS idx_gites_active ON gites(organization_id, is_active);
 
 COMMENT ON TABLE gites IS 'Propriétés/gîtes gérés par chaque organization';
 COMMENT ON COLUMN gites.ical_sources IS 'Config iCal par plateforme: {"airbnb": "https://...", "booking": "..."}';
@@ -162,9 +162,9 @@ CREATE TABLE IF NOT EXISTS organization_members (
     UNIQUE(organization_id, user_id)
 );
 
-CREATE INDEX idx_org_members_org ON organization_members(organization_id);
-CREATE INDEX idx_org_members_user ON organization_members(user_id);
-CREATE INDEX idx_org_members_role ON organization_members(organization_id, role);
+CREATE INDEX IF NOT EXISTS idx_org_members_org ON organization_members(organization_id);
+CREATE INDEX IF NOT EXISTS idx_org_members_user ON organization_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_org_members_role ON organization_members(organization_id, role);
 
 COMMENT ON TABLE organization_members IS 'Relie users aux organizations avec rôles et permissions';
 COMMENT ON COLUMN organization_members.role IS 'owner > admin > manager > housekeeper > viewer';
@@ -211,11 +211,11 @@ CREATE TABLE IF NOT EXISTS reservations (
     CONSTRAINT reservations_client_check CHECK (length(client_name) >= 2)
 );
 
-CREATE INDEX idx_reservations_org ON reservations(organization_id);
-CREATE INDEX idx_reservations_gite ON reservations(gite_id);
-CREATE INDEX idx_reservations_dates ON reservations(check_in, check_out);
-CREATE INDEX idx_reservations_status ON reservations(organization_id, status);
-CREATE INDEX idx_reservations_platform ON reservations(platform);
+CREATE INDEX IF NOT EXISTS idx_reservations_org ON reservations(organization_id);
+CREATE INDEX IF NOT EXISTS idx_reservations_gite ON reservations(gite_id);
+CREATE INDEX IF NOT EXISTS idx_reservations_dates ON reservations(check_in, check_out);
+CREATE INDEX IF NOT EXISTS idx_reservations_status ON reservations(organization_id, status);
+CREATE INDEX IF NOT EXISTS idx_reservations_platform ON reservations(platform);
 
 COMMENT ON TABLE reservations IS 'Réservations de gîtes (toutes sources)';
 COMMENT ON COLUMN reservations.source IS 'manual: saisie manuelle, ical: sync calendrier, api: API externe';
@@ -247,11 +247,11 @@ CREATE TABLE IF NOT EXISTS cleaning_schedule (
     completed_at TIMESTAMPTZ
 );
 
-CREATE INDEX idx_cleaning_org ON cleaning_schedule(organization_id);
-CREATE INDEX idx_cleaning_gite ON cleaning_schedule(gite_id);
-CREATE INDEX idx_cleaning_date ON cleaning_schedule(scheduled_date);
-CREATE INDEX idx_cleaning_status ON cleaning_schedule(organization_id, status);
-CREATE INDEX idx_cleaning_assigned ON cleaning_schedule(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_cleaning_org ON cleaning_schedule(organization_id);
+CREATE INDEX IF NOT EXISTS idx_cleaning_gite ON cleaning_schedule(gite_id);
+CREATE INDEX IF NOT EXISTS idx_cleaning_date ON cleaning_schedule(scheduled_date);
+CREATE INDEX IF NOT EXISTS idx_cleaning_status ON cleaning_schedule(organization_id, status);
+CREATE INDEX IF NOT EXISTS idx_cleaning_assigned ON cleaning_schedule(assigned_to);
 
 COMMENT ON TABLE cleaning_schedule IS 'Planning des ménages (1 par réservation)';
 COMMENT ON COLUMN cleaning_schedule.week_number IS 'Numéro semaine pour affichage (S1, S2...)';
@@ -287,10 +287,10 @@ CREATE TABLE IF NOT EXISTS cleaning_reports (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_cleaning_reports_org ON cleaning_reports(organization_id);
-CREATE INDEX idx_cleaning_reports_gite ON cleaning_reports(gite_id);
-CREATE INDEX idx_cleaning_reports_date ON cleaning_reports(cleaning_date);
-CREATE INDEX idx_cleaning_reports_reporter ON cleaning_reports(reported_by);
+CREATE INDEX IF NOT EXISTS idx_cleaning_reports_org ON cleaning_reports(organization_id);
+CREATE INDEX IF NOT EXISTS idx_cleaning_reports_gite ON cleaning_reports(gite_id);
+CREATE INDEX IF NOT EXISTS idx_cleaning_reports_date ON cleaning_reports(cleaning_date);
+CREATE INDEX IF NOT EXISTS idx_cleaning_reports_reporter ON cleaning_reports(reported_by);
 
 COMMENT ON TABLE cleaning_reports IS 'Retours après chaque ménage';
 COMMENT ON COLUMN cleaning_reports.tasks_completed IS 'Liste tâches effectuées';
@@ -325,9 +325,9 @@ CREATE TABLE IF NOT EXISTS linen_stocks (
     UNIQUE(organization_id, gite_id, item_type)
 );
 
-CREATE INDEX idx_linen_stocks_org ON linen_stocks(organization_id);
-CREATE INDEX idx_linen_stocks_gite ON linen_stocks(gite_id);
-CREATE INDEX idx_linen_stocks_low ON linen_stocks(gite_id) WHERE quantity <= min_quantity;
+CREATE INDEX IF NOT EXISTS idx_linen_stocks_org ON linen_stocks(organization_id);
+CREATE INDEX IF NOT EXISTS idx_linen_stocks_gite ON linen_stocks(gite_id);
+CREATE INDEX IF NOT EXISTS idx_linen_stocks_low ON linen_stocks(gite_id) WHERE quantity <= min_quantity;
 
 COMMENT ON TABLE linen_stocks IS 'Stocks de draps et linge par gîte';
 COMMENT ON COLUMN linen_stocks.item_type IS 'Type article normalisé (anglais, sans accent)';
@@ -365,10 +365,10 @@ CREATE TABLE IF NOT EXISTS expenses (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_expenses_org ON expenses(organization_id);
-CREATE INDEX idx_expenses_gite ON expenses(gite_id);
-CREATE INDEX idx_expenses_date ON expenses(expense_date);
-CREATE INDEX idx_expenses_category ON expenses(organization_id, category);
+CREATE INDEX IF NOT EXISTS idx_expenses_org ON expenses(organization_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_gite ON expenses(gite_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(expense_date);
+CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(organization_id, category);
 
 COMMENT ON TABLE expenses IS 'Charges et dépenses (globales ou par gîte)';
 COMMENT ON COLUMN expenses.gite_id IS 'NULL = charge globale organization';
@@ -399,10 +399,10 @@ CREATE TABLE IF NOT EXISTS practical_info (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_practical_info_org ON practical_info(organization_id);
-CREATE INDEX idx_practical_info_gite ON practical_info(gite_id);
-CREATE INDEX idx_practical_info_type ON practical_info(info_type);
-CREATE INDEX idx_practical_info_display ON practical_info(gite_id, display_order) WHERE is_active = true;
+CREATE INDEX IF NOT EXISTS idx_practical_info_org ON practical_info(organization_id);
+CREATE INDEX IF NOT EXISTS idx_practical_info_gite ON practical_info(gite_id);
+CREATE INDEX IF NOT EXISTS idx_practical_info_type ON practical_info(info_type);
+CREATE INDEX IF NOT EXISTS idx_practical_info_display ON practical_info(gite_id, display_order) WHERE is_active = true;
 
 COMMENT ON TABLE practical_info IS 'Informations pratiques pour guests (guides)';
 COMMENT ON COLUMN practical_info.gite_id IS 'NULL = info globale pour toute l''organization';
