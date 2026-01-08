@@ -17,7 +17,7 @@ DO $$
 DECLARE
     r RECORD;
 BEGIN
-    RAISE NOTICE '🗑️  SUPPRESSION DES ANCIENNES TABLES...';
+    RAISE NOTICE '🗑️  SUPPRESSION COMPLÈTE DE TOUT...';
     
     -- Désactiver RLS sur toutes les tables
     FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
@@ -33,6 +33,12 @@ BEGIN
     
     RAISE NOTICE '✅ RLS et policies supprimés';
 END $$;
+
+-- DROP SCHEMA public CASCADE pour TOUT supprimer (tables, fonctions, contraintes)
+DROP SCHEMA IF EXISTS public CASCADE;
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
 
 -- Supprimer les tables dans l'ordre des dépendances
 DROP TABLE IF EXISTS rls_access_logs CASCADE;
