@@ -711,27 +711,21 @@
 
         async function finishSetup() {
             try {
-                // 1. Préparer les données
-                const orgName = document.getElementById('org-name').value;
-                const orgEmail = document.getElementById('org-email').value;
-                const orgPhone = document.getElementById('org-phone').value;
-
-                // Utiliser la session stockée lors du signup
                 if (!userSession) {
                     throw new Error('Session expirée. Veuillez recommencer.');
                 }
 
-                // Créer slug depuis nom
+                const orgName = document.getElementById('org-name').value;
+                const orgEmail = document.getElementById('org-email').value;
+                const orgPhone = document.getElementById('org-phone').value;
+
                 let baseSlug = orgName.toLowerCase()
                     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/(^-|-$)/g, '');
+                const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`;
 
-                // Ajouter un identifiant unique court pour éviter les conflits
-                const uniqueId = Math.random().toString(36).substring(2, 8);
-                const slug = `${baseSlug}-${uniqueId}`;
-
-                // 2. Préparer les gîtes
+                // Préparer gîtes
                 const gitesCards = document.querySelectorAll('.gite-card');
                 const gitesData = [];
 
@@ -739,27 +733,18 @@
                     const name = card.querySelector('.gite-name').value;
                     if (!name) return;
 
-                    const icon = card.querySelector('.gite-icon').value;
-                    const color = card.querySelector('.gite-color').value;
-                    const capacity = parseInt(card.querySelector('.gite-capacity').value) || 4;
-                    const address = card.querySelector('.gite-address').value;
-
-                    // Générer slug unique pour chaque gîte
                     let baseGiteSlug = name.toLowerCase()
                         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                         .replace(/[^a-z0-9]+/g, '-')
                         .replace(/(^-|-$)/g, '');
                     
-                    const giteUniqueId = Math.random().toString(36).substring(2, 8);
-                    const giteSlug = `${baseGiteSlug}-${giteUniqueId}`;
-
                     gitesData.push({
                         name: name,
-                        slug: giteSlug,
-                        icon: icon,
-                        color: color,
-                        capacity: capacity,
-                        address: address
+                        slug: `${baseGiteSlug}-${Math.random().toString(36).substring(2, 8)}`,
+                        icon: card.querySelector('.gite-icon').value,
+                        color: card.querySelector('.gite-color').value,
+                        capacity: parseInt(card.querySelector('.gite-capacity').value) || 4,
+                        address: card.querySelector('.gite-address').value
                     });
                 });
 
@@ -768,38 +753,25 @@
                     return;
                 }
 
-                // 3. Appeler la fonction SQL (contourne le cache PostgREST)
-                const { data, error } = await window.supabaseClient
-                    .rpc('insert_onboarding_data', {
-                        p_user_id: userSession.user.id,
-                        p_org_name: orgName,
-                        p_org_slug: slug,
-                        p_org_email: orgEmail,
-                        p_org_phone: orgPhone,
-                        p_gites: gitesData
-                    });
+                // Appel RPC
+                const { data, error } = await window.supabaseClient.rpc('insert_onboarding_data', {
+                    p_user_id: userSession.user.id,
+                    p_org_name: orgName,
+                    p_org_slug: slug,
+                    p_org_email: orgEmail,
+                    p_org_phone: orgPhone,
+                    p_gites: gitesData
+                });
 
-                if (error) {
-                    console.error('Erreur RPC:', error);
-                    throw new Error(`Erreur d'insertion: ${error.message}`);
-                }
+                if (error) throw error;
+                if (!data.success) throw new Error(data.error);
 
-                if (!data.success) {
-                    throw new Error(`Erreur SQL: ${data.error}`);
-                }
-
-                console.log('✅ Onboarding terminé:', data);
-
-                // Succès ! Connexion automatique
+                console.log('✅ Onboarding terminé');
                 showStep(4);
-                
-                // Redirection automatique après 2 secondes
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
+                setTimeout(() => window.location.href = 'index.html', 2000);
 
             } catch (error) {
-                console.error('Erreur lors de la configuration:', error);
+                console.error('Erreur:', error);
                 alert('Erreur: ' + error.message);
             }
         }
