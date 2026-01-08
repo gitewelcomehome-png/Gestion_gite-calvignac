@@ -725,27 +725,10 @@
                     .replace(/(^-|-$)/g, '');
                 const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`;
 
-                // 1. Créer organization (toutes colonnes en une fois)
-                let orgResult = await window.supabaseClient
-                    .from('organizations')
-                    .insert([{ 
-                        name: orgName, 
-                        slug: slug,
-                        email: orgEmail || null,
-                        phone: orgPhone || null
-                    }])
-                    .select()
-                    .single();
-
-                if (orgResult.error) {
-                    console.error('Erreur détaillée:', orgResult.error);
-                    throw new Error(`Impossible de créer l'organization: ${orgResult.error.message || orgResult.error.details || 'Erreur inconnue'}`);
-                }
-
-                const orgId = orgResult.data.id;
-
-                // 2. Créer gîtes un par un (toutes colonnes)
+                // Préparer les données des gîtes
                 const gitesCards = document.querySelectorAll('.gite-card');
+                const gitesData = [];
+                
                 for (const card of gitesCards) {
                     const name = card.querySelector('.gite-name').value;
                     if (!name) continue;
@@ -755,45 +738,44 @@
                         .replace(/[^a-z0-9]+/g, '-')
                         .replace(/(^-|-$)/g, '');
                     
-                    const giteData = {
-                        organization_id: orgId,
+                    gitesData.push({
                         name: name,
                         slug: `${baseGiteSlug}-${Math.random().toString(36).substring(2, 8)}`,
-                        icon: card.querySelector('.gite-icon').value || 'home',
+                        icon: card.querySelector('.gite-icon').value || 'chalet',
                         color: card.querySelector('.gite-color').value || '#667eea',
                         capacity: parseInt(card.querySelector('.gite-capacity').value) || 4,
                         address: card.querySelector('.gite-address').value || null
-                    };
-
-                    let giteResult = await window.supabaseClient
-                        .from('gites')
-                        .insert([giteData])
-                        .select()
-                        .single();
-
-                    if (giteResult.error) {
-                        console.warn('Erreur gîte:', giteResult.error);
-                        continue;
-                    }
+                    });
                 }
 
-                // 3. Créer member owner
-                const memberResult = await window.supabaseClient
-                    .from('organization_members')
-                    .insert([{
-                        organization_id: orgId,
-                        user_id: userSession.user.id,
-                        role: 'owner'
-                    }]);
+                console.log('📤 Envoi des données via RPC...');
 
-                if (memberResult.error) throw new Error(`Member: ${memberResult.error.message}`);
+                // APPEL RPC FUNCTION (BYPASS RLS COMPLÈTEMENT)
+                const { data, error } = await window.supabaseClient.rpc('insert_onboarding_data', {
+                    p_user_id: userSession.user.id,
+                    p_org_name: orgName,
+                    p_org_slug: slug,
+                    p_org_email: orgEmail || null,
+                    p_org_phone: orgPhone || null,
+                    p_gites: gitesData
+                });
 
-                console.log('✅ Onboarding terminé');
+                if (error) {
+                    console.error('❌ Erreur RPC:', error);
+                    throw new Error(`Erreur serveur: ${error.message}`);
+                }
+
+                if (!data || !data.success) {
+                    console.error('❌ Fonction a échoué:', data);
+                    throw new Error(data?.error || 'Erreur inconnue');
+                }
+
+                console.log('✅ Onboarding terminé - Organization ID:', data.organization_id);
                 showStep(4);
                 setTimeout(() => window.location.href = 'index.html', 2000);
 
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('❌ Erreur finale:', error);
                 alert('Erreur: ' + error.message);
             }
         }
