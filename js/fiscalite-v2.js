@@ -736,7 +736,7 @@ function afficherResultats(data) {
 // Charger la liste des années disponibles
 async function chargerListeAnnees() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('simulations_fiscales')
             .select('annee')
             .order('annee', { ascending: false });
@@ -784,31 +784,33 @@ async function chargerAnnee(annee) {
     try {
         const anneeActuelle = new Date().getFullYear();
         
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('simulations_fiscales')
             .select('*')
             .eq('annee', parseInt(annee))
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
         
         if (error) {
-            if (error.code === 'PGRST116') {
-                // Aucune donnée pour cette année, créer une simulation vide
-                console.log(`📅 Aucune simulation pour ${annee}, création d'une nouvelle`);
-                document.getElementById('annee_simulation').value = annee;
-                
-                // Réinitialiser le formulaire
-                nouvelleSimulation();
-                
-                // Calculer automatiquement le CA UNIQUEMENT pour l'année en cours
-                if (parseInt(annee) === anneeActuelle) {
-                    await calculerCAAutomatique();
-                }
-                
-                return;
+            console.error(`❌ Erreur chargement simulation ${annee}:`, error);
+            return;
+        }
+        
+        if (!data) {
+            // Aucune donnée pour cette année, créer une simulation vide
+            console.log(`📅 Aucune simulation pour ${annee}, création d'une nouvelle`);
+            document.getElementById('annee_simulation').value = annee;
+            
+            // Réinitialiser le formulaire
+            nouvelleSimulation();
+            
+            // Calculer automatiquement le CA UNIQUEMENT pour l'année en cours
+            if (parseInt(annee) === anneeActuelle) {
+                await calculerCAAutomatique();
             }
-            throw error;
+            
+            return;
         }
         
         // Mettre à jour l'année cachée
@@ -907,7 +909,7 @@ async function creerNouvelleAnnee() {
     const nouvelleAnnee = anneeActuelle + 1;
     
     // Vérifier si l'année suivante existe déjà
-    const { data: existing } = await supabase
+    const { data: existing } = await window.supabaseClient
         .from('simulations_fiscales')
         .select('id')
         .eq('annee', nouvelleAnnee)
@@ -924,15 +926,23 @@ async function creerNouvelleAnnee() {
     
     try {
         // Récupérer les données de l'année actuelle
-        const { data: anneePrecedente, error: loadError } = await supabase
+        const { data: anneePrecedente, error: loadError } = await window.supabaseClient
             .from('simulations_fiscales')
             .select('*')
             .eq('annee', anneeActuelle)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
         
-        if (loadError) throw loadError;
+        if (loadError) {
+            console.error('❌ Erreur chargement année précédente:', loadError);
+            return;
+        }
+        
+        if (!anneePrecedente) {
+            showToast('Aucune simulation trouvée pour l\'année en cours', 'error');
+            return;
+        }
         
         // Créer les nouvelles données en copiant uniquement les frais fixes
         const nouvellesDonnees = {
@@ -1046,7 +1056,7 @@ async function creerNouvelleAnnee() {
         };
         
         // Sauvegarder la nouvelle année
-        const { error: insertError } = await supabase
+        const { error: insertError } = await window.supabaseClient
             .from('simulations_fiscales')
             .insert(nouvellesDonnees);
         
@@ -1386,7 +1396,7 @@ async function sauvegarderSimulation(silencieux = false) {
     }
     
     try {
-        const { data: result, error } = await supabase
+        const { data: result, error } = await window.supabaseClient
             .from('simulations_fiscales')
             .insert(data)
             .select();
@@ -1412,18 +1422,20 @@ async function sauvegarderSimulation(silencieux = false) {
 async function chargerDerniereSimulation() {
     
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('simulations_fiscales')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
         
         if (error) {
-            if (error.code === 'PGRST116') {
-                return;
-            }
-            throw error;
+            console.error('❌ Erreur chargement dernière simulation:', error);
+            return;
+        }
+        
+        if (!data) {
+            return;
         }
         
         if (!data) {
@@ -1638,7 +1650,10 @@ function nouvelleSimulation() {
     window.SecurityUtils.setInnerHTML(document.getElementById('travaux-liste'), '');
     window.SecurityUtils.setInnerHTML(document.getElementById('frais-divers-liste'), '');
     window.SecurityUtils.setInnerHTML(document.getElementById('produits-accueil-liste'), '');
-    document.getElementById('resultats-fiscalite').style.display = 'none';
+    const resultatsEl = document.getElementById('resultats-fiscalite');
+    if (resultatsEl) {
+        resultatsEl.style.display = 'none';
+    }
     travauxCounter = 0;
     fraisDiversCounter = 0;
     produitsCounter = 0;
@@ -1852,13 +1867,13 @@ async function verifierSauvegardeAnnee(annee) {
     console.log(`🔍 Vérification de la sauvegarde pour l'année ${annee}...`);
     
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('simulations_fiscales')
             .select('annee, cotisations_urssaf, impot_revenu, benefice_imposable, created_at')
             .eq('annee', annee)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
         
         if (error) {
             console.error(`❌ Erreur vérification année ${annee}:`, error);
@@ -1968,7 +1983,7 @@ async function chargerSoldesBancaires() {
     }
     
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('suivi_soldes_bancaires')
             .select('*')
             .eq('annee', annee)
@@ -2033,7 +2048,7 @@ async function sauvegarderSoldesBancaires() {
     
     try {
         // Upsert (insert ou update) pour chaque mois
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
             .from('suivi_soldes_bancaires')
             .upsert(soldesData, { 
                 onConflict: 'annee,mois',
@@ -2062,7 +2077,7 @@ async function afficherGraphiqueSoldes() {
     const annee = parseInt(document.getElementById('annee_tresorerie')?.value || new Date().getFullYear());
     
     try {
-        let query = supabase
+        let query = window.supabaseClient
             .from('suivi_soldes_bancaires')
             .select('*')
             .order('annee', { ascending: true })
@@ -2182,10 +2197,19 @@ async function afficherGraphiqueSoldes() {
 
 // Initialisation automatique au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    // Attendre que le contenu de l'onglet soit potentiellement chargé
-    setTimeout(initFiscalite, 1000);
+    // LAZY LOAD: charger uniquement quand l'utilisateur clique sur l'onglet
+    const fiscaliteTab = document.querySelector('[data-tab="fiscalite"]');
+    if (fiscaliteTab) {
+        let fiscaliteInitialized = false;
+        fiscaliteTab.addEventListener('click', () => {
+            if (!fiscaliteInitialized) {
+                setTimeout(initFiscalite, 100);
+                fiscaliteInitialized = true;
+            }
+        });
+    }
     
-    // Initialiser l'année pour la trésorerie
+    // Initialiser l'année pour la trésorerie (léger, pas de requête DB)
     setTimeout(() => {
         const anneeInput = document.getElementById('annee_tresorerie');
         const anneeSimulInput = document.getElementById('annee_simulation');
@@ -2260,7 +2284,7 @@ async function sauvegarderSoldesBancairesAuto() {
     if (soldesData.length === 0) return;
     
     try {
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
             .from('suivi_soldes_bancaires')
             .upsert(soldesData, { 
                 onConflict: 'annee,mois',

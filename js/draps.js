@@ -48,7 +48,7 @@ window.initDraps = initDraps;
 
 async function chargerStocks() {
     try {
-        const { data, error } = await window.supabase
+        const { data, error } = await window.supabaseClient
             .from('linen_stocks')
             .select('*');
 
@@ -106,7 +106,7 @@ async function sauvegarderStocks() {
                 updated_at: new Date().toISOString()
             };
 
-            const { error } = await window.supabase
+            const { error } = await window.supabaseClient
                 .from('linen_stocks')
                 .upsert(stocks, { onConflict: 'gite_id' });
 
@@ -134,11 +134,11 @@ async function analyserReservations() {
     try {
         // Récupérer les réservations futures
         const today = new Date().toISOString().split('T')[0];
-        const { data: reservations, error } = await window.supabase
+        const { data: reservations, error } = await window.supabaseClient
             .from('reservations')
             .select('*')
-            .gte('date_debut', today)
-            .order('date_debut', { ascending: true });
+            .gte('check_in', today)
+            .order('check_in', { ascending: true });
 
         if (error) throw error;
 
@@ -191,8 +191,8 @@ function calculerReservationsCouvertes(resaParGite) {
         if (nbReservations > 0 && reservations.length > 0) {
             const indexDerniere = Math.min(nbReservations - 1, reservations.length - 1);
             const derniereResa = reservations[indexDerniere];
-            if (derniereResa && derniereResa.date_fin) {
-                dateJusqua = new Date(derniereResa.date_fin);
+            if (derniereResa && derniereResa.check_out) {
+                dateJusqua = new Date(derniereResa.check_out);
                 const options = { year: 'numeric', month: 'long', day: 'numeric' };
                 messageDate = `📅 Vous pouvez tenir jusqu'au ${dateJusqua.toLocaleDateString('fr-FR', options)}`;
             }
@@ -377,7 +377,7 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture) {
             if (infos && infos.dateLimite && infos.dateLimite <= uneSemaneFuture) {
                 // Calculer les besoins pour les 3 prochaines semaines
                 const reservations3Semaines = resaParGite[gite].filter(r => {
-                    const dateDebut = new Date(r.date_debut);
+                    const dateDebut = new Date(r.check_in);
                     return dateDebut >= today && dateDebut <= troisSemainesFuture;
                 });
                 
@@ -426,7 +426,7 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture) {
                         const deuxJoursAvant = new Date(today);
                         deuxJoursAvant.setDate(deuxJoursAvant.getDate() - 2);
                         
-                        const { data: tachesExistantes } = await window.supabase
+                        const { data: tachesExistantes } = await window.supabaseClient
                             .from('todos')
                             .select('*')
                             .eq('category', 'achats')
@@ -437,7 +437,7 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture) {
                         
                         // Créer la tâche seulement si elle n'existe pas déjà
                         if (!tachesExistantes || tachesExistantes.length === 0) {
-                            await window.supabase
+                            await window.supabaseClient
                                 .from('todos')
                                 .insert({
                                     category: 'achats',
@@ -475,12 +475,12 @@ async function simulerBesoins() {
         const today = new Date().toISOString().split('T')[0];
         console.log('📊 Requête Supabase de', today, 'à', dateLimit);
         
-        const { data: reservations, error } = await window.supabaseClient
+        const { data: reservations, error } = await window.supabaseClientClient
             .from('reservations')
             .select('*')
-            .gte('date_debut', today)
-            .lte('date_debut', dateLimit)
-            .order('date_debut', { ascending: true });
+            .gte('check_in', today)
+            .lte('check_in', dateLimit)
+            .order('check_in', { ascending: true });
 
         if (error) throw error;
         
@@ -609,7 +609,7 @@ function afficherResultatsSimulation(resaParGite, dateLimit) {
                 `}
             </div>
         `;
-    });
+    }
 
     window.SecurityUtils.setInnerHTML(container, html);
 }
@@ -682,7 +682,7 @@ function afficherAEmmenerDepuisSimulation() {
                 `}
             </div>
         `;
-    });
+    }
 
     window.SecurityUtils.setInnerHTML(container, html);
 }

@@ -1,14 +1,21 @@
+<div class="tab-container">
+    <!-- Header Neo-Brutalism -->
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📅 Réservations</h2>
+                <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Planning et gestion des séjours</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button onclick="forceRefreshReservations()" class="btn-neo" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;" title="Actualiser les données">
+                    🔄 Actualiser
+                </button>
+                <input type="text" id="searchReservations" placeholder="🔍 Rechercher..." style="padding: 10px 15px; border-radius: 8px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; width: 250px; font-size: 0.9rem; font-family: 'Work Sans', sans-serif;" oninput="filterReservations(this.value)">
+            </div>
+        </div>
+    </div>
+
             <div class="card">
-                <div class="card-header">
-                    <span class="card-icon">📅</span>
-                    <h2 class="card-title">Planning des réservations</h2>
-                    <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
-                        <button onclick="forceRefreshReservations()" style="background: #e3f2fd; border: none; border-radius: 8px; padding: 10px 15px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 5px;" title="Actualiser les données">
-                            🔄 Actualiser
-                        </button>
-                        <input type="text" id="searchReservations" placeholder="🔍 Rechercher..." style="padding: 10px 15px; border-radius: 8px; border: 2px solid var(--border); width: 250px; font-size: 0.9rem; font-family: 'Work Sans', sans-serif;" oninput="filterReservations(this.value)">
-                    </div>
-                </div>
                 
                 <!-- Statut synchronisation -->
                 <div id="syncStatus" style="padding:12px;background:#e7f3ff;border-radius:8px;margin-bottom:20px;font-size:0.9rem;display:none">

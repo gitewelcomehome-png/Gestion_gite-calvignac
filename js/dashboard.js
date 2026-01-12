@@ -4,6 +4,11 @@
  */
 
 // ==========================================
+// CONFIGURATION FEATURES OPTIONNELLES
+// ==========================================
+let CHECKLIST_FEATURE_ENABLED = false; // Désactivé par défaut (table optionnelle non créée)
+
+// ==========================================
 // ==========================================
 
 function formatCurrency(amount) {
@@ -80,7 +85,7 @@ async function updateDashboardAlerts() {
     }
     
     // Vérifier les ménages refusés
-    const { data: cleanings } = await supabase
+    const { data: cleanings } = await window.supabaseClient
         .from('cleaning_schedule')
         .select('*')
         .eq('status', 'refused');
@@ -141,12 +146,13 @@ async function updateDashboardAlerts() {
     
     let html = '';
     alerts.forEach((alert, index) => {
-        const bgColor = alert.type === 'danger' ? '#E74C3C' : alert.type === 'warning' ? '#F39C12' : '#3498DB';
+        const bgColor = alert.type === 'danger' ? '#ff7675' : alert.type === 'warning' ? '#ffeaa7' : '#74b9ff';
+        const textColor = alert.type === 'warning' ? '#2D3436' : 'white';
         const alertId = `dashboard-alert-${index}`;
         html += `
-            <div id="${alertId}" style="background: ${bgColor}; color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+            <div id="${alertId}" style="background: ${bgColor}; color: ${textColor}; padding: 15px 20px; border-radius: 12px; border: 3px solid #2D3436; box-shadow: 4px 4px 0 #2D3436; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                 <span style="font-size: 1.5rem;">${alert.icon}</span>
-                <span style="flex: 1; font-weight: 500;">${alert.message}</span>
+                <span style="flex: 1;">${alert.message}</span>
                 <span style="font-size: 1.2rem;">→</span>
             </div>
         `;
@@ -185,7 +191,7 @@ async function updateDashboardStats() {
     weekEnd.setDate(weekStart.getDate() + 6);
     
     // Compteur ménages à faire cette semaine
-    const { data: cleanings } = await supabase
+    const { data: cleanings } = await window.supabaseClient
         .from('cleaning_schedule')
         .select('*')
         .gte('scheduled_date', weekStart.toISOString().split('T')[0])
@@ -194,7 +200,7 @@ async function updateDashboardStats() {
     const cleaningsCount = cleanings ? cleanings.length : 0;
     
     // Compteurs todos par catégorie (non archivés, non complétés)
-    const { data: todos } = await supabase
+    const { data: todos } = await window.supabaseClient
         .from('todos')
         .select('*')
         .eq('completed', false)
@@ -302,8 +308,11 @@ async function updateDashboardReservations() {
         const horaireArrivee = horairesMap[r.id]?.arrivee || '17:00';
         const horaireDepart = horairesMap[r.id]?.depart || '10:00';
         
-        // Charger la progression checklist
-        const checklistProgress = await getReservationChecklistProgressDashboard(r.id, r.gite);
+        // Charger la progression checklist (si feature activée)
+        let checklistProgress = { entree: { total: 0, completed: 0, percent: 0 }, sortie: { total: 0, completed: 0, percent: 0 } };
+        if (CHECKLIST_FEATURE_ENABLED) {
+            checklistProgress = await getReservationChecklistProgressDashboard(r.id, r.gite);
+        }
         
         let badge = '';
         let badgeColor = '';
@@ -361,33 +370,37 @@ async function updateDashboardReservations() {
         }
         
         html += `
-            <div style="border-left: 4px solid ${giteColor}; padding: 15px; margin-bottom: 10px; background: ${shouldSendReminder ? '#FFF9E6' : '#f8f9fa'}; border-radius: 8px; position: relative;">
-                ${shouldSendReminder ? '<div style="position: absolute; top: 10px; right: 10px; background: #F39C12; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">⏰ J-3 : Envoyer fiche</div>' : ''}
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                    <div style="flex: 1;">
-                        <strong style="font-size: 1.1rem; color: ${giteColor};">${r.nom}</strong>
-                        <div style="color: #666; font-size: 0.9rem; margin-top: 4px;">
-                            <span style="background: ${badgeColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 8px;">${badge}</span>
-                            ${formatDateFromObj(dateDebut)} <strong style="color: #27AE60;">⏰ ${horaireArrivee}</strong> → ${formatDateFromObj(dateFin)} <strong style="color: #E74C3C;">⏰ ${horaireDepart}</strong> (${r.nuits} nuits)
+            <div style="background: white; border: 3px solid ${giteColor}; padding: 15px; margin-bottom: 12px; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <div style="flex: 1; padding-right: ${shouldSendReminder ? '140px' : '0'};">
+                        <strong style="font-size: 1.15rem; color: #2D3436;">${r.nom}</strong>
+                        ${shouldSendReminder ? '<div style="position: absolute; top: 15px; right: 58px; background: #ffeaa7; color: #2D3436; padding: 5px 12px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 8px; font-size: 0.75rem; font-weight: 700;">⚡ J-3 : Envoyer fiche</div>' : ''}
+                        <div style="margin-top: 8px;">
+                            <span style="background: ${badgeColor}; color: white; padding: 4px 10px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-block;">${badge}</span>
                         </div>
-                        <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #666; margin-top: 6px;">
-                            <span>🏠 ${r.gite}</span>
-                            <span>👥 ${r.nbPersonnes || '-'} pers.</span>
-                            ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'};">📅 J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
+                        <div style="color: #666; font-size: 0.9rem; margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <svg viewBox="0 0 64 64" style="width:18px;height:18px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg>
+                            ${formatDateFromObj(dateDebut)} <strong style="color: #27AE60; display: flex; align-items: center; gap: 4px;"><svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireArrivee}</strong> → ${formatDateFromObj(dateFin)} <strong style="color: #E74C3C; display: flex; align-items: center; gap: 4px;"><svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireDepart}</strong>
+                            <span style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-weight: 600;">${r.nuits} nuits</span>
+                        </div>
+                        <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #666; margin-top: 8px; flex-wrap: wrap;">
+                            <span style="display: flex; align-items: center; gap: 4px;"><svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="28" width="36" height="28" fill="#ffffff"/><path d="M8 28 L32 8 L56 28" fill="#ff7675"/><rect x="42" y="10" width="6" height="10" fill="#ff7675"/><rect x="26" y="40" width="12" height="16" fill="#0984e3"/><rect x="18" y="34" width="6" height="6" fill="#74b9ff"/></svg> <strong>${r.gite}</strong></span>
+                            <span>👥 <strong>${r.nbPersonnes || '-'}</strong> pers.</span>
+                            ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'}; font-weight: 600; display: flex; align-items: center; gap: 4px;"><svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg> J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
                         </div>
                         ${checklistHtml}
                     </div>
                     <span style="font-size: 1.5rem; margin-left: 10px;" title="${r.paiement}">${paiementIcon}</span>
                 </div>
-                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; display: flex; gap: 8px;">
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #e0e0e0; display: flex; gap: 8px;">
                     ${showFicheButton ? `
-                    <button onclick="aperçuFicheClient(${r.id})" 
-                            style="flex: 1; background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <button onclick="aperçuFicheClient(${r.id})" class="btn-neo"
+                            style="flex: 1; background: #74b9ff; color: white; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='3px 3px 0 #2D3436'">
                         📄 Fiche Client
                     </button>
                     ` : ''}
-                    <button onclick="openEditReservation(${r.id})" 
-                            style="background: #3498DB; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                    <button onclick="openEditReservation(${r.id})" class="btn-neo"
+                            style="background: white; color: #2D3436; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='3px 3px 0 #2D3436'">
                         ✏️
                     </button>
                 </div>
@@ -412,9 +425,9 @@ async function updateDashboardMenages() {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
     
-    const { data: cleanings } = await supabase
+    const { data: cleanings } = await window.supabaseClient
         .from('cleaning_schedule')
-        .select('*, reservations(*)')
+        .select('*')
         .gte('scheduled_date', weekStart.toISOString().split('T')[0])
         .lte('scheduled_date', weekEnd.toISOString().split('T')[0])
         .order('scheduled_date', { ascending: true });
@@ -428,7 +441,7 @@ async function updateDashboardMenages() {
     }
     
     let html = '';
-    cleanings.forEach(c => {
+    for (const c of cleanings) {
         const statusIcons = {
             'validated': '✅',
             'pending_validation': '⏳',
@@ -453,7 +466,7 @@ async function updateDashboardMenages() {
         const color = statusColors[c.status] || '#999';
         const statusLabel = statusLabels[c.status] || 'Inconnu';
         const timeIcon = c.time_of_day === 'morning' ? '🌅' : '🌆';
-const gite = await window.gitesManager.getByName(c.gite) || await window.gitesManager.getById(c.gite_id);
+        const gite = await window.gitesManager?.getByName(c.gite) || await window.gitesManager?.getById(c.gite_id);
         const giteColor = gite ? gite.color : '#667eea';
         
         html += `
@@ -470,8 +483,8 @@ const gite = await window.gitesManager.getByName(c.gite) || await window.gitesMa
                 </div>
             </div>
         `;
-    });
-    
+    }
+
     window.SecurityUtils.setInnerHTML(container, html);
 }
 
@@ -488,7 +501,7 @@ async function updateTodoLists() {
 }
 
 async function updateTodoList(category) {
-    const { data: todos } = await supabase
+    const { data: todos } = await window.supabaseClient
         .from('todos')
         .select('*')
         .eq('category', category)
@@ -659,7 +672,7 @@ function initializeTodoModal() {
                 nextOccurrence = calculateNextOccurrence(frequency, frequencyDetail);
             }
             
-            const { error } = await supabase
+            const { error } = await window.supabaseClient
                 .from('todos')
                 .insert({
                     category: category,
@@ -723,7 +736,7 @@ function calculateNextOccurrence(frequency, frequencyDetail) {
 async function toggleTodo(id, completed) {
     try {
         // Récupérer la tâche pour vérifier si elle est récurrente
-        const { data: todo, error: fetchError } = await supabase
+        const { data: todo, error: fetchError } = await window.supabaseClient
             .from('todos')
             .select('*')
             .eq('id', id)
@@ -745,7 +758,7 @@ async function toggleTodo(id, completed) {
             const nextOccurrence = calculateNextOccurrence(todo.frequency, todo.frequency_detail);
             
             // Créer la nouvelle occurrence
-            const { error: insertError } = await supabase
+            const { error: insertError } = await window.supabaseClient
                 .from('todos')
                 .insert({
                     category: todo.category,
@@ -769,7 +782,7 @@ async function toggleTodo(id, completed) {
             }
             
             // Archiver l'ancienne
-            const { error: archiveError } = await supabase
+            const { error: archiveError } = await window.supabaseClient
                 .from('todos')
                 .update({ 
                     completed: true, 
@@ -791,7 +804,7 @@ async function toggleTodo(id, completed) {
             // Si coché (non récurrente), SUPPRIMER la tâche définitivement
             // Si décoché, restaurer (mais ne devrait pas arriver)
             if (completed) {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('todos')
                     .delete()
                     .eq('id', id);
@@ -806,7 +819,7 @@ async function toggleTodo(id, completed) {
                 showToast('✓ Tâche terminée et supprimée', 'success');
             } else {
                 // Décocher = restaurer
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('todos')
                     .update({ completed: false, archived_at: null })
                     .eq('id', id);
@@ -836,7 +849,7 @@ async function toggleTodo(id, completed) {
 async function deleteTodo(id) {
     if (!confirm('Supprimer cette tâche ?')) return;
     
-    const { error } = await supabase
+    const { error } = await window.supabaseClient
         .from('todos')
         .delete()
         .eq('id', id);
@@ -853,7 +866,7 @@ async function deleteTodo(id) {
 
 async function editTodo(id) {
     // Récupérer la tâche
-    const { data: todo, error } = await supabase
+    const { data: todo, error } = await window.supabaseClient
         .from('todos')
         .select('*')
         .eq('id', id)
@@ -949,7 +962,7 @@ async function editTodo(id) {
             }
         }
         
-        const { error: updateError } = await supabase
+        const { error: updateError } = await window.supabaseClient
             .from('todos')
             .update(updateData)
             .eq('id', id);
@@ -1028,7 +1041,7 @@ async function updateFinancialIndicators() {
     if (anneeCAEl) anneeCAEl.textContent = anneeActuelle;
     
     // Récupérer le Total Charges depuis la simulation fiscale de l'année en cours
-    const { data: simFiscale } = await supabase
+    const { data: simFiscale } = await window.supabaseClient
         .from('simulations_fiscales')
         .select('*')
         .eq('annee', anneeActuelle)
@@ -1121,7 +1134,7 @@ async function updateFinancialIndicators() {
     
     
     // 3. Calculer l'IR de l'ANNÉE PRÉCÉDENTE (depuis la base)
-    const { data: simulationPrecedente, error: errorPrecedente } = await supabase
+    const { data: simulationPrecedente, error: errorPrecedente } = await window.supabaseClient
         .from('simulations_fiscales')
         .select('*')
         .eq('annee', anneePrecedente)
@@ -1149,7 +1162,7 @@ async function updateFinancialIndicators() {
     }
     
     // 4. Calculer l'IR de l'ANNÉE EN COURS (temps réel)
-    const { data: simulationCourante } = await supabase
+    const { data: simulationCourante } = await window.supabaseClient
         .from('simulations_fiscales')
         .select('*')
         .eq('annee', anneeActuelle)
@@ -1242,12 +1255,12 @@ async function updateFinancialIndicators() {
     if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeAnnee);
     
     // 6. Trésorerie actuelle (dernier mois enregistré)
-    const { data: soldeMois } = await supabase
+    const { data: soldeMois } = await window.supabaseClient
         .from('suivi_soldes_bancaires')
         .select('solde')
         .eq('annee', anneeActuelle)
         .eq('mois', moisActuel)
-        .single();
+        .maybeSingle();
     
     const tresorerieEl = document.getElementById('dashboard-tresorerie');
     if (tresorerieEl) {
@@ -1391,7 +1404,7 @@ async function afficherGraphiqueTresorerieDashboard() {
     const anneeActuelle = new Date().getFullYear();
     
     // Récupérer les soldes de l'année en cours
-    const { data: soldes } = await supabase
+    const { data: soldes } = await window.supabaseClient
         .from('suivi_soldes_bancaires')
         .select('*')
         .eq('annee', anneeActuelle)
@@ -2020,14 +2033,26 @@ window.envoyerReponseWhatsApp = envoyerReponseWhatsApp;
 
 async function getReservationChecklistProgressDashboard(reservationId, gite) {
     try {
-        // Récupérer les templates pour ce gîte
+        // Vérifier si la table checklist_templates existe
+        // Retourner des valeurs vides si la table n'existe pas (migration pas encore faite)
         const { data: templates, error: templatesError } = await supabaseClient
             .from('checklist_templates')
             .select('id, type')
             .eq('gite', gite)
             .eq('actif', true);
         
-        if (templatesError) throw templatesError;
+        // Si la table n'existe pas, retourner des valeurs vides sans erreur
+        if (templatesError) {
+            if (templatesError.code === 'PGRST205') {
+                // Table n'existe pas encore - désactiver définitivement la feature
+                CHECKLIST_FEATURE_ENABLED = false;
+                return {
+                    entree: { total: 0, completed: 0, percent: 0 },
+                    sortie: { total: 0, completed: 0, percent: 0 }
+                };
+            }
+            throw templatesError;
+        }
         
         const templatesEntree = templates ? templates.filter(t => t.type === 'entree') : [];
         const templatesSortie = templates ? templates.filter(t => t.type === 'sortie') : [];
@@ -2064,7 +2089,10 @@ async function getReservationChecklistProgressDashboard(reservationId, gite) {
         };
         
     } catch (error) {
-        console.error('❌ Erreur calcul progression checklist:', error);
+        // Ne plus afficher l'erreur si c'est juste une table manquante
+        if (error.code !== 'PGRST205') {
+            console.error('❌ Erreur calcul progression checklist:', error);
+        }
         return {
             entree: { total: 0, completed: 0, percent: 0 },
             sortie: { total: 0, completed: 0, percent: 0 }
@@ -2084,7 +2112,7 @@ function getProgressColorDashboard(percent) {
 
 async function afficherDetailsRetourMenage(retourId) {
     try {
-        const { data: retour, error } = await supabase
+        const { data: retour, error } = await window.supabaseClient
             .from('retours_menage')
             .select('*')
             .eq('id', retourId)

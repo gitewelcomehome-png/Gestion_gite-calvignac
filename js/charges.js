@@ -189,8 +189,8 @@ async function saveHistoricalData() {
 
 async function getHistoricalData(year, gite) {
     try {
-        const { data, error } = await supabase
-            .from('historical_data')
+        const { data, error } = await window.supabaseClient
+            .from('fiscal_history')
             .select('*')
             .eq('year', year)
             .eq('gite', gite)
@@ -206,8 +206,8 @@ async function getHistoricalData(year, gite) {
 
 async function getAllHistoricalData() {
     try {
-        const { data, error } = await supabase
-            .from('historical_data')
+        const { data, error } = await window.supabaseClient
+            .from('fiscal_history')
             .select('*')
             .order('year', { ascending: false });
         
@@ -221,8 +221,8 @@ async function getAllHistoricalData() {
 
 async function deleteHistoricalDataById(id) {
     try {
-        const { error } = await supabase
-            .from('historical_data')
+        const { error } = await window.supabaseClient
+            .from('fiscal_history')
             .delete()
             .eq('id', id);
         
@@ -253,15 +253,15 @@ async function saveHistoricalDataTotal() {
         const existing = await getHistoricalData(year, 'Total');
         
         if (existing) {
-            const { error } = await supabase
-                .from('historical_data')
+            const { error } = await window.supabaseClient
+                .from('fiscal_history')
                 .update({ months: monthsData })
                 .eq('id', existing.id);
             
             if (error) throw error;
         } else {
-            const { error } = await supabase
-                .from('historical_data')
+            const { error } = await window.supabaseClient
+                .from('fiscal_history')
                 .insert({ year: year, gite: 'Total', months: monthsData });
             
             if (error) throw error;
@@ -346,7 +346,12 @@ function clearHistoricalForm() {
 }
 
 async function displayHistoricalYearsList() {
-    const data = await getAllHistoricalData();
+    let data = [];
+    try {
+        data = await getAllHistoricalData();
+    } catch (e) {
+        // Table non disponible
+    }
     const container = document.getElementById('historicalYearsList');
     
     if (data.length === 0) {
@@ -386,7 +391,12 @@ async function displayHistoricalYearsList() {
 
 async function updateStats() {
     const reservations = await getAllReservations();
-    const historicalData = await getAllHistoricalData();
+    let historicalData = [];
+    try {
+        historicalData = await getAllHistoricalData();
+    } catch (e) {
+        // Table non disponible
+    }
     
     // Filtrer par l'année sélectionnée
     const selectedYear = parseInt(document.getElementById('yearFilterStats')?.value || new Date().getFullYear());

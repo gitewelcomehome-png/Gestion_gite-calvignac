@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vérif Tables Tarifs</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Vérification Tables Tarifs</h1>
+    <button onclick="checkTables()">🔍 Vérifier</button>
+    <button onclick="checkRLS()">🔐 Tester RLS</button>
+    <pre id="result" style="background: #f4f4f4; padding: 20px; border-radius: 8px;"></pre>
+    
+    <script type="module">
+        import { SUPABASE_URL, SUPABASE_ANON_KEY } from './js/shared-config.js';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        window.checkTables = async function() {
+            const result = {};
+            const log = [];
+            
+            // Vérifier session
+            const { data: { session } } = await supabase.auth.getSession();
+            log.push(`Session: ${session ? '✅ Connecté' : '❌ Non connecté'}`);
+            log.push(`User ID: ${session?.user?.id || 'N/A'}`);
+            log.push('');
+            
+            // Test 1: Tarifs base
+            try {
+                const { data, error, count } = await supabase
+                    .from('tarifs_base')
+                    .select('*', { count: 'exact', head: false });
+                    
+                log.push('📊 tarifs_base:');
+                if (error) {
+                    log.push(`  ❌ Erreur: ${error.message}`);
+                    log.push(`  Code: ${error.code || 'N/A'}`);
+                    log.push(`  Details: ${JSON.stringify(error.details || {})}`);
+                } else {
+                    log.push(`  ✅ Table accessible`);
+                    log.push(`  Lignes: ${count || 0}`);
+                    if (data && data.length > 0) {
+                        log.push(`  Échantillon: ${JSON.stringify(data[0], null, 2)}`);
+                    }
+                }
+            } catch (e) {
+                log.push(`  💥 Exception: ${e.message}`);
+            }
+            log.push('');
+            
+            // Test 2: Règles tarifaires
+            try {
+                const { data, error, count } = await supabase
+                    .from('regles_tarifaires')
+                    .select('*', { count: 'exact' });
+                    
+                log.push('⚙️ regles_tarifaires:');
+                if (error) {
+                    log.push(`  ❌ Erreur: ${error.message}`);
+                    log.push(`  Code: ${error.code || 'N/A'}`);
+                } else {
+                    log.push(`  ✅ Table accessible`);
+                    log.push(`  Lignes: ${count || 0}`);
+                }
+            } catch (e) {
+                log.push(`  💥 Exception: ${e.message}`);
+            }
+            log.push('');
+            
+            // Test 3: Configuration
+            try {
+                const { data, error, count } = await supabase
+                    .from('configuration_calendrier')
+                    .select('*', { count: 'exact' });
+                    
+                log.push('🔧 configuration_calendrier:');
+                if (error) {
+                    log.push(`  ❌ Erreur: ${error.message}`);
+                    log.push(`  Code: ${error.code || 'N/A'}`);
+                } else {
+                    log.push(`  ✅ Table accessible`);
+                    log.push(`  Lignes: ${count || 0}`);
+                }
+            } catch (e) {
+                log.push(`  💥 Exception: ${e.message}`);
+            }
+            log.push('');
+            
+            // Test 4: Vérifier organization_members
+            try {
+                const { data, error } = await supabase
+                    .from('organization_members')
+                    .select('organization_id')
+                    .eq('user_id', session?.user?.id)
+                    .single();
+                    
+                log.push('🏢 organization_members:');
+                if (error) {
+                    log.push(`  ❌ Erreur: ${error.message}`);
+                } else {
+                    log.push(`  ✅ Organization ID: ${data?.organization_id || 'N/A'}`);
+                }
+            } catch (e) {
+                log.push(`  💥 Exception: ${e.message}`);
+            }
+            
+            document.getElementById('result').textContent = log.join('\n');
+        };
+        
+        window.checkRLS = async function() {
+            const log = [];
+            
+            // Tester INSERT
+            log.push('🧪 Test INSERT dans tarifs_base:');
+            try {
+                const { data: gites } = await supabase.from('gites').select('id, organization_id').limit(1);
+                if (!gites || gites.length === 0) {
+                    log.push('  ❌ Aucun gîte trouvé');
+                } else {
+                    const testData = {
+                        organization_id: gites[0].organization_id,
+                        gite_id: gites[0].id,
+                        date: '2026-12-31',
+                        prix_nuit: 99.99
+                    };
+                    
+                    log.push(`  Tentative: ${JSON.stringify(testData, null, 2)}`);
+                    
+                    const { data, error } = await supabase
+                        .from('tarifs_base')
+                        .upsert(testData)
+                        .select();
+                    
+                    if (error) {
+                        log.push(`  ❌ Erreur: ${error.message}`);
+                        log.push(`  Code: ${error.code}`);
+                        log.push(`  Details: ${JSON.stringify(error.details || {})}`);
+                        log.push(`  Hint: ${error.hint || 'N/A'}`);
+                    } else {
+                        log.push(`  ✅ INSERT réussi !`);
+                        log.push(`  Data: ${JSON.stringify(data, null, 2)}`);
+                    }
+                }
+            } catch (e) {
+                log.push(`  💥 Exception: ${e.message}`);
+            }
+            
+            document.getElementById('result').textContent = log.join('\n');
+        };
+    </script>
+</body>
+</html>

@@ -370,8 +370,8 @@ function telechargerPageHTML(reservation) {
             // Charger les activités selon le gîte
             const restaurants = JSON.parse(localStorage.getItem('restaurants') || '{}');
             const activites = JSON.parse(localStorage.getItem('activites') || '{}');
-            const restaurantsGite = restaurants[reservation.gite] || restaurants[reservation.gite_id] || '';
-            const activitesGite = activites[reservation.gite] || activites[reservation.gite_id] || '';
+            const restaurantsGite = reservation.gite === 'Trévoux' ? restaurants.trevoux : restaurants.couzon;
+            const activitesGite = reservation.gite === 'Trévoux' ? activites.trevoux : activites.couzon;
             const lyon = localStorage.getItem('activitesLyon') || '';
             const dombes = localStorage.getItem('activitesDombes') || '';
             const parcsZoo = localStorage.getItem('parcsZoo') || '';
@@ -570,7 +570,7 @@ function rechercherEvenements() {
                 <div>
                     <strong>❄️ Hiver (Déc - Fév)</strong>
                     <ul style="margin-left: 20px; margin-top: 5px;">
-                        <li>Marchés de Noël (Trevoux, Lyon)</li>
+                        <li>Marchés de Noël (Trévoux, Lyon)</li>
                         <li>Patinoire éphémère à Lyon</li>
                         <li>Fête des Lumières de Lyon (8 décembre)</li>
                     </ul>
@@ -594,13 +594,13 @@ function rechercherEvenements() {
                 </a>
                 
                 <a href="https://www.tripadvisor.fr/Attractions-g187265-Activities-Trevoux_Ain_Auvergne_Rhone_Alpes.html" target="_blank" style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; text-decoration: none; color: white; display: block;">
-                    <strong>⭐ TripAdvisor Trevoux</strong><br>
+                    <strong>⭐ TripAdvisor Trévoux</strong><br>
                     <small>Activités et avis voyageurs</small>
                 </a>
             </div>
             
             <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.9;">
-                💡 <strong>Astuce :</strong> Les offices de tourisme de Trevoux et Lyon proposent des guides gratuits avec les événements du mois.
+                💡 <strong>Astuce :</strong> Les offices de tourisme de Trévoux et Lyon proposent des guides gratuits avec les événements du mois.
             </p>
         </div>
     `);
@@ -905,7 +905,7 @@ window.loadInfosGiteFromSupabase = loadInfosGiteFromSupabase;
 // ==========================================
 
 // Variable globale pour le gîte actuellement sélectionné
-let currentGiteInfos = 'Trevoux';
+let currentGiteInfos = 'Trévoux';
 const DB_KEY_INFOS = 'gites_infos_pratiques_complet';
 
 // Sélection du gîte
@@ -916,20 +916,17 @@ window.selectGiteInfos = async function(gite) {
     // Changer le gîte
     currentGiteInfos = gite;
     
-    // Mettre à jour l'UI des boutons dynamiquement
-    const gites = await window.gitesManager.getAll();
-    gites.forEach(g => {
-        const btn = document.getElementById(`btn${g.name}`);
-        if (btn) {
-            if (g.name === gite) {
-                btn.style.background = 'white';
-                btn.style.color = '#667eea';
-            } else {
-                btn.style.background = 'rgba(255,255,255,0.2)';
-                btn.style.color = 'white';
-            }
-        }
-    });
+    // Mettre à jour l'UI des boutons
+    const btnTrevoux = document.getElementById('btnTrevoux');
+    const btnCouzon = document.getElementById('btnCouzon');
+    if (btnTrevoux) {
+        btnTrevoux.style.background = gite === 'Trévoux' ? 'white' : 'rgba(255,255,255,0.2)';
+        btnTrevoux.style.color = gite === 'Trévoux' ? '#667eea' : 'white';
+    }
+    if (btnCouzon) {
+        btnCouzon.style.background = gite === 'Couzon' ? 'white' : 'rgba(255,255,255,0.2)';
+        btnCouzon.style.color = gite === 'Couzon' ? '#667eea' : 'white';
+    }
     
     // Charger les données du nouveau gîte
     await chargerDonneesInfos();
@@ -1231,7 +1228,7 @@ function attachAutoSave() {
         }
     });
     
-    // console.log('✅ Auto-save activé sur', fields.length, 'champs');
+    console.log('✅ Auto-save activé sur', fields.length, 'champs');
 }
 
 // Attacher auto-save quand le tab est chargé
@@ -1556,4 +1553,4 @@ window.toggleLanguage = function() {
 window.sauvegarderDonneesInfos = sauvegarderDonneesInfos;
 window.chargerDonneesInfos = chargerDonneesInfos;
 window.updateProgressInfos = updateProgressInfos;
-window.currentGiteInfos = 'Trevoux';
+window.currentGiteInfos = 'Trévoux';

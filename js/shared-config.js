@@ -2,14 +2,14 @@
 // CONFIGURATION GLOBALE ET CONSTANTES
 // ==========================================
 
-// Initialiser APP_CONFIG s'il n'existe pas déjà
+// Utiliser LOCAL_CONFIG en priorité (pour dev), sinon valeurs par défaut
 if (typeof window.APP_CONFIG === 'undefined') {
     window.APP_CONFIG = {
         TIMEZONE: 'Europe/Paris',
-        SUPABASE_URL: 'https://ivqiisnudabxemcxxyru.supabase.co',
-        SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4'
+        SUPABASE_URL: window.LOCAL_CONFIG?.SUPABASE_URL || 'https://fgqimtpjjhdqeyyaptoj.supabase.co',
+        SUPABASE_KEY: window.LOCAL_CONFIG?.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZncWltdHBqamhkcWV5eWFwdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNTU0MjQsImV4cCI6MjA4MzczMTQyNH0.fOuYg0COYts7XXWxgB7AM01Fg6P86f8oz8XVpGdIaNM'
     };
-    console.log('✅ Configuration par défaut chargée');
+    // Configuration chargée silencieusement
 }
 
 // Configuration fuseau horaire
@@ -19,14 +19,14 @@ const TIMEZONE = window.APP_CONFIG.TIMEZONE;
 const SUPABASE_URL = window.APP_CONFIG.SUPABASE_URL;
 const SUPABASE_KEY = window.APP_CONFIG.SUPABASE_KEY;
 
-console.log('✅ Config OK:', { hasUrl: !!SUPABASE_URL, hasKey: !!SUPABASE_KEY });
+// Config OK (logs désactivés)
 
 // Initialiser Supabase (une seule fois)
 // Note: window.supabase est la bibliothèque chargée depuis le CDN
 if (typeof window.supabaseClient === 'undefined') {
     const { createClient } = window.supabase;
     window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
-    console.log('✅ Client Supabase initialisé');
+    // Client Supabase initialisé
 }
 
 // Variables globales pour les charts

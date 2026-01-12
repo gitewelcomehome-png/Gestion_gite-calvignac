@@ -270,5 +270,5 @@ if (typeof window !== 'undefined') {
         validateForm
     };
     
-    console.log('🛡️ SecurityUtils chargé et disponible globalement');
+    // SecurityUtils chargé
 }

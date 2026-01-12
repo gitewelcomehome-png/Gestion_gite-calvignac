@@ -8,11 +8,23 @@
 // 🔄 SYNCHRONISATION CALENDRIERS
 // ==========================================
 
+// Verrou global pour empêcher les synchronisations simultanées
+let syncInProgress = false;
+
 /**
  * Synchronise tous les calendriers iCal configurés
  * Met à jour les réservations depuis Airbnb, Abritel, etc.
  */
 async function syncAllCalendars() {
+    // ⚠️ PROTECTION : Empêcher les synchronisations simultanées (doublons)
+    if (syncInProgress) {
+        console.log('⏳ Synchronisation déjà en cours, ignorée');
+        return { total: 0, added: 0, skipped: 0, deleted: 0 };
+    }
+    
+    syncInProgress = true;
+    console.log('🔒 Verrou de synchronisation activé');
+    
     // Recharger les configs depuis localStorage
     window.ICAL_CONFIGS = getIcalConfigs();
     
@@ -25,10 +37,7 @@ async function syncAllCalendars() {
     const syncStatus = document.getElementById('syncStatus');
     const syncStatusIcon = document.getElementById('syncStatusIcon');
     const syncStatusText = document.getElementById('syncStatusText');
-    
-    // Réinitialiser les erreurs
-    window.SYNC_ERRORS = [];
-    
+
     // Afficher le statut
     if (syncStatus) {
         syncStatus.style.display = 'block';
@@ -66,12 +75,27 @@ async function syncAllCalendars() {
             // Récupérer les sources iCal depuis la BDD (JSONB)
             const icalSources = await window.gitesManager.getIcalSources(gite.id);
             
-            if (!icalSources || Object.keys(icalSources).length === 0) {
+            // Gérer à la fois l'ancien format (objet) et le nouveau (tableau)
+            let sources = [];
+            if (Array.isArray(icalSources)) {
+                // Nouveau format : [{url: '...', platform: '...'}, ...]
+                sources = icalSources.filter(s => s && s.url);
+            } else if (icalSources && typeof icalSources === 'object') {
+                // Ancien format : {airbnb: 'https://...', abritel: 'https://...'}
+                sources = Object.entries(icalSources)
+                    .filter(([platform, url]) => url && typeof url === 'string')
+                    .map(([platform, url]) => ({ platform, url }));
+            }
+            
+            if (sources.length === 0) {
                 addMessage(`  ℹ️ Aucune source iCal configurée`, 'info');
                 continue;
             }
             
-            for (const [platform, url] of Object.entries(icalSources)) {
+            for (const source of sources) {
+                const platform = source.platform || 'inconnu';
+                const url = source.url;
+                
                 if (!url) continue;
                 try {
                     addMessage(`  • ${platform}...`, 'info');
@@ -118,8 +142,11 @@ async function syncAllCalendars() {
             addMessage('   Allez dans ⚙️ Paramètres iCal pour les mettre à jour avec les nouvelles URLs de vos comptes Airbnb/Abritel.', 'error');
         }
         
-        await updateReservationsList();
-        await updateStats();
+        // Ne PAS appeler updateReservationsList ici - c'est l'appelant qui le fera
+        // await updateReservationsList(); // ❌ BOUCLE INFINIE
+        if (typeof updateStats === 'function') {
+            await updateStats().catch(err => console.warn('Stats update failed:', err));
+        }
         
         // Mettre à jour le statut en haut
         if (syncStatus) {
@@ -148,18 +175,31 @@ async function syncAllCalendars() {
         
         showToast(`✓ Sync terminée : ${totalAdded} réservations ajoutées`);
         
+        if (syncBtn) syncBtn.disabled = false;
+        
+        return { total: totalSources, added: totalAdded, skipped: totalSkipped, deleted: totalDeleted };
+        
     } catch (error) {
+        const syncStatus = document.getElementById('syncStatus');
+        const syncStatusIcon = document.getElementById('syncStatusIcon');
+        const syncStatusText = document.getElementById('syncStatusText');
+        const syncBtn = document.getElementById('syncBtn');
+        
         addMessage('✗ Erreur générale', 'error');
         if (syncStatus) {
             syncStatus.style.background = '#f8d7da';
             syncStatusIcon.textContent = '❌';
             syncStatusText.textContent = 'Erreur lors de la synchronisation';
         }
+        if (syncBtn) syncBtn.disabled = false;
         showToast('❌ Erreur sync', 'error');
         console.error(error);
+        return { total: 0, added: 0, skipped: 0, deleted: 0 };
+    } finally {
+        // ⚠️ TOUJOURS LIBÉRER LE VERROU, même en cas d'erreur
+        syncInProgress = false;
+        console.log('🔓 Verrou de synchronisation libéré');
     }
-    
-    if (syncBtn) syncBtn.disabled = false;
 }
 
 /**
@@ -173,11 +213,17 @@ async function syncCalendar(giteId, platform, url) {
     // Récupérer le gîte pour logs
     const gite = await window.gitesManager.getById(giteId);
     const giteName = gite ? gite.name : 'Inconnu';
+    
+    // Vérifier que l'URL est valide (pas un objet)
+    if (typeof url !== 'string' || !url.startsWith('http')) {
+        throw new Error(`URL invalide`);
+    }
+    
     // Essayer plusieurs proxies CORS en cascade
     const proxies = [
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+        `https://api.codetabs.com/v1/proxy/?quest=${url}` // Pas besoin d'encoder pour celui-ci
     ];
     
     let text;
@@ -186,7 +232,6 @@ async function syncCalendar(giteId, platform, url) {
     // Essayer chaque proxy jusqu'à ce qu'un fonctionne
     for (const proxyUrl of proxies) {
         try {
-            console.log(`🔄 Tentative avec proxy: ${proxyUrl.split('?')[0]}`);
             const response = await fetch(proxyUrl);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -195,14 +240,12 @@ async function syncCalendar(giteId, platform, url) {
             
             // Vérifier que c'est bien du iCal, pas une page d'erreur HTML
             if (!text.includes('BEGIN:VCALENDAR')) {
-                throw new Error('Réponse invalide (pas de VCALENDAR)');
+                throw new Error('Réponse invalide');
             }
             
-            console.log(`✅ Proxy réussi: ${proxyUrl.split('?')[0]}`);
             break; // Proxy fonctionne, sortir de la boucle
         } catch (err) {
             lastError = err;
-            console.warn(`⚠️ Proxy échoué: ${proxyUrl.split('?')[0]} - ${err.message}`);
             continue; // Essayer le prochain proxy
         }
     }
@@ -213,12 +256,10 @@ async function syncCalendar(giteId, platform, url) {
     }
     
     try {
+        // Analyse du flux iCal (silencieux)
         const jcalData = ICAL.parse(text);
         const comp = new ICAL.Component(jcalData);
         const vevents = comp.getAllSubcomponents('vevent');
-        
-        console.log(`🔍 ========== DÉBUT ANALYSE iCal ${giteName} / ${platform} ==========`);
-        console.log(`📊 Nombre total d'événements dans le flux: ${vevents.length}`);
         
         let added = 0;
         let skipped = 0;
@@ -261,15 +302,8 @@ async function syncCalendar(giteId, platform, url) {
         const foundReservationIds = new Set();
         
         // 🔍 AFFICHER TOUS LES ÉVÉNEMENTS BRUTS AVANT FILTRAGE
-        console.log(`\n📋 LISTE COMPLÈTE DES ÉVÉNEMENTS (avant filtrage):`);
-        vevents.forEach((vevent, index) => {
-            const event = new ICAL.Event(vevent);
-            const summary = event.summary || '';
-            const dateDebut = dateToLocalString(event.startDate.toJSDate());
-            const dateFin = dateToLocalString(event.endDate.toJSDate());
-            console.log(`   ${index + 1}. "${summary}" | ${dateDebut} → ${dateFin}`);
-        });
-        console.log(`\n🔄 DÉBUT DU TRAITEMENT:\n`);
+        // Liste des événements disponibles (silencieux)
+        // vevents contient tous les événements du flux iCal
         
         for (const vevent of vevents) {
             const event = new ICAL.Event(vevent);
@@ -282,10 +316,7 @@ async function syncCalendar(giteId, platform, url) {
             const dateDebut = dateToLocalString(event.startDate.toJSDate());
             const dateFin = dateToLocalString(event.endDate.toJSDate());
             
-            // 📋 LOG DÉTAILLÉ pour déboguer
-            console.log(`📅 Événement iCal: "${summary}" | ${giteName} | ${dateDebut} → ${dateFin}`);
-            
-            // 🚫 IGNORER LES BLOCAGES MANUELS (pas des vraies réservations)
+            //  IGNORER LES BLOCAGES MANUELS (pas des vraies réservations)
             // Airbnb, Abritel etc. envoient des événements "Blocked" ou "Not available" pour les dates bloquées
             // Aussi ignorer les événements très courts (< 2 jours) qui sont souvent des blocages techniques
             const blockTerms = [
@@ -391,12 +422,11 @@ async function syncCalendar(giteId, platform, url) {
             // Vérifier chevauchement avec d'autres réservations (pas de cette plateforme)
             const hasOverlap = await checkDateOverlap(giteId, dateDebut, dateFin, null, platform);
             if (hasOverlap) {
-                console.log(`⏭️ Réservation ignorée (chevauchement avec autre source): ${giteName} du ${dateDebut} au ${dateFin} - ${nom}`);
                 skipped++;
                 continue;
             }
             
-            console.log(`✅ Nouvelle réservation détectée: ${giteName} du ${dateDebut} au ${dateFin} - ${nom}`);
+            // Nouvelle réservation détectée (silencieux)
             
             // Déterminer site
             let site;
@@ -406,8 +436,10 @@ async function syncCalendar(giteId, platform, url) {
             else site = platform;
             
             const reservation = {
-                gite_id: giteId,
+                gite: giteId,        // Pour compatibilité
+                giteId: giteId,      // Nouveau format
                 nom: nom,
+                nomClient: nom,      // Pour compatibilité
                 telephone: '', // Téléphone vide, à remplir manuellement
                 provenance: '',
                 dateDebut: dateDebut,
@@ -423,8 +455,14 @@ async function syncCalendar(giteId, platform, url) {
                 syncedFrom: platform
             };
             
-            await addReservation(reservation);
-            added++;
+            console.log(`🔍 TENTATIVE INSERTION: ${nom} - ${dateDebut} → ${dateFin} (${site})`);
+            try {
+                await addReservation(reservation);
+                console.log(`✅ INSERTION RÉUSSIE: ${nom}`);
+                added++;
+            } catch (insertError) {
+                console.error(`❌ ERREUR INSERTION: ${nom}`, insertError);
+            }
         }
         
         // 🗑️ ÉTAPE 2 : Détecter les réservations annulées (plus dans le flux iCal)
@@ -625,7 +663,7 @@ async function cleanupBlockedReservations() {
                 .delete()
                 .eq('id', r.id);
             
-            console.log(`   ✓ Supprimé: ${r.gite} ${r.dateDebut} → ${r.dateFin} (${r.nom})`);
+            console.log(`   ✓ Supprimé: ${r.gite || r.giteId} ${r.dateDebut} → ${r.dateFin} (${r.nom})`);
         }
         
         return { deleted: toDelete.length };

@@ -1,46 +1,128 @@
-# 📊 État du projet - 6 janvier 2026
+# 📊 État du projet - 8 janvier 2026
 
-## ✅ Phase 1 - TERMINÉE (5 janvier 2026, 2h de travail)
+## ✅ Phase 1 - MIGRATION SUPABASE (7-8 janvier 2026)
 
-### Ce qui a été fait :
-- ✅ Audit sécurité complet (AUDIT_SECURITE.md)
-- ✅ Plan commercialisation 4 phases (PLAN_COMMERCIALISATION.md)
-- ✅ RLS activé sur 25 tables (script automatique)
-- ✅ Système authentification Supabase complet
-  - Login page moderne (login.html)
-  - AuthManager class (js/auth.js - 288 lignes)
-  - Protection index.html
-- ✅ Gestion des rôles utilisateurs (owner/cleaner/admin)
-  - Table user_roles créée
-  - Fonctions helper: has_role(), get_user_roles()
-  - Politiques RLS granulaires par rôle
-- ✅ Interface utilisateur
-  - Menu dropdown élégant avec nom + rôle
-  - Bouton déconnexion avec icône SVG
-  - Actions intégrées (iCal, Archives)
-- ✅ 5 scripts SQL debuggés et fonctionnels
-- ✅ Tests complets et corrections multiples
-- ✅ Mergé dans main + tag v5.1.0-security-phase1
-- ✅ Backup sécurité (branche production/v5-stable)
+### Contexte : Nouveau départ
+- Création nouveau projet Supabase : **gites-calvignac-test** (zgdjpetmnmetfkboxeyo)
+- Ancien projet conservé en backup (ivqiisnudabxemcxxyru)
+- Architecture multi-tenant simplifiée
 
-### Score sécurité : 3/10 → 5/10 🔒
+### ✅ Ce qui a été fait
 
-### Utilisateur créé :
-- Email : stephanecalvignac@hotmail.fr
-- UUID : dc38746e-1e1a-489d-aa8d-bafad34128ee
-- Rôle : owner (accès complet)
+### ✅ Ce qui a été fait
 
-### Problèmes résolus en temps réel :
-1. ✅ Syntaxe SQL (\d command → information_schema)
-2. ✅ Tables manquantes (IF EXISTS partout)
-3. ✅ Colonne type inexistante dans todos
-4. ✅ Race condition affichage rôle (updateUI() dans auth.js)
-5. ✅ Politiques retours_menage 403 forbidden
-6. ✅ validation.html 404 (restauré depuis archives)
+**1. Base de données (sql/fresh-start/01_schema_clean.sql)**
+- ✅ 4 tables créées : organizations, gites, organization_members, reservations
+- ✅ RLS activé sur toutes les tables
+- ✅ Policies configurées (insert/select/update)
+- ✅ Fonction helper : get_user_orgs()
+- ✅ Indexes pour performances
+
+**2. Authentification**
+- ✅ Inscription simplifiée (onboarding.html) : email + password uniquement
+- ✅ Connexion automatique après inscription
+- ✅ login.html fonctionnel avec nouveau projet
+- ✅ logout.html créé pour déconnexion rapide
+- ✅ Configuration unifiée (config.local.js + shared-config.js)
+
+**3. Architecture**
+- ✅ Multi-tenant avec organizations + members
+- ✅ Gîtes liés aux organisations
+- ✅ Réservations avec organization_id
+- ✅ Système de rôles : owner/admin/manager/viewer
+
+**4. Configuration projet**
+- ✅ Nouveau projet Supabase configuré
+- ✅ SMTP Hotmail configuré (en test)
+- ✅ Email confirmation contournée pour dev (connexion auto)
+
+### ⚠️ Ce qui n'a PAS fonctionné (abandonné)
+
+**1. Onboarding RPC complet**
+- ❌ RPC complete_onboarding() : erreurs cache PostgREST
+- ❌ Configuration gîtes pendant inscription
+- **Solution** : Inscription basique → configuration gîtes dans l'application
+
+**2. Email confirmation**
+- ❌ SMTP Hotmail : throttling/limites
+- ❌ Emails non reçus malgré config correcte
+- **Solution** : Connexion auto après inscription (mode dev)
+
+### 🔄 Changements architecturaux importants
+
+**Avant :** Onboarding complet (org + gîtes) → RPC → index.html  
+**Maintenant :** Inscription simple → login → index.html → config gîtes dans l'app
+
+**Avantages :**
+- Plus simple à débugger
+- Pas de dépendance aux RPC/cache
+- Onboarding plus rapide (1 étape au lieu de 2)
+- Configuration gîtes accessible depuis tableau de bord
 
 ---
 
-## 🎯 Prochaines étapes - Phases 2-4
+## 🚧 État actuel (8 janvier 2026, 12h30)
+
+### ✅ Fonctionnel
+- Inscription (onboarding.html)
+- Connexion (login.html)  
+- Déconnexion (logout.html)
+- Base données avec RLS
+- 1 utilisateur créé : stephanecalvignac@hotmail.fr
+- 1 organisation : "Mon Gîte"
+
+### ❌ À réparer (erreurs JavaScript dans index.html)
+1. dashboard.js : await hors fonction async
+2. statistiques.js : variable colors déclarée 2x
+3. draps.js : erreur syntaxe
+4. index.html : fin fichier inattendue
+5. widget-horaires-clients.js : erreur syntaxe
+6. Tables manquantes : user_roles, commits_log (anciennes)
+
+### Score sécurité : 4/10 🔒
+- ✅ RLS activé
+- ✅ Auth Supabase
+- ❌ Clés API encore visibles (config.local.js)
+- ❌ Pas de sanitization XSS
+- ❌ Pas de RGPD
+
+---
+
+## 🎯 Plan d'action - Prochaines étapes
+
+### IMMÉDIAT : Réparer index.html (30-45 min)
+**Priorité 1** : Corriger les 5 erreurs JavaScript pour débloquer l'application
+
+1. [ ] dashboard.js : wrapper async
+2. [ ] statistiques.js : renommer variable colors
+3. [ ] draps.js : corriger syntaxe
+4. [ ] index.html : fermer balises manquantes
+5. [ ] widget-horaires-clients.js : corriger syntaxe  
+6. [ ] Supprimer références aux tables obsolètes (user_roles, commits_log)
+
+**Objectif** : Application fonctionnelle avec nouveau schéma
+
+---
+
+### Phase 1bis : Adapter l'application au nouveau schéma (2-3h)
+
+**Actuellement** : L'app attend anciennes tables (clients, gites_anciens, etc.)  
+**Nouveau schéma** : organizations, gites, organization_members, reservations
+
+**Tâches :**
+1. [ ] Adapter js/reservations.js au nouveau schéma
+2. [ ] Adapter gestion gîtes (organizations au lieu de standalone)
+3. [ ] Créer interface config gîtes (remplace étape 2 onboarding)
+4. [ ] Supprimer code lié à user_roles (remplacé par organization_members.role)
+5. [ ] Tester flow complet : inscription → config gîtes → réservations
+
+**Fichiers concernés :**
+- js/reservations.js
+- js/gites-manager.js  
+- js/dashboard.js
+- index.html (sections gîtes)
+
+---
 
 ### Phase 2 : Protection des secrets (PRIORITÉ)
 **Temps estimé : 1-2 soirées de 2h**

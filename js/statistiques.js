@@ -85,8 +85,14 @@ async function updateAdvancedStats(reservations) {
     const nomsMois = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
     
     const selectedYear = parseInt(document.getElementById('yearFilterStats')?.value || new Date().getFullYear());
-    const historicalData = await getAllHistoricalData();
-    const histTotal = historicalData.find(d => d.year === selectedYear && d.gite === 'Total');
+    let historicalData = [];
+    let histTotal = null;
+    try {
+        historicalData = await getAllHistoricalData();
+        histTotal = historicalData.find(d => d.year === selectedYear && d.gite === 'Total');
+    } catch (e) {
+        // Table non disponible, on continue sans
+    }
     
     if (histTotal) {
         const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -197,7 +203,12 @@ async function filterStatsByYear() {
 
 async function updateAllCharts(filteredReservations = null) {
     const reservations = filteredReservations || await getAllReservations();
-    const historicalData = await getAllHistoricalData();
+    let historicalData = [];
+    try {
+        historicalData = await getAllHistoricalData();
+    } catch (e) {
+        // Table non disponible, on continue sans
+    }
     
     let reservationsForStats = reservations;
     if (!filteredReservations) {
@@ -323,7 +334,7 @@ async function updateAllCharts(filteredReservations = null) {
     const data = gites.map(g => {
         return currentReservations.filter(r => r.gite_id === g.id || r.gite === g.name).length;
     });
-    const colors = gites.map(g => g.color);
+    const giteColors = gites.map(g => g.color);
     
     const ctx2 = document.getElementById('gitesChart')?.getContext('2d');
     if (ctx2) {
@@ -335,7 +346,7 @@ async function updateAllCharts(filteredReservations = null) {
                 labels: labels,
                 datasets: [{
                     data: data,
-                    backgroundColor: colors,
+                    backgroundColor: giteColors,
                     borderWidth: 0
                 }]
             },
@@ -399,7 +410,7 @@ async function updateAllCharts(filteredReservations = null) {
         if (window.beneficesChartInstance) window.beneficesChartInstance.destroy();
         
         // Récupérer la simulation fiscale pour obtenir le total des charges annuelles
-        const { data: simFiscale } = await supabase
+        const { data: simFiscale } = await window.supabaseClient
             .from('simulations_fiscales')
             .select('*')
             .eq('annee', selectedYear)

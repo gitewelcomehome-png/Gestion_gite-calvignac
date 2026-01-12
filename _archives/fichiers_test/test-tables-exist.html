@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Tables</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test des tables tarifs</h1>
+    <pre id="result">Chargement...</pre>
+    
+    <script type="module">
+        import { SUPABASE_URL, SUPABASE_ANON_KEY } from './js/shared-config.js';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function testTables() {
+            const result = {};
+            
+            // Test tarifs_base
+            try {
+                const { data, error } = await supabase.from('tarifs_base').select('count').limit(1);
+                result.tarifs_base = error ? `❌ ${error.code || error.message}` : '✅ Existe';
+            } catch (e) {
+                result.tarifs_base = `❌ ${e.message}`;
+            }
+            
+            // Test regles_tarifaires
+            try {
+                const { data, error } = await supabase.from('regles_tarifaires').select('count').limit(1);
+                result.regles_tarifaires = error ? `❌ ${error.code || error.message}` : '✅ Existe';
+            } catch (e) {
+                result.regles_tarifaires = `❌ ${e.message}`;
+            }
+            
+            // Test configuration_calendrier
+            try {
+                const { data, error } = await supabase.from('configuration_calendrier').select('count').limit(1);
+                result.configuration_calendrier = error ? `❌ ${error.code || error.message}` : '✅ Existe';
+            } catch (e) {
+                result.configuration_calendrier = `❌ ${e.message}`;
+            }
+            
+            document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+        }
+        
+        testTables();
+    </script>
+</body>
+</html>

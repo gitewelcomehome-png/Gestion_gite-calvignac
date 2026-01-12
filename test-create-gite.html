@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Création Gîte</title>
+</head>
+<body>
+    <h1>Test Création Gîte - Diagnostic</h1>
+    <div id="logs" style="font-family: monospace; white-space: pre-wrap;"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/shared-config.js"></script>
+    
+    <script>
+        const log = (msg) => {
+            console.log(msg);
+            document.getElementById('logs').innerHTML += msg + '\n';
+        };
+        
+        async function testCreateGite() {
+            try {
+                log('=== TEST CRÉATION GÎTE ===\n');
+                
+                // 1. Vérifier la connexion
+                log('1️⃣ Vérification session...');
+                const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+                if (!session) throw new Error('Pas de session');
+                log(`✅ Session OK: ${session.user.email}`);
+                log(`   User ID: ${session.user.id}\n`);
+                
+                // 2. Vérifier la table gites
+                log('2️⃣ Test lecture table gites...');
+                const { data: existingGites, error: readError } = await window.supabaseClient
+                    .from('gites')
+                    .select('*');
+                if (readError) {
+                    log(`❌ Erreur lecture: ${readError.message}`);
+                    log(`   Code: ${readError.code}`);
+                    log(`   Details: ${readError.details}\n`);
+                } else {
+                    log(`✅ Lecture OK: ${existingGites.length} gîte(s) existant(s)\n`);
+                }
+                
+                // 3. Préparer les données
+                log('3️⃣ Préparation données...');
+                const testData = {
+                    owner_user_id: session.user.id,
+                    name: 'Test Gîte ' + Date.now(),
+                    slug: 'test-gite-' + Date.now(),
+                    icon: 'home',
+                    color: '#667eea',
+                    capacity: 4,
+                    address: 'Test Address',
+                    ical_sources: {},
+                    is_active: true
+                };
+                log('📦 Données à insérer:');
+                log(JSON.stringify(testData, null, 2) + '\n');
+                
+                // 4. Tester l'insertion
+                log('4️⃣ Test insertion...');
+                const { data, error } = await window.supabaseClient
+                    .from('gites')
+                    .insert(testData)
+                    .select()
+                    .single();
+                
+                if (error) {
+                    log(`❌ ERREUR INSERTION:`);
+                    log(`   Message: ${error.message}`);
+                    log(`   Code: ${error.code}`);
+                    log(`   Details: ${error.details}`);
+                    log(`   Hint: ${error.hint || 'N/A'}`);
+                    
+                    // Afficher l'erreur complète
+                    log(`\n📋 Erreur complète:`);
+                    log(JSON.stringify(error, null, 2));
+                } else {
+                    log(`✅ SUCCÈS !`);
+                    log(`   ID: ${data.id}`);
+                    log(`   Nom: ${data.name}`);
+                    log(`\n🎉 Le gîte a été créé avec succès !`);
+                }
+                
+            } catch (error) {
+                log(`\n💥 EXCEPTION:`);
+                log(`   ${error.message}`);
+                log(JSON.stringify(error, null, 2));
+            }
+        }
+        
+        // Lancer le test automatiquement
+        window.addEventListener('load', () => {
+            setTimeout(testCreateGite, 1000);
+        });
+    </script>
+</body>
+</html>
