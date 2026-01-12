@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>🔍 Diagnostic Tables Tarifs - STANDALONE</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            padding: 40px; 
+            max-width: 1000px; 
+            margin: 0 auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { 
+            color: #667eea; 
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        button { 
+            padding: 14px 28px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            border: none;
+            border-radius: 10px; 
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-warning { background: #ed8936; color: white; }
+        .result {
+            background: #f7fafc;
+            padding: 24px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .loading { 
+            color: #666; 
+            font-style: italic;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .status.connected { background: #c6f6d5; color: #22543d; }
+        .status.disconnected { background: #fed7d7; color: #742a2a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic Tables Tarifs</h1>
+        <p class="subtitle">Outil de vérification standalone - Pas de redirection</p>
+        
+        <div id="status"></div>
+        
+        <div class="btn-group">
+            <button class="btn-primary" onclick="checkTables()">🔍 Vérifier Tables</button>
+            <button class="btn-success" onclick="checkRLS()">🔐 Test INSERT</button>
+            <button class="btn-warning" onclick="showSQL()">📄 Voir SQL Migration</button>
+        </div>
+        
+        <pre id="result" class="result loading">Cliquez sur un bouton pour lancer le diagnostic...</pre>
+    </div>
+    
+    <script>
+        // ⚠️ Configuration en dur - pas d'import
+        const SUPABASE_URL = 'https://zgdjpetmnmetfkboxeyo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpnZGpwZXRtbm1ldGZrYm94ZXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQwNzI0NjMsImV4cCI6MjA0OTY0ODQ2M30.nGYVBB3fNL88zzrWW4bHR0wTMd2w56oUXDCdvCnkL7M';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Vérifier statut connexion au chargement
+        (async function() {
+            const { data: { session } } = await supabase.auth.getSession();
+            const statusDiv = document.getElementById('status');
+            if (session) {
+                statusDiv.innerHTML = `<span class="status connected">✅ Connecté: ${session.user.email}</span>`;
+            } else {
+                statusDiv.innerHTML = `<span class="status disconnected">⚠️ Non connecté - Certains tests échoueront</span>`;
+            }
+        })();
+        
+        async function checkTables() {
+            const log = [];
+            document.getElementById('result').textContent = '⏳ Vérification en cours...\n';
+            
+            try {
+                // Session
+                const { data: { session } } = await supabase.auth.getSession();
+                log.push('═════════════════════════════════════════════════');
+                log.push('🔐 SESSION');
+                log.push('═════════════════════════════════════════════════');
+                log.push(`Statut: ${session ? '✅ Connecté' : '❌ Non connecté'}`);
+                if (session) {
+                    log.push(`Email: ${session.user.email}`);
+                    log.push(`User ID: ${session.user.id}`);
+                }
+                log.push('');
+                
+                // Table 1: tarifs_base
+                log.push('═════════════════════════════════════════════════');
+                log.push('📊 TABLE: tarifs_base');
+                log.push('═════════════════════════════════════════════════');
+                try {
+                    const { data, error, count } = await supabase
+                        .from('tarifs_base')
+                        .select('*', { count: 'exact', head: false });
+                        
+                    if (error) {
+                        log.push(`❌ ERREUR`);
+                        log.push(`   Message: ${error.message}`);
+                        log.push(`   Code: ${error.code || 'N/A'}`);
+                        
+                        if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
+                            log.push('');
+                            log.push('🚨 DIAGNOSTIC: La table N\'EXISTE PAS dans la base !');
+                            log.push('➡️  Action: Exécutez le SQL de migration');
+                        }
+                    } else {
+                        log.push(`✅ TABLE EXISTE`);
+                        log.push(`   Nombre d'enregistrements: ${count || 0}`);
+                        if (data && data.length > 0) {
+                            log.push(`   Premier enregistrement:`);
+                            log.push(`   ${JSON.stringify(data[0], null, 4)}`);
+                        }
+                    }
+                } catch (e) {
+                    log.push(`💥 Exception: ${e.message}`);
+                }
+                log.push('');
+                
+                // Table 2: regles_tarifaires
+                log.push('═════════════════════════════════════════════════');
+                log.push('⚙️  TABLE: regles_tarifaires');
+                log.push('═════════════════════════════════════════════════');
+                try {
+                    const { data, error, count } = await supabase
+                        .from('regles_tarifaires')
+                        .select('*', { count: 'exact' });
+                        
+                    if (error) {
+                        log.push(`❌ ERREUR: ${error.message}`);
+                        log.push(`   Code: ${error.code || 'N/A'}`);
+                        if (error.code === 'PGRST116') {
+                            log.push('🚨 La table N\'EXISTE PAS');
+                        }
+                    } else {
+                        log.push(`✅ TABLE EXISTE`);
+                        log.push(`   Enregistrements: ${count || 0}`);
+                    }
+                } catch (e) {
+                    log.push(`💥 Exception: ${e.message}`);
+                }
+                log.push('');
+                
+                // Table 3: configuration_calendrier
+                log.push('═════════════════════════════════════════════════');
+                log.push('🔧 TABLE: configuration_calendrier');
+                log.push('═════════════════════════════════════════════════');
+                try {
+                    const { data, error, count } = await supabase
+                        .from('configuration_calendrier')
+                        .select('*', { count: 'exact' });
+                        
+                    if (error) {
+                        log.push(`❌ ERREUR: ${error.message}`);
+                        log.push(`   Code: ${error.code || 'N/A'}`);
+                        if (error.code === 'PGRST116') {
+                            log.push('🚨 La table N\'EXISTE PAS');
+                        }
+                    } else {
+                        log.push(`✅ TABLE EXISTE`);
+                        log.push(`   Enregistrements: ${count || 0}`);
+                    }
+                } catch (e) {
+                    log.push(`💥 Exception: ${e.message}`);
+                }
+                log.push('');
+                
+                // Membership
+                if (session) {
+                    log.push('═════════════════════════════════════════════════');
+                    log.push('🏢 ORGANIZATION MEMBERSHIP');
+                    log.push('═════════════════════════════════════════════════');
+                    try {
+                        const { data, error } = await supabase
+                            .from('organization_members')
+                            .select('organization_id, role')
+                            .eq('user_id', session.user.id);
+                            
+                        if (error) {
+                            log.push(`❌ Erreur: ${error.message}`);
+                        } else if (data && data.length > 0) {
+                            log.push(`✅ Organization ID: ${data[0].organization_id}`);
+                            log.push(`✅ Role: ${data[0].role}`);
+                        } else {
+                            log.push(`⚠️  Aucune organisation associée`);
+                        }
+                    } catch (e) {
+                        log.push(`💥 Exception: ${e.message}`);
+                    }
+                    log.push('');
+                }
+                
+                // Conclusion
+                log.push('═════════════════════════════════════════════════');
+                log.push('📋 CONCLUSION');
+                log.push('═════════════════════════════════════════════════');
+                const hasErrors = log.join('').includes('🚨');
+                if (hasErrors) {
+                    log.push('❌ LES TABLES NE SONT PAS CRÉÉES');
+                    log.push('');
+                    log.push('🔧 ACTION REQUISE:');
+                    log.push('   1. Ouvrez: https://zgdjpetmnmetfkboxeyo.supabase.co/project/_/sql');
+                    log.push('   2. Cliquez "New Query"');
+                    log.push('   3. Copiez le SQL du fichier:');
+                    log.push('      sql/migrations/20260111_create_tarifs_tables.sql');
+                    log.push('   4. Cliquez "RUN"');
+                } else {
+                    log.push('✅ Toutes les tables existent et sont accessibles');
+                    log.push('✅ Le système est prêt à fonctionner');
+                }
+                
+            } catch (e) {
+                log.push(`💥 Erreur globale: ${e.message}`);
+                log.push(e.stack);
+            }
+            
+            document.getElementById('result').textContent = log.join('\n');
+        }
+        
+        async function checkRLS() {
+            const log = [];
+            document.getElementById('result').textContent = '⏳ Test RLS en cours...\n';
+            
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                log.push('═════════════════════════════════════════════════');
+                log.push('🧪 TEST INSERT RLS');
+                log.push('═════════════════════════════════════════════════');
+                log.push('');
+                
+                if (!session) {
+                    log.push('❌ Vous devez être connecté pour tester les RLS');
+                    log.push('➡️  Connectez-vous d\'abord via l\'application principale');
+                    document.getElementById('result').textContent = log.join('\n');
+                    return;
+                }
+                
+                // Récupérer un gîte
+                const { data: gites, error: giteError } = await supabase
+                    .from('gites')
+                    .select('id, organization_id, nom')
+                    .limit(1);
+                    
+                if (giteError) {
+                    log.push(`❌ Erreur récupération gîte: ${giteError.message}`);
+                } else if (!gites || gites.length === 0) {
+                    log.push('❌ Aucun gîte trouvé dans la base');
+                } else {
+                    log.push(`📍 Gîte de test: ${gites[0].nom}`);
+                    log.push(`   ID: ${gites[0].id}`);
+                    log.push(`   Organization: ${gites[0].organization_id}`);
+                    log.push('');
+                    
+                    const testDate = new Date().toISOString().split('T')[0];
+                    const testData = {
+                        organization_id: gites[0].organization_id,
+                        gite_id: gites[0].id,
+                        date: testDate,
+                        prix_nuit: 123.45
+                    };
+                    
+                    log.push('📤 Tentative INSERT:');
+                    log.push(JSON.stringify(testData, null, 2));
+                    log.push('');
+                    
+                    const { data, error } = await supabase
+                        .from('tarifs_base')
+                        .upsert(testData, { onConflict: 'gite_id,date' })
+                        .select();
+                    
+                    if (error) {
+                        log.push('❌ ÉCHEC INSERT:');
+                        log.push(`   Message: ${error.message}`);
+                        log.push(`   Code: ${error.code || 'N/A'}`);
+                        
+                        if (error.code === 'PGRST116') {
+                            log.push('');
+                            log.push('🚨 La table tarifs_base N\'EXISTE PAS !');
+                        } else if (error.code === '42501') {
+                            log.push('');
+                            log.push('🚨 Problème de permissions RLS');
+                            log.push('   Vérifiez les policies dans Supabase');
+                        }
+                    } else {
+                        log.push('✅ INSERT RÉUSSI !');
+                        log.push('');
+                        log.push('📥 Données insérées:');
+                        log.push(JSON.stringify(data, null, 2));
+                        log.push('');
+                        log.push('✅ Les RLS fonctionnent correctement');
+                        log.push('✅ Le système est opérationnel');
+                    }
+                }
+            } catch (e) {
+                log.push(`💥 Exception: ${e.message}`);
+                log.push(e.stack);
+            }
+            
+            document.getElementById('result').textContent = log.join('\n');
+        }
+        
+        function showSQL() {
+            const sql = `-- Copiez ce SQL et exécutez-le dans Supabase Dashboard
+-- URL: https://zgdjpetmnmetfkboxeyo.supabase.co/project/_/sql
+
+Cliquez "New Query" puis collez le contenu du fichier:
+
+📄 sql/migrations/20260111_create_tarifs_tables.sql
+
+Le fichier contient:
+- CREATE TABLE tarifs_base
+- CREATE TABLE regles_tarifaires  
+- CREATE TABLE configuration_calendrier
+- Index pour performances
+- RLS policies pour sécurité
+- Triggers pour updated_at
+
+Total: 188 lignes SQL`;
+
+            document.getElementById('result').textContent = sql;
+        }
+    </script>
+</body>
+</html>

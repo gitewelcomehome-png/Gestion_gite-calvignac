@@ -1,21 +1,25 @@
-<div class="card">
-    <div class="card-header">
-        <span class="card-icon">💰</span>
-        <h2 class="card-title">Calculateur Fiscal LMP</h2>
-        <p style="color: #7f8c8d; font-size: 0.9rem; margin: 8px 0 0 0;">Optimisez votre déclaration et calculez vos charges déductibles</p>
+<div class="tab-container">
+    <!-- Header Neo-Brutalism -->
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">💰 Fiscalité LMNP</h2>
+                <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Optimisez votre déclaration et calculez vos charges</p>
+            </div>
+        </div>
     </div>
 
     <!-- Barre de gestion d'années -->
-    <div style="background: #f8f9fa; border-radius: 10px; padding: 15px 20px; margin-bottom: 20px;">
+    <div style="background: #f8f9fa; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 12px; padding: 15px 20px; margin-bottom: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <label style="font-weight: 600; color: #2c3e50;">📅 Année fiscale :</label>
-                <select id="annee_selector" onchange="chargerAnnee(this.value)" style="padding: 8px 15px; border-radius: 6px; border: 2px solid #3498db; font-size: 1rem; font-weight: 600; color: #2c3e50;">
+                <select id="annee_selector" onchange="chargerAnnee(this.value)" style="padding: 8px 15px; border-radius: 6px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; font-size: 1rem; font-weight: 600; color: #2c3e50;">
                     <!-- Rempli dynamiquement -->
                 </select>
             </div>
             <div style="display: flex; gap: 10px;">
-                <button type="button" onclick="creerNouvelleAnnee()" class="btn btn-primary" title="Créer l'année suivante" style="padding: 8px 15px; font-size: 0.9rem;">
+                <button type="button" onclick="creerNouvelleAnnee()" class="btn-neo" title="Créer l'année suivante" style="background: #74b9ff; color: white; padding: 8px 15px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
                     ➕ Nouvelle Année
                 </button>
             </div>
@@ -24,7 +28,8 @@
             <span style="color: #1976d2; font-weight: 600;">ℹ️ CA calculé automatiquement | Sauvegarde automatique activée</span>
         </div>
         </div>
-    </div>
+
+<div class="card">
 
     <form id="calculateur-lmp" onsubmit="calculerFiscalite(event)">
         

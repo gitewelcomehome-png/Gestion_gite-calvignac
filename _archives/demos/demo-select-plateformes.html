@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démo - Sélection Plateforme avec Icônes</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f1f2f6;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2D3436;
+            margin-bottom: 10px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: #636e72;
+            margin-top: 0;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #74b9ff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-box strong {
+            color: #0984e3;
+        }
+
+        .demo-row {
+            display: grid;
+            grid-template-columns: 50px 200px 1fr;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #2D3436;
+        }
+
+        select {
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .platform-icon-preview {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .platform-icon-preview:empty::before {
+            content: '🌐';
+            font-size: 24px;
+        }
+
+        .result {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            color: #636e72;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Démonstration Sélection Plateforme iCal</h1>
+    
+    <div class="section">
+        <h2>Version 1 : Select Standard HTML + Icône à côté</h2>
+        
+        <div class="info-box">
+            <strong>ℹ️ Limitation HTML :</strong> Les éléments <code>&lt;select&gt;</code> natifs ne peuvent pas afficher d'images ou de SVG dans leurs options. L'icône s'affiche donc dans une case séparée à gauche.
+        </div>
+        
+        <div class="demo-row">
+            <div class="platform-icon-preview" id="icon-preview-1"></div>
+            <label>Plateforme :</label>
+            <select id="platform-select-1" onchange="updateIconDemo(1)">
+                <option value="">Autre plateforme</option>
+                <option value="airbnb">Airbnb</option>
+                <option value="booking">Booking.com</option>
+                <option value="vrbo">Vrbo</option>
+                <option value="abritel">Abritel</option>
+                <option value="homeaway">HomeAway</option>
+                <option value="tripadvisor">TripAdvisor</option>
+                <option value="gites-de-france">Gîtes de France</option>
+            </select>
+        </div>
+        
+        <div class="result" id="result-1">
+            Sélectionnez une plateforme pour voir son icône
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Version 2 : Custom Select avec icônes intégrées</h2>
+        
+        <div class="info-box">
+            <strong>✨ Dropdown personnalisé :</strong> Cette version utilise des divs pour créer un menu déroulant personnalisé qui affiche les icônes directement dans la liste. Plus visuel mais plus complexe.
+        </div>
+        
+        <div id="custom-select-container"></div>
+        
+        <div class="result" id="result-2">
+            Cliquez sur le bouton pour voir toutes les plateformes avec leurs icônes
+        </div>
+    </div>
+
+    <script src="js/platform-icons.js"></script>
+    <script src="js/custom-platform-select.js"></script>
+    <script>
+        // VERSION 1 : Select standard
+        function updateIconDemo(version) {
+            const select = document.getElementById('platform-select-1');
+            const iconPreview = document.getElementById('icon-preview-1');
+            const result = document.getElementById('result-1');
+            
+            const platform = select.value;
+            const platformName = select.options[select.selectedIndex].text;
+            
+            if (window.PlatformIcons) {
+                iconPreview.innerHTML = window.PlatformIcons.get(platform);
+            }
+            
+            result.innerHTML = `
+                <strong>Valeur sélectionnée :</strong> "${platform}"<br>
+                <strong>Nom affiché :</strong> ${platformName}<br>
+                <strong>Icône :</strong> ${platform ? 'Affichée à gauche ⬅️' : 'Globe par défaut 🌐'}
+            `;
+        }
+        
+        // Initialiser l'icône par défaut
+        window.addEventListener('DOMContentLoaded', () => {
+            updateIconDemo(1);
+            
+            // VERSION 2 : Custom select
+            const container = document.getElementById('custom-select-container');
+            const customSelect = window.CustomPlatformSelect.create(container, (value, platform) => {
+                const result = document.getElementById('result-2');
+                result.innerHTML = `
+                    <strong>Valeur sélectionnée :</strong> "${value}"<br>
+                    <strong>Nom affiché :</strong> ${platform.name}<br>
+                    <strong>Icône :</strong> Intégrée dans le dropdown ✨
+                `;
+            });
+            
+            container.appendChild(customSelect);
+            
+            // Injecter le CSS du custom select
+            const style = document.createElement('style');
+            style.textContent = window.CustomPlatformSelect.getCSS();
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

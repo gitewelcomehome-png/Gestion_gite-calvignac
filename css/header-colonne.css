@@ -1,0 +1,45 @@
+/* --- VARIABLES DE STYLE --- */
+:root {
+    --stroke: #2D3436;       /* Contour Noir/Gris */
+    --shadow: 4px 4px 0px var(--stroke); /* Ombre dure */
+    
+    /* LA COULEUR DEMANDÉE : Bleu Trévoux Très Très Clair */
+    --bg-trevoux-light: #e1f0ff; 
+}
+
+/* --- LE HEADER FIXE (L'élément demandé) --- */
+.header-colonne-trevoux {
+    /* 1. Position Fixe dans la colonne */
+    position: sticky !important;
+    top: var(--header-height, 70px) !important;
+    z-index: 100 !important;
+
+    /* 2. Le Style "Barre" (Pas carte) */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 15px 25px !important;
+    margin-bottom: 20px !important; /* Espace avant la semaine 2 */
+
+    /* 3. Couleurs & Bordures */
+    background-color: var(--bg-trevoux-light) !important; /* Fond Bleu très pâle */
+    border: 3px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow) !important; /* Ombre portée style "Gestion Gîtes" */
+}
+
+/* Le Texte et l'Icône */
+.header-content {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    font-size: 1.5rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    color: var(--stroke) !important;
+}
+
+.header-content svg {
+    flex-shrink: 0 !important;
+}

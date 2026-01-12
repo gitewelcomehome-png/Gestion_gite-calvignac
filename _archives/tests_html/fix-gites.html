@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Migrations SQL - Fix Gîtes</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .migrations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .migration-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .migration-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .migration-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .migration-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .migration-title {
+            flex: 1;
+        }
+
+        .migration-title h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: #2D3436;
+        }
+
+        .migration-title p {
+            margin: 5px 0 0;
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+
+        .sql-preview {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .btn-copy {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-copy.copied {
+            background: #00b894;
+        }
+
+        .final-step {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .final-step h2 {
+            color: #2D3436;
+            margin-bottom: 20px;
+        }
+
+        .btn-supabase {
+            display: inline-block;
+            background: #00b894;
+            color: white;
+            text-decoration: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .btn-supabase:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.4);
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        .instructions li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Migrations SQL - Réparation Gîtes</h1>
+
+        <div class="migrations-grid">
+            <!-- Migration 1 -->
+            <div class="migration-card">
+                <div class="migration-header">
+                    <div class="migration-number">1</div>
+                    <div class="migration-title">
+                        <h2>Colonnes manquantes</h2>
+                        <p>emoji, location, ical_urls, is_active</p>
+                    </div>
+                </div>
+                <div class="sql-preview">ALTER TABLE gites 
+ADD COLUMN IF NOT EXISTS emoji TEXT DEFAULT 'house';
+ADD COLUMN IF NOT EXISTS location TEXT;
+ADD COLUMN IF NOT EXISTS ical_urls JSONB DEFAULT '[]'::jsonb;
+ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;</div>
+                <button class="btn-copy" onclick="copyMigration(1)">📋 Copier Migration 1</button>
+            </div>
+
+            <!-- Migration 2 -->
+            <div class="migration-card">
+                <div class="migration-header">
+                    <div class="migration-number">2</div>
+                    <div class="migration-title">
+                        <h2>Politiques RLS</h2>
+                        <p>Permissions de sécurité</p>
+                    </div>
+                </div>
+                <div class="sql-preview">ALTER TABLE gites ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view gites"
+ON gites FOR SELECT USING (
+    organization_id IN (
+        SELECT organization_id FROM organization_members
+        WHERE user_id = auth.uid()
+    )
+);</div>
+                <button class="btn-copy" onclick="copyMigration(2)">📋 Copier Migration 2</button>
+            </div>
+
+            <!-- Migration 3 -->
+            <div class="migration-card">
+                <div class="migration-header">
+                    <div class="migration-number">3</div>
+                    <div class="migration-title">
+                        <h2>Organisation auto</h2>
+                        <p>Créer organisation pour users existants</p>
+                    </div>
+                </div>
+                <div class="sql-preview">CREATE OR REPLACE FUNCTION create_user_organization()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Créer org et membership
+    INSERT INTO organizations ...
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;</div>
+                <button class="btn-copy" onclick="copyMigration(3)">📋 Copier Migration 3</button>
+            </div>
+        </div>
+
+        <div class="final-step">
+            <h2>🎯 Étape Finale</h2>
+            <p>Une fois les 3 migrations copiées et exécutées dans Supabase :</p>
+            <a href="https://supabase.com/dashboard/project/zgdjpetmnmetfkboxeyo/sql" target="_blank" class="btn-supabase">
+                🚀 Ouvrir SQL Editor Supabase
+            </a>
+            
+            <div class="instructions">
+                <strong>📝 Instructions :</strong>
+                <ol>
+                    <li>Clique sur chaque bouton "📋 Copier Migration" ci-dessus (dans l'ordre 1, 2, 3)</li>
+                    <li>Ouvre le SQL Editor Supabase (bouton ci-dessus)</li>
+                    <li>Colle chaque SQL et clique "Run" (exécute-les une par une)</li>
+                    <li>Recharge ton application et crée ton premier gîte ! 🎉</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <textarea id="clipboard" style="position:absolute;left:-9999px;"></textarea>
+
+    <script>
+        const migrations = {
+            1: `-- Migration 1 : Ajouter les colonnes manquantes
+ALTER TABLE gites ADD COLUMN IF NOT EXISTS emoji TEXT DEFAULT 'house';
+ALTER TABLE gites ADD COLUMN IF NOT EXISTS location TEXT;
+ALTER TABLE gites ADD COLUMN IF NOT EXISTS ical_urls JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE gites ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+CREATE INDEX IF NOT EXISTS idx_gites_active ON gites(is_active);
+COMMENT ON COLUMN gites.emoji IS 'Type de propriété';
+COMMENT ON COLUMN gites.location IS 'Localisation du gîte';
+COMMENT ON COLUMN gites.ical_urls IS 'URLs iCal';
+COMMENT ON COLUMN gites.is_active IS 'Soft delete';`,
+
+            2: `-- Migration 2 : Politiques RLS
+ALTER TABLE gites ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view gites in their organization" ON gites;
+CREATE POLICY "Users can view gites in their organization" ON gites FOR SELECT
+USING (organization_id IN (SELECT organization_id FROM organization_members WHERE user_id = auth.uid()));
+
+DROP POLICY IF EXISTS "Users can create gites in their organization" ON gites;
+CREATE POLICY "Users can create gites in their organization" ON gites FOR INSERT
+WITH CHECK (organization_id IN (SELECT organization_id FROM organization_members WHERE user_id = auth.uid() AND role IN ('owner', 'admin', 'manager')));
+
+DROP POLICY IF EXISTS "Users can update gites in their organization" ON gites;
+CREATE POLICY "Users can update gites in their organization" ON gites FOR UPDATE
+USING (organization_id IN (SELECT organization_id FROM organization_members WHERE user_id = auth.uid() AND role IN ('owner', 'admin', 'manager')))
+WITH CHECK (organization_id IN (SELECT organization_id FROM organization_members WHERE user_id = auth.uid() AND role IN ('owner', 'admin', 'manager')));
+
+DROP POLICY IF EXISTS "Users can delete gites in their organization" ON gites;
+CREATE POLICY "Users can delete gites in their organization" ON gites FOR UPDATE
+USING (organization_id IN (SELECT organization_id FROM organization_members WHERE user_id = auth.uid() AND role IN ('owner', 'admin')))
+WITH CHECK (organization_id IN (SELECT organization_id FROM organization_members WHERE user_id = auth.uid() AND role IN ('owner', 'admin')));`,
+
+            3: `-- Migration 3 : Créer automatiquement une organisation
+CREATE OR REPLACE FUNCTION create_user_organization()
+RETURNS TRIGGER AS $$
+DECLARE
+    new_org_id UUID;
+BEGIN
+    INSERT INTO organizations (name, slug, created_at)
+    VALUES ('Mon Organisation', 'org-' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 12), NOW())
+    RETURNING id INTO new_org_id;
+    
+    INSERT INTO organization_members (organization_id, user_id, role, created_at)
+    VALUES (new_org_id, NEW.id, 'owner', NOW());
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW
+    EXECUTE FUNCTION create_user_organization();
+
+-- Créer une org pour les users existants
+DO $$
+DECLARE
+    user_record RECORD;
+    new_org_id UUID;
+BEGIN
+    FOR user_record IN 
+        SELECT u.id FROM auth.users u
+        LEFT JOIN organization_members om ON om.user_id = u.id
+        WHERE om.user_id IS NULL
+    LOOP
+        INSERT INTO organizations (name, slug, created_at)
+        VALUES ('Mon Organisation', 'org-' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 12), NOW())
+        RETURNING id INTO new_org_id;
+        
+        INSERT INTO organization_members (organization_id, user_id, role, created_at)
+        VALUES (new_org_id, user_record.id, 'owner', NOW());
+    END LOOP;
+END $$;`
+        };
+
+        function copyMigration(num) {
+            const textarea = document.getElementById('clipboard');
+            textarea.value = migrations[num];
+            textarea.select();
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.classList.add('copied');
+            btn.textContent = '✅ Copié !';
+            
+            setTimeout(() => {
+                btn.classList.remove('copied');
+                btn.textContent = originalText;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

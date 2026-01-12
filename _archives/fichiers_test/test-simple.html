@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Simple</title>
+</head>
+<body>
+    <h1>Test de syntaxe JavaScript</h1>
+    <div id="result"></div>
+    
+    <script>
+        console.log('Script 1: Début');
+        
+        function showNotification(message, type) {
+            if (window.showToast) {
+                window.showToast(message, type);
+            } else {
+                console.log('[' + type + '] ' + message);
+            }
+        }
+        
+        console.log('Script 1: Fin');
+    </script>
+    
+    <script>
+        console.log('Script 2: Début');
+        document.getElementById('result').textContent = 'OK - Pas d\'erreur de syntaxe';
+        console.log('Script 2: Fin');
+    </script>
+</body>
+</html>

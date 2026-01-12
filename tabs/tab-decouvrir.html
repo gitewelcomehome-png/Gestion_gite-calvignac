@@ -1,22 +1,21 @@
-            
-            <!-- SÉLECTEUR DE GÎTE -->
-            <div class="card" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: white;">
-                <div class="card-header" style="border-bottom: 2px solid rgba(255,255,255,0.3);">
-                    <span class="card-icon">🗺️</span>
-                    <h2 class="card-title">À Découvrir Autour des Gîtes</h2>
-                </div>
-                <div style="padding: 20px;">
-                    <p style="font-size: 1.1rem; opacity: 0.95; margin-bottom: 20px;">Activités, restaurants, sites touristiques dans un rayon de 25km • Mise à jour automatique des événements</p>
-                    <div style="display: flex; gap: 15px;">
-                        <button class="btn" style="background: white; color: #FF6B6B; font-weight: 700; padding: 15px 40px;" onclick="selectGiteDecouvrir('Trevoux')">
-                            🏰 Trevoux
-                        </button>
-                        <button class="btn" style="background: white; color: #FF6B6B; font-weight: 700; padding: 15px 40px;" onclick="selectGiteDecouvrir('Couzon')">
-                            ⛰️ Couzon
-                        </button>
-                    </div>
-                </div>
+<div class="tab-container">
+    <!-- Header Neo-Brutalism -->
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">🗺️ À Découvrir</h2>
+                <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Activités, restaurants et sites touristiques (rayon 25km)</p>
             </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-neo" onclick="selectGiteDecouvrir('Trevoux')" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    🏰 Trevoux
+                </button>
+                <button class="btn-neo" onclick="selectGiteDecouvrir('Couzon')" style="background: white; color: #2D3436; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    ⛰️ Couzon
+                </button>
+            </div>
+        </div>
+    </div>
 
             <form id="formDecouvrir" style="display: none;">
                 <input type="hidden" id="decouvrir_gite">

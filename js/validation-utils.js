@@ -388,4 +388,4 @@ window.ValidationUtils = {
     rules: ValidationRules
 };
 
-console.log('✅ ValidationUtils chargé et disponible globalement');
+// ValidationUtils chargé

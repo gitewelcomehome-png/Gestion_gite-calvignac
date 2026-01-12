@@ -9,25 +9,28 @@ class GitesManager {
         this.gitesById = new Map();
         this.gitesBySlug = new Map();
         this.loaded = false;
+        this._loadPromise = null; // Promise cache
         this.organizationId = null;
     }
 
     /**
-     * Charger tous les gîtes de l'organisation courante
+     * Charger tous les gîtes de l'utilisateur connecté (RGPD)
      */
-    async loadGites(organizationId = null) {
-        try {
-            this.organizationId = organizationId;
-
+    async loadGites() {
+        // Promise cache: si chargement en cours, retourner la même promesse
+        if (this._loadPromise) {
+            return this._loadPromise;
+        }
+        
+        this._loadPromise = (async () => {
+            try {
+            // Charger uniquement les gîtes de l'utilisateur connecté
+            // Le filtre owner_user_id est géré automatiquement par RLS
             let query = window.supabaseClient
                 .from('gites')
                 .select('*')
                 .eq('is_active', true)
                 .order('name');
-
-            if (organizationId) {
-                query = query.eq('organization_id', organizationId);
-            }
 
             const { data, error } = await query;
 
@@ -38,18 +41,28 @@ class GitesManager {
 
             this.gites = data || [];
             
+            // Appliquer l'ordre personnalisé depuis localStorage
+            this.applySavedOrder();
+            
             // Indexer par ID et slug pour accès rapide
             this.gitesById = new Map(this.gites.map(g => [g.id, g]));
             this.gitesBySlug = new Map(this.gites.map(g => [g.slug, g]));
             
             this.loaded = true;
-            
-            console.log(`✅ ${this.gites.length} gîtes chargés`, this.gites.map(g => g.name));
-            
             return this.gites;
 
         } catch (error) {
             console.error('❌ Erreur loadGites:', error);
+            this._loadPromise = null; // Reset cache en cas d'erreur
+            throw error;
+        }
+        })();
+        
+        try {
+            const result = await this._loadPromise;
+            this._loadPromise = null; // Reset cache après succès
+            return result;
+        } catch (error) {
             throw error;
         }
     }
@@ -79,8 +92,25 @@ class GitesManager {
     /**
      * Obtenir tous les gîtes
      */
-    getAll() {
+    async getAll(forceReload = false) {
+        // Si pas encore chargé ou rechargement forcé, charger depuis Supabase
+        if (!this.loaded || forceReload) {
+            // Architecture simplifiée : RLS filtre automatiquement par owner_user_id
+            await this.loadGites();
+        }
         return this.gites;
+    }
+
+    /**
+     * Obtenir un gîte par son nom
+     */
+    getByName(name) {
+        if (!name) return null;
+        const normalized = name.toLowerCase().trim();
+        return this.gites.find(g => 
+            g.name.toLowerCase().trim() === normalized || 
+            g.slug === normalized
+        );
     }
 
     /**
@@ -96,6 +126,108 @@ class GitesManager {
         const index = this.gites.findIndex(g => g.id === giteId);
         const icons = ['🏡', '⛰️', '🏰', '🌲', '🌊', '🏔️', '🌄', '🌅'];
         return icons[index % icons.length];
+    }
+
+    /**
+     * Créer un nouveau gîte
+     */
+    async create(giteData) {
+        try {
+            // Générer un slug unique à partir du nom
+            const baseSlug = giteData.name
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Supprimer les accents
+                .replace(/[^a-z0-9]+/g, '-')     // Remplacer les caractères spéciaux par -
+                .replace(/^-+|-+$/g, '');         // Supprimer les - au début/fin
+            
+            const slug = baseSlug || 'gite-' + Date.now();
+            
+            // Récupérer l'ID utilisateur pour la RLS policy
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            if (!user) throw new Error('Utilisateur non authentifié');
+            
+            const insertData = {
+                owner_user_id: user.id,
+                name: giteData.name,
+                slug: slug,
+                icon: giteData.emoji || 'house-simple',
+                color: giteData.color || '#667eea',
+                capacity: giteData.capacity || null,
+                address: giteData.location || null,
+                ical_urls: giteData.ical_urls && giteData.ical_urls.length > 0 
+                    ? giteData.ical_urls
+                    : []
+            };
+            
+            console.log('📤 Données INSERT gites:', insertData);
+            
+            // Créer avec owner_user_id explicite pour passer la RLS policy
+            const { data, error } = await window.supabaseClient
+                .from('gites')
+                .insert(insertData)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('❌ Erreur Supabase détaillée:', error);
+                throw error;
+            }
+
+            // Recharger la liste
+            await this.loadGites();
+            
+            return data;
+        } catch (error) {
+            console.error('❌ Erreur création gîte:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Mettre à jour un gîte
+     */
+    async update(giteId, giteData) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('gites')
+                .update(giteData)
+                .eq('id', giteId)
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            // Recharger la liste
+            await this.loadGites(this.organizationId);
+            
+            return data;
+        } catch (error) {
+            console.error('❌ Erreur mise à jour gîte:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Supprimer un gîte (soft delete)
+     */
+    async delete(giteId) {
+        try {
+            const { error } = await window.supabaseClient
+                .from('gites')
+                .update({ is_active: false })
+                .eq('id', giteId);
+
+            if (error) throw error;
+
+            // Recharger la liste
+            await this.loadGites(this.organizationId);
+            
+            return true;
+        } catch (error) {
+            console.error('❌ Erreur suppression gîte:', error);
+            throw error;
+        }
     }
 
     /**
@@ -310,9 +442,72 @@ class GitesManager {
 
         return select;
     }
+
+    /**
+     * Appliquer l'ordre personnalisé depuis localStorage
+     */
+    applySavedOrder() {
+        try {
+            const savedOrder = localStorage.getItem('gites_custom_order');
+            if (!savedOrder) {
+                // Pas d'ordre sauvegardé, trier alphabétiquement
+                this.gites.sort((a, b) => a.name.localeCompare(b.name));
+                return;
+            }
+
+            const orderMap = JSON.parse(savedOrder);
+            this.gites.sort((a, b) => {
+                const indexA = orderMap[a.id] ?? 999;
+                const indexB = orderMap[b.id] ?? 999;
+                if (indexA !== indexB) {
+                    return indexA - indexB;
+                }
+                return a.name.localeCompare(b.name);
+            });
+        } catch (error) {
+            console.error('Erreur lors de l\'application de l\'ordre:', error);
+            // En cas d'erreur, trier alphabétiquement
+            this.gites.sort((a, b) => a.name.localeCompare(b.name));
+        }
+    }
+
+    /**
+     * Sauvegarder l'ordre actuel dans localStorage
+     */
+    saveCurrentOrder() {
+        try {
+            const orderMap = {};
+            this.gites.forEach((gite, index) => {
+                orderMap[gite.id] = index;
+            });
+            localStorage.setItem('gites_custom_order', JSON.stringify(orderMap));
+            // Ordre sauvé
+        } catch (error) {
+            console.error('❌ Erreur lors de la sauvegarde de l\'ordre:', error);
+        }
+    }
+
+    /**
+     * Déplacer un gîte dans l'ordre
+     */
+    moveGite(giteId, direction) {
+        const currentIndex = this.gites.findIndex(g => g.id === giteId);
+        if (currentIndex === -1) return false;
+
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (newIndex < 0 || newIndex >= this.gites.length) return false;
+
+        // Échanger les positions
+        [this.gites[currentIndex], this.gites[newIndex]] = [this.gites[newIndex], this.gites[currentIndex]];
+
+        // Sauvegarder le nouvel ordre
+        this.saveCurrentOrder();
+
+        return true;
+    }
 }
 
 // Instance globale
 window.gitesManager = new GitesManager();
 
-console.log('✅ GitesManager initialisé');
+// GitesManager initialisé

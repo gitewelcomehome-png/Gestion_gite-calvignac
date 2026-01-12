@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration BDD - Gestion Gîte</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f1f2f6;
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2D3436;
+            margin-bottom: 30px;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .alert h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+
+        .steps {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .step {
+            margin-bottom: 25px;
+            padding-left: 40px;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .sql-box {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .sql-box pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 4px;
+            color: #155724;
+            display: none;
+        }
+
+        .link-btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .link-btn:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Migration Base de Données</h1>
+    
+    <div class="alert">
+        <h3>⚠️ Action requise</h3>
+        <p>Deux migrations SQL sont nécessaires : ajouter les colonnes ET configurer les permissions (RLS).</p>
+    </div>
+
+    <div class="steps">
+        <h2>Migration 1 : Colonnes manquantes</h2>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Ouvre le SQL Editor de Supabase</h3>
+            <a href="https://supabase.com/dashboard/project/zgdjpetmnmetfkboxeyo/sql" target="_blank" class="link-btn">
+                🚀 Ouvrir SQL Editor
+            </a>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Copie ce SQL (Colonnes)</h3>
+            <div class="sql-box">
+                <button class="copy-btn" onclick="copySQL('sql-content-1')">📋 Copier</button>
+                <pre id="sql-content-1">-- Migration : Ajouter les colonnes manquantes à la table gites
+-- Date : 2026-01-08
+
+-- Ajouter la colonne emoji (type de propriété)
+ALTER TABLE gites 
+ADD COLUMN IF NOT EXISTS emoji TEXT DEFAULT 'house';
+
+-- Ajouter la colonne location
+ALTER TABLE gites 
+ADD COLUMN IF NOT EXISTS location TEXT;
+
+-- Ajouter la colonne ical_urls (JSONB pour stocker un tableau d'objets)
+ALTER TABLE gites 
+ADD COLUMN IF NOT EXISTS ical_urls JSONB DEFAULT '[]'::jsonb;
+
+-- Ajouter la colonne is_active pour les soft deletes
+ALTER TABLE gites 
+ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+
+-- Index pour les recherches sur is_active
+CREATE INDEX IF NOT EXISTS idx_gites_active ON gites(is_active);
+
+-- Commentaires
+COMMENT ON COLUMN gites.emoji IS 'Type de propriété (house-simple, apartment, studio, chalet, castle, camper, church, house)';
+COMMENT ON COLUMN gites.location IS 'Localisation du gîte (ville, région)';
+COMMENT ON COLUMN gites.ical_urls IS 'URLs de synchronisation iCal avec les plateformes [{platform: "airbnb", url: "https://..."}]';
+COMMENT ON COLUMN gites.is_active IS 'Soft delete : false = supprimé';</pre>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Exécute dans Supabase</h3>
+            <p>Colle le SQL dans le SQL Editor et clique sur <strong>"Run"</strong></p>
+        </div>
+    </div>
+
+    <div class="steps" style="margin-top: 40px;">
+        <h2>Migration 2 : Politiques de sécurité (RLS)</h2>
+        
+        <div class="step">
+            <div class="step-number">4</div>
+            <h3>Copie ce SQL (Permissions RLS)</h3>
+            <div class="sql-box">
+                <button class="copy-btn" onclick="copySQL('sql-content-2')">📋 Copier</button>
+                <pre id="sql-content-2">-- Migration : Politiques RLS pour la table gites
+-- Date : 2026-01-08
+
+-- Activer RLS sur la table gites
+ALTER TABLE gites ENABLE ROW LEVEL SECURITY;
+
+-- Politique SELECT : Voir les gîtes de son organisation
+DROP POLICY IF EXISTS "Users can view gites in their organization" ON gites;
+CREATE POLICY "Users can view gites in their organization"
+ON gites FOR SELECT
+USING (
+    organization_id IN (
+        SELECT organization_id 
+        FROM organization_members 
+        WHERE user_id = auth.uid()
+    )
+);
+
+-- Politique INSERT : Créer des gîtes dans son organisation
+DROP POLICY IF EXISTS "Users can create gites in their organization" ON gites;
+CREATE POLICY "Users can create gites in their organization"
+ON gites FOR INSERT
+WITH CHECK (
+    organization_id IN (
+        SELECT organization_id 
+        FROM organization_members 
+        WHERE user_id = auth.uid()
+        AND role IN ('owner', 'admin', 'manager')
+    )
+);
+
+-- Politique UPDATE : Modifier les gîtes de son organisation
+DROP POLICY IF EXISTS "Users can update gites in their organization" ON gites;
+CREATE POLICY "Users can update gites in their organization"
+ON gites FOR UPDATE
+USING (
+    organization_id IN (
+        SELECT organization_id 
+        FROM organization_members 
+        WHERE user_id = auth.uid()
+        AND role IN ('owner', 'admin', 'manager')
+    )
+)
+WITH CHECK (
+    organization_id IN (
+        SELECT organization_id 
+        FROM organization_members 
+        WHERE user_id = auth.uid()
+        AND role IN ('owner', 'admin', 'manager')
+    )
+);
+
+-- Politique DELETE : Supprimer les gîtes de son organisation
+DROP POLICY IF EXISTS "Users can delete gites in their organization" ON gites;
+CREATE POLICY "Users can delete gites in their organization"
+ON gites FOR UPDATE
+USING (
+    organization_id IN (
+        SELECT organization_id 
+        FROM organization_members 
+        WHERE user_id = auth.uid()
+        AND role IN ('owner', 'admin')
+    )
+)
+WITH CHECK (
+    organization_id IN (
+        SELECT organization_id 
+        FROM organization_members 
+        WHERE user_id = auth.uid()
+        AND role IN ('owner', 'admin')
+    )
+);</pre>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">5</div>
+            <h3>Exécute dans Supabase</h3>
+            <p>Colle le SQL RLS dans le SQL Editor et clique sur <strong>"Run"</strong></p>
+        </div>
+
+        <div class="step">
+            <div class="step-number">6</div>
+            <h3>Recharge la page</h3>
+            <p>Une fois la migration exécutée, recharge ton application pour créer des gîtes.</p>
+        </div>
+    </div>
+
+    <div class="success" id="success-msg">
+        ✅ SQL copié dans le presse-papier !
+    </div>
+
+    <script>
+        function copySQL(elementId) {
+            const sqlContent = document.getElementById(elementId || 'sql-content-1').textContent;
+            navigator.clipboard.writeText(sqlContent).then(() => {
+                const successMsg = document.getElementById('success-msg');
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Tables Tarifs</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: system-ui; padding: 40px; max-width: 900px; margin: 0 auto; }
+        button { padding: 12px 24px; margin: 10px; font-size: 16px; font-weight: 600; cursor: pointer; border: 2px solid #000; border-radius: 8px; background: #4CAF50; color: white; }
+        button:hover { background: #45a049; }
+        pre { background: #f4f4f4; padding: 20px; border-radius: 8px; border: 2px solid #ddd; white-space: pre-wrap; font-size: 13px; line-height: 1.5; }
+        .loading { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnostic Tables Tarifs</h1>
+    <div>
+        <button onclick="checkTables()">🔍 Vérifier Tables</button>
+        <button onclick="checkRLS()">🔐 Tester INSERT</button>
+    </div>
+    <pre id="result" class="loading">Cliquez sur un bouton pour lancer le diagnostic...</pre>
+    
+    <script>
+        // Configuration Supabase
+        const SUPABASE_URL = 'https://zgdjpetmnmetfkboxeyo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpnZGpwZXRtbm1ldGZrYm94ZXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQwNzI0NjMsImV4cCI6MjA0OTY0ODQ2M30.nGYVBB3fNL88zzrWW4bHR0wTMd2w56oUXDCdvCnkL7M';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function checkTables() {
+            const log = [];
+            document.getElementById('result').textContent = '⏳ Vérification en cours...';
+            
+            try {
+                // Vérifier session
+                const { data: { session } } = await supabase.auth.getSession();
+                log.push(`Session: ${session ? '✅ Connecté' : '❌ Non connecté'}`);
+                log.push(`User ID: ${session?.user?.id || 'N/A'}`);
+                log.push('');
+                
+                // Test 1: Tarifs base
+                try {
+                    const { data, error, count } = await supabase
+                        .from('tarifs_base')
+                        .select('*', { count: 'exact', head: false });
+                        
+                    log.push('📊 TABLE: tarifs_base');
+                    if (error) {
+                        log.push(`  ❌ Erreur: ${error.message}`);
+                        log.push(`  Code: ${error.code || 'N/A'}`);
+                        if (error.code === 'PGRST116' || error.code === '42P01') {
+                            log.push(`  🚨 La table N'EXISTE PAS dans la base !`);
+                        }
+                    } else {
+                        log.push(`  ✅ Table accessible`);
+                        log.push(`  Lignes: ${count || 0}`);
+                        if (data && data.length > 0) {
+                            log.push(`  Premier enregistrement: ${JSON.stringify(data[0], null, 2)}`);
+                        }
+                    }
+                } catch (e) {
+                    log.push(`  💥 Exception: ${e.message}`);
+                }
+                log.push('');
+                
+                // Test 2: Règles tarifaires
+                try {
+                    const { data, error, count } = await supabase
+                        .from('regles_tarifaires')
+                        .select('*', { count: 'exact' });
+                        
+                    log.push('⚙️ TABLE: regles_tarifaires');
+                    if (error) {
+                        log.push(`  ❌ Erreur: ${error.message}`);
+                        log.push(`  Code: ${error.code || 'N/A'}`);
+                        if (error.code === 'PGRST116' || error.code === '42P01') {
+                            log.push(`  🚨 La table N'EXISTE PAS dans la base !`);
+                        }
+                    } else {
+                        log.push(`  ✅ Table accessible`);
+                        log.push(`  Lignes: ${count || 0}`);
+                    }
+                } catch (e) {
+                    log.push(`  💥 Exception: ${e.message}`);
+                }
+                log.push('');
+                
+                // Test 3: Configuration
+                try {
+                    const { data, error, count } = await supabase
+                        .from('configuration_calendrier')
+                        .select('*', { count: 'exact' });
+                        
+                    log.push('🔧 TABLE: configuration_calendrier');
+                    if (error) {
+                        log.push(`  ❌ Erreur: ${error.message}`);
+                        log.push(`  Code: ${error.code || 'N/A'}`);
+                        if (error.code === 'PGRST116' || error.code === '42P01') {
+                            log.push(`  🚨 La table N'EXISTE PAS dans la base !`);
+                        }
+                    } else {
+                        log.push(`  ✅ Table accessible`);
+                        log.push(`  Lignes: ${count || 0}`);
+                    }
+                } catch (e) {
+                    log.push(`  💥 Exception: ${e.message}`);
+                }
+                log.push('');
+                
+                // Test 4: Vérifier organization_members
+                if (session) {
+                    try {
+                        const { data, error } = await supabase
+                            .from('organization_members')
+                            .select('organization_id, role')
+                            .eq('user_id', session.user.id);
+                            
+                        log.push('🏢 MEMBERSHIP:');
+                        if (error) {
+                            log.push(`  ❌ Erreur: ${error.message}`);
+                        } else if (data && data.length > 0) {
+                            log.push(`  ✅ Organization ID: ${data[0].organization_id}`);
+                            log.push(`  ✅ Role: ${data[0].role}`);
+                        } else {
+                            log.push(`  ⚠️ Aucune organisation associée`);
+                        }
+                    } catch (e) {
+                        log.push(`  💥 Exception: ${e.message}`);
+                    }
+                }
+                
+                log.push('');
+                log.push('═══════════════════════════════════════');
+                log.push('CONCLUSION:');
+                if (log.join('').includes('🚨')) {
+                    log.push('❌ Les tables ne sont PAS créées dans Supabase');
+                    log.push('➡️ Exécutez sql/migrations/20260111_create_tarifs_tables.sql');
+                } else {
+                    log.push('✅ Toutes les tables existent');
+                }
+                
+            } catch (e) {
+                log.push(`💥 Erreur globale: ${e.message}`);
+            }
+            
+            document.getElementById('result').textContent = log.join('\n');
+        }
+        
+        async function checkRLS() {
+            const log = [];
+            document.getElementById('result').textContent = '⏳ Test RLS en cours...';
+            
+            try {
+                // Vérifier session
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    log.push('❌ Vous devez être connecté pour tester les RLS');
+                    document.getElementById('result').textContent = log.join('\n');
+                    return;
+                }
+                
+                log.push('🧪 Test INSERT dans tarifs_base:');
+                log.push('');
+                
+                // Récupérer un gîte
+                const { data: gites, error: giteError } = await supabase
+                    .from('gites')
+                    .select('id, organization_id, nom')
+                    .limit(1);
+                    
+                if (giteError) {
+                    log.push(`❌ Erreur récupération gîte: ${giteError.message}`);
+                } else if (!gites || gites.length === 0) {
+                    log.push('❌ Aucun gîte trouvé');
+                } else {
+                    log.push(`✅ Gîte test: ${gites[0].nom}`);
+                    log.push(`   Organization: ${gites[0].organization_id}`);
+                    log.push('');
+                    
+                    const testData = {
+                        organization_id: gites[0].organization_id,
+                        gite_id: gites[0].id,
+                        date: '2026-12-31',
+                        prix_nuit: 99.99
+                    };
+                    
+                    log.push('Tentative INSERT:');
+                    log.push(JSON.stringify(testData, null, 2));
+                    log.push('');
+                    
+                    const { data, error } = await supabase
+                        .from('tarifs_base')
+                        .upsert(testData, { onConflict: 'gite_id,date' })
+                        .select();
+                    
+                    if (error) {
+                        log.push('❌ ÉCHEC:');
+                        log.push(`   Message: ${error.message}`);
+                        log.push(`   Code: ${error.code || 'N/A'}`);
+                        log.push(`   Details: ${JSON.stringify(error.details || {})}`);
+                        log.push(`   Hint: ${error.hint || 'N/A'}`);
+                        
+                        if (error.code === 'PGRST116' || error.code === '42P01') {
+                            log.push('');
+                            log.push('🚨 La table tarifs_base N\'EXISTE PAS !');
+                        } else if (error.code === '42501') {
+                            log.push('');
+                            log.push('🚨 Problème de permissions RLS');
+                        }
+                    } else {
+                        log.push('✅ INSERT RÉUSSI !');
+                        log.push('');
+                        log.push('Données insérées:');
+                        log.push(JSON.stringify(data, null, 2));
+                    }
+                }
+            } catch (e) {
+                log.push(`💥 Exception: ${e.message}`);
+            }
+            
+            document.getElementById('result').textContent = log.join('\n');
+        }
+    </script>
+</body>
+</html>

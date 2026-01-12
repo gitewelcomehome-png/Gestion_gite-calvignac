@@ -62,15 +62,13 @@ export async function afficherHorairesClients() {
         return;
     }
     
-    window.SecurityUtils.setInnerHTML(container, `
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            ${demandesValides.map(demande => {
+    const items = await Promise.all(demandesValides.map(async demande => {
                 const reservation = reservationsMap[demande.reservation_id];
                 if (!reservation) return '';
-                const gite = await window.gitesManager.getByName(reservation.gite) || await window.gitesManager.getById(reservation.gite_id);
+                const gite = await window.gitesManager?.getByName(reservation.gite) || await window.gitesManager?.getById(reservation.gite_id);
                 const giteColor = gite ? gite.color : '#667eea';
                 const giteIcon = gite ? gite.icon : '🏡';
-                const giteName = gite ? gite.name : reservation.gite;
+                const giteName = gite ? gite.name : reservation.gite || reservation.gite_id;
                 
                 const typeLabel = demande.type === 'arrivee_anticipee' ? '🕐 Arrivée' : '🕐 Départ';
                 return `
@@ -84,10 +82,10 @@ export async function afficherHorairesClients() {
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
                             <div>
                                 <div style="font-size: 1.2rem; font-weight: 700; color: #333; margin-bottom: 5px;">
-                                    ${giteIcon} ${giteName} - ${reservation.nom}
+                                    ${giteIcon} ${giteName} - ${reservation.client_name || reservation.nom}
                                 </div>
                                 <div style="color: #666; font-size: 0.95rem;">
-                                    ${formatDateCourt(reservation.date_debut)} → ${formatDateCourt(reservation.date_fin)}
+                                    ${formatDateCourt(reservation.check_in || reservation.date_debut)} → ${formatDateCourt(reservation.check_out || reservation.date_fin)}
                                 </div>
                             </div>
                             <div style="background: #e8f5e9; color: #27AE60; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
@@ -115,7 +113,11 @@ export async function afficherHorairesClients() {
                         </div>
                     </div>
                 `;
-            }).filter(Boolean).join('')}
+    }));
+    
+    window.SecurityUtils.setInnerHTML(container, `
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            ${items.filter(Boolean).join('')}
         </div>
     `);
 }

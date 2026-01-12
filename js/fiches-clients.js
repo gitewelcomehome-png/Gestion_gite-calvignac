@@ -139,15 +139,15 @@ async function loadFichesClientList() {
                 demandes:demandes_horaires(id, status),
                 retours:retours_clients(id, status)
             `)
-            .order('date_debut', { ascending: false });
+            .order('check_in', { ascending: false });
         
         // Appliquer les filtres
         if (filterGite !== 'tous') {
-            query = query.eq('gite', filterGite);
+            query = query.eq('gite_id', filterGite);
         }
         
         if (filterDate) {
-            query = query.gte('date_debut', filterDate);
+            query = query.gte('check_in', filterDate);
         }
         
         const { data: reservations, error } = await query;
@@ -171,7 +171,7 @@ async function loadFichesClientList() {
         
         if (searchClient) {
             filteredReservations = filteredReservations.filter(resa => 
-                (resa.nom_client || '').toLowerCase().includes(searchClient)
+                (resa.client_name || '').toLowerCase().includes(searchClient)
             );
         }
         
@@ -209,10 +209,10 @@ async function loadFichesClientList() {
                 <div class="fiche-card">
                     <div class="fiche-header">
                         <div class="fiche-info">
-                            <h3>${resa.nom_client || 'Client inconnu'}</h3>
+                            <h3>${resa.client_name || 'Client inconnu'}</h3>
                             <div class="fiche-dates">
-                                📅 ${formatDate(resa.date_debut)} → ${formatDate(resa.date_fin)}
-                                • 🏡 ${resa.gite}
+                                📅 ${formatDate(resa.check_in)} → ${formatDate(resa.check_out)}
+                                • 🏡 ${resa.gite_id}
                             </div>
                         </div>
                         <span class="fiche-status ${statusClass}">${statusText}</span>
@@ -238,14 +238,14 @@ async function loadFichesClientList() {
                     
                     <div class="fiche-actions">
                         ${!hasFiche || isExpired ? `
-                            <button class="btn btn-primary" onclick="openModalGenereFiche(${resa.id}, '${escapeHtml(resa.nom_client)}')">
+                            <button class="btn btn-primary" onclick="openModalGenereFiche(${resa.id}, '${escapeHtml(resa.client_name)}')">
                                 📄 Générer la fiche
                             </button>
                         ` : `
                             <button class="btn btn-success" onclick="openFicheClient('${resa.token[0].token}')">
                                 👁️ Voir la fiche
                             </button>
-                            <button class="btn btn-primary" onclick="sendWhatsAppFicheReservation(${resa.id}, '${resa.telephone}', '${resa.token[0].token}')">
+                            <button class="btn btn-primary" onclick="sendWhatsAppFicheReservation(${resa.id}, '${resa.client_phone}', '${resa.token[0].token}')">
                                 💬 WhatsApp
                             </button>
                         `}
@@ -291,7 +291,7 @@ async function confirmerGenerationFiche() {
         const token = generateSecureToken();
         
         // Calculer la date d'expiration (7 jours après la date de départ)
-        const expiresAt = new Date(reservation.date_fin);
+        const expiresAt = new Date(reservation.check_out);
         expiresAt.setDate(expiresAt.getDate() + 7);
         
         // Enregistrer le token
@@ -395,7 +395,7 @@ async function loadDemandesHoraires() {
             .from('demandes_horaires')
             .select(`
                 *,
-                reservation:reservations(nom_client, gite, date_debut, date_fin)
+                reservation:reservations(client_name, gite_id, check_in, check_out)
             `)
             .order('created_at', { ascending: false });
         
@@ -452,7 +452,7 @@ function renderDemandeCard(demande, category) {
         <div class="demande-card ${category}">
             <div style="display: flex; justify-content: between; margin-bottom: 15px;">
                 <div style="flex: 1;">
-                    <h4 style="margin: 0 0 5px 0;">${demande.reservation.nom_client} - ${demande.reservation.gite}</h4>
+                    <h4 style="margin: 0 0 5px 0;">${demande.reservation.client_name} - ${demande.reservation.gite_id}</h4>
                     <div style="color: var(--gray-600); font-size: 0.875rem;">
                         ${typeLabel} • Heure demandée: <strong>${formatTime(demande.heure_demandee)}</strong>
                         ${autoApprove}
@@ -499,14 +499,14 @@ function openModalValidation(demandeId, action) {
         .from('demandes_horaires')
         .select(`
             *,
-            reservation:reservations(nom_client, gite, date_debut, date_fin, telephone)
+            reservation:reservations(client_name, gite_id, check_in, check_out, client_phone)
         `)
         .eq('id', demandeId)
         .single()
         .then(({ data: demande }) => {
             const typeLabel = demande.type === 'arrivee_anticipee' ? 'Arrivée anticipée' : 'Départ tardif';
             
-            document.getElementById('titreDemande').textContent = `${typeLabel} - ${demande.reservation.nom_client}`;
+            document.getElementById('titreDemande').textContent = `${typeLabel} - ${demande.reservation.client_name}`;
             
             const motifHtml = demande.motif ? `<p><strong>Motif:</strong> ${demande.motif}</p>` : '';
             const autoApprouvableHtml = demande.automatiquement_approuvable ? 
@@ -600,7 +600,7 @@ async function loadRetoursClients() {
             .from('retours_clients')
             .select(`
                 *,
-                reservation:reservations(nom_client, gite, telephone)
+                reservation:reservations(client_name, gite_id, client_phone)
             `)
             .order('created_at', { ascending: false });
         
@@ -636,7 +636,7 @@ async function loadRetoursClients() {
                         <div>
                             <h4 style="margin: 0;">${typeEmoji} ${retour.sujet}</h4>
                             <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 5px;">
-                                ${retour.reservation.nom_client} - ${retour.reservation.gite}
+                                ${retour.reservation.client_name} - ${retour.reservation.gite_id}
                             </div>
                         </div>
                         <div style="text-align: right;">
@@ -662,7 +662,7 @@ async function loadRetoursClients() {
                                 ✅ Marquer résolu
                             </button>
                             ${retour.reservation.telephone ? `
-                                <button class="btn btn-secondary" onclick="contactClient('${retour.reservation.telephone}', '${escapeHtml(retour.reservation.nom_client)}', '${escapeHtml(retour.sujet)}')">
+                                <button class="btn btn-secondary" onclick="contactClient('${retour.reservation.client_phone}', '${escapeHtml(retour.reservation.client_name)}', '${escapeHtml(retour.sujet)}')">
                                     📞 Contacter
                                 </button>
                             ` : ''}

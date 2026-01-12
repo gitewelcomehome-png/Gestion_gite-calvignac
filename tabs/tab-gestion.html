@@ -1,50 +1,28 @@
+<div class="tab-container">
+    <!-- Header Neo-Brutalism -->
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">⚙️ Gestion iCal</h2>
+                <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Configuration des URLs de synchronisation</p>
+            </div>
+        </div>
+    </div>
+
             <div class="card">
-                <div class="card-header">
-                    <span class="card-icon">⚙️</span>
-                    <h2 class="card-title">Gestion URLs iCal</h2>
-                </div>
                 
-                <div class="alert alert-info">
-                    <strong>🔄 Synchronisation automatique</strong><br>
-                    Les calendriers sont synchronisés automatiquement à l'ouverture de la page.
+                <div class="alert alert-info" style="text-align: center; padding: 60px 40px;">
+                    <h3 style="margin-bottom: 20px;">📅 Nouvelle interface de gestion</h3>
+                    <p style="font-size: 1.1rem; margin-bottom: 30px;">
+                        La gestion des URLs iCal se fait maintenant directement dans le gestionnaire de gîtes.
+                    </p>
+                    <button class="btn btn-primary" onclick="showGitesManager()" style="font-size: 1.2rem; padding: 15px 40px;">
+                        🏠 Gérer mes gîtes
+                    </button>
+                    <p style="margin-top: 30px; color: #666; font-size: 0.9rem;">
+                        Vous pouvez ajouter plusieurs URLs iCal par gîte (Airbnb, Booking, Vrbo, etc.)
+                    </p>
                 </div>
-                
-                <div class="alert alert-warning">
-                    <strong>⚠️ Limitation RGPD</strong><br>
-                    Les fichiers iCal publics ne contiennent PAS les noms des clients. Les réservations seront importées avec "Réservation [Plateforme]".
-                </div>
-                
-                <h3 style="margin: 30px 0 15px; color: var(--trevoux);">🏰 Trevoux</h3>
-                <div class="form-group">
-                    <label>Airbnb iCal URL</label>
-                    <textarea id="icalAirbnbTrevoux" rows="2" style="font-size:0.85rem"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Abritel iCal URL</label>
-                    <textarea id="icalAbritelTrevoux" rows="2" style="font-size:0.85rem"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Gîtes de France iCal URL</label>
-                    <textarea id="icalGitesTrevoux" rows="2" style="font-size:0.85rem"></textarea>
-                </div>
-                
-                <h3 style="margin: 30px 0 15px; color: var(--couzon);">⛰️ Couzon</h3>
-                <div class="form-group">
-                    <label>Airbnb iCal URL</label>
-                    <textarea id="icalAirbnbCouzon" rows="2" style="font-size:0.85rem"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Abritel iCal URL</label>
-                    <textarea id="icalAbritelCouzon" rows="2" style="font-size:0.85rem"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Gîtes de France iCal URL</label>
-                    <textarea id="icalGitesCouzon" rows="2" style="font-size:0.85rem"></textarea>
-                </div>
-                
-                <button class="btn btn-primary" onclick="sauvegarderUrlsIcal()">
-                    <span>💾</span> Sauvegarder les URLs
-                </button>
                 
                 <button class="btn btn-sync" onclick="syncAllCalendars()" style="margin-top:10px">
                     <span>🔄</span> Synchroniser maintenant

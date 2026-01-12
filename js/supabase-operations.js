@@ -44,24 +44,32 @@ async function addReservation(reservation) {
             return null;
         }
         
+        // Récupérer l'utilisateur connecté
+        const { data: userData } = await window.supabaseClient.auth.getUser();
+        if (!userData?.user?.id) {
+            throw new Error('Utilisateur non authentifié');
+        }
+
         const data = {
-            gite: reservation.gite,
-            date_debut: formatDateForSupabase(reservation.dateDebut),
-            date_fin: formatDateForSupabase(reservation.dateFin),
-            plateforme: reservation.site || reservation.plateforme || 'Autre',
-            montant: parseFloat(reservation.montant) || 0,
-            nom_client: reservation.nom || reservation.nomClient || null,
-            telephone: reservation.telephone || null,
-            provenance: reservation.provenance || null,
-            nb_personnes: reservation.nbPersonnes || 0,
-            acompte: parseFloat(reservation.acompte) || 0,
-            restant: parseFloat(reservation.restant) || 0,
-            paiement: reservation.paiement || 'En attente',
-            timestamp: reservation.timestamp || new Date().toISOString(),
+            owner_user_id: userData.user.id,
+            gite_id: reservation.gite || reservation.giteId,
+            check_in: formatDateForSupabase(reservation.dateDebut),
+            check_out: formatDateForSupabase(reservation.dateFin),
+            platform: reservation.site || reservation.plateforme || 'other',
+            total_price: parseFloat(reservation.montant) || 0,
+            client_name: reservation.nom || reservation.nomClient || 'Client',
+            client_phone: reservation.telephone || null,
+            client_email: reservation.email || null,
+            client_address: reservation.provenance || null,
+            guest_count: reservation.nbPersonnes || 1,
+            paid_amount: parseFloat(reservation.acompte) || 0,
+            notes: reservation.notes || null,
+            status: reservation.status || 'confirmed',
+            source: reservation.syncedFrom ? 'ical' : 'manual',
             synced_from: reservation.syncedFrom || null
         };
         
-        if (!data.date_debut || !data.date_fin) {
+        if (!data.check_in || !data.check_out) {
             throw new Error('Dates invalides');
         }
         
@@ -93,7 +101,7 @@ async function getAllReservations(forceRefresh) {
         const result = await window.supabaseClient
             .from('reservations')
             .select('*')
-            .order('date_debut', { ascending: true });
+            .order('check_in', { ascending: true });
         
         if (result.error) throw result.error;
         
@@ -101,20 +109,25 @@ async function getAllReservations(forceRefresh) {
         const reservations = (result.data || []).map(function(r) {
             return {
                 id: r.id,
-                gite: r.gite,
-                dateDebut: r.date_debut,
-                dateFin: r.date_fin,
-                site: r.plateforme,
-                montant: r.montant,
-                nom: r.nom_client,
-                telephone: r.telephone,
-                provenance: r.provenance,
-                nbPersonnes: r.nb_personnes,
-                acompte: r.acompte,
-                restant: r.restant,
-                paiement: r.paiement,
-                nuits: window.calculateNights(r.date_debut, r.date_fin),
-                timestamp: r.timestamp,
+                gite: r.gite_id,
+                giteId: r.gite_id,
+                dateDebut: r.check_in,
+                dateFin: r.check_out,
+                site: r.platform,
+                plateforme: r.platform,
+                montant: r.total_price,
+                nom: r.client_name,
+                nomClient: r.client_name,
+                telephone: r.client_phone,
+                email: r.client_email,
+                provenance: r.client_address,
+                nbPersonnes: r.guest_count,
+                acompte: r.paid_amount,
+                restant: (r.total_price || 0) - (r.paid_amount || 0),
+                paiement: r.paid_amount >= r.total_price ? 'Payé' : 'En attente',
+                status: r.status,
+                nuits: window.calculateNights(r.check_in, r.check_out),
+                timestamp: r.created_at,
                 syncedFrom: r.synced_from
             };
         }).filter(function(r) {
@@ -137,18 +150,26 @@ async function getAllReservations(forceRefresh) {
 async function updateReservation(id, updates) {
     try {
         const data = {};
-        if (updates.gite !== undefined) data.gite = updates.gite;
-        if (updates.dateDebut !== undefined) data.date_debut = updates.dateDebut;
-        if (updates.dateFin !== undefined) data.date_fin = updates.dateFin;
-        if (updates.site !== undefined) data.plateforme = updates.site;
-        if (updates.montant !== undefined) data.montant = parseFloat(updates.montant);
-        if (updates.nom !== undefined) data.nom_client = updates.nom;
-        if (updates.telephone !== undefined) data.telephone = updates.telephone;
-        if (updates.provenance !== undefined) data.provenance = updates.provenance;
-        if (updates.nbPersonnes !== undefined) data.nb_personnes = updates.nbPersonnes;
-        if (updates.acompte !== undefined) data.acompte = parseFloat(updates.acompte);
-        if (updates.restant !== undefined) data.restant = parseFloat(updates.restant);
+        if (updates.gite !== undefined) data.gite_id = updates.gite;
+        if (updates.giteId !== undefined) data.gite_id = updates.giteId;
+        if (updates.dateDebut !== undefined) data.check_in = updates.dateDebut;
+        if (updates.dateFin !== undefined) data.check_out = updates.dateFin;
+        if (updates.site !== undefined) data.platform = updates.site;
+        if (updates.plateforme !== undefined) data.platform = updates.plateforme;
+        if (updates.montant !== undefined) data.total_price = parseFloat(updates.montant);
+        if (updates.nom !== undefined) data.client_name = updates.nom;
+        if (updates.nomClient !== undefined) data.client_name = updates.nomClient;
+        if (updates.telephone !== undefined) data.client_phone = updates.telephone;
+        if (updates.email !== undefined) data.client_email = updates.email;
+        if (updates.provenance !== undefined) data.client_address = updates.provenance;
+        if (updates.nbPersonnes !== undefined) data.guest_count = updates.nbPersonnes;
+        if (updates.acompte !== undefined) data.paid_amount = parseFloat(updates.acompte);
+        if (updates.status !== undefined) data.status = updates.status;
         if (updates.paiement !== undefined) data.paiement = updates.paiement;
+        
+        // 🛡️ PROTECTION : Si l'utilisateur modifie manuellement une réservation,
+        // marquer manual_override = true pour la protéger des syncs iCal
+        data.manual_override = true;
         
         const result = await window.supabaseClient
             .from('reservations')

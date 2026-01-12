@@ -10,35 +10,49 @@ class AuthManager {
     constructor() {
         this.currentUser = null;
         this.userRoles = [];
-        this.isRedirecting = false; // Flag pour éviter les redirections multiples
-        this.init();
+        this.isRedirecting = false;
+        this.authListener = null;
+        this.initialSessionHandled = false;
+        this.redirectCount = 0;
+        this.lastRedirectTime = 0;
+        this._initPromise = null; // Cache de la promesse d'initialisation
+        // N'appelle PAS init() automatiquement - attendre que la page soit prête
     }
 
     async init() {
-        // Éviter l'initialisation multiple
-        if (window._authManagerInitialized) {
-            console.log('⚠️ AuthManager déjà initialisé');
-            return;
+        // Promise cache: si init déjà en cours, retourner la même promesse
+        if (this._initPromise) {
+            return this._initPromise;
         }
-        window._authManagerInitialized = true;
         
-        await this.checkAuthState();
-        this.setupAuthListener();
+        this._initPromise = (async () => {
+            try {
+                await this.checkAuthState();
+                this.setupAuthListener();
+            } catch (error) {
+                console.error('Erreur initialisation auth:', error);
+                throw error;
+            }
+        })();
+        
+        return this._initPromise;
     }
 
     /**
      * Vérifier l'état d'authentification au chargement
      */
     async checkAuthState() {
+        // Pages publiques: pas de vérification
+        if (window.location.pathname.includes('login.html') || 
+            window.location.pathname.includes('onboarding.html')) {
+            return;
+        }
+        
         try {
             const { data: { session }, error } = await window.supabaseClient.auth.getSession();
             
             if (error) {
-                if (window.logger) {
-                    window.logger.error('Erreur vérification auth', error);
-                } else {
-                    console.error('Erreur vérification auth:', error);
-                }
+                if (window.logger) window.logger.error('Erreur vérification auth', error);
                 this.redirectToLogin();
                 return;
             }
@@ -46,107 +60,98 @@ class AuthManager {
             if (session && session.user) {
                 this.currentUser = session.user;
                 await this.loadUserRoles();
-                
-                // Vérifier si l'onboarding est terminé (sauf sur page onboarding)
-                const isOnOnboardingPage = window.location.pathname.includes('onboarding.html');
-                if (!isOnOnboardingPage) {
-                    const onboardingComplete = await this.checkOnboardingComplete();
-                    if (!onboardingComplete) {
-                        console.log('⚠️ Onboarding incomplet, redirection...');
-                        window.location.href = 'onboarding.html';
-                        return;
-                    }
-                }
-                
-                this.onAuthSuccess();
+                this.updateUI();
             } else {
                 this.redirectToLogin();
             }
         } catch (error) {
-            if (window.logger) {
-                window.logger.error('Erreur checkAuthState', error);
-            } else {
-                console.error('Erreur checkAuthState:', error);
-            }
+            if (window.logger) window.logger.error('Erreur checkAuthState', error);
             this.redirectToLogin();
         }
     }
 
     /**
      * Vérifier si l'utilisateur a terminé l'onboarding
+     * NOTE: Architecture simplifiée sans organization_members
+     * Chaque user possède directement ses gîtes via owner_user_id
      */
     async checkOnboardingComplete() {
-        try {
-            // Vérifier si l'utilisateur appartient à une organization
-            const { data, error } = await window.supabaseClient
-                .from('organization_members')
-                .select('organization_id')
-                .eq('user_id', this.currentUser.id)
-                .limit(1);
-            
-            if (error) {
-                console.error('Erreur vérification onboarding:', error);
-                return false;
-            }
-            
-            const hasOrganization = data && data.length > 0;
-            console.log('✅ Onboarding terminé:', hasOrganization);
-            return hasOrganization;
-        } catch (error) {
-            console.error('Erreur checkOnboardingComplete:', error);
-            return false;
-        }
+        // Toujours retourner true - pas d'onboarding requis
+        // L'utilisateur peut créer ses gîtes directement
+        return true;
     }
 
     /**
-     * Charger les rôles de l'utilisateur depuis user_roles
+     * Charger les rôles de l'utilisateur
+     * NOTE: Architecture simplifiée - tous les users sont propriétaires
      */
     async loadUserRoles() {
-        try {
-            const { data, error } = await window.supabaseClient
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', this.currentUser.id);
-            
-            if (error) {
-                if (window.logger) {
-                    window.logger.error('Erreur chargement rôles', error);
-                } else {
-                    console.error('Erreur chargement rôles:', error);
-                }
-                this.userRoles = [];
-                return;
-            }
-            
-            this.userRoles = data ? data.map(r => r.role) : [];
-            console.log('✅ Rôles utilisateur:', this.userRoles);
-        } catch (error) {
-            if (window.logger) {
-                window.logger.error('Erreur loadUserRoles', error);
-            } else {
-                console.error('Erreur loadUserRoles:', error);
-            }
-            this.userRoles = [];
-        }
+        // Pas de table organization_members - chaque user est owner
+        this.userRoles = ['owner'];
+        return ['owner'];
     }
 
     /**
      * Écouter les changements d'authentification
      */
     setupAuthListener() {
-        window.supabaseClient.auth.onAuthStateChange((event, session) => {
-        // console.log('Auth event:', event);
+        // Ne pas réinstaller le listener s'il existe déjà
+        if (this.authListener) {
+            // Listener déjà installé
+            return;
+        }
+        
+        // Listener auth installé
+        let lastEvent = null;
+        let lastEventTime = 0;
+        
+        const { data } = window.supabaseClient.auth.onAuthStateChange((event, session) => {
+            const now = Date.now();
+            
+            // Ignorer INITIAL_SESSION après le premier chargement
+            if (event === 'INITIAL_SESSION' && this.initialSessionHandled) {
+                // INITIAL_SESSION ignoré
+                return;
+            }
+            
+            if (event === 'INITIAL_SESSION') {
+                this.initialSessionHandled = true;
+            }
+            
+            // Ignorer les événements dupliqués dans les 500ms
+            if (event === lastEvent && (now - lastEventTime) < 500) {
+                // Événement dupliqué ignoré
+                return;
+            }
+            lastEvent = event;
+            lastEventTime = now;
+            
+            // Auth event traité
+            
             if (event === 'SIGNED_IN' && session) {
-                this.currentUser = session.user;
-                this.loadUserRoles().then(() => this.onAuthSuccess());
+                // SIGNED_IN : seulement traiter si on est sur login.html
+                // Sur les autres pages, checkAuthState() gère déjà l'auth
+                if (window.location.pathname.includes('login.html')) {
+                    this.currentUser = session.user;
+                    this.loadUserRoles().then(() => this.onAuthSuccess());
+                }
             } else if (event === 'SIGNED_OUT') {
                 this.currentUser = null;
                 this.userRoles = [];
-                this.redirectToLogin();
+                // Ne rediriger que si on n'est pas déjà sur login.html
+                if (!window.location.pathname.includes('login.html')) {
+                    this.redirectToLogin();
+                }
             } else if (event === 'TOKEN_REFRESHED') {
-                console.log('Token rafraîchi');
+                // Token rafraîchi - juste mettre à jour la session
+                if (session) {
+                    this.currentUser = session.user;
+                }
             }
         });
+        
+        // Sauvegarder pour pouvoir le cleanup plus tard si nécessaire
+        this.authListener = data;
     }
 
     /**
@@ -256,18 +261,18 @@ class AuthManager {
      * Rediriger vers la page de connexion
      */
     redirectToLogin() {
-        // Protection contre les redirections multiples
-        if (this.isRedirecting) {
-            console.log('⚠️ Redirection déjà en cours, ignorée');
+        if (this.isRedirecting) return;
+        
+        const now = Date.now();
+        if (this.redirectCount >= 3 && (now - this.lastRedirectTime) < 5000) {
+            console.error('❌ Boucle de redirection détectée');
             return;
         }
         
-        // Ne pas rediriger si déjà sur la page de login
-        if (window.location.pathname.includes('login.html')) {
-            return;
-        }
+        if (window.location.pathname.includes('login.html')) return;
         
-        console.log('🔐 Redirection vers login...');
+        this.redirectCount++;
+        this.lastRedirectTime = now;
         this.isRedirecting = true;
         window.location.href = '/login.html';
     }
@@ -276,18 +281,22 @@ class AuthManager {
      * Actions après authentification réussie
      */
     onAuthSuccess() {
-        // console.log('✅ Authentifié:', this.currentUser.email);
-        // console.log('📋 Rôles:', this.userRoles);
-        
-        // Rediriger depuis login vers dashboard (UNE SEULE FOIS)
-        if (window.location.pathname.includes('login.html') && !this.isRedirecting) {
-            console.log('🏠 Redirection vers index...');
-            this.isRedirecting = true;
-            window.location.href = '/index.html';
-            return; // Sortir immédiatement
+        const now = Date.now();
+        if (this.redirectCount >= 3 && (now - this.lastRedirectTime) < 5000) {
+            console.error('❌ Boucle de redirection détectée');
+            return;
         }
         
-        // Afficher les informations utilisateur dans l'interface
+        // Depuis login.html: rediriger vers dashboard
+        if (window.location.pathname.includes('login.html') && !this.isRedirecting) {
+            this.redirectCount++;
+            this.lastRedirectTime = now;
+            this.isRedirecting = true;
+            window.location.href = '/index.html';
+            return;
+        }
+        
+        // Déjà sur page protégée: juste mettre à jour l'UI
         this.updateUI();
     }
 
@@ -378,6 +387,15 @@ class AuthManager {
 // Créer l'instance globale dès le chargement
 if (typeof window.authManager === 'undefined') {
     window.authManager = new AuthManager();
+    // Initialiser UNIQUEMENT quand le DOM est prêt
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.authManager.init();
+        });
+    } else {
+        // DOM déjà prêt
+        window.authManager.init();
+    }
 }
 
 // ================================================================
@@ -410,12 +428,4 @@ window.getCurrentUser = getCurrentUser;
 window.hasRole = hasRole;
 window.logout = logout;
 
-// Instancier l'AuthManager de manière sécurisée (une seule fois)
-if (typeof window !== 'undefined' && !window.authManager) {
-    console.log('✅ Création instance AuthManager...');
-    window.authManager = new AuthManager();
-} else {
-    console.log('⚠️ AuthManager déjà instancié');
-}
-
-console.log('✅ AuthManager chargé');
+// AuthManager chargé

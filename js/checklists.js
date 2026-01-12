@@ -5,6 +5,11 @@
 let currentGiteFilter = 'Trevoux';
 let currentTypeFilter = 'entree';
 
+// Helper : Vérifie si l'erreur est PGRST205 (table non créée)
+function isTableNotFound(error) {
+    return error && error.code === 'PGRST205';
+}
+
 // =============================================
 // INITIALISATION
 // =============================================
@@ -54,7 +59,11 @@ async function loadChecklistItems() {
             .eq('actif', true)
             .order('ordre', { ascending: true });
         
-        if (error) throw error;
+        if (error) {
+            // Table non créée - ignorer silencieusement
+            if (error.code === 'PGRST205') return;
+            throw error;
+        }
         
         if (!data || data.length === 0) {
             window.SecurityUtils.setInnerHTML(container, `
@@ -134,7 +143,10 @@ async function addChecklistItem() {
             .order('ordre', { ascending: false })
             .limit(1);
         
-        if (maxError) throw maxError;
+        if (maxError) {
+            if (isTableNotFound(maxError)) return;
+            throw maxError;
+        }
         
         const nextOrdre = (maxData && maxData.length > 0) ? maxData[0].ordre + 1 : 1;
         
@@ -150,7 +162,10 @@ async function addChecklistItem() {
                 actif: true
             });
         
-        if (error) throw error;
+        if (error) {
+            if (isTableNotFound(error)) return;
+            throw error;
+        }
         
         // Rafraîchir la liste
         await loadChecklistItems();
@@ -180,7 +195,10 @@ async function deleteChecklistItem(itemId) {
             .update({ actif: false })
             .eq('id', itemId);
         
-        if (error) throw error;
+        if (error) {
+            if (isTableNotFound(error)) return;
+            throw error;
+        }
         
         await loadChecklistItems();
         showNotification('✅ Item supprimé', 'success');
@@ -206,7 +224,10 @@ async function moveChecklistItem(itemId, direction) {
             .eq('actif', true)
             .order('ordre', { ascending: true });
         
-        if (fetchError) throw fetchError;
+        if (fetchError) {
+            if (isTableNotFound(fetchError)) return;
+            throw fetchError;
+        }
         
         // Trouver l'index de l'item à déplacer
         const currentIndex = items.findIndex(item => item.id === itemId);
@@ -229,7 +250,10 @@ async function moveChecklistItem(itemId, direction) {
                 .update({ ordre: update.ordre })
                 .eq('id', update.id);
             
-            if (error) throw error;
+            if (error) {
+                if (isTableNotFound(error)) return;
+                throw error;
+            }
         }
         
         await loadChecklistItems();
@@ -269,16 +293,16 @@ async function loadReservationsProgress() {
         const { data: reservations, error: resaError } = await supabaseClient
             .from('reservations')
             .select('*')
-            .lte('date_debut', aujourdhui)  // Déjà arrivés
-            .gte('date_fin', aujourdhui)    // Pas encore partis
-            .order('date_debut', { ascending: true });
+            .lte('check_in', aujourdhui)  // Déjà arrivés
+            .gte('check_out', aujourdhui)    // Pas encore partis
+            .order('check_in', { ascending: true });
         
         if (resaError) throw resaError;
         
         // Filtrer les réservations d'un seul jour (phantoms)
         const reservationsFiltered = reservations.filter(r => {
-            const dateDebut = new Date(r.date_debut);
-            const dateFin = new Date(r.date_fin);
+            const dateDebut = new Date(r.check_in);
+            const dateFin = new Date(r.check_out);
             const nuits = Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24));
             return nuits > 1; // Exclure réservations d'une nuit ou moins
         });
@@ -304,14 +328,15 @@ async function loadReservationsProgress() {
             const { data: templates, error: templatesError } = await supabaseClient
                 .from('checklist_templates')
                 .select('*')
-                .eq('gite', resa.gite)
+                .eq('gite', resa.gite_id)
                 .eq('actif', true)
                 .order('type', { ascending: true })
                 .order('ordre', { ascending: true });
             
-            // console.log(`📋 Templates trouvés pour ${resa.gite}:`, templates?.length || 0);
+            // console.log(`📋 Templates trouvés pour ${resa.gite_id}:`, templates?.length || 0);
             
             if (templatesError) {
+                if (isTableNotFound(templatesError)) continue;
                 console.error('Erreur templates:', templatesError);
                 continue;
             }
@@ -349,11 +374,11 @@ async function loadReservationsProgress() {
                     <!-- En-tête réservation -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #e5e7eb;">
                         <div>
-                            <strong style="font-size: 1.2rem;">${resa.nom_client}</strong>
-                            <span style="color: var(--gray-600); margin-left: 15px; font-size: 1.1rem;">${resa.gite}</span>
+                            <strong style="font-size: 1.2rem;">${resa.client_name}</strong>
+                            <span style="color: var(--gray-600); margin-left: 15px; font-size: 1.1rem;">${resa.gite_id}</span>
                         </div>
                         <div style="color: var(--gray-600); font-size: 0.95rem;">
-                            ${formatDate(resa.date_debut)} → ${formatDate(resa.date_fin)}
+                            ${formatDate(resa.check_in)} → ${formatDate(resa.check_out)}
                         </div>
                     </div>
                     
@@ -445,7 +470,10 @@ async function getReservationChecklistProgress(reservationId, gite) {
             .eq('gite', gite)
             .eq('actif', true);
         
-        if (templatesError) throw templatesError;
+        if (templatesError) {
+            if (isTableNotFound(templatesError)) return { entreeTotal: 0, entreeCompleted: 0, sortieTotal: 0, sortieCompleted: 0 };
+            throw templatesError;
+        }
         
         const templatesEntree = templates.filter(t => t.type === 'entree');
         const templatesSortie = templates.filter(t => t.type === 'sortie');
@@ -563,7 +591,13 @@ async function loadChecklistDetailForReservation(reservationId) {
             .order('type', { ascending: true })
             .order('ordre', { ascending: true });
         
-        if (templatesError) throw templatesError;
+        if (templatesError) {
+            if (isTableNotFound(templatesError)) {
+                showNotification('⚠️ Table checklist_templates non créée', 'warning');
+                return;
+            }
+            throw templatesError;
+        }
         
         // Récupérer la progression
         const { data: progress, error: progressError } = await supabaseClient

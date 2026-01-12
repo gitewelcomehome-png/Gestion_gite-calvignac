@@ -2037,6 +2037,10 @@ async function loadClientChecklists() {
             .order('ordre', { ascending: true });
         
         if (errorEntree || errorSortie) {
+            // Table non créée - ignorer silencieusement
+            if ((errorEntree && errorEntree.code === 'PGRST205') || (errorSortie && errorSortie.code === 'PGRST205')) {
+                return;
+            }
             console.error('❌ Erreur chargement templates:', errorEntree || errorSortie);
             return;
         }

@@ -3,8 +3,20 @@
 // ==========================================
 // Fonctions de recherche, affichage, modification et suppression des réservations
 
+// ==========================================// UTILITAIRES
 // ==========================================
-// � ACTUALISATION FORCÉE
+
+/**
+ * Échapper les caractères HTML pour éviter les erreurs de syntaxe
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ==========================================// � ACTUALISATION FORCÉE
 // ==========================================
 
 async function forceRefreshReservations() {
@@ -41,7 +53,8 @@ async function forceRefreshReservations() {
 // ==========================================
 
 async function filterReservations(searchTerm) {
-    const reservations = await getAllReservations();
+    // forceRefresh=true pour toujours avoir les dernières données
+    const reservations = await getAllReservations(true);
     
     if (!searchTerm || searchTerm.trim() === '') {
         // Pas de recherche, afficher tout
@@ -94,7 +107,7 @@ function displayFilteredReservations(reservations) {
                     </div>
                     
                     <div style="font-weight: 700; font-size: 1.15rem; color: #0f172a; margin-bottom: 8px;">
-                        ${r.nom}${messageEnvoye}${incompleteBadge}
+                        ${escapeHtml(r.nom)}${messageEnvoye}${incompleteBadge}
                     </div>
                     
                     <div style="font-size: 1.05rem; color: #334155; margin-bottom: 8px;">
@@ -119,7 +132,7 @@ function displayFilteredReservations(reservations) {
 // ==========================================
 
 function openEditModal(id) {
-    getAllReservations().then(reservations => {
+    getAllReservations(true).then(reservations => {
         const reservation = reservations.find(r => r.id === id);
         if (!reservation) return;
         
@@ -210,13 +223,34 @@ async function updateReservationsList(keepScrollPosition = false) {
     // Mémoriser la position du scroll si demandé
     const scrollY = keepScrollPosition ? window.scrollY : null;
     
-    const reservations = await getAllReservations();
+    // Synchroniser les calendriers iCal UNIQUEMENT au premier chargement (pas lors des rafraîchissements)
+    // et seulement si on a des gîtes configurés
+    if (!keepScrollPosition && typeof syncAllCalendars === 'function') {
+        const gites = await window.gitesManager?.getAll() || [];
+        
+        // Vérifier si au moins un gîte a des URLs iCal configurées
+        const hasIcalConfigs = gites.some(g => {
+            if (!g.ical_sources) return false;
+            if (Array.isArray(g.ical_sources)) return g.ical_sources.length > 0;
+            if (typeof g.ical_sources === 'object') return Object.keys(g.ical_sources).length > 0;
+            return false;
+        });
+        
+        if (hasIcalConfigs) {
+            // Sync en arrière-plan, attendre le résultat pour invalider le cache
+            await syncAllCalendars().catch(err => console.warn('Sync iCal:', err.message));
+        }
+    }
+    
+    // ⚠️ IMPORTANT : forceRefresh=true pour recharger depuis BDD après sync
+    const reservations = await getAllReservations(true);
+    const gites = await window.gitesManager.getAll(); // Charger les gîtes
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     // Récupérer les validations de la société de ménage
-    const { data: cleaningSchedules } = await supabase
+    const { data: cleaningSchedules } = await window.supabaseClient
         .from('cleaning_schedule')
         .select('*');
     
@@ -231,13 +265,18 @@ async function updateReservationsList(keepScrollPosition = false) {
     const active = reservations.filter(r => {
         const dateFin = parseLocalDate(r.dateFin);
         dateFin.setHours(0, 0, 0, 0);
-        
-        // Afficher si la réservation se termine après aujourd'hui
         return dateFin > today;
     });
     
     const container = document.getElementById('planning-container');
     if (!container) return;
+    
+    // gites déjà chargé plus haut dans la fonction
+    
+    if (gites.length === 0) {
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">⚠️ Aucun gîte configuré. <a href="#" onclick="showGitesManager(); return false;" style="color: #667eea; text-decoration: underline;">Créer un gîte</a></p>');
+        return;
+    }
     
     if (active.length === 0) {
         window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation</p>');
@@ -247,53 +286,90 @@ async function updateReservationsList(keepScrollPosition = false) {
     // Organiser par gîte (dynamique)
     const byGite = {};
     gites.forEach(g => {
-        byGite[g.id] = active.filter(r => r.gite_id === g.id);
+        // Filtrer par gite_id (UUID) - utiliser r.giteId qui vient de supabase-operations
+        byGite[g.id] = active.filter(r => r.giteId === g.id);
         // Trier par date
         byGite[g.id].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     });
     
-    // Obtenir toutes les semaines à afficher (basé sur la date de DÉBUT uniquement)
+    // Obtenir toutes les semaines à afficher avec ANNÉE (basé sur la date de DÉBUT)
     const allWeeks = new Set();
     active.forEach(r => {
         const start = parseLocalDate(r.dateDebut);
-        allWeeks.add(getWeekNumber(start));
+        const year = start.getFullYear();
+        const weekNum = getWeekNumber(start);
+        allWeeks.add(`${year}-W${weekNum}`); // Format "2026-W3"
     });
     
     const sortedWeeks = Array.from(allWeeks).sort((a, b) => {
-        // getWeekNumber retourne un nombre, pas une chaîne avec '-W'
-        return a - b;
+        // Trier par année puis par semaine
+        return a.localeCompare(b);
     });
     
-    // Générer le HTML avec en-têtes sticky par gîte (dynamique)
+    // Générer le HTML avec en-tête fixe style barre (comme l'exemple HTML fourni)
     let html = '<div class="planning-weeks">';
     
-    // En-têtes sticky dynamiques
-    html += `<div style="display: grid; grid-template-columns: repeat(${gites.length}, 1fr); position: sticky; top: 0; z-index: 100; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
-    gites.forEach(g => {
-        html += `<div class="gite-label" style="margin: 0; border-radius: 0; background: ${g.color}; color: white;">${g.icon} ${g.name}</div>`;
-    });
-    html += '</div>';
-    
-    sortedWeeks.forEach(weekNum => {
-        // weekNum est déjà un nombre (résultat de getWeekNumber)
-        const year = new Date().getFullYear(); // Année courante
-        const weekDates = getWeekDates(year, weekNum);
+    sortedWeeks.forEach(weekKey => {
+        // Extraire l'année et le numéro de semaine
+        const [year, weekPart] = weekKey.split('-W');
+        const weekNum = parseInt(weekPart);
+        const weekDates = getWeekDates(parseInt(year), weekNum);
         
         // En-tête de semaine
+        // Adapter l'affichage selon le nombre de gîtes (1 à 4)
+        let gridStyle;
+        let gap = '20px';
+        let padding = '20px';
+        
+        if (gites.length === 1) {
+            gridStyle = 'display: flex; justify-content: center; max-width: 800px; margin: 0 auto;';
+        } else if (gites.length === 2) {
+            gridStyle = `display: grid; grid-template-columns: repeat(2, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+        } else if (gites.length === 3) {
+            gridStyle = `display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+        } else if (gites.length >= 4) {
+            // Pour 4 colonnes ou plus, réduire légèrement l'espacement
+            gap = '15px';
+            padding = '15px';
+            gridStyle = `display: grid; grid-template-columns: repeat(4, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+        }
+        
         html += `
             <div class="week-block">
-                <div class="week-header-unique">
-                    <div class="week-number-big">Semaine ${weekNum}</div>
-                    <div class="week-dates-small">${formatDateShort(weekDates.start)} - ${formatDateShort(weekDates.end)}</div>
-                </div>
-                
-                <div class="week-content-grid" style="border-top: none; grid-template-columns: repeat(${gites.length}, 1fr);">`;
+                <div class="week-content-grid" style="border-top: none; ${gridStyle} padding: 0 ${padding} ${padding} ${padding}; box-sizing: border-box;">`;
         
         // Générer colonnes pour chaque gîte
         gites.forEach(g => {
-            html += `<div class="gite-column-inline">
-                ${generateWeekReservations(byGite[g.id], weekNum, g.slug, active, validationMap, today)}
-            </div>`;
+            const columnStyle = gites.length === 1 ? 'width: 100%; max-width: 800px;' : '';
+            const giteColor = g.brand_color || window.gitesManager.getColor(g.id) || '#667eea';
+            // Convertir la couleur hex en rgba avec opacité 0.15
+            const hexToRgba = (hex) => {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, 0.15)`;
+            };
+            const giteColorLight = hexToRgba(giteColor);
+            
+            // Adapter les tailles selon le nombre de colonnes
+            const headerPadding = gites.length >= 4 ? '6px 15px' : '8px 20px';
+            const contentPadding = gites.length >= 4 ? '15px' : '20px';
+            const headerFontSize = gites.length >= 4 ? '0.7rem' : '0.75rem';
+            const weekFontSize = gites.length >= 4 ? '0.85rem' : '0.95rem';
+            const datesFontSize = gites.length >= 4 ? '0.75rem' : '0.8rem';
+            
+            html += `
+            <div style="display: flex; flex-direction: column; min-width: 0; ${columnStyle}">
+                <div class="week-header-unique" style="padding: ${headerPadding}; background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); border-radius: 8px 8px 0 0; margin-bottom: 0; border: 3px solid #2D3436; border-bottom: none;">
+                    <div style="font-size: ${headerFontSize}; margin-bottom: 2px; opacity: 0.8; color: white;">${g.name}</div>
+                    <div class="week-number-big" style="font-size: ${weekFontSize}; margin-bottom: 2px; color: white;">Semaine ${weekNum}</div>
+                    <div class="week-dates-small" style="font-size: ${datesFontSize}; opacity: 0.9; color: white;">${formatDateShort(weekDates.start)} - ${formatDateShort(weekDates.end)}</div>
+                </div>
+                <div style="background: ${giteColorLight}; border: 3px solid #2D3436; border-radius: 0 0 12px 12px; padding: ${contentPadding}; min-height: 120px; box-shadow: 6px 6px 0 #2D3436;">
+                    ${generateWeekReservations(byGite[g.id], weekNum, g.slug, active, validationMap, today)}
+                </div>
+            </div>
+            `;
         });
         
         html += `
@@ -401,7 +477,7 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
                 
                 <!-- Nom en haut -->
                 <div style="font-weight: 700; font-size: 1.15rem; color: #0f172a; margin-bottom: 8px; line-height: 1.3;">
-                    ${r.nom}${messageEnvoye}
+                    ${escapeHtml(r.nom)}${messageEnvoye}
                 </div>
                 
                 <!-- Dates et tarif avec horaires -->
@@ -431,15 +507,21 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
 // ==========================================
 
 function getPlatformLogo(platform) {
-    const normalizedPlatform = platform.toLowerCase();
+    if (!platform) return '';
+    
+    const normalizedPlatform = platform.toLowerCase().trim();
     
     if (normalizedPlatform.includes('airbnb')) {
         return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #FF5A5F; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">airbnb</span>';
     } else if (normalizedPlatform.includes('abritel') || normalizedPlatform.includes('homeaway') || normalizedPlatform.includes('homelidays')) {
         return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #0D4F8B; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">abritel</span>';
-    } else if (normalizedPlatform.includes('gîtes') || normalizedPlatform.includes('gites')) {
+    } else if (normalizedPlatform.includes('gîtes') || normalizedPlatform.includes('gites') || normalizedPlatform.includes('france')) {
+        return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #27AE60; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">gîtes de france</span>';
+    } else if (normalizedPlatform === 'autre' || normalizedPlatform === 'other' || normalizedPlatform === '') {
+        // "Autre" = par défaut Gîtes de France
         return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #27AE60; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">gîtes de france</span>';
     } else {
+        // Afficher la plateforme inconnue telle quelle
         return `<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #95a5a6; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">${platform}</span>`;
     }
 }
