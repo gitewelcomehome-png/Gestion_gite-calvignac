@@ -2173,6 +2173,9 @@ function fermerModalRetourMenage() {
 
 // Permettre de fermer en cliquant sur le fond
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialiser la date immédiatement
+    updateDashboardHeader();
+    
     const setupModalRetourClick = () => {
         const modal = document.getElementById('modal-retour-menage');
         if (modal && !modal.dataset.clickSetup) {
