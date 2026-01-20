@@ -86,25 +86,6 @@
     <script src="js/platform-icons.js"></script>
     <script src="js/property-icons.js"></script>
     <script src="js/gites-crud.js"></script>
-    <script>
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-            const btnGites = document.querySelector('button.user-menu-item[data-action="gites"]');
-            if (btnGites) {
-                btnGites.addEventListener('click', function() {
-                    if (typeof window.showGitesManager === 'function') {
-                        window.showGitesManager();
-                    } else {
-                        console.error('❌ window.showGitesManager non disponible au clic.');
-                        alert('Gestionnaire de gîtes non disponible. Vérifiez le chargement du JS ou les erreurs dans la console.');
-                    }
-                });
-            } else {
-                console.error('❌ Bouton "Gérer mes gîtes" introuvable dans le DOM.');
-            }
-        }, 200);
-    });
-    </script>
     <script src="js/calendrier-tarifs.js?v=4.3"></script>
     <script src="js/remplissage-auto-tarifs.js?v=1.8"></script>
     
@@ -127,116 +108,29 @@
     <!-- Fiscalité Neo Styles (chargé en DERNIER pour priorité) -->
     <link rel="stylesheet" href="css/fiscalite-neo.css?v=1737243600" />
     <link rel="stylesheet" href="css/remplissage-auto.css?v=1.0" />
-    <!-- 📱 Responsive Mobile -->
-    <link rel="stylesheet" href="css/responsive-mobile.css?v=4.4" />
 </head>
 <body>
-    <!-- Menu hamburger mobile -->
-    <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Menu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
 
-    <nav id="mobile-nav-menu" class="mobile-nav-menu">
-        <div class="mobile-nav-header">
-            <h3>📱 Menu</h3>
-            <button id="mobile-menu-close" class="mobile-menu-close">&times;</button>
-        </div>
-        <div class="mobile-nav-list">
-            <!-- Les onglets seront générés dynamiquement par JS -->
-        </div>
-    </nav>
-    <div id="mobile-nav-overlay" class="mobile-nav-overlay"></div>
-
-    <!-- Cadre bouton commit info -->
-    <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
-        <div style="display: inline-block; position: relative;">
-            <button id="commitInfoBtn" style="padding: 8px 16px; border-radius: 8px; background: #1976d2; color: white; border: none; cursor: pointer; font-weight: bold;">
-                📝 Dernier commit
-            </button>
-            <div id="commitInfoTooltip" style="display: none; position: absolute; top: 110%; left: 0; background: #fff; color: #222; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); padding: 12px; min-width: 320px; font-size: 0.95em;">
-                <div style="text-align: center; color: #999;">Chargement...</div>
-            </div>
-        </div>
-    </div>
     <script>
-    const btn = document.getElementById('commitInfoBtn');
-    const tooltip = document.getElementById('commitInfoTooltip');
+    // ⚡ DÉTECTION MOBILE/DESKTOP - CHARGEMENT SÉPARÉ
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
     
-    // Afficher/masquer au survol
-    btn.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
-    btn.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
-    
-    // Charger le dernier commit depuis Supabase
-    async function loadLastCommit() {
-        try {
-            // Attendre que Supabase soit chargé
-            if (typeof window.supabase === 'undefined') {
-                await new Promise(resolve => {
-                    const checkSupabase = setInterval(() => {
-                        if (typeof window.supabaseClient !== 'undefined') {
-                            clearInterval(checkSupabase);
-                            resolve();
-                        }
-                    }, 100);
-                });
-            }
-            
-            const supabase = window.supabaseClient;
-            
-            // DÉSACTIVÉ: table commits_log non créée
-            /*
-            const { data, error } = await supabase
-                .from('commits_log')
-                .select('*')
-                .order('commit_date', { ascending: false })
-                .limit(1);
-            
-            if (error) {
-                console.error('Erreur chargement commit:', error);
-                window.SecurityUtils.setInnerHTML(tooltip, '<div style="color: #e74c3c;">❌ Erreur de chargement</div>');
-                return;
-            }
-            */
-            
-            const data = []; // Table commits_log désactivée
-            
-            if (data && data.length > 0) {
-                const commit = data[0];
-                const date = new Date(commit.commit_date);
-                const dateStr = date.toLocaleString('fr-FR', { 
-                    year: 'numeric', 
-                    month: '2-digit', 
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                window.SecurityUtils.setInnerHTML(tooltip, `
-                    <strong>📌 Commit :</strong> ${commit.commit_ref}<br>
-                    <strong>📅 Date :</strong> ${dateStr}<br>
-                    <strong>💬 Résumé :</strong><br>
-                    <div style="margin-top: 6px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-size: 0.9em;">
-                        ${commit.resume}
-                    </div>
-                `);
-            } else {
-                window.SecurityUtils.setInnerHTML(tooltip, '<div style="color: #999;">Aucun commit enregistré</div>');
-            }
-        } catch (err) {
-            console.error('Erreur:', err);
-            window.SecurityUtils.setInnerHTML(tooltip, '<div style="color: #e74c3c;">❌ Erreur</div>');
-        }
+    // Charger CSS mobile si nécessaire
+    if (isMobile) {
+        const mobileCss = document.createElement('link');
+        mobileCss.rel = 'stylesheet';
+        mobileCss.href = 'css/mobile.css?v=1.0';
+        document.head.appendChild(mobileCss);
+        console.log('📱 Mode MOBILE détecté - CSS mobile chargé');
+    } else {
+        console.log('💻 Mode DESKTOP détecté');
     }
-    
-    // Charger au démarrage - attendre que SecurityUtils soit chargé
-    // loadLastCommit(); // DÉSACTIVÉ - commits_log non disponible
+
     // Chargement dynamique des onglets
     document.addEventListener('DOMContentLoaded', function() {
-        const cacheBuster = '?v=20260105-4';
+        const cacheBuster = '?v=20260120-mobile';
         const tabFiles = {
-            'tab-dashboard': 'tabs/tab-dashboard.html' + cacheBuster,
+            'tab-dashboard': isMobile ? 'tabs/tab-dashboard-mobile.html' + cacheBuster : 'tabs/tab-dashboard.html' + cacheBuster,
             'tab-gestion': 'tabs/tab-gestion.html',
             'tab-reservations': 'tabs/tab-reservations.html',
             'tab-archives': 'tabs/tab-archives.html',

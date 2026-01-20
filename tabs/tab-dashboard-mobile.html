@@ -1,0 +1,246 @@
+<div class="tab-container mobile-dashboard">
+    <!-- VERSION MOBILE SÉPARÉE -->
+    
+    <!-- En-tête compact mobile -->
+    <div class="card" style="background: white; border: 2px solid #2D3436; padding: 15px; margin-bottom: 15px; box-shadow: 2px 2px 0 #2D3436; border-radius: 12px;">
+        <div style="text-align: center;">
+            <h2 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700;">📊 Tableau de Bord</h2>
+            <div id="dashboard-date" style="font-size: 0.85rem; font-weight: 600; color: #2c3e50; margin-top: 5px;">Chargement...</div>
+            <button onclick="updateFinancialIndicators()" class="btn-neo" style="background: #74b9ff; color: white; padding: 8px 16px; border: 2px solid #2D3436; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 2px 2px 0 #2D3436; margin-top: 10px; width: 100%; font-size: 0.9rem;">
+                🔄 Actualiser
+            </button>
+        </div>
+    </div>
+
+    <!-- ⚠️ DEMANDES CLIENTS URGENTES -->
+    <div id="dashboard-demandes-clients" class="card" style="margin-bottom: 15px; background: white; border: 2px solid #ffeaa7; box-shadow: 2px 2px 0 #2D3436; border-radius: 12px; padding: 15px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1rem; color: #2D3436; font-weight: 700;">📄 FICHES CLIENTS</h3>
+            <span id="badge-demandes-count" style="background: #ffeaa7; color: #2D3436; padding: 4px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; border: 2px solid #2D3436;">0</span>
+        </div>
+        <div id="liste-demandes-clients" style="display: flex; flex-direction: column; gap: 8px;">
+            <p style="color: #95a5a6; font-style: italic; margin: 0; font-size: 0.85rem;">Aucune demande en attente</p>
+        </div>
+    </div>
+
+    <!-- ⚠️ PROBLÈMES URGENTS -->
+    <div id="dashboard-problemes-urgents" class="card" style="margin-bottom: 15px; background: white; border: 2px solid #ff7675; box-shadow: 2px 2px 0 #2D3436; border-radius: 12px; padding: 15px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1rem; color: #2D3436; font-weight: 700;">⚠️ PROBLÈMES URGENTS</h3>
+            <span id="badge-problemes-urgents-count" style="background: #ff7675; color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; border: 2px solid #2D3436;">0</span>
+        </div>
+        <div id="liste-problemes-urgents" style="display: flex; flex-direction: column; gap: 8px;">
+            <p style="color: #95a5a6; font-style: italic; margin: 0; font-size: 0.85rem;">Aucun problème urgent</p>
+        </div>
+    </div>
+
+    <!-- 💬 DEMANDES & RETOURS -->
+    <div id="dashboard-demandes-retours" class="card" style="margin-bottom: 15px; background: white; border: 2px solid #74b9ff; box-shadow: 2px 2px 0 #2D3436; border-radius: 12px; padding: 15px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1rem; color: #2D3436; font-weight: 700;">💬 DEMANDES</h3>
+            <span id="badge-demandes-retours-count" style="background: #74b9ff; color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; border: 2px solid #2D3436;">0</span>
+        </div>
+        <div id="liste-demandes-retours" style="display: flex; flex-direction: column; gap: 8px;">
+            <p style="color: #95a5a6; font-style: italic; margin: 0; font-size: 0.85rem;">Aucune demande en attente</p>
+        </div>
+    </div>
+
+    <!-- 📊 VISION GLOBALE - Version Mobile Compacte -->
+    <div class="card" style="background: white; border: 2px solid #2D3436; padding: 15px; border-radius: 12px; box-shadow: 2px 2px 0 #2D3436; margin-bottom: 15px;">
+        <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; color: #2D3436; font-weight: 700; text-align: center; border-bottom: 2px solid #2D3436; padding-bottom: 10px;">📊 VISION GLOBALE</h3>
+        
+        <!-- Indicateurs en grille 2 colonnes -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+            <!-- CA -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">
+                <div style="font-size: 0.7rem; color: white; margin-bottom: 4px; font-weight: 600;">💰 CA</div>
+                <div id="dashboard-ca" style="font-size: 1.2rem; font-weight: 700; color: white;">-</div>
+            </div>
+
+            <!-- BÉNÉF -->
+            <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">
+                <div style="font-size: 0.7rem; color: white; margin-bottom: 4px; font-weight: 600;">📈 BÉNÉF</div>
+                <div id="dashboard-benefices" style="font-size: 1.2rem; font-weight: 700; color: white;">-</div>
+            </div>
+
+            <!-- TRÉSO -->
+            <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">
+                <div style="font-size: 0.7rem; color: white; margin-bottom: 4px; font-weight: 600;">💳 TRÉSO</div>
+                <div id="dashboard-tresorerie" style="font-size: 1.2rem; font-weight: 700; color: white;">-</div>
+            </div>
+
+            <!-- TX OCC -->
+            <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">
+                <div style="font-size: 0.7rem; color: white; margin-bottom: 4px; font-weight: 600;">📊 OCC</div>
+                <div id="dashboard-occupation" style="font-size: 1.2rem; font-weight: 700; color: white;">-</div>
+            </div>
+        </div>
+
+        <!-- URSSAF & IR - Compacts -->
+        <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <!-- URSSAF -->
+            <div style="background: rgba(102, 126, 234, 0.1); border: 2px solid #667eea; padding: 10px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 0.7rem; margin-bottom: 6px; font-weight: 600; color: #667eea;">💼 URSSAF</div>
+                <div id="dashboard-urssaf-2026" style="font-size: 1rem; font-weight: 700; color: #667eea;">-</div>
+            </div>
+
+            <!-- IR -->
+            <div style="background: rgba(230, 126, 34, 0.1); border: 2px solid #e67e22; padding: 10px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 0.7rem; margin-bottom: 6px; font-weight: 600; color: #e67e22;">🏛️ IR</div>
+                <div id="dashboard-ir-2026" style="font-size: 1rem; font-weight: 700; color: #e67e22;">-</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📅 RÉSERVATIONS CETTE SEMAINE -->
+    <div class="card" style="background: white; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+        <h3 style="margin: 0 0 12px 0; font-size: 1rem; color: #2D3436; font-weight: 700; border-bottom: 2px solid #2D3436; padding-bottom: 8px;">📅 RÉSERVATIONS</h3>
+        <div id="dashboard-reservations" style="display: flex; flex-direction: column; gap: 10px;">
+            <p style="text-align: center; color: #999; padding: 20px; font-size: 0.85rem;">Chargement...</p>
+        </div>
+    </div>
+
+    <!-- 🧹 MÉNAGES PRÉVUS -->
+    <div class="card" style="background: white; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 2px solid #2D3436; padding-bottom: 8px;">
+            <h3 style="margin: 0; font-size: 1rem; color: #2D3436; font-weight: 700;">🧹 MÉNAGES</h3>
+            <span id="dashboard-cleanings" style="background: #ffeaa7; color: #2D3436; padding: 3px 10px; border: 2px solid #2D3436; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">0</span>
+        </div>
+        <div id="dashboard-menages" style="max-height: 200px; overflow-y: auto;">
+            <p style="text-align: center; color: #999; padding: 20px; font-size: 0.85rem;">Chargement...</p>
+        </div>
+    </div>
+
+    <!-- ✅ ACTIONS RÉSERVATIONS -->
+    <div class="card" style="border: 2px solid #667eea; border-left: 4px solid #667eea; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 2px solid #667eea; margin-bottom: 10px;">
+            <h3 style="font-size: 0.95rem; font-weight: 600; color: #2c3e50; margin: 0;">✅ Actions Réservations <span id="todo-count-reservations" style="background: #667eea; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 5px;">0</span></h3>
+            <button onclick="addTodoItem('reservations')" style="background: #667eea; border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 1rem;">+</button>
+        </div>
+        <div id="todo-reservations" style="max-height: 200px; overflow-y: auto;">
+            <!-- Todos dynamiques -->
+        </div>
+    </div>
+
+    <!-- 🔧 TRAVAUX & MAINTENANCE -->
+    <div class="card" style="border: 2px solid #F39C12; border-left: 4px solid #F39C12; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 2px solid #F39C12; margin-bottom: 10px;">
+            <h3 style="font-size: 0.95rem; font-weight: 600; color: #2c3e50; margin: 0;">🔧 Travaux <span id="todo-count-travaux" style="background: #F39C12; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 5px;">0</span></h3>
+            <button onclick="addTodoItem('travaux')" style="background: #F39C12; border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 1rem;">+</button>
+        </div>
+        <div id="todo-travaux" style="max-height: 200px; overflow-y: auto;">
+            <!-- Todos dynamiques -->
+        </div>
+    </div>
+
+    <!-- 🛒 ACHATS & COURSES -->
+    <div class="card" style="border: 2px solid #27AE60; border-left: 4px solid #27AE60; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 2px solid #27AE60; margin-bottom: 10px;">
+            <h3 style="font-size: 0.95rem; font-weight: 600; color: #2c3e50; margin: 0;">🛒 Achats <span id="todo-count-achats" style="background: #27AE60; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 5px;">0</span></h3>
+            <button onclick="addTodoItem('achats')" style="background: #27AE60; border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 1rem;">+</button>
+        </div>
+        <div id="todo-achats" style="max-height: 200px; overflow-y: auto;">
+            <!-- Todos dynamiques -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Tâche (identique pour mobile) -->
+<div id="addTodoModal" class="modal">
+    <div class="modal-content">
+        <div class="card-header">
+            <span class="card-icon">📝</span>
+            <h2 class="card-title">Nouvelle Tâche</h2>
+        </div>
+        
+        <form id="addTodoForm">
+            <input type="hidden" id="todoCategory" />
+            
+            <div class="form-group">
+                <label for="todoTitle">Titre de la tâche</label>
+                <input type="text" id="todoTitle" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="todoGite">Gîte concerné (optionnel)</label>
+                <select id="todoGite">
+                    <option value="">Tous les gîtes</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="todoPriority">Priorité</label>
+                <select id="todoPriority" required>
+                    <option value="basse">🟢 Basse</option>
+                    <option value="normale" selected>🟡 Normale</option>
+                    <option value="haute">🔴 Haute</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="todoDeadline">Échéance (optionnel)</label>
+                <input type="date" id="todoDeadline" />
+            </div>
+            
+            <div class="form-group">
+                <label for="todoNotes">Notes (optionnel)</label>
+                <textarea id="todoNotes" rows="3"></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" onclick="closeAddTodoModal()" class="btn-secondary">Annuler</button>
+                <button type="submit" class="btn-primary">Ajouter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Édition Tâche (identique pour mobile) -->
+<div id="editTodoModal" class="modal">
+    <div class="modal-content">
+        <div class="card-header">
+            <span class="card-icon">✏️</span>
+            <h2 class="card-title">Modifier la Tâche</h2>
+        </div>
+        
+        <form id="editTodoForm">
+            <input type="hidden" id="editTodoId" />
+            
+            <div class="form-group">
+                <label for="editTodoTitle">Titre de la tâche</label>
+                <input type="text" id="editTodoTitle" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="editTodoGite">Gîte concerné (optionnel)</label>
+                <select id="editTodoGite">
+                    <option value="">Tous les gîtes</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="editTodoPriority">Priorité</label>
+                <select id="editTodoPriority" required>
+                    <option value="basse">🟢 Basse</option>
+                    <option value="normale">🟡 Normale</option>
+                    <option value="haute">🔴 Haute</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="editTodoDeadline">Échéance (optionnel)</label>
+                <input type="date" id="editTodoDeadline" />
+            </div>
+            
+            <div class="form-group">
+                <label for="editTodoNotes">Notes (optionnel)</label>
+                <textarea id="editTodoNotes" rows="3"></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" onclick="closeEditTodoModal()" class="btn-secondary">Annuler</button>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
