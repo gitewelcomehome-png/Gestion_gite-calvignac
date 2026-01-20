@@ -3,20 +3,24 @@
     <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div>
-                <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📋 Infos Pratiques</h2>
+                <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📋 INFOS PRATIQUES</h2>
                 <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Informations essentielles pour vos clients</p>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <!-- Bouton SAUVEGARDER -->
+                <button type="button" onclick="sauvegarderInfosGiteComplet(event)" style="background: #10b981; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; font-size: 0.9rem; font-weight: 700; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;" title="Sauvegarder les modifications" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
+                    💾 SAUVEGARDER
+                </button>
                 <!-- Sélecteur de gîte (généré dynamiquement) -->
-                <div id="gitesButtonsContainer" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div id="gitesButtonsContainer" style="display: flex; gap: 10px;">
                     <!-- Les boutons seront générés dynamiquement par JS -->
                 </div>
                 <!-- Sélecteur de langue -->
-                <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.3s; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;" title="Switch to English">
+                <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;" title="Switch to English" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
                     <img id="flagIcon" src="https://flagcdn.com/w80/fr.png" alt="FR" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
                 </button>
                 <!-- Bouton effacer -->
-                <button type="button" onclick="resetGiteInfosQuick()" style="background: #ff7675; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; font-size: 1.2rem; cursor: pointer; padding: 10px; border-radius: 8px; transition: all 0.3s;" title="Effacer toutes les informations">
+                <button type="button" onclick="resetGiteInfosQuick()" style="background: #ff7675; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; font-size: 1.2rem; cursor: pointer; padding: 10px; border-radius: 8px; transition: all 0.2s;" title="Effacer toutes les informations" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
                     🗑️
                 </button>
             </div>
@@ -26,6 +30,13 @@
             <!-- BARRE DE NAVIGATION COMPACTE -->
                 </div>
             </div>
+
+            <!-- 🏡 SECTION ENGLOBANTE AVEC BORDURE COLORÉE -->
+            <div id="gite-content-wrapper" class="card" style="background: white; border: 3px solid #667eea; padding: 30px; border-radius: 16px; box-shadow: 4px 4px 0 #2D3436; margin-bottom: 30px;">
+                <!-- Indicateur de gîte sélectionné -->
+                <div id="gite-indicator" style="background: rgba(102, 126, 234, 0.1); border: 2px solid #667eea; padding: 15px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #667eea; text-transform: uppercase; letter-spacing: 1px;">🏡 GÎTE SÉLECTIONNÉ : TRÉVOUX</div>
+                </div>
 
             <form id="infosGiteForm">
 
@@ -38,12 +49,12 @@
 
                     <div style="display: grid; gap: 20px;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div>
+                            <div style="grid-column: 1 / -1;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète <span style="color: #ef4444;">*</span></label>
-                                <input type="text" id="infos_adresse" class="form-control" placeholder="12 rue de la République, 01600 Trevoux">
-                                <small style="color: var(--gray); font-style: italic;">Adresse exacte avec code postal pour GPS</small>
+                                <input type="text" id="infos_adresse" class="form-control" placeholder="12 rue de la République, 01600 Trevoux" style="flex: 1;">
+                                <small style="color: var(--gray); font-style: italic;">📍 Les coordonnées GPS seront calculées automatiquement lors de la sauvegarde</small>
                             </div>
-                            <div style="display: none;">
+                            <div style="display: none; grid-column: 1 / -1;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Full Address <span style="color: #ef4444;">*</span></label>
                                 <input type="text" id="infos_adresse_en" class="form-control" placeholder="12 Republic Street, 01600 Trevoux">
                                 <small style="color: var(--gray); font-style: italic;">Exact address with postal code for GPS</small>
@@ -66,13 +77,13 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Coordonnées GPS - Latitude</label>
-                                <input type="text" id="infos_gpsLat" class="form-control" placeholder="45.9423">
-                                <small style="color: var(--gray); font-style: italic;">Format décimal, ex: 45.9423</small>
+                                <input type="text" id="infos_gpsLat" class="form-control" placeholder="45.9423" readonly style="background: #f3f4f6; cursor: not-allowed;">
+                                <small style="color: var(--gray); font-style: italic;">Calculée automatiquement depuis l'adresse</small>
                             </div>
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Coordonnées GPS - Longitude</label>
-                                <input type="text" id="infos_gpsLon" class="form-control" placeholder="4.7681">
-                                <small style="color: var(--gray); font-style: italic;">Format décimal, ex: 4.7681</small>
+                                <input type="text" id="infos_gpsLon" class="form-control" placeholder="4.7681" readonly style="background: #f3f4f6; cursor: not-allowed;">
+                                <small style="color: var(--gray); font-style: italic;">Calculée automatiquement depuis l'adresse</small>
                             </div>
                         </div>
 
@@ -850,10 +861,7 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     </div>
                 </div>
 
-                <!-- Auto-save activée : modifications enregistrées automatiquement -->
-                <div class="card" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 15px; text-align: center;">
-                    <div style="font-size: 1.1rem; font-weight: 600;">💾 Sauvegarde automatique activée</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">Vos modifications sont enregistrées automatiquement</div>
-                </div>
-
             </form>
+            
+            </div>
+            <!-- FIN SECTION ENGLOBANTE -->

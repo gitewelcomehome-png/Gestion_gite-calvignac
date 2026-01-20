@@ -4676,6 +4676,11 @@ function toggleOptionsPersonnelles() {
         section.style.display = 'none';
         localStorage.setItem('fiscalite_options_perso', 'false');
     }
+    
+    // Mettre à jour l'affichage du dashboard (section IR)
+    if (typeof window.updateFinancialIndicators === 'function') {
+        window.updateFinancialIndicators();
+    }
 }
 
 /**

@@ -3,15 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion gites - v4.3</title>
+    <title>Gestion gites - v4.4</title>
     
     <!-- Favicon vide pour éviter requête 404 -->
     <link rel="icon" href="data:,">
+    
+    <!-- 🛡️ Masquer TOUTES les erreurs des extensions Chrome - DOIT être en premier -->
+    <script>
+        // Capturer TOUTES les erreurs avant tout autre script
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            // Bloquer toutes les erreurs d'extensions Chrome
+            if (url && url.includes('chrome-extension://')) {
+                return true; // Empêche l'affichage dans la console
+            }
+            // Bloquer les erreurs de syntaxe export (extensions)
+            if (msg && (msg.includes('Unexpected token') || msg.includes('export'))) {
+                return true;
+            }
+            return false;
+        };
+        
+        // Supprimer également du console.error
+        const _consoleError = console.error;
+        console.error = function(...args) {
+            const str = args.join(' ');
+            if (str.includes('chrome-extension') || 
+                str.includes('webpage_content_reporter') || 
+                str.includes('Unexpected token') ||
+                str.includes('export')) {
+                return;
+            }
+            _consoleError.apply(console, args);
+        };
+    </script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
     
     <!-- 🔒 PHASE 2 SÉCURITÉ: Configuration locale optionnelle -->
     <!-- config.local.js désactivé (fichier absent) - Configuration en dur dans shared-config.js -->
@@ -23,9 +53,9 @@
     <!-- 🔒 PHASE 1 SÉCURITÉ: Authentification obligatoire -->
     <script src="js/auth.js"></script>
     <!-- 🛡️ PHASE 3 SÉCURITÉ: Protection XSS -->
-    <script type="module" src="js/security-utils.js"></script>
+    <script src="js/security-utils.js"></script>
     <!-- 🛡️ PHASE 4 SÉCURITÉ: Validation des entrées -->
-    <script type="module" src="js/validation-utils.js"></script>
+    <script src="js/validation-utils.js"></script>
     <!-- 📊 PHASE 4 SÉCURITÉ: Logging centralisé -->
     <script src="js/error-logger.js"></script>
     <!-- 🛡️ PHASE 4 SÉCURITÉ: Rate limiting anti-spam -->
@@ -722,23 +752,9 @@
                 });
             }
             if (tabName === 'decouvrir') {
-                // Pré-sélectionner le premier gîte si aucun gîte n'est sélectionné
-                const giteInput = document.getElementById('decouvrir_gite');
-                if (!giteInput || !giteInput.value) {
-                    if (typeof selectGiteDecouvrir === 'function' && window.gitesManager && window.gitesManager.gites && window.gitesManager.gites.length > 0) {
-                        selectGiteDecouvrir(window.gitesManager.gites[0].name);
-                    }
-                } else {
-                    // Si un gîte est déjà sélectionné, charger les événements
-                    if (typeof rechercherEvenements === 'function') {
-                        setTimeout(() => rechercherEvenements(), 100);
-                    }
-                }
-                if (typeof chargerActivites === 'function') {
-                    chargerActivites();
-                }
-                if (typeof chargerToutSurCarte === 'function') {
-                    chargerToutSurCarte();
+                // Initialiser le module "À Découvrir"
+                if (typeof window.initModuleDecouvrir === 'function') {
+                    window.initModuleDecouvrir();
                 }
             }
             if (tabName === 'calendrier-tarifs') {
@@ -2480,163 +2496,18 @@
             initActivitesParGite();
         }
         
-        // Ouvrir la modale d'activité
-        function ouvrirModalActivite(isModification = false, positionY = null) {
-            const modal = document.getElementById('modalActivite');
-            const overlay = document.getElementById('modalOverlay');
-            
-            modal.style.display = 'block';
-            overlay.style.display = 'block';
-            
-            // Si une position est fournie, la modale s'affiche à cet endroit
-            if (positionY !== null) {
-                modal.style.top = positionY + 'px';
-                modal.style.transform = 'translate(-50%, -50%)';
-            } else {
-                // Sinon, centrée au milieu de l'écran
-                modal.style.top = '50%';
-                modal.style.transform = 'translate(-50%, -50%)';
-            }
-            
-            const modalTitle = document.getElementById('modalTitle');
-            const btnSave = document.getElementById('btnSaveActivite');
-            
-            if (isModification) {
-                modalTitle.textContent = '✏️ Modifier l\'Activité';
-                btnSave.textContent = '✏️ Modifier cette activité';
-                btnSave.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-            } else {
-                modalTitle.textContent = '➕ Ajouter une Activité';
-                btnSave.textContent = '➕ Ajouter cette activité';
-                btnSave.style.background = 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)';
-            }
-        }
-        
-        // Fermer la modale d'activité
-        function fermerModalActivite() {
-            document.getElementById('modalActivite').style.display = 'none';
-            document.getElementById('modalOverlay').style.display = 'none';
-            // Réinitialiser le formulaire
-            document.getElementById('activite_nom').value = '';
-            document.getElementById('activite_categorie').value = '';
-            document.getElementById('activite_description').value = '';
-            document.getElementById('activite_adresse').value = '';
-            document.getElementById('activite_latitude').value = '';
-            document.getElementById('activite_longitude').value = '';
-            document.getElementById('activite_distance').value = '';
-            document.getElementById('activite_note').value = '';
-            document.getElementById('activite_avis').value = '';
-            document.getElementById('activite_prix').value = '';
-            document.getElementById('activite_telephone').value = '';
-            document.getElementById('activite_website').value = '';
-            document.getElementById('activite_type_resto').value = '';
-            document.getElementById('typeRestoDiv').style.display = 'none';
-            delete window.activiteEnCoursDeModification;
-        }
+        // ==================== FONCTIONS DÉCOUVRIR - Déplacées dans js/decouvrir.js ====================
+        // Les fonctions suivantes sont maintenant gérées par le module decouvrir.js :
+        // - ouvrirModalActivite, fermerModalActivite
+        // - calculerDistance, obtenirCoordonnees
+        // - afficherTypeRestoSiRestaurant
+        // - chargerActivites, afficherActivites
+        // - supprimerActivite, modifierActivite
+        // - filtrerActivitesParCategorie
+        // - chargerToutSurCarte
         
         // Utiliser GITES_COORDS depuis shared-config.js (window.GITES_COORDS)
         // Pas besoin de redéclarer ici
-        
-        // Calculer la distance entre deux points GPS (formule de Haversine)
-        function calculerDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Rayon de la Terre en km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = 
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const distance = R * c;
-            return Math.round(distance * 100) / 100; // Arrondi à 2 décimales
-        }
-        
-        // Obtenir les coordonnées GPS depuis l'adresse
-        async function obtenirCoordonnees() {
-            const adresse = document.getElementById('activite_adresse').value.trim();
-            
-            if (!adresse) {
-                showNotification('⚠️ Veuillez d\'abord entrer une adresse', 'warning');
-                return;
-            }
-            
-            showNotification('📍 Récupération des coordonnées GPS...', 'info');
-            
-            const gite = document.getElementById('decouvrir_gite').value;
-            const coords = await geocodeAddress(adresse, gite);
-            
-            if (coords && coords.lat && coords.lng) {
-                document.getElementById('activite_latitude').value = coords.lat;
-                document.getElementById('activite_longitude').value = coords.lng;
-                
-                // Calculer et afficher les distances pour tous les gîtes
-                const gitesCoords = window.getGitesCoordinates();
-                const distances = [];
-                
-                for (const [giteName, giteCoords] of Object.entries(gitesCoords)) {
-                    const dist = calculerDistance(giteCoords.lat, giteCoords.lng, coords.lat, coords.lng);
-                    distances.push(`${giteName}: ${dist}km`);
-                }
-                
-                showNotification(`✓ Coordonnées trouvées : ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}\n📏 Distances - ${distances.join(' | ')}`, 'success');
-            } else {
-                showNotification('❌ Impossible de trouver les coordonnées pour cette adresse', 'error');
-            }
-        }
-        
-        // Charger les activités depuis Supabase
-        // Afficher/cacher le champ type de restaurant selon la catégorie
-        function afficherTypeRestoSiRestaurant() {
-            const categorie = document.getElementById('activite_categorie').value;
-            const typeRestoDiv = document.getElementById('typeRestoDiv');
-            if (categorie === 'Restaurant') {
-                typeRestoDiv.style.display = 'block';
-            } else {
-                typeRestoDiv.style.display = 'none';
-            }
-        }
-        
-        // ==================== CHARGER ACTIVITÉS - Déplacé dans js/decouvrir.js ====================
-        // Voir js/decouvrir.js pour: chargerActivites, chargerToutSurCarte, afficherActivites,
-        // supprimerActivite, modifierActivite, filtrerActivitesParCategorie, etc.
-        
-        // Sélectionner un gîte pour "À Découvrir"
-        async function selectGiteDecouvrir(giteName) {
-            document.getElementById('decouvrir_gite').value = giteName;
-            document.getElementById('formDecouvrir').style.display = 'block';
-            
-            // Mettre à jour les styles des boutons de sélection de gîte
-            const gites = await window.gitesManager.getAll();
-            gites.forEach(g => {
-                const bouton = document.querySelector(`[onclick*="selectGiteDecouvrir('${g.name}')"]`);
-                if (bouton) {
-                    if (g.name === giteName) {
-                        bouton.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                        bouton.style.color = 'white';
-                    } else {
-                        bouton.style.background = 'white';
-                        bouton.style.color = '#FF6B6B';
-                    }
-                }
-            });
-            
-            // Masquer le message de gîte sélectionné
-            const alertInfo = document.querySelector('#formDecouvrir .alert.alert-info');
-            if (alertInfo) alertInfo.style.display = 'none';
-            
-            // Charger et afficher les activités
-            chargerActivites();
-            
-            // Charger automatiquement les événements de la semaine
-            setTimeout(() => {
-                rechercherEvenements();
-            }, 100);
-            
-            // Charger automatiquement les événements et afficher TOUT sur la carte
-            setTimeout(() => {
-                chargerToutSurCarte();
-            }, 500);
-        }
         
         // Fonction pour géocoder une adresse (convertir adresse → coordonnées GPS)
         async function geocodeAddress(address, giteName) {

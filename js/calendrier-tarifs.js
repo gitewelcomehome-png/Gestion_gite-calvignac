@@ -60,7 +60,7 @@ async function initCalendrierTarifs() {
         const user = await window.supabaseClient.auth.getUser();
         if (!user || !user.data || !user.data.user) {
             // Utilisateur non connecté
-            window.location.href = 'login.html';
+            window.location.href = '/pages/login.html';
             return;
         }
         

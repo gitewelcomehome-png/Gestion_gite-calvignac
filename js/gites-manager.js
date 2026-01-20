@@ -342,8 +342,8 @@ class GitesManager {
         const gite = this.getById(giteId);
         if (!gite) return '#999999';
         
-        // Utiliser une propriété custom si définie
-        if (gite.brand_color) return gite.brand_color;
+        // Utiliser la couleur définie dans la BDD
+        if (gite.color) return gite.color;
         
         // Palette par défaut basée sur l'index
         const index = this.gites.findIndex(g => g.id === giteId);

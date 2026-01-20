@@ -7,17 +7,33 @@
 // 📱 GÉNÉRATION & ENVOI PAGE CLIENT
 // ==========================================
 
-function loadInfosGites(gite) {
-    const allData = JSON.parse(localStorage.getItem('gites_infos_pratiques_complet') || '{}');
-    const data = allData[gite] || {};
+async function loadInfosGites(gite) {
+    // Charger depuis Supabase uniquement
+    const { data, error } = await supabase
+        .from('infos_gites')
+        .select('*')
+        .eq('gite', gite.toLowerCase())
+        .maybeSingle();
+    
+    if (error || !data) {
+        console.warn(`⚠️ Aucune info pour ${gite}`);
+        return {
+            wifi: '',
+            codeCle: '',
+            adresse: '',
+            instructionsArrivee: '',
+            instructionsDepart: '',
+            infosComplementaires: ''
+        };
+    }
     
     // Transformer au format attendu par l'ancien système (compatibilité)
     return {
-        wifi: data.wifiPassword || '',
-        codeCle: data.codeAcces || '',
+        wifi: data.wifi_password || '',
+        codeCle: data.code_acces || '',
         adresse: data.adresse || '',
-        instructionsArrivee: data.instructionsCles || '',
-        instructionsDepart: data.checklistDepart || '',
+        instructionsArrivee: data.instructions_cles || '',
+        instructionsDepart: data.checklist_depart || '',
         infosComplementaires: ''
     };
 }
@@ -99,7 +115,7 @@ async function envoyerViaWhatsApp(reservationId) {
     
     const reservations = await getAllReservations();
     const reservation = reservations.find(r => r.id === reservationId);
-    const infosGite = loadInfosGites(reservation.gite);
+    const infosGite = await loadInfosGites(reservation.gite);
     
     // Nettoyer le numéro de téléphone pour WhatsApp
     let telephone = reservation.telephone.replace(/\s/g, '').replace(/\+/g, '');
@@ -155,7 +171,7 @@ async function envoyerViaSMS(reservationId) {
     
     const reservations = await getAllReservations();
     const reservation = reservations.find(r => r.id === reservationId);
-    const infosGite = loadInfosGites(reservation.gite);
+    const infosGite = await loadInfosGites(reservation.gite);
     
     // Nettoyer le numéro de téléphone
     let telephone = reservation.telephone.replace(/\s/g, '');
@@ -212,8 +228,8 @@ async function telechargerSeulementHTML(reservationId) {
     await aperçuFicheClient(reservationId);
 }
 
-function telechargerPageHTML(reservation) {
-    const infosGite = loadInfosGites(reservation.gite);
+async function telechargerPageHTML(reservation) {
+    const infosGite = await loadInfosGites(reservation.gite);
     
     const htmlContent = `<!DOCTYPE html>
 <html lang="fr">
@@ -626,10 +642,11 @@ function clearAllData() {
 // 🎯 GESTION INFOS PRATIQUES (SUPABASE)
 // ==========================================
 
-async function saveInfosGiteToSupabase(gite, formData) {
+async function saveInfosGiteToSupabase(giteName, formData) {
     try {
         const dataToSave = {
-            gite: gite.toLowerCase(),
+            gite: giteName.toLowerCase(),
+            owner_user_id: (await window.supabaseClient.auth.getUser()).data.user?.id,
             // Section 1: Base
             adresse: formData.adresse || null,
             telephone: formData.telephone || null,
@@ -747,25 +764,34 @@ async function saveInfosGiteToSupabase(gite, formData) {
         
         return true;
     } catch (error) {
-        console.error('Erreur sauvegarde Supabase:', error);
-        showNotification('⚠️ Sauvegarde locale OK, mais erreur sync cloud', 'warning');
+        console.error('❌ Erreur sauvegarde Supabase infos gîte:', error);
         return false;
     }
 }
 
-async function loadInfosGiteFromSupabase(gite) {
+async function loadInfosGiteFromSupabase(giteName) {
     try {
         const { data, error } = await supabase
             .from('infos_gites')
             .select('*')
-            .eq('gite', gite.toLowerCase())
-            .single();
+            .eq('gite', giteName.toLowerCase())
+            .maybeSingle(); // maybeSingle() au lieu de single() pour éviter erreur 406 si pas de données
         
         if (error) {
-            if (error.code === 'PGRST116') {
-                return null;
-            }
-            throw error;
+            console.error('❌ Erreur chargement infos_gites:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                status: error.status
+            });
+            return null;
+        }
+        
+        // Pas de données trouvées = OK
+        if (!data) {
+            console.log(`ℹ️ Aucune donnée pour ${giteName} - Création à la première sauvegarde`);
+            return null;
         }
         
         // Convertir de snake_case SQL vers camelCase JavaScript
@@ -906,7 +932,35 @@ window.loadInfosGiteFromSupabase = loadInfosGiteFromSupabase;
 
 // Variable globale pour le gîte actuellement sélectionné
 let currentGiteInfos = 'Trévoux';
+let initialAddress = ''; // Adresse initiale chargée pour détecter les changements
 const DB_KEY_INFOS = 'gites_infos_pratiques_complet';
+
+// ==========================================
+// 🎨 APPLICATION COULEUR GÎTE AUX CARDS
+// ==========================================
+function applyGiteColorToCards(color) {
+    // Extraire RGB de la couleur hex
+    const r = parseInt(color.slice(1,3), 16);
+    const g = parseInt(color.slice(3,5), 16);
+    const b = parseInt(color.slice(5,7), 16);
+    
+    // Appliquer aux toutes les cards du formulaire
+    const formCards = document.querySelectorAll('#infosGiteForm .card');
+    formCards.forEach(card => {
+        card.style.background = `rgba(${r}, ${g}, ${b}, 0.08)`;
+        card.style.border = `2px solid ${color}`;
+        card.style.borderRadius = '12px';
+        card.style.padding = '20px';
+        card.style.marginBottom = '20px';
+    });
+    
+    // Mettre à jour les titres des sections
+    const cardHeaders = document.querySelectorAll('#infosGiteForm .card-header');
+    cardHeaders.forEach(header => {
+        header.style.color = color;
+        header.style.borderBottom = `2px solid ${color}`;
+    });
+}
 
 // ==========================================
 // 🏠 GÉNÉRATION DYNAMIQUE DES BOUTONS GÎTES
@@ -942,18 +996,24 @@ async function generateGitesButtons() {
         container.innerHTML = '';
 
         // Générer un bouton pour chaque gîte
+        const colors = ['#667eea', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#feca57', '#48dbfb', '#ff6b6b'];
+        
         gites.forEach((gite, index) => {
             const button = document.createElement('button');
             button.className = 'btn-neo';
             button.id = `btn${gite.name.replace(/\s+/g, '')}`;
             button.onclick = () => selectGiteInfos(gite.name);
             
+            // Couleur du gîte basée sur l'index
+            const giteColor = gite.color || colors[index % colors.length];
+            button.dataset.color = giteColor;
+            
             // Premier bouton actif par défaut
             if (index === 0) {
-                button.style.cssText = 'background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;';
+                button.style.cssText = `background: ${giteColor}; color: white; padding: 10px 20px; border: 4px solid #2D3436; box-shadow: 8px 8px 0 #2D3436; border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transform: scale(1.1); transition: all 0.3s;`;
                 currentGiteInfos = gite.name;
             } else {
-                button.style.cssText = 'background: white; color: #2D3436; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;';
+                button.style.cssText = 'background: #f5f5f5; color: #999; padding: 10px 20px; border: 2px solid #e0e0e0; box-shadow: 2px 2px 0 #e0e0e0; border-radius: 8px; font-weight: 500; font-size: 1rem; cursor: pointer; opacity: 0.5; transform: scale(0.95); transition: all 0.3s;';
             }
             
             button.textContent = `🏡 ${gite.name}`;
@@ -962,8 +1022,37 @@ async function generateGitesButtons() {
 
         console.log(`✅ ${gites.length} boutons de gîtes générés dynamiquement`);
         
+        // Appliquer la couleur du premier gîte à la section englobante
+        const firstGiteColor = gites[0]?.color || colors[0];
+        const wrapper = document.getElementById('gite-content-wrapper');
+        const indicateur = document.getElementById('gite-indicator');
+        
+        if (wrapper) {
+            wrapper.style.border = `3px solid ${firstGiteColor}`;
+        }
+        if (indicateur) {
+            // Extraire RGB de la couleur hex pour créer une version transparente
+            const r = parseInt(firstGiteColor.slice(1,3), 16);
+            const g = parseInt(firstGiteColor.slice(3,5), 16);
+            const b = parseInt(firstGiteColor.slice(5,7), 16);
+            indicateur.style.background = `rgba(${r}, ${g}, ${b}, 0.1)`;
+            indicateur.style.border = `2px solid ${firstGiteColor}`;
+            indicateur.style.color = firstGiteColor;
+            indicateur.innerHTML = `<div style="font-size: 1.1rem; font-weight: 700; color: ${firstGiteColor}; text-transform: uppercase; letter-spacing: 1px;">🏡 GÎTE SÉLECTIONNÉ : ${gites[0].name.toUpperCase()}</div>`;
+        }
+        
+        // Appliquer le style aux cards du formulaire
+        applyGiteColorToCards(firstGiteColor);
+        
         // Charger les données du premier gîte
         await chargerDonneesInfos();
+        
+        // Attacher les listeners après le chargement initial
+        setTimeout(() => {
+            captureFormState();
+            attachChangeListeners();
+            console.log('✅ Système de détection de modifications activé');
+        }, 300);
         
     } catch (error) {
         console.error('❌ Erreur génération boutons gîtes:', error);
@@ -976,11 +1065,24 @@ window.generateGitesButtons = generateGitesButtons;
 
 // Sélection du gîte
 window.selectGiteInfos = async function(gite) {
-    // Sauvegarder les données actuelles
-    sauvegarderDonneesInfos();
+    // Vérifier si des modifications non sauvegardées existent
+    if (window.isDirty && currentGiteInfos && currentGiteInfos !== gite) {
+        const confirmer = confirm(`⚠️ Vous avez des modifications non sauvegardées pour "${currentGiteInfos}".\n\nVoulez-vous les sauvegarder avant de changer de gîte ?`);
+        if (confirmer) {
+            await sauvegarderDonneesInfos();
+            if (typeof showNotification === 'function') {
+                showNotification('✓ Modifications sauvegardées', 'success');
+            }
+        }
+        // Réinitialiser le flag
+        window.isDirty = false;
+    }
     
     // Changer le gîte
     currentGiteInfos = gite;
+    
+    // Récupérer la couleur du gîte sélectionné
+    let giteColor = '#667eea'; // Couleur par défaut
     
     // Mettre à jour l'UI des boutons
     const container = document.getElementById('gitesButtonsContainer');
@@ -988,25 +1090,66 @@ window.selectGiteInfos = async function(gite) {
         const buttons = container.querySelectorAll('button');
         buttons.forEach(btn => {
             const btnGiteName = btn.textContent.trim().replace('🏡 ', '');
+            const btnColor = btn.dataset.color || '#667eea';
+            
             if (btnGiteName === gite) {
-                btn.style.background = '#74b9ff';
+                giteColor = btnColor; // Capturer la couleur du gîte actif
+                // Bouton sélectionné : couleur vive + indicateur visuel fort
+                btn.style.background = btnColor;
                 btn.style.color = 'white';
+                btn.style.border = '4px solid #2D3436';
+                btn.style.boxShadow = '8px 8px 0 #2D3436';
+                btn.style.fontWeight = '800';
+                btn.style.opacity = '1';
+                btn.style.transform = 'scale(1.1)';
+                btn.style.fontSize = '1.1rem';
             } else {
-                btn.style.background = 'white';
-                btn.style.color = '#2D3436';
+                // Boutons non sélectionnés : gris très discret
+                btn.style.background = '#f5f5f5';
+                btn.style.color = '#999';
+                btn.style.border = '2px solid #e0e0e0';
+                btn.style.boxShadow = '2px 2px 0 #e0e0e0';
+                btn.style.fontWeight = '500';
+                btn.style.opacity = '0.5';
+                btn.style.transform = 'scale(0.95)';
+                btn.style.fontSize = '1rem';
             }
         });
     }
     
+    // Appliquer la couleur du gîte sélectionné à la section englobante
+    const wrapper = document.getElementById('gite-content-wrapper');
+    const indicateur = document.getElementById('gite-indicator');
+    
+    if (wrapper) {
+        wrapper.style.border = `3px solid ${giteColor}`;
+    }
+    if (indicateur) {
+        // Extraire RGB de la couleur hex pour créer une version transparente
+        const r = parseInt(giteColor.slice(1,3), 16);
+        const g = parseInt(giteColor.slice(3,5), 16);
+        const b = parseInt(giteColor.slice(5,7), 16);
+        indicateur.style.background = `rgba(${r}, ${g}, ${b}, 0.1)`;
+        indicateur.style.border = `2px solid ${giteColor}`;
+        indicateur.style.color = giteColor;
+        indicateur.innerHTML = `<div style="font-size: 1.1rem; font-weight: 700; color: ${giteColor}; text-transform: uppercase; letter-spacing: 1px;">🏡 GÎTE SÉLECTIONNÉ : ${gite.toUpperCase()}</div>`;
+    }
+    
+    // Appliquer le style aux cards du formulaire
+    applyGiteColorToCards(giteColor);
+    
     // Charger les données du nouveau gîte
     await chargerDonneesInfos();
     
-    if (typeof showNotification === 'function') {
-        showNotification(`Gîte ${gite} sélectionné`, 'success');
-    }
+    // Capturer l'état initial après chargement
+    setTimeout(() => {
+        initialAddress = document.getElementById('infos_adresse')?.value || '';
+        captureFormState();
+        attachChangeListeners();
+    }, 200);
 };
 
-function sauvegarderDonneesInfos() {
+async function sauvegarderDonneesInfos() {
     // Validation des champs critiques si ValidationUtils disponible
     if (window.ValidationUtils) {
         const emailField = document.getElementById('infos_email');
@@ -1015,7 +1158,7 @@ function sauvegarderDonneesInfos() {
         const gpsLonField = document.getElementById('infos_gpsLon');
         
         // Valider email si rempli
-        if (emailField?.value && !window.ValidationUtils.validate(emailField.value, 'email').valid) {
+        if (emailField?.value && !window.ValidationUtils.validateValue(emailField.value, 'email').valid) {
             console.warn('⚠️ Email invalide, sauvegarde annulée');
             if (typeof showNotification === 'function') {
                 showNotification('❌ Email invalide', 'error');
@@ -1024,7 +1167,7 @@ function sauvegarderDonneesInfos() {
         }
         
         // Valider téléphone si rempli
-        if (telephoneField?.value && !window.ValidationUtils.validate(telephoneField.value, 'phone').valid) {
+        if (telephoneField?.value && !window.ValidationUtils.validateValue(telephoneField.value, 'phone').valid) {
             console.warn('⚠️ Téléphone invalide, sauvegarde annulée');
             if (typeof showNotification === 'function') {
                 showNotification('❌ Téléphone invalide (format: 06 12 34 56 78)', 'error');
@@ -1172,12 +1315,39 @@ function sauvegarderDonneesInfos() {
         dateModification: new Date().toISOString()
     };
     
-    // Sauvegarder dans localStorage (backup local)
-    const allData = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
-    allData[currentGiteInfos] = formData;
-    localStorage.setItem(DB_KEY_INFOS, JSON.stringify(allData));
+    // Détecter si l'adresse a changé
+    const addressChanged = formData.adresse && formData.adresse.trim() !== initialAddress.trim();
     
-    // Sauvegarder en base de données Supabase (async)
+    // Géocoder automatiquement si :
+    // 1. L'adresse est renseignée ET pas de GPS
+    // 2. OU si l'adresse a changé
+    if (formData.adresse && (!formData.gpsLat || !formData.gpsLon || addressChanged)) {
+        console.log('📍 Géocodage automatique de l\'adresse...');
+        if (addressChanged) {
+            console.log('🔄 Adresse modifiée détectée');
+        }
+        const coords = await geocodeAddressAuto(formData.adresse);
+        if (coords) {
+            formData.gpsLat = coords.lat.toString();
+            formData.gpsLon = coords.lon.toString();
+            // Mettre à jour les champs visuels
+            document.getElementById('infos_gpsLat').value = coords.lat.toFixed(8);
+            document.getElementById('infos_gpsLon').value = coords.lon.toFixed(8);
+            // Mettre à jour l'adresse initiale
+            initialAddress = formData.adresse;
+        }
+    }
+    
+    // Si l'adresse est vide, effacer les GPS
+    if (!formData.adresse || formData.adresse.trim() === '') {
+        formData.gpsLat = '';
+        formData.gpsLon = '';
+        document.getElementById('infos_gpsLat').value = '';
+        document.getElementById('infos_gpsLon').value = '';
+        initialAddress = '';
+    }
+    
+    // Sauvegarder en base de données Supabase uniquement
     saveInfosGiteToSupabase(currentGiteInfos, formData);
     
     if (typeof updateProgressInfos === 'function') {
@@ -1186,31 +1356,35 @@ function sauvegarderDonneesInfos() {
 }
 
 async function chargerDonneesInfos() {
-    // Essayer de charger depuis Supabase d'abord
-    const dataFromSupabase = await loadInfosGiteFromSupabase(currentGiteInfos);
+    // Charger uniquement depuis Supabase
+    const data = await loadInfosGiteFromSupabase(currentGiteInfos);
     
-    let data;
-    if (dataFromSupabase) {
-        // Données depuis Supabase
-        data = dataFromSupabase;
-        
-        // Mettre à jour le localStorage aussi
-        const allData = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
-        allData[currentGiteInfos] = data;
-        localStorage.setItem(DB_KEY_INFOS, JSON.stringify(allData));
-    } else {
-        // Fallback sur localStorage
-        const allData = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
-        data = allData[currentGiteInfos] || {};
+    if (!data) {
+        // Aucune donnée : vider tous les champs
+        const form = document.getElementById('infosGiteForm');
+        if (form) {
+            const inputs = form.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                if (input.type !== 'button' && input.type !== 'submit') {
+                    input.value = '';
+                }
+            });
+        }
+        return;
     }
     
-    // Remplir tous les champs
+    // Remplir tous les champs avec les données de la base (y compris les vides)
     Object.keys(data).forEach(key => {
         const element = document.getElementById('infos_' + key);
         if (element) {
             element.value = data[key] || '';
         }
     });
+    
+    // Charger les coordonnées depuis la table gites si non présentes
+    if (!data.gpsLat || !data.gpsLon) {
+        await loadGiteCoordinatesFromMainTable(currentGiteInfos);
+    }
     
     // Mettre à jour les champs conditionnels
     if (typeof toggleParkingInfos === 'function') {
@@ -1250,75 +1424,70 @@ function updateProgressInfos() {
     if (progressText) progressText.textContent = Math.round(percent) + '%';
 }
 
-// Auto-save avec debounce
-let autoSaveTimeout = null;
+// Tracking des modifications non sauvegardées
+window.isDirty = false;
+let originalFormData = null;
 
+// Marquer le formulaire comme modifié
+function markFormAsDirty() {
+    window.isDirty = true;
+}
+
+// Capturer l'état initial du formulaire
+function captureFormState() {
+    const form = document.getElementById('infosGiteForm');
+    if (!form) return;
+    
+    const fields = form.querySelectorAll('input, textarea, select');
+    const data = {};
+    fields.forEach(field => {
+        data[field.name || field.id] = field.value;
+    });
+    originalFormData = JSON.stringify(data);
+    window.isDirty = false;
+}
+
+// Vérifier si le formulaire a changé
+function checkIfFormChanged() {
+    const form = document.getElementById('infosGiteForm');
+    if (!form) return false;
+    
+    const fields = form.querySelectorAll('input, textarea, select');
+    const currentData = {};
+    fields.forEach(field => {
+        currentData[field.name || field.id] = field.value;
+    });
+    
+    return JSON.stringify(currentData) !== originalFormData;
+}
+
+// Attacher les listeners de modification
+function attachChangeListeners() {
+    const form = document.getElementById('infosGiteForm');
+    if (!form) return;
+    
+    const fields = form.querySelectorAll('input, textarea, select');
+    fields.forEach(field => {
+        field.addEventListener('input', markFormAsDirty);
+        field.addEventListener('change', markFormAsDirty);
+    });
+}
+
+// Sauvegarde manuelle
 window.sauvegarderInfosGiteComplet = function(event) {
     if (event) event.preventDefault();
     sauvegarderDonneesInfos();
+    window.isDirty = false;
+    captureFormState();
     if (typeof showNotification === 'function') {
         showNotification('✓ Informations sauvegardées pour ' + currentGiteInfos, 'success');
     }
 };
 
-function autoSaveInfos() {
-    clearTimeout(autoSaveTimeout);
-    autoSaveTimeout = setTimeout(() => {
-        sauvegarderDonneesInfos();
-        // Toast discret
-        const toast = document.createElement('div');
-        toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
-        toast.textContent = '💾 Sauvegardé';
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 1500);
-    }, 800); // Attendre 800ms après la dernière frappe
-}
-
-function attachAutoSave() {
-    const form = document.getElementById('infosGiteForm');
-    if (!form) return;
-    
-    // Tous les inputs, textareas, selects
-    const fields = form.querySelectorAll('input, textarea, select');
-    fields.forEach(field => {
-        // Pour inputs/textareas: sauvegarder après arrêt de frappe
-        if (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA') {
-            field.addEventListener('input', autoSaveInfos);
-            field.addEventListener('blur', () => {
-                clearTimeout(autoSaveTimeout);
-                sauvegarderDonneesInfos();
-            });
-        }
-        // Pour selects: sauvegarder immédiatement
-        if (field.tagName === 'SELECT') {
-            field.addEventListener('change', () => {
-                clearTimeout(autoSaveTimeout);
-                sauvegarderDonneesInfos();
-            });
-        }
-    });
-    
-    console.log('✅ Auto-save activé sur', fields.length, 'champs');
-}
-
-// Attacher auto-save quand le tab est chargé
-if (typeof chargerDonneesInfos !== 'undefined') {
-    const originalChargerDonneesInfos = chargerDonneesInfos;
-    chargerDonneesInfos = async function() {
-        await originalChargerDonneesInfos();
-        setTimeout(attachAutoSave, 500);
-    };
-}
-
 window.resetGiteInfosQuick = async function() {
     if (!confirm(`⚠️ ATTENTION !\n\nVoulez-vous vraiment effacer TOUTES les informations du gîte ${currentGiteInfos} ?\n\n✓ Ceci supprimera :\n- Adresse et coordonnées\n- Informations WiFi\n- Instructions d'arrivée\n- Équipements\n- Toutes les autres données\n\n❌ Cette action est IRRÉVERSIBLE !\n\nCliquez sur OK pour confirmer la suppression.`)) {
         return;
     }
-    
-    // Supprimer de localStorage
-    const data = JSON.parse(localStorage.getItem(DB_KEY_INFOS) || '{}');
-    delete data[currentGiteInfos];
-    localStorage.setItem(DB_KEY_INFOS, JSON.stringify(data));
     
     // Supprimer de Supabase
     try {
@@ -1568,7 +1737,7 @@ window.toggleLanguage = function() {
         'adresse', 'telephone', 'email',
         'wifiSSID', 'wifiPassword', 'wifiDebit', 'wifiLocalisation', 'wifiZones',
         'heureArrivee', 'arriveeTardive', 'parkingDispo', 'parkingPlaces', 'parkingDetails',
-        'typeAcces', 'codeAcces', 'instructionsCles', 'etage', 'ascenseur',
+        'typeAcces', 'codeAcces', 'instructionsCles', 'etage',
         'itineraireLogement', 'premiereVisite',
         'typeChauffage', 'climatisation', 'instructionsChauffage',
         'equipementsCuisine', 'instructionsFour', 'instructionsPlaques',
@@ -1618,6 +1787,179 @@ window.toggleLanguage = function() {
         }
     }
 };
+
+// ==========================================
+// GÉOCODAGE AUTOMATIQUE (utilise la fonction existante)
+// ==========================================
+
+// Synchroniser les coordonnées avec la table gites
+async function syncGiteCoordinates(giteName, address, latitude, longitude) {
+    try {
+        const { data: gites, error: giteError } = await supabase
+            .from('gites')
+            .select('id')
+            .ilike('name', giteName)
+            .single();
+        
+        if (giteError || !gites) {
+            console.warn('⚠️ Gîte non trouvé pour synchronisation:', giteName);
+            return;
+        }
+        
+        const { error: updateError } = await supabase
+            .from('gites')
+            .update({
+                address: address,
+                latitude: parseFloat(latitude),
+                longitude: parseFloat(longitude),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', gites.id);
+        
+        if (updateError) {
+            console.error('❌ Erreur sync coordonnées gites:', updateError);
+        } else {
+            console.log('✅ Coordonnées synchronisées dans la table gites');
+        }
+    } catch (error) {
+        console.error('❌ Erreur syncGiteCoordinates:', error);
+    }
+}
+
+// Charger les coordonnées depuis la table gites au démarrage
+async function loadGiteCoordinatesFromMainTable(giteName) {
+    try {
+        const { data: gites, error } = await supabase
+            .from('gites')
+            .select('address, latitude, longitude')
+            .ilike('name', giteName)
+            .single();
+        
+        if (error || !gites) return;
+        
+        if (gites.address) {
+            const addressField = document.getElementById('infos_adresse');
+            if (addressField && !addressField.value) {
+                addressField.value = gites.address;
+            }
+        }
+        
+        if (gites.latitude && gites.longitude) {
+            const latField = document.getElementById('infos_gpsLat');
+            const lonField = document.getElementById('infos_gpsLon');
+            
+            if (latField && !latField.value) {
+                latField.value = gites.latitude;
+            }
+            if (lonField && !lonField.value) {
+                lonField.value = gites.longitude;
+            }
+        }
+    } catch (error) {
+        console.error('❌ Erreur loadGiteCoordinatesFromMainTable:', error);
+    }
+}
+
+window.geocodeAddress = async function() {
+    const addressField = document.getElementById('infos_adresse');
+    if (!addressField?.value) {
+        if (typeof showNotification === 'function') {
+            showNotification('⚠️ Veuillez saisir une adresse', 'warning');
+        }
+        return;
+    }
+    
+    await geocodeAddressAuto(addressField.value);
+};
+
+// Fonction interne de géocodage
+async function geocodeAddressAuto(address) {
+    const latField = document.getElementById('infos_gpsLat');
+    const lonField = document.getElementById('infos_gpsLon');
+    
+    if (!address || !address.trim()) return;
+    
+    console.log(`🔍 Recherche GPS pour: "${address}"`);
+    
+    // Ajouter un délai pour respecter la limite Nominatim (1 req/sec)
+    await new Promise(resolve => setTimeout(resolve, 1100));
+    
+    // Extraire code postal et ville (plus fiable pour géocodage)
+    const postalMatch = address.match(/(\d{5})\s+(.+?)(?:,|$)/);
+    const cityMatch = address.match(/\d{5}\s+([^,]+)/);
+    
+    // Essayer variantes optimisées par ordre de fiabilité décroissante
+    const variants = [
+        // 1. Adresse complète + pays (LE PLUS PRÉCIS)
+        address + ', France',
+        // 2. Adresse sans numéro de rue + pays
+        address.replace(/^\d+\s+/, '') + ', France',
+        // 3. Code postal + ville (centre-ville)
+        postalMatch ? `${postalMatch[1]} ${postalMatch[2].trim()}, France` : null,
+        // 4. Ville seule + pays
+        cityMatch ? `${cityMatch[1].trim()}, France` : null
+    ].filter((v, i, arr) => v && arr.indexOf(v) === i); // Retirer null et doublons
+    
+    for (const variant of variants) {
+        try {
+            const encodedAddress = encodeURIComponent(variant);
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=3&addressdetails=1`;
+            
+            console.log(`📡 Tentative: "${variant}"`);
+            
+            const response = await fetch(url, {
+                headers: {
+                    'User-Agent': 'GiteManager/1.0'
+                }
+            });
+            
+            if (!response.ok) {
+                console.error(`❌ Erreur HTTP ${response.status}`);
+                continue;
+            }
+            
+            const data = await response.json();
+            
+            console.log(`📊 Résultats: ${data.length}`, data);
+            
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat).toFixed(8);
+                const lon = parseFloat(data[0].lon).toFixed(8);
+                
+                console.log(`✅ Coordonnées: ${lat}, ${lon} (${data[0].display_name})`);
+                
+                if (latField) latField.value = lat;
+                if (lonField) lonField.value = lon;
+                
+                window.isDirty = true;
+                
+                // Synchroniser avec la table gites
+                await syncGiteCoordinates(currentGiteInfos, address, lat, lon);
+                
+                if (typeof showNotification === 'function') {
+                    showNotification(`✅ GPS trouvé: ${data[0].display_name.substring(0, 60)}...`, 'success');
+                }
+                
+                return { lat: parseFloat(lat), lon: parseFloat(lon) };
+            }
+            
+            // Attendre avant la prochaine tentative
+            if (variant !== variants[variants.length - 1]) {
+                await new Promise(resolve => setTimeout(resolve, 1100));
+            }
+            
+        } catch (error) {
+            console.error(`❌ Erreur tentative "${variant}":`, error);
+        }
+    }
+    
+    // Aucune variante n'a fonctionné
+    console.warn(`⚠️ Aucun résultat après ${variants.length} tentatives`);
+    if (typeof showNotification === 'function') {
+        showNotification(`⚠️ Adresse non trouvée. Vérifiez le format (ex: "12 rue principale, 46160 Calvignac")`, 'warning');
+    }
+    return null;
+}
 
 // Exports supplémentaires
 window.sauvegarderDonneesInfos = sauvegarderDonneesInfos;
