@@ -6,7 +6,65 @@
 
 ---
 
-## 🔍 ANALYSE DE L'EXISTANT
+## � POINT DE SAUVEGARDE
+
+### ✅ Commit de Sauvegarde Créé
+
+**Hash :** `87afbe22cec5fb27c51b3bc54be5632a4d72b5b3`  
+**Date :** 20 janvier 2026  
+**Message :** "v4.4 - État stable avant refonte responsive mobile"
+
+### 🔄 PROCÉDURE DE ROLLBACK (EN CAS DE PROBLÈME)
+
+#### Option 1 : Revenir au commit de sauvegarde (HARD RESET)
+```bash
+cd /workspaces/Gestion_gite-calvignac
+git reset --hard 87afbe22cec5fb27c51b3bc54be5632a4d72b5b3
+```
+⚠️ **ATTENTION :** Supprime tous les changements non commités
+
+#### Option 2 : Créer une branche de secours (avant modifications)
+```bash
+git checkout -b backup-pre-responsive
+git checkout main
+```
+Pour revenir :
+```bash
+git checkout backup-pre-responsive
+```
+
+#### Option 3 : Récupérer un fichier spécifique
+```bash
+# Exemple : récupérer index.html
+git checkout 87afbe22cec5fb27c51b3bc54be5632a4d72b5b3 -- index.html
+
+# Exemple : récupérer tout le dossier css
+git checkout 87afbe22cec5fb27c51b3bc54be5632a4d72b5b3 -- css/
+```
+
+#### Option 4 : Voir les modifications depuis la sauvegarde
+```bash
+git diff 87afbe22cec5fb27c51b3bc54be5632a4d72b5b3
+```
+
+### 📂 État des Fichiers Sauvegardés
+
+**Fichiers principaux :**
+- ✅ `index.html` (v4.4)
+- ✅ `css/flat-outline.css` (Navigation neo-brutalism)
+- ✅ `css/main-inline.css` (Styles globaux)
+- ✅ `tabs/tab-dashboard.html` (Dashboard avec IR conditionnel)
+- ✅ `tabs/tab-infos-gites.html` (Header modernisé)
+- ✅ `tabs/tab-decouvrir.html` (Avec carte Leaflet)
+- ✅ `js/decouvrir.js` (632 lignes, refactorisé)
+- ✅ `js/dashboard.js` (Affichage conditionnel IR)
+- ✅ `js/fiscalite-v2.js` (Avec callback updateFinancialIndicators)
+
+**Total :** 30 fichiers modifiés dans ce commit
+
+---
+
+## �🔍 ANALYSE DE L'EXISTANT
 
 ### ✅ Points Positifs Identifiés
 

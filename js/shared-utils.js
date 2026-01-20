@@ -264,10 +264,146 @@ function toggleSlide(slideId) {
     }
 }
 
+// ==========================================
+// MENU MOBILE
+// ==========================================
+
+function initMobileMenu() {
+    const toggleBtn = document.getElementById('mobile-menu-toggle');
+    const closeBtn = document.getElementById('mobile-menu-close');
+    const menu = document.getElementById('mobile-nav-menu');
+    const overlay = document.getElementById('mobile-nav-overlay');
+    const navList = document.querySelector('.mobile-nav-list');
+    
+    if (!toggleBtn || !menu || !overlay || !navList) return;
+    
+    // Générer les items du menu depuis les onglets existants
+    const tabs = document.querySelectorAll('.nav-tabs-wrapper .tab-neo');
+    navList.innerHTML = ''; // Clear existing items
+    
+    tabs.forEach(tab => {
+        const item = document.createElement('div');
+        item.className = 'mobile-nav-item';
+        item.dataset.tab = tab.dataset.tab;
+        
+        // Copier le contenu (icône + texte)
+        const icon = tab.querySelector('.tab-icon');
+        const text = tab.textContent.trim();
+        
+        if (icon) {
+            item.innerHTML = icon.outerHTML + ' ' + text;
+        } else {
+            item.textContent = text;
+        }
+        
+        // Marquer l'onglet actif
+        if (tab.classList.contains('active')) {
+            item.classList.add('active');
+        }
+        
+        item.addEventListener('click', () => {
+            switchTab(tab.dataset.tab);
+            closeMobileMenu();
+            
+            // Mettre à jour l'état actif
+            document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+        
+        navList.appendChild(item);
+    });
+    
+    // Ouvrir menu
+    toggleBtn.addEventListener('click', () => {
+        menu.classList.add('open');
+        overlay.classList.add('open');
+        toggleBtn.classList.add('open');
+    });
+    
+    // Fermer menu
+    function closeMobileMenu() {
+        menu.classList.remove('open');
+        overlay.classList.remove('open');
+        toggleBtn.classList.remove('open');
+    }
+    
+    closeBtn?.addEventListener('click', closeMobileMenu);
+    overlay?.addEventListener('click', closeMobileMenu);
+    
+    // Initialiser les sections collapsables sur mobile
+    initMobileSections();
+}
+
+// ==========================================
+// SECTIONS COLLAPSABLES MOBILE
+// ==========================================
+
+function initMobileSections() {
+    // Afficher les headers collapse uniquement sur mobile
+    if (window.innerWidth <= 768) {
+        document.querySelectorAll('.mobile-collapse-header').forEach(header => {
+            header.style.display = 'flex';
+        });
+        
+        // Masquer le titre desktop dans les sections
+        document.querySelectorAll('.mobile-collapse-section > div:not(.mobile-collapse-header):not(.mobile-collapse-content)').forEach(el => {
+            if (!el.classList.contains('mobile-collapse-content')) {
+                el.style.display = 'none';
+            }
+        });
+        
+        // Toutes les sections fermées par défaut sauf la première
+        document.querySelectorAll('.mobile-collapse-content').forEach((content, index) => {
+            if (index > 0) {
+                content.classList.add('hidden');
+                const icon = document.getElementById('icon-' + content.id.replace('content-', ''));
+                if (icon) icon.classList.add('collapsed');
+            }
+        });
+    }
+}
+
+function toggleMobileSection(sectionId) {
+    const content = document.getElementById('content-' + sectionId);
+    const icon = document.getElementById('icon-' + sectionId);
+    
+    if (!content) return;
+    
+    content.classList.toggle('hidden');
+    icon?.classList.toggle('collapsed');
+}
+
+// Réinitialiser sur changement de taille
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        // Desktop : afficher tout
+        document.querySelectorAll('.mobile-collapse-header').forEach(header => {
+            header.style.display = 'none';
+        });
+        document.querySelectorAll('.mobile-collapse-content').forEach(content => {
+            content.classList.remove('hidden');
+        });
+    } else {
+        initMobileSections();
+    }
+});
+
+// Initialiser le menu mobile et les sections collapsables au chargement
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        initMobileMenu();
+        initMobileSections();
+    });
+} else {
+    initMobileMenu();
+    initMobileSections();
+}
+
 // Export vers window pour accessibilité globale
 window.switchTab = switchTab;
 window.showToast = showToast;
 window.dateToLocalString = dateToLocalString;
+window.toggleMobileSection = toggleMobileSection;
 window.parseLocalDate = parseLocalDate;
 window.calculateNights = calculateNights;
 window.formatDate = formatDate;
