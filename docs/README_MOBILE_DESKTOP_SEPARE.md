@@ -20,17 +20,21 @@ Cette détection s'effectue **AVANT** le chargement de tout contenu.
 
 ### Desktop
 - `tabs/tab-dashboard.html` - Dashboard desktop (2 colonnes, tous détails)
+- `tabs/tab-reservations.html` - Réservations desktop
+- `tabs/tab-menage.html` - Ménage desktop
 - CSS standard du site
 
 ### Mobile
-- `tabs/tab-dashboard-mobile.html` - Dashboard mobile (1 colonne, compact)
-- `css/mobile.css` - CSS optimisé mobile uniquement
+- `tabs/mobile/dashboard.html` - Dashboard mobile (1 colonne, compact)
+- `tabs/mobile/reservations.html` - Réservations mobile (à créer)
+- `tabs/mobile/menage.html` - Ménage mobile (à créer)
+- `css/mobile/main.css` - CSS optimisé mobile uniquement
 
 ## 🔄 Chargement Conditionnel
 
 ```javascript
 const tabFiles = {
-    'tab-dashboard': isMobile ? 'tabs/tab-dashboard-mobile.html' : 'tabs/tab-dashboard.html',
+    'tab-dashboard': isMobile ? 'tabs/mobile/dashboard.html' : 'tabs/tab-dashboard.html',
     // ... autres tabs
 };
 ```
@@ -65,11 +69,12 @@ const tabFiles = {
 
 ## 🚀 Ajouter un Nouvel Onglet Mobile
 
-1. Créer `tabs/tab-NOMONGLET-mobile.html`
+1. Créer `tabs/mobile/NOMONGLET.html` (sans préfixe `tab-`)
 2. Créer la version mobile compacte
-3. Ajouter dans `index.html` :
+3. (Optionnel) Créer `css/mobile/NOMONGLET.css` si styles spécifiques
+4. Ajouter dans `index.html` :
 ```javascript
-'tab-NOMONGLET': isMobile ? 'tabs/tab-NOMONGLET-mobile.html' : 'tabs/tab-NOMONGLET.html',
+'tab-NOMONGLET': isMobile ? 'tabs/mobile/NOMONGLET.html' : 'tabs/tab-NOMONGLET.html',
 ```
 
 ## 🧪 Test
@@ -111,7 +116,7 @@ Option 2 - Vrai device :
 → Éditer `tabs/tab-dashboard.html`
 → Le mobile n'est PAS affecté
 
-### Modifier UNIQUEMENT le Mobile
+### Modifier UNmobile/dashboard.html` et `css/mobile/main
 → Éditer `tabs/tab-dashboard-mobile.html` et `css/mobile.css`
 → Le desktop n'est PAS affecté
 
@@ -128,7 +133,7 @@ Option 2 - Vrai device :
 
 ## 🎨 Personnalisation Mobile
 
-Pour adapter d'autres éléments sur mobile, ajouter dans `css/mobile.css` :
+Pour adapter d'autres éléments sur mobile, ajouter dans `css/mobile/main.css` :
 ```css
 /* Exemple : masquer un élément sur mobile */
 #mon-element-desktop-only {
@@ -143,12 +148,12 @@ Pour adapter d'autres éléments sur mobile, ajouter dans `css/mobile.css` :
 → Vérifier la console : message de détection doit s'afficher
 
 ### Le CSS mobile ne s'applique pas
-→ Vérifier que `css/mobile.css` existe
+→ Vérifier que `css/mobile/main.css` existe
 → Vérifier la console pour erreurs 404
 → Forcer le rechargement du CSS (changer le `?v=1.0`)
 
 ### Le dashboard mobile ne charge pas
-→ Vérifier que `tabs/tab-dashboard-mobile.html` existe
+→ Vérifier que `tabs/mobile/dashboard.html` existe
 → Vérifier la console pour erreurs de fetch
 → Vérifier le cacheBuster dans index.html
 

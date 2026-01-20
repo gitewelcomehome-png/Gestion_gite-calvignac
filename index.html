@@ -119,7 +119,7 @@
     if (isMobile) {
         const mobileCss = document.createElement('link');
         mobileCss.rel = 'stylesheet';
-        mobileCss.href = 'css/mobile.css?v=1.0';
+        mobileCss.href = 'css/mobile/main.css?v=1.0';
         document.head.appendChild(mobileCss);
         console.log('📱 Mode MOBILE détecté - CSS mobile chargé');
     } else {
@@ -128,9 +128,9 @@
 
     // Chargement dynamique des onglets
     document.addEventListener('DOMContentLoaded', function() {
-        const cacheBuster = '?v=20260120-mobile';
+        const cacheBuster = '?v=20260120-mobile-folders';
         const tabFiles = {
-            'tab-dashboard': isMobile ? 'tabs/tab-dashboard-mobile.html' + cacheBuster : 'tabs/tab-dashboard.html' + cacheBuster,
+            'tab-dashboard': isMobile ? 'tabs/mobile/dashboard.html' + cacheBuster : 'tabs/tab-dashboard.html' + cacheBuster,
             'tab-gestion': 'tabs/tab-gestion.html',
             'tab-reservations': 'tabs/tab-reservations.html',
             'tab-archives': 'tabs/tab-archives.html',

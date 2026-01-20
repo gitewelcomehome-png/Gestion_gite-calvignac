@@ -50,6 +50,92 @@
         max-width: 100%;
     }
     
+    .tab-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Cards : marges minimales */
+    .card {
+        margin: 0 0 6px 0 !important;
+        padding: 6px !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Header sticky : titre centré, admin à droite */
+    .sticky-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 12px 8px !important;
+        min-height: 60px !important;
+        position: relative !important;
+    }
+    
+    /* Centrer le titre */
+    .site-title {
+        position: absolute !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        font-size: 1rem !important;
+        margin: 0 !important;
+    }
+    
+    /* Menu utilisateur : reste à droite */
+    .user-menu-container {
+        position: fixed !important;
+        right: 10px !important;
+        top: 10px !important;
+        z-index: 999 !important;
+    }
+    
+    /* Masquer le menu dropdown classique sur mobile */
+    .user-menu-dropdown {
+        display: none !important;
+    }
+    
+    /* Bouton devient bouton déconnexion sur mobile */
+    .user-menu-button {
+        padding: 8px !important;
+        font-size: 1.5rem !important;
+        min-width: 45px !important;
+        height: 45px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 8px !important;
+        background: #e74c3c !important;
+        color: white !important;
+        border: 2px solid #2D3436 !important;
+        box-shadow: 2px 2px 0 #2D3436 !important;
+    }
+    
+    /* Remplacer le contenu par l'icône power et déconnexion directe */
+    .user-menu-button::before {
+        content: "⏻" !important;
+        font-size: 1.5rem !important;
+    }
+    
+    /* Masquer tout le contenu original */
+    .user-menu-info,
+    .user-menu-icon,
+    .user-menu-name,
+    .user-menu-role {
+        display: none !important;
+    }
+    
+    /* Sur mobile, transformer le clic en déconnexion */
+    .user-menu-button {
+        pointer-events: all !important;
+    }
+    
+    /* Remplacer le onclick par déconnexion sur mobile */
+    @supports selector(:has(*)) {
+        .user-menu-button:has(.user-menu-info) {
+            pointer-events: none !important;
+        }
+    }
+    
     /* Cards */
     .card {
         padding: 4px !important;
@@ -180,19 +266,88 @@
     }
     
     /* DASHBOARD - VISION GLOBALE - Garder 2 colonnes */
-    .dashboard-mobile-wrapper [style*="grid-template-columns: repeat(auto-fit"] {
+    #tab-dashboard [style*="grid-template-columns: repeat(auto-fit"] {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 8px !important;
     }
     
+    /* Titres des grandes boxes : afficher version mobile */
+    #tab-dashboard .box-title::before {
+        content: attr(data-mobile);
+    }
+    
+    #tab-dashboard .box-title {
+        font-size: 0 !important;
+    }
+    
+    #tab-dashboard .box-title::before {
+        font-size: 0.75rem !important;
+    }
+    
+    /* Labels indicators : afficher version mobile */
+    #tab-dashboard .indicator-label::before {
+        content: attr(data-mobile);
+    }
+    
+    #tab-dashboard .indicator-label {
+        font-size: 0 !important;
+    }
+    
+    #tab-dashboard .indicator-label::before {
+        font-size: 0.55rem !important;
+    }
+    
+    /* FORCER : Toutes les boxes internes ont la même hauteur ET largeur */
+    #tab-dashboard .indicator-box {
+        height: 85px !important;
+        min-height: 85px !important;
+        max-height: 85px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 8px 6px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+    }
+    
+    /* Réduire les chiffres pour qu'ils tiennent */
+    #tab-dashboard .indicator-box [id^="dashboard-"] {
+        font-size: 1.1rem !important;
+        line-height: 1.1 !important;
+        margin: 4px 0 !important;
+    }
+    
+    /* Réduire tous les labels */
+    #tab-dashboard .indicator-box > div[style*="font-size: 0.75rem"],
+    #tab-dashboard .indicator-box > div[style*="font-size: 0.65rem"] {
+        font-size: 0.55rem !important;
+        line-height: 1 !important;
+        margin: 2px 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    /* Tronquer TOUS les textes dans les boxes */
+    #tab-dashboard .indicator-box > div,
+    #tab-dashboard .indicator-box div {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 100% !important;
+    }
+    
     /* DASHBOARD - VISION ACTIONS - 1 COLONNE UNIQUEMENT */
-    .dashboard-mobile-wrapper > div > div[style*="grid-template-columns: 1fr 1fr"] {
+    #vision-actions-container {
         grid-template-columns: 1fr !important;
     }
     
     /* Sections collapsables */
     .mobile-collapse-section {
         margin-bottom: 8px;
+        min-height: auto !important;
+        height: auto !important;
     }
     
     .mobile-collapse-header {
@@ -221,7 +376,7 @@
     }
     
     .mobile-collapse-content.hidden {
-        display: none;
+        display: none !important;
     }
     
     .mobile-collapse-icon {
@@ -234,13 +389,7 @@
     }
     
     /* Graphiques - MASQUÉS sur mobile */
-    canvas {
-        display: none !important;
-    }
-    
-    /* Masquer les containers de graphiques */
-    [style*="canvas"],
-    div:has(canvas) {
+    #graphiques-dashboard {
         display: none !important;
     }
     
@@ -358,8 +507,8 @@
     display: none;
     position: fixed;
     top: 10px;
-    right: 10px;
-    z-index: 1002;
+    left: 10px;
+    z-index: 9999;
     background: white;
     border: 3px solid #2D3436;
     border-radius: 8px;
@@ -400,7 +549,7 @@
     .mobile-menu-btn {
         display: flex;
         top: 10px;
-        right: 10px;
+        left: 10px;
         padding: 8px;
         width: 45px;
         height: 45px;
@@ -420,7 +569,7 @@
     .user-menu-container {
         position: fixed;
         top: 10px;
-        left: 10px;
+        right: 10px;
         z-index: 998;
     }
     
@@ -442,17 +591,12 @@
     /* Ajuster marge du contenu pour éviter chevauchement */
     .tab-container {
         margin-top: 60px !important;
-        padding: 0 3px !important;
+        padding: 0 !important;
     }
     
     /* Headers collapse - afficher sur mobile */
     .mobile-collapse-header {
         display: flex !important;
-    }
-    
-    /* Masquer les titres originaux dans les sections */
-    .mobile-collapse-content > div:first-child {
-        display: none !important;
     }
 }
 
@@ -603,6 +747,84 @@
 @media (max-width: 768px) {
     #dashboard-reservations {
         grid-template-columns: 1fr !important;
+    }
+    
+    /* ==========================================
+       ONGLET RÉSERVATIONS - MOBILE
+       ========================================== */
+    
+    /* Planning : 1 seule colonne */
+    .planning-container > div[style*="grid-template-columns"] {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Masquer les cases VIDES (Disponible) */
+    .week-empty {
+        display: none !important;
+    }
+    
+    /* Une seule réservation par ligne */
+    .week-reservation {
+        width: 100% !important;
+        padding: 8px !important;
+        margin: 0 0 8px 0 !important;
+        border-radius: 6px !important;
+    }
+    
+    /* MASQUER TOUS LES BOUTONS D'ÉDITION */
+    .week-reservation button[onclick*="openEditModal"],
+    .week-reservation button[onclick*="deleteReservationById"],
+    .week-reservation button[onclick*="aperçuFicheClient"] {
+        display: none !important;
+    }
+    
+    /* Réduire taille du texte */
+    .week-reservation {
+        font-size: 0.75rem !important;
+    }
+    
+    .week-reservation > div[style*="font-weight: 700"] {
+        font-size: 0.9rem !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .week-reservation > div[style*="font-size: 1.05rem"] {
+        font-size: 0.8rem !important;
+        line-height: 1.4 !important;
+        margin-bottom: 8px !important;
+    }
+    
+    /* Réduire taille badges et emojis */
+    .week-reservation strong {
+        font-size: 0.85rem !important;
+    }
+    
+    /* Header des semaines : empiler en colonne */
+    .planning-container > div > div[style*="display: grid"] {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 0 !important;
+    }
+    
+    /* Header semaine/gite plus compact */
+    .planning-container > div > div > div > div[style*="padding: 12px 20px"] {
+        padding: 6px 10px !important;
+        font-size: 0.7rem !important;
+        margin-bottom: 0 !important;
+    }
+    
+    .planning-container > div > div > div > div[style*="padding: 12px 20px"] > div {
+        font-size: 0.65rem !important;
+        margin-bottom: 2px !important;
+    }
+    
+    /* Conteneur blanc des réservations plus compact */
+    .planning-container > div > div > div > div[style*="min-height: 120px"] {
+        padding: 4px !important;
+        min-height: auto !important;
     }
 }
 
