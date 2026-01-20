@@ -3,20 +3,23 @@
  * Protection contre les injections XSS et validation des données utilisateur
  */
 
-// Importer DOMPurify
-import DOMPurify from '../node_modules/dompurify/dist/purify.es.mjs';
+(function() {
+    'use strict';
+    
+    // DOMPurify sera chargé via le CDN dans le HTML principal
+    const DOMPurify = window.DOMPurify;
 
-// ==========================================
-// 🧹 SANITIZATION HTML (Protection XSS)
-// ==========================================
+    // ==========================================
+    // 🧹 SANITIZATION HTML (Protection XSS)
+    // ==========================================
 
-/**
- * Nettoie du HTML pour enlever tout code malveillant
- * @param {string} dirty - HTML potentiellement dangereux
- * @param {object} config - Configuration DOMPurify optionnelle
- * @returns {string} HTML nettoyé et sécurisé
- */
-export function sanitizeHTML(dirty, config = {}) {
+    /**
+     * Nettoie du HTML pour enlever tout code malveillant
+     * @param {string} dirty - HTML potentiellement dangereux
+     * @param {object} config - Configuration DOMPurify optionnelle
+     * @returns {string} HTML nettoyé et sécurisé
+     */
+    function sanitizeHTML(dirty, config = {}) {
     if (!dirty) return '';
     
     const defaultConfig = {
@@ -30,13 +33,13 @@ export function sanitizeHTML(dirty, config = {}) {
     return DOMPurify.sanitize(dirty, { ...defaultConfig, ...config });
 }
 
-/**
- * Remplace innerHTML de manière sécurisée
- * @param {HTMLElement} element - Élément DOM
- * @param {string} html - HTML à insérer
- * @param {object} config - Configuration DOMPurify optionnelle
- */
-export function setInnerHTML(element, html, config = {}) {
+    /**
+     * Remplace innerHTML de manière sécurisée
+     * @param {HTMLElement} element - Élément DOM
+     * @param {string} html - HTML à insérer
+     * @param {object} config - Configuration DOMPurify optionnelle
+     */
+    function setInnerHTML(element, html, config = {}) {
     if (!element) {
         console.error('setInnerHTML: élément null');
         return;
@@ -95,12 +98,12 @@ export function setInnerHTML(element, html, config = {}) {
     }
 }
 
-/**
- * Nettoie du texte brut (enlève toutes les balises HTML)
- * @param {string} text - Texte potentiellement avec HTML
- * @returns {string} Texte pur sans HTML
- */
-export function sanitizeText(text) {
+    /**
+     * Nettoie du texte brut (enlève toutes les balises HTML)
+     * @param {string} text - Texte potentiellement avec HTML
+     * @returns {string} Texte pur sans HTML
+     */
+    function sanitizeText(text) {
     if (!text) return '';
     return DOMPurify.sanitize(text, { ALLOWED_TAGS: [] });
 }
@@ -109,35 +112,35 @@ export function sanitizeText(text) {
 // ✅ VALIDATION DES DONNÉES
 // ==========================================
 
-/**
- * Valide une adresse email
- * @param {string} email - Email à valider
- * @returns {boolean} true si valide
- */
-export function validateEmail(email) {
+    /**
+     * Valide une adresse email
+     * @param {string} email - Email à valider
+     * @returns {boolean} true si valide
+     */
+    function validateEmail(email) {
     if (!email) return false;
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
 }
 
-/**
- * Valide un numéro de téléphone français
- * @param {string} phone - Téléphone à valider
- * @returns {boolean} true si valide
- */
-export function validatePhone(phone) {
+    /**
+     * Valide un numéro de téléphone français
+     * @param {string} phone - Téléphone à valider
+     * @returns {boolean} true si valide
+     */
+    function validatePhone(phone) {
     if (!phone) return false;
     // Accepte : 0612345678, 06 12 34 56 78, 06.12.34.56.78, +33612345678
     const regex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
     return regex.test(phone);
 }
 
-/**
- * Valide un montant (nombre positif avec max 2 décimales)
- * @param {string|number} amount - Montant à valider
- * @returns {boolean} true si valide
- */
-export function validateAmount(amount) {
+    /**
+     * Valide un montant (nombre positif avec max 2 décimales)
+     * @param {string|number} amount - Montant à valider
+     * @returns {boolean} true si valide
+     */
+    function validateAmount(amount) {
     if (amount === null || amount === undefined || amount === '') return false;
     const num = parseFloat(amount);
     if (isNaN(num) || num < 0) return false;
@@ -145,24 +148,24 @@ export function validateAmount(amount) {
     return /^\d+(\.\d{1,2})?$/.test(amount.toString());
 }
 
-/**
- * Valide un nom (lettres, espaces, tirets, apostrophes)
- * @param {string} name - Nom à valider
- * @returns {boolean} true si valide
- */
-export function validateName(name) {
+    /**
+     * Valide un nom (lettres, espaces, tirets, apostrophes)
+     * @param {string} name - Nom à valider
+     * @returns {boolean} true si valide
+     */
+    function validateName(name) {
     if (!name || name.trim().length < 2) return false;
     // Accepte lettres accentuées, espaces, tirets, apostrophes
     const regex = /^[a-zA-ZÀ-ÿ\s'-]{2,50}$/;
     return regex.test(name);
 }
 
-/**
- * Valide une date au format YYYY-MM-DD
- * @param {string} date - Date à valider
- * @returns {boolean} true si valide
- */
-export function validateDate(date) {
+    /**
+     * Valide une date au format YYYY-MM-DD
+     * @param {string} date - Date à valider
+     * @returns {boolean} true si valide
+     */
+    function validateDate(date) {
     if (!date) return false;
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(date)) return false;
@@ -171,12 +174,12 @@ export function validateDate(date) {
     return d instanceof Date && !isNaN(d);
 }
 
-/**
- * Valide un nombre entier positif
- * @param {string|number} num - Nombre à valider
- * @returns {boolean} true si valide
- */
-export function validateInteger(num) {
+    /**
+     * Valide un nombre entier positif
+     * @param {string|number} num - Nombre à valider
+     * @returns {boolean} true si valide
+     */
+    function validateInteger(num) {
     if (num === null || num === undefined || num === '') return false;
     const n = parseInt(num);
     return !isNaN(n) && n >= 0 && n.toString() === num.toString();
@@ -186,12 +189,12 @@ export function validateInteger(num) {
 // 🎨 HELPERS POUR FORMULAIRES
 // ==========================================
 
-/**
- * Ajoute une classe d'erreur à un input invalide
- * @param {HTMLElement} input - Input à marquer
- * @param {string} message - Message d'erreur
- */
-export function markInputError(input, message = '') {
+    /**
+     * Ajoute une classe d'erreur à un input invalide
+     * @param {HTMLElement} input - Input à marquer
+     * @param {string} message - Message d'erreur
+     */
+    function markInputError(input, message = '') {
     if (!input) return;
     input.classList.add('input-error');
     input.setAttribute('aria-invalid', 'true');
@@ -207,11 +210,11 @@ export function markInputError(input, message = '') {
     }
 }
 
-/**
- * Enlève la classe d'erreur d'un input
- * @param {HTMLElement} input - Input à nettoyer
- */
-export function clearInputError(input) {
+    /**
+     * Enlève la classe d'erreur d'un input
+     * @param {HTMLElement} input - Input à nettoyer
+     */
+    function clearInputError(input) {
     if (!input) return;
     input.classList.remove('input-error');
     input.removeAttribute('aria-invalid');
@@ -222,13 +225,13 @@ export function clearInputError(input) {
     }
 }
 
-/**
- * Valide un formulaire complet
- * @param {HTMLFormElement} form - Formulaire à valider
- * @param {object} validators - Map de {fieldName: validatorFunction}
- * @returns {boolean} true si le formulaire est valide
- */
-export function validateForm(form, validators) {
+    /**
+     * Valide un formulaire complet
+     * @param {HTMLFormElement} form - Formulaire à valider
+     * @param {object} validators - Map de {fieldName: validatorFunction}
+     * @returns {boolean} true si le formulaire est valide
+     */
+    function validateForm(form, validators) {
     if (!form) return false;
     
     let isValid = true;
@@ -249,12 +252,11 @@ export function validateForm(form, validators) {
     return isValid;
 }
 
-// ==========================================
-// 🔒 EXPORT GLOBAL POUR COMPATIBILITÉ
-// ==========================================
+    // ==========================================
+    // 🔒 EXPORT GLOBAL POUR COMPATIBILITÉ
+    // ==========================================
 
-// Rendre disponible globalement pour les scripts existants
-if (typeof window !== 'undefined') {
+    // Rendre disponible globalement pour les scripts existants
     window.SecurityUtils = {
         sanitizeHTML,
         setInnerHTML,
@@ -269,6 +271,5 @@ if (typeof window !== 'undefined') {
         clearInputError,
         validateForm
     };
-    
-    // SecurityUtils chargé
-}
+
+})();

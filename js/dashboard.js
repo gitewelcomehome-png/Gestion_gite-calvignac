@@ -472,11 +472,12 @@ async function updateDashboardMenages() {
         const timeIcon = c.time_of_day === 'morning' ? '🌅' : '🌆';
         const gite = await window.gitesManager?.getByName(c.gite) || await window.gitesManager?.getById(c.gite_id);
         const giteColor = gite ? gite.color : '#667eea';
+        const giteName = gite ? (gite.name || gite.nom || c.gite) : c.gite;
         
         html += `
             <div style="border-left: 4px solid ${giteColor}; padding: 12px; margin-bottom: 8px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                 <div style="flex: 1;">
-                    <strong style="color: ${giteColor};">${c.gite}</strong>
+                    <strong style="color: ${giteColor};">${giteName || 'Gîte inconnu'}</strong>
                     <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
                         📅 ${formatDateFromObj(new Date(c.scheduled_date))} ${timeIcon}
                     </div>
@@ -1183,12 +1184,21 @@ async function updateFinancialIndicators() {
         urssaf2026El.textContent = formatCurrency(urssafTotal);
     }
     
-    // Afficher IR des 2 années  
-    if (ir2025El) {
-        ir2025El.textContent = simulationPrecedente ? formatCurrency(impotRevenuPrecedent) : '-';
+    // Afficher IR des 2 années (seulement si option personnelle activée)
+    const optionsPersoActivees = localStorage.getItem('fiscalite_options_perso') === 'true';
+    const irContainer = document.getElementById('dashboard-ir-container');
+    
+    if (irContainer) {
+        irContainer.style.display = optionsPersoActivees ? 'block' : 'none';
     }
-    if (ir2026El) {
-        ir2026El.textContent = formatCurrency(impotRevenuCourant);
+    
+    if (optionsPersoActivees) {
+        if (ir2025El) {
+            ir2025El.textContent = simulationPrecedente ? formatCurrency(impotRevenuPrecedent) : '-';
+        }
+        if (ir2026El) {
+            ir2026El.textContent = formatCurrency(impotRevenuCourant);
+        }
     }
     
     // Afficher bénéfice

@@ -174,6 +174,19 @@ function getWeekDates(year, weekNum) {
 // ==========================================
 
 function switchTab(tabName) {
+    // Vérifier si on quitte l'onglet infos-pratiques avec des changements non sauvegardés
+    const currentTab = document.querySelector('.tab-content.active');
+    if (currentTab && currentTab.id === 'tab-infos-pratiques' && tabName !== 'infos-pratiques') {
+        if (typeof window.isDirty !== 'undefined' && window.isDirty && typeof window.currentGiteInfos !== 'undefined') {
+            const confirmer = confirm(`⚠️ Vous avez des modifications non sauvegardées.\n\nVoulez-vous les sauvegarder avant de changer d'onglet ?`);
+            if (confirmer && typeof window.sauvegarderInfosGiteComplet === 'function') {
+                window.sauvegarderInfosGiteComplet();
+            }
+            // Réinitialiser le flag
+            window.isDirty = false;
+        }
+    }
+    
     // Masquer tous les onglets
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');

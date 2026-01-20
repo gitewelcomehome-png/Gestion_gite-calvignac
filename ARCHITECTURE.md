@@ -99,7 +99,27 @@
 - **Nouvelle colonne :** `distance_km` (DECIMAL) - Distance depuis domicile en km
 - Utilisée pour calcul automatique des trajets
 
-#### 11. **auth.users** (Supabase Auth)
+#### 11. **activites_gites** ⭐ REFONTE (20/01/2026)
+- Base de données des activités, POIs et sites touristiques autour des gîtes
+- **Colonnes principales :** 
+  - `nom`, `categorie`, `description` (texte)
+  - `adresse` (TEXT) - Adresse complète pour géocodage
+  - `distance_km` (DECIMAL) - Calculée automatiquement depuis GPS
+  - `latitude`, `longitude` (DECIMAL) - Coordonnées GPS (géocodage automatique via Nominatim)
+  - `url`, `telephone` (texte)
+  - `note` (NUMERIC 2,1) - Note Google (0-5)
+  - `nb_avis` (INTEGER) - Nombre d'avis Google
+  - `photos` (JSONB), `is_active` (BOOLEAN)
+- **Relations :** FK vers `gites` via `gite_id`, FK vers `auth.users` via `owner_user_id`
+- **Catégories supportées :** Restaurant, Café/Bar, Musée, Château, Parc, Hôtel, Attraction
+- **RLS activé**
+- **Géocodage :** Automatique via OpenStreetMap Nominatim (calcul GPS + distance depuis gîte)
+- **Interface :** [tabs/tab-decouvrir.html](tabs/tab-decouvrir.html) - Design moderne en grille de cartes Neo-Brutalism
+- **Module JS :** [js/decouvrir.js](js/decouvrir.js) - Gestion complète CRUD + filtres + carte interactive + géocodage auto
+- **Fonctionnalités :** Ajout/édition/suppression activités, filtres par catégorie, export PDF guide client
+- **SQL Structure :** [sql/update_activites_gites_structure.sql](sql/update_activites_gites_structure.sql)
+
+#### 12. **auth.users** (Supabase Auth)
 - Gestion des utilisateurs
 - Rôles stockés dans `user_roles` (JSON)
 
@@ -126,6 +146,7 @@
 - **`calendrier-tarifs.js`** - Calendrier avec tarifs
 - **`draps.js`** - Gestion du linge
 - **`charges.js`** - Gestion des charges
+- **`decouvrir.js`** ⭐ REFONTE (20/01/2026) - Module "À Découvrir" : gestion activités/POIs avec table `activites_gites`, interface moderne en grille de cartes, filtres dynamiques par catégorie, CRUD complet, support carte Google Maps
 - **`fiscalite-v2.js`** - Calculs fiscaux LMNP multi-gîtes
 - **`taux-fiscaux-config.js`** ⭐ NOUVEAU - Configuration dynamique des taux fiscaux (URSSAF, IR, barème km)
 - **`km-manager.js`** ⭐ NOUVEAU - Module gestion kilomètres professionnels

@@ -274,7 +274,7 @@ class AuthManager {
         this.redirectCount++;
         this.lastRedirectTime = now;
         this.isRedirecting = true;
-        window.location.href = '/login.html';
+        window.location.href = '/pages/login.html';
     }
 
     /**

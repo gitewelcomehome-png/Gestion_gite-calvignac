@@ -4,6 +4,9 @@
  * Phase 4 - Sécurisation des inputs
  */
 
+(function() {
+    'use strict';
+
 // ==========================================
 // 📋 RÈGLES DE VALIDATION
 // ==========================================
@@ -100,7 +103,7 @@ const ValidationRules = {
  * @param {Object} options - Options supplémentaires (required, custom, etc.)
  * @returns {Object} - { valid: boolean, message: string, sanitized: any }
  */
-export function validateValue(value, ruleType, options = {}) {
+function validateValue(value, ruleType, options = {}) {
     // Champ optionnel vide
     if (!options.required && (!value || value.toString().trim() === '')) {
         return { valid: true, message: '', sanitized: '' };
@@ -175,7 +178,7 @@ export function validateValue(value, ruleType, options = {}) {
  * @param {Object} rules - Règles par champ { fieldId: { type: 'email', required: true } }
  * @returns {Object} - { valid: boolean, errors: {}, values: {} }
  */
-export function validateForm(form, rules) {
+function validateForm(form, rules) {
     const errors = {};
     const values = {};
     let valid = true;
@@ -251,7 +254,7 @@ function clearFieldError(field) {
  * @param {string} ruleType - Type de règle
  * @param {Object} options - Options
  */
-export function attachRealtimeValidation(fieldId, ruleType, options = {}) {
+function attachRealtimeValidation(fieldId, ruleType, options = {}) {
     const field = document.getElementById(fieldId);
     if (!field) return;
     
@@ -359,7 +362,7 @@ export function attachRealtimeValidation(fieldId, ruleType, options = {}) {
  * @param {string} html - HTML à sanitizer
  * @returns {string} - HTML nettoyé
  */
-export function sanitizeHTML(html) {
+function sanitizeHTML(html) {
     const temp = document.createElement('div');
     temp.textContent = html;
     return temp.innerHTML;
@@ -370,7 +373,7 @@ export function sanitizeHTML(html) {
  * @param {string} value - Valeur à échapper
  * @returns {string} - Valeur échappée
  */
-export function escapeSQLValue(value) {
+function escapeSQLValue(value) {
     if (typeof value !== 'string') return value;
     return value.replace(/['";\\]/g, '\\$&');
 }
@@ -388,4 +391,4 @@ window.ValidationUtils = {
     rules: ValidationRules
 };
 
-// ValidationUtils chargé
+})();

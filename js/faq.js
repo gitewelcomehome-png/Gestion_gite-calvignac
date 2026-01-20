@@ -6,7 +6,7 @@
 // const supabase = window.supabaseClient; // Commentaire car peut causer un conflit
 
 let faqData = [];
-let categorieActive = 'all';
+let categorieFaqActive = 'all';
 
 // ================================================================
 // INITIALISATION
@@ -49,9 +49,9 @@ function afficherFAQ() {
     const container = document.getElementById('faq-list');
     if (!container) return;
 
-    const faqFiltrees = categorieActive === 'all' 
+    const faqFiltrees = categorieFaqActive === 'all' 
         ? faqData 
-        : faqData.filter(q => q.categorie === categorieActive);
+        : faqData.filter(q => q.categorie === categorieFaqActive);
 
     if (faqFiltrees.length === 0) {
         window.SecurityUtils.setInnerHTML(container, `
@@ -109,7 +109,7 @@ function getCategorieIcon(categorie) {
 // ================================================================
 
 window.filtrerFAQ = function(categorie) {
-    categorieActive = categorie;
+    categorieFaqActive = categorie;
     
     // Mettre à jour l'UI des chips
     document.querySelectorAll('.filter-chips .chip').forEach(chip => {
@@ -179,7 +179,7 @@ window.rechercherFAQ = function(terme) {
 };
 
 window.filtrerFAQ = function(categorie) {
-    categorieActive = categorie;
+    categorieFaqActive = categorie;
     
     // Mettre à jour l'UI des chips
     document.querySelectorAll('.filter-chips .chip').forEach(chip => {

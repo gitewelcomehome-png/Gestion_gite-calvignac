@@ -1,794 +1,553 @@
 /**
- * MODULE DÉCOUVRIR - Gestion des Activités, POIs et Google Maps
- * Gère l'affichage et la gestion des activités, points d'intérêt et cartes Google Maps
+ * MODULE DÉCOUVRIR - Gestion des Activités
+ * Version modernisée utilisant la table activites_gites
  */
 
 // ==================== VARIABLES GLOBALES ====================
 let googleMap = null;
 let allMarkers = [];
-let googleGiteMarker = null;
-let infoWindow = null;
-let directionsService = null;
-let directionsRenderer = null;
+let activitesCache = [];
+let categorieActive = null;
 
-// Initialisation des activités par gîte (important pour les filtres)
-if (!window.activitesParGite) {
-    window.activitesParGite = {}; // Initialisé dynamiquement via gitesManager
-}
-
-// Coordonnées des gîtes (désormais récupérées via gitesManager.getCoordinates)
-// ⚠️ DEPRECATED: Utiliser await window.gitesManager.getCoordinates(giteId)
-const gitesCoordinates = {};
-
-// Couleurs par catégorie
-const categoryColors = {
-    'gite': '#FF5A5F',
-    'restaurant': '#FF8C00',
-    'Restaurant': '#FF8C00',
-    'culture': '#9B59B6',
-    'Musée': '#9B59B6',
-    'Château': '#9B59B6',
-    'nature': '#27AE60',
-    'Parc': '#27AE60',
-    'shopping': '#3498DB',
-    'Café/Bar': '#3498DB',
-    'Hôtel': '#3498DB',
-    'Attraction': '#3498DB'
+// Icônes et couleurs par catégorie
+const CATEGORIES_CONFIG = {
+    'Restaurant': { icon: '🍽️', color: '#FF8C00' },
+    'Café/Bar': { icon: '☕', color: '#3498DB' },
+    'Musée': { icon: '🏛️', color: '#9B59B6' },
+    'Château': { icon: '🏰', color: '#9B59B6' },
+    'Parc': { icon: '🌳', color: '#27AE60' },
+    'Hôtel': { icon: '🏨', color: '#3498DB' },
+    'Attraction': { icon: '🎪', color: '#E74C3C' }
 };
 
-// Icônes emoji par catégorie
-const categoryIcons = {
-    'gite': '🏡',
-    'restaurant': '🍽️',
-    'Restaurant': '🍽️',
-    'culture': '🏛️',
-    'Musée': '🏛️',
-    'Château': '🏰',
-    'nature': '🌳',
-    'Parc': '🌳',
-    'shopping': '🛍️',
-    'Café/Bar': '☕',
-    'Hôtel': '🏨',
-    'Attraction': '🎪'
-};
-
-// Mapping des catégories Supabase vers les catégories du filtre
-const categoryMapping = {
-    'Restaurant': 'restaurant',
-    'Musée': 'culture',
-    'Château': 'culture',
-    'Parc': 'nature',
-    'Café/Bar': 'shopping',
-    'Hôtel': 'shopping',
-    'Attraction': 'nature'
-};
-
-// ==================== HELPER: HTML ESCAPING ====================
-function escapeHtml(text) {
-    if (!text) return '';
-    // Utiliser SecurityUtils pour sanitiser le texte
-    return window.SecurityUtils.sanitizeText(text);
-}
-
-// Helper pour échapper les attributs onclick
-function escapeForOnclick(text) {
-    if (!text) return '';
-    return text.replace(/'/g, '&#39;')
-                .replace(/"/g, '&quot;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/\\/g, '\\\\');
-}
-
-// ==================== INITIALISATION GOOGLE MAPS ====================
-async function initGoogleMap() {
-    const giteInput = document.getElementById('decouvrir_gite');
-    const giteActuel = giteInput ? giteInput.value : null;
-    
-    let centerCoords;
-    if (giteActuel) {
-        const gite = await window.gitesManager.getByName(giteActuel);
-        centerCoords = gite ? await window.gitesManager.getCoordinates(gite.id) : null;
-    }
-    
-    // Fallback: premier gîte disponible
-    if (!centerCoords) {
-        const gites = await window.gitesManager.getAll();
-        if (gites.length > 0) {
-            centerCoords = await window.gitesManager.getCoordinates(gites[0].id);
-        } else {
-            centerCoords = { lat: 45.9, lng: 4.8 }; // Fallback Lyon
-        }
-    }
-    
-    // Créer la carte
-    googleMap = new google.maps.Map(document.getElementById('googleMap'), {
-        center: centerCoords,
-        zoom: 13,
-        mapTypeControl: true,
-        mapTypeControlOptions: {
-            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
-            position: google.maps.ControlPosition.TOP_RIGHT
-        },
-        streetViewControl: true,
-        fullscreenControl: true,
-        zoomControl: true,
-        styles: [
-            {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [{ visibility: "on" }]
-            }
-        ]
-    });
-    
-    // Initialiser les services
-    infoWindow = new google.maps.InfoWindow();
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer({
-        map: googleMap,
-        suppressMarkers: false,
-        polylineOptions: {
-            strokeColor: '#667eea',
-            strokeWeight: 5
-        }
-    });
-    
-    // Ajouter le marqueur du gîte
-    ajouterMarqueurGite(giteActuel);
-    
-    // Charger et afficher les POIs
-    chargerPOIsFromSupabase(giteActuel);
-}
-
-// ==================== AJOUTER LE MARQUEUR DU GÎTE ====================
-function ajouterMarqueurGite(nomGite) {
-    const coords = gitesCoordinates[nomGite];
-    if (!coords) return;
-    
-    // Supprimer l'ancien marqueur du gîte s'il existe
-    if (googleGiteMarker) {
-        googleGiteMarker.setMap(null);
-    }
-    
-    googleGiteMarker = new google.maps.Marker({
-        position: coords,
-        map: googleMap,
-        title: `🏡 Gîte ${nomGite}`,
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 14,
-            fillColor: categoryColors.gite,
-            fillOpacity: 1,
-            strokeColor: '#fff',
-            strokeWeight: 3
-        },
-        zIndex: 1000,
-        animation: google.maps.Animation.DROP
-    });
-    
-    googleGiteMarker.addListener('click', () => {
-        infoWindow.setContent(`
-            <div style="padding: 15px; max-width: 280px;">
-                <h3 style="margin: 0 0 10px 0; color: ${categoryColors.gite}; font-size: 1.2rem;">
-                    🏡 Gîte ${nomGite}
-                </h3>
-                <p style="margin: 5px 0; color: #666;"><strong>📍 Votre point de départ</strong></p>
-                <p style="margin: 10px 0 0 0; font-size: 0.9rem; color: #999;">
-                    Cliquez sur un point d'intérêt pour calculer l'itinéraire
-                </p>
-            </div>
-        `);
-        infoWindow.open(googleMap, googleGiteMarker);
-    });
-}
-
-// ==================== CHARGER LES POIs DEPUIS SUPABASE ====================
-async function chargerPOIsFromSupabase(giteActuel) {
-    // Effacer tous les anciens marqueurs POI
-    allMarkers.forEach(marker => marker.setMap(null));
-    allMarkers = [];
-    
+// ==================== INITIALISATION ====================
+async function initModuleDecouvrir() {
     try {
-        // Récupérer les données depuis Supabase
-        const { data, error } = await window.supabaseClient
+        await chargerGites();
+        genererFiltresCategories();
+        attacherEvenements();
+    } catch (error) {
+        console.error('❌ Erreur init module découvrir:', error);
+    }
+}
+
+// ==================== CHARGER LES GÎTES ====================
+async function chargerGites() {
+    try {
+        const select = document.getElementById('selectGiteDecouvrir');
+        if (!select) {
+            console.error('❌ Élément selectGiteDecouvrir introuvable');
+            return;
+        }
+
+        if (window.gitesManager) {
+            const gites = await window.gitesManager.getAll();
+            
+            if (gites && gites.length > 0) {
+                select.innerHTML = '<option value="">Tous les gîtes</option>';
+                gites.forEach(gite => {
+                    const option = document.createElement('option');
+                    option.value = gite.id;
+                    option.textContent = gite.name || gite.nom;
+                    select.appendChild(option);
+                });
+                
+                // Charger les activités du premier gîte par défaut
+                select.value = gites[0].id;
+                await chargerActivitesGite(gites[0].id);
+            } else {
+                select.innerHTML = '<option value="">Aucun gîte disponible</option>';
+            }
+        } else {
+            console.error('❌ gitesManager non disponible');
+        }
+    } catch (error) {
+        console.error('❌ Erreur chargement gîtes:', error);
+    }
+}
+
+// ==================== CHARGER LES ACTIVITÉS D'UN GÎTE ====================
+async function chargerActivitesGite(giteId) {
+    try {
+        document.getElementById('nbActivites').textContent = '⏳';
+        
+        const query = window.supabaseClient
             .from('activites_gites')
             .select('*')
-            .eq('gite', giteActuel)
-            .order('type', { ascending: true });
+            .eq('owner_user_id', (await window.supabaseClient.auth.getUser()).data.user.id)
+            .eq('is_active', true);
         
-        if (error) throw error;
+        // Filtrer par gîte si spécifié
+        if (giteId) {
+            query.eq('gite_id', giteId);
+        }
         
-        const pois = data || [];
+        const { data, error } = await query;
         
-        // Mapper les noms de colonnes pour compatibilité
-        pois.forEach(poi => {
-            if (poi.latitude !== undefined && poi.lat === undefined) poi.lat = poi.latitude;
-            if (poi.longitude !== undefined && poi.lng === undefined) poi.lng = poi.longitude;
-            if (poi.distance !== undefined && poi.distance_km === undefined) poi.distance_km = poi.distance;
-            if (poi.categorie !== undefined && poi.type === undefined) poi.type = poi.categorie;
-            if (poi.telephone !== undefined && poi.phone === undefined) poi.phone = poi.telephone;
-            if (poi.nom !== undefined && poi.name === undefined) poi.name = poi.nom;
-        });
+        if (error) {
+            console.error('Erreur chargement activités:', error);
+            return;
+        }
         
-        // Ajouter chaque POI sur la carte
-        pois.forEach(poi => {
-            ajouterMarqueurPOI(poi, giteActuel);
-        });
+        activitesCache = data || [];
         
-        // Afficher la liste
-        afficherListePOIs(pois);
+        // Mettre à jour le compteur
+        document.getElementById('nbActivites').textContent = activitesCache.length;
+        
+        // Afficher les activités
+        afficherActivites(activitesCache);
+        
+        // Mettre à jour la carte si visible
+        if (document.getElementById('mapActivitesContainer').style.display !== 'none') {
+            afficherActivitesSurCarte(activitesCache);
+        }
+        
     } catch (error) {
-        console.error('Erreur chargement POIs:', error);
-        afficherListePOIs([]);
+        console.error('Erreur:', error);
     }
 }
 
-// ==================== AJOUTER UN MARQUEUR POI ====================
-function ajouterMarqueurPOI(poi, giteActuel) {
-    if (!poi.lat || !poi.lng) return;
+// ==================== GÉNÉRER LES FILTRES CATÉGORIES ====================
+function genererFiltresCategories() {
+    const container = document.getElementById('filtresCategories');
+    if (!container) return;
     
-    const category = poi.type || poi.categorie || 'Attraction';
-    const filterCategory = categoryMapping[category] || 'shopping';
+    let html = `
+        <button class="btn-filtre active" data-categorie="" style="background: #6366f1; color: white; padding: 10px 16px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;">
+            📋 Tous
+        </button>
+    `;
     
-    const marker = new google.maps.Marker({
-        position: { 
-            lat: parseFloat(poi.lat), 
-            lng: parseFloat(poi.lng) 
-        },
-        map: googleMap,
-        title: poi.name,
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 11,
-            fillColor: categoryColors[category] || '#999',
-            fillOpacity: 0.95,
-            strokeColor: '#fff',
-            strokeWeight: 2
-        },
-        animation: google.maps.Animation.DROP
-    });
-    
-    // Stocker les données du POI dans le marqueur
-    marker.poiData = poi;
-    marker.poiCategory = filterCategory;
-    
-    // Événement click sur le marqueur
-    marker.addListener('click', () => {
-        const iconEmoji = categoryIcons[category] || '📍';
-        const color = categoryColors[category] || '#999';
-        
-        // Échapper toutes les données utilisateur
-        const safeName = escapeHtml(poi.name);
-        const safeDescription = escapeHtml(poi.description);
-        const safePhone = escapeHtml(poi.phone);
-        const safeWebsite = escapeHtml(poi.website);
-        const safeNameForOnclick = escapeForOnclick(poi.name);
-        
-        const contentHTML = `
-            <div style="padding: 15px; max-width: 320px;">
-                <h3 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1rem;">
-                    ${iconEmoji} ${safeName}
-                </h3>
-                ${poi.description ? `<p style="margin: 8px 0; color: #666; line-height: 1.5;">${safeDescription}</p>` : ''}
-                <div style="margin: 10px 0; display: flex; flex-direction: column; gap: 5px;">
-                    ${poi.distance_km ? `<div style="color: #555;"><strong>📍 Distance:</strong> ${poi.distance_km} km</div>` : ''}
-                    ${poi.phone ? `<div style="color: #555;"><strong>📞:</strong> ${safePhone}</div>` : ''}
-                    ${poi.website ? `<div><a href="${safeWebsite}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">🌐 Site web</a></div>` : ''}
-                    ${poi.rating ? `<div style="color: #555;"><strong>⭐ Note:</strong> ${poi.rating}/5</div>` : ''}
-                </div>
-                <button 
-                    onclick="calculerItineraire(${poi.lat}, ${poi.lng}, '${safeNameForOnclick}')" 
-                    style="margin-top: 12px; padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; font-size: 0.95rem;">
-                    🚗 Itinéraire depuis le gîte
-                </button>
-            </div>
+    Object.entries(CATEGORIES_CONFIG).forEach(([cat, config]) => {
+        html += `
+            <button class="btn-filtre" data-categorie="${cat}" style="background: ${config.color}; color: white; padding: 10px 16px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;">
+                ${config.icon} ${cat}
+            </button>
         `;
-        
-        infoWindow.setContent(contentHTML);
-        infoWindow.open(googleMap, marker);
     });
     
-    allMarkers.push(marker);
-}
-
-// ==================== CALCULER ITINÉRAIRE ====================
-async function calculerItineraire(destLat, destLng, nomDestination) {
-    const giteInput = document.getElementById('decouvrir_gite');
-    const giteActuel = giteInput ? giteInput.value : null;
-    
-    let origin;
-    if (giteActuel) {
-        const gite = await window.gitesManager.getByName(giteActuel);
-        origin = gite ? await window.gitesManager.getCoordinates(gite.id) : null;
+    if (window.SecurityUtils) {
+        window.SecurityUtils.setInnerHTML(container, html);
+    } else {
+        container.innerHTML = html;
     }
     
-    if (!origin) {
-        showToast('❌ Coordonnées du gîte introuvables', 'error');
-        return;
-    }
-    
-    const destination = { lat: parseFloat(destLat), lng: parseFloat(destLng) };
-    
-    directionsService.route({
-        origin: origin,
-        destination: destination,
-        travelMode: google.maps.TravelMode.DRIVING
-    }, (result, status) => {
-        if (status === 'OK') {
-            directionsRenderer.setDirections(result);
+    // Attacher les événements
+    container.querySelectorAll('.btn-filtre').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Retirer la classe active de tous les boutons
+            container.querySelectorAll('.btn-filtre').forEach(b => b.classList.remove('active'));
+            // Ajouter la classe active au bouton cliqué
+            this.classList.add('active');
             
-            const route = result.routes[0].legs[0];
-            const message = `🚗 Itinéraire calculé vers ${nomDestination}\n\n` +
-                          `📍 Distance: ${route.distance.text}\n` +
-                          `⏱️ Durée estimée: ${route.duration.text}`;
-            
-            showToast(message, 'success');
-        } else {
-            showToast('❌ Impossible de calculer l\'itinéraire: ' + status, 'error');
-        }
+            const categorie = this.dataset.categorie;
+            filtrerParCategorie(categorie);
+        });
     });
-}
-
-// ==================== CENTRER SUR LE GÎTE ====================
-function centrerCarteGite() {
-    const giteInput = document.getElementById('decouvrir_gite');
-    let giteActuel = giteInput ? giteInput.value : '';
-    
-    // Fallback sur le premier gîte si aucun sélectionné
-    if (!giteActuel && window.gitesManager && window.gitesManager.gites && window.gitesManager.gites.length > 0) {
-        giteActuel = window.gitesManager.gites[0].name;
-    }
-    
-    const coords = gitesCoordinates[giteActuel];
-    
-    if (coords && googleMap) {
-        googleMap.panTo(coords);
-        googleMap.setZoom(13);
-        
-        // Effacer l'itinéraire s'il y en a un
-        if (directionsRenderer) {
-            directionsRenderer.setDirections({routes: []});
-        }
-        
-        showToast('📍 Carte recentrée sur le gîte', 'info');
-    }
 }
 
 // ==================== FILTRER PAR CATÉGORIE ====================
-function filterMapByCategory() {
-    const filter = document.getElementById('mapCategoryFilter').value;
+function filtrerParCategorie(categorie) {
+    categorieActive = categorie;
     
-    allMarkers.forEach(marker => {
-        if (filter === 'all') {
-            marker.setVisible(true);
-        } else {
-            marker.setVisible(marker.poiCategory === filter);
-        }
-    });
+    let activitesFiltrees = activitesCache;
+    if (categorie) {
+        activitesFiltrees = activitesCache.filter(a => a.categorie === categorie);
+    }
     
-    const categoryName = filter === 'all' ? 'toutes les catégories' : filter;
-    showToast(`🔍 Filtrage: ${categoryName}`, 'info');
+    afficherActivites(activitesFiltrees);
+    
+    // Mettre à jour la carte si elle est visible
+    const container = document.getElementById('mapActivitesContainer');
+    if (container && container.style.display !== 'none' && googleMap) {
+        afficherActivitesSurCarte(activitesFiltrees);
+    }
 }
 
-// ==================== AFFICHER LA LISTE DES POIs ====================
-function afficherListePOIs(pois) {
-    const container = document.getElementById('poiListContainer');
-    if (!container) return;
+// ==================== AFFICHER LES ACTIVITÉS (GRILLE DE CARTES) ====================
+function afficherActivites(activites) {
+    const grille = document.getElementById('grilleActivites');
+    const messageVide = document.getElementById('messageVide');
     
-    if (pois.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, `
-            <p style="text-align: center; color: #999; padding: 40px; font-size: 1.1rem;">
-                📭 Aucun point d'intérêt enregistré pour ce gîte
-            </p>
-        `);
+    if (!grille) return;
+    
+    if (!activites || activites.length === 0) {
+        grille.style.display = 'none';
+        if (messageVide) messageVide.style.display = 'block';
         return;
     }
     
-    const html = pois.map(poi => {
-        const category = poi.type || poi.categorie || 'Attraction';
-        const iconEmoji = categoryIcons[category] || '📍';
-        const color = categoryColors[category] || '#999';
+    grille.style.display = 'grid';
+    if (messageVide) messageVide.style.display = 'none';
+    
+    let html = '';
+    activites.forEach(act => {
+        const config = CATEGORIES_CONFIG[act.categorie] || { icon: '📍', color: '#95a5a6' };
         
-        // Échapper toutes les données utilisateur
-        const safeName = escapeHtml(poi.name);
-        const safeDescription = escapeHtml(poi.description);
-        const safePhone = escapeHtml(poi.phone);
-        const safeWebsite = escapeHtml(poi.website);
-        const safeNameForOnclick = escapeForOnclick(poi.name);
-        
-        return `
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid ${color}; transition: all 0.3s;" 
-                 onmouseover="this.style.background='#e9ecef'; this.style.transform='translateX(5px)';" 
-                 onmouseout="this.style.background='#f8f9fa'; this.style.transform='translateX(0)';">
-                <div style="display: flex; justify-content: space-between; align-items: start; gap: 15px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 250px;">
-                        <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1rem;">
-                            ${iconEmoji} ${safeName}
-                        </h4>
-                        ${poi.description ? `<p style="margin: 5px 0; color: #666; line-height: 1.6;">${safeDescription}</p>` : ''}
-                        <div style="display: flex; gap: 15px; margin-top: 12px; flex-wrap: wrap; font-size: 0.9rem; color: #555;">
-                            ${poi.distance_km ? `<span><strong>📍</strong> ${poi.distance_km} km</span>` : ''}
-                            ${poi.phone ? `<span><strong>📞</strong> ${safePhone}</span>` : ''}
-                            ${poi.website ? `<a href="${safeWebsite}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;"><strong>🌐</strong> Site web</a>` : ''}
-                            ${poi.rating ? `<span><strong>⭐</strong> ${poi.rating}/5</span>` : ''}
+        html += `
+            <div class="card-activite" style="background: white; border: 3px solid #2D3436; border-radius: 12px; padding: 20px; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s; cursor: pointer;" 
+                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='5px 5px 0 #2D3436'" 
+                 onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
+                
+                <!-- Header de la carte -->
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <span style="font-size: 1.8rem;">${config.icon}</span>
+                            <h3 style="margin: 0; font-size: 1.2rem; color: #2D3436;">${escapeHtml(act.nom)}</h3>
                         </div>
+                        <span style="display: inline-block; background: ${config.color}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                            ${act.categorie}
+                        </span>
                     </div>
-                    <div style="display: flex; gap: 10px; flex-direction: column;">
-                        <button onclick="zoomOnPOI(${poi.lat}, ${poi.lng}, '${safeNameForOnclick}')" 
-                            style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-weight: 600;">
-                            🔍 Voir sur la carte
-                        </button>
-                        <button onclick="calculerItineraire(${poi.lat}, ${poi.lng}, '${safeNameForOnclick}')" 
-                            style="padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-weight: 600;">
-                            🚗 Itinéraire
-                        </button>
+                    <button class="btn-editer-activite" data-activite-id="${act.id}" style="background: #667eea; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;" title="Modifier">
+                        ✏️
+                    </button>
+                </div>
+                
+                <!-- Description -->
+                ${act.description ? `
+                <p style="color: #666; line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem;">
+                    ${escapeHtml(act.description)}
+                </p>
+                ` : ''}
+                
+                <!-- Informations -->
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.9rem; color: #555; margin-bottom: 15px;">
+                    ${act.distance_km ? `
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 1.1rem;">📍</span>
+                        <span>${act.distance_km} km</span>
                     </div>
+                    ` : ''}
+                    ${act.telephone ? `
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 1.1rem;">📞</span>
+                        <a href="tel:${act.telephone}" style="color: #555; text-decoration: none;">${escapeHtml(act.telephone)}</a>
+                    </div>
+                    ` : ''}
+                    ${act.note ? `
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 1.1rem;">⭐</span>
+                        <span><strong>${act.note}</strong>/5</span>
+                    </div>
+                    ` : ''}
+                    ${act.nb_avis ? `
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 1.1rem;">💬</span>
+                        <span>${act.nb_avis} avis</span>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <!-- Boutons d'action -->
+                <div style="display: grid; grid-template-columns: ${act.url ? '1fr 1fr' : '1fr'}; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 2px solid #e0e0e0;">
+                    ${act.url ? `
+                    <a href="${escapeHtml(act.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                        <button style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;" 
+                                onmouseover="this.style.background='#2980b9'" 
+                                onmouseout="this.style.background='#3498db'">
+                            🌐 Site web
+                        </button>
+                    </a>
+                    ` : ''}
+                    <button class="btn-supprimer-activite" data-activite-id="${act.id}" data-activite-nom="${escapeHtml(act.nom)}" 
+                            style="width: 100%; background: #e74c3c; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;" 
+                            onmouseover="this.style.background='#c0392b'" 
+                            onmouseout="this.style.background='#e74c3c'">
+                        🗑️ Supprimer
+                    </button>
                 </div>
             </div>
         `;
-    }).join('');
+    });
     
-    window.SecurityUtils.setInnerHTML(container, html);
-}
-
-// ==================== ZOOMER SUR UN POI ====================
-function zoomOnPOI(lat, lng, name) {
-    const position = { lat: parseFloat(lat), lng: parseFloat(lng) };
-    googleMap.panTo(position);
-    googleMap.setZoom(16);
-    
-    // Trouver le marqueur correspondant et déclencher son click
-    const marker = allMarkers.find(m => 
-        m.getPosition().lat() === position.lat && 
-        m.getPosition().lng() === position.lng
-    );
-    
-    if (marker) {
-        google.maps.event.trigger(marker, 'click');
+    if (window.SecurityUtils) {
+        window.SecurityUtils.setInnerHTML(grille, html);
+    } else {
+        grille.innerHTML = html;
     }
     
-    showToast(`🔍 Zoom sur ${name}`, 'info');
-}
-
-// ==================== MODAL ITINÉRAIRE ====================
-function afficherItineraireModal() {
-    showToast('💡 Cliquez sur un point d\'intérêt sur la carte pour calculer l\'itinéraire !', 'info');
-}
-
-// ==================== CHARGER LES ACTIVITÉS ====================
-async function chargerActivites() {
-    try {
-        // Mettre à jour le compteur
-        const counter = document.getElementById('activitesCounter');
-        if (counter) window.SecurityUtils.setInnerHTML(counter, '⏳ Chargement...');
-
-        const { data, error } = await window.supabaseClient
-            .from('activites_gites')
-            .select('*')
-            .order('categorie', { ascending: true });
-        
-        if (error) throw error;
-        
-        if (data) {
-            // Initialiser dynamiquement pour N gîtes
-            window.activitesParGite = {};
-            const gites = await window.gitesManager.getAll();
-            gites.forEach(g => {
-                window.activitesParGite[g.name] = [];
-            });
-            
-            data.forEach(act => {
-                // Mapper les noms de colonnes pour compatibilité (DB utilise categorie, distance, telephone)
-                if (act.latitude !== undefined && act.lat === undefined) act.lat = act.latitude;
-                if (act.longitude !== undefined && act.lng === undefined) act.lng = act.longitude;
-                if (act.distance !== undefined && act.distance_km === undefined) act.distance_km = act.distance;
-                if (act.categorie !== undefined && act.type === undefined) act.type = act.categorie;
-                if (act.telephone !== undefined && act.phone === undefined) act.phone = act.telephone;
-                if (act.nom !== undefined && act.name === undefined) act.name = act.nom;
-                
-                if (window.activitesParGite[act.gite]) {
-                    window.activitesParGite[act.gite].push(act);
-                }
-            });
-            
-            // Mettre à jour le compteur dynamiquement
-            let total = 0;
-            let counterText = '✅ ';
-            gites.forEach(g => {
-                const count = window.activitesParGite[g.name]?.length || 0;
-                total += count;
-            });
-            
-            // Générer texte avec icônes
-            const parts = gites.map(g => {
-                const count = window.activitesParGite[g.name]?.length || 0;
-                return `${g.icon} ${count}`;
-            });
-            
-            counterText += `${total} activités (${parts.join(' • ')})`;
-            if (counter) {
-                window.SecurityUtils.setInnerHTML(counter, counterText);
+    // Attacher les événements sur les boutons éditer/supprimer
+    document.querySelectorAll('.btn-editer-activite').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            ouvrirModalActivite(this.dataset.activiteId);
+        });
+    });
+    
+    document.querySelectorAll('.btn-supprimer-activite').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (window.supprimerActivite) {
+                window.supprimerActivite(this.dataset.activiteId, this.dataset.activiteNom);
             }
+        });
+    });
+}
+
+// ==================== ATTACHER LES ÉVÉNEMENTS ====================
+function attacherEvenements() {
+    // Changement de gîte
+    const selectGite = document.getElementById('selectGiteDecouvrir');
+    if (selectGite) {
+        selectGite.addEventListener('change', function() {
+            chargerActivitesGite(this.value || null);
+        });
+    }
+    
+    // Bouton ajouter activité
+    const btnAjouter = document.getElementById('btnAjouterActivite');
+    if (btnAjouter) {
+        btnAjouter.addEventListener('click', ouvrirModalActivite);
+    }
+    
+    // Toggle carte
+    const btnToggle = document.getElementById('btnToggleCarte');
+    if (btnToggle) {
+        btnToggle.addEventListener('click', toggleCarte);
+    }
+    
+    // Fermeture modal
+    const btnFermer = document.getElementById('btnFermerModal');
+    const btnAnnuler = document.getElementById('btnAnnulerModal');
+    const overlay = document.getElementById('modalActiviteOverlay');
+    
+    if (btnFermer) btnFermer.addEventListener('click', fermerModalActivite);
+    if (btnAnnuler) btnAnnuler.addEventListener('click', fermerModalActivite);
+    if (overlay) overlay.addEventListener('click', fermerModalActivite);
+    
+    // Formulaire
+    const form = document.getElementById('formActivite');
+    if (form) {
+        form.addEventListener('submit', sauvegarderActivite);
+    }
+    
+    // Génération PDF
+    const btnPDF = document.getElementById('btnGenererPDF');
+    if (btnPDF) {
+        btnPDF.addEventListener('click', genererGuidePDF);
+    }
+    
+    // Bouton Calculer GPS
+    const btnCalculerGPS = document.getElementById('btnCalculerGPS');
+    if (btnCalculerGPS) {
+        btnCalculerGPS.addEventListener('click', calculerGPSActivite);
+    }
+}
+
+// ==================== MODAL: OUVRIR ====================
+function ouvrirModalActivite(activiteId = null) {
+    const overlay = document.getElementById('modalActiviteOverlay');
+    const dialog = document.getElementById('modalActiviteDialog');
+    const titre = document.getElementById('modalTitre');
+    const form = document.getElementById('formActivite');
+    
+    if (!overlay || !dialog) return;
+    
+    // Réinitialiser le formulaire
+    if (form) form.reset();
+    
+    if (activiteId) {
+        // Mode édition
+        titre.textContent = '✏️ Modifier l\'activité';
+        const activite = activitesCache.find(a => a.id === activiteId);
+        if (activite) {
+            document.getElementById('activite_id').value = activite.id;
+            document.getElementById('activite_nom').value = activite.nom || '';
+            document.getElementById('activite_categorie').value = activite.categorie || '';
+            document.getElementById('activite_description').value = activite.description || '';
+            document.getElementById('activite_adresse').value = activite.adresse || '';
+            document.getElementById('activite_distance_km').value = activite.distance_km || '';
+            document.getElementById('activite_url').value = activite.url || '';
+            document.getElementById('activite_telephone').value = activite.telephone || '';
+            document.getElementById('activite_latitude').value = activite.latitude || '';
+            document.getElementById('activite_longitude').value = activite.longitude || '';
+            document.getElementById('activite_note').value = activite.note || '';
+            document.getElementById('activite_nb_avis').value = activite.nb_avis || '';
+        }
+    } else {
+        // Mode ajout
+        titre.textContent = '➕ Nouvelle Activité';
+        document.getElementById('activite_id').value = '';
+        
+        // Récupérer le gîte sélectionné
+        const selectGite = document.getElementById('selectGiteDecouvrir');
+        if (selectGite && selectGite.value) {
+            document.getElementById('activite_gite_id').value = selectGite.value;
+        }
+    }
+    
+    overlay.style.display = 'block';
+    dialog.style.display = 'block';
+}
+
+// ==================== MODAL: FERMER ====================
+function fermerModalActivite() {
+    const overlay = document.getElementById('modalActiviteOverlay');
+    const dialog = document.getElementById('modalActiviteDialog');
+    
+    if (overlay) overlay.style.display = 'none';
+    if (dialog) dialog.style.display = 'none';
+}
+
+// ==================== CALCULER GPS DEPUIS ADRESSE ====================
+async function calculerGPSActivite() {
+    const adresseField = document.getElementById('activite_adresse');
+    const latField = document.getElementById('activite_latitude');
+    const lonField = document.getElementById('activite_longitude');
+    const distanceField = document.getElementById('activite_distance_km');
+    
+    const adresse = adresseField?.value?.trim();
+    
+    if (!adresse) {
+        showToast('⚠️ Veuillez saisir une adresse', 'warning');
+        return;
+    }
+    
+    showToast('🔍 Recherche des coordonnées GPS...', 'info');
+    
+    try {
+        // Attendre 1.1s pour respecter les limites de Nominatim
+        await new Promise(resolve => setTimeout(resolve, 1100));
+        
+        const encodedAddress = encodeURIComponent(adresse + ', France');
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1&addressdetails=1`;
+        
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'GiteManager/1.0'
+            }
+        });
+        
+        if (!response.ok) {
+            showToast('❌ Erreur lors de la recherche GPS', 'error');
+            return;
         }
         
-        // Afficher automatiquement les activités du gîte sélectionné
-        const giteSelectionne = document.getElementById('decouvrir_gite')?.value;
-        if (giteSelectionne) {
-            // Petit délai pour s'assurer que le DOM est prêt
-            setTimeout(() => {
-                const container = document.getElementById('activitesParCategorie');
-                if (container) {
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat).toFixed(8);
+            const lon = parseFloat(data[0].lon).toFixed(8);
+            
+            latField.value = lat;
+            lonField.value = lon;
+            
+            // Calculer la distance depuis le gîte sélectionné
+            const selectGite = document.getElementById('selectGiteDecouvrir');
+            if (selectGite && selectGite.value && window.gitesManager) {
+                const gite = await window.gitesManager.getById(selectGite.value);
+                if (gite) {
+                    const coords = await window.gitesManager.getCoordinates(gite.id);
+                    if (coords && coords.lat && coords.lng) {
+                        const distance = calculerDistance(coords.lat, coords.lng, lat, lon);
+                        distanceField.value = distance.toFixed(1);
+                    }
                 }
-                try {
-                    afficherActivites(giteSelectionne);
-                } catch (e) {
-                    console.error('💥 ERREUR dans afficherActivites():', e);
-                }
-            }, 100);
+            }
+            
+            showToast(`✅ GPS trouvé: ${data[0].display_name.substring(0, 80)}...`, 'success');
         } else {
-            setTimeout(() => {
-                afficherToutesLesActivites();
-            }, 100);
+            showToast('⚠️ Adresse non trouvée. Vérifiez le format (ex: "46160 Calvignac")', 'warning');
         }
     } catch (error) {
-        console.error('Erreur chargement activités:', error);
-        const counter = document.getElementById('activitesCounter');
-        if (counter) window.SecurityUtils.setInnerHTML(counter, '❌ Erreur');
-        showNotification('❌ Erreur lors du chargement des activités', 'error');
+        console.error('❌ Erreur géocodage:', error);
+        showToast('❌ Erreur lors du calcul GPS', 'error');
     }
 }
 
-// ==================== CHARGER TOUT SUR LA CARTE ====================
-async function chargerToutSurCarte() {
-    const gite = document.getElementById('decouvrir_gite').value;
-    if (!gite) {
-        showNotification('⚠️ Veuillez sélectionner un gîte', 'warning');
-        return;
-    }
-    
-    showNotification('🗺️ Chargement de la carte...', 'info');
-    
-    // S'assurer que les activités sont chargées
-    if (!window.activitesParGite || Object.keys(window.activitesParGite).length === 0) {
-        await chargerActivites();
-    }
-    
-    // Récupérer les activités déjà chargées pour ce gîte
-    const activitesGite = window.activitesParGite[gite] || [];
-    
-    // Mapper les activités pour la carte avec coordonnées valides
-    window.allActivites = activitesGite
-        .filter(act => act.lat && act.lng && !isNaN(act.lat) && !isNaN(act.lng))
-        .map(act => ({
-            titre: act.nom,
-            nom: act.nom,
-            date: null,
-            lieu: act.adresse,
-            adresse: act.adresse,
-            description: act.description,
-            lien: act.website,
-            icone: '📍',
-            distance: act.distance || 0,
-            lat: parseFloat(act.lat),
-            lng: parseFloat(act.lng),
-            note: act.note,
-            categorie: act.categorie,
-            telephone: act.telephone,
-            isActivite: true
-        }));
-    
-    
-    if (window.allActivites.length === 0) {
-        showNotification('⚠️ Aucune activité avec coordonnées valides', 'warning');
-        return;
-    }
-    
-    // Afficher toutes les activités sur la carte
-    afficherCarteEvenements(window.allActivites);
-    showNotification(`✓ ${window.allActivites.length} activités affichées sur la carte`, 'success');
+// ==================== CALCULER DISTANCE (HAVERSINE) ====================
+function calculerDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Rayon de la Terre en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance;
 }
 
-// ==================== OBTENIR COULEUR CATÉGORIE ====================
-function getCategoryColor(categorie) {
-    const colors = {
-        'Restaurant': { badge: '#10b981', light: '#d1fae5' },
-        'Musée': { badge: '#3b82f6', light: '#dbeafe' },
-        'Café': { badge: '#f59e0b', light: '#fef3c7' },
-        'Parc': { badge: '#8b5cf6', light: '#ede9fe' },
-        'Hôtel': { badge: '#ec4899', light: '#fce7f3' }
-    };
-    return colors[categorie] || { badge: '#667eea', light: '#e0e7ff' };
-}
-
-// ==================== AFFICHER TOUTES LES ACTIVITÉS (TOUS GÎTES) ====================
-async function afficherToutesLesActivites() {
-    const container = document.getElementById('activitesParCategorie');
-    if (!container) return;
+// ==================== SAUVEGARDER ACTIVITÉ ====================
+async function sauvegarderActivite(e) {
+    if (e) e.preventDefault();
     
-    const gites = await window.gitesManager.getAll();
-    const toutesActivites = [];
-    gites.forEach(g => {
-        if (window.activitesParGite[g.name]) {
-            toutesActivites.push(...window.activitesParGite[g.name]);
+    try {
+        const activiteId = document.getElementById('activite_id').value;
+        const giteId = document.getElementById('activite_gite_id').value || document.getElementById('selectGiteDecouvrir').value;
+        
+        if (!giteId) {
+            showToast('❌ Veuillez sélectionner un gîte', 'error');
+            return;
         }
-    });
-    
-    if (toutesActivites.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucune activité enregistrée. Cliquez sur un gîte pour commencer.</p>');
-        return;
-    }
-    
-    let html = `<h3 style="color: white; font-size: 1.6rem; margin-bottom: 24px; text-align: center; padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">✨ Toutes les activités <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${toutesActivites.length}</span></h3>`;
-    
-    // Grouper par gîte dynamiquement
-    gites.forEach(gite => {
-        const activitesGite = window.activitesParGite[gite.name] || [];
-        if (activitesGite.length === 0) return;
         
-        html += `
-            <div style="margin-bottom: 40px; border: 3px solid #667eea; border-radius: 16px; padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);">
-                <h4 style="color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 10px; font-size: 1.4rem; margin-bottom: 20px; text-align: center;">
-                    ${gite.icon} ${gite.name} <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activitesGite.length}</span>
-                </h4>
-        `;
-        
-        // Grouper par catégorie pour ce gîte
-        const parCategorie = {};
-        activitesGite.forEach(act => {
-            if (!parCategorie[act.categorie]) {
-                parCategorie[act.categorie] = [];
-            }
-            parCategorie[act.categorie].push(act);
-        });
-        
-        Object.keys(parCategorie).sort().forEach(cat => {
-            html += `
-                <div style="margin-bottom: 20px;">
-                    <h5 style="color: #667eea; margin-bottom: 12px; font-size: 1.1rem; padding: 10px 12px; background: white; border-radius: 8px; border-left: 4px solid #667eea;">
-                        ${cat} (${parCategorie[cat].length})
-                    </h5>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            `;
-            
-            parCategorie[cat].forEach(act => {
-                const colors = getCategoryColor(act.categorie);
-                const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) + ` ${act.note}/5` : '';
-                const distanceText = act.distance ? `${act.distance} km` : '';
-                
-                html += `
-                    <div data-activite-id="${act.id}" style="background: white; border: none; padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 10px 28px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'">
-                        <div style="display: inline-block; background: ${colors.badge}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px;">${act.categorie}</div>
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                            <div style="flex: 1;">
-                                <h6 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #1f2937;">${act.nom}${distanceText ? ` <span style="font-size: 0.9rem; font-weight: 500; color: #6b7280;">• ${distanceText}</span>` : ''}</h6>
-                            </div>
-                        </div>
-                        ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #4b5563;"><span style="font-size: 1rem;">📍</span> ${act.adresse}</p>` : ''}
-                        ${act.description ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #6b7280; font-style: italic;">${act.description}</p>` : ''}
-                        ${noteStars ? `<p style="margin: 8px 0; font-size: 0.95rem;">${noteStars}</p>` : ''}
-                    </div>
-                `;
-            });
-            
-            html += '</div></div>';
-        });
-        
-        html += '</div>';
-    });
-    
-    window.SecurityUtils.setInnerHTML(container, html);
-}
-
-// ==================== AFFICHER LES ACTIVITÉS ====================
-function afficherActivites(gite) {
-    const container = document.getElementById('activitesParCategorie');
-    
-    // Vérifier que le container existe
-    if (!container) {
-        console.error('❌ Element #activitesParCategorie introuvable !');
-        return;
-    }
-    
-    const activites = window.activitesParGite[gite] || [];
-    
-    if (activites.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, '<div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%); border-radius: 16px; border: 2px dashed #ef4444;"><div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div><p style="color: #ef4444; font-size: 1.2rem; font-weight: 600;">Aucune activité enregistrée pour ce gîte</p></div>');
-        return;
-    }
-    
-    // Grouper par catégorie
-    const parCategorie = {};
-    activites.forEach(act => {
-        if (!parCategorie[act.categorie]) {
-            parCategorie[act.categorie] = [];
+        const user = (await window.supabaseClient.auth.getUser()).data.user;
+        if (!user) {
+            showToast('❌ Utilisateur non authentifié', 'error');
+            return;
         }
-        parCategorie[act.categorie].push(act);
-    });
-    
-    
-    let html = `<h3 style="color: white; font-size: 1.6rem; margin-bottom: 24px; text-align: center; padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">✨ Toutes les activités à ${gite} <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 8px;">${activites.length}</span></h3>`;
-    
-    Object.keys(parCategorie).sort().forEach(cat => {
-        html += `
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-bottom: 15px; font-size: 1.1rem; padding: 12px 16px; border-radius: 8px;">
-                    ${cat} (${parCategorie[cat].length})
-                </h4>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-        `;
         
-        parCategorie[cat].forEach(act => {
-            const colors = getCategoryColor(act.categorie);
-            const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) + ` ${act.note}/5` : '';
-            const avisText = act.avis ? `(${act.avis} avis)` : '';
-            const telText = act.telephone ? `📞 ${act.telephone}` : '';
-            const distanceText = act.distance ? `${act.distance} km` : '';
-            const prixText = act.prix ? `${act.prix}` : '';
-            const typeRestoText = act.type_restaurant ? `${act.type_restaurant}` : '';
-            
-            html += `
-                <div data-activite-id="${act.id}" style="background: white; border: none; padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease; position: relative;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 10px 28px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'">
-                    <!-- Badge catégorie -->
-                    <div style="display: inline-block; background: ${colors.badge}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                        ${cat}
-                    </div>
-                    
-                    <!-- Titre et boutons -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                        <div style="flex: 1;">
-                            <h5 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #1f2937; word-wrap: break-word; font-family: 'Work Sans', sans-serif;">${act.nom}${distanceText ? ` <span style="font-size: 0.95rem; font-weight: 500; color: #6b7280;">• ${distanceText}</span>` : ''}</h5>
-                        </div>
-                        <div style="display: flex; gap: 4px; margin-left: 12px;">
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">✏️</button>
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">🗑️</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Adresse -->
-                    ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #4b5563; display: flex; align-items: center; gap: 6px;"><span style="font-size: 1rem;">📍</span> ${act.adresse}</p>` : ''}
-                    
-                    <!-- Description -->
-                    ${act.description ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #6b7280; font-style: italic; line-height: 1.5;">${act.description}</p>` : ''}
-                    
-                    <!-- Prix et Type Restaurant -->
-                    <div style="display: flex; gap: 20px; margin: 12px 0; font-size: 0.9rem; color: #6b7280;">
-                        ${prixText ? `<div><span style="font-weight: 600;">💵 ${prixText}</span></div>` : ''}
-                        ${typeRestoText ? `<div><span style="font-weight: 600;">🍽️ ${typeRestoText}</span></div>` : ''}
-                    </div>
-                    
-                    <!-- Note et avis -->
-                    ${noteStars ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #f59e0b; font-weight: 600;">${noteStars} ${avisText}</p>` : ''}
-                    
-                    <!-- Téléphone -->
-                    ${telText ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #6b7280;">${telText}</p>` : ''}
-                    
-                    <!-- Liens d'action -->
-                    <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
-                        ${act.google_maps_link ? `
-                            <a href="${act.google_maps_link}" target="_blank" title="Google Maps" style="background: white; color: #ef4444; border: 2px solid #ef4444; border-radius: 8px; padding: 12px 18px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);" onmouseover="this.style.background='#fef2f2'; this.style.borderColor='#dc2626'; this.style.color='#dc2626'; this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.3)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='white'; this.style.borderColor='#ef4444'; this.style.color='#ef4444'; this.style.boxShadow='0 2px 8px rgba(239, 68, 68, 0.2)'; this.style.transform='translateY(0)'">
-                                <img src="./images/location-pin.svg" alt="Localisation" style="width: 24px; height: 24px; object-fit: contain;"> Itinéraire
-                            </a>
-                        ` : ''}
-                        ${act.website ? `
-                            <a href="${act.website}" target="_blank" title="Site web" style="background: white; color: #3b82f6; border: 2px solid #3b82f6; border-radius: 8px; padding: 12px 18px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);" onmouseover="this.style.background='#f0f9ff'; this.style.borderColor='#1e40af'; this.style.color='#1e40af'; this.style.boxShadow='0 6px 16px rgba(59, 130, 246, 0.3)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='white'; this.style.borderColor='#3b82f6'; this.style.color='#3b82f6'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.2)'; this.style.transform='translateY(0)'">
-                                <img src="./images/web-redirect.svg" alt="Web" style="width: 24px; height: 24px; object-fit: contain;"> Site
-                            </a>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        });
+        const data = {
+            owner_user_id: user.id,
+            gite_id: giteId,
+            nom: document.getElementById('activite_nom').value,
+            categorie: document.getElementById('activite_categorie').value,
+            description: document.getElementById('activite_description').value || null,
+            adresse: document.getElementById('activite_adresse').value || null,
+            distance_km: document.getElementById('activite_distance_km').value || null,
+            url: document.getElementById('activite_url').value || null,
+            telephone: document.getElementById('activite_telephone').value || null,
+            latitude: document.getElementById('activite_latitude').value || null,
+            longitude: document.getElementById('activite_longitude').value || null,
+            note: document.getElementById('activite_note').value || null,
+            nb_avis: document.getElementById('activite_nb_avis').value || null,
+            is_active: true
+        };
         
-        html += `</div></div>`;
-    });
-    
-    window.SecurityUtils.setInnerHTML(container, html);
+        let result;
+        if (activiteId) {
+            // UPDATE
+            result = await window.supabaseClient
+                .from('activites_gites')
+                .update(data)
+                .eq('id', activiteId);
+        } else {
+            // INSERT
+            result = await window.supabaseClient
+                .from('activites_gites')
+                .insert(data);
+        }
+        
+        if (result.error) {
+            console.error('Erreur sauvegarde:', result.error);
+            showToast('❌ Erreur lors de la sauvegarde', 'error');
+            return;
+        }
+        
+        showToast(`✅ Activité ${activiteId ? 'modifiée' : 'ajoutée'} avec succès`, 'success');
+        fermerModalActivite();
+        
+        // Recharger les activités
+        const selectGite = document.getElementById('selectGiteDecouvrir');
+        await chargerActivitesGite(selectGite ? selectGite.value : null);
+        
+    } catch (error) {
+        console.error('Erreur:', error);
+        showToast('❌ Erreur lors de la sauvegarde', 'error');
+    }
 }
 
-// ==================== SUPPRIMER UNE ACTIVITÉ ====================
-async function supprimerActivite(id) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette activité ?')) {
+// ==================== ÉDITER ACTIVITÉ ====================
+window.editerActivite = function(activiteId) {
+    ouvrirModalActivite(activiteId);
+};
+
+// ==================== SUPPRIMER ACTIVITÉ ====================
+window.supprimerActivite = async function(activiteId, nom) {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer "${nom}" ?`)) {
         return;
     }
     
@@ -796,474 +555,219 @@ async function supprimerActivite(id) {
         const { error } = await window.supabaseClient
             .from('activites_gites')
             .delete()
-            .eq('id', id);
+            .eq('id', activiteId);
         
-        if (error) throw error;
+        if (error) {
+            console.error('Erreur suppression:', error);
+            showToast('❌ Erreur lors de la suppression', 'error');
+            return;
+        }
         
-        showNotification('✓ Activité supprimée', 'success');
-        await chargerActivites();
+        showToast('✅ Activité supprimée', 'success');
+        
+        // Recharger les activités
+        const selectGite = document.getElementById('selectGiteDecouvrir');
+        await chargerActivitesGite(selectGite ? selectGite.value : null);
         
     } catch (error) {
-        console.error('Erreur suppression activité:', error);
-        showNotification('❌ Erreur : ' + error.message, 'error');
+        console.error('Erreur:', error);
+        showToast('❌ Erreur lors de la suppression', 'error');
     }
-}
+};
 
-// ==================== FILTRER ACTIVITÉS PAR CATÉGORIE ====================
-async function filtrerActivitesParCategorie(motCle) {
+// ==================== TOGGLE CARTE ====================
+function toggleCarte() {
+    const container = document.getElementById('mapActivitesContainer');
+    const btn = document.getElementById('btnToggleCarte');
     
-    const giteInput = document.getElementById('decouvrir_gite');
-    const gite = giteInput?.value;
-    const container = document.getElementById('activitesParCategorie');
+    if (!container || !btn) return;
     
-    // Récupérer tous les gîtes dynamiquement
-    const allGites = window.gitesManager?.gites?.map(g => g.name) || [];
-    
-    // Vérifier si les activités sont chargées, sinon les charger
-    const activitesChargees = allGites.every(giteName => 
-        window.activitesParGite && window.activitesParGite[giteName]?.length > 0
-    );
-    
-    if (!activitesChargees) {
-        showNotification('⏳ Chargement des activités...', 'info');
-        await chargerActivites();
-    }
-    
-    let activites = [];
-    let titre = '';
-    
-    // Si un gîte est sélectionné, filtrer uniquement celui-ci
-    if (gite) {
-        activites = window.activitesParGite[gite] || [];
-        titre = `${motCle} à ${gite}`;
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        btn.textContent = '🗺️ Masquer la carte';
+        
+        // Initialiser ou mettre à jour la carte
+        setTimeout(() => {
+            initLeafletMap();
+            afficherActivitesSurCarte(categorieActive ? activitesCache.filter(a => a.categorie === categorieActive) : activitesCache);
+        }, 100);
     } else {
-        // Sinon, chercher dans tous les gîtes
-        activites = allGites.flatMap(giteName => window.activitesParGite[giteName] || []);
-        titre = `${motCle} - Tous les gîtes`;
+        container.style.display = 'none';
+        btn.textContent = '🗺️ Afficher la carte';
     }
-    
-    
-    // Filtrer par mot-clé dans la catégorie
-    const filtrees = activites.filter(act => 
-        act.categorie.toLowerCase().includes(motCle.toLowerCase())
-    );
-    
-    
-    if (filtrees.length === 0) {
-        const lieu = gite || 'les gîtes';
-        window.SecurityUtils.setInnerHTML(container, `<p style="text-align: center; color: #999; padding: 40px;">Aucune activité "${motCle}" trouvée pour ${lieu}. 
-        <br><br><button onclick="chargerActivites()" class="btn" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">
-        🔄 Recharger les activités
-        </button></p>`);
-        return;
-    }
-    
-    // 🗺️ Mettre à jour le filtre et la carte
-    window.filtreCategorieActive = motCle;
-    afficherActivitesFiltrées(filtrees, titre);
-    
-    // 📍 Afficher uniquement les activités filtrées sur la carte
-    afficherCarteEvenements();
 }
 
-// ==================== AFFICHER TOUTES LES ACTIVITÉS ====================
-async function afficherToutesActivites() {
-    const giteInput = document.getElementById('decouvrir_gite');
-    const gite = giteInput?.value;
+// ==================== INITIALISER LEAFLET MAP ====================
+function initLeafletMap() {
+    const container = document.getElementById('mapActivitesContainer');
+    if (!container) return;
     
-    // Récupérer tous les gîtes dynamiquement
-    const allGites = window.gitesManager?.gites?.map(g => g.name) || [];
-    
-    // Vérifier si les activités sont chargées, sinon les charger
-    const activitesChargees = allGites.every(giteName => 
-        window.activitesParGite && window.activitesParGite[giteName]?.length > 0
-    );
-    
-    if (!activitesChargees) {
-        showNotification('⏳ Chargement des activités...', 'info');
-        await chargerActivites();
-        return; // chargerActivites() appelera déjà afficherToutesLesActivites()
+    // Si la carte existe déjà, la supprimer pour recréer
+    if (googleMap) {
+        googleMap.remove();
+        googleMap = null;
     }
     
-    let activites = [];
-    let titre = '';
+    // Centre par défaut (France)
+    const centerLat = 44.5;
+    const centerLng = 1.5;
     
-    // Si un gîte est sélectionné, afficher uniquement celui-ci
-    if (gite) {
-        activites = window.activitesParGite[gite] || [];
-        titre = `Toutes les activités à ${gite}`;
-    } else {
-        // Sinon, afficher tous les gîtes
-        activites = allGites.flatMap(giteName => window.activitesParGite[giteName] || []);
-        titre = 'Toutes les activités - Tous les gîtes';
-    }
+    // Créer la carte Leaflet
+    googleMap = L.map('mapActivitesContainer').setView([centerLat, centerLng], 10);
     
-    // 🗺️ Réinitialiser le filtre et afficher toutes les activités
-    window.filtreCategorieActive = null;
-    afficherActivitesFiltrées(activites, titre);
+    // Ajouter les tuiles OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(googleMap);
     
-    // 📍 Afficher tous les marqueurs sur la carte
-    afficherCarteEvenements();
+    allMarkers = [];
 }
 
-// ==================== AFFICHER ACTIVITÉS FILTRÉES ====================
-function afficherActivitesFiltrées(activites, titre) {
-    const container = document.getElementById('activitesParCategorie');
+// ==================== AFFICHER ACTIVITÉS SUR CARTE ====================
+async function afficherActivitesSurCarte(activites) {
+    if (!googleMap) {
+        initLeafletMap();
+    }
     
-    // Grouper par catégorie
-    const parCategorie = {};
-    activites.forEach(act => {
-        if (!parCategorie[act.categorie]) {
-            parCategorie[act.categorie] = [];
-        }
-        parCategorie[act.categorie].push(act);
-    });
+    // Supprimer les anciens marqueurs
+    allMarkers.forEach(marker => marker.remove());
+    allMarkers = [];
     
-    let html = `<h3 style="color: #2C5F7D; font-size: 1.5rem; margin-bottom: 20px; text-align: center; padding: 20px; background: #f0f4f8; border-radius: 12px;">🎯 ${titre} (${activites.length})</h3>`;
+    // Récupérer le gîte sélectionné
+    const selectGite = document.getElementById('selectGiteDecouvrir');
+    let giteCoords = null;
     
-    Object.keys(parCategorie).sort().forEach(cat => {
-        html += `
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-bottom: 15px; font-size: 1.1rem; padding: 12px 16px; border-radius: 8px;">
-                    ${cat} (${parCategorie[cat].length})
-                </h4>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-        `;
+    if (selectGite && selectGite.value && window.gitesManager) {
+        const gite = await window.gitesManager.getById(selectGite.value);
         
-        parCategorie[cat].forEach(act => {
-            const colors = getCategoryColor(act.categorie);
-            const noteStars = act.note ? '⭐'.repeat(Math.round(act.note)) + ` ${act.note}/5` : '';
-            const avisText = act.avis ? `(${act.avis} avis)` : '';
-            const telText = act.telephone ? `📞 ${act.telephone}` : '';
-            const distanceText = act.distance ? `${act.distance} km` : '';
-            const prixText = act.prix ? `${act.prix}` : '';
-            const typeRestoText = act.type_restaurant ? `${act.type_restaurant}` : '';
+        if (gite) {
+            giteCoords = await window.gitesManager.getCoordinates(gite.id);
             
-            html += `
-                <div data-activite-id="${act.id}" style="background: white; border: none; padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease; position: relative;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 10px 28px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'">
-                    <!-- Badge catégorie -->
-                    <div style="display: inline-block; background: ${colors.badge}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                        ${act.categorie}
-                    </div>
-                    
-                    <!-- Titre et boutons -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                        <div style="flex: 1;">
-                            <h5 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #1f2937; word-wrap: break-word; font-family: 'Work Sans', sans-serif;">${act.nom}${distanceText ? ` <span style="font-size: 0.95rem; font-weight: 500; color: #6b7280;">• ${distanceText}</span>` : ''}</h5>
-                        </div>
-                        <div style="display: flex; gap: 4px; margin-left: 12px;">
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); modifierActivite(${act.id});" title="Modifier" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">✏️</button>
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); supprimerActivite(${act.id});" title="Supprimer" style="background: transparent; border: none; cursor: pointer; font-size: 1.3rem; transition: transform 0.2s, opacity 0.2s; opacity: 0.7; padding: 4px;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='1'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='0.7'">🗑️</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Adresse -->
-                    ${act.adresse ? `<p style="margin: 8px 0; font-size: 0.9rem; color: #4b5563; display: flex; align-items: center; gap: 6px;"><span style="font-size: 1rem;">📍</span> ${act.adresse}</p>` : ''}
-                    
-                    <!-- Description -->
-                    ${act.description ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #6b7280; font-style: italic; line-height: 1.5;">${act.description}</p>` : ''}
-                    
-                    <!-- Prix et Type Restaurant -->
-                    <div style="display: flex; gap: 20px; margin: 12px 0; font-size: 0.9rem; color: #6b7280;">
-                        ${prixText ? `<div><span style="font-weight: 600;">💵 ${prixText}</span></div>` : ''}
-                        ${typeRestoText ? `<div><span style="font-weight: 600;">🍽️ ${typeRestoText}</span></div>` : ''}
-                    </div>
-                    
-                    <!-- Note et avis -->
-                    ${noteStars ? `<p style="margin: 10px 0; font-size: 0.9rem; color: #f59e0b; font-weight: 600;">${noteStars} ${avisText}</p>` : ''}
-                    
-                    <!-- Téléphone -->
-                    ${telText ? `<p style="margin: 8px 0; font-size: 0.85rem; color: #6b7280;">${telText}</p>` : ''}
-                    
-                    <!-- Liens d'action -->
-                    <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
-                        ${act.google_maps_link ? `
-                            <a href="${act.google_maps_link}" target="_blank" title="Google Maps" style="background: white; color: #ef4444; border: 2px solid #ef4444; border-radius: 8px; padding: 12px 18px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);" onmouseover="this.style.background='#fef2f2'; this.style.borderColor='#dc2626'; this.style.color='#dc2626'; this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.3)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='white'; this.style.borderColor='#ef4444'; this.style.color='#ef4444'; this.style.boxShadow='0 2px 8px rgba(239, 68, 68, 0.2)'; this.style.transform='translateY(0)'">
-                                <img src="./images/location-pin.svg" alt="Localisation" style="width: 24px; height: 24px; object-fit: contain;"> Itinéraire
-                            </a>
-                        ` : ''}
-                        ${act.website ? `
-                            <a href="${act.website}" target="_blank" title="Site web" style="background: white; color: #3b82f6; border: 2px solid #3b82f6; border-radius: 8px; padding: 12px 18px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);" onmouseover="this.style.background='#f0f9ff'; this.style.borderColor='#1e40af'; this.style.color='#1e40af'; this.style.boxShadow='0 6px 16px rgba(59, 130, 246, 0.3)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='white'; this.style.borderColor='#3b82f6'; this.style.color='#3b82f6'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.2)'; this.style.transform='translateY(0)'">
-                                <img src="./images/web-redirect.svg" alt="Web" style="width: 24px; height: 24px; object-fit: contain;"> Site
-                            </a>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += `</div></div>`;
-    });
-    
-    window.SecurityUtils.setInnerHTML(container, html);
-}
-
-// ==================== MODIFIER UNE ACTIVITÉ ====================
-// ==================== MODAL ACTIVITÉ ====================
-function ouvrirModalActivite(modeModification = false, positionY = null) {
-    const modal = document.getElementById('modalActivite');
-    const overlay = document.getElementById('modalOverlay');
-    const btnSave = document.getElementById('btnSaveActivite');
-    const titre = document.getElementById('modalTitle');
-    
-    // Validation temps réel
-    if (window.ValidationUtils && !modeModification) {
-        window.ValidationUtils.attachRealtimeValidation('activite_nom', 'text', { required: true });
-        window.ValidationUtils.attachRealtimeValidation('activite_adresse', 'text', { required: true });
-        window.ValidationUtils.attachRealtimeValidation('activite_telephone', 'phone', { required: false });
-        window.ValidationUtils.attachRealtimeValidation('activite_website', 'url', { required: false });
-    }
-    
-    if (modeModification) {
-        titre.textContent = '✏️ Modifier une Activité';
-        btnSave.textContent = '💾 Enregistrer les modifications';
-    } else {
-        titre.textContent = '➕ Ajouter une Activité';
-        btnSave.textContent = '➕ Ajouter cette activité';
-        // Réinitialiser le formulaire
-        document.getElementById('formDecouvrir').reset();
-        window.activiteEnCoursDeModification = null;
-    }
-    
-    modal.style.display = 'block';
-    overlay.style.display = 'block';
-    
-    // Positionner la modale si nécessaire
-    if (positionY) {
-        modal.style.top = `${positionY}px`;
-        modal.style.transform = 'translate(-50%, -50%)';
-    }
-}
-
-function fermerModalActivite() {
-    const modal = document.getElementById('modalActivite');
-    const overlay = document.getElementById('modalOverlay');
-    
-    modal.style.display = 'none';
-    overlay.style.display = 'none';
-    
-    // Réinitialiser
-    document.getElementById('formDecouvrir').reset();
-    window.activiteEnCoursDeModification = null;
-}
-
-function afficherTypeRestoSiRestaurant() {
-    const categorie = document.getElementById('activite_categorie').value;
-    const typeRestoDiv = document.getElementById('typeRestoDiv');
-    
-    if (typeRestoDiv) {
-        typeRestoDiv.style.display = categorie === 'Restaurant' ? 'block' : 'none';
-    }
-}
-
-// ==================== AJOUTER ACTIVITÉ ====================
-async function ajouterActivite() {
-    try {
-        // Validation avec ValidationUtils
-        const form = document.getElementById('formDecouvrir');
-        if (window.ValidationUtils) {
-            const rules = {
-                'activite_nom': { type: 'text', required: true },
-                'activite_adresse': { type: 'text', required: true },
-                'activite_telephone': { type: 'phone', required: false },
-                'activite_website': { type: 'url', required: false }
-            };
-            
-            const validation = window.ValidationUtils.validateForm(form, rules);
-            if (!validation.valid) {
-                console.warn('❌ Formulaire activité invalide:', validation.errors);
-                showNotification('❌ Veuillez remplir tous les champs requis', 'error');
-                return;
-            }
-            
-            // Validation GPS si remplie
-            const lat = document.getElementById('activite_latitude').value;
-            const lon = document.getElementById('activite_longitude').value;
-            if (lat || lon) {
-                const latNum = parseFloat(lat);
-                const lonNum = parseFloat(lon);
-                if (isNaN(latNum) || latNum < -90 || latNum > 90 || isNaN(lonNum) || lonNum < -180 || lonNum > 180) {
-                    showNotification('❌ Coordonnées GPS invalides', 'error');
-                    return;
-                }
-            }
-        }
-        
-        let gite = document.getElementById('decouvrir_gite')?.value || '';
-        
-        // Fallback sur le premier gîte si aucun sélectionné
-        if (!gite && window.gitesManager && window.gitesManager.gites && window.gitesManager.gites.length > 0) {
-            gite = window.gitesManager.gites[0].name;
-        }
-        
-        const nom = document.getElementById('activite_nom').value;
-        const categorie = document.getElementById('activite_categorie').value;
-        const description = document.getElementById('activite_description').value;
-        const adresse = document.getElementById('activite_adresse').value;
-        const latitude = parseFloat(document.getElementById('activite_latitude').value) || null;
-        const longitude = parseFloat(document.getElementById('activite_longitude').value) || null;
-        const distance = parseFloat(document.getElementById('activite_distance').value) || null;
-        const note = parseFloat(document.getElementById('activite_note').value) || null;
-        const avis = parseInt(document.getElementById('activite_avis').value) || null;
-        const prix = document.getElementById('activite_prix').value || null;
-        const telephone = document.getElementById('activite_telephone').value || null;
-        const website = document.getElementById('activite_website').value || null;
-        const typeResto = document.getElementById('activite_type_resto')?.value || null;
-        
-        // Mode modification ou ajout ?
-        if (window.activiteEnCoursDeModification) {
-            // MODIFICATION
-            const { error } = await window.supabaseClient
-                .from('activites_gites')
-                .update({
-                    nom,
-                    categorie,
-                    description,
-                    adresse,
-                    latitude,
-                    longitude,
-                    distance,
-                    note,
-                    avis,
-                    prix,
-                    telephone,
-                    website,
-                    type_resto: typeResto,
-                    gite
-                })
-                .eq('id', window.activiteEnCoursDeModification);
-            
-            if (error) throw error;
-            
-            showNotification('✅ Activité modifiée', 'success');
-            window.activiteEnCoursDeModification = null;
-        } else {
-            // AJOUT
-            const { error } = await window.supabaseClient
-                .from('activites_gites')
-                .insert({
-                    nom,
-                    categorie,
-                    description,
-                    adresse,
-                    latitude,
-                    longitude,
-                    distance,
-                    note,
-                    avis,
-                    prix,
-                    telephone,
-                    website,
-                    type_resto: typeResto,
-                    gite
+            // Ajouter le marqueur du gîte (maison)
+            if (giteCoords && giteCoords.lat && giteCoords.lng) {
+                // Marqueur rouge pour le gîte
+                const homeIcon = new L.Icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
                 });
-            
-            if (error) throw error;
-            
-            showNotification('✅ Activité ajoutée', 'success');
+                
+                const homeMarker = L.marker([giteCoords.lat, giteCoords.lng], { icon: homeIcon })
+                    .bindPopup(`<b>🏠 ${gite.name || gite.nom}</b><br>Votre gîte`)
+                    .addTo(googleMap);
+                
+                allMarkers.push(homeMarker);
+            }
         }
-        
-        // Fermer la modale et recharger
-        fermerModalActivite();
-        await chargerActivites();
-        
-    } catch (error) {
-        console.error('Erreur ajout/modification activité:', error);
-        showNotification('❌ Erreur : ' + error.message, 'error');
+    }
+    
+    // Ajouter les marqueurs des activités
+    const bounds = [];
+    
+    activites.forEach(act => {
+        if (act.latitude && act.longitude) {
+            const config = CATEGORIES_CONFIG[act.categorie] || { icon: '📍', color: '#95a5a6' };
+            
+            // Choisir la couleur du marqueur selon la catégorie
+            const colorMap = {
+                'Restaurant': 'orange',
+                'Café/Bar': 'blue',
+                'Musée': 'violet',
+                'Château': 'violet',
+                'Parc': 'green',
+                'Hôtel': 'blue',
+                'Attraction': 'red'
+            };
+            const markerColor = colorMap[act.categorie] || 'grey';
+            
+            const actIcon = new L.Icon({
+                iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+            
+            const marker = L.marker([parseFloat(act.latitude), parseFloat(act.longitude)], { icon: actIcon })
+                .bindPopup(`
+                    <div style="min-width: 200px;">
+                        <b>${config.icon} ${escapeHtml(act.nom)}</b><br>
+                        <span style="color: ${config.color}; font-weight: 600;">${act.categorie}</span><br>
+                        ${act.distance_km ? `📍 ${act.distance_km} km<br>` : ''}
+                        ${act.note ? `⭐ ${act.note}/5<br>` : ''}
+                        ${act.telephone ? `📞 ${escapeHtml(act.telephone)}<br>` : ''}
+                        ${act.url ? `<a href="${escapeHtml(act.url)}" target="_blank">🌐 Site web</a>` : ''}
+                    </div>
+                `)
+                .addTo(googleMap);
+            
+            allMarkers.push(marker);
+            bounds.push([parseFloat(act.latitude), parseFloat(act.longitude)]);
+        }
+    });
+    
+    // Ajouter les coordonnées du gîte aux bounds
+    if (giteCoords && giteCoords.lat && giteCoords.lng) {
+        bounds.push([giteCoords.lat, giteCoords.lng]);
+    }
+    
+    // Ajuster la vue pour inclure tous les marqueurs
+    if (bounds.length > 0) {
+        googleMap.fitBounds(bounds, { padding: [50, 50] });
     }
 }
 
-// ==================== MODIFIER ACTIVITÉ ====================
-async function modifierActivite(id) {
-    try {
-        // Récupérer l'élément de l'activité
-        const element = document.querySelector(`[data-activite-id="${id}"]`);
-        let positionY = window.innerHeight / 2; // Par défaut au centre
-        
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // Attendre un peu que le scroll soit fait
-            await new Promise(resolve => setTimeout(resolve, 300));
-            
-            // Récupérer la position de l'élément
-            const rect = element.getBoundingClientRect();
-            positionY = rect.top + window.scrollY + rect.height / 2;
-        }
-        
-        // Récupérer l'activité à modifier
-        const { data, error } = await window.supabaseClient
-            .from('activites_gites')
-            .select('*')
-            .eq('id', id)
-            .single();
-        
-        if (error) throw error;
-        
-        // Pré-remplir le formulaire
-        document.getElementById('activite_nom').value = data.nom || '';
-        document.getElementById('activite_categorie').value = data.categorie || '';
-        document.getElementById('activite_description').value = data.description || '';
-        document.getElementById('activite_adresse').value = data.adresse || '';
-        document.getElementById('activite_distance').value = data.distance || '';
-        document.getElementById('activite_note').value = data.note || '';
-        document.getElementById('activite_avis').value = data.avis || '';
-        document.getElementById('activite_prix').value = data.prix || '';
-        document.getElementById('activite_telephone').value = data.telephone || '';
-        document.getElementById('activite_website').value = data.website || '';
-        
-        // Afficher/cacher le champ type de restaurant selon la catégorie
-        afficherTypeRestoSiRestaurant();
-        
-        // Stocker l'ID en cours de modification
-        window.activiteEnCoursDeModification = id;
-        
-        // Ouvrir la modale en mode modification avec position
-        ouvrirModalActivite(true, positionY);
-        
-        showNotification('✏️ Mode modification activé', 'info');
-        
-    } catch (error) {
-        console.error('Erreur modification activité:', error);
-        showNotification('❌ Erreur : ' + error.message, 'error');
+// ==================== GÉNÉRER PDF ====================
+function genererGuidePDF() {
+    showToast('📄 Génération du PDF en cours...', 'info');
+    // TODO: Implémenter la génération PDF
+    console.log('Génération PDF pour', activitesCache.length, 'activités');
+}
+
+// ==================== HELPERS ====================
+function escapeHtml(text) {
+    if (!text) return '';
+    if (window.SecurityUtils) {
+        return window.SecurityUtils.sanitizeText(text);
+    }
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function escapeForOnclick(text) {
+    if (!text) return '';
+    return text.replace(/'/g, '&#39;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    if (toast) {
+        toast.textContent = message;
+        toast.className = `toast ${type}`;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    } else {
+        console.log(`[${type.toUpperCase()}] ${message}`);
     }
 }
 
-// ==================== EXPORTS WINDOW ====================
-window.initGoogleMap = initGoogleMap;
-window.ajouterMarqueurGite = ajouterMarqueurGite;
-window.chargerPOIsFromSupabase = chargerPOIsFromSupabase;
-window.ajouterMarqueurPOI = ajouterMarqueurPOI;
-window.calculerItineraire = calculerItineraire;
-window.centrerCarteGite = centrerCarteGite;
-window.filterMapByCategory = filterMapByCategory;
-window.afficherListePOIs = afficherListePOIs;
-window.zoomOnPOI = zoomOnPOI;
-window.afficherItineraireModal = afficherItineraireModal;
-window.chargerActivites = chargerActivites;
-window.chargerToutSurCarte = chargerToutSurCarte;
-window.getCategoryColor = getCategoryColor;
-window.afficherActivites = afficherActivites;
-window.afficherToutesLesActivites = afficherToutesLesActivites;
-window.supprimerActivite = supprimerActivite;
-window.filtrerActivitesParCategorie = filtrerActivitesParCategorie;
-window.afficherToutesActivites = afficherToutesActivites;
-window.afficherActivitesFiltrées = afficherActivitesFiltrées;
-window.modifierActivite = modifierActivite;
-window.ajouterActivite = ajouterActivite;
+// ==================== AUTO-INIT ====================
+// NE PAS FAIRE D'AUTO-INIT car le HTML est chargé dynamiquement
+// L'initialisation est déclenchée par index.html lors du switch d'onglet
+
+// Export pour utilisation globale
+window.initModuleDecouvrir = initModuleDecouvrir;
+window.chargerActivitesGite = chargerActivitesGite;
 window.ouvrirModalActivite = ouvrirModalActivite;
 window.fermerModalActivite = fermerModalActivite;
-window.afficherTypeRestoSiRestaurant = afficherTypeRestoSiRestaurant;
-window.escapeHtml = escapeHtml;
-window.escapeForOnclick = escapeForOnclick;
-
-// Variables globales exportées
-window.googleMap = googleMap;
-window.allMarkers = allMarkers;
-window.googleGiteMarker = googleGiteMarker;
-window.infoWindow = infoWindow;
-window.directionsService = directionsService;
-window.directionsRenderer = directionsRenderer;
-window.gitesCoordinates = gitesCoordinates;
-window.categoryColors = categoryColors;
-window.categoryIcons = categoryIcons;
-window.categoryMapping = categoryMapping;

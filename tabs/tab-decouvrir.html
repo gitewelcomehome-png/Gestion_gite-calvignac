@@ -4,459 +4,148 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div>
                 <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">🗺️ À Découvrir</h2>
-                <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Activités, restaurants et sites touristiques (rayon 25km)</p>
+                <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Activités, restaurants et sites touristiques autour de vos gîtes</p>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-neo" onclick="selectGiteDecouvrir('Trevoux')" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    🏰 Trevoux
-                </button>
-                <button class="btn-neo" onclick="selectGiteDecouvrir('Couzon')" style="background: white; color: #2D3436; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    ⛰️ Couzon
-                </button>
+            <div id="compteurActivites" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 20px; font-weight: 700; font-size: 1rem; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                <span id="nbActivites">0</span> activité(s)
             </div>
         </div>
     </div>
 
-            <form id="formDecouvrir" style="display: none;">
-                <input type="hidden" id="decouvrir_gite">
+    <!-- Sélection Gîte et Filtres -->
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: end; margin-bottom: 20px;">
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436;">🏡 Sélectionner un gîte</label>
+                <select id="selectGiteDecouvrir" class="form-control" style="width: 100%; padding: 12px; border: 2px solid #2D3436; border-radius: 8px; font-weight: 600; font-size: 1rem;">
+                    <option value="">⏳ Chargement...</option>
+                </select>
+            </div>
+            <button id="btnAjouterActivite" class="btn-neo" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px 24px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                <span style="font-size: 1.2rem;">➕</span> Ajouter une activité
+            </button>
+        </div>
+
+        <!-- Filtres par catégorie -->
+        <div id="filtresCategories" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+            <!-- Généré dynamiquement par JS -->
+        </div>
+    </div>
+
+    <!-- Carte Interactive (toggle) -->
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; color: #2D3436; font-weight: 700;">📍 Carte Interactive</h3>
+            <button id="btnToggleCarte" class="btn-neo" style="background: white; color: #2D3436; padding: 8px 16px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
+                🗺️ Afficher la carte
+            </button>
+        </div>
+        <div id="mapActivitesContainer" style="display: none; height: 500px; border-radius: 12px; overflow: hidden; border: 2px solid #2D3436;"></div>
+    </div>
+
+    <!-- Grille d'Activités -->
+    <div id="grilleActivites" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-bottom: 25px;">
+        <!-- Cartes générées dynamiquement par JS -->
+    </div>
+
+    <!-- Message si vide -->
+    <div id="messageVide" style="display: none; text-align: center; padding: 80px 20px; background: white; border: 3px solid #2D3436; border-radius: 16px; box-shadow: 4px 4px 0 #2D3436;">
+        <div style="font-size: 4rem; margin-bottom: 20px;">🗺️</div>
+        <h3 style="color: #2D3436; margin-bottom: 10px;">Aucune activité trouvée</h3>
+        <p style="color: #666; margin-bottom: 25px;">Commencez par ajouter des activités pour ce gîte</p>
+        <button class="btn-neo" onclick="document.getElementById('btnAjouterActivite').click()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px 24px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
+            ➕ Ajouter la première activité
+        </button>
+    </div>
+
+    <!-- Modal Ajout/Édition Activité -->
+    <div id="modalActiviteOverlay" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; backdrop-filter: blur(3px);"></div>
+    <div id="modalActiviteDialog" class="modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: 3px solid #2D3436; z-index: 10000;">
+        
+        <!-- Header Modal -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 3px solid #2D3436; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 13px 13px 0 0;">
+            <h2 id="modalTitre" style="margin: 0; color: white; font-size: 1.5rem; font-weight: 700;">➕ Nouvelle Activité</h2>
+            <button id="btnFermerModal" style="background: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">✖️</button>
+        </div>
+
+        <!-- Corps Modal -->
+        <div style="padding: 24px;">
+            <form id="formActivite">
+                <input type="hidden" id="activite_id">
+                <input type="hidden" id="activite_gite_id">
                 
-                <!-- TITRE GÎTE SÉLECTIONNÉ -->
-                <div class="alert alert-info">
-                    <strong>📍 Gîte sélectionné :</strong> <span id="selectedGiteDecouvrir" style="font-weight: 700;"></span>
-                </div>
-
-                <!-- CARTE AVEC FILTRES -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-icon">📅</span>
-                        <h2 class="card-title">Événements de la Semaine</h2>
-                        <button type="button" class="btn btn-secondary" onclick="refreshEvenements()" style="margin-left: auto; width: 50px; height: 50px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;" title="Actualiser">
-                            🔄
-                        </button>
+                <!-- Nom et Catégorie -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436;">Nom <span style="color: #e74c3c;">*</span></label>
+                        <input type="text" id="activite_nom" required class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;" placeholder="Restaurant Le Gourmet">
                     </div>
-                    
-                    <div class="alert alert-info">
-                        <strong>📅 Semaine du :</strong> <span id="dateEvenements" style="font-weight: 700;"></span>
-                    </div>
-                    
-
-                    
-                    <!-- Carte interactive avec filtres -->
-                    <div class="card">
-                    <div style="display: grid; grid-template-columns: 1fr 250px; gap: 20px; margin-bottom: 20px;">
-                        <!-- Carte à gauche -->
-                        <div id="mapEvenements" style="height: 600px; border-radius: 12px; display: none; z-index: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"></div>
-                        
-                        <!-- Filtres à droite -->
-                        <div style="
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            padding: 15px;
-                            border-radius: 12px;
-                            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-                            height: fit-content;
-                        ">
-                            <h3 style="
-                                color: white;
-                                margin: 0 0 12px 0;
-                                font-size: 1rem;
-                                display: flex;
-                                align-items: center;
-                                gap: 8px;
-                            ">🗺️ Filtres</h3>
-                            
-                            <!-- Filtre par catégorie avec boutons -->
-                            <div style="margin-bottom: 15px;">
-                                <label style="color: white; font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.85rem;">
-                                    📂 Catégorie
-                                </label>
-                                <div style="display: flex; flex-direction: column; gap: 6px;">
-                                    <button 
-                                        class="btn-filtre-cat" 
-                                        data-categorie="tous"
-                                        onclick="filtrerCarteParcategorie('tous'); return false;"
-                                        style="
-                                            width: 100%;
-                                            padding: 8px 12px;
-                                            background: rgba(255,255,255,0.9);
-                                            color: #667eea;
-                                            border: 2px solid transparent;
-                                            border-radius: 6px;
-                                            cursor: pointer;
-                                            font-weight: 600;
-                                            font-size: 0.8rem;
-                                            transition: all 0.2s;
-                                            text-align: left;
-                                        "
-                                        onmouseover="this.style.background='white'; this.style.borderColor='white'"
-                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.9)'; this.style.borderColor='transparent'"
-                                    >
-                                        📋 Tous
-                                    </button>
-                                    <button 
-                                        class="btn-filtre-cat" 
-                                        data-categorie="Restaurant"
-                                        onclick="filtrerCarteParcategorie('Restaurant'); return false;"
-                                        style="
-                                            width: 100%;
-                                            padding: 8px 12px;
-                                            background: rgba(255,255,255,0.2);
-                                            color: white;
-                                            border: 2px solid transparent;
-                                            border-radius: 6px;
-                                            cursor: pointer;
-                                            font-weight: 600;
-                                            font-size: 0.8rem;
-                                            transition: all 0.2s;
-                                            text-align: left;
-                                        "
-                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
-                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
-                                    >
-                                        🍽️ Restaurants
-                                    </button>
-                                    <button 
-                                        class="btn-filtre-cat" 
-                                        data-categorie="Musée"
-                                        onclick="filtrerCarteParcategorie('Musée'); return false;"
-                                        style="
-                                            width: 100%;
-                                            padding: 8px 12px;
-                                            background: rgba(255,255,255,0.2);
-                                            color: white;
-                                            border: 2px solid transparent;
-                                            border-radius: 6px;
-                                            cursor: pointer;
-                                            font-weight: 600;
-                                            font-size: 0.8rem;
-                                            transition: all 0.2s;
-                                            text-align: left;
-                                        "
-                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
-                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
-                                    >
-                                        🏛️ Musées
-                                    </button>
-                                    <button 
-                                        class="btn-filtre-cat" 
-                                        data-categorie="Parc"
-                                        onclick="filtrerCarteParcategorie('Parc'); return false;"
-                                        style="
-                                            width: 100%;
-                                            padding: 8px 12px;
-                                            background: rgba(255,255,255,0.2);
-                                            color: white;
-                                            border: 2px solid transparent;
-                                            border-radius: 6px;
-                                            cursor: pointer;
-                                            font-weight: 600;
-                                            font-size: 0.8rem;
-                                            transition: all 0.2s;
-                                            text-align: left;
-                                        "
-                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
-                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
-                                    >
-                                        🌳 Parcs
-                                    </button>
-                                    <button 
-                                        class="btn-filtre-cat" 
-                                        data-categorie="Bar"
-                                        onclick="filtrerCarteParcategorie('Bar'); return false;"
-                                        style="
-                                            width: 100%;
-                                            padding: 8px 12px;
-                                            background: rgba(255,255,255,0.2);
-                                            color: white;
-                                            border: 2px solid transparent;
-                                            border-radius: 6px;
-                                            cursor: pointer;
-                                            font-weight: 600;
-                                            font-size: 0.8rem;
-                                            transition: all 0.2s;
-                                            text-align: left;
-                                        "
-                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
-                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
-                                    >
-                                        ☕ Bars
-                                    </button>
-                                    <button 
-                                        class="btn-filtre-cat" 
-                                        data-categorie="Santé"
-                                        onclick="filtrerCarteParcategorie('Santé'); return false;"
-                                        style="
-                                            width: 100%;
-                                            padding: 8px 12px;
-                                            background: rgba(255,255,255,0.2);
-                                            color: white;
-                                            border: 2px solid transparent;
-                                            border-radius: 6px;
-                                            cursor: pointer;
-                                            font-weight: 600;
-                                            font-size: 0.8rem;
-                                            transition: all 0.2s;
-                                            text-align: left;
-                                        "
-                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
-                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
-                                    >
-                                        💊 Santé
-                                    </button>
-                                    <button 
-                                        class="btn-filtre-cat" 
-                                        data-categorie="Alimentation"
-                                        onclick="filtrerCarteParcategorie('Alimentation'); return false;"
-                                        style="
-                                            width: 100%;
-                                            padding: 8px 12px;
-                                            background: rgba(255,255,255,0.2);
-                                            color: white;
-                                            border: 2px solid transparent;
-                                            border-radius: 6px;
-                                            cursor: pointer;
-                                            font-weight: 600;
-                                            font-size: 0.8rem;
-                                            transition: all 0.2s;
-                                            text-align: left;
-                                        "
-                                        onmouseover="this.style.background='rgba(255,255,255,0.3)'"
-                                        onmouseout="if(!this.classList.contains('active')) this.style.background='rgba(255,255,255,0.2)'"
-                                    >
-                                        🥖 Alimentation
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Bouton actualiser -->
-                            <button 
-                                onclick="chargerToutSurCarte(); return false;"
-                                style="
-                                    width: 100%;
-                                    padding: 10px;
-                                    background: rgba(255,255,255,0.9);
-                                    color: #667eea;
-                                    border: none;
-                                    border-radius: 8px;
-                                    cursor: pointer;
-                                    font-weight: 600;
-                                    font-size: 0.85rem;
-                                    transition: all 0.3s;
-                                "
-                                onmouseover="this.style.background='white'"
-                                onmouseout="this.style.background='rgba(255,255,255,0.9)'"
-                            >
-                                🔄 Actualiser
-                            </button>
-                        </div>
-                    </div>
-                    </div>
-
-                <!-- ÉVÉNEMENTS DE LA SEMAINE -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-icon">📅</span>
-                        <h2 class="card-title">Événements de la Semaine</h2>
-                        <button type="button" class="btn btn-secondary" onclick="refreshEvenements()" style="margin-left: auto; width: 50px; height: 50px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;" title="Actualiser">
-                            🔄
-                        </button>
-                    </div>
-                    
-                    <div class="alert alert-info">
-                        <strong>📅 Semaine du :</strong> <span id="dateEvenements" style="font-weight: 700;"></span>
-                    </div>
-                    
-                    <div id="evenementsListe" style="display: grid; gap: 15px;">
-                        <p style="text-align: center; color: #999; padding: 40px;">
-                            Les événements se chargeront automatiquement...
-                        </p>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436;">Catégorie <span style="color: #e74c3c;">*</span></label>
+                        <select id="activite_categorie" required class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                            <option value="">-- Choisir --</option>
+                            <option value="Restaurant">🍽️ Restaurant</option>
+                            <option value="Café/Bar">☕ Café/Bar</option>
+                            <option value="Musée">🏛️ Musée</option>
+                            <option value="Château">🏰 Château</option>
+                            <option value="Parc">🌳 Parc</option>
+                            <option value="Hôtel">🏨 Hôtel</option>
+                            <option value="Attraction">🎪 Attraction</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- ACTIVITÉS PERMANENTES PAR CATÉGORIE -->
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span class="card-icon">🎯</span>
-                            <h2 class="card-title">Activités & Points d'Intérêt</h2>
-                        </div>
-                        <!-- Compteur d'activités en temps réel -->
-                        <div id="activitesCounter" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
-                            ⏳ Chargement...
-                        </div>
-                    </div>
-                    
-                    <!-- FILTRES PAR CATÉGORIE -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px;">
-                        <button type="button" class="btn" style="background: #27AE60;" onclick="ouvrirModalActivite(false)">
-                            ➕ Ajouter une activité
-                        </button>
-                        <button type="button" class="btn" style="background: #10b981;" onclick="filtrerActivitesParCategorie('Restaurant')">
-                            🍽️ Restaurants
-                        </button>
-                        <button type="button" class="btn" style="background: #3b82f6;" onclick="filtrerActivitesParCategorie('Musée')">
-                            🏛️ Musées & Châteaux
-                        </button>
-                        <button type="button" class="btn" style="background: #f59e0b;" onclick="filtrerActivitesParCategorie('Café')">
-                            ☕ Cafés & Bars
-                        </button>
-                        <button type="button" class="btn" style="background: #8b5cf6;" onclick="filtrerActivitesParCategorie('Parc')">
-                            🌳 Parcs & Loisirs
-                        </button>
-                        <button type="button" class="btn" style="background: #ec4899;" onclick="filtrerActivitesParCategorie('Hôtel')">
-                            🏨 Hôtels
-                        </button>
-                        <button type="button" class="btn" style="background: #6366f1;" onclick="afficherToutesActivites()">
-                            📋 Tous
-                        </button>
-                    </div>
-                    
-                    <!-- LISTE DES ACTIVITÉS -->
-                    <div id="activitesParCategorie" style="display: grid; gap: 20px; min-height: 200px;">
-                        <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); border-radius: 16px; border: 2px dashed #667eea;">
-                            <div style="font-size: 3rem; margin-bottom: 20px;">🔄</div>
-                            <p style="color: #667eea; font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;">Chargement des activités...</p>
-                            <p style="color: #999; font-size: 0.95rem;">Cliquez sur "📋 Tous" ou une catégorie pour afficher</p>
-                            <button onclick="afficherActivites(document.getElementById('decouvrir_gite')?.value || 'Trevoux');" style="margin-top: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
-                                🔄 Afficher maintenant
-                            </button>
-                        </div>
+                <!-- Description -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436;">Description</label>
+                    <textarea id="activite_description" rows="3" class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical;" placeholder="Excellent restaurant traditionnel..."></textarea>
+                </div>
+
+                <!-- Adresse complète -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436;">📍 Adresse complète</label>
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+                        <input type="text" id="activite_adresse" class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;" placeholder="12 Rue Principale, 46160 Calvignac">
+                        <button type="button" id="btnCalculerGPS" class="btn-neo" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap;">🌍 Calculer GPS</button>
                     </div>
                 </div>
 
-                <!-- MODALE MODIFICATION/AJOUT ACTIVITÉ -->
-                    <!-- Overlay semi-transparent -->
-                    <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; cursor: pointer;" onclick="fermerModalActivite()"></div>
-                    
-                    <!-- Dialog modale -->
-                    <div id="modalActivite" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 90vw; max-width: 700px; max-height: 90vh; overflow-y: auto;">
-                        <div style="background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white;">
-                                <h2 id="modalTitle" style="margin: 0; color: #2C5F7D; font-size: 1.4rem;">➕ Ajouter une Activité</h2>
-                                <button type="button" onclick="fermerModalActivite()" style="background: transparent; border: none; font-size: 1.8rem; cursor: pointer; color: #666; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#666'" title="Fermer">
-                                    ✖️
-                                </button>
-                            </div>
-
-                            <div style="padding: 24px; display: grid; gap: 20px;">
-                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nom de l'activité *</label>
-                                        <input type="text" id="activite_nom" class="form-control" placeholder="Restaurant Le Gourmet">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Catégorie *</label>
-                                        <select id="activite_categorie" class="form-control" onchange="afficherTypeRestoSiRestaurant()">
-                                            <option value="">-- Sélectionner --</option>
-                                            <option value="Restaurant">🍽️ Restaurant</option>
-                                            <option value="Café/Bar">☕ Café/Bar</option>
-                                            <option value="Musée">🏛️ Musée</option>
-                                            <option value="Château">🏰 Château</option>
-                                            <option value="Parc">🌳 Parc</option>
-                                            <option value="Hôtel">🏨 Hôtel</option>
-                                            <option value="Attraction">🎪 Attraction</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <!-- Champ Type de Restaurant (caché par défaut) -->
-                                <div id="typeRestoDiv" style="display: none;">
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Type de Restaurant</label>
-                                    <select id="activite_type_resto" class="form-control">
-                                        <option value="">-- Sélectionner --</option>
-                                        <option value="Restaurant traditionnel">Restaurant traditionnel</option>
-                                        <option value="Fast Food">Fast Food</option>
-                                        <option value="Burger">Burger</option>
-                                        <option value="Pizza">Pizza</option>
-                                        <option value="Asian">Cuisine asiatique</option>
-                                        <option value="Italian">Cuisine italienne</option>
-                                        <option value="Crêpes">Crêperie</option>
-                                        <option value="Steakhouse">Steakhouse</option>
-                                        <option value="Végétarien">Végétarien</option>
-                                        <option value="Gastronomique">Gastronomique</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Description</label>
-                                    <textarea id="activite_description" class="form-control" rows="3" placeholder="Excellent restaurant traditionnel français avec terrasse..."></textarea>
-                                </div>
-
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Adresse complète *</label>
-                                    <div style="display: flex; gap: 10px;">
-                                        <input type="text" id="activite_adresse" class="form-control" placeholder="12 Place du Marché, 01600 Trevoux" style="flex: 1;">
-                                        <button type="button" onclick="obtenirCoordonnees()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0 20px; cursor: pointer; font-weight: 600; white-space: nowrap; box-shadow: 0 2px 8px rgba(102,126,234,0.3);" title="Récupérer les coordonnées GPS">
-                                            📍 GPS
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Latitude</label>
-                                        <input type="number" id="activite_latitude" class="form-control" step="0.000001" placeholder="45.9431600" readonly style="background: #f5f5f5;">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Longitude</label>
-                                        <input type="number" id="activite_longitude" class="form-control" step="0.000001" placeholder="4.7747858" readonly style="background: #f5f5f5;">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Distance (km)</label>
-                                        <input type="number" id="activite_distance" class="form-control" step="0.1" placeholder="2.5">
-                                    </div>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Site web</label>
-                                        <input type="url" id="activite_website" class="form-control" placeholder="https://restaurant-exemple.fr">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Téléphone</label>
-                                        <input type="tel" id="activite_telephone" class="form-control" placeholder="04 74 00 00 00">
-                                    </div>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Note Google (0-5)</label>
-                                        <input type="number" id="activite_note" class="form-control" step="0.1" min="0" max="5" placeholder="4.5">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Nombre d'avis</label>
-                                        <input type="number" id="activite_avis" class="form-control" placeholder="127">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Gamme de prix</label>
-                                        <select id="activite_prix" class="form-control">
-                                            <option value="">-- Sélectionner --</option>
-                                            <option value="€">€ (Économique)</option>
-                                            <option value="€€">€€ (Moyen)</option>
-                                            <option value="€€€">€€€ (Élevé)</option>
-                                            <option value="€€€€">€€€€ (Très élevé)</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
-                                    <button type="button" class="btn" style="background: #e0e0e0; color: #333;" onclick="fermerModalActivite()">
-                                        ✕ Annuler
-                                    </button>
-                                    <button type="button" class="btn btn-primary" id="btnSaveActivite" onclick="ajouterActivite()">
-                                        ➕ Ajouter cette activité
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Coordonnées GPS -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #667eea;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #667eea;">📍 Coordonnées GPS (calculées automatiquement)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 120px; gap: 15px;">
+                        <input type="number" id="activite_latitude" step="0.000001" class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff;" placeholder="Latitude" readonly>
+                        <input type="number" id="activite_longitude" step="0.000001" class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff;" placeholder="Longitude" readonly>
+                        <input type="number" id="activite_distance_km" step="0.1" class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff;" placeholder="X km" readonly>
                     </div>
-
-                    <div id="activitesParCategorie">
                 </div>
 
-                <!-- BOUTON GÉNÉRATION GUIDE CLIENT -->
-                <div class="card" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
-                    <button type="button" class="btn" style="width: 100%; padding: 20px; background: none; border: none; color: white; font-size: 1.3rem; font-weight: 700; cursor: pointer;" onclick="genererGuideDecouverte()">
-                        📄 GÉNÉRER LE GUIDE "À DÉCOUVRIR" (PDF)
-                    </button>
+                <!-- URL, Téléphone, Note Google, Nb Avis -->
+                <div style="display: grid; grid-template-columns: 2fr 1.5fr 100px 100px; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436;">🌐 Site web</label>
+                        <input type="url" id="activite_url" class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436;">📞 Téléphone</label>
+                        <input type="tel" id="activite_telephone" class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;" placeholder="04 XX XX XX XX">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436;">⭐ Note</label>
+                        <input type="number" id="activite_note" step="0.1" min="0" max="5" class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;" placeholder="4.5">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436;">💬 Avis</label>
+                        <input type="number" id="activite_nb_avis" min="0" class="form-control" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;" placeholder="150">
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
+                    <button type="button" id="btnAnnulerModal" class="btn-neo" style="background: white; color: #2D3436; padding: 12px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">✖️ Annuler</button>
+                    <button type="submit" class="btn-neo" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">✅ Enregistrer</button>
                 </div>
             </form>
+        </div>
+    </div>
+
