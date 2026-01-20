@@ -1,4 +1,4 @@
-<div class="tab-container dashboard-mobile-wrapper">
+<div class="tab-container">
     <!-- Version: 2026-01-05-v4 -->
     <!-- En-tête avec semaine actuelle -->
     <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
@@ -194,96 +194,66 @@
         <h2 style="margin: 0 0 25px 0; font-size: 1.4rem; color: #2D3436; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px solid #2D3436; padding-bottom: 15px;">VISION ACTIONS</h2>
         
         <!-- Layout principal : 2 colonnes adaptatives -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;" id="vision-actions-container">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
         
         <!-- COLONNE GAUCHE : Réservations + Ménages -->
         <div>
             <!-- Réservations de la semaine -->
-            <div class="card mobile-collapse-section" id="section-reservations" style="background: white; border: 3px solid #2D3436; box-shadow: 4px 4px 0 #2D3436; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('reservations')" style="display: none;">
-                    <span>📅 Réservations cette semaine</span>
-                    <span class="mobile-collapse-icon" id="icon-reservations">▼</span>
+            <div class="card" style="background: white; border: 3px solid #2D3436; box-shadow: 4px 4px 0 #2D3436; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #2D3436;">
+                    <span style="font-size: 1.8rem;">📅</span>
+                    <h3 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Réservations cette semaine</h3>
                 </div>
-                <div class="mobile-collapse-content" id="content-reservations">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #2D3436;">
-                        <span style="font-size: 1.8rem;">📅</span>
-                        <h3 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Réservations cette semaine</h3>
-                    </div>
-                    <div id="dashboard-reservations" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
-                        <p style="text-align: center; color: #999; padding: 40px; grid-column: 1 / -1;">Chargement...</p>
-                    </div>
+                <div id="dashboard-reservations" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+                    <p style="text-align: center; color: #999; padding: 40px; grid-column: 1 / -1;">Chargement...</p>
                 </div>
             </div>
 
             <!-- Ménages prévus -->
-            <div class="card mobile-collapse-section" id="section-menages" style="background: white; border: 3px solid #2D3436; box-shadow: 4px 4px 0 #2D3436; border-radius: 12px; padding: 20px;">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('menages')" style="display: none;">
-                    <span>🧹 Ménages prévus</span>
-                    <span class="mobile-collapse-icon" id="icon-menages">▼</span>
+            <div class="card" style="background: white; border: 3px solid #2D3436; box-shadow: 4px 4px 0 #2D3436; border-radius: 12px; padding: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #2D3436;">
+                    <span style="font-size: 1.8rem;">🧹</span>
+                    <h3 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Ménages prévus <span id="dashboard-cleanings" style="background: #ffeaa7; color: #2D3436; padding: 3px 10px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 6px; font-size: 0.8rem; margin-left: 8px; font-weight: 700;">0</span></h3>
                 </div>
-                <div class="mobile-collapse-content" id="content-menages">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #2D3436;">
-                        <span style="font-size: 1.8rem;">🧹</span>
-                        <h3 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Ménages prévus <span id="dashboard-cleanings" style="background: #ffeaa7; color: #2D3436; padding: 3px 10px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 6px; font-size: 0.8rem; margin-left: 8px; font-weight: 700;">0</span></h3>
-                    </div>
-                    <div id="dashboard-menages" style="max-height: 300px; overflow-y: auto;">
-                        <p style="text-align: center; color: #999; padding: 40px;">Chargement...</p>
-                    </div>
+                <div id="dashboard-menages" style="max-height: 300px; overflow-y: auto;">
+                    <p style="text-align: center; color: #999; padding: 40px;">Chargement...</p>
                 </div>
-            </div>
             </div>
         </div>
 
         <!-- COLONNE DROITE : Todo listes -->
         <div>
             <!-- Todo : Actions Réservations -->
-            <div class="card mobile-collapse-section" id="section-todo-reservations" style="margin-bottom: 20px; border-left: 4px solid #667eea; box-shadow: 0 2px 4px rgba(0,0,0,0.08); min-height: 200px;">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('todo-reservations')" style="display: none;">
-                    <span>✅ Actions Réservations</span>
-                    <span class="mobile-collapse-icon" id="icon-todo-reservations">▼</span>
+            <div class="card" style="margin-bottom: 20px; border-left: 4px solid #667eea; box-shadow: 0 2px 4px rgba(0,0,0,0.08); min-height: 200px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 3px solid #667eea;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.3rem;">✅</span>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Actions Réservations <span id="todo-count-reservations" style="background: #667eea; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
+                    </div>
+                    <button onclick="addTodoItem('reservations')" style="background: #667eea; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#5568d3'" onmouseout="this.style.background='#667eea'">+</button>
                 </div>
-                <div class="mobile-collapse-content" id="content-todo-reservations">
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 3px solid #667eea;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.3rem;">✅</span>
-                            <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Actions Réservations <span id="todo-count-reservations" style="background: #667eea; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
-                        </div>
-                        <button onclick="addTodoItem('reservations')" style="background: #667eea; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#5568d3'" onmouseout="this.style.background='#667eea'">+</button>
-                    </div>
-                    <div id="todo-reservations" style="padding: 15px; max-height: 250px; overflow-y: auto;">
-                        <!-- Todos dynamiques -->
-                    </div>
+                <div id="todo-reservations" style="padding: 15px; max-height: 250px; overflow-y: auto;">
+                    <!-- Todos dynamiques -->
                 </div>
             </div>
 
             <!-- Todo : Travaux par gîte -->
-            <div class="card mobile-collapse-section" id="section-todo-travaux" style="margin-bottom: 20px; border-left: 4px solid #F39C12; box-shadow: 0 2px 4px rgba(0,0,0,0.08); min-height: 200px;">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('todo-travaux')" style="display: none;">
-                    <span>🔧 Travaux & Maintenance</span>
-                    <span class="mobile-collapse-icon" id="icon-todo-travaux">▼</span>
+            <div class="card" style="margin-bottom: 20px; border-left: 4px solid #F39C12; box-shadow: 0 2px 4px rgba(0,0,0,0.08); min-height: 200px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 3px solid #F39C12;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.3rem;">🔧</span>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Travaux & Maintenance <span id="todo-count-travaux" style="background: #F39C12; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
+                    </div>
+                    <button onclick="addTodoItem('travaux')" style="background: #F39C12; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#e67e22'" onmouseout="this.style.background='#F39C12'">+</button>
                 </div>
-                <div class="mobile-collapse-content" id="content-todo-travaux">
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 3px solid #F39C12;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.3rem;">🔧</span>
-                            <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Travaux & Maintenance <span id="todo-count-travaux" style="background: #F39C12; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
-                        </div>
-                        <button onclick="addTodoItem('travaux')" style="background: #F39C12; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#e67e22'" onmouseout="this.style.background='#F39C12'">+</button>
-                    </div>
-                    <div id="todo-travaux" style="padding: 15px; max-height: 250px; overflow-y: auto;">
-                        <!-- Todos dynamiques -->
-                    </div>
+                <div id="todo-travaux" style="padding: 15px; max-height: 250px; overflow-y: auto;">
+                    <!-- Todos dynamiques -->
                 </div>
             </div>
 
             <!-- Todo : Achats -->
-            <div class="card mobile-collapse-section" id="section-todo-achats" style="border-left: 4px solid #27AE60; box-shadow: 0 2px 4px rgba(0,0,0,0.08); min-height: 200px;">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('todo-achats')" style="display: none;">
-                    <span>🛒 Achats & Courses</span>
-                    <span class="mobile-collapse-icon" id="icon-todo-achats">▼</span>
-                </div>
-                <div class="mobile-collapse-content" id="content-todo-achats">
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 3px solid #27AE60;">
+            <div class="card" style="border-left: 4px solid #27AE60; box-shadow: 0 2px 4px rgba(0,0,0,0.08); min-height: 200px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 3px solid #27AE60;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span style="font-size: 1.3rem;">🛒</span>
                         <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Achats & Courses <span id="todo-count-achats" style="background: #27AE60; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
