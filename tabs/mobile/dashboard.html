@@ -45,49 +45,61 @@
         </div>
     </div>
 
-    <!-- 📊 VISION GLOBALE - Version Mobile Compacte -->
+    <!-- 📊 VISION GLOBALE - Version Mobile Optimisée -->
     <div class="card" style="background: white; border: 2px solid #2D3436; padding: 15px; border-radius: 12px; box-shadow: 2px 2px 0 #2D3436; margin-bottom: 15px;">
         <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; color: #2D3436; font-weight: 700; text-align: center; border-bottom: 2px solid #2D3436; padding-bottom: 10px;">📊 VISION GLOBALE</h3>
         
-        <!-- Indicateurs en grille 2 colonnes -->
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-            <!-- CA -->
+        <!-- CA & Bénéfices -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+            <!-- CA Mois -->
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">
-                <div style="font-size: 0.7rem; color: white; margin-bottom: 4px; font-weight: 600;">💰 CA</div>
-                <div id="dashboard-ca" style="font-size: 1.2rem; font-weight: 700; color: white;">-</div>
+                <div style="font-size: 0.65rem; color: white; margin-bottom: 2px; font-weight: 600;">💰 CA MOIS</div>
+                <div id="dashboard-ca-mois" style="font-size: 1.1rem; font-weight: 700; color: white;">-</div>
+            </div>
+
+            <!-- CA Année -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">
+                <div style="font-size: 0.65rem; color: white; margin-bottom: 2px; font-weight: 600;">💰 CA ANNÉE</div>
+                <div id="dashboard-ca-annee" style="font-size: 1.1rem; font-weight: 700; color: white;">-</div>
             </div>
 
             <!-- BÉNÉF -->
             <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">
-                <div style="font-size: 0.7rem; color: white; margin-bottom: 4px; font-weight: 600;">📈 BÉNÉF</div>
-                <div id="dashboard-benefices" style="font-size: 1.2rem; font-weight: 700; color: white;">-</div>
+                <div style="font-size: 0.65rem; color: white; margin-bottom: 2px; font-weight: 600;">📈 BÉNÉF</div>
+                <div id="dashboard-benefice-moyen" style="font-size: 1.1rem; font-weight: 700; color: white;">-</div>
             </div>
 
             <!-- TRÉSO -->
             <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">
-                <div style="font-size: 0.7rem; color: white; margin-bottom: 4px; font-weight: 600;">💳 TRÉSO</div>
-                <div id="dashboard-tresorerie" style="font-size: 1.2rem; font-weight: 700; color: white;">-</div>
-            </div>
-
-            <!-- TX OCC -->
-            <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">
-                <div style="font-size: 0.7rem; color: white; margin-bottom: 4px; font-weight: 600;">📊 OCC</div>
-                <div id="dashboard-occupation" style="font-size: 1.2rem; font-weight: 700; color: white;">-</div>
+                <div style="font-size: 0.65rem; color: white; margin-bottom: 2px; font-weight: 600;">💳 TRÉSO</div>
+                <div id="dashboard-tresorerie" style="font-size: 1.1rem; font-weight: 700; color: white;">-</div>
             </div>
         </div>
 
-        <!-- URSSAF & IR - Compacts -->
-        <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <!-- URSSAF -->
-            <div style="background: rgba(102, 126, 234, 0.1); border: 2px solid #667eea; padding: 10px; border-radius: 8px; text-align: center;">
-                <div style="font-size: 0.7rem; margin-bottom: 6px; font-weight: 600; color: #667eea;">💼 URSSAF</div>
-                <div id="dashboard-urssaf-2026" style="font-size: 1rem; font-weight: 700; color: #667eea;">-</div>
+        <!-- URSSAF & IR -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <!-- URSSAF 2025 -->
+            <div style="background: rgba(102, 126, 234, 0.1); border: 2px solid #667eea; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 0.6rem; margin-bottom: 3px; font-weight: 600; color: #667eea;">💼 URSSAF 2025</div>
+                <div id="dashboard-urssaf-2025" style="font-size: 0.9rem; font-weight: 700; color: #667eea;">-</div>
             </div>
 
-            <!-- IR -->
-            <div style="background: rgba(230, 126, 34, 0.1); border: 2px solid #e67e22; padding: 10px; border-radius: 8px; text-align: center;">
-                <div style="font-size: 0.7rem; margin-bottom: 6px; font-weight: 600; color: #e67e22;">🏛️ IR</div>
-                <div id="dashboard-ir-2026" style="font-size: 1rem; font-weight: 700; color: #e67e22;">-</div>
+            <!-- URSSAF 2026 -->
+            <div style="background: rgba(102, 126, 234, 0.1); border: 2px solid #667eea; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 0.6rem; margin-bottom: 3px; font-weight: 600; color: #667eea;">💼 URSSAF 2026</div>
+                <div id="dashboard-urssaf-2026" style="font-size: 0.9rem; font-weight: 700; color: #667eea;">-</div>
+            </div>
+
+            <!-- IR 2025 -->
+            <div style="background: rgba(230, 126, 34, 0.1); border: 2px solid #e67e22; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 0.6rem; margin-bottom: 3px; font-weight: 600; color: #e67e22;">🏛️ IR 2025</div>
+                <div id="dashboard-ir-2025" style="font-size: 0.9rem; font-weight: 700; color: #e67e22;">-</div>
+            </div>
+
+            <!-- IR 2026 -->
+            <div style="background: rgba(230, 126, 34, 0.1); border: 2px solid #e67e22; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 0.6rem; margin-bottom: 3px; font-weight: 600; color: #e67e22;">🏛️ IR 2026</div>
+                <div id="dashboard-ir-2026" style="font-size: 0.9rem; font-weight: 700; color: #e67e22;">-</div>
             </div>
         </div>
     </div>

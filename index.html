@@ -110,6 +110,8 @@
     <link rel="stylesheet" href="css/remplissage-auto.css?v=1.0" />
 </head>
 <body>
+    <!-- Menu hamburger mobile (injecté dynamiquement) -->
+    <div id="mobile-menu-container"></div>
 
     <script>
     // ⚡ DÉTECTION MOBILE/DESKTOP - CHARGEMENT SÉPARÉ
@@ -119,16 +121,42 @@
     if (isMobile) {
         const mobileCss = document.createElement('link');
         mobileCss.rel = 'stylesheet';
-        mobileCss.href = 'css/mobile/main.css?v=1.0';
+        mobileCss.href = 'css/mobile/main.css?v=1.1';
         document.head.appendChild(mobileCss);
-        console.log('📱 Mode MOBILE détecté - CSS mobile chargé');
+        
+        // Charger JS mobile
+        const mobileJs = document.createElement('script');
+        mobileJs.src = 'js/mobile.js?v=1.0';
+        document.head.appendChild(mobileJs);
+        
+        // Injecter le HTML du menu hamburger
+        document.getElementById('mobile-menu-container').innerHTML = `
+            <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav id="mobile-nav-menu" class="mobile-nav-menu">
+                <div class="mobile-nav-header">
+                    <h3>📱 Menu</h3>
+                    <button id="mobile-menu-close" class="mobile-menu-close">&times;</button>
+                </div>
+                <div class="mobile-nav-list">
+                    <!-- Les onglets seront générés dynamiquement par JS -->
+                </div>
+            </nav>
+            <div id="mobile-nav-overlay" class="mobile-nav-overlay"></div>
+        `;
+        
+        console.log('📱 Mode MOBILE détecté - CSS et JS mobile chargés');
     } else {
         console.log('💻 Mode DESKTOP détecté');
     }
 
     // Chargement dynamique des onglets
     document.addEventListener('DOMContentLoaded', function() {
-        const cacheBuster = '?v=20260120-mobile-folders';
+        const cacheBuster = '?v=20260120-mobile-v2';
         const tabFiles = {
             'tab-dashboard': isMobile ? 'tabs/mobile/dashboard.html' + cacheBuster : 'tabs/tab-dashboard.html' + cacheBuster,
             'tab-gestion': 'tabs/tab-gestion.html',
