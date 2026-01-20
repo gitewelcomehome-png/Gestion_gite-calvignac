@@ -1,4 +1,162 @@
-<!-- 🧹 ONGLET PLANNING MÉNAGE -->
+<style>
+/* ========================================
+   PLANNING MÉNAGE - NEO-BRUTALISM (COMME RÉSERVATIONS)
+   ======================================== */
+
+.week-block {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.week-content-grid {
+    /* Styles inline définis dynamiquement selon nombre de gîtes */
+}
+
+.week-header-unique {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    padding: 8px 20px;
+    text-align: center;
+    color: white;
+}
+
+.week-number-big {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+}
+
+.week-dates-small {
+    font-size: 0.8rem;
+    opacity: 0.95;
+}
+
+.menage-card {
+    background: #f8f9fa;
+    border-left: 4px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.menage-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.menage-card.validated {
+    border-left-color: #27ae60;
+    background: #e8f5e9;
+}
+
+.menage-card.pending-validation {
+    border-left-color: #f39c12;
+    background: #fff3cd;
+}
+
+.menage-date-main {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.menage-info-row {
+    display: flex;
+    gap: 15px;
+    margin: 8px 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.menage-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.status-validated {
+    background: #27ae60;
+    color: white;
+}
+
+.status-pending {
+    background: #95a5a6;
+    color: white;
+}
+
+.status-waiting {
+    background: #f39c12;
+    color: white;
+}
+
+.menage-modifier {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.modifier-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.modifier-form input[type="date"] {
+    flex: 1;
+    min-width: 150px;
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.modifier-form select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.modifier-form button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-save {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #229954;
+}
+
+.empty-column {
+    text-align: center;
+    padding: 40px;
+    color: #95a5a6;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .week-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 <div class="tab-container">
     <!-- Header Neo-Brutalism -->
     <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
@@ -8,17 +166,240 @@
                 <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Organisation et validation des nettoyages</p>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-neo" onclick="showCleaningRulesModal()" style="background: #a29bfe; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    🎯 Règles de Ménage
+                </button>
+                <button class="btn-neo" onclick="showRulesModal()" style="background: #ffeaa7; color: #2D3436; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    📋 Voir les Règles
+                </button>
                 <button class="btn-neo" onclick="ouvrirPageValidation()" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
                     🏢 Page Validation Société
                 </button>
                 <button class="btn-neo" onclick="ouvrirPageFemmeMenage()" style="background: #55efc4; color: #2D3436; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
                     🧹 Espace Femme de Ménage
                 </button>
-                <button class="btn-neo" onclick="showRulesModal()" style="background: #ffeaa7; color: #2D3436; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    📋 Voir les Règles
-                </button>
             </div>
         </div>
     </div>
 
-<div class="card">
+    <!-- Section propositions en attente -->
+    <div id="propositionsEnAttente"></div>
+    
+    <!-- Planning par semaine -->
+    <div id="menagePlanningWeeks" style="margin-bottom: 20px;">
+        <!-- Généré dynamiquement par JS -->
+    </div>
+</div>
+
+<style>
+/* ========================================
+   PLANNING MÉNAGE - NEO-BRUTALISM STYLE
+   ======================================== */
+
+.cleaning-week-table {
+    background: white;
+    border: 3px solid #2D3436;
+    border-radius: 16px;
+    box-shadow: 4px 4px 0 #2D3436;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+.cleaning-week-header {
+    background: linear-gradient(135deg, #2D3436 0%, #636e72 100%);
+    color: white;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #2D3436;
+}
+
+.week-number-big {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.week-dates-small {
+    font-size: 1rem;
+    opacity: 0.95;
+    font-weight: 500;
+}
+
+.cleaning-week-body {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: #e0e0e0;
+    min-height: 100px;
+}
+
+.cleaning-column {
+    background: white;
+    padding: 0;
+    min-height: 150px;
+    position: relative;
+}
+
+.cleaning-column-header {
+    padding: 15px 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 3px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cleaning-item {
+    background: #f8f9fa;
+    margin: 15px;
+    padding: 18px;
+    border: 2px solid #2D3436;
+    border-radius: 12px;
+    box-shadow: 3px 3px 0 #2D3436;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.cleaning-item:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 #2D3436;
+}
+
+.cleaning-item.validated {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-color: #27ae60;
+    box-shadow: 3px 3px 0 #27ae60;
+}
+
+.cleaning-item.validated:hover {
+    box-shadow: 5px 5px 0 #27ae60;
+}
+
+.cleaning-item.empty {
+    background: white;
+    border: 2px dashed #ddd;
+    box-shadow: none;
+    text-align: center;
+    color: #95a5a6;
+    font-style: italic;
+    padding: 40px 20px;
+}
+
+.cleaning-item.empty:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.validation-status {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 2px solid #2D3436;
+    box-shadow: 2px 2px 0 #2D3436;
+}
+
+.validation-status.validated {
+    background: #27ae60;
+    color: white;
+}
+
+.validation-status.pending {
+    background: #f39c12;
+    color: white;
+}
+
+.validation-status.notvalidated {
+    background: #e74c3c;
+    color: white;
+}
+
+.cleaning-date-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.cleaning-date {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2D3436;
+}
+
+.cleaning-details {
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.cleaning-client {
+    font-size: 0.95rem;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.cleaning-actions {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px solid #e0e0e0;
+    display: flex;
+    gap: 8px;
+}
+
+.btn-small {
+    background: #74b9ff;
+    color: white;
+    border: 2px solid #2D3436;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    box-shadow: 2px 2px 0 #2D3436;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.btn-small:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 #2D3436;
+}
+
+.btn-small:active {
+    transform: translate(0, 0);
+    box-shadow: 2px 2px 0 #2D3436;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .cleaning-week-body {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .cleaning-week-body {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .cleaning-week-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+</style>
+
+
+
+</div>

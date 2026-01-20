@@ -21,7 +21,6 @@ async function syncAllCalendars() {
 
     try {
         syncInProgress = true;
-        console.log('🔒 Verrou de synchronisation activé');
 
         const gites = await window.gitesManager.getAll();
         
@@ -198,6 +197,16 @@ async function syncCalendar(giteId, platform, url) {
             const dtend = event.endDate;
 
             if (!dtstart || !dtend) continue;
+
+            // 🚫 IGNORER LES BLOCKED / NOT AVAILABLE / INDISPONIBLE
+            const summaryLower = summary.toLowerCase();
+            if (summaryLower.includes('blocked') || 
+                summaryLower.includes('not available') || 
+                summaryLower.includes('indisponible') ||
+                summaryLower.includes('unavailable')) {
+                skipped++;
+                continue;
+            }
 
             const dateDebut = formatDateForIcal(dtstart);
             const dateFin = formatDateForIcal(dtend);

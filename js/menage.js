@@ -14,6 +14,36 @@
  * @param {Array} toutesReservations - Liste de toutes les réservations pour détecter enchainements
  * @returns {string} - Date formatée "Lundi 23 déc. à 12h00"
  */
+// Variable globale pour stocker les règles actives
+let activeCleaningRules = [];
+
+/**
+ * Charge les règles de ménage actives depuis la base de données
+ */
+async function loadActiveCleaningRules() {
+    try {
+        if (typeof getActiveCleaningRules === 'function') {
+            activeCleaningRules = await getActiveCleaningRules();
+            console.log('📋 Règles de ménage chargées:', activeCleaningRules.length);
+        } else {
+            console.warn('⚠️ getActiveCleaningRules non disponible - règles hardcodées utilisées');
+        }
+    } catch (error) {
+        console.error('❌ Erreur chargement règles:', error);
+    }
+}
+
+/**
+ * Vérifie si une règle est active
+ */
+function isRuleActive(ruleCode) {
+    if (!activeCleaningRules || activeCleaningRules.length === 0) {
+        // Par défaut si pas de règles chargées, toutes les règles sont actives
+        return true;
+    }
+    return activeCleaningRules.some(r => r.rule_code === ruleCode && r.is_enabled);
+}
+
 function calculerDateMenage(reservation, toutesReservations) {
     const departDate = parseLocalDate(reservation.dateFin || reservation.date_fin);
     const departDay = departDate.getDay(); // 0=dimanche, 6=samedi
@@ -28,12 +58,14 @@ function calculerDateMenage(reservation, toutesReservations) {
         parseLocalDate(r.dateDebut || r.date_debut).toDateString() === departDate.toDateString()
     );
     
+    // RÈGLE 7: Enchainement le jour même (PRIORITÉ 1)
+    if (arriveeMemejour && isRuleActive('same_day_checkin')) {
+        heure = '13h00';
+        // Pas de changement de date, ménage le jour même
+    }
     // RÈGLE 1: Dimanche - Reporter au lundi (sauf enchainement)
-    if (departDay === 0) {
-        if (arriveeMemejour) {
-            // Exception: enchainement dimanche
-            heure = '13h00';
-        } else {
+    else if (departDay === 0 && isRuleActive('sunday_postpone')) {
+        if (!arriveeMemejour) {
             // Reporter au lundi
             menageDate.setDate(menageDate.getDate() + 1);
             
@@ -47,10 +79,8 @@ function calculerDateMenage(reservation, toutesReservations) {
         }
     }
     // RÈGLE 2: Samedi - Vérifier réservation samedi/dimanche avant de décider
-    else if (departDay === 6) {
-        if (arriveeMemejour) {
-            heure = '12h00'; // Après-midi même si enchainement
-        } else {
+    else if (departDay === 6 && isRuleActive('saturday_conditional')) {
+        if (!arriveeMemejour) {
             // Vérifier s'il y a une réservation samedi soir ou dimanche soir
             const samediDate = new Date(departDate);
             const dimancheDate = new Date(departDate);
@@ -63,10 +93,7 @@ function calculerDateMenage(reservation, toutesReservations) {
                  parseLocalDate(r.dateDebut || r.date_debut).toDateString() === dimancheDate.toDateString())
             );
             
-            if (resaSamediOuDimanche) {
-                // Il y a une réservation samedi ou dimanche → ménage le samedi
-                heure = '12h00';
-            } else {
+            if (!resaSamediOuDimanche) {
                 // Pas de réservation samedi/dimanche → reporter au lundi
                 menageDate.setDate(menageDate.getDate() + 2);
                 
@@ -81,30 +108,21 @@ function calculerDateMenage(reservation, toutesReservations) {
         }
     }
     // RÈGLE 3: Mercredi ou Jeudi - Vérifier réservation avant vendredi
-    else if (departDay === 3 || departDay === 4) { // 3=mercredi, 4=jeudi
-        if (arriveeMemejour) {
-            // Il y a un enchainement → ménage le jour même
-            heure = '12h00';
-        } else {
-            // Vérifier s'il y a une réservation jeudi ou vendredi (avant le vendredi)
-            const jeudiDate = new Date(departDate);
-            if (departDay === 3) {
-                jeudiDate.setDate(jeudiDate.getDate() + 1); // Si départ mercredi, vérifier jeudi
-            }
+    else if ((departDay === 3 || departDay === 4) && isRuleActive('midweek_conditional')) {
+        if (!arriveeMemejour) {
+            // Vérifier s'il y a une réservation avant le vendredi
             const vendrediDate = new Date(departDate);
-            const joursAajouter = departDay === 3 ? 2 : 1; // Mercredi +2 = vendredi, Jeudi +1 = vendredi
+            const joursAajouter = departDay === 3 ? 2 : 1;
             vendrediDate.setDate(vendrediDate.getDate() + joursAajouter);
             
             const resaAvantVendredi = toutesReservations.find(r =>
                 r.gite_id === reservation.gite_id &&
                 r.id !== reservation.id &&
-                (parseLocalDate(r.dateDebut || r.date_debut) < vendrediDate)
+                parseLocalDate(r.dateDebut || r.date_debut) < vendrediDate &&
+                parseLocalDate(r.dateDebut || r.date_debut) > departDate
             );
             
-            if (resaAvantVendredi) {
-                // Il y a une réservation avant vendredi → ménage le jour du départ
-                heure = '12h00';
-            } else {
+            if (!resaAvantVendredi) {
                 // Pas de réservation avant vendredi → reporter au vendredi
                 menageDate.setDate(menageDate.getDate() + joursAajouter);
                 
@@ -118,20 +136,34 @@ function calculerDateMenage(reservation, toutesReservations) {
             }
         }
     }
-    // RÈGLE 4: Autres jours semaine (Lun, Mar, Ven) - Après-midi TOUJOURS
-    else {
-        heure = '12h00'; // TOUJOURS après-midi en semaine
+    
+    // RÈGLE 8: Ménage du matin si arrivée le jour du ménage
+    if (isRuleActive('morning_if_same_day')) {
+        const arriveeCeJour = toutesReservations.find(r =>
+            r.gite_id === reservation.gite_id &&
+            r.id !== reservation.id &&
+            parseLocalDate(r.dateDebut || r.date_debut).toDateString() === menageDate.toDateString()
+        );
+        if (arriveeCeJour && !arriveeMemejour) {
+            heure = '07h00';
+        }
     }
     
-    // Vérifier jour férié (sauf enchainement même jour)
-    if (!arriveeMemejour && isJourFerie(menageDate)) {
+    // RÈGLE 2: Vérifier jour férié (sauf enchainement même jour)
+    if (!arriveeMemejour && isRuleActive('avoid_holidays') && isJourFerie(menageDate)) {
         do {
             menageDate.setDate(menageDate.getDate() + 1);
         } while (isJourFerie(menageDate) || menageDate.getDay() === 0);
     }
     
     const joursComplets = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-    return `${joursComplets[menageDate.getDay()]} ${formatDateShort(menageDate)} à ${heure}`;
+    
+    // Retourner un objet avec la date et l'heure au lieu d'une chaîne
+    return {
+        date: menageDate,
+        heure: heure,
+        formatted: `${joursComplets[menageDate.getDay()]} ${formatDateShort(menageDate)} à ${heure}`
+    };
 }
 
 /**
@@ -227,29 +259,9 @@ async function genererPlanningMenage() {
         const departDate = parseLocalDate(r.dateFin);
         
         // Utiliser la fonction calculerDateMenage pour garantir la cohérence
-        const dateMenageFormatted = calculerDateMenage(r, relevant);
-        
-        // Parser le résultat pour extraire la date et l'heure
-        // Format: "Lundi 23 déc. à 12h00"
-        const match = dateMenageFormatted.match(/(\w+) (\d+) (\w+)\. à (\d+h\d+)/);
-        if (!match) return;
-        
-        const [_, jourNom, jour, mois, heure] = match;
-        
-        // Reconstruire la date du ménage
-        const moisMap = {
-            'janv': 0, 'févr': 1, 'mars': 2, 'avr': 3, 'mai': 4, 'juin': 5,
-            'juil': 6, 'août': 7, 'sept': 8, 'oct': 9, 'nov': 10, 'déc': 11
-        };
-        
-        const menageDate = new Date(departDate);
-        menageDate.setMonth(moisMap[mois]);
-        menageDate.setDate(parseInt(jour));
-        
-        // Si le mois du ménage est < mois du départ, c'est l'année suivante
-        if (menageDate < departDate) {
-            menageDate.setFullYear(menageDate.getFullYear() + 1);
-        }
+        const menageInfo = calculerDateMenage(r, relevant);
+        const menageDate = menageInfo.date;
+        const heure = menageInfo.heure;
         
         // Vérifier enchainement
         const arriveeMemejour = relevant.find(resa => 
@@ -358,26 +370,58 @@ async function genererPlanningMenage() {
 }
 
 /**
- * Affiche le planning de ménage organisé par semaines avec colonnes Trevoux/Couzon
+ * Affiche le planning de ménage organisé par semaines - Multi-gîtes dynamique
  */
 async function afficherPlanningParSemaine() {
-    const reservations = await getAllReservations();
+    // Charger les règles de ménage actives
+    await loadActiveCleaningRules();
     
-    // Récupérer les validations de la société de ménage
+    // Charger les gîtes dynamiquement
+    const gites = await window.gitesManager.getAll();
+    if (!gites || gites.length === 0) {
+        console.error('❌ Aucun gîte trouvé');
+        return;
+    }
+    
+    // ✅ Charger les réservations depuis la BDD (pas iCal)
+    const reservations = await getAllReservations(true);
+    
+    // Récupérer l'utilisateur connecté pour RLS
+    const { data: { user } } = await window.supabaseClient.auth.getUser();
+    if (!user) {
+        console.error('❌ Utilisateur non connecté');
+        return;
+    }
+    
+    // Récupérer les validations de la société de ménage avec filtre RLS
     const { data: cleaningSchedules } = await window.supabaseClient
         .from('cleaning_schedule')
-        .select('*');
+        .select('*')
+        .eq('owner_user_id', user.id);
+    
+    console.log('🗂️ Total cleaning_schedules récupérés:', cleaningSchedules?.length || 0);
+    if (cleaningSchedules && cleaningSchedules.length > 0) {
+        console.log('📊 Détail des cleaning_schedules:', cleaningSchedules);
+    }
     
     const validationMap = {};
     let pendingModifications = 0;
     if (cleaningSchedules) {
         cleaningSchedules.forEach(cs => {
             validationMap[cs.reservation_id] = cs;
-            if (cs.status === 'proposed') {
+            if (cs.status === 'pending_validation') {
+                console.log('📩 Proposition trouvée:', {
+                    reservationId: cs.reservation_id,
+                    status: cs.status,
+                    proposedBy: cs.proposed_by,
+                    scheduledDate: cs.scheduled_date
+                });
                 pendingModifications++;
             }
         });
     }
+    
+    console.log('🔔 Nombre de modifications en attente:', pendingModifications);
     
     // Afficher le badge de notification si modifications en attente
     const notifBadge = document.getElementById('cleaning-notif-badge');
@@ -414,33 +458,9 @@ async function afficherPlanningParSemaine() {
         const validation = validationMap[r.id];
         
         // Calculer la date avec les règles métier
-        const dateMenageFormatted = calculerDateMenage(r, relevant);
-        
-        // Parser le résultat "Lundi 23 déc. à 12h00"
-        const match = dateMenageFormatted.match(/(\w+) (\d+) (\w+)\. à (\d+h\d+)/);
-        let dateMenage;
-        let calculatedTimeOfDay;
-        
-        if (match) {
-            const [_, jourNom, jour, mois, heure] = match;
-            const moisMap = {
-                'janv': 0, 'févr': 1, 'mars': 2, 'avr': 3, 'mai': 4, 'juin': 5,
-                'juil': 6, 'août': 7, 'sept': 8, 'oct': 9, 'nov': 10, 'déc': 11
-            };
-            
-            dateMenage = new Date(dateFin);
-            dateMenage.setMonth(moisMap[mois]);
-            dateMenage.setDate(parseInt(jour));
-            
-            if (dateMenage < dateFin) {
-                dateMenage.setFullYear(dateMenage.getFullYear() + 1);
-            }
-            
-            calculatedTimeOfDay = (heure.startsWith('07') || heure.startsWith('08')) ? 'morning' : 'afternoon';
-        } else {
-            dateMenage = new Date(dateFin);
-            calculatedTimeOfDay = 'afternoon';
-        }
+        const menageCalcul = calculerDateMenage(r, relevant);
+        const dateMenage = menageCalcul.date;
+        const calculatedTimeOfDay = menageCalcul.heure.startsWith('07') || menageCalcul.heure.startsWith('08') ? 'morning' : 'afternoon';
         
         // Trouver le lundi de cette semaine
         const dayOfWeek = dateMenage.getDay();
@@ -475,7 +495,9 @@ async function afficherPlanningParSemaine() {
                 }
                 
                 await window.supabaseClient.from('cleaning_schedule').upsert({
+                    owner_user_id: user.id,
                     reservation_id: r.id,
+                    gite: r.gite,
                     gite_id: r.gite_id,
                     scheduled_date: scheduledDateStr,
                     time_of_day: calculatedTimeOfDay,
@@ -496,9 +518,20 @@ async function afficherPlanningParSemaine() {
             proposedDate: validation ? validation.proposed_date : null,
             status: validation ? validation.status : 'pending',
             timeOfDay: validation ? validation.time_of_day : calculatedTimeOfDay,
+            proposedBy: validation ? validation.proposed_by : null,
             reservationEndBefore: dateFin,
             reservationStartAfter: null // À calculer
         };
+        
+        // Debug log pour vérifier les données
+        if (validation && validation.status === 'pending_validation') {
+            console.log('🔍 menageInfo créé avec proposition:', {
+                reservationId: r.id,
+                status: validation.status,
+                proposedBy: validation.proposed_by,
+                hasValidation: !!validation
+            });
+        }
         
         // Chercher la réservation suivante pour ce gîte
         const nextReservation = reservations
@@ -520,11 +553,8 @@ async function afficherPlanningParSemaine() {
     // Trier les semaines
     const sortedWeeks = Array.from(weekStarts).sort();
     
-    // Générer le HTML
-    let html = '<div style="margin-top: 20px;">';
-    
-    // console.log('🧹 GÉNÉRATION PLANNING MÉNAGE');
-    // console.log('📊 Nombre de semaines:', sortedWeeks.length);
+    // Générer le HTML - Style original du 10 janvier
+    let html = '';
     
     sortedWeeks.forEach((weekKey, index) => {
         const week = weeks[weekKey];
@@ -533,40 +563,72 @@ async function afficherPlanningParSemaine() {
         sunday.setDate(monday.getDate() + 6);
         
         // Calculer le vrai numéro de semaine de l'année
-        const weekNumber = `S${getWeekNumber(monday)}`;
-        const weekDisplay = `${monday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} - ${sunday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}`;
+        const weekNumber = getWeekNumber(monday);
+        const dateFormatted = monday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) + ' - ' + 
+                             sunday.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
         
-        // Générer colonnes dynamiquement pour chaque gîte
-        let columnsHTML = '';
-        gites.forEach(gite => {
+        // Adapter l'affichage selon le nombre de gîtes (1 à 4) - COMME RÉSERVATIONS
+        let gridStyle;
+        let gap = '20px';
+        
+        if (gites.length === 1) {
+            gridStyle = 'display: flex; justify-content: center; max-width: 800px; margin: 0 auto;';
+        } else if (gites.length === 2) {
+            gridStyle = `display: grid; grid-template-columns: repeat(2, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+        } else if (gites.length === 3) {
+            gridStyle = `display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+        } else if (gites.length >= 4) {
+            gridStyle = `display: grid; grid-template-columns: repeat(4, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+        }
+        
+        html += `
+            <div style="background: white; border: 3px solid #2D3436; padding: 0; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; overflow: hidden;">
+                <div style="${gridStyle} padding: 20px; box-sizing: border-box;">
+        `;
+        
+        // Générer colonnes pour chaque gîte
+        const colors = [
+            '#667eea', '#f5576c', '#27AE60', '#3498DB', '#E67E22', '#9B59B6'
+        ];
+        
+        gites.forEach((gite, giteIndex) => {
             const menages = week.gitesMenages[gite.id] || [];
-            columnsHTML += `
-                <div class="cleaning-column">
-                    <div class="cleaning-column-header" style="background: ${gite.color}; color: white;">
-                        ${gite.icon} ${gite.name}
-                    </div>
-                    ${menages.length > 0 ? 
-                        menages.map(m => generateCleaningItemHTML(m)).join('') :
-                        '<div class="cleaning-item empty">Aucun ménage prévu</div>'
-                    }
+            const columnStyle = gites.length === 1 ? 'width: 100%; max-width: 800px;' : '';
+            const giteColor = colors[giteIndex % colors.length];
+            
+            html += `
+            <div style="display: flex; flex-direction: column; min-width: 0; ${columnStyle}; flex: 1;">
+                <div style="padding: 12px 20px; background: ${giteColor}; border-radius: 12px 12px 0 0; margin-bottom: 0; border: 3px solid #2D3436; border-bottom: none; box-shadow: 4px 4px 0 #2D3436;">
+                    <div style="font-size: 0.8rem; margin-bottom: 2px; color: white; font-weight: 600;">${gite.icon || '🏠'} ${gite.name}</div>
+                    <div style="font-size: 1rem; margin-bottom: 2px; color: white; font-weight: 700; text-transform: uppercase;">Semaine ${weekNumber}</div>
+                    <div style="font-size: 0.8rem; opacity: 0.95; color: white;">${dateFormatted}</div>
                 </div>
+                <div style="background: white; border: 3px solid #2D3436; border-top: none; border-radius: 0 0 12px 12px; padding: 20px; min-height: 120px; box-shadow: 4px 4px 0 #2D3436;">
+            `;
+            
+            if (menages.length === 0) {
+                html += '<div style="text-align: center; color: #95a5a6; font-style: italic; padding: 20px;">Aucun ménage prévu</div>';
+            } else {
+                menages.forEach(m => {
+                    html += generateMenageCardHTML(m);
+                });
+            }
+            
+            html += `
+                </div>
+            </div>
             `;
         });
         
         html += `
-            <div class="cleaning-week-table">
-                <div class="cleaning-week-header">
-                    <div class="week-number-big">${weekNumber}</div>
-                    <div class="week-dates-small">${weekDisplay}</div>
-                </div>
-                <div class="cleaning-week-body" style="grid-template-columns: repeat(${gites.length}, 1fr);">
-                    ${columnsHTML}
                 </div>
             </div>
         `;
     });
     
-    html += '</div>';
+    if (html === '') {
+        html = '<p style="text-align: center; color: #999; padding: 40px;">Aucun ménage prévu dans les 12 prochains mois</p>';
+    }
     
     // console.log('\n📝 HTML généré, longueur:', html.length, 'caractères');
     
@@ -592,47 +654,213 @@ async function afficherPlanningParSemaine() {
 }
 
 /**
- * Génère le HTML pour un élément de ménage
+ * Génère le HTML pour une card de ménage - Style original du 10 janvier
  * @param {Object} menageInfo - Informations sur le ménage
- * @returns {string} - HTML de l'élément
+ * @returns {string} - HTML de la card
  */
-function generateCleaningItemHTML(menageInfo) {
-    const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay } = menageInfo;
+function generateMenageCardHTML(menageInfo) {
+    const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay, proposedBy } = menageInfo;
     const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
     
-    // Icône et badge de statut
-    let statusIcon = '';
+    // Statut
+    let statusClass = 'status-pending';
+    let statusText = 'Non validé';
+    let proposedByCompany = false;
+    
     if (validated) {
-        statusIcon = '<span class="validation-status validated" title="Validé par société">✓</span>';
+        statusClass = 'status-validated';
+        statusText = 'Validé';
+    } else if (status === 'pending_validation') {
+        statusClass = 'status-waiting';
+        // Vérifier qui a proposé
+        proposedByCompany = proposedBy === 'company';
+        console.log('🔍 Affichage proposition:', {
+            reservationId: reservation.id,
+            proposedBy: proposedBy,
+            proposedByCompany: proposedByCompany,
+            status: status
+        });
+        statusText = proposedByCompany ? 'Proposition société' : 'En attente';
     } else if (status === 'proposed') {
-        statusIcon = '<span class="validation-status pending" title="En attente validation">⏳</span>';
-    } else {
-        statusIcon = '<span class="validation-status notvalidated" title="À valider">✗</span>';
+        statusClass = 'status-waiting';
+        statusText = 'En attente';
     }
     
     const dateStr = displayDate.toLocaleDateString('fr-FR', { 
-        weekday: 'short', 
-        day: '2-digit', 
-        month: 'short' 
+        weekday: 'long', 
+        day: 'numeric', 
+        month: 'long' 
     });
     
     const savedTime = timeOfDay || localStorage.getItem(`cleaning_time_${reservation.id}`) || 'afternoon';
-    const timeDisplay = savedTime === 'morning' ? '🌅 Matin' : '🌇 Après-midi';
+    const timeDisplay = savedTime === 'morning' ? '🌅 Matin (avant 12h)' : '🌆 Après-midi (après 12h)';
+    
+    // Info départ/arrivée
+    const departInfo = reservationEndBefore ? reservationEndBefore.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
+    const arriveeInfo = reservationStartAfter ? reservationStartAfter.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
+    
+    const cardClass = validated ? 'menage-card validated' : (status === 'pending_validation' || status === 'proposed' ? 'menage-card pending-validation' : 'menage-card');
     
     return `
-        <div class="cleaning-item ${validated ? 'validated' : ''}">
-            ${statusIcon}
-            <div class="cleaning-date-time">
-                📅 ${dateStr} ${timeDisplay}
+        <div style="background: white; margin-bottom: 15px; padding: 15px; border: 2px solid #2D3436; border-radius: 12px; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s; ${validated ? 'background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-color: #27ae60; box-shadow: 3px 3px 0 #27ae60;' : ''}" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='${validated ? '5px 5px 0 #27ae60' : '5px 5px 0 #2D3436'}'" onmouseout="this.style.transform=''; this.style.boxShadow='${validated ? '3px 3px 0 #27ae60' : '3px 3px 0 #2D3436'}'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-size: 0.95rem; font-weight: 700; color: #2D3436;">📅 ${dateStr}</div>
+                <div style="width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; background: ${validated ? '#55efc4' : '#ffeaa7'}; color: #2D3436;">
+                    ${validated ? '✓' : '⏳'}
+                </div>
             </div>
-            <div class="cleaning-client">${reservation.nom}</div>
-            <div class="cleaning-actions">
-                <button onclick="toggleCleaningTime(${reservation.id})" class="btn-icon" title="Changer l'horaire">
-                    ⏰
-                </button>
+            <div style="font-size: 0.9rem; color: #636e72; margin-bottom: 5px;">
+                ${timeDisplay}
             </div>
+            ${departInfo ? `<div style="font-size: 0.85rem; color: #666; margin-bottom: 3px;">🚪 Départ: ${departInfo}</div>` : ''}
+            ${arriveeInfo ? `<div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">🔑 Arrivée: ${arriveeInfo}</div>` : ''}
+            
+            ${proposedByCompany ? `
+                <div style="background: #fff3cd; padding: 12px; margin: 10px 0; border: 2px solid #f39c12; border-radius: 8px; box-shadow: 2px 2px 0 #f39c12;">
+                    <div style="font-weight: 700; color: #856404; margin-bottom: 5px;">📩 Proposition de la société de ménage</div>
+                    <div style="font-size: 0.9rem; color: #856404;">Date proposée : <strong>${dateStr}</strong></div>
+                    <div style="font-size: 0.9rem; color: #856404;">Horaire : <strong>${timeDisplay}</strong></div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button onclick="acceptCompanyProposal('${reservation.id}')" style="flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; background: #27ae60; color: white; font-size: 0.9rem;">
+                        ✓ Accepter
+                    </button>
+                    <button onclick="refuseCompanyProposal('${reservation.id}')" style="flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; background: #e74c3c; color: white; font-size: 0.9rem;">
+                        ✗ Refuser
+                    </button>
+                </div>
+            ` : `
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <input type="date" id="date-${reservation.id}" value="${displayDate.toISOString().split('T')[0]}" style="flex: 1; min-width: 120px; padding: 6px 8px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.85rem;">
+                        <select id="time-${reservation.id}" style="padding: 6px 8px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.85rem;">
+                            <option value="morning" ${savedTime === 'morning' ? 'selected' : ''}>🌅 Matin</option>
+                            <option value="afternoon" ${savedTime === 'afternoon' ? 'selected' : ''}>🌆 AM</option>
+                        </select>
+                        <button onclick="modifierDateMenage('${reservation.id}')" style="padding: 6px 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; background: #27ae60; color: white; font-size: 0.85rem;">💾</button>
+                    </div>
+                </div>
+            `}
         </div>
     `;
+}
+
+/**
+ * Fonction héritée - conservée pour compatibilité
+ */
+function generateCleaningItemHTML(menageInfo) {
+    return generateMenageCardHTML(menageInfo);
+}
+
+/**
+ * Accepter une proposition de la société de ménage
+ */
+async function acceptCompanyProposal(reservationId) {
+    try {
+        const { error } = await supabaseClient
+            .from('cleaning_schedule')
+            .update({
+                status: 'validated',
+                validated_by_company: true,
+                proposed_by: null // Réinitialiser après acceptation
+            })
+            .eq('reservation_id', reservationId);
+        
+        if (error) throw error;
+        
+        showToast('✓ Proposition acceptée !', 'success');
+        afficherPlanningParSemaine();
+    } catch (error) {
+        console.error(error);
+        showToast('Erreur: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Refuser une proposition de la société de ménage
+ */
+async function refuseCompanyProposal(reservationId) {
+    const raison = prompt('Raison du refus (optionnel):');
+    
+    try {
+        const { error } = await supabaseClient
+            .from('cleaning_schedule')
+            .update({
+                status: 'pending',
+                validated_by_company: false,
+                proposed_by: null,
+                notes: raison || 'Proposition refusée par le site principal'
+            })
+            .eq('reservation_id', reservationId);
+        
+        if (error) throw error;
+        
+        showToast('✗ Proposition refusée', 'info');
+        afficherPlanningParSemaine();
+    } catch (error) {
+        console.error(error);
+        showToast('Erreur: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Modifier la date de ménage (proposition du site principal)
+ */
+async function modifierDateMenage(reservationId) {
+    const dateInput = document.getElementById(`date-${reservationId}`);
+    const timeSelect = document.getElementById(`time-${reservationId}`);
+    
+    if (!dateInput || !timeSelect) {
+        showToast('Erreur: formulaire introuvable', 'error');
+        return;
+    }
+    
+    const newDate = dateInput.value;
+    const newTime = timeSelect.value;
+    
+    if (!newDate) {
+        showToast('Veuillez sélectionner une date', 'error');
+        return;
+    }
+    
+    try {
+        // Récupérer l'utilisateur actuel
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        
+        // Récupérer les infos de la réservation
+        const { data: reservation, error: resError } = await supabaseClient
+            .from('reservations')
+            .select('gite_id, check_out')
+            .eq('id', reservationId)
+            .single();
+        
+        if (resError) throw resError;
+        
+        const { error } = await supabaseClient
+            .from('cleaning_schedule')
+            .upsert({
+                owner_user_id: user.id,
+                reservation_id: reservationId,
+                gite_id: reservation.gite_id,
+                scheduled_date: newDate,
+                time_of_day: newTime,
+                status: 'pending_validation',
+                proposed_by: 'owner',
+                validated_by_company: false,
+                reservation_end: reservation.check_out
+            }, { onConflict: 'reservation_id' });
+        
+        if (error) throw error;
+        
+        // Sauvegarder le choix d'horaire
+        localStorage.setItem(`cleaning_time_${reservationId}`, newTime);
+        
+        showToast('📝 Proposition envoyée à la société de ménage', 'success');
+        afficherPlanningParSemaine();
+    } catch (error) {
+        console.error(error);
+        showToast('Erreur: ' + error.message, 'error');
+    }
 }
 
 /**

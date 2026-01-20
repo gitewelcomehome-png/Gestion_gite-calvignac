@@ -116,13 +116,13 @@ body {
    3. NAVIGATION (ONGLETS NEO-BRUTALISM)
    ========================================= */
 
-/* CONTENEUR DES ONGLETS (Responsive - une seule ligne) */
+/* CONTENEUR DES ONGLETS (Responsive - une seune ligne) */
 .nav-tabs-wrapper {
     display: flex;
     flex-wrap: nowrap; /* Toujours sur une seule ligne */
     gap: 8px;
     overflow-x: auto; /* Scroll si nécessaire uniquement en très petit écran */
-    padding: 10px 5px 20px 5px; /* Espace pour l'ombre */
+    padding: 10px 20px 20px 20px; /* Espace pour l'ombre - Aligné avec .container */
     margin-top: 20px;
     margin-bottom: 40px !important; /* Plus d'espace avant le contenu */
     justify-content: flex-start; /* Alignement des onglets */
@@ -592,3 +592,10 @@ select:focus {
     background: var(--c-red) !important;
 }
 
+/* =========================================
+   FISCALITÉ - STYLES SPÉCIFIQUES
+   ========================================= */
+/* ⚠️ TOUS LES STYLES FISCALITÉ SONT DANS fiscalite-neo.css
+   Ne pas ajouter de styles fiscalité ici pour éviter les conflits !
+   Fichier: css/fiscalite-neo.css
+*/

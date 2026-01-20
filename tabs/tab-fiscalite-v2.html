@@ -1,33 +1,41 @@
 <div class="tab-container">
     <!-- Header Neo-Brutalism -->
-    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+    <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div>
                 <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">💰 Fiscalité LMNP</h2>
                 <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Optimisez votre déclaration et calculez vos charges</p>
             </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="debugResidence()" class="btn-neo-secondary" style="background: #ff9800; border-color: #ff9800;">
+                    🐛 Debug
+                </button>
+                <button type="button" onclick="afficherModalOptions()" class="btn-neo-secondary">
+                    ⚙️ Options
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Barre de gestion d'années -->
-    <div style="background: #f8f9fa; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 12px; padding: 15px 20px; margin-bottom: 20px;">
+    <div class="card" style="background: #f8f9fa;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <label style="font-weight: 600; color: #2c3e50;">📅 Année fiscale :</label>
-                <select id="annee_selector" onchange="chargerAnnee(this.value)" style="padding: 8px 15px; border-radius: 6px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; font-size: 1rem; font-weight: 600; color: #2c3e50;">
+                <select id="annee_selector" onchange="chargerAnnee(this.value)" class="form-control">
                     <!-- Rempli dynamiquement -->
                 </select>
             </div>
             <div style="display: flex; gap: 10px;">
-                <button type="button" onclick="creerNouvelleAnnee()" class="btn-neo" title="Créer l'année suivante" style="background: #74b9ff; color: white; padding: 8px 15px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
+                <button type="button" onclick="creerNouvelleAnnee()" class="btn-neo" title="Créer l'année suivante">
                     ➕ Nouvelle Année
                 </button>
             </div>
         </div>
-        <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 6px;">
-            <span style="color: #1976d2; font-weight: 600;">ℹ️ CA calculé automatiquement | Sauvegarde automatique activée</span>
+        <div class="info-box">
+            <span>ℹ️ CA calculé automatiquement | Sauvegarde automatique activée</span>
         </div>
-        </div>
+    </div>
 
 <div class="card">
 
@@ -36,337 +44,78 @@
         <!-- Année cachée (gérée par le sélecteur) -->
         <input type="hidden" id="annee_simulation" value=""  />
         
-        <!-- BLOC 1 : Chiffre d'affaires -->
-        <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
-                <span class="toggle-icon">▼</span> 📊 Chiffre d'affaires
-            </h3>
-            <div class="bloc-content">
-                <div class="form-group">
-                    <label>Chiffre d'affaires annuel (€) <span class="required">*</span></label>
-                    <input type="number" id="ca" step="0.01" required readonly placeholder="Ex: 25000" style="background-color: #e8f5e9; font-weight: 600; cursor: not-allowed;">
-                    <small style="color: #7f8c8d; display: block; margin-top: 5px;">💡 Utilisez le bouton "🔄 Calculer CA" pour calculer automatiquement depuis les réservations (champ non modifiable)</small>
+        <!-- BLOC 1 : Chiffre d'affaires (TOUJOURS VISIBLE) -->
+        <div class="fiscal-bloc">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 0.9rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">📊 Chiffre d'affaires annuel</div>
+                        <div id="ca-display" style="font-size: 3rem; font-weight: 700; margin-top: 10px;">0,00 €</div>
+                    </div>
                 </div>
             </div>
+            <input type="hidden" id="ca" value="0">
         </div>
 
-        <!-- BLOC 2A : Charges COUZON -->
-        <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
-                <span class="toggle-icon">▼</span> 🏠 Charges COUZON (100% déductibles)
-            </h3>
-            <div class="bloc-content">
-            <div class="fiscal-grid">
-                <div class="form-group">
-                    <label>Internet</label>
-                    <div class="input-with-select">
-                        <select id="internet_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="internet_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Eau</label>
-                    <div class="input-with-select">
-                        <select id="eau_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="eau_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Électricité</label>
-                    <div class="input-with-select">
-                        <select id="electricite_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="electricite_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Assurance habitation</label>
-                    <div class="input-with-select">
-                        <select id="assurance_hab_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="assurance_hab_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Assurance emprunteur</label>
-                    <div class="input-with-select">
-                        <select id="assurance_emprunt_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="assurance_emprunt_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Intérêts emprunt</label>
-                    <div class="input-with-select">
-                        <select id="interets_emprunt_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="interets_emprunt_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Ménage/Entretien</label>
-                    <div class="input-with-select">
-                        <select id="menage_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="menage_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Linge (draps, serviettes)</label>
-                    <div class="input-with-select">
-                        <select id="linge_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="linge_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Logiciel de gestion</label>
-                    <div class="input-with-select">
-                        <select id="logiciel_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="logiciel_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Charges de copropriété</label>
-                    <div class="input-with-select">
-                        <select id="copropriete_couzon_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="copropriete_couzon" step="0.01" placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Taxe foncière (annuel)</label>
-                    <input type="number" id="taxe_fonciere_couzon" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>CFE (annuel)</label>
-                    <input type="number" id="cfe_couzon" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>Commissions plateformes (annuel)</label>
-                    <input type="number" id="commissions_couzon" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>Amortissement du bien (annuel)</label>
-                    <input type="number" id="amortissement_couzon" step="0.01" placeholder="0.00">
-                </div>
-            </div>
-            </div>
-        </div>
+        <!-- BLOC 2 : Charges par gîte (généré dynamiquement) -->
+        <div id="gites-charges-container"></div>
 
-        <!-- BLOC 2B : Charges TRÉVOUX -->
+        <!-- BLOC 2C : FRAIS D'EXPLOITATIONS (Englobe les 3 listes) -->
         <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🏠 Charges TRÉVOUX (100% déductibles)</h3>
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> 💼 FRAIS D'EXPLOITATIONS</h3>
             <div class="bloc-content">
-                <div class="fiscal-grid">
-                    <div class="form-group">
-                        <label>Internet</label>
-                        <div class="input-with-select">
-                            <select id="internet_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="internet_trevoux" step="0.01" placeholder="0.00" oninput="calculerTempsReel()">
-                        </div>
+                
+                <!-- Sous-section Travaux/Réparations -->
+                <div class="exploitation-section" style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #e65100; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5rem;">🔧</span>
+                        Travaux/Réparations
+                    </h4>
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" onclick="ajouterTravaux()" class="btn btn-secondary" style="background: #ff9800; border-color: #ff9800;">
+                            ➕ Ajouter un travail
+                        </button>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>Eau</label>
-                        <div class="input-with-select">
-                            <select id="eau_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="eau_trevoux" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Électricité</label>
-                        <div class="input-with-select">
-                            <select id="electricite_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="electricite_trevoux" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Assurance habitation</label>
-                        <div class="input-with-select">
-                            <select id="assurance_hab_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="assurance_hab_trevoux" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Assurance emprunteur</label>
-                        <div class="input-with-select">
-                            <select id="assurance_emprunt_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="assurance_emprunt_trevoux" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Intérêts emprunt</label>
-                        <div class="input-with-select">
-                            <select id="interets_emprunt_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="interets_emprunt_trevoux" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Ménage/Entretien</label>
-                        <div class="input-with-select">
-                            <select id="menage_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="menage_trevoux" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Linge (draps, serviettes)</label>
-                        <div class="input-with-select">
-                            <select id="linge_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="linge_trevoux" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Logiciel de gestion</label>
-                        <div class="input-with-select">
-                            <select id="logiciel_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="logiciel_trevoux" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Charges de copropriété</label>
-                        <div class="input-with-select">
-                            <select id="copropriete_trevoux_type" class="type-select">
-                                <option value="mensuel">Mensuel</option>
-                                <option value="annuel">Annuel</option>
-                            </select>
-                            <input type="number" id="copropriete_trevoux" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Taxe foncière (annuel)</label>
-                        <input type="number" id="taxe_fonciere_trevoux" step="0.01" placeholder="0.00">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>CFE (annuel)</label>
-                        <input type="number" id="cfe_trevoux" step="0.01" placeholder="0.00">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Commissions plateformes (annuel)</label>
-                        <input type="number" id="commissions_trevoux" step="0.01" placeholder="0.00">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Amortissement du bien (annuel)</label>
-                        <input type="number" id="amortissement_trevoux" step="0.01" placeholder="0.00">
+                    <div id="travaux-liste" style="display: grid; gap: 10px;">
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- BLOC 2C : Travaux (Liste dynamique) -->
-        <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🔧 Travaux/Réparations</h3>
-            <div class="bloc-content">
-                <div style="margin-bottom: 15px;">
-                    <button type="button" onclick="ajouterTravaux()" class="btn btn-secondary">➕ Ajouter un travail</button>
+                <!-- Sous-section Frais divers -->
+                <div class="exploitation-section" style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #2e7d32; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5rem;">📝</span>
+                        Frais divers
+                    </h4>
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" onclick="ajouterFraisDivers()" class="btn btn-secondary" style="background: #4caf50; border-color: #4caf50;">
+                            ➕ Ajouter un frais
+                        </button>
+                    </div>
+                    <div id="frais-divers-liste" style="display: grid; gap: 10px;">
+                    </div>
                 </div>
-                <div id="travaux-liste" style="display: grid; gap: 10px;">
-                </div>
-            </div>
-        </div>
 
-        <!-- BLOC 2D : Frais divers (Liste dynamique) -->
-        <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 📝 Frais divers</h3>
-            <div class="bloc-content">
-                <div style="margin-bottom: 15px;">
-                    <button type="button" onclick="ajouterFraisDivers()" class="btn btn-secondary">➕ Ajouter un frais</button>
+                <!-- Sous-section Produits d'accueil -->
+                <div class="exploitation-section" style="background: #f3e5f5; border-left: 4px solid #9c27b0; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #6a1b9a; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5rem;">🧴</span>
+                        Produits d'accueil
+                    </h4>
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" onclick="ajouterProduitAccueil()" class="btn btn-secondary" style="background: #9c27b0; border-color: #9c27b0;">
+                            ➕ Ajouter un produit
+                        </button>
+                    </div>
+                    <div id="produits-accueil-liste" style="display: grid; gap: 10px;">
+                    </div>
                 </div>
-                <div id="frais-divers-liste" style="display: grid; gap: 10px;">
-                </div>
-            </div>
-        </div>
 
-        <!-- BLOC 2E : Produits d'accueil (Liste dynamique) -->
-        <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🧴 Produits d'accueil</h3>
-            <div class="bloc-content">
-                <div style="margin-bottom: 15px;">
-                <button type="button" onclick="ajouterProduitAccueil()" class="btn btn-secondary">➕ Ajouter un produit</button>
-            </div>
-            <div id="produits-accueil-liste" style="display: grid; gap: 10px;">
-            </div>
             </div>
         </div>
 
         <!-- BLOC 3 : Résidence principale (Bureau) -->
         <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🏡 Charges résidence principale (Bureau)</h3>
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> 🏡 Charges résidence principale (Bureau)</h3>
             <div class="bloc-content">
                 <p class="fiscal-info">⚠️ Déductibles au prorata de la surface professionnelle</p>
             
@@ -385,71 +134,60 @@
                         Ratio : 0%
                     </div>
                 </div>
+                
+                <!-- Toggle Mensuel/Annuel pour toute la section -->
+                <div style="margin-bottom: 20px; padding: 12px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; gap: 15px;">
+                    <label style="font-weight: 600; margin: 0;">Périodicité des charges :</label>
+                    <button type="button" class="btn-toggle-period active" data-period="mensuel" data-section="residence" onclick="togglePeriodSection('residence', 'mensuel')">Mensuel</button>
+                    <button type="button" class="btn-toggle-period" data-period="annuel" data-section="residence" onclick="togglePeriodSection('residence', 'annuel')">Annuel</button>
+                </div>
             
                 <div class="fiscal-grid">
                 <div class="form-group">
                     <label>Intérêts emprunt résidence</label>
-                    <div class="input-with-select">
-                        <select id="interets_residence_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="interets_residence" step="0.01" placeholder="0.00">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="interets_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="interets_residence">mensuel</span>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label>Assurance emprunteur résidence</label>
-                    <div class="input-with-select">
-                        <select id="assurance_residence_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="assurance_residence" step="0.01" placeholder="0.00">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="assurance_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="assurance_residence">mensuel</span>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label>Électricité résidence</label>
-                    <div class="input-with-select">
-                        <select id="electricite_residence_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="electricite_residence" step="0.01" placeholder="0.00">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="electricite_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="electricite_residence">mensuel</span>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label>Internet résidence</label>
-                    <div class="input-with-select">
-                        <select id="internet_residence_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="internet_residence" step="0.01" placeholder="0.00">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="internet_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="internet_residence">mensuel</span>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label>Eau résidence</label>
-                    <div class="input-with-select">
-                        <select id="eau_residence_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="eau_residence" step="0.01" placeholder="0.00">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="eau_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="eau_residence">mensuel</span>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label>Assurance habitation résidence</label>
-                    <div class="input-with-select">
-                        <select id="assurance_hab_residence_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="assurance_hab_residence" step="0.01" placeholder="0.00">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="assurance_hab_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="assurance_hab_residence">mensuel</span>
                     </div>
                 </div>
                 
@@ -463,54 +201,62 @@
 
         <!-- BLOC 4 : Frais professionnels -->
         <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 💼 Frais professionnels (100% déductibles)</h3>
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> 💼 Frais professionnels (100% déductibles)</h3>
             <div class="bloc-content">
+                
+                <!-- Toggle Mensuel/Annuel pour toute la section -->
+                <div style="margin-bottom: 20px; padding: 12px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; gap: 15px;">
+                    <label style="font-weight: 600; margin: 0;">Périodicité des frais :</label>
+                    <button type="button" class="btn-toggle-period active" data-period="mensuel" data-section="frais_pro" onclick="(function(e){e.stopPropagation(); togglePeriodSection('frais_pro', 'mensuel');})(event)">Mensuel</button>
+                    <button type="button" class="btn-toggle-period" data-period="annuel" data-section="frais_pro" onclick="(function(e){e.stopPropagation(); togglePeriodSection('frais_pro', 'annuel');})(event)">Annuel</button>
+                </div>
+                
                 <div class="fiscal-grid">
-                <div class="form-group">
-                    <label>Comptable (annuel)</label>
-                    <input type="number" id="comptable" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>Frais bancaires (annuel)</label>
-                    <input type="number" id="frais_bancaires" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>Téléphone</label>
-                    <div class="input-with-select">
-                        <select id="telephone_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="telephone" step="0.01" placeholder="0.00">
-            </div>
-        </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Matériel informatique (annuel)</label>
-                    <input type="number" id="materiel_info" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>RC Professionnelle (annuel)</label>
-                    <input type="number" id="rc_pro" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>Formation (annuel)</label>
-                    <input type="number" id="formation" step="0.01" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label>Fournitures</label>
-                    <div class="input-with-select">
-                        <select id="fournitures_type" class="type-select">
-                            <option value="mensuel">Mensuel</option>
-                            <option value="annuel">Annuel</option>
-                        </select>
-                        <input type="number" id="fournitures" step="0.01" placeholder="0.00">
+                    <div class="form-group">
+                        <label>Comptable</label>
+                        <input type="number" id="comptable" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Frais bancaires</label>
+                        <input type="number" id="frais_bancaires" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <div class="input-with-select">
+                            <select id="telephone_type" class="type-select">
+                                <option value="mensuel">Mensuel</option>
+                                <option value="annuel">Annuel</option>
+                            </select>
+                            <input type="number" id="telephone" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Matériel informatique</label>
+                        <input type="number" id="materiel_info" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>RC Professionnelle</label>
+                        <input type="number" id="rc_pro" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Formation</label>
+                        <input type="number" id="formation" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fournitures</label>
+                        <div class="input-with-select">
+                            <select id="fournitures_type" class="type-select">
+                                <option value="mensuel">Mensuel</option>
+                                <option value="annuel">Annuel</option>
+                            </select>
+                            <input type="number" id="fournitures" step="0.01" placeholder="0.00">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -518,23 +264,97 @@
 
         <!-- BLOC 5 : Véhicule -->
         <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🚗 Frais de véhicule (Barème kilométrique 2024)</h3>
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> 🚗 Frais de véhicule & Kilomètres professionnels</h3>
             <div class="bloc-content">
-                <div class="fiscal-grid">
-                    <div class="form-group">
-                        <label>Puissance fiscale (CV)</label>
-                        <select id="puissance_fiscale" onchange="calculerTempsReel()">
-                            <option value="3">3 CV</option>
-                            <option value="4">4 CV</option>
-                            <option value="5" selected>5 CV</option>
-                            <option value="6">6 CV</option>
-                            <option value="7">7 CV et +</option>
-                        </select>
+                <!-- Champs cachés pour la compatibilité -->
+                <input type="hidden" id="vehicule_type" value="thermique">
+                <input type="hidden" id="puissance_fiscale" value="5">
+                <input type="hidden" id="km_professionnels" value="0">
+                <input type="hidden" id="montant_frais_km" value="0">
+                
+                <!-- Configuration principale -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                    <!-- Configuration véhicule -->
+                    <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="font-size: 2rem; margin-right: 12px;">🚙</div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; color: #1565c0; font-size: 1.1rem; font-weight: 600;">Mon véhicule</h4>
+                                <div id="vehicule-resume" style="margin-top: 6px; font-size: 0.9rem; color: #546e7a; font-weight: 500;">
+                                    <!-- Résumé rempli dynamiquement -->
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="afficherModalConfigVehicule()" class="btn-neo-secondary" style="width: 100%; justify-content: center; background: white; color: #1565c0; font-weight: 600;">
+                            ⚙️ Configurer mon véhicule
+                        </button>
+                    </div>
+
+                    <!-- Configuration automatisation -->
+                    <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffe082 100%); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="font-size: 2rem; margin-right: 12px;">⚡</div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; color: #f57c00; font-size: 1.1rem; font-weight: 600;">Automatisation</h4>
+                                <p style="margin: 6px 0 0; font-size: 0.85rem; color: #795548;">Générer vos trajets automatiquement</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="afficherModalConfigKm()" class="btn-neo-secondary" style="width: 100%; justify-content: center; background: white; color: #f57c00; font-weight: 600;">
+                            ⚙️ Configurer l'automatisation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Résumé annuel -->
+                <div id="km-resume-annuel" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
+                        <div>
+                            <div style="font-size: 0.85rem; color: #2e7d32; font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">Distance totale</div>
+                            <div id="km-total-annuel" style="font-size: 2rem; font-weight: 700; color: #1b5e20;">0 km</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #2e7d32; font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">Nombre de trajets</div>
+                            <div id="km-nombre-trajets" style="font-size: 2rem; font-weight: 700; color: #1b5e20;">0</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #2e7d32; font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">Montant déductible</div>
+                            <div id="km-montant-total" style="font-size: 2rem; font-weight: 700; color: #1b5e20;">0,00 €</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestion des trajets -->
+                <div style="background: white; padding: 20px; border-radius: 12px; border: 2px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <!-- Header avec actions -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f5f5f5;">
+                        <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem; font-weight: 600;">
+                            🗓️ Historique des trajets
+                        </h4>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" onclick="afficherModalLieuxFavoris()" class="btn-neo-secondary">
+                                📍 Gérer mes lieux
+                            </button>
+                            <button type="button" onclick="afficherModalAjoutTrajet()" class="btn-neo">
+                                ➕ Ajouter un trajet
+                            </button>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Kilomètres professionnels</label>
-                        <input type="number" id="km_professionnels" step="1" placeholder="5000" oninput="calculerTempsReel()">
+                    <!-- Résumé mensuel -->
+                    <div id="km-resume-mensuel" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <!-- Cartes mensuelles avec bouton Voir -->
+                    </div>
+                    
+                    <!-- Liste des trajets (masquée par défaut) -->
+                    <div id="km-liste-trajets" style="display: none; gap: 10px; max-height: 450px; overflow-y: auto; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                        <!-- Trajets affichés quand on clique sur Voir -->
+                    </div>
+                    
+                    <!-- Footer avec export -->
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 2px solid #f5f5f5;">
+                        <button type="button" onclick="exporterTrajetsCSV()" class="btn-neo-secondary">
+                            📊 Exporter en Excel
+                        </button>
                     </div>
                 </div>
             </div>
@@ -542,7 +362,7 @@
 
         <!-- Résultats Fiscaux -->
         <div class="fiscal-bloc collapsible collapsed" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; margin-top: 30px;">
-            <h3 class="fiscal-bloc-title" style="color: white; cursor: pointer;" onclick="toggleBloc(this)">
+            <h3 class="fiscal-bloc-title" style="color: white !important; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; font-weight: 700 !important; background: transparent !important; border-bottom: none !important;">
                 <span class="toggle-icon">▼</span> 📊 RÉSULTATS FISCAUX
             </h3>
             <div class="bloc-content">
@@ -566,8 +386,20 @@
                     <h4 style="color: white; margin-bottom: 15px; font-size: 1rem;">📋 Détails URSSAF :</h4>
                     <div style="display: grid; gap: 8px;">
                         <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                            <span>Cotisations sociales (22%)</span>
-                            <strong id="detail-sociales">0 €</strong>
+                            <span>Indemnités journalières (0.85%)</span>
+                            <strong id="detail-indemnites">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Retraite de base (17.75%)</span>
+                            <strong id="detail-retraite-base">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Retraite complémentaire (7%)</span>
+                            <strong id="detail-retraite-compl">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Invalidité-Décès (1.3%)</span>
+                            <strong id="detail-invalidite">0 €</strong>
                         </div>
                         <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
                             <span>CSG/CRDS (9.7%)</span>
@@ -590,6 +422,9 @@
                             <strong id="detail-trimestres">0</strong>
                         </div>
                     </div>
+                    <div style="background: rgba(52, 152, 219, 0.2); padding: 10px; border-radius: 4px; font-size: 0.85rem; margin-top: 10px; border-left: 3px solid #3498db;">
+                        💡 <strong>Régime LMP au réel :</strong> Les cotisations sont calculées uniquement sur le bénéfice imposable. Les taux sont mis à jour automatiquement selon l'année en cours.
+                    </div>
                 </div>
                 
                 <div id="alerte-retraite" style="display: none; background: #e74c3c; padding: 12px; border-radius: 8px; font-weight: 600;">
@@ -598,19 +433,38 @@
             </div>
         </div>
 
+        <!-- ========== SECTION PERSONNELLE (optionnelle) ========== -->
+        <div id="section-personnelle" style="display: none;">
+        
         <!-- Calcul Impôt sur le Revenu -->
         <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🧾 Calcul Impôt sur le Revenu (IR)</h3>
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> 🧾 Calcul Impôt sur le Revenu (IR)</h3>
             <div class="bloc-content">
                 <div class="fiscal-grid">
                     <div class="form-group">
                         <label>Salaire annuel Madame (€)</label>
-                        <input type="number" id="salaire_madame" step="0.01" placeholder="0.00" oninput="calculerIR()">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="salaire_madame" step="0.01" placeholder="0.00" oninput="calculerIR()" style="flex: 1;">
+                            <button type="button" onclick="openFraisReelsSalarieModal('madame')" style="padding: 8px 16px; background: #2196f3; color: white; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                                ⚙️ Frais
+                            </button>
+                        </div>
+                        <div id="frais-madame-info" style="display: none; margin-top: 5px; font-size: 0.85rem; color: #666; padding: 5px 10px; background: #e3f2fd; border-radius: 4px;">
+                            <strong>Déduction :</strong> <span id="frais-madame-montant">0 €</span>
+                        </div>
                     </div>
                     
                     <div class="form-group">
                         <label>Salaire annuel Monsieur (€)</label>
-                        <input type="number" id="salaire_monsieur" step="0.01" placeholder="0.00" oninput="calculerIR()">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="salaire_monsieur" step="0.01" placeholder="0.00" oninput="calculerIR()" style="flex: 1;">
+                            <button type="button" onclick="openFraisReelsSalarieModal('monsieur')" style="padding: 8px 16px; background: #2196f3; color: white; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                                ⚙️ Frais
+                            </button>
+                        </div>
+                        <div id="frais-monsieur-info" style="display: none; margin-top: 5px; font-size: 0.85rem; color: #666; padding: 5px 10px; background: #e3f2fd; border-radius: 4px;">
+                            <strong>Déduction :</strong> <span id="frais-monsieur-montant">0 €</span>
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -630,6 +484,8 @@
                         </select>
                     </div>
                 </div>
+                
+                <!-- Champs cachés pour compatibilité - SUPPRIMÉS -->
                 
                 <div id="resultat-ir" style="display: none; margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 10px;">
                     <div style="display: grid; gap: 10px;">
@@ -658,52 +514,51 @@
             </div>
         </div>
 
+        <!-- BLOC : Crédits personnels (section personnelle) -->
+        <div class="fiscal-bloc collapsible collapsed">
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> 💳 Crédits personnels</h3>
+            <div class="bloc-content">
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #856404; font-size: 0.95rem;">
+                        ℹ️ Enregistrez vos crédits mensuels personnels (immobilier, auto, conso...) pour calculer votre reste à vivre.
+                    </p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h4 style="margin: 0; color: #2c3e50;">📋 Liste des crédits</h4>
+                    <button type="button" onclick="ajouterLigneCredit()" class="btn-neo">
+                        ➕ Ajouter un crédit
+                    </button>
+                </div>
+
+                <!-- Liste des crédits -->
+                <div id="liste-credits-personnels" style="display: grid; gap: 10px; margin-bottom: 20px;">
+                    <!-- Lignes générées dynamiquement -->
+                </div>
+
+                <!-- Récapitulatif -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">💳 Total mensuel des crédits personnels</div>
+                            <div id="total-credits-display" style="font-size: 2rem; font-weight: 700; margin-top: 5px;">0.00 €</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- BLOC : Total Charges Annuelles -->
         <div class="fiscal-bloc collapsible collapsed" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; margin-top: 30px;">
-            <h3 class="fiscal-bloc-title" style="color: white; cursor: pointer;" onclick="toggleBloc(this)">
+            <h3 class="fiscal-bloc-title" style="color: white !important; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; font-weight: 700 !important; background: transparent !important; border-bottom: none !important;">
                 <span class="toggle-icon">▼</span> 💼 TOTAL CHARGES ANNUELLES
             </h3>
             <div class="bloc-content">
                 <p style="color: white; opacity: 0.9; margin-bottom: 20px;">Récapitulatif de toutes les charges pour le calcul du bénéfice</p>
                 
                 <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                    <div style="display: grid; gap: 8px;">
-                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                            <span>Charges Couzon</span>
-                            <strong id="total-charges-couzon">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                            <span>Charges Trevoux</span>
-                            <strong id="total-charges-trevoux">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                            <span>Charges Résidence (proratisées)</span>
-                            <strong id="total-charges-residence">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                            <span>Frais Professionnels</span>
-                            <strong id="total-frais-pro">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                            <span>Frais Véhicule</span>
-                            <strong id="total-frais-vehicule">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                            <span>Travaux</span>
-                            <strong id="total-travaux">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                            <span>Frais Divers</span>
-                            <strong id="total-frais-divers">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                            <span>Produits d'accueil</span>
-                            <strong id="total-produits-accueil">0 €</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 4px; font-weight: 700; margin-top: 10px; font-size: 1.1rem;">
-                            <span>TOTAL CHARGES</span>
-                            <strong id="total-charges-annuelles">0 €</strong>
-                        </div>
+                    <div id="total-charges-container" style="display: grid; gap: 8px;">
+                        <!-- Les charges par gîte seront générées dynamiquement -->
                     </div>
                 </div>
             </div>
@@ -711,23 +566,12 @@
 
         <!-- BLOC : Reste à vivre -->
         <div class="fiscal-bloc collapsible collapsed">
-            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
+            <h3 class="fiscal-bloc-title" style="font-weight: 700;">
                 <span class="toggle-icon">▼</span> 💰 Reste à vivre après crédits
             </h3>
             <div class="bloc-content">
                 <p style="color: #7f8c8d; margin-bottom: 20px;">Calculez votre reste à vivre mensuel en intégrant tous vos revenus (salaires, LMP, amortissements) et toutes vos charges (crédits, frais personnels).</p>
                 
-                <!-- Crédits en cours -->
-                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
-                    <h4 style="margin-bottom: 15px; color: #856404;">📋 Crédits en cours</h4>
-                    <div id="credits-liste" style="display: grid; gap: 10px; margin-bottom: 15px;">
-                        <!-- Les crédits seront ajoutés ici dynamiquement -->
-                    </div>
-                    <button type="button" onclick="ajouterCredit()" class="btn btn-secondary" style="width: 100%;">
-                        ➕ Ajouter un crédit
-                    </button>
-                </div>
-
                 <!-- Frais personnels mensuels -->
                 <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
                     <h4 style="margin-bottom: 15px; color: #1565c0;">🏠 Frais personnels mensuels (maison)</h4>
@@ -822,259 +666,401 @@
                 </div>
             </div>
         </div>
+        
+        <!-- SECTION SUIVI TRÉSORERIE (simplifiée) -->
+        <div class="fiscal-bloc collapsible collapsed" style="margin-top: 30px;">
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> 💰 Suivi Trésorerie Mensuelle</h3>
+            <div class="bloc-content">
+                <p style="color: #7f8c8d; margin-bottom: 20px;">Ajoutez vos soldes mensuels pour alimenter le graphique du dashboard.</p>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" onclick="afficherModalAjoutSolde()" class="btn-neo">
+                        ➕ Ajouter un solde
+                    </button>
+                    <button type="button" onclick="afficherHistoriqueSoldes()" class="btn-neo-secondary">
+                        👁️ Voir l'historique
+                    </button>
+                    <button type="button" onclick="exporterSoldesCSV()" class="btn-neo-secondary">
+                        📥 Exporter
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        </div>
+        <!-- ========== FIN SECTION PERSONNELLE ========== -->
 
     </form>
     
-    <!-- SECTION SUIVI TRÉSORERIE -->
-    <div class="fiscal-bloc" style="margin-top: 40px; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
-        <div onclick="toggleSlide('slide-tresorerie')" style="cursor: pointer; padding: 20px; background: linear-gradient(135deg, #3498DB 0%, #2874A6 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">
-                💰 Suivi Trésorerie Mensuelle
-            </h3>
-            <span id="slide-tresorerie-icon" style="font-size: 1.5rem; transition: transform 0.3s;">▼</span>
+</div>
+
+<!-- ==========================================
+     MODAL OPTIONS PERSONNELLES
+     ========================================== -->
+<div id="modal-options" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: #2D3436;">⚙️ Options personnelles</h3>
+            <button onclick="fermerModalOptions()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
         </div>
-        <div id="slide-tresorerie" class="bloc-content" style="display: none; padding: 20px;">
-            <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
-                <label for="annee_tresorerie" style="margin: 0;">Année :</label>
-                <input type="number" id="annee_tresorerie" min="2020" max="2050" style="max-width: 120px; padding: 8px;">
-                <button type="button" onclick="chargerSoldesBancaires()" class="btn btn-secondary" style="padding: 8px 15px;">📥 Charger</button>
-                <button type="button" onclick="sauvegarderSoldesBancaires()" class="btn btn-primary" style="padding: 8px 15px;">💾 Sauvegarder</button>
-                <div style="margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap;">
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                        <input type="radio" name="vue_graphique" value="annee" checked onchange="afficherGraphiqueSoldes()"> Par année
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                💡 Activez les options personnelles pour accéder aux calculs d'impôts, crédits et reste à vivre.
+            </p>
+        </div>
+        
+        <div style="padding: 20px; background: #f8f9fa; border-radius: 8px; margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; font-size: 1rem;">
+                <input type="checkbox" id="checkbox-activer-perso" onchange="toggleOptionsPersonnelles()" style="width: 24px; height: 24px; cursor: pointer;">
+                <span style="font-weight: 600;">✅ Activer les options personnelles</span>
+            </label>
+            <p style="margin: 10px 0 0 39px; font-size: 0.85rem; color: #666;">
+                Inclut : Impôt sur le revenu, Crédits personnels, Reste à vivre, Trésorerie mensuelle
+            </p>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end;">
+            <button type="button" onclick="fermerModalOptions()" class="btn-neo">✓ Valider</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     MODALS - GESTION TRÉSORERIE
+     ========================================== -->
+
+<!-- Modal : Ajouter un solde -->
+<div id="modal-ajout-solde" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: #2D3436;">💰 Ajouter un solde bancaire</h3>
+            <button onclick="fermerModalAjoutSolde()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+        </div>
+        
+        <div class="fiscal-grid" style="gap: 15px;">
+            <div class="form-group">
+                <label>Date du relevé *</label>
+                <input type="date" id="modal-solde-date" required style="padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+            </div>
+            
+            <div class="form-group">
+                <label>Solde bancaire (€) *</label>
+                <input type="number" id="modal-solde-montant" step="0.01" required placeholder="0.00" style="padding: 10px; border: 2px solid #ddd; border-radius: 6px; text-align: right;">
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button type="button" onclick="fermerModalAjoutSolde()" class="btn-neo-secondary">Annuler</button>
+            <button type="button" onclick="enregistrerSolde()" class="btn-neo">💾 Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal : Historique des soldes -->
+<div id="modal-historique-soldes" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: #2D3436;">👁️ Historique des soldes</h3>
+            <button onclick="fermerModalHistoriqueSoldes()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+        </div>
+        
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+            <label>Filtrer par année :</label>
+            <select id="modal-historique-annee" onchange="chargerHistoriqueSoldes()" style="padding: 8px; border: 2px solid #ddd; border-radius: 6px;">
+                <!-- Généré dynamiquement -->
+            </select>
+            <button type="button" onclick="chargerHistoriqueSoldes()" class="btn-neo-secondary">🔄 Actualiser</button>
+        </div>
+        
+        <div style="max-height: 500px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="position: sticky; top: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <tr>
+                        <th style="padding: 12px; text-align: left;">Date</th>
+                        <th style="padding: 12px; text-align: right;">Solde (€)</th>
+                        <th style="padding: 12px; text-align: center; width: 80px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-historique-soldes">
+                    <!-- Généré dynamiquement -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     MODALS - GESTION KILOMÈTRES
+     ========================================== -->
+
+<!-- Modal : Ajouter un trajet -->
+<div id="modal-ajout-trajet" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: #2D3436;">➕ Ajouter un trajet</h3>
+            <button onclick="fermerModalTrajet()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+        </div>
+        
+        <form id="form-ajout-trajet" onsubmit="soumettreTrajet(event)">
+            <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Date du trajet *</label>
+                    <input type="date" id="trajet-date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Type de trajet *</label>
+                    <select id="trajet-type" required onchange="updateMotifTrajet()">
+                        <option value="menage_entree">Ménage entrée</option>
+                        <option value="menage_sortie">Ménage sortie</option>
+                        <option value="courses">Courses</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Motif *</label>
+                    <input type="text" id="trajet-motif" placeholder="Ex: Ménage entrée - Gîte La Roseraie" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Départ</label>
+                    <input type="text" id="trajet-depart" placeholder="Domicile (par défaut)" value="Domicile">
+                </div>
+                
+                <div class="form-group">
+                    <label>Destination *</label>
+                    <select id="trajet-destination" required onchange="updateDistanceTrajet()">
+                        <option value="">-- Choisir --</option>
+                        <optgroup label="Gîtes" id="optgroup-gites-trajet"></optgroup>
+                        <optgroup label="Lieux favoris" id="optgroup-lieux-trajet"></optgroup>
+                        <option value="autre">🖊️ Autre (saisir manuellement)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="trajet-destination-autre-group" style="display: none;">
+                    <label>Nom destination</label>
+                    <input type="text" id="trajet-destination-autre" placeholder="Ex: Leroy Merlin Cahors">
+                </div>
+                
+                <div class="form-group">
+                    <label>Distance aller (km) *</label>
+                    <input type="number" id="trajet-distance" step="0.1" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="trajet-aller-retour" checked style="width: auto; margin-right: 5px;">
+                        Aller-retour
                     </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                        <input type="radio" name="vue_graphique" value="generale" onchange="afficherGraphiqueSoldes()"> Vue générale
-                    </label>
-                    <button type="button" onclick="afficherGraphiqueSoldes()" class="btn btn-secondary" style="padding: 8px 15px;">📊 Actualiser</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>Distance totale (calculée)</label>
+                    <input type="number" id="trajet-distance-totale" readonly style="background: #e8f5e9; font-weight: 600;">
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Notes</label>
+                    <textarea id="trajet-notes" rows="2" placeholder="Notes optionnelles..."></textarea>
                 </div>
             </div>
             
-            <!-- Tableau de saisie mensuelle -->
-            <div style="overflow-x: auto; margin-bottom: 30px;">
-                <table id="tableau-soldes" style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: var(--primary); color: white;">
-                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Mois</th>
-                            <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Solde en banque (€)</th>
-                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-soldes">
-                        <!-- Généré dynamiquement par genererTableauSoldes() -->
-                    </tbody>
-                </table>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="fermerModalTrajet()" class="btn-neo-secondary">Annuler</button>
+                <button type="submit" class="btn-neo">💾 Enregistrer</button>
             </div>
-            
-            <!-- Graphique -->
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <canvas id="graphique-soldes" style="max-height: 400px;"></canvas>
-            </div>
-        </div>
+        </form>
     </div>
-    
 </div>
 
-<style>
-.fiscal-bloc {
-    background: white;
-    border-radius: 15px;
-    padding: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
+<!-- Modal : Configuration automatisation -->
+<div id="modal-config-km" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: #2D3436;">⚙️ Configuration automatisation</h3>
+            <button onclick="fermerModalConfigKm()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+        </div>
+        
+        <form id="form-config-km" onsubmit="sauvegarderConfigKm(event)">
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <p style="margin: 0 0 15px 0; color: #666; font-size: 0.95rem;">
+                    Cochez les types de trajets que vous souhaitez créer automatiquement lors de l'ajout d'une réservation :
+                </p>
+                
+                <div style="display: grid; gap: 12px;">
+                    <label style="display: flex; align-items: center; padding: 10px; background: white; border-radius: 6px; cursor: pointer;">
+                        <input type="checkbox" id="config-auto-menage-entree" style="width: auto; margin-right: 10px;">
+                        <div>
+                            <strong>Ménage entrée</strong>
+                            <div style="font-size: 0.85rem; color: #666;">Créer un trajet la veille de l'arrivée client</div>
+                        </div>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; padding: 10px; background: white; border-radius: 6px; cursor: pointer;">
+                        <input type="checkbox" id="config-auto-menage-sortie" style="width: auto; margin-right: 10px;">
+                        <div>
+                            <strong>Ménage sortie</strong>
+                            <div style="font-size: 0.85rem; color: #666;">Créer un trajet le jour du départ client</div>
+                        </div>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; padding: 10px; background: white; border-radius: 6px; cursor: pointer;">
+                        <input type="checkbox" id="config-auto-courses" style="width: auto; margin-right: 10px;">
+                        <div>
+                            <strong>Courses</strong>
+                            <div style="font-size: 0.85rem; color: #666;">Créer un trajet courses avant l'arrivée</div>
+                        </div>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; padding: 10px; background: white; border-radius: 6px; cursor: pointer;">
+                        <input type="checkbox" id="config-auto-maintenance" style="width: auto; margin-right: 10px;">
+                        <div>
+                            <strong>Maintenance</strong>
+                            <div style="font-size: 0.85rem; color: #666;">Créer un trajet de maintenance périodique</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="fermerModalConfigKm()" class="btn-neo-secondary">Annuler</button>
+                <button type="submit" class="btn-neo">💾 Sauvegarder</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-.fiscal-bloc-title {
-    font-size: 1.4rem;
-    color: var(--primary);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+<!-- Modal : Gestion lieux favoris -->
+<div id="modal-lieux-favoris" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: #2D3436;">📍 Gérer mes lieux</h3>
+            <button onclick="fermerModalLieuxFavoris()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+        </div>
+        
+        <!-- Gîtes -->
+        <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="margin-bottom: 15px; color: #6a1b9a;">🏠 Mes gîtes</h4>
+            <div id="liste-distances-gites" style="display: grid; gap: 10px;">
+                <!-- Généré dynamiquement -->
+            </div>
+        </div>
+        
+        <!-- Magasins et autres lieux -->
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h4 style="margin: 0; color: #1565c0;">🏪 Magasins & autres lieux</h4>
+                <button type="button" onclick="afficherFormulaireNouveauLieu()" class="btn-neo-secondary">➕ Ajouter</button>
+            </div>
+            
+            <div id="form-nouveau-lieu" style="display: none; background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                <div class="fiscal-grid">
+                    <div class="form-group">
+                        <label>Nom du lieu *</label>
+                        <input type="text" id="nouveau-lieu-nom" placeholder="Ex: Intermarché Cahors">
+                    </div>
+                    <div class="form-group">
+                        <label>Distance (km) *</label>
+                        <input type="number" id="nouveau-lieu-distance" step="0.1" min="0">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Adresse (optionnel)</label>
+                        <input type="text" id="nouveau-lieu-adresse" placeholder="Adresse complète">
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                    <button type="button" onclick="annulerNouveauLieu()" class="btn-neo-secondary">Annuler</button>
+                    <button type="button" onclick="enregistrerNouveauLieu()" class="btn-neo">💾 Enregistrer</button>
+                </div>
+            </div>
+            
+            <div id="liste-lieux-favoris" style="display: grid; gap: 8px;">
+                <!-- Généré dynamiquement -->
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <button type="button" onclick="fermerModalLieuxFavoris()" class="btn-neo">Fermer</button>
+        </div>
+    </div>
+</div>
+<!-- Modal : Configuration véhicule -->
+<div id="modal-config-vehicule" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: #2D3436;">🚙 Configuration de mon véhicule</h3>
+            <button onclick="fermerModalConfigVehicule()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+        </div>
+        
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px;">
+            <div class="fiscal-grid" style="gap: 15px;">
+                <div class="form-group">
+                    <label>Type de véhicule *</label>
+                    <select id="modal-vehicule-type" onchange="togglePuissanceFieldModal()">
+                        <option value="thermique" selected>🛢️ Thermique (essence/diesel)</option>
+                        <option value="electrique">⚡ Électrique</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="modal-puissance-group">
+                    <label>Puissance fiscale (CV) *</label>
+                    <select id="modal-puissance-fiscale">
+                        <option value="3">3 CV</option>
+                        <option value="4">4 CV</option>
+                        <option value="5" selected>5 CV</option>
+                        <option value="6">6 CV</option>
+                        <option value="7">7 CV et +</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.6); padding: 15px; border-radius: 6px; margin-top: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 0.95rem;">📊 Informations calculées</h4>
+                <div style="display: grid; gap: 8px; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Total km professionnels :</span>
+                        <strong id="modal-km-total">0 km</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Montant déductible 2024 :</span>
+                        <strong id="modal-montant-deductible" style="color: #27ae60;">0,00 €</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button type="button" onclick="fermerModalConfigVehicule()" class="btn-neo-secondary">Annuler</button>
+            <button type="button" onclick="enregistrerConfigVehicule()" class="btn-neo">💾 Enregistrer</button>
+        </div>
+    </div>
+</div>
 
-.fiscal-info {
-    background: #fff3cd;
-    border-left: 4px solid #ffc107;
-    color: #856404;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-}
-
-.fiscal-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    max-width: 900px;
-    gap: 20px;
-}
-
-.input-with-select {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.type-select {
-    min-width: 85px;
-    max-width: 85px;
-    padding: 8px 4px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-}
-
-.input-with-select input {
-    flex: 1;
-    min-width: 0;
-}
-
-.liste-item {
-    display: grid;
-    grid-template-columns: 1fr 120px 150px 40px;
-    gap: 10px;
-    align-items: center;
-    background: #f8f9fa;
-    padding: 10px;
-    border-radius: 8px;
-    border-left: 4px solid var(--primary);
-}
-
-.liste-item input,
-.liste-item select {
-    padding: 8px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-}
-
-.liste-item button {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.liste-item button:hover {
-    background: #c0392b;
-}
-
-.credit-item {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 40px;
-    gap: 10px;
-    align-items: center;
-    background: #fff;
-    padding: 12px;
-    border-radius: 8px;
-    border-left: 4px solid #ffc107;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.credit-item input {
-    padding: 8px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-}
-
-.credit-item button {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.credit-item button:hover {
-    background: #c0392b;
-}
-
-#resultats-content {
-    background: rgba(255,255,255,0.1);
-    padding: 20px;
-    border-radius: 8px;
-}
-
-.resultat-ligne {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-.resultat-ligne.total {
-    font-size: 1.3rem;
-    font-weight: 700;
-    border-top: 2px solid white;
-    border-bottom: 2px solid white;
-    margin: 10px 0;
-}
-
-.resultat-section {
-    margin: 20px 0;
-}
-
-.resultat-section h4 {
-    color: white;
-    font-size: 1.1rem;
-    margin-bottom: 10px;
-}
-
-/* Blocs collapsibles */
-.fiscal-bloc.collapsible .fiscal-bloc-title {
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.3s ease;
-}
-
-.fiscal-bloc.collapsible .fiscal-bloc-title:hover {
-    opacity: 0.8;
-}
-
-.toggle-icon {
-    display: inline-block;
-    transition: transform 0.3s ease;
-    margin-right: 5px;
-}
-
-.fiscal-bloc.collapsible.collapsed .toggle-icon {
-    transform: rotate(-90deg);
-}
-
-.fiscal-bloc.collapsible.collapsed .bloc-content {
-    display: none;
-}
-
-.bloc-content {
-    margin-top: 20px;
-}
-</style>
-
-<script>
-window.toggleBloc = function(titleElement) {
-    const bloc = titleElement.closest('.fiscal-bloc');
-    bloc.classList.toggle('collapsed');
-}
-
-// Attacher les événements aux titres collapsibles
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.fiscal-bloc-title')) {
-        const title = e.target.closest('.fiscal-bloc-title');
-        window.toggleBloc(title);
-    }
-});
-</script>
+<!-- Modal Frais Réels Impôts -->
+<div id="modal-frais-reels" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: white; border-radius: 12px; padding: 0; max-width: 700px; width: 90%; max-height: 90vh; overflow: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <div style="background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); color: white; padding: 25px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.4rem;">🚗 Déclarer mes frais réels professionnels</h3>
+            <button onclick="closeFraisReelsModal()" style="background: transparent; border: none; color: white; font-size: 2rem; cursor: pointer;">×</button>
+        </div>
+        <div style="padding: 30px;">
+            <p style="color: #666; margin-bottom: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 6px;">⚠️ Ces frais concernent vos déplacements personnels (domicile-travail).</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div><label>Kilomètres parcourus (an)</label><input type="number" id="km_perso_impots_modal" step="1" placeholder="0" oninput="calculerFraisReelsImpots()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px;"></div>
+                <div><label>Chevaux fiscaux</label><input type="number" id="chevaux_fiscaux_impots_modal" step="1" value="5" oninput="calculerFraisReelsImpots()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px;"></div>
+                <div><label>Péages annuels (€)</label><input type="number" id="peages_impots_modal" step="0.01" placeholder="0.00" oninput="calculerFraisReelsImpots()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px;"></div>
+            </div>
+            <div style="margin-top: 25px; padding: 20px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 8px; text-align: center;">
+                <div style="font-size: 0.95rem;">💰 Déduction frais réels totale</div>
+                <div id="total-frais-reels-impots-modal" style="font-size: 2rem; font-weight: 700;">0.00 €</div>
+            </div>
+        </div>
+        <div style="padding: 20px 30px; background: #f5f5f5; border-radius: 0 0 12px 12px; display: flex; gap: 15px; justify-content: flex-end;">
+            <button onclick="closeFraisReelsModal()" style="padding: 12px 24px; background: #9e9e9e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Annuler</button>
+            <button onclick="validerFraisReels()" style="padding: 12px 24px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✓ Valider</button>
+        </div>
+    </div>
+</div>

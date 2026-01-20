@@ -1,0 +1,609 @@
+// ==========================================
+// 📅 MODULE GESTION DES RÉSERVATIONS
+// ==========================================
+// Fonctions de recherche, affichage, modification et suppression des réservations
+
+// ==========================================// UTILITAIRES
+// ==========================================
+
+/**
+ * Échapper les caractères HTML pour éviter les erreurs de syntaxe
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ==========================================// � ACTUALISATION FORCÉE
+// ==========================================
+
+async function forceRefreshReservations() {
+    // Afficher un indicateur de chargement
+    const btn = event?.target || document.querySelector('button[onclick*="forceRefreshReservations"]');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Actualisation...';
+    }
+    
+    try {
+        // Lancer synchronisation iCal en arrière-plan
+        if (typeof syncAllCalendars === 'function') {
+            syncAllCalendars().catch(err => console.error('Erreur sync iCal:', err));
+        }
+        
+        invalidateCache('all');
+        await updateReservationsList();
+        showToast('Données actualisées + Sync iCal lancée', 'success');
+    } catch (error) {
+        console.error('❌ Erreur actualisation:', error);
+        showToast('Erreur lors de l\'actualisation', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+}
+
+// ==========================================
+// �🔍 RECHERCHE RÉSERVATIONS
+// ==========================================
+
+async function filterReservations(searchTerm) {
+    // forceRefresh=true pour toujours avoir les dernières données
+    const reservations = await getAllReservations(true);
+    
+    if (!searchTerm || searchTerm.trim() === '') {
+        // Pas de recherche, afficher tout
+        updateReservationsList();
+        return;
+    }
+    
+    const term = searchTerm.toLowerCase().trim();
+    const filtered = reservations.filter(r => {
+        return (
+            (r.nom && r.nom.toLowerCase().includes(term)) ||
+            (r.telephone && r.telephone.includes(term)) ||
+            (r.gite && r.gite.toLowerCase().includes(term)) ||
+            (r.site && r.site.toLowerCase().includes(term)) ||
+            (r.provenance && r.provenance.toLowerCase().includes(term))
+        );
+    });
+    
+    // Afficher résultats
+    displayFilteredReservations(filtered);
+}
+
+function displayFilteredReservations(reservations) {
+    const container = document.getElementById('planning-container');
+    
+    if (reservations.length === 0) {
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucun résultat</p>');
+        return;
+    }
+    
+    let html = '<div class="planning-weeks"><h3 style="margin-bottom: 20px;">🔍 Résultats de recherche (' + reservations.length + ')</h3>';
+    
+    reservations.forEach(r => {
+        const platformLogo = getPlatformLogo(r.site);
+        const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 600;">✓</span>' : '';
+        const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.9rem;">📱 ${r.telephone}</span>` : '';
+        
+        const isIncomplete = !r.nom || r.nom.includes('⚠️') || r.nom.includes('À COMPLÉTER') || r.nom.includes('Client');
+        const incompleteBadge = isIncomplete ? 
+            '<span style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 8px;">⚠️ À COMPLÉTER</span>' : 
+            '';
+        
+        html += `
+            <div class="week-reservation" style="margin-bottom: 15px; padding: 12px; border-radius: 12px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); ${isIncomplete ? 'border-left: 4px solid #ff6b6b;' : ''}">
+                <div style="position: relative;">
+                    <div style="position: absolute; top: 0; right: 0; display: flex; gap: 4px;">
+                        <button onclick="openEditModal(${r.id})" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Modifier">✏️</button>
+                        <button onclick="aperçuFicheClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Page Client">📄</button>
+                        <button onclick="deleteReservationById(${r.id})" style="background: #ffebee; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Supprimer">🗑️</button>
+                    </div>
+                    
+                    <div style="font-weight: 700; font-size: 1.15rem; color: #0f172a; margin-bottom: 8px;">
+                        ${escapeHtml(r.nom)}${messageEnvoye}${incompleteBadge}
+                    </div>
+                    
+                    <div style="font-size: 1.05rem; color: #334155; margin-bottom: 8px;">
+                        📅 <strong>${formatDate(r.dateDebut)} → ${formatDate(r.dateFin)}</strong>${telephoneDisplay}<br>
+                        💰 <strong>${r.montant.toFixed(2)} €</strong> • ${platformLogo}
+                    </div>
+                    
+                    <div style="font-size: 0.9rem; color: #64748b;">
+                        🏠 ${r.gite}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    window.SecurityUtils.setInnerHTML(container, html);
+}
+
+// ==========================================
+// ✏️ ÉDITION RÉSERVATIONS
+// ==========================================
+
+function openEditModal(id) {
+    getAllReservations(true).then(reservations => {
+        const reservation = reservations.find(r => r.id === id);
+        if (!reservation) return;
+        
+        document.getElementById('editId').value = reservation.id;
+        document.getElementById('editNom').value = reservation.nom;
+        document.getElementById('editTelephone').value = reservation.telephone || '';
+        document.getElementById('editProvenance').value = reservation.provenance || '';
+        document.getElementById('editNbPersonnes').value = reservation.nbPersonnes || '';
+        document.getElementById('editMontant').value = reservation.montant;
+        document.getElementById('editAcompte').value = reservation.acompte || 0;
+        document.getElementById('editPaiement').value = reservation.paiement;
+        
+        document.getElementById('editModal').classList.add('show');
+    });
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('show');
+}
+
+async function saveEditReservation(event) {
+    event.preventDefault();
+    
+    const id = parseInt(document.getElementById('editId').value);
+    const nom = document.getElementById('editNom').value.trim();
+    const telephone = document.getElementById('editTelephone').value.trim();
+    const provenance = document.getElementById('editProvenance').value.trim();
+    const nbPersonnes = document.getElementById('editNbPersonnes').value;
+    const montant = parseFloat(document.getElementById('editMontant').value);
+    const acompte = parseFloat(document.getElementById('editAcompte').value) || 0;
+    const paiement = document.getElementById('editPaiement').value;
+    
+    if (!nom) {
+        showToast('Le nom est obligatoire', 'error');
+        return;
+    }
+    
+    if (isNaN(montant)) {
+        showToast('Le montant est obligatoire', 'error');
+        return;
+    }
+    
+    try {
+        const updates = {
+            nom: nom,
+            telephone: telephone,
+            provenance: provenance,
+            nbPersonnes: nbPersonnes ? parseInt(nbPersonnes) : null,
+            montant: montant,
+            acompte: acompte,
+            restant: montant - acompte,
+            paiement: paiement
+        };
+        
+        await updateReservation(id, updates);
+        await updateReservationsList(true); // Garder la position du scroll
+        await updateStats();
+        
+        closeEditModal();
+        showToast('✓ Réservation modifiée', 'success');
+    } catch (error) {
+        console.error('❌ Erreur lors de la modification:', error);
+        showToast('Erreur lors de la modification', 'error');
+    }
+}
+
+async function updatePaiementStatus(id, newStatus) {
+    await updateReservation(id, { paiement: newStatus });
+    await updateReservationsList(true); // Garder la position du scroll
+    showToast('✓ Statut mis à jour');
+}
+
+async function deleteReservationById(id) {
+    if (confirm('Supprimer cette réservation ?')) {
+        await deleteReservation(id);
+        await updateReservationsList(true); // Garder la position du scroll
+        await updateStats();
+        await updateArchivesDisplay();
+        showToast('✓ Réservation supprimée');
+    }
+}
+
+// ==========================================
+// 📅 AFFICHAGE PLANNING PAR SEMAINE
+// ==========================================
+
+async function updateReservationsList(keepScrollPosition = false) {
+    // Mémoriser la position du scroll si demandé
+    const scrollY = keepScrollPosition ? window.scrollY : null;
+    
+    // Synchroniser les calendriers iCal UNIQUEMENT au premier chargement (pas lors des rafraîchissements)
+    // et seulement si on a des gîtes configurés
+    if (!keepScrollPosition && typeof syncAllCalendars === 'function') {
+        const gites = await window.gitesManager?.getAll() || [];
+        
+        // Vérifier si au moins un gîte a des URLs iCal configurées
+        const hasIcalConfigs = gites.some(g => {
+            if (!g.ical_sources) return false;
+            if (Array.isArray(g.ical_sources)) return g.ical_sources.length > 0;
+            if (typeof g.ical_sources === 'object') return Object.keys(g.ical_sources).length > 0;
+            return false;
+        });
+        
+        if (hasIcalConfigs) {
+            // Sync en arrière-plan, attendre le résultat pour invalider le cache
+            await syncAllCalendars().catch(err => console.warn('Sync iCal:', err.message));
+        }
+    }
+    
+    // ⚠️ IMPORTANT : forceRefresh=true pour recharger depuis BDD après sync
+    const reservations = await getAllReservations(true);
+    const gites = await window.gitesManager.getAll(); // Charger les gîtes
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Récupérer les validations de la société de ménage
+    const { data: cleaningSchedules } = await window.supabaseClient
+        .from('cleaning_schedule')
+        .select('*');
+    
+    const validationMap = {};
+    if (cleaningSchedules) {
+        cleaningSchedules.forEach(cs => {
+            validationMap[cs.reservation_id] = cs;
+        });
+    }
+    
+    // DÉDOUBLONNER par ID (comme Dashboard)
+    const uniqueById = {};
+    reservations.forEach(r => {
+        if (!uniqueById[r.id]) uniqueById[r.id] = r;
+    });
+    const uniqueReservations = Object.values(uniqueById);
+    
+    // Filtrer : date fin > aujourd'hui ET > 1 nuit (comme Dashboard)
+    const active = uniqueReservations.filter(r => {
+        const dateDebut = parseLocalDate(r.dateDebut);
+        const dateFin = parseLocalDate(r.dateFin);
+        dateDebut.setHours(0, 0, 0, 0);
+        dateFin.setHours(0, 0, 0, 0);
+        
+        // Masquer si terminée
+        if (dateFin <= today) return false;
+        
+        // Masquer les fantômes (≤ 1 nuit)
+        const nuits = Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24));
+        if (nuits <= 1) return false;
+        
+        return true;
+    });
+    
+    console.log('🔍 EXTRACTION RÉSERVATIONS:');
+    console.log('Total unique:', uniqueReservations.length);
+    console.log('Après filtre:', active.length);
+    active.slice(0, 10).forEach(r => {
+        console.log(`- ${r.dateDebut} → ${r.dateFin} | ${r.nom} | Gîte: ${r.gite} | GiteID: ${r.giteId}`);
+    });
+    
+    const container = document.getElementById('planning-container');
+    if (!container) return;
+    
+    // gites déjà chargé plus haut dans la fonction
+    
+    if (gites.length === 0) {
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">⚠️ Aucun gîte configuré. <a href="#" onclick="showGitesManager(); return false;" style="color: #667eea; text-decoration: underline;">Créer un gîte</a></p>');
+        return;
+    }
+    
+    if (active.length === 0) {
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation</p>');
+        return;
+    }
+    
+    // Organiser par gîte (dynamique)
+    const byGite = {};
+    gites.forEach(g => {
+        // Filtrer par gite_id (UUID) - utiliser r.giteId qui vient de supabase-operations
+        byGite[g.id] = active.filter(r => r.giteId === g.id);
+        // Trier par date
+        byGite[g.id].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
+    });
+    
+    // Obtenir toutes les semaines à afficher : AUJOURD'HUI jusqu'à la dernière réservation
+    const allWeeks = new Set();
+    
+    // Trouver la semaine de la dernière réservation
+    let maxWeekKey = null;
+    active.forEach(r => {
+        const start = parseLocalDate(r.dateDebut);
+        const year = start.getFullYear();
+        const weekNum = getWeekNumber(start);
+        const weekKey = `${year}-W${weekNum}`;
+        allWeeks.add(weekKey);
+        if (!maxWeekKey || weekKey > maxWeekKey) {
+            maxWeekKey = weekKey;
+        }
+    });
+    
+    // Ajouter TOUTES les semaines de AUJOURD'HUI jusqu'à la dernière réservation
+    const todayWeekNum = getWeekNumber(today);
+    const todayYear = today.getFullYear();
+    const todayWeekKey = `${todayYear}-W${todayWeekNum}`;
+    
+    // Remplir toutes les semaines entre aujourd'hui et la dernière réservation
+    if (maxWeekKey) {
+        let currentDate = new Date(today);
+        let currentWeekKey = todayWeekKey;
+        
+        while (currentWeekKey <= maxWeekKey) {
+            allWeeks.add(currentWeekKey);
+            // Passer à la semaine suivante
+            currentDate.setDate(currentDate.getDate() + 7);
+            const year = currentDate.getFullYear();
+            const weekNum = getWeekNumber(currentDate);
+            currentWeekKey = `${year}-W${weekNum}`;
+        }
+    } else {
+        // Si aucune réservation, afficher au moins la semaine actuelle
+        allWeeks.add(todayWeekKey);
+    }
+    
+    const sortedWeeks = Array.from(allWeeks).sort((a, b) => {
+        // Trier par année puis par semaine
+        return a.localeCompare(b);
+    });
+    
+    // Générer le HTML avec en-tête fixe style barre (comme l'exemple HTML fourni)
+    let html = '<div class="planning-weeks">';
+    
+    sortedWeeks.forEach(weekKey => {
+        // Extraire l'année et le numéro de semaine
+        const [year, weekPart] = weekKey.split('-W');
+        const weekNum = parseInt(weekPart);
+        const weekDates = getWeekDates(parseInt(year), weekNum);
+        
+        // En-tête de semaine
+        // Adapter l'affichage selon le nombre de gîtes (1 à 4)
+        let gridStyle;
+        let gap = '20px';
+        let padding = '20px';
+        
+        if (gites.length === 1) {
+            gridStyle = 'display: flex; justify-content: center; max-width: 800px; margin: 0 auto;';
+        } else if (gites.length === 2) {
+            gridStyle = `display: grid; grid-template-columns: repeat(2, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+        } else if (gites.length === 3) {
+            gridStyle = `display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+        } else if (gites.length >= 4) {
+            // Pour 4 colonnes ou plus, réduire légèrement l'espacement
+            gap = '15px';
+            padding = '15px';
+            gridStyle = `display: grid; grid-template-columns: repeat(4, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+        }
+        
+        html += `
+            <div class="week-block">
+                <div class="week-content-grid" style="border-top: none; ${gridStyle} padding: 0 ${padding} ${padding} ${padding}; box-sizing: border-box;">`;
+        
+        // Générer colonnes pour chaque gîte
+        gites.forEach(g => {
+            const columnStyle = gites.length === 1 ? 'width: 100%; max-width: 800px;' : '';
+            const giteColor = g.brand_color || window.gitesManager.getColor(g.id) || '#667eea';
+            // Convertir la couleur hex en rgba avec opacité 0.15
+            const hexToRgba = (hex) => {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, 0.15)`;
+            };
+            const giteColorLight = hexToRgba(giteColor);
+            
+            // Adapter les tailles selon le nombre de colonnes
+            const headerPadding = gites.length >= 4 ? '6px 15px' : '8px 20px';
+            const contentPadding = gites.length >= 4 ? '15px' : '20px';
+            const headerFontSize = gites.length >= 4 ? '0.7rem' : '0.75rem';
+            const weekFontSize = gites.length >= 4 ? '0.85rem' : '0.95rem';
+            const datesFontSize = gites.length >= 4 ? '0.75rem' : '0.8rem';
+            
+            html += `
+            <div style="display: flex; flex-direction: column; min-width: 0; ${columnStyle}">
+                <div class="week-header-unique" style="padding: ${headerPadding}; background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); border-radius: 8px 8px 0 0; margin-bottom: 0; border: 3px solid #2D3436; border-bottom: none;">
+                    <div style="font-size: ${headerFontSize}; margin-bottom: 2px; opacity: 0.8; color: white;">${g.name}</div>
+                    <div class="week-number-big" style="font-size: ${weekFontSize}; margin-bottom: 2px; color: white;">Semaine ${weekNum}</div>
+                    <div class="week-dates-small" style="font-size: ${datesFontSize}; opacity: 0.9; color: white;">${formatDateShort(weekDates.start)} - ${formatDateShort(weekDates.end)}</div>
+                </div>
+                <div style="background: ${giteColorLight}; border: 3px solid #2D3436; border-radius: 0 0 12px 12px; padding: ${contentPadding}; min-height: 120px; box-shadow: 6px 6px 0 #2D3436;">
+                    ${generateWeekReservations(byGite[g.id], weekNum, g.slug, active, validationMap, today)}
+                </div>
+            </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    window.SecurityUtils.setInnerHTML(container, html);
+    
+    // Scroller automatiquement vers la première semaine SEULEMENT si on ne garde pas la position
+    if (!keepScrollPosition) {
+        setTimeout(() => {
+            const firstWeek = container.querySelector('.week-block');
+            if (firstWeek) {
+                firstWeek.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    } else {
+        // Restaurer la position du scroll
+        setTimeout(() => {
+            window.scrollTo(0, scrollY);
+        }, 50);
+    }
+}
+
+function generateWeekReservations(reservations, weekKey, cssClass, toutesReservations, validationMap = {}, today = null) {
+    // Trouver les réservations dont la date de DÉBUT est dans cette semaine
+    const weekReservations = reservations.filter(r => {
+        const start = parseLocalDate(r.dateDebut);
+        return getWeekNumber(start) === weekKey;
+    });
+    
+    if (weekReservations.length === 0) {
+        return '<div class="week-empty">Disponible</div>';
+    }
+    
+    let html = '';
+    weekReservations.forEach(r => {
+        const platformLogo = getPlatformLogo(r.site);
+        
+        // Horaires par défaut (les horaires validées seront chargées dynamiquement si nécessaire)
+        let horaireArrivee = '17:00';
+        let horaireDepart = '10:00';
+        
+        // Récupérer l'état de validation du ménage
+        const validation = validationMap[r.id];
+        
+        // Utiliser la date de ménage depuis cleaning_schedule si elle existe, sinon calculer
+        let dateMenage;
+        if (validation?.scheduled_date) {
+            // Utiliser la date enregistrée
+            const [year, month, day] = validation.scheduled_date.split('-');
+            const menageDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            const joursComplets = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+            const timeOfDay = validation.time_of_day === 'morning' ? '07h00' : '12h00';
+            dateMenage = `${joursComplets[menageDate.getDay()]} ${formatDateShort(menageDate)} à ${timeOfDay}`;
+        } else {
+            // Calculer la date théorique
+            dateMenage = calculerDateMenage(r, toutesReservations);
+        }
+        
+        const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 600;">✓</span>' : '';
+        const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.9rem;">📱 ${r.telephone}</span>` : '';
+        
+        // Moment de la journée depuis cleaning_schedule
+        let timeLabel = '';
+        if (validation?.time_of_day) {
+            timeLabel = validation.time_of_day === 'morning' ? ' 🌅' : ' 🌆';
+        }
+        let statusBadge = '';
+        if (validation) {
+            if (validation.status === 'validated') {
+                // VERT = Validé
+                statusBadge = '<span class="validation-status validated" title="Validé par société" style="margin-left: 8px;">✓</span>';
+            } else if (validation.status === 'pending_validation') {
+                // ORANGE = En attente de validation client
+                statusBadge = '<span class="validation-status pending" title="En attente validation client" style="margin-left: 8px;">⏳</span>';
+            } else if (validation.status === 'refused') {
+                // ROUGE FONCE = Refusé
+                statusBadge = '<span class="validation-status refused" title="Refusé par client" style="margin-left: 8px;">❌</span>';
+            } else {
+                // ROUGE = À valider (status = 'pending')
+                statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
+            }
+        } else {
+            // Pas de validation enregistrée = ROUGE = À valider
+            statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
+        }
+        
+        // Masquer bouton si réservation se termine aujourd'hui ou avant
+        const dateFin = parseLocalDate(r.dateFin);
+        dateFin.setHours(0, 0, 0, 0);
+        const isExpired = today && dateFin.getTime() <= today.getTime();
+        const ficheClientButton = isExpired ? '' : `<button onclick="aperçuFicheClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
+        
+        html += `
+            <div class="week-reservation ${cssClass}" style="position: relative; padding: 12px; padding-top: 40px;">
+                <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;">
+                    <button onclick="openEditModal(${r.id})" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Modifier">✏️</button>
+                    ${ficheClientButton}
+                    <button onclick="deleteReservationById(${r.id})" style="background: #ffebee; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Supprimer">🗑️</button>
+                </div>
+                
+                <!-- Nom en haut -->
+                <div style="font-weight: 700; font-size: 1.15rem; color: #0f172a; margin-bottom: 8px; line-height: 1.3;">
+                    ${escapeHtml(r.nom)}${messageEnvoye}
+                </div>
+                
+                <!-- Dates et tarif avec horaires -->
+                <div style="font-size: 1.05rem; color: #334155; margin-bottom: 8px; line-height: 1.5;">
+                    📅 <strong>${formatDate(r.dateDebut)} <span style="color: #27AE60;">⏰ ${horaireArrivee}</span> → ${formatDate(r.dateFin)} <span style="color: #E74C3C;">⏰ ${horaireDepart}</span></strong>${telephoneDisplay}<br>
+                    💰 <strong>${r.montant.toFixed(2)} €</strong>
+                </div>
+                
+                <!-- Pied : Ménage avec pastille à gauche, Plateforme à droite -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+                    <div style="font-size: 0.85rem; color: #64748b; display: flex; align-items: center;">
+                        🧹 ${dateMenage}${timeLabel}${statusBadge}
+                    </div>
+                    <div>
+                        ${platformLogo}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    return html;
+}
+
+// ==========================================
+// 🔧 UTILITAIRES
+// ==========================================
+
+function getPlatformLogo(platform) {
+    if (!platform) return '';
+    
+    const normalizedPlatform = platform.toLowerCase().trim();
+    
+    if (normalizedPlatform.includes('airbnb')) {
+        return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #FF5A5F; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">airbnb</span>';
+    } else if (normalizedPlatform.includes('abritel') || normalizedPlatform.includes('homeaway') || normalizedPlatform.includes('homelidays')) {
+        return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #0D4F8B; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">abritel</span>';
+    } else if (normalizedPlatform.includes('gîtes') || normalizedPlatform.includes('gites') || normalizedPlatform.includes('france')) {
+        return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #27AE60; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">gîtes de france</span>';
+    } else if (normalizedPlatform === 'autre' || normalizedPlatform === 'other' || normalizedPlatform === '') {
+        // "Autre" = par défaut Gîtes de France
+        return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #27AE60; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">gîtes de france</span>';
+    } else {
+        // Afficher la plateforme inconnue telle quelle
+        return `<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #95a5a6; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">${platform}</span>`;
+    }
+}
+
+
+// ==========================================
+// 🌐 EXPORTS GLOBAUX
+// ==========================================
+
+window.filterReservations = filterReservations;
+window.displayFilteredReservations = displayFilteredReservations;
+window.openEditModal = openEditModal;
+window.closeEditModal = closeEditModal;
+window.saveEditReservation = saveEditReservation;
+window.updatePaiementStatus = updatePaiementStatus;
+window.deleteReservationById = deleteReservationById;
+window.updateReservationsList = updateReservationsList;
+window.generateWeekReservations = generateWeekReservations;
+window.getPlatformLogo = getPlatformLogo;
+
+// ==========================================
+// 🎯 INITIALISATION
+// ==========================================
+
+// Ajouter le gestionnaire d'événement pour le formulaire d'édition
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.getElementById('editForm');
+    if (editForm) {
+        editForm.addEventListener('submit', saveEditReservation);
+    }
+});

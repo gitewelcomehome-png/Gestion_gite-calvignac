@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Boutons</title>
+</head>
+<body>
+    <h1>Test des boutons</h1>
+    <button onclick="testOpenEditModal()">Test Modifier</button>
+    <button onclick="testAperçuFicheClient()">Test Fiche Client</button>
+    <button onclick="testDeleteReservation()">Test Supprimer</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        function testOpenEditModal() {
+            if (typeof openEditModal === 'function') {
+                document.getElementById('result').innerHTML = '✅ openEditModal existe';
+            } else {
+                document.getElementById('result').innerHTML = '❌ openEditModal non trouvée';
+            }
+        }
+        
+        function testAperçuFicheClient() {
+            if (typeof aperçuFicheClient === 'function') {
+                document.getElementById('result').innerHTML = '✅ aperçuFicheClient existe';
+            } else if (typeof window.aperçuFicheClient === 'function') {
+                document.getElementById('result').innerHTML = '✅ window.aperçuFicheClient existe';
+            } else {
+                document.getElementById('result').innerHTML = '❌ aperçuFicheClient non trouvée';
+            }
+        }
+        
+        function testDeleteReservation() {
+            if (typeof deleteReservationById === 'function') {
+                document.getElementById('result').innerHTML = '✅ deleteReservationById existe';
+            } else {
+                document.getElementById('result').innerHTML = '❌ deleteReservationById non trouvée';
+            }
+        }
+    </script>
+</body>
+</html>

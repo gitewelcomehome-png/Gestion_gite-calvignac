@@ -77,14 +77,24 @@ function isCouzon(giteName) {
     console.warn('⚠️ isCouzon() deprecated - Use r.gite === gite.name or r.gite_id === gite.id');
     if (!giteName) return false;
     const normalized = giteName.toLowerCase().trim();
-    return normalized === 'couzon' || normalized === 'couzon-au-mont-d\'or' || normalized.startsWith('couzon');
+    // Ne plus hardcoder - Utiliser window.gitesManager pour vérifier
+    if (window.gitesManager) {
+        const gite = window.gitesManager.gites.find(g => g.name.toLowerCase().trim() === normalized);
+        return gite !== undefined;
+    }
+    return false;
 }
 
 function isTrevoux(giteName) {
     console.warn('⚠️ isTrevoux() deprecated - Use r.gite === gite.name or r.gite_id === gite.id');
     if (!giteName) return false;
     const normalized = giteName.toLowerCase().trim();
-    return normalized === 'trevoux' || normalized === 'trevoux';
+    // Ne plus hardcoder - Utiliser window.gitesManager pour vérifier
+    if (window.gitesManager) {
+        const gite = window.gitesManager.gites.find(g => g.name.toLowerCase().trim() === normalized);
+        return gite !== undefined;
+    }
+    return false;
 }
 
 // ==========================================
@@ -193,8 +203,8 @@ function switchTab(tabName) {
         window.loadReservationsTab();
     } else if (tabName === 'statistiques' && typeof window.loadStatistiquesTab === 'function') {
         window.loadStatistiquesTab();
-    } else if (tabName === 'charges' && typeof window.initFiscaliteV2 === 'function') {
-        window.initFiscaliteV2();
+    } else if (tabName === 'charges' && typeof window.initFiscalite === 'function') {
+        window.initFiscalite();
     } else if (tabName === 'menage' && typeof window.loadCleaningSchedule === 'function') {
         window.loadCleaningSchedule();
     } else if (tabName === 'infos-gites' && typeof window.initInfosGites === 'function') {

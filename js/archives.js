@@ -32,8 +32,9 @@ async function updateArchivesDisplay() {
                 <div style="margin-top: 8px; font-size: 0.9rem; color: #666;">
                     📅 ${formatDate(r.dateDebut)} → ${formatDate(r.dateFin)} (${r.nuits} nuits)
                 </div>
-                <div style="margin-top: 8px; font-size: 0.9rem;">
-                    💰 ${r.montant ? r.montant.toFixed(2) : '0.00'} € | Statut: ${r.paiement}
+                <div style="margin-top: 8px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span>💰 ${r.montant ? r.montant.toFixed(2) : '0.00'} € | Statut: ${r.paiement}</span>
+                    <button onclick="openEditModal(${r.id})" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 0.9rem;" title="Modifier">✏️ Modifier</button>
                 </div>
             </div>
         `;

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - Gestion Gîtes</title>
+    <link rel="stylesheet" href="../css/flat-outline.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 450px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--gray-900);
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--gray-600);
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--gray-600);
+        }
+
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            animation: fadeIn 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏡 Bienvenue</h1>
+        <p class="subtitle">Créez votre compte pour gérer vos gîtes</p>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    required 
+                    placeholder="votre@email.com"
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    required 
+                    placeholder="Minimum 6 caractères"
+                    minlength="6"
+                    autocomplete="new-password"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="passwordConfirm">Confirmer le mot de passe</label>
+                <input 
+                    type="password" 
+                    id="passwordConfirm" 
+                    required 
+                    placeholder="Retapez votre mot de passe"
+                    minlength="6"
+                    autocomplete="new-password"
+                >
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                Créer mon compte
+            </button>
+        </form>
+
+        <div class="login-link">
+            Déjà un compte ? <a href="login.html">Se connecter</a>
+        </div>
+    </div>
+
+    <!-- Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/shared-config.js"></script>
+
+    <script>
+        // Utiliser le client Supabase déjà initialisé dans shared-config.js
+        const supabaseClient = window.supabaseClient;
+        console.log('✅ Client Supabase initialisé');
+
+        const form = document.getElementById('signupForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('passwordConfirm').value;
+
+            // Validation
+            if (password !== passwordConfirm) {
+                showError('Les mots de passe ne correspondent pas');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Le mot de passe doit contenir au moins 6 caractères');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Création en cours...';
+
+            try {
+                console.log('🚀 Inscription...', email);
+
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/index.html'
+                    }
+                });
+
+                if (error) {
+                    console.error('❌ Erreur:', error);
+                    showError(error.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Créer mon compte';
+                    return;
+                }
+
+                console.log('✅ Compte créé!', data);
+
+                // Attendre un peu pour que Supabase enregistre le compte
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Connexion automatique après inscription
+                console.log('🔐 Connexion automatique...');
+                const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (signInError) {
+                    console.warn('⚠️ Connexion échouée:', signInError.message);
+                    showError('Compte créé mais connexion impossible. Le compte nécessite une confirmation par email. Consultez votre boîte mail puis connectez-vous.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Créer mon compte';
+                } else {
+                    console.log('✅ Connecté!');
+                    showSuccess('✅ Compte créé et connecté ! Redirection...');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                }
+
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                showError('Erreur lors de la création du compte');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Créer mon compte';
+            }
+        });
+
+        // Vérifier si déjà connecté
+        async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                console.log('✅ Déjà connecté, redirection');
+                window.location.href = 'index.html';
+            }
+        }
+        checkAuth();
+    </script>
+</body>
+</html>

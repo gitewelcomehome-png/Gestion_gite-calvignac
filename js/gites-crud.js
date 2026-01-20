@@ -1131,7 +1131,7 @@ gitesStyles.textContent = `
     }
 `;
 document.head.appendChild(gitesStyles);
-console.log('✅ CSS Neo-Brutalism pour gîtes chargé');
+// CSS Neo-Brutalism chargé
 
 // ================================================================
 // GESTION DE L'ORDRE D'AFFICHAGE

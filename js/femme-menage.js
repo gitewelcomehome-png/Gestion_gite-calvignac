@@ -1,0 +1,627 @@
+/**
+ * 🧹 ESPACE FEMME DE MÉNAGE
+ * Interface dédiée pour la femme de ménage
+ */
+
+// Utiliser le supabase déjà configuré globalement
+// (pas besoin de redéclarer)
+
+// ================================================================
+// CHARGEMENT INITIAL
+// ================================================================
+
+/**
+ * Peuple tous les selects de gîtes avec les données dynamiques
+ */
+async function peuplerSelectsGites() {
+    const gites = await window.gitesManager.getAll();
+    if (!gites || gites.length === 0) {
+        console.error('❌ Aucun gîte trouvé pour peupler les selects');
+        return;
+    }
+    
+    // Sélecteurs à peupler
+    const selectIds = [
+        'tache-achats-gite',
+        'tache-travaux-gite',
+        'retour-gite'
+    ];
+    
+    selectIds.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        
+        // Garder l'option par défaut
+        const defaultOption = select.querySelector('option[value=""]');
+        select.innerHTML = '';
+        if (defaultOption) {
+            select.appendChild(defaultOption);
+        }
+        
+        // Ajouter les gîtes
+        gites.forEach(gite => {
+            const option = document.createElement('option');
+            option.value = gite.id;
+            option.textContent = gite.name;
+            select.appendChild(option);
+        });
+        
+        // Option "Les deux" uniquement pour achats et travaux
+        if (selectId !== 'retour-gite' && gites.length > 1) {
+            const option = document.createElement('option');
+            option.value = 'all';
+            option.textContent = 'Tous les gîtes';
+            select.appendChild(option);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Attendre l'initialisation de gitesManager
+    if (window.gitesManager && !window.gitesManager.loaded) {
+        await window.gitesManager.loadGites();
+    }
+    
+    // Peupler les selects de gîtes dynamiquement
+    await peuplerSelectsGites();
+    
+    await chargerInterventions();
+    await chargerStocksDraps(); // Activer le chargement des stocks
+    
+    // Validation temps réel
+    if (window.ValidationUtils) {
+        window.ValidationUtils.attachRealtimeValidation('tache-achats-titre', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('tache-travaux-titre', 'text', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('retour-date', 'date', { required: true });
+    }
+    
+    // Formulaires - Avec vérification de sécurité
+    const formAchats = document.getElementById('form-tache-achats');
+    const formTravaux = document.getElementById('form-tache-travaux');
+    const formRetour = document.getElementById('form-retour-menage');
+    const inputRetourDate = document.getElementById('retour-date');
+    
+    if (formAchats) formAchats.addEventListener('submit', creerTacheAchats);
+    if (formTravaux) formTravaux.addEventListener('submit', creerTacheTravaux);
+    if (formRetour) formRetour.addEventListener('submit', envoyerRetourMenage);
+    if (inputRetourDate) inputRetourDate.valueAsDate = new Date();
+});
+
+// ================================================================
+// INTERVENTIONS PRÉVUES
+// ================================================================
+
+async function chargerInterventions() {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const troisSemaines = new Date(today);
+        troisSemaines.setDate(today.getDate() + 21);
+        
+        // Charger les ménages des 3 prochaines semaines
+        const { data: menages, error } = await window.supabaseClient
+            .from('cleaning_schedule')
+            .select('*')
+            .gte('scheduled_date', today.toISOString().split('T')[0])
+            .lte('scheduled_date', troisSemaines.toISOString().split('T')[0])
+            .order('scheduled_date', { ascending: true });
+
+        if (error) throw error;
+
+        const container = document.getElementById('interventions-list');
+        
+        if (!menages || menages.length === 0) {
+            if (window.SecurityUtils) {
+                window.SecurityUtils.setInnerHTML(container, `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Aucune intervention prévue dans les 3 prochaines semaines</p>
+                    </div>
+                `, { trusted: true });
+            } else {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Aucune intervention prévue dans les 3 prochaines semaines</p>
+                    </div>
+                `;
+            }
+            return;
+        }
+
+        // Regrouper par semaine puis par gîte
+        const semaines = {};
+        menages.forEach(menage => {
+            const date = new Date(menage.scheduled_date);
+            const weekStart = getStartOfWeek(date);
+            const weekKey = weekStart.toISOString().split('T')[0];
+            
+            if (!semaines[weekKey]) {
+                semaines[weekKey] = {
+                    debut: weekStart,
+                    gites: {}
+                };
+            }
+            
+            const giteId = menage.gite_id || 'unknown';
+            if (!semaines[weekKey].gites[giteId]) {
+                semaines[weekKey].gites[giteId] = [];
+            }
+            
+            semaines[weekKey].gites[giteId].push(menage);
+        });
+
+        // Générer le HTML avec colonnes par gîte
+        let html = '';
+        Object.keys(semaines).sort().forEach(weekKey => {
+            const semaine = semaines[weekKey];
+            const weekEnd = new Date(semaine.debut);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            
+            const weekNumber = getWeekNumber(semaine.debut);
+            const dateDebut = semaine.debut.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            const dateFin = weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            
+            html += `
+                <div class="cleaning-week-table">
+                    <div class="cleaning-week-header">
+                        <div class="week-number-big">📅 Semaine ${weekNumber}</div>
+                        <div class="week-dates-small">${dateDebut} - ${dateFin}</div>
+                    </div>
+                    <div class="cleaning-week-body">
+            `;
+            
+            // Colonnes par gîte avec gitesManager
+            const giteIds = Object.keys(semaine.gites).sort();
+            giteIds.forEach(giteId => {
+                const menagesGite = semaine.gites[giteId];
+                const gite = window.gitesManager?.getById(giteId);
+                const giteName = gite?.name || 'Gîte inconnu';
+                const couleur = gite?.color || '#667eea';
+                const giteSlug = giteName.toLowerCase().replace(/[^a-z0-9]/g, '');
+                
+                html += `
+                    <div class="cleaning-column" data-gite="${giteSlug}">
+                        <div class="cleaning-column-header">
+                            ${giteName}
+                        </div>
+                `;
+                
+                menagesGite.forEach(menage => {
+                    const date = new Date(menage.scheduled_date);
+                    const dateFormatee = date.toLocaleDateString('fr-FR', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long' 
+                    });
+                    
+                    const validated = menage.validated_by_company;
+                    const itemClass = validated ? 'cleaning-item validated' : 'cleaning-item';
+                    
+                    html += `
+                        <div class="${itemClass}">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <div style="font-size: 0.95rem; font-weight: 700; color: #2D3436;">${dateFormatee}</div>
+                                <div class="validation-status ${validated ? 'validated' : ''}">
+                                    ${validated ? '✓' : '⏳'}
+                                </div>
+                            </div>
+                            <div style="font-size: 0.9rem; color: #636e72; margin-bottom: 5px;">
+                                ⏰ ${menage.time_of_day === 'morning' ? 'Matin (7h-12h)' : 'Après-midi (12h-17h)'}
+                            </div>
+                            ${menage.notes ? `<div style="margin-top: 8px; padding: 8px; background: white; border-radius: 6px; font-size: 0.85rem; color: #666;">📝 ${menage.notes}</div>` : ''}
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    </div>
+                `;
+            });
+            
+            // Compléter avec des colonnes vides si nécessaire
+            const nbGites = giteIds.length;
+            for (let i = nbGites; i < 4; i++) {
+                html += `
+                    <div class="cleaning-column" data-gite="empty">
+                        <div class="cleaning-column-header">
+                            -
+                        </div>
+                        <div class="cleaning-item empty">
+                            Aucun ménage prévu
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+
+        if (window.SecurityUtils) {
+            window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+        } else {
+            container.innerHTML = html;
+        }
+    } catch (error) {
+        console.error('Erreur chargement interventions:', error);
+        const errorContainer = document.getElementById('interventions-list');
+        if (window.SecurityUtils) {
+            window.SecurityUtils.setInnerHTML(errorContainer, `
+                <div class="alert alert-warning">
+                    ⚠️ Erreur lors du chargement des interventions
+                </div>
+            `, { trusted: true });
+        } else {
+            errorContainer.innerHTML = `
+                <div class="alert alert-warning">
+                    ⚠️ Erreur lors du chargement des interventions
+                </div>
+            `;
+        }
+    }
+}
+
+// Fonctions utilitaires pour le calendrier
+function getStartOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+}
+
+function getWeekNumber(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+// ================================================================
+// ONGLETS
+// ================================================================
+
+function switchTaskTab(tab) {
+    // Désactiver tous les onglets
+    document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    
+    // Activer l'onglet sélectionné
+    event.target.classList.add('active');
+    document.getElementById(`tab-${tab}`).classList.add('active');
+}
+
+function switchStockTab(gite) {
+    // Désactiver tous les onglets
+    document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    
+    // Activer l'onglet sélectionné
+    event.target.classList.add('active');
+    document.getElementById(`stock-${gite}`).classList.add('active');
+}
+
+// Exporter les fonctions globalement
+window.switchTaskTab = switchTaskTab;
+window.switchStockTab = switchStockTab;
+
+// ================================================================
+// CRÉER DES TÂCHES
+// ================================================================
+
+async function creerTacheAchats(e) {
+    e.preventDefault();
+    
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const rules = {
+            'tache-achats-titre': { type: 'text', required: true }
+        };
+        
+        const validation = window.ValidationUtils.validateForm(e.target, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire tâche achats invalide:', validation.errors);
+            return;
+        }
+    }
+    
+    const titre = document.getElementById('tache-achats-titre').value;
+    const giteId = document.getElementById('tache-achats-gite').value; // UUID direct
+    const description = document.getElementById('tache-achats-description').value;
+    
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) throw new Error('Non connecté');
+        
+        const { error } = await window.supabaseClient
+            .from('todos')
+            .insert({
+                owner_user_id: user.id,
+                category: 'achats',
+                title: titre,
+                description: description || `Signalé par la femme de ménage`,
+                gite_id: giteId === 'all' ? null : giteId,
+                completed: false
+            });
+
+        if (error) throw error;
+
+        alert('✅ Tâche d\'achat créée avec succès !');
+        document.getElementById('form-tache-achats').reset();
+    } catch (error) {
+        console.error('Erreur création tâche achats:', error);
+        alert('❌ Erreur lors de la création de la tâche');
+    }
+}
+
+async function creerTacheTravaux(e) {
+    e.preventDefault();
+    
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const rules = {
+            'tache-travaux-titre': { type: 'text', required: true }
+        };
+        
+        const validation = window.ValidationUtils.validateForm(e.target, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire tâche travaux invalide:', validation.errors);
+            return;
+        }
+    }
+    
+    const titre = document.getElementById('tache-travaux-titre').value;
+    const giteId = document.getElementById('tache-travaux-gite').value; // UUID direct
+    const priorite = document.getElementById('tache-travaux-priorite').value;
+    const description = document.getElementById('tache-travaux-description').value;
+    
+    const titreComplet = priorite === 'urgente' ? `🚨 URGENT: ${titre}` : titre;
+    
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) throw new Error('Non connecté');
+        
+        const { error } = await window.supabaseClient
+            .from('todos')
+            .insert({
+                owner_user_id: user.id,
+                category: 'travaux',
+                title: titreComplet,
+                description: `${description}\n\n📍 Signalé par la femme de ménage`,
+                gite_id: giteId === 'all' ? null : giteId,
+                completed: false
+            });
+
+        if (error) throw error;
+
+        alert('✅ Tâche de travaux créée avec succès !');
+        document.getElementById('form-tache-travaux').reset();
+    } catch (error) {
+        console.error('Erreur création tâche travaux:', error);
+        alert('❌ Erreur lors de la création de la tâche');
+    }
+}
+
+// ================================================================
+// STOCKS DE DRAPS
+// ================================================================
+
+const ARTICLES_DRAPS = [
+    { id: 'draps_plats_grands', label: 'Draps plats grands' },
+    { id: 'draps_plats_petits', label: 'Draps plats petits' },
+    { id: 'housses_couettes_grandes', label: 'Housses couette grandes' },
+    { id: 'housses_couettes_petites', label: 'Housses couette petites' },
+    { id: 'taies_oreillers', label: 'Taies d\'oreillers' },
+    { id: 'serviettes', label: 'Serviettes' },
+    { id: 'tapis_bain', label: 'Tapis de bain' }
+];
+
+async function chargerStocksDraps() {
+    try {
+        const gites = await window.gitesManager.getAll();
+        if (!gites || gites.length === 0) {
+            console.error('❌ Aucun gîte pour charger les stocks');
+            return;
+        }
+
+        const { data: stocks, error } = await window.supabaseClient
+            .from('linen_stocks')
+            .select('*');
+
+        if (error) throw error;
+
+        // Cibler spécifiquement la section des stocks
+        const stocksSection = document.getElementById('section-stocks-draps');
+        if (!stocksSection) {
+            console.error('❌ Section stocks-draps non trouvée');
+            return;
+        }
+        
+        const tabsContainer = stocksSection.querySelector('.tabs');
+        if (!tabsContainer) {
+            console.error('❌ Conteneur tabs non trouvé dans section stocks');
+            return;
+        }
+
+        // Vider et reconstruire les tabs
+        tabsContainer.innerHTML = '';
+        
+        // Créer un tab pour chaque gîte
+        gites.forEach((gite, index) => {
+            const button = document.createElement('button');
+            button.className = 'tab' + (index === 0 ? ' active' : '');
+            button.textContent = `🏠 ${gite.name}`;
+            button.onclick = () => switchStockTab(gite.id);
+            tabsContainer.appendChild(button);
+        });
+
+        // Supprimer les anciens contenus de tabs
+        stocksSection.querySelectorAll('.tab-content').forEach(el => el.remove());
+
+        // Créer les grilles pour chaque gîte
+        gites.forEach((gite, index) => {
+            const stockGite = stocks?.find(s => s.gite_id === gite.id) || {};
+            
+            const tabContent = document.createElement('div');
+            tabContent.id = `stock-${gite.id}`;
+            tabContent.className = 'tab-content' + (index === 0 ? ' active' : '');
+            
+            const grid = document.createElement('div');
+            grid.className = 'stock-grid';
+            grid.id = `stock-grid-${gite.id}`;
+            
+            const button = document.createElement('button');
+            button.className = 'btn btn-success';
+            button.style.marginTop = '20px';
+            button.textContent = `💾 Sauvegarder ${gite.name}`;
+            button.onclick = () => sauvegarderStocks(gite.id);
+            
+            tabContent.appendChild(grid);
+            tabContent.appendChild(button);
+            stocksSection.appendChild(tabContent);
+            
+            // Afficher la grille
+            afficherGrilleStock(gite.id, stockGite);
+        });
+    } catch (error) {
+        console.error('Erreur chargement stocks:', error);
+    }
+}
+
+function afficherGrilleStock(giteId, stocks) {
+    const container = document.getElementById(`stock-grid-${giteId}`);
+    if (!container) return;
+    
+    let html = '';
+
+    ARTICLES_DRAPS.forEach(article => {
+        const valeur = stocks[article.id] || 0;
+        html += `
+            <div class="stock-item">
+                <label for="${giteId}-${article.id}">${article.label}</label>
+                <input 
+                    type="number" 
+                    id="${giteId}-${article.id}" 
+                    value="${valeur}"
+                    min="0"
+                >
+            </div>
+        `;
+    });
+
+    if (window.SecurityUtils) {
+        window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+    } else {
+        container.innerHTML = html;
+    }
+}
+
+async function sauvegarderStocks(giteId) {
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) throw new Error('Non connecté');
+        
+        const stocks = {};
+        
+        ARTICLES_DRAPS.forEach(article => {
+            const input = document.getElementById(`${giteId}-${article.id}`);
+            stocks[article.id] = parseInt(input.value) || 0;
+        });
+
+        const { error } = await window.supabaseClient
+            .from('linen_stocks')
+            .upsert({
+                owner_user_id: user.id,
+                gite_id: giteId,
+                ...stocks,
+                updated_at: new Date().toISOString()
+            }, {
+                onConflict: 'gite_id'
+            });
+
+        if (error) throw error;
+
+        alert('✅ Stocks enregistrés avec succès !');
+    } catch (error) {
+        console.error('Erreur sauvegarde stocks:', error);
+        alert('❌ Erreur lors de la sauvegarde des stocks');
+    }
+}
+
+// Fonction globale pour switcher entre les tabs
+window.switchStockTab = function(giteId) {
+    // Désactiver tous les tabs et contenus
+    document.querySelectorAll('.tabs .tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    // Activer le tab cliqué
+    event.target.classList.add('active');
+    
+    // Activer le contenu correspondant
+    const content = document.getElementById(`stock-${giteId}`);
+    if (content) content.classList.add('active');
+};
+
+// ================================================================
+// RETOUR APRÈS MÉNAGE
+// ================================================================
+
+async function envoyerRetourMenage(e) {
+    e.preventDefault();
+    
+    // Validation avec ValidationUtils
+    if (window.ValidationUtils) {
+        const rules = {
+            'retour-date': { type: 'date', required: true }
+        };
+        
+        const validation = window.ValidationUtils.validateForm(e.target, rules);
+        if (!validation.valid) {
+            console.warn('❌ Formulaire retour ménage invalide:', validation.errors);
+            return;
+        }
+    }
+    
+    const giteId = document.getElementById('retour-gite').value; // UUID direct
+    const date = document.getElementById('retour-date').value;
+    const etatArrivee = document.getElementById('retour-etat-arrivee')?.value;
+    const detailsEtat = document.getElementById('retour-details-etat')?.value;
+    const deroulement = document.getElementById('retour-deroulement')?.value;
+    const detailsDeroulement = document.getElementById('retour-details-deroulement')?.value;
+    
+    // Construire les commentaires depuis les champs du formulaire
+    let commentaires = '';
+    if (etatArrivee) commentaires += `État à l'arrivée: ${etatArrivee}\n`;
+    if (detailsEtat) commentaires += `Détails état: ${detailsEtat}\n`;
+    if (deroulement) commentaires += `Déroulement: ${deroulement}\n`;
+    if (detailsDeroulement) commentaires += `Détails déroulement: ${detailsDeroulement}`;
+    
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) throw new Error('Non connecté');
+        
+        const { error } = await window.supabaseClient
+            .from('retours_menage')
+            .insert({
+                owner_user_id: user.id,
+                reported_by: user.id, // La personne qui fait le retour
+                gite_id: giteId,
+                date_menage: date,
+                commentaires: commentaires.trim() || null,
+                validated: false
+            });
+
+        if (error) throw error;
+
+        alert('✅ Retour envoyé avec succès ! Le propriétaire sera notifié.');
+        document.getElementById('form-retour-menage').reset();
+        document.getElementById('retour-date').valueAsDate = new Date();
+    } catch (error) {
+        console.error('Erreur envoi retour:', error);
+        alert('❌ Erreur lors de l\'envoi du retour');
+    }
+}

@@ -102,34 +102,25 @@ async function updateDashboardAlerts() {
     // Vérifier les retours de ménage en attente de validation
     const { data: retoursMenage } = await window.supabaseClient
         .from('retours_menage')
-        .select('*')
+        .select('*, gites(name)')
         .eq('validated', false)
         .order('created_at', { ascending: false });
     
     if (retoursMenage && retoursMenage.length > 0) {
         retoursMenage.forEach(retour => {
+            const giteName = retour.gites?.name || 'Gîte inconnu';
             const dateFormatee = new Date(retour.date_menage).toLocaleDateString('fr-FR', { 
                 day: 'numeric', 
                 month: 'short' 
             });
             
-            const etatIcon = {
-                'propre': '✅',
-                'sale': '🧹',
-                'dégâts': '⚠️',
-                'autre': '❓'
-            }[retour.etat_arrivee] || '📝';
-            
-            const deroulementIcon = {
-                'bien': '✅',
-                'problèmes': '⚠️',
-                'difficultés': '❌'
-            }[retour.deroulement] || '📝';
+            const hasComments = retour.commentaires && retour.commentaires.trim().length > 0;
+            const icon = hasComments ? '📝' : '✅';
             
             alerts.push({
-                type: retour.deroulement === 'bien' ? 'info' : 'warning',
+                type: 'info',
                 icon: '🧹',
-                message: `Retour ménage ${retour.gite} du ${dateFormatee} : ${etatIcon} ${deroulementIcon}`,
+                message: `Retour ménage ${giteName} du ${dateFormatee} ${icon}`,
                 action: () => afficherDetailsRetourMenage(retour.id),
                 retourId: retour.id
             });
@@ -241,6 +232,9 @@ async function updateDashboardStats() {
 
 async function updateDashboardReservations() {
     const reservations = await getAllReservations();
+    
+    // ✅ Charger le planning ménage dashboard en parallèle
+    updateDashboardMenages().catch(err => console.error('Erreur planning ménage:', err));
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -263,8 +257,15 @@ async function updateDashboardReservations() {
     const in7Days = new Date(today);
     in7Days.setDate(today.getDate() + 6);
     
+    // DÉDOUBLONNER par ID (garder la première occurrence)
+    const uniqueById = {};
+    reservations.forEach(r => {
+        if (!uniqueById[r.id]) uniqueById[r.id] = r;
+    });
+    const uniqueReservations = Object.values(uniqueById);
+    
     // Filtrer les réservations
-    const filtered = reservations.filter(r => {
+    const filtered = uniqueReservations.filter(r => {
         const dateDebut = parseLocalDate(r.dateDebut);
         const dateFin = parseLocalDate(r.dateFin);
         dateDebut.setHours(0, 0, 0, 0);
@@ -290,7 +291,7 @@ async function updateDashboardReservations() {
     if (!container) return;
     
     if (filtered.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation dans les 7 prochains jours</p>');
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px; grid-column: 1 / -1;">Aucune réservation dans les 7 prochains jours</p>');
         return;
     }
     
@@ -311,7 +312,7 @@ async function updateDashboardReservations() {
         // Charger la progression checklist (si feature activée)
         let checklistProgress = { entree: { total: 0, completed: 0, percent: 0 }, sortie: { total: 0, completed: 0, percent: 0 } };
         if (CHECKLIST_FEATURE_ENABLED) {
-            checklistProgress = await getReservationChecklistProgressDashboard(r.id, r.gite);
+            checklistProgress = await getReservationChecklistProgressDashboard(r.id, r.gite_id);
         }
         
         let badge = '';
@@ -370,37 +371,40 @@ async function updateDashboardReservations() {
         }
         
         html += `
-            <div style="background: white; border: 3px solid ${giteColor}; padding: 15px; margin-bottom: 12px; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; position: relative;">
+            <div style="background: white; border: 3px solid ${giteColor}; padding: 15px; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; position: relative; display: flex; flex-direction: column;">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                     <div style="flex: 1; padding-right: ${shouldSendReminder ? '140px' : '0'};">
-                        <strong style="font-size: 1.15rem; color: #2D3436;">${r.nom}</strong>
-                        ${shouldSendReminder ? '<div style="position: absolute; top: 15px; right: 58px; background: #ffeaa7; color: #2D3436; padding: 5px 12px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 8px; font-size: 0.75rem; font-weight: 700;">⚡ J-3 : Envoyer fiche</div>' : ''}
-                        <div style="margin-top: 8px;">
-                            <span style="background: ${badgeColor}; color: white; padding: 4px 10px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-block;">${badge}</span>
+                        <strong style="font-size: 1.05rem; color: #2D3436; display: block; margin-bottom: 8px;">${r.nom}</strong>
+                        ${shouldSendReminder ? '<div style="position: absolute; top: 15px; right: 58px; background: #ffeaa7; color: #2D3436; padding: 5px 10px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 8px; font-size: 0.7rem; font-weight: 700;">⚡ J-3 : Fiche</div>' : ''}
+                        <div style="margin-bottom: 8px;">
+                            <span style="background: ${badgeColor}; color: white; padding: 3px 8px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block;">${badge}</span>
                         </div>
-                        <div style="color: #666; font-size: 0.9rem; margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            <svg viewBox="0 0 64 64" style="width:18px;height:18px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg>
-                            ${formatDateFromObj(dateDebut)} <strong style="color: #27AE60; display: flex; align-items: center; gap: 4px;"><svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireArrivee}</strong> → ${formatDateFromObj(dateFin)} <strong style="color: #E74C3C; display: flex; align-items: center; gap: 4px;"><svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireDepart}</strong>
-                            <span style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-weight: 600;">${r.nuits} nuits</span>
+                        <div style="color: #666; font-size: 0.8rem; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg>
+                            ${formatDateFromObj(dateDebut)} <strong style="color: #27AE60; display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireArrivee}</strong>
                         </div>
-                        <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #666; margin-top: 8px; flex-wrap: wrap;">
-                            <span style="display: flex; align-items: center; gap: 4px;"><svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="28" width="36" height="28" fill="#ffffff"/><path d="M8 28 L32 8 L56 28" fill="#ff7675"/><rect x="42" y="10" width="6" height="10" fill="#ff7675"/><rect x="26" y="40" width="12" height="16" fill="#0984e3"/><rect x="18" y="34" width="6" height="6" fill="#74b9ff"/></svg> <strong>${r.gite}</strong></span>
-                            <span>👥 <strong>${r.nbPersonnes || '-'}</strong> pers.</span>
-                            ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'}; font-weight: 600; display: flex; align-items: center; gap: 4px;"><svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg> J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
+                        <div style="color: #666; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            ${formatDateFromObj(dateFin)} <strong style="color: #E74C3C; display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireDepart}</strong>
+                            <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem;">${r.nuits}n</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; font-size: 0.75rem; color: #666; margin-top: 6px; flex-wrap: wrap;">
+                            <span style="display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="28" width="36" height="28" fill="#ffffff"/><path d="M8 28 L32 8 L56 28" fill="#ff7675"/><rect x="42" y="10" width="6" height="10" fill="#ff7675"/><rect x="26" y="40" width="12" height="16" fill="#0984e3"/><rect x="18" y="34" width="6" height="6" fill="#74b9ff"/></svg> <strong>${r.gite}</strong></span>
+                            <span>👥 <strong>${r.nbPersonnes || '-'}</strong></span>
+                            ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'}; font-weight: 600; display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg> J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
                         </div>
                         ${checklistHtml}
                     </div>
-                    <span style="font-size: 1.5rem; margin-left: 10px;" title="${r.paiement}">${paiementIcon}</span>
+                    <span style="font-size: 1.3rem; margin-left: 8px;" title="${r.paiement}">${paiementIcon}</span>
                 </div>
-                <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #e0e0e0; display: flex; gap: 8px;">
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #e0e0e0; display: flex; gap: 6px;">
                     ${showFicheButton ? `
-                    <button onclick="aperçuFicheClient(${r.id})" class="btn-neo"
-                            style="flex: 1; background: #74b9ff; color: white; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='3px 3px 0 #2D3436'">
-                        📄 Fiche Client
+                    <button onclick="aperçuFicheClient('${r.id}')" class="btn-neo"
+                            style="flex: 1; background: #74b9ff; color: white; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='4px 4px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='2px 2px 0 #2D3436'">
+                        📄 Fiche
                     </button>
                     ` : ''}
-                    <button onclick="openEditReservation(${r.id})" class="btn-neo"
-                            style="background: white; color: #2D3436; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='3px 3px 0 #2D3436'">
+                    <button onclick="openEditReservation('${r.id}')" class="btn-neo"
+                            style="background: white; color: #2D3436; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='4px 4px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='2px 2px 0 #2D3436'">
                         ✏️
                     </button>
                 </div>
@@ -501,66 +505,77 @@ async function updateTodoLists() {
 }
 
 async function updateTodoList(category) {
-    const { data: todos } = await window.supabaseClient
-        .from('todos')
-        .select('*')
-        .eq('category', category)
-        .eq('completed', false)
-        .is('archived_at', null)
-        .order('created_at', { ascending: true });
-    
-    const now = new Date();
-    const visibleTodos = todos?.filter(todo => {
-        if (!todo.is_recurrent || !todo.next_occurrence) {
-            return true;
-        }
-        const nextOcc = new Date(todo.next_occurrence);
-        return nextOcc <= now;
-    }) || [];
-    
-    const container = document.getElementById(`todo-${category}`);
-    if (!container) return;
-    
-    if (!visibleTodos || visibleTodos.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>');
-        return;
-    }
-    
-    let html = '';
-    visibleTodos.forEach(todo => {
-        const recurrentBadge = todo.is_recurrent ? '<span style="background: #9B59B6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px;">🔁 Récurrent</span>' : '';
-        const frequencyLabel = todo.is_recurrent && todo.frequency ? 
-            (todo.frequency === 'weekly' ? 'Hebdo' : todo.frequency === 'biweekly' ? 'Bi-hebdo' : 'Mensuel') : '';
+    try {
+        const { data: todos, error } = await window.supabaseClient
+            .from('todos')
+            .select('*')
+            .eq('completed', false)
+            .eq('category', category)
+            .order('created_at', { ascending: true });
         
-        html += `
-            <div style="display: flex; gap: 12px; padding: 14px; margin-bottom: 8px; background: white; border-radius: 8px; border: 1px solid #e9ecef; align-items: start; transition: all 0.2s;">
-                <input type="checkbox" onchange="toggleTodo(${todo.id}, this.checked)" 
-                       style="width: 20px; height: 20px; cursor: pointer; margin-top: 3px; flex-shrink: 0;">
-                <div style="flex: 1;">
-                    <div style="font-weight: 500; font-size: 0.95rem; margin-bottom: 6px; line-height: 1.4; color: #2c3e50;">
-                        ${todo.title}
-                        ${recurrentBadge}
+        if (error) {
+            console.error('Erreur chargement todos:', error);
+            return;
+        }
+        
+        const container = document.getElementById(`todo-${category}`);
+        if (!container) return;
+        
+        if (!todos || todos.length === 0) {
+            window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 20px; font-size: 0.9rem;">Aucune tâche</p>');
+            return;
+        }
+        
+        // Récupérer les noms des gîtes si nécessaire
+        const giteIds = [...new Set(todos.filter(t => t.gite_id).map(t => t.gite_id))];
+        let gitesMap = {};
+        
+        if (giteIds.length > 0) {
+            const { data: gites } = await window.supabaseClient
+                .from('gites')
+                .select('id, name')
+                .in('id', giteIds);
+            
+            if (gites) {
+                gitesMap = Object.fromEntries(gites.map(g => [g.id, g.name]));
+            }
+        }
+        
+        let html = '';
+        todos.forEach(todo => {
+            const giteName = todo.gite_id ? (gitesMap[todo.gite_id] || '') : '';
+            
+            html += `
+                <div style="display: flex; gap: 12px; padding: 14px; margin-bottom: 8px; background: white; border-radius: 8px; border: 1px solid #e9ecef; align-items: start; transition: all 0.2s;">
+                    <input type="checkbox" onchange="toggleTodo('${todo.id}', this.checked)" 
+                           style="width: 20px; height: 20px; cursor: pointer; margin-top: 3px; flex-shrink: 0;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500; font-size: 0.95rem; margin-bottom: 6px; line-height: 1.4; color: #2c3e50;">
+                            ${todo.title}
+                        </div>
+                        ${todo.description ? `<div style="font-size: 0.85rem; color: #6c757d; margin-bottom: 8px; line-height: 1.5;">${todo.description}</div>` : ''}
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            ${giteName ? `<span class="gite-badge" style="background: #667eea; color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${giteName}</span>` : ''}
+                            ${todo.priority ? `<span class="priority-badge" style="background: ${todo.priority === 'urgent' ? '#E74C3C' : todo.priority === 'high' ? '#F39C12' : '#95a5a6'}; color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${todo.priority}</span>` : ''}
+                        </div>
                     </div>
-                    ${todo.description ? `<div style="font-size: 0.85rem; color: #6c757d; margin-bottom: 8px; line-height: 1.5;">${todo.description}</div>` : ''}
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        ${todo.gite ? `<span class="gite-badge" data-gite="${todo.gite}" style="background: var(--gite-color, #667eea); color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${todo.gite}</span>` : ''}
-                        ${todo.is_recurrent && frequencyLabel ? `<span style="background: #E8DAEF; color: #7D3C98; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">${frequencyLabel}</span>` : ''}
-                    </div>
-                </div>
-                <button onclick="editTodo(${todo.id})" 
-                        style="background: #e3f2fd; border: 1px solid #90caf9; color: #1976d2; cursor: pointer; font-size: 1rem; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; transition: all 0.2s; line-height: 1;"
-                        onmouseover="this.style.background='#1976d2'; this.style.color='white';"
-                        onmouseout="this.style.background='#e3f2fd'; this.style.color='#1976d2';"
-                        title="Modifier">✏️</button>
-                <button onclick="deleteTodo(${todo.id})" 
-                        style="background: #fee; border: 1px solid #fcc; color: #E74C3C; cursor: pointer; font-size: 1.3rem; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; transition: all 0.2s; line-height: 1;"
-                        onmouseover="this.style.background='#E74C3C'; this.style.color='white';"
-                        onmouseout="this.style.background='#fee'; this.style.color='#E74C3C';"
-                        title="Supprimer">×</button>
-            </div>`;
-    });
-    
-    window.SecurityUtils.setInnerHTML(container, html);
+                    <button onclick="editTodo('${todo.id}')" 
+                            style="background: #e3f2fd; border: 1px solid #90caf9; color: #1976d2; cursor: pointer; font-size: 1rem; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; transition: all 0.2s; line-height: 1;"
+                            onmouseover="this.style.background='#1976d2'; this.style.color='white';"
+                            onmouseout="this.style.background='#e3f2fd'; this.style.color='#1976d2';"
+                            title="Modifier">✏️</button>
+                    <button onclick="deleteTodo('${todo.id}')" 
+                            style="background: #fee; border: 1px solid #fcc; color: #E74C3C; cursor: pointer; font-size: 1.3rem; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; transition: all 0.2s; line-height: 1;"
+                            onmouseover="this.style.background='#E74C3C'; this.style.color='white';"
+                            onmouseout="this.style.background='#fee'; this.style.color='#E74C3C';"
+                            title="Supprimer">×</button>
+                </div>`;
+        });
+        
+        window.SecurityUtils.setInnerHTML(container, html);
+    } catch (err) {
+        console.error('Erreur dans updateTodoList:', err);
+    }
 }
 
 async function addTodoItem(category) {
@@ -648,42 +663,28 @@ function initializeTodoModal() {
                 }
             }
             
-            const category = document.getElementById('todoCategory').value;
+            const category = document.getElementById('todoCategory')?.value;
             const title = document.getElementById('todoTitle').value;
             const description = document.getElementById('todoDescription').value;
-            const gite = document.getElementById('todoGite').value || null;
-            const isRecurrent = document.getElementById('todoRecurrent').checked;
+            const giteSelect = document.getElementById('todoGite');
+            const giteValue = giteSelect?.value;
             
-            let frequency = null;
-            let frequencyDetail = null;
-            let nextOccurrence = null;
-            
-            if (isRecurrent) {
-                frequency = document.getElementById('todoFrequency').value;
-                
-                if (frequency === 'weekly' || frequency === 'biweekly') {
-                    const dayOfWeek = parseInt(document.getElementById('todoWeekday').value);
-                    frequencyDetail = { day_of_week: dayOfWeek };
-                } else if (frequency === 'monthly') {
-                    const dayOfMonth = parseInt(document.getElementById('todoDayOfMonth').value);
-                    frequencyDetail = { day_of_month: dayOfMonth };
-                }
-                
-                nextOccurrence = calculateNextOccurrence(frequency, frequencyDetail);
+            // Trouver le gite_id correspondant au nom sélectionné
+            let giteId = null;
+            if (giteValue) {
+                const gites = await window.gitesManager.getAll();
+                const gite = gites.find(g => g.name === giteValue || g.slug === giteValue);
+                giteId = gite ? gite.id : null;
             }
             
             const { error } = await window.supabaseClient
                 .from('todos')
                 .insert({
-                    category: category,
                     title: title,
                     description: description || null,
-                    gite: gite,
+                    gite_id: giteId,
                     completed: false,
-                    is_recurrent: isRecurrent,
-                    frequency: frequency,
-                    frequency_detail: frequencyDetail,
-                    next_occurrence: nextOccurrence
+                    priority: 'medium'
                 });
             
             if (error) {
@@ -694,7 +695,7 @@ function initializeTodoModal() {
             
             // Fermer le modal et rafraîchir
             closeAddTodoModal();
-            await updateTodoList(category);
+            await updateTodoList();
             await updateDashboardStats();
         });
     }
@@ -734,116 +735,44 @@ function calculateNextOccurrence(frequency, frequencyDetail) {
 }
 
 async function toggleTodo(id, completed) {
-    try {
-        // Récupérer la tâche pour vérifier si elle est récurrente
-        const { data: todo, error: fetchError } = await window.supabaseClient
+    if (completed) {
+        // Marquer comme terminé
+        const { error } = await window.supabaseClient
             .from('todos')
-            .select('*')
-            .eq('id', id)
-            .single();
+            .update({ 
+                completed: true,
+                completed_at: new Date().toISOString()
+            })
+            .eq('id', id);
         
-        
-        if (fetchError || !todo) {
-            console.error('❌ Erreur récupération todo:', fetchError);
-            showToast('Erreur lors de la récupération de la tâche', 'error');
-            // Recharger pour restaurer l'état correct
-            await updateTodoList(todo?.category || 'menage');
+        if (error) {
+            console.error('❌ Erreur mise à jour todo:', error);
+            showToast('Erreur lors de la mise à jour', 'error');
             return;
         }
         
+        showToast('✓ Tâche terminée', 'success');
+    } else {
+        // Réactiver la tâche
+        const { error } = await window.supabaseClient
+            .from('todos')
+            .update({ 
+                completed: false,
+                completed_at: null
+            })
+            .eq('id', id);
         
-        // Si cochée et récurrente, créer une nouvelle occurrence et archiver l'actuelle
-        if (completed && todo.is_recurrent) {
-            // Calculer la prochaine occurrence
-            const nextOccurrence = calculateNextOccurrence(todo.frequency, todo.frequency_detail);
-            
-            // Créer la nouvelle occurrence
-            const { error: insertError } = await window.supabaseClient
-                .from('todos')
-                .insert({
-                    category: todo.category,
-                    title: todo.title,
-                    description: todo.description,
-                    gite: todo.gite,
-                    completed: false,
-                    is_recurrent: true,
-                    frequency: todo.frequency,
-                    frequency_detail: todo.frequency_detail,
-                    next_occurrence: nextOccurrence,
-                    archived_at: null
-                });
-            
-            
-            if (insertError) {
-                console.error('❌ Erreur création nouvelle occurrence:', insertError);
-                showToast('Erreur lors de la création de la prochaine occurrence', 'error');
-                await updateTodoList(todo.category);
-                return;
-            }
-            
-            // Archiver l'ancienne
-            const { error: archiveError } = await window.supabaseClient
-                .from('todos')
-                .update({ 
-                    completed: true, 
-                    archived_at: new Date().toISOString(),
-                    last_generated: new Date().toISOString()
-                })
-                .eq('id', id);
-            
-            
-            if (archiveError) {
-                console.error('❌ Erreur mise à jour todo:', archiveError);
-                showToast('Erreur lors de l\'archivage', 'error');
-                await updateTodoList(todo.category);
-                return;
-            }
-            
-            showToast('✓ Tâche terminée, prochaine occurrence créée', 'success');
-        } else {
-            // Si coché (non récurrente), SUPPRIMER la tâche définitivement
-            // Si décoché, restaurer (mais ne devrait pas arriver)
-            if (completed) {
-                const { error } = await window.supabaseClient
-                    .from('todos')
-                    .delete()
-                    .eq('id', id);
-                
-                if (error) {
-                    console.error('❌ Erreur suppression todo:', error);
-                    showToast('Erreur lors de la suppression', 'error');
-                    await updateTodoList(todo.category);
-                    return;
-                }
-                
-                showToast('✓ Tâche terminée et supprimée', 'success');
-            } else {
-                // Décocher = restaurer
-                const { error } = await window.supabaseClient
-                    .from('todos')
-                    .update({ completed: false, archived_at: null })
-                    .eq('id', id);
-                
-                if (error) {
-                    console.error('❌ Erreur mise à jour todo:', error);
-                    showToast('Erreur lors de la restauration', 'error');
-                    await updateTodoList(todo.category);
-                    return;
-                }
-                
-                showToast('↺ Tâche réactivée', 'success');
-            }
+        if (error) {
+            console.error('❌ Erreur mise à jour todo:', error);
+            showToast('Erreur lors de la mise à jour', 'error');
+            return;
         }
         
-        // Recharger la liste correspondante
-        await updateTodoList(todo.category);
-        
-        await updateDashboardStats(); // Mettre à jour le compteur
-    } catch (error) {
-        console.error('❌ Erreur dans toggleTodo:', error);
-        console.error('❌ Stack:', error.stack);
-        showToast('Erreur inattendue', 'error');
+        showToast('↺ Tâche réactivée', 'success');
     }
+    
+    await updateTodoLists();
+    await updateDashboardStats();
 }
 
 async function deleteTodo(id) {
@@ -1041,13 +970,19 @@ async function updateFinancialIndicators() {
     if (anneeCAEl) anneeCAEl.textContent = anneeActuelle;
     
     // Récupérer le Total Charges depuis la simulation fiscale de l'année en cours
-    const { data: simFiscale } = await window.supabaseClient
-        .from('simulations_fiscales')
-        .select('*')
-        .eq('annee', anneeActuelle)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+    let simFiscale = null;
+    try {
+        const { data } = await window.supabaseClient
+            .from('simulations_fiscales')
+            .select('*')
+            .eq('annee', anneeActuelle)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        simFiscale = data;
+    } catch (error) {
+        // Table non créée ou erreur - continuer sans simulation
+    }
     
     let totalChargesAnnee = 0;
     
@@ -1100,12 +1035,11 @@ async function updateFinancialIndicators() {
         const fraisDivers = (simFiscale.frais_divers_liste || []).reduce((sum, item) => sum + item.montant, 0);
         const produitsAccueil = (simFiscale.produits_accueil_liste || []).reduce((sum, item) => sum + item.montant, 0);
         
-        // Crédit Trevoux
-        const creditTrevoux = (simFiscale.credits_liste || [])
-            .filter(c => c.nom && c.nom.toLowerCase().includes('trevoux'))
+        // Crédits (tous gîtes)
+        const credits = (simFiscale.credits_liste || [])
             .reduce((sum, c) => sum + (c.mensualite * 12), 0);
         
-        totalChargesAnnee = chargesCouzon + chargesTrevoux + fraisPro + travaux + fraisDivers + produitsAccueil + creditTrevoux;
+        totalChargesAnnee = chargesCouzon + chargesTrevoux + fraisPro + travaux + fraisDivers + produitsAccueil + credits;
     }
     
     // Bénéfice = CA - Total Charges (depuis fiscalité)
@@ -1134,13 +1068,19 @@ async function updateFinancialIndicators() {
     
     
     // 3. Calculer l'IR de l'ANNÉE PRÉCÉDENTE (depuis la base)
-    const { data: simulationPrecedente, error: errorPrecedente } = await window.supabaseClient
-        .from('simulations_fiscales')
-        .select('*')
-        .eq('annee', anneePrecedente)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+    let simulationPrecedente = null;
+    try {
+        const { data } = await window.supabaseClient
+            .from('simulations_fiscales')
+            .select('*')
+            .eq('annee', anneePrecedente)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        simulationPrecedente = data;
+    } catch (error) {
+        // Table non créée ou erreur - continuer sans simulation
+    }
     
     let impotRevenuPrecedent = 0;
     let urssafPrecedent = 0;
@@ -1168,7 +1108,7 @@ async function updateFinancialIndicators() {
         .eq('annee', anneeActuelle)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
     
     let impotRevenuCourant = 0;
     
@@ -1486,6 +1426,7 @@ async function refreshDashboard() {
     await updateDashboardMenages();
     await updateTodoLists();
     await updateFinancialIndicators();
+    await afficherGraphiqueTresorerieDashboard();
     initializeTodoModal();
     initializeReponseWhatsappModal();
     
@@ -2038,12 +1979,12 @@ async function getReservationChecklistProgressDashboard(reservationId, gite) {
         const { data: templates, error: templatesError } = await supabaseClient
             .from('checklist_templates')
             .select('id, type')
-            .eq('gite', gite)
+            .eq('gite_id', gite)
             .eq('actif', true);
         
         // Si la table n'existe pas, retourner des valeurs vides sans erreur
         if (templatesError) {
-            if (templatesError.code === 'PGRST205') {
+            if (templatesError.code === 'PGRST205' || templatesError.code === '42703' || templatesError.code === '42P01') {
                 // Table n'existe pas encore - désactiver définitivement la feature
                 CHECKLIST_FEATURE_ENABLED = false;
                 return {
@@ -2114,11 +2055,14 @@ async function afficherDetailsRetourMenage(retourId) {
     try {
         const { data: retour, error } = await window.supabaseClient
             .from('retours_menage')
-            .select('*')
+            .select('*, gites(name)')
             .eq('id', retourId)
             .single();
 
         if (error) throw error;
+        
+        // Extraire le nom du gîte
+        const giteName = retour.gites?.name || 'Gîte inconnu';
 
         const dateFormatee = new Date(retour.date_menage).toLocaleDateString('fr-FR', { 
             weekday: 'long',
@@ -2145,31 +2089,19 @@ async function afficherDetailsRetourMenage(retourId) {
                 <h2 style="color: #667eea; margin-bottom: 20px;">🧹 Retour Ménage</h2>
                 
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                    <div style="font-weight: 600; margin-bottom: 8px;">🏠 ${retour.gite}</div>
+                    <div style="font-weight: 600; margin-bottom: 8px;">🏠 ${giteName}</div>
                     <div style="color: #666;">📅 ${dateFormatee}</div>
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <h3 style="color: #333; margin-bottom: 10px;">État de la maison à l'arrivée</h3>
+                    <h3 style="color: #333; margin-bottom: 10px;">Commentaires</h3>
                     <div style="padding: 15px; background: #fff; border-left: 4px solid #667eea; border-radius: 8px;">
-                        <div style="font-weight: 600; margin-bottom: 8px;">${etatLabels[retour.etat_arrivee]}</div>
-                        ${retour.details_etat ? `<div style="color: #666; font-size: 0.95rem;">${retour.details_etat}</div>` : ''}
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 30px;">
-                    <h3 style="color: #333; margin-bottom: 10px;">Déroulement du ménage</h3>
-                    <div style="padding: 15px; background: #fff; border-left: 4px solid ${retour.deroulement === 'bien' ? '#27AE60' : '#F39C12'}; border-radius: 8px;">
-                        <div style="font-weight: 600; margin-bottom: 8px;">${deroulementLabels[retour.deroulement]}</div>
-                        ${retour.details_deroulement ? `<div style="color: #666; font-size: 0.95rem;">${retour.details_deroulement}</div>` : ''}
+                        <div style="white-space: pre-wrap; color: #666; font-size: 0.95rem;">${retour.commentaires || 'Aucun commentaire'}</div>
                     </div>
                 </div>
 
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="validerRetourMenage(${retourId})" class="btn" style="flex: 1; background: linear-gradient(135deg, #27AE60 0%, #229954 100%); color: white; padding: 15px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
-                        ✅ Valider ce retour
-                    </button>
-                    <button onclick="fermerModalRetourMenage()" class="btn" style="flex: 1; background: #ddd; color: #333; padding: 15px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                    <button onclick="fermerEtValiderRetourMenage('${retourId}')" class="btn" style="flex: 1; background: #ddd; color: #333; padding: 15px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
                         Fermer
                     </button>
                 </div>
@@ -2186,10 +2118,11 @@ async function afficherDetailsRetourMenage(retourId) {
         }
 
         window.SecurityUtils.setInnerHTML(modal, `
-            <div style="background: white; border-radius: 20px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div onclick="event.stopPropagation()" style="background: white; border-radius: 20px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
                 ${modalContent}
             </div>
         `);
+        modal.dataset.retourId = retourId; // Stocker l'ID pour le clic sur l'overlay
         modal.style.display = 'flex';
 
     } catch (error) {
@@ -2198,25 +2131,26 @@ async function afficherDetailsRetourMenage(retourId) {
     }
 }
 
-async function validerRetourMenage(retourId) {
+async function fermerEtValiderRetourMenage(retourId) {
     try {
-        // Supprimer le retour au lieu de le marquer validé
+        // Marquer le retour comme validé pour qu'il disparaisse des alertes
         const { error } = await window.supabaseClient
             .from('retours_menage')
-            .delete()
+            .update({ validated: true })
             .eq('id', retourId);
 
         if (error) throw error;
 
-        alert('✅ Retour validé et supprimé avec succès !');
+        // Fermer la modal
         fermerModalRetourMenage();
         
-        // Recharger les alertes
+        // Recharger les alertes pour enlever ce retour
         await updateDashboardAlerts();
         
     } catch (error) {
         console.error('Erreur validation retour:', error);
-        alert('❌ Erreur lors de la validation du retour');
+        // Fermer quand même la modal
+        fermerModalRetourMenage();
     }
 }
 
@@ -2227,6 +2161,30 @@ function fermerModalRetourMenage() {
     }
 }
 
-window.afficherDetailsRetourMenage = afficherDetailsRetourMenage;
-window.validerRetourMenage = validerRetourMenage;
+// Permettre de fermer en cliquant sur le fond
+document.addEventListener('DOMContentLoaded', () => {
+    const setupModalRetourClick = () => {
+        const modal = document.getElementById('modal-retour-menage');
+        if (modal && !modal.dataset.clickSetup) {
+            modal.dataset.clickSetup = 'true';
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    // Récupérer l'ID du retour depuis le data attribute
+                    const retourId = modal.dataset.retourId;
+                    if (retourId) {
+                        fermerEtValiderRetourMenage(retourId);
+                    } else {
+                        fermerModalRetourMenage();
+                    }
+                }
+            });
+        }
+    };
+    // Essayer périodiquement si la modal n'existe pas encore
+    setInterval(setupModalRetourClick, 1000);
+});
+
+window.affichEtValiderRetourMenage = fermerEtValiderRetourMenage;
+window.fermererDetailsRetourMenage = afficherDetailsRetourMenage;
 window.fermerModalRetourMenage = fermerModalRetourMenage;
+window.chargerGraphiqueTresorerie = afficherGraphiqueTresorerieDashboard;

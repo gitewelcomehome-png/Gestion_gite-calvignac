@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projections Financières - Channel Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav-header">
+        <div class="container">
+            <h1>📊 Business Plan Channel Manager</h1>
+            <p class="subtitle">Solution B2B pour Gîtes de France - Janvier 2026</p>
+            <div class="nav-tabs">
+                <a href="index.html">🏠 Accueil</a>
+                <a href="etude-marche.html">📈 Étude de Marché</a>
+                <a href="analyse-concurrence.html">🎯 Concurrence</a>
+                <a href="business-model.html">💼 Business Model</a>
+                <a href="projections.html" class="active">💰 Projections</a>
+                <a href="strategie.html">🚀 Stratégie</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero fade-in-up">
+            <h2>💰 Projections Financières 2026-2028</h2>
+            <p class="subtitle">Prévisions détaillées sur 3 ans avec 3 scénarios</p>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">📊 Hypothèses de Base</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Paramètre</th>
+                            <th>Valeur</th>
+                            <th>Justification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Marché adressable</strong></td>
+                            <td>55 000 membres GdF</td>
+                            <td>75% non équipés = 41 250 prospects</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Prix B2B (White Label)</strong></td>
+                            <td>8€/mois/utilisateur</td>
+                            <td>GdF revend à 15€ (47% marge pour eux)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Churn mensuel</strong></td>
+                            <td>2%</td>
+                            <td>Standard SaaS B2B, bonne rétention</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coûts variables</strong></td>
+                            <td>2,70€/user/mois</td>
+                            <td>Infrastructure (1,20€) + Support (1,50€)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marge brute</strong></td>
+                            <td>66%</td>
+                            <td>(8€ - 2,70€) / 8€</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAC (Coût Acquisition)</strong></td>
+                            <td>10€/client</td>
+                            <td>Via GdF : marketing partagé, faible CAC</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lancement pilote</strong></td>
+                            <td>T2 2026 (Avril)</td>
+                            <td>50 gîtes tests pendant 3 mois</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Déploiement national</strong></td>
+                            <td>T4 2026 (Octobre)</td>
+                            <td>Communication massive via GdF</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">🎯 Scénario Réaliste (Base)</h2>
+            <p class="section-subtitle">Pénétration progressive : 5% An 1 → 10% An 2 → 15% An 3</p>
+            
+            <div class="chart-container">
+                <h3 style="margin-bottom: 20px;">Évolution Clients & Revenus</h3>
+                <div class="bar-chart">
+                    <div class="bar" style="height: 20%;">
+                        <span class="bar-value">2 750</span>
+                        <span class="bar-label">2026 (5%)</span>
+                    </div>
+                    <div class="bar" style="height: 50%;">
+                        <span class="bar-value">5 500</span>
+                        <span class="bar-label">2027 (10%)</span>
+                    </div>
+                    <div class="bar" style="height: 100%;">
+                        <span class="bar-value">8 250</span>
+                        <span class="bar-label">2028 (15%)</span>
+                    </div>
+                </div>
+                <p style="margin-top: 50px; text-align: center; color: var(--text-muted);">Nombre de clients actifs en fin d'année</p>
+            </div>
+
+            <div class="table-container" style="margin-top: 40px;">
+                <h3 style="margin-bottom: 20px;">Compte de Résultat Prévisionnel</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Poste</th>
+                            <th>2026</th>
+                            <th>2027</th>
+                            <th>2028</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: var(--bg-light); font-weight: bold;">
+                            <td colspan="4">📈 REVENUS</td>
+                        </tr>
+                        <tr>
+                            <td>Clients fin d'année</td>
+                            <td>2 750</td>
+                            <td>5 500</td>
+                            <td>8 250</td>
+                        </tr>
+                        <tr>
+                            <td>Clients moyens/mois</td>
+                            <td>917</td>
+                            <td>4 125</td>
+                            <td>6 875</td>
+                        </tr>
+                        <tr>
+                            <td>Prix unitaire B2B</td>
+                            <td>8€/mois</td>
+                            <td>8€/mois</td>
+                            <td>8€/mois</td>
+                        </tr>
+                        <tr style="background: #dbeafe;">
+                            <td><strong>Chiffre d'Affaires</strong></td>
+                            <td><strong>88 032€</strong></td>
+                            <td><strong>396 000€</strong></td>
+                            <td><strong>660 000€</strong></td>
+                        </tr>
+                        
+                        <tr style="background: var(--bg-light); font-weight: bold;">
+                            <td colspan="4">💸 COÛTS VARIABLES</td>
+                        </tr>
+                        <tr>
+                            <td>Infrastructure (1,20€/user)</td>
+                            <td>13 205€</td>
+                            <td>59 400€</td>
+                            <td>99 000€</td>
+                        </tr>
+                        <tr>
+                            <td>Support (1,50€/user)</td>
+                            <td>16 506€</td>
+                            <td>74 250€</td>
+                            <td>123 750€</td>
+                        </tr>
+                        <tr style="background: #fee2e2;">
+                            <td><strong>Total Coûts Variables</strong></td>
+                            <td><strong>29 711€</strong></td>
+                            <td><strong>133 650€</strong></td>
+                            <td><strong>222 750€</strong></td>
+                        </tr>
+                        
+                        <tr style="background: #dcfce7; font-weight: bold;">
+                            <td><strong>MARGE BRUTE</strong></td>
+                            <td><strong>58 321€ (66%)</strong></td>
+                            <td><strong>262 350€ (66%)</strong></td>
+                            <td><strong>437 250€ (66%)</strong></td>
+                        </tr>
+                        
+                        <tr style="background: var(--bg-light); font-weight: bold;">
+                            <td colspan="4">🔧 COÛTS FIXES</td>
+                        </tr>
+                        <tr>
+                            <td>Développement (1 dev mi-temps)</td>
+                            <td>30 000€</td>
+                            <td>36 000€</td>
+                            <td>42 000€</td>
+                        </tr>
+                        <tr>
+                            <td>Marketing & Communication</td>
+                            <td>9 600€</td>
+                            <td>12 000€</td>
+                            <td>15 000€</td>
+                        </tr>
+                        <tr>
+                            <td>Admin & Légal</td>
+                            <td>6 000€</td>
+                            <td>6 000€</td>
+                            <td>7 200€</td>
+                        </tr>
+                        <tr>
+                            <td>Outils & Logiciels</td>
+                            <td>3 600€</td>
+                            <td>4 200€</td>
+                            <td>5 000€</td>
+                        </tr>
+                        <tr style="background: #fee2e2;">
+                            <td><strong>Total Coûts Fixes</strong></td>
+                            <td><strong>49 200€</strong></td>
+                            <td><strong>58 200€</strong></td>
+                            <td><strong>69 200€</strong></td>
+                        </tr>
+                        
+                        <tr style="background: var(--bg-light); font-weight: bold;">
+                            <td colspan="4">💰 RÉSULTAT</td>
+                        </tr>
+                        <tr>
+                            <td>Coût Acquisition Clients (CAC)</td>
+                            <td>-27 500€</td>
+                            <td>-27 500€</td>
+                            <td>-27 500€</td>
+                        </tr>
+                        <tr style="background: #dcfce7; font-weight: bold; font-size: 1.1rem;">
+                            <td><strong>RÉSULTAT NET</strong></td>
+                            <td><strong style="color: #991b1b;">-18 379€</strong></td>
+                            <td><strong style="color: var(--success);">+176 650€</strong></td>
+                            <td><strong style="color: var(--success);">+340 550€</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marge nette</strong></td>
+                            <td>-21%</td>
+                            <td><strong style="color: var(--success);">45%</strong></td>
+                            <td><strong style="color: var(--success);">52%</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-success" style="margin-top: 30px;">
+                <strong>✅ Rentabilité atteinte dès l'année 2 :</strong> Investissement initial de 18K€ récupéré en 12 mois. Année 3 génère 340K€ de bénéfices avec 52% de marge nette.
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">📊 Comparaison des 3 Scénarios</h2>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Métrique</th>
+                            <th>Pessimiste</th>
+                            <th>Réaliste</th>
+                            <th>Optimiste</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: var(--bg-light); font-weight: bold;">
+                            <td colspan="4">ANNÉE 1 - 2026</td>
+                        </tr>
+                        <tr>
+                            <td>Taux pénétration</td>
+                            <td>2%</td>
+                            <td>5%</td>
+                            <td>10%</td>
+                        </tr>
+                        <tr>
+                            <td>Clients fin d'année</td>
+                            <td>1 100</td>
+                            <td>2 750</td>
+                            <td>5 500</td>
+                        </tr>
+                        <tr>
+                            <td>Chiffre d'Affaires</td>
+                            <td>35 200€</td>
+                            <td>88 032€</td>
+                            <td>176 000€</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Résultat Net</strong></td>
+                            <td style="color: #991b1b;"><strong>-55 000€</strong></td>
+                            <td style="color: #991b1b;"><strong>-18 379€</strong></td>
+                            <td style="color: var(--success);"><strong>+31 500€</strong></td>
+                        </tr>
+                        
+                        <tr style="background: var(--bg-light); font-weight: bold;">
+                            <td colspan="4">ANNÉE 2 - 2027</td>
+                        </tr>
+                        <tr>
+                            <td>Taux pénétration</td>
+                            <td>4%</td>
+                            <td>10%</td>
+                            <td>18%</td>
+                        </tr>
+                        <tr>
+                            <td>Clients fin d'année</td>
+                            <td>2 200</td>
+                            <td>5 500</td>
+                            <td>9 900</td>
+                        </tr>
+                        <tr>
+                            <td>Chiffre d'Affaires</td>
+                            <td>158 400€</td>
+                            <td>396 000€</td>
+                            <td>712 800€</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Résultat Net</strong></td>
+                            <td style="color: var(--warning);"><strong>+15 000€</strong></td>
+                            <td style="color: var(--success);"><strong>+176 650€</strong></td>
+                            <td style="color: var(--success);"><strong>+382 500€</strong></td>
+                        </tr>
+                        
+                        <tr style="background: var(--bg-light); font-weight: bold;">
+                            <td colspan="4">ANNÉE 3 - 2028</td>
+                        </tr>
+                        <tr>
+                            <td>Taux pénétration</td>
+                            <td>5%</td>
+                            <td>15%</td>
+                            <td>25%</td>
+                        </tr>
+                        <tr>
+                            <td>Clients fin d'année</td>
+                            <td>2 750</td>
+                            <td>8 250</td>
+                            <td>13 750</td>
+                        </tr>
+                        <tr>
+                            <td>Chiffre d'Affaires</td>
+                            <td>246 000€</td>
+                            <td>660 000€</td>
+                            <td>1 188 000€</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Résultat Net</strong></td>
+                            <td style="color: var(--success);"><strong>+80 000€</strong></td>
+                            <td style="color: var(--success);"><strong>+340 550€</strong></td>
+                            <td style="color: var(--success);"><strong>+658 000€</strong></td>
+                        </tr>
+                        
+                        <tr style="background: #dcfce7; font-weight: bold; font-size: 1.1rem;">
+                            <td><strong>CUMUL 3 ANS</strong></td>
+                            <td><strong>+40 000€</strong></td>
+                            <td><strong>+498 821€</strong></td>
+                            <td><strong>+1 072 000€</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="stats-grid" style="margin-top: 40px;">
+                <div class="stat-card">
+                    <div class="stat-number">5%</div>
+                    <div class="stat-label">Pénétration Réaliste An 1</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">499K€</div>
+                    <div class="stat-label">Bénéfice Cumulé 3 ans</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">52%</div>
+                    <div class="stat-label">Marge Nette Année 3</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">18 mois</div>
+                    <div class="stat-label">Retour sur Investissement</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">💸 Plan d'Investissement Initial</h2>
+            <div class="table-container">
+                <h3 style="margin-bottom: 20px;">Besoins de Financement Phase 1 (Janvier - Juin 2026)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Poste</th>
+                            <th>Montant</th>
+                            <th>Détails</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Développement & Sécurisation</strong></td>
+                            <td>20 000€</td>
+                            <td>4 mois dev full-time (Phase 1-4 sécurité)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Infrastructure & Tests</strong></td>
+                            <td>3 000€</td>
+                            <td>Serveurs pro, monitoring, tests charge</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Audit Sécurité</strong></td>
+                            <td>5 000€</td>
+                            <td>Audit externe pentest + RGPD</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Légal & Admin</strong></td>
+                            <td>4 000€</td>
+                            <td>Création société, CGU/CGV, assurance</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marketing & Commercial</strong></td>
+                            <td>6 000€</td>
+                            <td>Pitch deck, démos, présentation GdF</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pilote 50 gîtes</strong></td>
+                            <td>5 000€</td>
+                            <td>Support intensif, ajustements, formation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trésorerie sécurité</strong></td>
+                            <td>7 000€</td>
+                            <td>3 mois charges fixes sans revenus</td>
+                        </tr>
+                        <tr style="background: #dbeafe; font-weight: bold; font-size: 1.1rem;">
+                            <td><strong>TOTAL</strong></td>
+                            <td><strong>50 000€</strong></td>
+                            <td>Capital démarrage</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info" style="margin-top: 20px;">
+                <strong>💰 Sources de financement :</strong> Apport personnel (20K€) + Prêt d'honneur Initiative France (15K€) + Love Money (10K€) + BPI France Création (5K€)
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">📈 Flux de Trésorerie Mensuel (Année 1)</h2>
+            <div class="chart-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mois</th>
+                            <th>Nouveaux Clients</th>
+                            <th>Clients Actifs</th>
+                            <th>CA Mensuel</th>
+                            <th>Coûts</th>
+                            <th>Trésorerie Cumulée</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jan 2026</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0€</td>
+                            <td>-8 000€</td>
+                            <td style="color: #991b1b;"><strong>42 000€</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Fév 2026</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0€</td>
+                            <td>-8 000€</td>
+                            <td style="color: #991b1b;"><strong>34 000€</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Mar 2026</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0€</td>
+                            <td>-8 000€</td>
+                            <td style="color: #991b1b;"><strong>26 000€</strong></td>
+                        </tr>
+                        <tr style="background: #fef3c7;">
+                            <td>Avr 2026</td>
+                            <td>50</td>
+                            <td>50</td>
+                            <td>400€</td>
+                            <td>-8 500€</td>
+                            <td style="color: #991b1b;"><strong>17 900€</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Mai 2026</td>
+                            <td>0</td>
+                            <td>49</td>
+                            <td>392€</td>
+                            <td>-8 500€</td>
+                            <td style="color: #991b1b;"><strong>9 792€</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Juin 2026</td>
+                            <td>0</td>
+                            <td>48</td>
+                            <td>384€</td>
+                            <td>-8 500€</td>
+                            <td style="color: #991b1b;"><strong>1 676€</strong></td>
+                        </tr>
+                        <tr style="background: #dcfce7;">
+                            <td>Juil 2026</td>
+                            <td>300</td>
+                            <td>345</td>
+                            <td>2 760€</td>
+                            <td>-7 000€</td>
+                            <td style="color: #991b1b;"><strong>-2 564€</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Août 2026</td>
+                            <td>400</td>
+                            <td>735</td>
+                            <td>5 880€</td>
+                            <td>-7 500€</td>
+                            <td style="color: var(--warning);"><strong>+816€</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Sep 2026</td>
+                            <td>500</td>
+                            <td>1 215</td>
+                            <td>9 720€</td>
+                            <td>-8 000€</td>
+                            <td style="color: var(--success);"><strong>+2 536€</strong></td>
+                        </tr>
+                        <tr style="background: #dcfce7;">
+                            <td>Oct 2026</td>
+                            <td>600</td>
+                            <td>1 800</td>
+                            <td>14 400€</td>
+                            <td>-9 000€</td>
+                            <td style="color: var(--success);"><strong>+7 936€</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Nov 2026</td>
+                            <td>500</td>
+                            <td>2 265</td>
+                            <td>18 120€</td>
+                            <td>-9 500€</td>
+                            <td style="color: var(--success);"><strong>+16 556€</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Déc 2026</td>
+                            <td>400</td>
+                            <td>2 650</td>
+                            <td>21 200€</td>
+                            <td>-9 800€</td>
+                            <td style="color: var(--success);"><strong>+27 956€</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-warning" style="margin-top: 20px;">
+                <strong>⚠️ Point critique :</strong> Trésorerie au plus bas en juillet 2026 (-2 564€). Le déploiement national en octobre redresse immédiatement la situation. Point mort trésorerie atteint en août 2026.
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">🎯 Objectifs Financiers par Étape</h2>
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="badge badge-info" style="margin-bottom: 15px;">Q2 2026</div>
+                    <h3>Phase Pilote</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>50 gîtes</strong> testeurs</li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>0 bug critique</strong></li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>NPS > 70</strong> (excellent)</li>
+                        <li style="padding: 10px 0;"><strong>Validation</strong> business model</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="badge badge-success" style="margin-bottom: 15px;">Q4 2026</div>
+                    <h3>Fin Année 1</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>2 750 clients</strong> payants</li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>88K€ CA</strong> annuel</li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>Churn < 3%</strong> mensuel</li>
+                        <li style="padding: 10px 0;"><strong>Tréso positive</strong> atteinte</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="badge badge-success" style="margin-bottom: 15px;">Déc 2027</div>
+                    <h3>Fin Année 2</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>5 500 clients</strong> (×2)</li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>396K€ CA</strong> (×4,5)</li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>177K€ bénéfice</strong></li>
+                        <li style="padding: 10px 0;"><strong>Leader</strong> segment GdF</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="badge badge-warning" style="margin-bottom: 15px;">Déc 2028</div>
+                    <h3>Fin Année 3</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>8 250 clients</strong> (15% marché)</li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>660K€ CA</strong></li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--border);"><strong>341K€ bénéfice</strong> (52% marge)</li>
+                        <li style="padding: 10px 0;"><strong>Expansion</strong> autres réseaux</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">⚖️ Analyse de Sensibilité</h2>
+            <div class="table-container">
+                <h3 style="margin-bottom: 20px;">Impact des Variations sur le Résultat Année 3</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Variation</th>
+                            <th>Impact CA</th>
+                            <th>Impact Résultat</th>
+                            <th>Sensibilité</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Taux pénétration</strong></td>
+                            <td>±5 points</td>
+                            <td>±220K€</td>
+                            <td>±145K€</td>
+                            <td><span class="badge badge-danger">Très élevée</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Prix B2B</strong></td>
+                            <td>±1€/mois</td>
+                            <td>±99K€</td>
+                            <td>±99K€</td>
+                            <td><span class="badge badge-danger">Très élevée</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Churn mensuel</strong></td>
+                            <td>±1 point</td>
+                            <td>∓85K€</td>
+                            <td>∓56K€</td>
+                            <td><span class="badge badge-warning">Élevée</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coût infra/user</strong></td>
+                            <td>±0,50€</td>
+                            <td>0€</td>
+                            <td>∓41K€</td>
+                            <td><span class="badge badge-info">Moyenne</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coûts fixes</strong></td>
+                            <td>±20%</td>
+                            <td>0€</td>
+                            <td>∓14K€</td>
+                            <td><span class="badge badge-success">Faible</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-warning" style="margin-top: 20px;">
+                <strong>🎯 Facteurs critiques :</strong> Le succès dépend principalement du taux d'adoption (pénétration) et du churn. Le prix B2B doit être défendu lors des négociations avec GdF. Les coûts sont bien maîtrisables.
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="alert alert-success">
+                <strong>💰 Conclusion Projections :</strong> Le projet est rentable dès l'année 2 avec un investissement initial de 50K€ récupéré en 18 mois. En scénario réaliste, l'année 3 génère 660K€ de CA et 341K€ de bénéfices (52% marge). Les unit economics sont solides (LTV/CAC 26x) et le modèle est scalable sans investissements lourds.
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 Channel Manager Gîtes de France - Business Plan Confidentiel</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">Document créé le 16 janvier 2026</p>
+    </footer>
+</body>
+</html>

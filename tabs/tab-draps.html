@@ -13,156 +13,67 @@
         </div>
     </div>
 
-<!-- Configuration des besoins par gîte -->
-<div class="card" style="margin-bottom: 20px;">
-    <h2>📋 Configuration des besoins par réservation</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
-        <!-- Trevoux -->
-        <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
-            <h3 style="color: #667eea; margin-bottom: 10px;">🏠 Trevoux</h3>
-            <p style="font-size: 14px; color: #666;">6 lits doubles + 3 lits simples</p>
-            <ul style="font-size: 13px; margin-top: 10px; line-height: 1.8;">
-                <li>6 draps plats grands</li>
-                <li>3 draps plats petits</li>
-                <li>6 housses de couette grandes</li>
-                <li>3 housses de couette petites</li>
-                <li>15 taies d'oreillers</li>
-                <li>15 serviettes</li>
-                <li>3 tapis de bain</li>
-            </ul>
-        </div>
-        
-        <!-- Couzon -->
-        <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
-            <h3 style="color: #667eea; margin-bottom: 10px;">🏠 Couzon</h3>
-            <p style="font-size: 14px; color: #666;">4 lits doubles + 3 lits simples</p>
-            <ul style="font-size: 13px; margin-top: 10px; line-height: 1.8;">
-                <li>4 draps plats grands</li>
-                <li>3 draps plats petits</li>
-                <li>4 housses de couette grandes</li>
-                <li>3 housses de couette petites</li>
-                <li>11 taies d'oreillers</li>
-                <li>11 serviettes</li>
-                <li>2 tapis de bain</li>
-            </ul>
-        </div>
+<!-- 📋 CONFIGURATION DES BESOINS -->
+<div class="card" style="background: white; border: 3px solid #667eea; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+    <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📋 Configuration des besoins par réservation</h3>
+    <div id="besoins-container" style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;">
+        <!-- Généré dynamiquement par JS -->
     </div>
 </div>
 
-<!-- Stocks actuels -->
-<div class="card" style="margin-bottom: 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h2>📦 Stocks en Réserve</h2>
-        <button class="btn-primary" onclick="sauvegarderStocks()">💾 Sauvegarder les Stocks</button>
+<!-- 📦 STOCKS EN RÉSERVE -->
+<div class="card" style="background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📦 Stocks en Réserve</h3>
+        <button onclick="sauvegarderStocks()" style="background: #27ae60; color: white; padding: 10px 20px; border: 2px solid #2D3436; border-radius: 10px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
+            💾 Sauvegarder
+        </button>
     </div>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <!-- Stock Trevoux -->
-        <div>
-            <h3 style="color: #667eea; margin-bottom: 15px;">🏠 Trevoux</h3>
-            <div style="display: grid; gap: 10px;">
-                <div class="input-group">
-                    <label>Draps plats grands</label>
-                    <input type="number" id="stock-trevoux-draps-grands" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Draps plats petits</label>
-                    <input type="number" id="stock-trevoux-draps-petits" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Housses couette grandes</label>
-                    <input type="number" id="stock-trevoux-housses-grandes" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Housses couette petites</label>
-                    <input type="number" id="stock-trevoux-housses-petites" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Taies d'oreillers</label>
-                    <input type="number" id="stock-trevoux-taies" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Serviettes</label>
-                    <input type="number" id="stock-trevoux-serviettes" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Tapis de bain</label>
-                    <input type="number" id="stock-trevoux-tapis" min="0" class="input">
-                </div>
-            </div>
-        </div>
-        
-        <!-- Stock Couzon -->
-        <div>
-            <h3 style="color: #667eea; margin-bottom: 15px;">🏠 Couzon</h3>
-            <div style="display: grid; gap: 10px;">
-                <div class="input-group">
-                    <label>Draps plats grands</label>
-                    <input type="number" id="stock-couzon-draps-grands" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Draps plats petits</label>
-                    <input type="number" id="stock-couzon-draps-petits" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Housses couette grandes</label>
-                    <input type="number" id="stock-couzon-housses-grandes" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Housses couette petites</label>
-                    <input type="number" id="stock-couzon-housses-petites" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Taies d'oreillers</label>
-                    <input type="number" id="stock-couzon-taies" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Serviettes</label>
-                    <input type="number" id="stock-couzon-serviettes" min="0" class="input">
-                </div>
-                <div class="input-group">
-                    <label>Tapis de bain</label>
-                    <input type="number" id="stock-couzon-tapis" min="0" class="input">
-                </div>
-            </div>
-        </div>
+    <div id="stocks-container" style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;">
+        <!-- Généré dynamiquement par JS -->
     </div>
 </div>
 
-<!-- Analyse et prévisions -->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+<!-- 📊 ANALYSE & PRÉVISIONS -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
     <!-- Réservations couvertes -->
-    <div class="card">
-        <h2>📊 Réservations Couvertes</h2>
-        <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Nombre de réservations que vous pouvez assurer avec vos stocks actuels</p>
-        <div id="reservations-couvertes">
+    <div class="card" style="background: white; border: 3px solid #3498DB; padding: 20px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📊 Réservations Couvertes</h3>
+        <p style="color: #666; font-size: 0.85rem; margin-bottom: 15px;">Nombre de réservations assurables avec vos stocks</p>
+        <div id="reservations-couvertes" style="display: flex; gap: 16px; flex-wrap: wrap;">
             <!-- Rempli par JS -->
         </div>
     </div>
     
     <!-- À emmener dans les gîtes -->
-    <div class="card">
-        <h2>🚗 À Emmener dans les Gîtes</h2>
-        <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Pour les prochaines réservations</p>
-        <div id="a-emmener">
+    <div class="card" style="background: white; border: 3px solid #f5576c; padding: 20px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">🚗 À Emmener dans les Gîtes</h3>
+        <p style="color: #666; font-size: 0.85rem; margin-bottom: 15px;">Pour les prochaines réservations</p>
+        <div id="a-emmener" style="display: flex; gap: 16px; flex-wrap: wrap;">
             <!-- Rempli par JS -->
         </div>
     </div>
-</div>
-
-<!-- Simulation des besoins futurs -->
-<div class="card">
-    <h2>🔮 Simulation des Besoins Futurs</h2>
-    <div style="margin: 15px 0;">
-        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Calculer les besoins jusqu'au :</label>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="date" id="date-simulation" class="input" style="max-width: 200px;">
-            <button class="btn-primary" onclick="simulerBesoins()">🔍 Calculer</button>
-        </div>
-    </div>
     
-    <div id="resultats-simulation" style="margin-top: 20px;">
-        <!-- Rempli par JS -->
+    <!-- 🔮 SIMULATION DES BESOINS FUTURS -->
+    <div class="card" style="grid-column: 1 / -1; background: white; border: 3px solid #E67E22; padding: 20px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">🔮 Simulation des Besoins Futurs</h3>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2D3436; text-transform: uppercase; font-size: 0.85rem;">Calculer les besoins jusqu'au :</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="date" id="date-simulation" style="padding: 10px; border: 2px solid #2D3436; border-radius: 8px; font-weight: 600; max-width: 200px;">
+                <button onclick="simulerBesoins()" style="background: #E67E22; color: white; padding: 10px 20px; border: 2px solid #2D3436; border-radius: 10px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
+                    🔍 Calculer
+                </button>
+            </div>
+        </div>
+        
+        <div id="resultats-simulation" style="display: flex; gap: 16px; flex-wrap: wrap;">
+            <div style="background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 16px; padding: 40px; text-align: center; width: 100%;">
+                <div style="font-size: 48px; margin-bottom: 15px; opacity: 0.6;">📊</div>
+                <p style="color: #666; font-size: 15px; margin: 0;">Sélectionnez une date et cliquez sur "Calculer" pour simuler vos besoins futurs</p>
+            </div>
+        </div>
     </div>
 </div>
 
