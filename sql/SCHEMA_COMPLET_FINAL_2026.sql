@@ -331,25 +331,34 @@ CREATE INDEX IF NOT EXISTS idx_retours_gite ON retours_menage(gite_id);
 CREATE INDEX IF NOT EXISTS idx_retours_date ON retours_menage(date_menage);
 
 -- ================================================================
--- TABLE 6: stocks_draps (Gestion draps et linge)
+-- TABLE 6: linen_stocks (Gestion draps et linge)
 -- ================================================================
 
-CREATE TABLE IF NOT EXISTS stocks_draps (
+CREATE TABLE IF NOT EXISTS linen_stocks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    gite_id UUID REFERENCES gites(id) ON DELETE CASCADE,
-    type_linge TEXT NOT NULL CHECK (type_linge IN ('drap_simple', 'drap_double', 'housse_couette', 'taie', 'serviette', 'torchon')),
-    quantite INT NOT NULL DEFAULT 0,
-    quantite_min INT DEFAULT 0,
-    etat TEXT DEFAULT 'bon' CHECK (etat IN ('neuf', 'bon', 'usage', 'a_remplacer')),
-    derniere_maj TIMESTAMPTZ DEFAULT NOW(),
+    gite_id UUID NOT NULL REFERENCES gites(id) ON DELETE CASCADE,
+    
+    -- Colonnes pour chaque type de linge (correspondant au code JS)
+    draps_plats_grands INT DEFAULT 0 CHECK (draps_plats_grands >= 0),
+    draps_plats_petits INT DEFAULT 0 CHECK (draps_plats_petits >= 0),
+    housses_couettes_grandes INT DEFAULT 0 CHECK (housses_couettes_grandes >= 0),
+    housses_couettes_petites INT DEFAULT 0 CHECK (housses_couettes_petites >= 0),
+    taies_oreillers INT DEFAULT 0 CHECK (taies_oreillers >= 0),
+    serviettes INT DEFAULT 0 CHECK (serviettes >= 0),
+    tapis_bain INT DEFAULT 0 CHECK (tapis_bain >= 0),
+    
+    -- Métadonnées
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    
+    -- Contrainte UNIQUE pour on_conflict dans JS (upsert par gite_id)
+    CONSTRAINT linen_stocks_gite_id_unique UNIQUE(gite_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_stocks_owner ON stocks_draps(owner_user_id);
-CREATE INDEX IF NOT EXISTS idx_stocks_gite ON stocks_draps(gite_id);
-CREATE INDEX IF NOT EXISTS idx_stocks_type ON stocks_draps(type_linge);
+-- Index pour performances
+CREATE INDEX IF NOT EXISTS idx_linen_stocks_owner ON linen_stocks(owner_user_id);
+CREATE INDEX IF NOT EXISTS idx_linen_stocks_gite ON linen_stocks(gite_id);
 
 -- ================================================================
 -- TABLE 7: infos_pratiques (Informations clients)
@@ -402,10 +411,17 @@ CREATE TABLE IF NOT EXISTS todos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     gite_id UUID REFERENCES gites(id) ON DELETE CASCADE,
+    category TEXT,
     title TEXT NOT NULL,
     description TEXT,
+    gite TEXT,
     status TEXT DEFAULT 'todo' CHECK (status IN ('todo', 'in_progress', 'done', 'cancelled')),
     priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+    completed BOOLEAN DEFAULT false,
+    is_recurrent BOOLEAN DEFAULT false,
+    frequency TEXT CHECK (frequency IN ('weekly', 'biweekly', 'monthly')),
+    frequency_detail JSONB,
+    next_occurrence TIMESTAMPTZ,
     due_date DATE,
     completed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -416,6 +432,8 @@ CREATE INDEX IF NOT EXISTS idx_todos_owner ON todos(owner_user_id);
 CREATE INDEX IF NOT EXISTS idx_todos_gite ON todos(gite_id);
 CREATE INDEX IF NOT EXISTS idx_todos_status ON todos(status);
 CREATE INDEX IF NOT EXISTS idx_todos_priority ON todos(priority);
+CREATE INDEX IF NOT EXISTS idx_todos_completed ON todos(completed);
+CREATE INDEX IF NOT EXISTS idx_todos_next_occurrence ON todos(next_occurrence);
 
 -- ================================================================
 -- TABLE 10: demandes_horaires (Demandes horaires clients)
@@ -506,6 +524,71 @@ CREATE INDEX IF NOT EXISTS idx_soldes_gite ON suivi_soldes_bancaires(gite_id);
 CREATE INDEX IF NOT EXISTS idx_soldes_date ON suivi_soldes_bancaires(date_releve);
 
 -- ================================================================
+-- TABLE 14: historical_data (Historique des modifications)
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS historical_data (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    table_name TEXT NOT NULL,
+    record_id UUID NOT NULL,
+    action TEXT NOT NULL CHECK (action IN ('INSERT', 'UPDATE', 'DELETE')),
+    old_data JSONB,
+    new_data JSONB,
+    changed_at TIMESTAMPTZ DEFAULT NOW(),
+    changed_by UUID REFERENCES auth.users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_historical_owner ON historical_data(owner_user_id);
+CREATE INDEX IF NOT EXISTS idx_historical_table ON historical_data(table_name, record_id);
+
+-- ================================================================
+-- TABLE: CHECKLIST_TEMPLATES
+-- ================================================================
+-- Templates de checklist pour les entrées/sorties par gîte
+-- Permet de définir les points à vérifier lors des arrivées/départs
+
+CREATE TABLE IF NOT EXISTS checklist_templates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    gite_id UUID NOT NULL REFERENCES gites(id) ON DELETE CASCADE,
+    type TEXT NOT NULL CHECK (type IN ('entree', 'sortie')),
+    ordre INTEGER NOT NULL DEFAULT 1,
+    texte TEXT NOT NULL,
+    description TEXT,
+    actif BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_checklist_templates_owner ON checklist_templates(owner_user_id);
+CREATE INDEX IF NOT EXISTS idx_checklist_templates_gite ON checklist_templates(gite_id);
+CREATE INDEX IF NOT EXISTS idx_checklist_templates_type ON checklist_templates(type);
+
+-- ================================================================
+-- TABLE: CHECKLIST_PROGRESS
+-- ================================================================
+-- Progression des checklists par réservation
+-- Permet de suivre quels items ont été validés pour chaque réservation
+
+CREATE TABLE IF NOT EXISTS checklist_progress (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    reservation_id UUID NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
+    template_id UUID NOT NULL REFERENCES checklist_templates(id) ON DELETE CASCADE,
+    completed BOOLEAN DEFAULT false,
+    completed_at TIMESTAMPTZ,
+    completed_by UUID REFERENCES auth.users(id),
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(reservation_id, template_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_checklist_progress_owner ON checklist_progress(owner_user_id);
+CREATE INDEX IF NOT EXISTS idx_checklist_progress_resa ON checklist_progress(reservation_id);
+CREATE INDEX IF NOT EXISTS idx_checklist_progress_template ON checklist_progress(template_id);
+
+-- ================================================================
 -- ACTIVATION ROW LEVEL SECURITY
 -- ================================================================
 
@@ -522,6 +605,9 @@ ALTER TABLE demandes_horaires ENABLE ROW LEVEL SECURITY;
 ALTER TABLE problemes_signales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE simulations_fiscales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE suivi_soldes_bancaires ENABLE ROW LEVEL SECURITY;
+ALTER TABLE historical_data ENABLE ROW LEVEL SECURITY;
+ALTER TABLE checklist_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE checklist_progress ENABLE ROW LEVEL SECURITY;
 
 -- ================================================================
 -- POLITIQUES RLS - ISOLATION PAR USER
@@ -548,7 +634,9 @@ DO $$
 BEGIN
     DROP POLICY IF EXISTS rgpd_all_own_cleaning ON cleaning_schedule;
     CREATE POLICY rgpd_all_own_cleaning ON cleaning_schedule 
-    FOR ALL USING (owner_user_id = auth.uid());
+    FOR ALL 
+    USING (owner_user_id = auth.uid())
+    WITH CHECK (owner_user_id = auth.uid());
 END $$;
 
 -- CHARGES
@@ -628,6 +716,30 @@ DO $$
 BEGIN
     DROP POLICY IF EXISTS rgpd_all_own_soldes ON suivi_soldes_bancaires;
     CREATE POLICY rgpd_all_own_soldes ON suivi_soldes_bancaires 
+    FOR ALL USING (owner_user_id = auth.uid());
+END $$;
+
+-- HISTORICAL_DATA
+DO $$ 
+BEGIN
+    DROP POLICY IF EXISTS rgpd_all_own_historical ON historical_data;
+    CREATE POLICY rgpd_all_own_historical ON historical_data 
+    FOR ALL USING (owner_user_id = auth.uid());
+END $$;
+
+-- CHECKLIST_TEMPLATES
+DO $$ 
+BEGIN
+    DROP POLICY IF EXISTS rgpd_all_own_checklist_templates ON checklist_templates;
+    CREATE POLICY rgpd_all_own_checklist_templates ON checklist_templates 
+    FOR ALL USING (owner_user_id = auth.uid());
+END $$;
+
+-- CHECKLIST_PROGRESS
+DO $$ 
+BEGIN
+    DROP POLICY IF EXISTS rgpd_all_own_checklist_progress ON checklist_progress;
+    CREATE POLICY rgpd_all_own_checklist_progress ON checklist_progress 
     FOR ALL USING (owner_user_id = auth.uid());
 END $$;
 

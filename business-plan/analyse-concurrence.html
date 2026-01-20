@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse Concurrence - Channel Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav-header">
+        <div class="container">
+            <h1>📊 Business Plan Channel Manager</h1>
+            <p class="subtitle">Solution B2B pour Gîtes de France - Janvier 2026</p>
+            <div class="nav-tabs">
+                <a href="index.html">🏠 Accueil</a>
+                <a href="etude-marche.html">📈 Étude de Marché</a>
+                <a href="analyse-concurrence.html" class="active">🎯 Concurrence</a>
+                <a href="business-model.html">💼 Business Model</a>
+                <a href="projections.html">💰 Projections</a>
+                <a href="strategie.html">🚀 Stratégie</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero fade-in-up">
+            <h2>🎯 Analyse Concurrentielle Détaillée</h2>
+            <p class="subtitle">Comparatif complet avec les principaux acteurs du marché</p>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">🏆 Les 5 Principaux Concurrents</h2>
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-icon">👑</div>
+                    <h3>Beds24</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">Leader européen</p>
+                    <div style="background: var(--bg-light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong>Prix :</strong> 30-60€/mois<br>
+                        <strong>Clients :</strong> 20 000+<br>
+                        <strong>CA estimé :</strong> 5-10M€/an
+                    </div>
+                    <span class="badge badge-warning">Très complet mais complexe</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🇩🇪</div>
+                    <h3>Smoobu</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">Challenger allemand</p>
+                    <div style="background: var(--bg-light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong>Prix :</strong> 35-90€/mois<br>
+                        <strong>Clients :</strong> 15 000+<br>
+                        <strong>Focus :</strong> Automatisation
+                    </div>
+                    <span class="badge badge-warning">Très automatisé, prix élevé</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🌐</div>
+                    <h3>Lodgify</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">Espagnol, création sites</p>
+                    <div style="background: var(--bg-light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong>Prix :</strong> 40-100€/mois<br>
+                        <strong>Clients :</strong> 10 000+<br>
+                        <strong>Focus :</strong> Site web intégré
+                    </div>
+                    <span class="badge badge-info">Inclut création de site</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🇬🇧</div>
+                    <h3>Tokeet</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">Britannique, API-first</p>
+                    <div style="background: var(--bg-light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong>Prix :</strong> 45-120€/mois<br>
+                        <strong>Clients :</strong> 8 000+<br>
+                        <strong>Focus :</strong> Grandes agences
+                    </div>
+                    <span class="badge badge-danger">Trop complexe pour petits gîtes</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🇺🇸</div>
+                    <h3>Guesty</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">Américain, haut de gamme</p>
+                    <div style="background: var(--bg-light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong>Prix :</strong> 90-200€/mois<br>
+                        <strong>Clients :</strong> 5 000+<br>
+                        <strong>Focus :</strong> Professionnels
+                    </div>
+                    <span class="badge badge-danger">Hors budget petits propriétaires</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">📊 Matrice Comparative Complète</h2>
+            <div class="table-container competitive-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fonctionnalité</th>
+                            <th>Beds24</th>
+                            <th>Smoobu</th>
+                            <th>Lodgify</th>
+                            <th>NOUS</th>
+                            <th>Priorité</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #f0f9ff;">
+                            <td><strong>Prix mensuel</strong></td>
+                            <td>30-60€</td>
+                            <td>35-90€</td>
+                            <td>40-100€</td>
+                            <td><strong style="color: var(--success);">15€</strong></td>
+                            <td><span class="badge badge-success">CRITIQUE</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Calendrier réservations</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-success">ESSENTIEL</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Import iCal (Airbnb, Booking)</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-success">ESSENTIEL</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Export iCal bidirectionnel</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td><span class="badge badge-warning">V2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Planning ménage</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-success">ESSENTIEL</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gestion draps/linge</strong></td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-success">DIFFÉRENCIANT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fiscalité LMNP France</strong></td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-success">DIFFÉRENCIANT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multi-gîtes</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-success">ESSENTIEL</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fiches clients</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-success">ESSENTIEL</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gestion charges</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-info">IMPORTANT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tarification dynamique</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td><span class="badge badge-warning">V2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Booking engine intégré</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td><span class="badge badge-warning">V2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Paiement en ligne</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td><span class="badge badge-warning">V2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Emails automatiques</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td><span class="badge badge-warning">V2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mobile App native</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                            <td><span class="badge badge-info">V3</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>API publique</strong></td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td><span class="badge badge-info">V3</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multi-langues</strong></td>
+                            <td class="check">✓ (15)</td>
+                            <td class="check">✓ (12)</td>
+                            <td class="check">✓ (8)</td>
+                            <td>FR uniquement</td>
+                            <td><span class="badge badge-info">Non prioritaire</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Support français</strong></td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-success">DIFFÉRENCIANT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hébergement France</strong></td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                            <td class="check"><strong>✓</strong></td>
+                            <td><span class="badge badge-success">DIFFÉRENCIANT</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">💎 Notre Stratégie de Différenciation</h2>
+            <div class="cards-grid">
+                <div class="card">
+                    <h3>🎯 Stratégie #1 : Simplicité Radicale</h3>
+                    <p><strong>Problème concurrent :</strong> Beds24 et Smoobu ont 50+ fonctionnalités, interface complexe, courbe d'apprentissage de plusieurs semaines.</p>
+                    <div class="alert alert-success" style="margin-top: 15px;">
+                        <strong>Notre réponse :</strong> 15 fonctionnalités essentielles, interface épurée, prise en main en 30 minutes.
+                    </div>
+                    <ul class="feature-list" style="margin-top: 15px;">
+                        <li>Interface minimaliste et claire</li>
+                        <li>Pas de fonctions inutiles qui distraient</li>
+                        <li>Tutoriel vidéo intégré 5 minutes</li>
+                        <li>Onboarding guidé étape par étape</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>💰 Stratégie #2 : Prix Disruptif</h3>
+                    <p><strong>Problème concurrent :</strong> 30-90€/mois hors budget pour petits propriétaires (1-3 gîtes). Modèle par propriété = coûts qui explosent.</p>
+                    <div class="alert alert-success" style="margin-top: 15px;">
+                        <strong>Notre réponse :</strong> 15€/mois illimité (jusqu'à 10 gîtes), soit 50-80% moins cher.
+                    </div>
+                    <ul class="feature-list" style="margin-top: 15px;">
+                        <li>Prix fixe, pas de surprise</li>
+                        <li>Pas de frais cachés</li>
+                        <li>Résiliation à tout moment</li>
+                        <li>Essai gratuit 30 jours</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🇫🇷 Stratégie #3 : 100% Français</h3>
+                    <p><strong>Problème concurrent :</strong> Outils internationaux, support anglais, fiscalité non adaptée, serveurs hors UE.</p>
+                    <div class="alert alert-success" style="margin-top: 15px;">
+                        <strong>Notre réponse :</strong> Conçu pour le marché français, fiscalité LMNP intégrée, support FR.
+                    </div>
+                    <ul class="feature-list" style="margin-top: 15px;">
+                        <li>Calculs fiscaux micro-BIC / réel</li>
+                        <li>Modèles de baux conformes</li>
+                        <li>Support email/téléphone en français</li>
+                        <li>Serveurs en France (RGPD)</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🤝 Stratégie #4 : Partenariat B2B</h3>
+                    <p><strong>Problème concurrent :</strong> Acquisition client B2C coûteuse (30-50€/client), longue (6-12 mois de payback).</p>
+                    <div class="alert alert-success" style="margin-top: 15px;">
+                        <strong>Notre réponse :</strong> 1 contrat Gîtes de France = 55 000 prospects qualifiés.
+                    </div>
+                    <ul class="feature-list" style="margin-top: 15px;">
+                        <li>White-label pour Gîtes de France</li>
+                        <li>Intégration dans leur offre</li>
+                        <li>Coût acquisition divisé par 100</li>
+                        <li>Crédibilité du label GdF</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">📈 Positionnement Prix/Valeur</h2>
+            <div class="chart-container">
+                <div style="position: relative; height: 400px; background: var(--bg-light); border-radius: 12px; padding: 40px;">
+                    <div style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-weight: bold; color: var(--text-muted);">
+                        VALEUR / COMPLEXITÉ →
+                    </div>
+                    <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-weight: bold; color: var(--text-muted);">
+                        PRIX →
+                    </div>
+                    
+                    <!-- Quadrants -->
+                    <div style="position: absolute; top: 40px; left: 60px; right: 40px; bottom: 60px;">
+                        <!-- Guesty -->
+                        <div style="position: absolute; right: 10%; top: 15%; background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: var(--shadow);">
+                            Guesty<br><small>90-200€/mois</small><br><small style="font-weight: normal;">Complexe & Cher</small>
+                        </div>
+                        
+                        <!-- Smoobu -->
+                        <div style="position: absolute; right: 25%; top: 25%; background: #fef3c7; color: #92400e; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: var(--shadow);">
+                            Smoobu<br><small>35-90€/mois</small><br><small style="font-weight: normal;">Automatisé mais cher</small>
+                        </div>
+                        
+                        <!-- Beds24 -->
+                        <div style="position: absolute; right: 35%; top: 35%; background: #fef3c7; color: #92400e; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: var(--shadow);">
+                            Beds24<br><small>30-60€/mois</small><br><small style="font-weight: normal;">Complet mais complexe</small>
+                        </div>
+                        
+                        <!-- Lodgify -->
+                        <div style="position: absolute; right: 20%; top: 50%; background: #fef3c7; color: #92400e; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: var(--shadow);">
+                            Lodgify<br><small>40-100€/mois</small><br><small style="font-weight: normal;">Site web inclus</small>
+                        </div>
+                        
+                        <!-- NOUS -->
+                        <div style="position: absolute; left: 10%; top: 60%; background: linear-gradient(135deg, var(--success), var(--secondary)); color: white; padding: 20px; border-radius: 12px; font-weight: bold; box-shadow: var(--shadow-lg); border: 3px solid white;">
+                            NOUS<br><small style="font-size: 1.2rem;">15€/mois</small><br><small style="font-weight: normal;">Simple & Abordable</small><br><span style="background: white; color: var(--success); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin-top: 5px; display: inline-block;">SWEET SPOT 🎯</span>
+                        </div>
+                    </div>
+                </div>
+                <p style="margin-top: 20px; padding: 15px; background: var(--bg-light); border-left: 4px solid var(--success); border-radius: 8px;">
+                    <strong>Notre positionnement :</strong> Nous occupons le quadrant idéal "Simple & Abordable" où 70% du marché se trouve (petits propriétaires). Les concurrents visent le quadrant "Complexe & Cher" (professionnels).
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">⚔️ Analyse Forces / Faiblesses</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50%;">💪 NOS FORCES</th>
+                            <th style="width: 50%;">⚠️ NOS FAIBLESSES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong>Prix ultra-compétitif :</strong> 15€ vs 30-90€ concurrents<br>
+                                <span class="badge badge-success">Avantage durable</span>
+                            </td>
+                            <td>
+                                <strong>Manque de notoriété :</strong> Marque inconnue vs leaders établis<br>
+                                <span class="badge badge-warning">Atténué par partenariat GdF</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Simplicité d'usage :</strong> 15 fonctions vs 50+<br>
+                                <span class="badge badge-success">Différenciant fort</span>
+                            </td>
+                            <td>
+                                <strong>Moins de fonctionnalités :</strong> Pas d'API, pas d'automatisations poussées<br>
+                                <span class="badge badge-info">Acceptable pour notre cible</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Fiscalité française intégrée :</strong> Calculs LMNP automatiques<br>
+                                <span class="badge badge-success">Unique sur le marché</span>
+                            </td>
+                            <td>
+                                <strong>Marché limité :</strong> France uniquement<br>
+                                <span class="badge badge-info">Choix stratégique assumé</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Partenariat Gîtes de France :</strong> 55K prospects d'un coup<br>
+                                <span class="badge badge-success">Game changer</span>
+                            </td>
+                            <td>
+                                <strong>Dépendance au partenariat :</strong> Échec = Plan B plus long<br>
+                                <span class="badge badge-warning">Risque stratégique</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Agilité :</strong> Petite équipe = décisions rapides, pivots possibles<br>
+                                <span class="badge badge-success">Startup advantage</span>
+                            </td>
+                            <td>
+                                <strong>Ressources limitées :</strong> Pas de budget marketing massif<br>
+                                <span class="badge badge-warning">Compense par growth hacking</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Données RGPD France :</strong> Conformité totale<br>
+                                <span class="badge badge-success">Rassure les clients</span>
+                            </td>
+                            <td>
+                                <strong>Plateforme jeune :</strong> Pas d'historique, bugs possibles<br>
+                                <span class="badge badge-warning">Pilote 50 gîtes avant déploiement</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">🎯 Nos Avantages Compétitifs Durables</h2>
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-icon">🔒</div>
+                    <h3>1. Réseau Exclusif Gîtes de France</h3>
+                    <p>Si nous signons un partenariat exclusif avec Gîtes de France, nous créons une <strong>barrière à l'entrée majeure</strong> pour nos concurrents.</p>
+                    <div class="progress-bar" style="margin-top: 15px;">
+                        <div class="progress-fill" style="width: 95%; background: linear-gradient(90deg, var(--success), var(--secondary));"></div>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.9rem;"><strong>Durabilité :</strong> Très élevée (contrat multi-années)</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3>2. Fiscalité LMNP Propriétaire</h3>
+                    <p>Notre expertise fiscale française est <strong>difficile à répliquer</strong> pour des acteurs internationaux. Changements légaux fréquents = connaissance locale requise.</p>
+                    <div class="progress-bar" style="margin-top: 15px;">
+                        <div class="progress-fill" style="width: 85%; background: linear-gradient(90deg, var(--success), var(--secondary));"></div>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.9rem;"><strong>Durabilité :</strong> Élevée (niche)</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">💰</div>
+                    <h3>3. Structure de Coûts Optimisée</h3>
+                    <p>Moins de fonctionnalités = moins de développement = coûts réduits = prix plus bas <strong>soutenable long terme</strong>.</p>
+                    <div class="progress-bar" style="margin-top: 15px;">
+                        <div class="progress-fill" style="width: 80%; background: linear-gradient(90deg, var(--success), var(--secondary));"></div>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.9rem;"><strong>Durabilité :</strong> Élevée (modèle économique)</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🎓</div>
+                    <h3>4. Connaissance Terrain</h3>
+                    <p>Développé PAR un propriétaire de gîte POUR des propriétaires. <strong>Empathie et compréhension</strong> des vrais besoins, pas d'over-engineering.</p>
+                    <div class="progress-bar" style="margin-top: 15px;">
+                        <div class="progress-fill" style="width: 75%; background: linear-gradient(90deg, var(--success), var(--secondary));"></div>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.9rem;"><strong>Durabilité :</strong> Moyenne-élevée (culture d'entreprise)</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="alert alert-success">
+                <strong>🎯 Conclusion Analyse Concurrence :</strong> Nous nous positionnons sur un segment négligé par les acteurs actuels (petits propriétaires français). Notre combinaison prix/simplicité/spécificités françaises crée une proposition de valeur unique et défendable.
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 Channel Manager Gîtes de France - Business Plan Confidentiel</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">Document créé le 16 janvier 2026</p>
+    </footer>
+</body>
+</html>

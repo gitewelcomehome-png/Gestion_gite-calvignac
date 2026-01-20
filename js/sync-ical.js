@@ -335,13 +335,28 @@ async function syncCalendar(giteId, platform, url) {
             const nuits = calculateNights(dateDebut, dateFin);
             
             if (isBlocked) {
-                console.log(`   🚫 → BLOCAGE IGNORÉ: "${summary}"`);
                 skipped++;
                 continue;
             }
             
             if (nuits < 2) {
-                console.log(`   🚫 → DURÉE TROP COURTE IGNORÉE: ${nuits} nuit(s)`);
+                skipped++;
+                continue;
+            }
+            
+            // ⚡ RÈGLE ANTI-DOUBLON : Si c'est un "blocked" et que la date existe déjà sur une autre plateforme = IGNORER
+            // Quand Airbnb est réservé, Booking bloque automatiquement les dates (et vice versa)
+            const existingReservationOtherPlatform = allReservations.find(r => 
+                r.giteId === giteId && 
+                r.plateforme !== platform &&
+                (
+                    (dateDebut >= r.dateDebut && dateDebut < r.dateFin) ||
+                    (dateFin > r.dateDebut && dateFin <= r.dateFin) ||
+                    (dateDebut <= r.dateDebut && dateFin >= r.dateFin)
+                )
+            );
+            
+            if (existingReservationOtherPlatform && isBlocked) {
                 skipped++;
                 continue;
             }
@@ -411,12 +426,12 @@ async function syncCalendar(giteId, platform, url) {
                     !existingResa.nom.includes('Reserved');
                 
                 if (hasCustomName) {
-                    console.log(`🔒 Réservation protégée (nom personnalisé): ${giteName} du ${dateDebut} au ${dateFin} - ${existingResa.nom}`);
+                    skipped++;
+                    continue;
                 } else {
-                    console.log(`♻️ Réservation existante confirmée: ${giteName} du ${dateDebut} au ${dateFin} - ${nom}`);
+                    skipped++;
+                    continue;
                 }
-                skipped++;
-                continue;
             }
             
             // Vérifier chevauchement avec d'autres réservations (pas de cette plateforme)

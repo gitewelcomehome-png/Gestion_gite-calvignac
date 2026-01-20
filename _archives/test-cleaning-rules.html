@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Règles Ménage</title>
+</head>
+<body style="padding: 20px; font-family: Arial, sans-serif;">
+    <h1>Test du système de règles de ménage</h1>
+    
+    <div style="margin: 20px 0;">
+        <button onclick="testScripts()" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+            🧪 Tester les scripts
+        </button>
+    </div>
+    
+    <div id="results" style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px; font-family: monospace;">
+        Cliquez sur le bouton pour tester...
+    </div>
+    
+    <script>
+        function testScripts() {
+            const results = document.getElementById('results');
+            let html = '<h3>Résultats des tests:</h3>';
+            
+            // Test 1: Vérifier window.showCleaningRulesModal
+            if (typeof window.showCleaningRulesModal === 'function') {
+                html += '✅ showCleaningRulesModal est définie<br>';
+            } else {
+                html += '❌ showCleaningRulesModal N\'EST PAS définie<br>';
+            }
+            
+            // Test 2: Vérifier window.loadCleaningRules
+            if (typeof window.loadCleaningRules === 'function') {
+                html += '✅ loadCleaningRules est définie<br>';
+            } else {
+                html += '❌ loadCleaningRules N\'EST PAS définie<br>';
+            }
+            
+            // Test 3: Vérifier window.supabaseClient
+            if (typeof window.supabaseClient !== 'undefined') {
+                html += '✅ supabaseClient est disponible<br>';
+            } else {
+                html += '❌ supabaseClient N\'EST PAS disponible<br>';
+            }
+            
+            // Test 4: Lister tous les scripts chargés
+            html += '<br><strong>Scripts chargés:</strong><br>';
+            const scripts = document.scripts;
+            for (let i = 0; i < scripts.length; i++) {
+                if (scripts[i].src.includes('cleaning-rules')) {
+                    html += `✅ ${scripts[i].src}<br>`;
+                }
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        // Charger les scripts nécessaires
+        const scripts = [
+            'js/shared-config.js',
+            'js/cleaning-rules.js',
+            'js/cleaning-rules-modal.js'
+        ];
+        
+        scripts.forEach(src => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => console.log(`✅ ${src} chargé`);
+            script.onerror = () => console.error(`❌ Erreur chargement ${src}`);
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>

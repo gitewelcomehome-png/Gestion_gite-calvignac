@@ -7,13 +7,10 @@
                 <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Informations essentielles pour vos clients</p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <!-- Sélecteur de gîte -->
-                <button class="btn-neo" onclick="selectGiteInfos('Trevoux')" id="btnTrevoux" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    🏡 Trevoux
-                </button>
-                <button class="btn-neo" onclick="selectGiteInfos('Couzon')" id="btnCouzon" style="background: white; color: #2D3436; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    ⛰️ Couzon
-                </button>
+                <!-- Sélecteur de gîte (généré dynamiquement) -->
+                <div id="gitesButtonsContainer" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <!-- Les boutons seront générés dynamiquement par JS -->
+                </div>
                 <!-- Sélecteur de langue -->
                 <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.3s; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;" title="Switch to English">
                     <img id="flagIcon" src="https://flagcdn.com/w80/fr.png" alt="FR" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">

@@ -2023,7 +2023,7 @@ async function loadClientChecklists() {
         const { data: templatesEntree, error: errorEntree } = await supabase
             .from('checklist_templates')
             .select('*')
-            .eq('gite', giteNormalized)
+            .eq('gite_id', giteInfo.gite_id)
             .eq('type', 'entree')
             .eq('actif', true)
             .order('ordre', { ascending: true });
@@ -2031,17 +2031,18 @@ async function loadClientChecklists() {
         const { data: templatesSortie, error: errorSortie } = await supabase
             .from('checklist_templates')
             .select('*')
-            .eq('gite', giteNormalized)
+            .eq('gite_id', giteInfo.gite_id)
             .eq('type', 'sortie')
             .eq('actif', true)
             .order('ordre', { ascending: true });
         
         if (errorEntree || errorSortie) {
-            // Table non créée - ignorer silencieusement
-            if ((errorEntree && errorEntree.code === 'PGRST205') || (errorSortie && errorSortie.code === 'PGRST205')) {
+            // Table non créée ou colonne inexistante - ignorer silencieusement
+            const err = errorEntree || errorSortie;
+            if (err && (err.code === 'PGRST205' || err.code === '42703' || err.code === '42P01')) {
                 return;
             }
-            console.error('❌ Erreur chargement templates:', errorEntree || errorSortie);
+            console.error('❌ Erreur chargement templates:', err);
             return;
         }
         
@@ -2154,14 +2155,20 @@ async function toggleClientChecklistItem(templateId, type) {
         
         const newCompleted = existing ? !existing.completed : true;
         
+        // Récupérer l'ID utilisateur pour RLS
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Utilisateur non authentifié');
+        
         // Upsert
         const { error: upsertError } = await supabase
             .from('checklist_progress')
             .upsert({
+                owner_user_id: user.id,
                 reservation_id: reservationData.id,
                 template_id: templateId,
                 completed: newCompleted,
-                completed_at: newCompleted ? new Date().toISOString() : null
+                completed_at: newCompleted ? new Date().toISOString() : null,
+                completed_by: newCompleted ? user.id : null
             }, {
                 onConflict: 'reservation_id,template_id'
             });

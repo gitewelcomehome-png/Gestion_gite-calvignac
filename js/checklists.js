@@ -2,7 +2,7 @@
    CHECKLISTS.JS - Gestion des Check-lists
    ================================================ */
 
-let currentGiteFilter = 'Trevoux';
+let currentGiteFilter = null; // UUID du gîte, sera initialisé dynamiquement
 let currentTypeFilter = 'entree';
 
 // Helper : Vérifie si l'erreur est PGRST205 (table non créée)
@@ -17,17 +17,35 @@ function isTableNotFound(error) {
 async function initChecklistsTab() {
     // console.log('📋 Initialisation onglet Check-lists');
     
-    // Listeners pour les filtres
+    // Charger les gîtes dynamiquement et remplir le select
+    const gites = await window.gitesManager.getAll();
     const giteSelect = document.getElementById('checklist-gite-select');
-    const typeSelect = document.getElementById('checklist-type-select');
     
-    if (giteSelect) {
+    if (giteSelect && gites && gites.length > 0) {
+        // Vider et remplir le select avec les gîtes dynamiques
+        giteSelect.innerHTML = '';
+        gites.forEach(gite => {
+            const option = document.createElement('option');
+            option.value = gite.id; // UUID
+            option.textContent = gite.name;
+            giteSelect.appendChild(option);
+        });
+        
+        // Initialiser avec le premier gîte si pas encore défini
+        if (!currentGiteFilter) {
+            currentGiteFilter = gites[0].id;
+        }
+        giteSelect.value = currentGiteFilter;
+        
+        // Listener pour changement de gîte
         giteSelect.addEventListener('change', (e) => {
             currentGiteFilter = e.target.value;
             loadChecklistItems();
         });
     }
     
+    // Listener pour changement de type
+    const typeSelect = document.getElementById('checklist-type-select');
     if (typeSelect) {
         typeSelect.addEventListener('change', (e) => {
             currentTypeFilter = e.target.value;
@@ -54,14 +72,23 @@ async function loadChecklistItems() {
         const { data, error } = await supabaseClient
             .from('checklist_templates')
             .select('*')
-            .eq('gite', currentGiteFilter)
+            .eq('gite_id', currentGiteFilter)
             .eq('type', currentTypeFilter)
             .eq('actif', true)
             .order('ordre', { ascending: true });
         
         if (error) {
-            // Table non créée - ignorer silencieusement
-            if (error.code === 'PGRST205') return;
+            // Table non créée ou colonne inexistante - ignorer silencieusement
+            if (error.code === 'PGRST205' || error.code === '42703' || error.code === '42P01') {
+                window.SecurityUtils.setInnerHTML(container, `
+                    <div style="text-align: center; padding: 40px; color: var(--gray-500);">
+                        <p style="font-size: 3rem; margin-bottom: 10px;">📋</p>
+                        <p>Fonctionnalité Check-lists non configurée</p>
+                        <p style="font-size: 0.85rem; margin-top: 10px;">La table checklist_templates n'existe pas en base de données</p>
+                    </div>
+                `);
+                return;
+            }
             throw error;
         }
         
@@ -138,23 +165,31 @@ async function addChecklistItem() {
         const { data: maxData, error: maxError } = await supabaseClient
             .from('checklist_templates')
             .select('ordre')
-            .eq('gite', currentGiteFilter)
+            .eq('gite_id', currentGiteFilter)
             .eq('type', currentTypeFilter)
             .order('ordre', { ascending: false })
             .limit(1);
         
         if (maxError) {
-            if (isTableNotFound(maxError)) return;
+            if (isTableNotFound(maxError) || maxError.code === '42703' || maxError.code === '42P01') {
+                showNotification('⚠️ Table checklist_templates non disponible', 'warning');
+                return;
+            }
             throw maxError;
         }
         
         const nextOrdre = (maxData && maxData.length > 0) ? maxData[0].ordre + 1 : 1;
         
+        // Récupérer l'ID utilisateur pour RLS
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) throw new Error('Utilisateur non authentifié');
+        
         // Insertion
         const { error } = await supabaseClient
             .from('checklist_templates')
             .insert({
-                gite: currentGiteFilter,
+                owner_user_id: user.id,
+                gite_id: currentGiteFilter,
                 type: currentTypeFilter,
                 ordre: nextOrdre,
                 texte: texte,
@@ -219,13 +254,13 @@ async function moveChecklistItem(itemId, direction) {
         const { data: items, error: fetchError } = await supabaseClient
             .from('checklist_templates')
             .select('*')
-            .eq('gite', currentGiteFilter)
+            .eq('gite_id', currentGiteFilter)
             .eq('type', currentTypeFilter)
             .eq('actif', true)
             .order('ordre', { ascending: true });
         
         if (fetchError) {
-            if (isTableNotFound(fetchError)) return;
+            if (isTableNotFound(fetchError) || fetchError.code === '42703' || fetchError.code === '42P01') return;
             throw fetchError;
         }
         
@@ -336,7 +371,7 @@ async function loadReservationsProgress() {
             // console.log(`📋 Templates trouvés pour ${resa.gite_id}:`, templates?.length || 0);
             
             if (templatesError) {
-                if (isTableNotFound(templatesError)) continue;
+                if (isTableNotFound(templatesError) || templatesError.code === '42703' || templatesError.code === '42P01') continue;
                 console.error('Erreur templates:', templatesError);
                 continue;
             }
@@ -467,11 +502,13 @@ async function getReservationChecklistProgress(reservationId, gite) {
         const { data: templates, error: templatesError } = await supabaseClient
             .from('checklist_templates')
             .select('id, type')
-            .eq('gite', gite)
+            .eq('gite_id', gite)
             .eq('actif', true);
         
         if (templatesError) {
-            if (isTableNotFound(templatesError)) return { entreeTotal: 0, entreeCompleted: 0, sortieTotal: 0, sortieCompleted: 0 };
+            if (isTableNotFound(templatesError) || templatesError.code === '42703' || templatesError.code === '42P01') {
+                return { entreeTotal: 0, entreeCompleted: 0, sortieTotal: 0, sortieCompleted: 0 };
+            }
             throw templatesError;
         }
         
@@ -580,20 +617,20 @@ async function loadChecklistDetailForReservation(reservationId) {
         
         if (resaError) throw resaError;
         
-        const gite = reservations.gite;
+        const gite = reservations.gite_id; // UUID du gîte
         
         // Récupérer tous les templates pour ce gîte
         const { data: templates, error: templatesError } = await supabaseClient
             .from('checklist_templates')
             .select('*')
-            .eq('gite', gite)
+            .eq('gite_id', gite)
             .eq('actif', true)
             .order('type', { ascending: true })
             .order('ordre', { ascending: true });
         
         if (templatesError) {
-            if (isTableNotFound(templatesError)) {
-                showNotification('⚠️ Table checklist_templates non créée', 'warning');
+            if (isTableNotFound(templatesError) || templatesError.code === '42703' || templatesError.code === '42P01') {
+                window.SecurityUtils.setInnerHTML(detailContainer, '<p style="text-align: center; color: var(--gray-500); padding: 20px;">⚠️ Fonctionnalité non disponible</p>');
                 return;
             }
             throw templatesError;

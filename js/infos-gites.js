@@ -84,7 +84,7 @@ async function genererPageClient(reservationId) {
                 <span style="color: #666;">
                 1. Téléchargez "WhatsApp Business" depuis Play Store/App Store<br>
                 2. Configurez avec votre numéro professionnel des gîtes<br>
-                3. Créez un profil avec nom "Gîtes Calvignac" + adresse<br>
+                3. Créez un profil avec nom et adresse<br>
                 4. Cliquez sur "WhatsApp Business" ci-dessus
                 </span>
             </div>
@@ -908,6 +908,72 @@ window.loadInfosGiteFromSupabase = loadInfosGiteFromSupabase;
 let currentGiteInfos = 'Trévoux';
 const DB_KEY_INFOS = 'gites_infos_pratiques_complet';
 
+// ==========================================
+// 🏠 GÉNÉRATION DYNAMIQUE DES BOUTONS GÎTES
+// ==========================================
+async function generateGitesButtons() {
+    const container = document.getElementById('gitesButtonsContainer');
+    if (!container) {
+        // Le container n'existe pas encore, c'est normal si le tab n'est pas encore chargé
+        return;
+    }
+
+    try {
+        // Récupérer les gîtes depuis le gitesManager
+        let gites = [];
+        if (window.gitesManager && window.gitesManager.gites) {
+            gites = window.gitesManager.gites;
+        } else {
+            // Fallback: charger directement depuis Supabase
+            const { data, error } = await supabase
+                .from('gites')
+                .select('id, name')
+                .order('name');
+            
+            if (error) throw error;
+            gites = data || [];
+        }
+
+        if (gites.length === 0) {
+            return;
+        }
+
+        // Vider le container
+        container.innerHTML = '';
+
+        // Générer un bouton pour chaque gîte
+        gites.forEach((gite, index) => {
+            const button = document.createElement('button');
+            button.className = 'btn-neo';
+            button.id = `btn${gite.name.replace(/\s+/g, '')}`;
+            button.onclick = () => selectGiteInfos(gite.name);
+            
+            // Premier bouton actif par défaut
+            if (index === 0) {
+                button.style.cssText = 'background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;';
+                currentGiteInfos = gite.name;
+            } else {
+                button.style.cssText = 'background: white; color: #2D3436; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;';
+            }
+            
+            button.textContent = `🏡 ${gite.name}`;
+            container.appendChild(button);
+        });
+
+        console.log(`✅ ${gites.length} boutons de gîtes générés dynamiquement`);
+        
+        // Charger les données du premier gîte
+        await chargerDonneesInfos();
+        
+    } catch (error) {
+        console.error('❌ Erreur génération boutons gîtes:', error);
+        container.innerHTML = '<span style="color: red; font-size: 0.9rem;">❌ Erreur chargement gîtes</span>';
+    }
+}
+
+// Exposer la fonction pour être appelée quand le tab est activé
+window.generateGitesButtons = generateGitesButtons;
+
 // Sélection du gîte
 window.selectGiteInfos = async function(gite) {
     // Sauvegarder les données actuelles
@@ -917,15 +983,19 @@ window.selectGiteInfos = async function(gite) {
     currentGiteInfos = gite;
     
     // Mettre à jour l'UI des boutons
-    const btnTrevoux = document.getElementById('btnTrevoux');
-    const btnCouzon = document.getElementById('btnCouzon');
-    if (btnTrevoux) {
-        btnTrevoux.style.background = gite === 'Trévoux' ? 'white' : 'rgba(255,255,255,0.2)';
-        btnTrevoux.style.color = gite === 'Trévoux' ? '#667eea' : 'white';
-    }
-    if (btnCouzon) {
-        btnCouzon.style.background = gite === 'Couzon' ? 'white' : 'rgba(255,255,255,0.2)';
-        btnCouzon.style.color = gite === 'Couzon' ? '#667eea' : 'white';
+    const container = document.getElementById('gitesButtonsContainer');
+    if (container) {
+        const buttons = container.querySelectorAll('button');
+        buttons.forEach(btn => {
+            const btnGiteName = btn.textContent.trim().replace('🏡 ', '');
+            if (btnGiteName === gite) {
+                btn.style.background = '#74b9ff';
+                btn.style.color = 'white';
+            } else {
+                btn.style.background = 'white';
+                btn.style.color = '#2D3436';
+            }
+        });
     }
     
     // Charger les données du nouveau gîte

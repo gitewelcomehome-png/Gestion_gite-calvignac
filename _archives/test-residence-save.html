@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Sauvegarde Résidence</title>
+</head>
+<body>
+    <h1>Test Sauvegarde Charges Résidence</h1>
+    
+    <div>
+        <label>Intérêts emprunt :</label>
+        <input type="number" id="interets_residence" value="" data-period-type="mensuel">
+        <span id="type-display"></span>
+    </div>
+    
+    <button onclick="testerSauvegarde()">Tester Sauvegarde</button>
+    <button onclick="testerChargement()">Tester Chargement</button>
+    
+    <pre id="resultat"></pre>
+    
+    <script>
+        function testerSauvegarde() {
+            const input = document.getElementById('interets_residence');
+            const value = parseFloat(input.value || 0);
+            const type = input.getAttribute('data-period-type') || 'mensuel';
+            
+            const data = {
+                interets_residence: value,
+                interets_residence_type: type
+            };
+            
+            // Simuler sauvegarde
+            localStorage.setItem('test_residence', JSON.stringify(data));
+            
+            document.getElementById('resultat').textContent = 
+                '✅ Sauvegardé:\n' + JSON.stringify(data, null, 2);
+        }
+        
+        function testerChargement() {
+            const saved = localStorage.getItem('test_residence');
+            if (!saved) {
+                document.getElementById('resultat').textContent = '❌ Rien à charger';
+                return;
+            }
+            
+            const data = JSON.parse(saved);
+            const input = document.getElementById('interets_residence');
+            
+            input.value = data.interets_residence || '';
+            if (data.interets_residence_type) {
+                input.setAttribute('data-period-type', data.interets_residence_type);
+            }
+            
+            document.getElementById('resultat').textContent = 
+                '✅ Chargé:\n' + JSON.stringify(data, null, 2) + 
+                '\n\nAttribut data-period-type: ' + input.getAttribute('data-period-type');
+        }
+        
+        // Afficher le type en temps réel
+        setInterval(() => {
+            const input = document.getElementById('interets_residence');
+            document.getElementById('type-display').textContent = 
+                'Type: ' + (input.getAttribute('data-period-type') || 'non défini');
+        }, 500);
+    </script>
+</body>
+</html>

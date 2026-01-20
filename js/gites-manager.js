@@ -382,28 +382,21 @@ class GitesManager {
     /**
      * Mapper l'ancien nom de gîte vers le nouveau gite_id
      * TEMPORAIRE - pour migration des données
+     * @deprecated Utiliser directement gite.id ou gite.slug
      */
     mapOldNameToId(oldName) {
+        console.warn('⚠️ mapOldNameToId() est obsolète - Utiliser gite.id ou gite.slug');
+        
         // Normaliser
         const normalized = oldName?.toLowerCase().trim();
         
-        // Mapping manuel temporaire
-        const mapping = {
-            'couzon': 'le-rive-droite',
-            'le rive droite': 'le-rive-droite',
-            'rive droite': 'le-rive-droite',
-            'trevoux': 'trevoux',
-            'trevoux': 'trevoux',
-            'treoux': 'trevoux'
-        };
+        // Chercher dans les gîtes chargés
+        const gite = this.gites.find(g => 
+            g.name.toLowerCase().trim() === normalized ||
+            g.slug === normalized
+        );
         
-        const slug = mapping[normalized];
-        if (slug) {
-            const gite = this.getBySlug(slug);
-            return gite?.id;
-        }
-        
-        return null;
+        return gite?.id || null;
     }
 
     /**

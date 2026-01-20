@@ -50,8 +50,25 @@ const DEFAULT_ICAL_CONFIGS = window.APP_CONFIG?.DEFAULT_ICAL_CONFIGS || {
 };
 
 // Coordonnées GPS des gîtes
-// ⚠️ DEPRECATED: Utiliser window.gitesManager.getCoordinates() à la place
+// ⚠️ DEPRECATED: Utiliser window.gitesManager.gites pour obtenir les coordonnées dynamiquement
+// Les coordonnées sont désormais chargées depuis la table 'gites' (gps_lat, gps_lon)
 const GITES_COORDS = {};
+
+// Fonction pour récupérer dynamiquement les coordonnées depuis gitesManager
+window.getGitesCoordinates = function() {
+    const coords = {};
+    if (window.gitesManager && window.gitesManager.gites) {
+        window.gitesManager.gites.forEach(gite => {
+            if (gite.gps_lat && gite.gps_lon) {
+                coords[gite.name] = {
+                    lat: parseFloat(gite.gps_lat),
+                    lng: parseFloat(gite.gps_lon)
+                };
+            }
+        });
+    }
+    return coords;
+};
 
 // Système de cache intelligent
 const CACHE = {

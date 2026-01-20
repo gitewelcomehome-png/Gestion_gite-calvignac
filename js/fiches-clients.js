@@ -728,25 +728,25 @@ async function editGiteInfo(gite) {
         
         if (error) throw error;
         
-        // Remplir le formulaire
+        // Remplir le formulaire - mapping vers colonnes réelles
         document.getElementById('editGiteId').value = data.id;
-        document.getElementById('editCodeEntree').value = data.code_entree || '';
-        document.getElementById('editAdresse').value = data.adresse_complete || '';
-        document.getElementById('editLatitude').value = data.latitude || '';
-        document.getElementById('editLongitude').value = data.longitude || '';
-        document.getElementById('editInstructionsFr').value = data.instructions_acces_fr || '';
-        document.getElementById('editInstructionsEn').value = data.instructions_acces_en || '';
+        document.getElementById('editCodeEntree').value = data.code_acces || data.code_porte || '';
+        document.getElementById('editAdresse').value = data.adresse || '';
+        document.getElementById('editLatitude').value = data.gps_lat || '';
+        document.getElementById('editLongitude').value = data.gps_lon || '';
+        document.getElementById('editInstructionsFr').value = data.instructions_cles || '';
+        document.getElementById('editInstructionsEn').value = data.instructions_cles_en || '';
         document.getElementById('editWifiSsid').value = data.wifi_ssid || '';
         document.getElementById('editWifiPassword').value = data.wifi_password || '';
-        document.getElementById('editWifiQr').value = data.wifi_qr_code_url || '';
-        document.getElementById('editHeureArrivee').value = formatTime(data.heure_arrivee_standard);
-        document.getElementById('editHeureDepart').value = formatTime(data.heure_depart_standard);
-        document.getElementById('editHeureArriveeMin').value = formatTime(data.heure_arrivee_anticipee_min);
-        document.getElementById('editHeureArriveeAvecMenage').value = formatTime(data.heure_arrivee_avec_menage);
-        document.getElementById('editHeureDepartMax').value = formatTime(data.heure_depart_semaine_max);
-        document.getElementById('editHeureDepartDimanche').value = formatTime(data.heure_depart_dimanche_max);
-        document.getElementById('editReglementFr').value = data.reglement_interieur_fr || '';
-        document.getElementById('editReglementEn').value = data.reglement_interieur_en || '';
+        document.getElementById('editWifiQr').value = data.wifi_qr_url || '';
+        document.getElementById('editHeureArrivee').value = formatTime(data.heure_arrivee);
+        document.getElementById('editHeureDepart').value = formatTime(data.heure_depart);
+        document.getElementById('editHeureArriveeMin').value = formatTime(data.heure_arrivee_min);
+        document.getElementById('editHeureArriveeAvecMenage').value = formatTime(data.heure_arrivee_menage);
+        document.getElementById('editHeureDepartMax').value = formatTime(data.heure_depart_max);
+        document.getElementById('editHeureDepartDimanche').value = formatTime(data.heure_depart_dimanche);
+        document.getElementById('editReglementFr').value = data.tabac || '';
+        document.getElementById('editReglementEn').value = data.tabac_en || '';
         
         openModal('modalEditGite');
         
@@ -780,23 +780,23 @@ async function saveGiteInfo(event) {
     const giteId = document.getElementById('editGiteId').value;
     
     const updates = {
-        code_entree: document.getElementById('editCodeEntree').value,
-        adresse_complete: document.getElementById('editAdresse').value,
-        latitude: parseFloat(document.getElementById('editLatitude').value) || null,
-        longitude: parseFloat(document.getElementById('editLongitude').value) || null,
-        instructions_acces_fr: document.getElementById('editInstructionsFr').value,
-        instructions_acces_en: document.getElementById('editInstructionsEn').value,
+        code_acces: document.getElementById('editCodeEntree').value,
+        adresse: document.getElementById('editAdresse').value,
+        gps_lat: parseFloat(document.getElementById('editLatitude').value) || null,
+        gps_lon: parseFloat(document.getElementById('editLongitude').value) || null,
+        instructions_cles: document.getElementById('editInstructionsFr').value,
+        instructions_cles_en: document.getElementById('editInstructionsEn').value,
         wifi_ssid: document.getElementById('editWifiSsid').value,
         wifi_password: document.getElementById('editWifiPassword').value,
-        wifi_qr_code_url: document.getElementById('editWifiQr').value || null,
-        heure_arrivee_standard: document.getElementById('editHeureArrivee').value,
-        heure_depart_standard: document.getElementById('editHeureDepart').value,
-        heure_arrivee_anticipee_min: document.getElementById('editHeureArriveeMin').value,
-        heure_arrivee_avec_menage: document.getElementById('editHeureArriveeAvecMenage').value,
-        heure_depart_semaine_max: document.getElementById('editHeureDepartMax').value,
-        heure_depart_dimanche_max: document.getElementById('editHeureDepartDimanche').value,
-        reglement_interieur_fr: document.getElementById('editReglementFr').value,
-        reglement_interieur_en: document.getElementById('editReglementEn').value
+        wifi_qr_url: document.getElementById('editWifiQr').value || null,
+        heure_arrivee: document.getElementById('editHeureArrivee').value,
+        heure_depart: document.getElementById('editHeureDepart').value,
+        heure_arrivee_min: document.getElementById('editHeureArriveeMin').value,
+        heure_arrivee_menage: document.getElementById('editHeureArriveeAvecMenage').value,
+        heure_depart_max: document.getElementById('editHeureDepartMax').value,
+        heure_depart_dimanche: document.getElementById('editHeureDepartDimanche').value,
+        tabac: document.getElementById('editReglementFr').value,
+        tabac_en: document.getElementById('editReglementEn').value
     };
     
     try {

@@ -1,0 +1,914 @@
+/* =========================================
+   FLAT OUTLINE DESIGN - NEO-BRUTALISM SOFT
+   =========================================
+   Style "Flat Outline" pour Gestion Gîtes
+   Contours nets, ombres dures, couleurs vives
+   ========================================= */
+
+/* --- CHARTE GRAPHIQUE FLAT OUTLINE --- */
+:root {
+    --stroke: #2D3436;
+    --bg-page: #f1f2f6;
+    --white: #ffffff;
+    --c-blue: #74b9ff;
+    --c-yellow: #ffeaa7;
+    --c-red: #ff7675;
+    --c-green: #55efc4;
+    --shadow-hard: 4px 4px 0px var(--stroke);
+    /* Alias pour compatibilité */
+    --blue-accent: #74b9ff;
+    --dark-blue: #0984e3;
+    --red-accent: #ff7675;
+    --yellow-accent: #ffeaa7;
+    --green-accent: #55efc4;
+    --card-bg: #ffffff;
+}
+
+body {
+    background-color: var(--bg-page) !important;
+    font-family: 'Segoe UI', 'Roboto', sans-serif !important;
+    color: var(--stroke) !important;
+    padding-top: 80px !important; /* Espace pour le header fixe */
+}
+
+/* =========================================
+   1. HEADER FIXE (STICKY)
+   ========================================= */
+.sticky-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    background: white !important;
+    border-bottom: 3px solid var(--stroke) !important;
+    padding: 15px 30px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.05) !important;
+}
+
+.site-title {
+    font-size: 1.8rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    color: var(--stroke) !important;
+    letter-spacing: 1px !important;
+}
+
+.property-name {
+    font-size: 1.3rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    color: var(--stroke) !important;
+    background: var(--yellow-accent) !important;
+    padding: 8px 20px !important;
+    border: 2px solid var(--stroke) !important;
+    border-radius: 8px !important;
+    box-shadow: 3px 3px 0 var(--stroke) !important;
+}
+
+/* =========================================
+   2. BOUTONS (GROS & CLICKY)
+   ========================================= */
+.btn-neo {
+    padding: 12px 24px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    border: 2px solid var(--stroke) !important;
+    border-radius: 10px !important;
+    background: white !important;
+    color: var(--stroke) !important;
+    box-shadow: var(--shadow-hard) !important;
+    cursor: pointer !important;
+    transition: transform 0.1s !important;
+    margin-right: 10px !important;
+    font-size: 0.95rem !important;
+}
+
+.btn-neo:active {
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0 var(--stroke) !important;
+}
+
+.btn-neo:hover {
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0 var(--stroke) !important;
+}
+
+.btn-save, .btn-neo.save {
+    background-color: var(--blue-accent) !important;
+    color: white !important;
+}
+
+.btn-delete, .btn-neo.delete {
+    background-color: var(--red-accent) !important;
+    color: white !important;
+}
+
+.btn-valid, .btn-neo.valid {
+    background-color: var(--green-accent) !important;
+    color: var(--stroke) !important;
+}
+
+/* =========================================
+   3. NAVIGATION (ONGLETS NEO-BRUTALISM)
+   ========================================= */
+
+/* CONTENEUR DES ONGLETS (Responsive - une seule ligne) */
+.nav-tabs-wrapper {
+    display: flex;
+    flex-wrap: nowrap; /* Toujours sur une seule ligne */
+    gap: 8px;
+    overflow-x: auto; /* Scroll si nécessaire uniquement en très petit écran */
+    padding: 10px 5px 20px 5px; /* Espace pour l'ombre */
+    margin-top: 20px;
+    margin-bottom: 40px !important; /* Plus d'espace avant le contenu */
+    justify-content: flex-start; /* Alignement des onglets */
+    scrollbar-width: thin;
+    scrollbar-color: var(--stroke) transparent;
+}
+
+/* SCROLLBAR STYLE (Chrome/Safari) */
+.nav-tabs-wrapper::-webkit-scrollbar { 
+    height: 6px; 
+}
+.nav-tabs-wrapper::-webkit-scrollbar-thumb { 
+    background: var(--stroke); 
+    border-radius: 10px; 
+}
+.nav-tabs-wrapper::-webkit-scrollbar-track { 
+    background: rgba(0,0,0,0.05); 
+}
+
+/* STYLE DE L'ONGLET */
+.tab-neo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: white;
+    border: 2px solid transparent; /* Invisible par défaut */
+    border-radius: 12px;
+    color: #636e72;
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap; /* Empêche le texte de passer à la ligne */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none; /* Si c'est un lien <a> */
+    flex-shrink: 0; /* Ne pas rétrécir les onglets */
+}
+
+/* Responsive : Cacher le texte sur écrans moyens et petits, garder seulement les icônes */
+@media (max-width: 1200px) {
+    .tab-neo {
+        padding: 10px; /* Rendre carré quand mode icône seule */
+        gap: 0;
+    }
+    
+    /* Cacher tous les textes sauf l'icône */
+    .tab-neo > *:not(.tab-icon) {
+        display: none;
+    }
+    
+    .tab-icon {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+/* L'ONGLET AU SURVOL */
+.tab-neo:hover {
+    background: #e9ecef;
+    color: var(--stroke);
+}
+
+/* L'ONGLET ACTIF (Sélectionné) */
+.tab-neo.active {
+    background: white;
+    border: 2px solid var(--stroke);
+    color: var(--stroke);
+    box-shadow: var(--shadow-hard);
+    transform: translateY(-2px);
+}
+
+/* STYLE DES MINI ICONES SVG */
+.tab-icon {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor; /* Prend la couleur du texte */
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: all 0.2s;
+}
+
+/* Quand l'onglet est actif, on remplit l'icône avec une couleur */
+.tab-neo.active .tab-icon {
+    fill: var(--c-yellow); /* Petit fond jaune sympa */
+    stroke: var(--stroke);
+}
+
+/* Variantes de couleurs au clic selon le thème */
+.tab-neo.active[data-theme="blue"] .tab-icon { fill: var(--c-blue); }
+.tab-neo.active[data-theme="green"] .tab-icon { fill: var(--c-green); }
+.tab-neo.active[data-theme="red"] .tab-icon { fill: var(--c-red); }
+.tab-neo.active[data-theme="yellow"] .tab-icon { fill: var(--c-yellow); }
+
+/* COMPATIBILITÉ ANCIENNE NAVIGATION */
+.nav-tabs {
+    display: flex !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    padding: 10px 5px 20px 5px !important;
+    margin-top: 20px !important;
+}
+
+.nav-tab {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 18px !important;
+    background: white !important;
+    border: 2px solid transparent !important;
+    border-radius: 12px !important;
+    color: #636e72 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.nav-tab:hover {
+    background: #e9ecef !important;
+    color: var(--stroke) !important;
+}
+
+.nav-tab.active {
+    background: white !important;
+    border: 2px solid var(--stroke) !important;
+    color: var(--stroke) !important;
+    box-shadow: var(--shadow-hard) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* --- 1. LES BOUTONS DE NAVIGATION (Tableau de bord, etc) --- */
+.nav-button, .btn {
+    border: 2px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    background-color: white !important;
+    color: var(--stroke) !important;
+    font-weight: 700 !important;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.1) !important; /* Légère ombre */
+    transition: all 0.2s ease !important;
+}
+
+.nav-button.active, .btn-primary {
+    background-color: var(--blue-accent) !important;
+    color: white !important;
+    box-shadow: var(--shadow-hard) !important; /* Ombre dure active */
+    transform: translate(-2px, -2px) !important;
+}
+
+.nav-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-hard) !important;
+}
+
+/* --- 2. LA CARTE "TRÉVOUX" (Transformation majeure) --- */
+/* Style Neo-Brutalism comme le tableau de bord */
+.gite-label {
+    background: white !important;
+    border: 3px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    box-shadow: 6px 6px 0 var(--stroke) !important;
+    padding: 12px 20px !important;
+    position: relative !important;
+    overflow: visible !important;
+    color: var(--stroke) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+}
+
+/* Retirer le ::before (bande bleue en haut) */
+.gite-label::before {
+    display: none !important;
+}
+
+.property-title {
+    margin: 0 !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: var(--stroke) !important;
+}
+
+/* --- 3. LES EN-TÊTES DE SEMAINE --- */
+.week-header-unique {
+    background-color: var(--stroke) !important;
+    color: var(--yellow-accent) !important;
+    border-radius: 12px !important;
+    border: 2px solid var(--stroke) !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    box-shadow: var(--shadow-hard) !important;
+}
+
+.week-number-big {
+    color: var(--yellow-accent) !important;
+    font-weight: 900 !important;
+}
+
+.week-dates-small {
+    color: rgba(255, 234, 167, 0.8) !important;
+}
+
+/* --- 4. LES BLOCS DE RÉSERVATIONS --- */
+.week-reservation {
+    background: white !important;
+    border: 3px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+    padding: 15px !important;
+    box-shadow: var(--shadow-hard) !important;
+    transition: all 0.2s ease !important;
+}
+
+.week-reservation:hover {
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0px var(--stroke) !important;
+}
+
+/* Colonnes de gîtes */
+.gite-column-inline {
+    background: white !important;
+    border: 3px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    box-shadow: var(--shadow-hard) !important;
+}
+
+/* --- 5. BARRE DE SUCCÈS (Le bandeau vert) --- */
+.alert-success, .success-banner {
+    background-color: var(--yellow-accent) !important;
+    color: var(--stroke) !important;
+    border: 2px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.05) !important;
+    padding: 12px 20px !important;
+}
+
+/* --- 6. BOUTONS D'ACTION (Modifier, Supprimer, etc.) --- */
+button[style*="background: #e3f2fd"],
+button[style*="background: #e8f5e9"],
+button[style*="background: #ffebee"] {
+    border: 2px solid var(--stroke) !important;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.1) !important;
+}
+
+button[style*="background: #e3f2fd"]:hover,
+button[style*="background: #e8f5e9"]:hover,
+button[style*="background: #ffebee"]:hover {
+    transform: translate(-1px, -1px) !important;
+    box-shadow: 3px 3px 0px var(--stroke) !important;
+}
+
+/* --- 7. HEADER STICKY (Bande en haut avec Trévoux) --- */
+.planning-weeks > div[style*="position: sticky"] {
+    background: linear-gradient(180deg, #ffffff 0%, var(--bg-page) 100%) !important;
+    border-bottom: 3px solid var(--stroke) !important;
+    box-shadow: 0 6px 0px rgba(45, 52, 54, 0.15) !important;
+    position: sticky !important;
+    top: 80px !important; /* En dessous du header principal */
+    z-index: 999 !important;
+}
+
+/* Conteneur principal des semaines */
+.planning-weeks {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Week blocks adaptés au contenu */
+.week-block {
+    width: 100% !important;
+    max-width: 100% !important;
+    transition: all 0.3s ease !important;
+}
+
+.week-block:hover .week-header-unique {
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0px var(--stroke) !important;
+}
+
+/* --- 8. CARTES DE STATISTIQUES, WIDGETS, DASHBOARD --- */
+.stat-card, .widget-card, .dashboard-card, .card {
+    background: white !important;
+    border: 3px solid var(--stroke) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-hard) !important;
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+    transition: all 0.2s ease !important;
+}
+
+.card:hover {
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0px var(--stroke) !important;
+}
+
+/* En-têtes de cartes */
+.card-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 2px solid var(--stroke) !important;
+}
+
+.card-icon {
+    font-size: 1.5rem !important;
+    line-height: 1 !important;
+}
+
+.card-title {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    color: var(--stroke) !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* --- 9. INPUTS ET FORMULAIRES --- */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+    border: 2px solid var(--stroke) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none !important;
+    border-color: var(--blue-accent) !important;
+    box-shadow: 0 0 0 3px rgba(116, 185, 255, 0.2) !important;
+}
+
+/* --- 10. MODALES --- */
+.modal-content {
+    border: 3px solid var(--stroke) !important;
+    border-radius: 20px !important;
+    box-shadow: 8px 8px 0px var(--stroke) !important;
+}
+
+.modal-header {
+    background-color: var(--blue-accent) !important;
+    color: white !important;
+    border-bottom: 3px solid var(--stroke) !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+}
+
+/* --- 11. BADGES ET ÉTIQUETTES --- */
+.badge {
+    border: 2px solid var(--stroke) !important;
+    border-radius: 8px !important;
+    padding: 4px 12px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.1) !important;
+}
+
+.badge-airbnb {
+    background-color: #ff5a5f !important;
+    color: white !important;
+}
+
+.badge-abritel {
+    background-color: #0057FF !important;
+    color: white !important;
+}
+
+.badge-gdf {
+    background-color: #00A651 !important;
+    color: white !important;
+}
+
+/* =========================================
+   12. MENU UTILISATEUR (compact sur le côté)
+   ========================================= */
+.user-menu-container {
+    position: relative !important;
+}
+
+.user-menu-button {
+    padding: 6px 12px !important;
+    border: 2px solid var(--stroke) !important;
+    border-radius: 8px !important;
+    background: white !important;
+    cursor: pointer !important;
+    box-shadow: 2px 2px 0 var(--stroke) !important;
+    transition: all 0.2s ease !important;
+    font-size: 0.85rem !important;
+}
+
+.user-menu-button:hover {
+    transform: translate(-1px, -1px) !important;
+    box-shadow: 3px 3px 0 var(--stroke) !important;
+}
+
+.user-menu-name {
+    font-weight: 600 !important;
+    color: var(--stroke) !important;
+}
+
+.user-menu-role {
+    font-size: 0.75rem !important;
+    color: #666 !important;
+}
+
+.user-menu-dropdown {
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    margin-top: 8px !important;
+    min-width: 200px !important;
+    border: 2px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-hard) !important;
+    background: white !important;
+    overflow: hidden !important;
+    z-index: 1000 !important;
+}
+
+.user-menu-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    border: none !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+    padding: 12px 16px !important;
+    background: white !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+}
+
+.user-menu-item:last-child {
+    border-bottom: none !important;
+}
+
+.user-menu-item:hover {
+    background: var(--c-blue) !important;
+    color: white !important;
+    transform: translateX(4px) !important;
+}
+
+.user-menu-item.logout:hover {
+    background: var(--c-red) !important;
+}
+
+/* =========================================
+   FISCALITÉ - STYLES SPÉCIFIQUES
+   ========================================= */
+
+/* ⚠️ DÉSACTIVÉ - Tous les styles fiscalité sont dans fiscalite-neo.css
+   Ne pas réactiver ces styles ici pour éviter les conflits !
+*/
+
+.fiscal-bloc:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--stroke);
+}
+
+.fiscal-bloc-title {
+    background: var(--bg-page);
+    padding: 15px 20px;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--stroke);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 3px solid var(--stroke);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.fiscal-bloc-title:hover {
+    background: #e9ecef;
+}
+
+.toggle-icon {
+    transition: transform 0.3s;
+    font-size: 0.9rem;
+}
+
+.fiscal-bloc.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.bloc-content {
+    padding: 20px;
+    display: block;
+}
+
+.fiscal-bloc.collapsed .bloc-content {
+    display: none;
+}
+
+/* Grille de formulaire */
+.fiscal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
+    max-width: 100%;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--stroke);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-group input[type="number"],
+.form-group input[type="text"],
+.form-group select {
+    padding: 10px 12px;
+    border: 2px solid var(--stroke);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--stroke);
+    box-shadow: 2px 2px 0 var(--stroke);
+    transition: all 0.2s;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--stroke);
+}
+
+.form-group input:read-only {
+    background: #e8f5e9;
+    cursor: not-allowed;
+}
+
+.required {
+    color: var(--c-red);
+    font-weight: 700;
+}
+
+/* Input avec sélecteur */
+.input-with-select {
+    display: flex;
+    gap: 6px;
+    align-items: stretch;
+}
+
+.type-select {
+    flex: 0 0 80px;
+    width: 80px;
+    padding: 6px 4px;
+    border: 2px solid var(--stroke);
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    box-shadow: 2px 2px 0 var(--stroke);
+    background: white;
+}
+
+.input-with-select input {
+    flex: 1;
+    min-width: 80px;
+    max-width: 150px;
+}
+
+.form-group input[type="number"]:not(.input-with-select input) {
+    max-width: 200px;
+}
+
+/* Zone de prévisualisation */
+.preview-container {
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.1) 0%, rgba(85, 239, 196, 0.1) 100%);
+    border: 3px solid var(--stroke);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 3px 3px 0 var(--stroke);
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.preview-item {
+    background: white;
+    border: 2px solid var(--stroke);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 2px 2px 0 var(--stroke);
+}
+
+.preview-item label {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.preview-item .value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--stroke);
+}
+
+/* Listes dynamiques */
+.dynamic-list {
+    margin-top: 15px;
+}
+
+.list-item {
+    background: white;
+    border: 2px solid var(--stroke);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 2px 2px 0 var(--stroke);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.list-item input {
+    flex: 1;
+    min-width: 0;
+}
+
+.list-item button {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    background: var(--c-red);
+    color: white;
+    border: 2px solid var(--stroke);
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 var(--stroke);
+}
+
+.list-item button:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--stroke);
+}
+
+.btn-add-item {
+    margin-top: 10px;
+    width: 100%;
+    background: var(--c-green);
+    color: var(--stroke);
+}
+
+/* Messages d'information */
+.info-box {
+    padding: 15px;
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    border-radius: 8px;
+    margin-top: 15px;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+}
+
+.info-box span {
+    color: #1976d2;
+    font-weight: 600;
+}
+
+.success-box {
+    padding: 15px;
+    background: #d4edda;
+    border-left: 4px solid #28a745;
+    border-radius: 8px;
+    margin-top: 15px;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+}
+
+.success-box span {
+    color: #155724;
+    font-weight: 600;
+}
+
+.warning-box {
+    padding: 15px;
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    border-radius: 8px;
+    margin-top: 15px;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+}
+
+.warning-box span {
+    color: #856404;
+    font-weight: 600;
+}
+
+/* Zone de résultats */
+.results-container {
+    background: white;
+    border: 3px solid var(--stroke);
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 20px;
+    box-shadow: 4px 4px 0 var(--stroke);
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.result-card {
+    background: var(--bg-page);
+    border: 2px solid var(--stroke);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 2px 2px 0 var(--stroke);
+}
+
+.result-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: #7f8c8d;
+    font-weight: 600;
+}
+
+.result-card .result-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--stroke);
+}
+
+/* Responsive fiscalité */
+@media (max-width: 768px) {
+    .fiscal-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .preview-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .input-with-select {
+        flex-direction: column;
+    }
+    
+    .type-select {
+        width: 100%;
+    }
+}

@@ -333,7 +333,13 @@ async function calculerItineraire(destLat, destLng, nomDestination) {
 // ==================== CENTRER SUR LE GÎTE ====================
 function centrerCarteGite() {
     const giteInput = document.getElementById('decouvrir_gite');
-    const giteActuel = giteInput ? giteInput.value : 'Trevoux';
+    let giteActuel = giteInput ? giteInput.value : '';
+    
+    // Fallback sur le premier gîte si aucun sélectionné
+    if (!giteActuel && window.gitesManager && window.gitesManager.gites && window.gitesManager.gites.length > 0) {
+        giteActuel = window.gitesManager.gites[0].name;
+    }
+    
     const coords = gitesCoordinates[giteActuel];
     
     if (coords && googleMap) {
@@ -810,10 +816,15 @@ async function filtrerActivitesParCategorie(motCle) {
     const gite = giteInput?.value;
     const container = document.getElementById('activitesParCategorie');
     
+    // Récupérer tous les gîtes dynamiquement
+    const allGites = window.gitesManager?.gites?.map(g => g.name) || [];
     
     // Vérifier si les activités sont chargées, sinon les charger
-    if (!window.activitesParGite || 
-        (window.activitesParGite['Trevoux'].length === 0 && window.activitesParGite['Couzon'].length === 0)) {
+    const activitesChargees = allGites.every(giteName => 
+        window.activitesParGite && window.activitesParGite[giteName]?.length > 0
+    );
+    
+    if (!activitesChargees) {
         showNotification('⏳ Chargement des activités...', 'info');
         await chargerActivites();
     }
@@ -826,11 +837,8 @@ async function filtrerActivitesParCategorie(motCle) {
         activites = window.activitesParGite[gite] || [];
         titre = `${motCle} à ${gite}`;
     } else {
-        // Sinon, chercher dans les deux gîtes
-        activites = [
-            ...(window.activitesParGite['Trevoux'] || []),
-            ...(window.activitesParGite['Couzon'] || [])
-        ];
+        // Sinon, chercher dans tous les gîtes
+        activites = allGites.flatMap(giteName => window.activitesParGite[giteName] || []);
         titre = `${motCle} - Tous les gîtes`;
     }
     
@@ -863,9 +871,15 @@ async function afficherToutesActivites() {
     const giteInput = document.getElementById('decouvrir_gite');
     const gite = giteInput?.value;
     
+    // Récupérer tous les gîtes dynamiquement
+    const allGites = window.gitesManager?.gites?.map(g => g.name) || [];
+    
     // Vérifier si les activités sont chargées, sinon les charger
-    if (!window.activitesParGite || 
-        (window.activitesParGite['Trevoux'].length === 0 && window.activitesParGite['Couzon'].length === 0)) {
+    const activitesChargees = allGites.every(giteName => 
+        window.activitesParGite && window.activitesParGite[giteName]?.length > 0
+    );
+    
+    if (!activitesChargees) {
         showNotification('⏳ Chargement des activités...', 'info');
         await chargerActivites();
         return; // chargerActivites() appelera déjà afficherToutesLesActivites()
@@ -879,11 +893,8 @@ async function afficherToutesActivites() {
         activites = window.activitesParGite[gite] || [];
         titre = `Toutes les activités à ${gite}`;
     } else {
-        // Sinon, afficher les deux gîtes
-        activites = [
-            ...(window.activitesParGite['Trevoux'] || []),
-            ...(window.activitesParGite['Couzon'] || [])
-        ];
+        // Sinon, afficher tous les gîtes
+        activites = allGites.flatMap(giteName => window.activitesParGite[giteName] || []);
         titre = 'Toutes les activités - Tous les gîtes';
     }
     
@@ -1078,7 +1089,13 @@ async function ajouterActivite() {
             }
         }
         
-        const gite = document.getElementById('decouvrir_gite')?.value || 'Trevoux';
+        let gite = document.getElementById('decouvrir_gite')?.value || '';
+        
+        // Fallback sur le premier gîte si aucun sélectionné
+        if (!gite && window.gitesManager && window.gitesManager.gites && window.gitesManager.gites.length > 0) {
+            gite = window.gitesManager.gites[0].name;
+        }
+        
         const nom = document.getElementById('activite_nom').value;
         const categorie = document.getElementById('activite_categorie').value;
         const description = document.getElementById('activite_description').value;

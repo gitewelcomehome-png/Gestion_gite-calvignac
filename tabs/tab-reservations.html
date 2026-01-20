@@ -1,24 +1,24 @@
 <div class="tab-container">
-    <!-- Header Neo-Brutalism -->
-    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <!-- Header Vision Globale -->
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 30px; margin-bottom: 30px; box-shadow: 6px 6px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
             <div>
-                <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📅 Réservations</h2>
-                <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Planning et gestion des séjours</p>
+                <h2 style="margin: 0 0 8px 0; font-size: 1.8rem; color: #2D3436; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📅 RÉSERVATIONS</h2>
+                <p style="margin: 0; font-size: 1rem; color: #64748b; font-weight: 500;">Planning et gestion des séjours</p>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <button onclick="forceRefreshReservations()" class="btn-neo" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;" title="Actualiser les données">
-                    🔄 Actualiser
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <button onclick="forceRefreshReservations()" class="btn-neo" style="background: white; color: #667eea; padding: 12px 24px; border: 3px solid #667eea; box-shadow: 4px 4px 0 #667eea; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='5px 5px 0 #667eea'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 0 #667eea'" title="Actualiser les données">
+                    🔄 ACTUALISER
                 </button>
-                <input type="text" id="searchReservations" placeholder="🔍 Rechercher..." style="padding: 10px 15px; border-radius: 8px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; width: 250px; font-size: 0.9rem; font-family: 'Work Sans', sans-serif;" oninput="filterReservations(this.value)">
+                <input type="text" id="searchReservations" placeholder="🔍 Rechercher..." style="padding: 12px 18px; border-radius: 10px; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; width: 280px; font-size: 0.95rem; font-family: 'Work Sans', sans-serif; font-weight: 500;" oninput="filterReservations(this.value)">
             </div>
         </div>
     </div>
 
-            <div class="card">
+            <div class="card" style="background: white; border: 3px solid #2D3436; padding: 25px; box-shadow: 6px 6px 0 #2D3436; border-radius: 16px;">
                 
                 <!-- Statut synchronisation -->
-                <div id="syncStatus" style="padding:12px;background:#e7f3ff;border-radius:8px;margin-bottom:20px;font-size:0.9rem;display:none">
+                <div id="syncStatus" style="padding: 15px 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-radius: 10px; margin-bottom: 25px; font-size: 0.95rem; display: none; border: 2px solid #667eea; font-weight: 600; color: #667eea;">
                     <span id="syncStatusIcon">🔄</span> <span id="syncStatusText">Synchronisation en cours...</span>
                 </div>
                 

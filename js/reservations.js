@@ -1,7 +1,16 @@
 // ==========================================
-// 📅 MODULE GESTION DES RÉSERVATIONS
+// 📅 MODULE GESTION DES RÉSERVATIONS - v2.0
 // ==========================================
 // Fonctions de recherche, affichage, modification et suppression des réservations
+// Design modernisé Vision Globale - 19 janvier 2026
+//
+// ✨ NOUVEAUTÉS v2.0:
+// - Design Vision Globale cohérent avec le dashboard
+// - Cartes blanches avec bordures 3px et ombres
+// - Boutons colorés avec hover effects
+// - Headers de semaine modernisés (fond noir)
+// - Badges de plateforme avec bordures et ombres
+// - Typographie améliorée et espacements optimisés
 
 // ==========================================// UTILITAIRES
 // ==========================================
@@ -81,41 +90,41 @@ function displayFilteredReservations(reservations) {
     const container = document.getElementById('planning-container');
     
     if (reservations.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucun résultat</p>');
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px; font-size: 1.1rem;">Aucun résultat</p>');
         return;
     }
     
-    let html = '<div class="planning-weeks"><h3 style="margin-bottom: 20px;">🔍 Résultats de recherche (' + reservations.length + ')</h3>';
+    let html = '<div class="planning-weeks"><h3 style="margin-bottom: 25px; font-size: 1.4rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">🔍 Résultats de recherche (' + reservations.length + ')</h3>';
     
     reservations.forEach(r => {
         const platformLogo = getPlatformLogo(r.site);
-        const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 600;">✓</span>' : '';
-        const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.9rem;">📱 ${r.telephone}</span>` : '';
+        const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 700; font-size: 1.1rem;">✓</span>' : '';
+        const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.95rem; color: #64748b;">📱 ${r.telephone}</span>` : '';
         
         const isIncomplete = !r.nom || r.nom.includes('⚠️') || r.nom.includes('À COMPLÉTER') || r.nom.includes('Client');
         const incompleteBadge = isIncomplete ? 
-            '<span style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 8px;">⚠️ À COMPLÉTER</span>' : 
+            '<span style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; margin-left: 10px; box-shadow: 2px 2px 0 #2D3436; border: 2px solid #2D3436;">⚠️ À COMPLÉTER</span>' : 
             '';
         
         html += `
-            <div class="week-reservation" style="margin-bottom: 15px; padding: 12px; border-radius: 12px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); ${isIncomplete ? 'border-left: 4px solid #ff6b6b;' : ''}">
+            <div class="week-reservation" style="margin-bottom: 20px; padding: 20px; border-radius: 12px; background: white; box-shadow: 4px 4px 0 #2D3436; border: 3px solid #2D3436; ${isIncomplete ? 'border-left: 6px solid #ff6b6b;' : ''}">
                 <div style="position: relative;">
-                    <div style="position: absolute; top: 0; right: 0; display: flex; gap: 4px;">
-                        <button onclick="openEditModal(${r.id})" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Modifier">✏️</button>
-                        <button onclick="aperçuFicheClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Page Client">📄</button>
-                        <button onclick="deleteReservationById(${r.id})" style="background: #ffebee; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem;" title="Supprimer">🗑️</button>
+                    <div style="position: absolute; top: 0; right: 0; display: flex; gap: 8px;">
+                        <button onclick="openEditModal('${r.id}')" style="background: white; border: 2px solid #667eea; color: #667eea; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 1.1rem; box-shadow: 2px 2px 0 #667eea; font-weight: 600; transition: all 0.2s; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='3px 3px 0 #667eea'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='2px 2px 0 #667eea'" title="Modifier">✏️</button>
+                        <button onclick="aperçuFicheClient('${r.id}')" style="background: white; border: 2px solid #27ae60; color: #27ae60; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 1.1rem; box-shadow: 2px 2px 0 #27ae60; font-weight: 600; transition: all 0.2s; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='3px 3px 0 #27ae60'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='2px 2px 0 #27ae60'" title="Page Client">✓</button>
+                        <button onclick="deleteReservationById('${r.id}')" style="background: white; border: 2px solid #e74c3c; color: #e74c3c; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 1.1rem; box-shadow: 2px 2px 0 #e74c3c; font-weight: 600; transition: all 0.2s; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='3px 3px 0 #e74c3c'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='2px 2px 0 #e74c3c'" title="Supprimer">🗑️</button>
                     </div>
                     
-                    <div style="font-weight: 700; font-size: 1.15rem; color: #0f172a; margin-bottom: 8px;">
+                    <div style="font-weight: 700; font-size: 1.3rem; color: #2D3436; margin-bottom: 12px; padding-right: 140px;">
                         ${escapeHtml(r.nom)}${messageEnvoye}${incompleteBadge}
                     </div>
                     
-                    <div style="font-size: 1.05rem; color: #334155; margin-bottom: 8px;">
-                        📅 <strong>${formatDate(r.dateDebut)} → ${formatDate(r.dateFin)}</strong>${telephoneDisplay}<br>
-                        💰 <strong>${r.montant.toFixed(2)} €</strong> • ${platformLogo}
+                    <div style="font-size: 1.1rem; color: #334155; margin-bottom: 10px; font-weight: 600;">
+                        📅 <strong style="color: #667eea;">${formatDate(r.dateDebut)} → ${formatDate(r.dateFin)}</strong>${telephoneDisplay}<br>
+                        💰 <strong style="color: #27ae60; font-size: 1.2rem;">${r.montant.toFixed(2)} €</strong> • ${platformLogo}
                     </div>
                     
-                    <div style="font-size: 0.9rem; color: #64748b;">
+                    <div style="font-size: 1rem; color: #64748b; font-weight: 600;">
                         🏠 ${r.gite}
                     </div>
                 </div>
@@ -156,7 +165,7 @@ function closeEditModal() {
 async function saveEditReservation(event) {
     event.preventDefault();
     
-    const id = parseInt(document.getElementById('editId').value);
+    const id = document.getElementById('editId').value; // UUID est une string, pas parseInt
     const nom = document.getElementById('editNom').value.trim();
     const telephone = document.getElementById('editTelephone').value.trim();
     const provenance = document.getElementById('editProvenance').value.trim();
@@ -261,11 +270,14 @@ async function updateReservationsList(keepScrollPosition = false) {
         });
     }
     
-    // Afficher TOUTES les réservations futures (date de fin après aujourd'hui)
+    // ============================================
+    // AFFICHAGE : Réservations en cours ou à venir
+    // ============================================
+    // RÈGLE : Afficher si check_out >= aujourd'hui (en cours ou futures)
     const active = reservations.filter(r => {
         const dateFin = parseLocalDate(r.dateFin);
         dateFin.setHours(0, 0, 0, 0);
-        return dateFin > today;
+        return dateFin >= today;
     });
     
     const container = document.getElementById('planning-container');
@@ -292,18 +304,28 @@ async function updateReservationsList(keepScrollPosition = false) {
         byGite[g.id].sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     });
     
-    // Obtenir toutes les semaines à afficher avec ANNÉE (basé sur la date de DÉBUT)
+    // Obtenir toutes les semaines à afficher : ajouter semaine ACTUELLE + semaines des réservations
     const allWeeks = new Set();
+    
+    // TOUJOURS ajouter la semaine actuelle en premier
+    const todayWeekNum = getWeekNumber(today);
+    const todayYear = today.getFullYear();
+    allWeeks.add(`${todayYear}-W${String(todayWeekNum).padStart(2, '0')}`);
+    
+    // Ajouter les semaines des réservations
     active.forEach(r => {
         const start = parseLocalDate(r.dateDebut);
         const year = start.getFullYear();
         const weekNum = getWeekNumber(start);
-        allWeeks.add(`${year}-W${weekNum}`); // Format "2026-W3"
+        allWeeks.add(`${year}-W${String(weekNum).padStart(2, '0')}`);
     });
     
     const sortedWeeks = Array.from(allWeeks).sort((a, b) => {
-        // Trier par année puis par semaine
-        return a.localeCompare(b);
+        // Tri numérique : extraire année et semaine
+        const [yearA, weekA] = a.split('-W').map(x => parseInt(x));
+        const [yearB, weekB] = b.split('-W').map(x => parseInt(x));
+        if (yearA !== yearB) return yearA - yearB;
+        return weekA - weekB;
     });
     
     // Générer le HTML avec en-tête fixe style barre (comme l'exemple HTML fourni)
@@ -328,44 +350,31 @@ async function updateReservationsList(keepScrollPosition = false) {
         } else if (gites.length === 3) {
             gridStyle = `display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
         } else if (gites.length >= 4) {
-            // Pour 4 colonnes ou plus, réduire légèrement l'espacement
-            gap = '15px';
-            padding = '15px';
             gridStyle = `display: grid; grid-template-columns: repeat(4, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
         }
         
         html += `
-            <div class="week-block">
-                <div class="week-content-grid" style="border-top: none; ${gridStyle} padding: 0 ${padding} ${padding} ${padding}; box-sizing: border-box;">`;
+            <div style="background: white; border: 3px solid #2D3436; padding: 0; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; overflow: hidden;">
+                <div style="${gridStyle} padding: 20px; box-sizing: border-box;">
+        `;
         
         // Générer colonnes pour chaque gîte
-        gites.forEach(g => {
+        const colors = [
+            '#667eea', '#f5576c', '#27AE60', '#3498DB', '#E67E22', '#9B59B6'
+        ];
+        
+        gites.forEach((g, giteIndex) => {
             const columnStyle = gites.length === 1 ? 'width: 100%; max-width: 800px;' : '';
-            const giteColor = g.brand_color || window.gitesManager.getColor(g.id) || '#667eea';
-            // Convertir la couleur hex en rgba avec opacité 0.15
-            const hexToRgba = (hex) => {
-                const r = parseInt(hex.slice(1, 3), 16);
-                const g = parseInt(hex.slice(3, 5), 16);
-                const b = parseInt(hex.slice(5, 7), 16);
-                return `rgba(${r}, ${g}, ${b}, 0.15)`;
-            };
-            const giteColorLight = hexToRgba(giteColor);
-            
-            // Adapter les tailles selon le nombre de colonnes
-            const headerPadding = gites.length >= 4 ? '6px 15px' : '8px 20px';
-            const contentPadding = gites.length >= 4 ? '15px' : '20px';
-            const headerFontSize = gites.length >= 4 ? '0.7rem' : '0.75rem';
-            const weekFontSize = gites.length >= 4 ? '0.85rem' : '0.95rem';
-            const datesFontSize = gites.length >= 4 ? '0.75rem' : '0.8rem';
+            const giteColor = colors[giteIndex % colors.length];
             
             html += `
-            <div style="display: flex; flex-direction: column; min-width: 0; ${columnStyle}">
-                <div class="week-header-unique" style="padding: ${headerPadding}; background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); border-radius: 8px 8px 0 0; margin-bottom: 0; border: 3px solid #2D3436; border-bottom: none;">
-                    <div style="font-size: ${headerFontSize}; margin-bottom: 2px; opacity: 0.8; color: white;">${g.name}</div>
-                    <div class="week-number-big" style="font-size: ${weekFontSize}; margin-bottom: 2px; color: white;">Semaine ${weekNum}</div>
-                    <div class="week-dates-small" style="font-size: ${datesFontSize}; opacity: 0.9; color: white;">${formatDateShort(weekDates.start)} - ${formatDateShort(weekDates.end)}</div>
+            <div style="display: flex; flex-direction: column; min-width: 0; ${columnStyle}; flex: 1;">
+                <div style="padding: 12px 20px; background: ${giteColor}; border-radius: 12px 12px 0 0; margin-bottom: 0; border: 3px solid #2D3436; border-bottom: none; box-shadow: 4px 4px 0 #2D3436;">
+                    <div style="font-size: 0.8rem; margin-bottom: 2px; color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${g.name}</div>
+                    <div style="font-size: 1rem; margin-bottom: 2px; color: white; font-weight: 700; text-transform: uppercase;">Semaine ${weekNum}</div>
+                    <div style="font-size: 0.8rem; opacity: 0.95; color: white;">${formatDateShort(weekDates.start)} - ${formatDateShort(weekDates.end)}</div>
                 </div>
-                <div style="background: ${giteColorLight}; border: 3px solid #2D3436; border-radius: 0 0 12px 12px; padding: ${contentPadding}; min-height: 120px; box-shadow: 6px 6px 0 #2D3436;">
+                <div style="background: white; border: 3px solid #2D3436; border-top: none; border-radius: 0 0 12px 12px; padding: 20px; min-height: 120px; box-shadow: 4px 4px 0 #2D3436;">
                     ${generateWeekReservations(byGite[g.id], weekNum, g.slug, active, validationMap, today)}
                 </div>
             </div>
@@ -405,7 +414,7 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
     });
     
     if (weekReservations.length === 0) {
-        return '<div class="week-empty">Disponible</div>';
+        return '<div class="week-empty" style="padding: 30px 20px; text-align: center; color: #95a5a6; font-size: 1rem; font-weight: 600; font-style: italic;">✨ Disponible</div>';
     }
     
     let html = '';
@@ -465,35 +474,36 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         const dateFin = parseLocalDate(r.dateFin);
         dateFin.setHours(0, 0, 0, 0);
         const isExpired = today && dateFin.getTime() <= today.getTime();
-        const ficheClientButton = isExpired ? '' : `<button onclick="aperçuFicheClient(${r.id})" style="background: #e8f5e9; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Page Client">📄</button>`;
+        const ficheClientButton = isExpired ? '' : `<button onclick="aperçuFicheClient('${r.id}')" style="background: white; border: 2px solid #27ae60; color: #27ae60; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 1.1rem; font-weight: 600; box-shadow: 2px 2px 0 #27ae60; transition: all 0.2s; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='3px 3px 0 #27ae60'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='2px 2px 0 #27ae60'" title="Page Client">✓</button>`;
         
         html += `
-            <div class="week-reservation ${cssClass}" style="position: relative; padding: 12px; padding-top: 40px;">
-                <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;">
-                    <button onclick="openEditModal(${r.id})" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Modifier">✏️</button>
+            <div class="week-reservation ${cssClass}" style="padding: 20px; border-bottom: 2px solid #e5e7eb; background: white; margin-bottom: 8px; border-radius: 8px;">
+                <!-- Boutons en haut -->
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px;">
+                    <button onclick="openEditModal('${r.id}')" style="background: white; border: 2px solid #667eea; color: #667eea; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 1.1rem; font-weight: 600; box-shadow: 2px 2px 0 #667eea; transition: all 0.2s; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='3px 3px 0 #667eea'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='2px 2px 0 #667eea'" title="Modifier">✏️</button>
                     ${ficheClientButton}
-                    <button onclick="deleteReservationById(${r.id})" style="background: #ffebee; border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" title="Supprimer">🗑️</button>
+                    <button onclick="deleteReservationById('${r.id}')" style="background: white; border: 2px solid #e74c3c; color: #e74c3c; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 1.1rem; font-weight: 600; box-shadow: 2px 2px 0 #e74c3c; transition: all 0.2s; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='3px 3px 0 #e74c3c'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='2px 2px 0 #e74c3c'" title="Supprimer">🗑️</button>
                 </div>
                 
-                <!-- Nom en haut -->
-                <div style="font-weight: 700; font-size: 1.15rem; color: #0f172a; margin-bottom: 8px; line-height: 1.3;">
+                <!-- Nom en dessous des boutons -->
+                <div style="font-weight: 700; font-size: 1.25rem; color: #2D3436; margin-bottom: 14px; line-height: 1.3;">
                     ${escapeHtml(r.nom)}${messageEnvoye}
                 </div>
                 
                 <!-- Dates et tarif avec horaires -->
-                <div style="font-size: 1.05rem; color: #334155; margin-bottom: 8px; line-height: 1.5;">
-                    📅 <strong>${formatDate(r.dateDebut)} <span style="color: #27AE60;">⏰ ${horaireArrivee}</span> → ${formatDate(r.dateFin)} <span style="color: #E74C3C;">⏰ ${horaireDepart}</span></strong>${telephoneDisplay}<br>
-                    💰 <strong>${r.montant.toFixed(2)} €</strong>
-                </div>
-                
-                <!-- Pied : Ménage avec pastille à gauche, Plateforme à droite -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
-                    <div style="font-size: 0.85rem; color: #64748b; display: flex; align-items: center;">
-                        🧹 ${dateMenage}${timeLabel}${statusBadge}
-                    </div>
-                    <div>
+                <div style="font-size: 1.05rem; color: #334155; margin-bottom: 18px; line-height: 1.8; font-weight: 500;">
+                    📅 <strong style="color: #667eea;">${formatDate(r.dateDebut)} <span style="color: #27AE60; font-size: 0.95rem;">⏰ ${horaireArrivee}</span> → ${formatDate(r.dateFin)} <span style="color: #E74C3C; font-size: 0.95rem;">⏰ ${horaireDepart}</span></strong>${telephoneDisplay}<br>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                        <span>💰 <strong style="color: #27ae60; font-size: 1.2rem;">${r.montant.toFixed(2)} €</strong></span>
                         ${platformLogo}
                     </div>
+                </div>
+                
+                <!-- Pied : Ménage seul -->
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 18px; padding-top: 16px; border-top: 2px solid #e5e7eb; font-size: 0.95rem; color: #64748b; font-weight: 600;">
+                    <span style="font-size: 1.1rem;">🧹</span>
+                    <span style="color: #2D3436; font-weight: 600;">${dateMenage}${timeLabel}</span>
+                    ${statusBadge}
                 </div>
             </div>
         `;
@@ -512,17 +522,17 @@ function getPlatformLogo(platform) {
     const normalizedPlatform = platform.toLowerCase().trim();
     
     if (normalizedPlatform.includes('airbnb')) {
-        return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #FF5A5F; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">airbnb</span>';
+        return '<span style="display: inline-flex; align-items: center; padding: 5px 12px; background: #FF5A5F; color: white; border-radius: 8px; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.5px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">AIRBNB</span>';
     } else if (normalizedPlatform.includes('abritel') || normalizedPlatform.includes('homeaway') || normalizedPlatform.includes('homelidays')) {
-        return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #0D4F8B; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">abritel</span>';
+        return '<span style="display: inline-flex; align-items: center; padding: 5px 12px; background: #0D4F8B; color: white; border-radius: 8px; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.5px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">ABRITEL</span>';
     } else if (normalizedPlatform.includes('gîtes') || normalizedPlatform.includes('gites') || normalizedPlatform.includes('france')) {
-        return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #27AE60; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">gîtes de france</span>';
+        return '<span style="display: inline-flex; align-items: center; padding: 5px 12px; background: #27AE60; color: white; border-radius: 8px; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.5px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">GDF</span>';
     } else if (normalizedPlatform === 'autre' || normalizedPlatform === 'other' || normalizedPlatform === '') {
         // "Autre" = par défaut Gîtes de France
-        return '<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #27AE60; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">gîtes de france</span>';
+        return '<span style="display: inline-flex; align-items: center; padding: 5px 12px; background: #27AE60; color: white; border-radius: 8px; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.5px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">GDF</span>';
     } else {
         // Afficher la plateforme inconnue telle quelle
-        return `<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: #95a5a6; color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">${platform}</span>`;
+        return `<span style="display: inline-flex; align-items: center; padding: 5px 12px; background: #95a5a6; color: white; border-radius: 8px; font-weight: 700; font-size: 0.8rem; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">${platform.toUpperCase()}</span>`;
     }
 }
 

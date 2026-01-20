@@ -1,0 +1,26 @@
+{
+  "name": "Gestion Gîte Calvignac",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  
+  // Configuration de l'inactivité
+  "settings": {
+    "codespaces.idleTimeout": "5m"
+  },
+  
+  // Extensions recommandées
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-node-azure-pack"
+      ]
+    }
+  },
+  
+  // Port forwarding
+  "forwardPorts": [3000, 5500],
+  
+  // Post create command
+  "postCreateCommand": "echo 'Codespace configuré - timeout: 5 minutes'"
+}

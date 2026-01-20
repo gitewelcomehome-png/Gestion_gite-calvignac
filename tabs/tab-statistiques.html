@@ -1,5 +1,5 @@
 <div class="tab-container">
-    <!-- Header Neo-Brutalism -->
+    <!-- Header Style Dashboard -->
     <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div>
@@ -12,71 +12,71 @@
                     style="width: 110px; padding: 8px; border: 2px solid #2D3436; border-radius: 8px; font-size: 0.9rem; text-align: center; font-weight: 600; cursor: pointer; background: white; box-shadow: 2px 2px 0 #2D3436;">
                     <option value="">Chargement...</option>
                 </select>
-                <button class="btn-neo" onclick="toggleHistoricalDataForm()" style="background: #74b9ff; color: white; padding: 8px 16px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    📅 Gérer les données
+                <button onclick="toggleHistoricalDataForm()" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; border-radius: 10px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
+                    📅 Gérer données
                 </button>
             </div>
         </div>
     </div>
 
-            <div class="stats-section">
-                
-                <!-- 📊 Compteurs par plateforme -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
-                    <div style="background: linear-gradient(135deg, #FF5A5F 0%, #FF385C 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Airbnb</div>
-                        <div id="countAirbnb" style="font-size: 2rem; font-weight: 700;">-</div>
-                        <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+            <!-- 📊 RÉSERVATIONS PAR PLATEFORME -->
+            <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📱 Réservations par Plateforme</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div style="background: white; border: 3px solid #FF5A5F; padding: 20px; border-radius: 12px; box-shadow: 4px 4px 0 #FF5A5F;">
+                        <div style="font-size: 0.875rem; font-weight: 600; color: #FF5A5F; margin-bottom: 8px; text-transform: uppercase;">🏠 Airbnb</div>
+                        <div id="countAirbnb" style="font-size: 2.5rem; font-weight: 700; color: #2D3436;">-</div>
+                        <div style="font-size: 0.8rem; color: #666;">réservations</div>
                     </div>
-                    <div style="background: linear-gradient(135deg, #3498DB 0%, #2874A6 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Abritel</div>
-                        <div id="countAbritel" style="font-size: 2rem; font-weight: 700;">-</div>
-                        <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+                    <div style="background: white; border: 3px solid #3498DB; padding: 20px; border-radius: 12px; box-shadow: 4px 4px 0 #3498DB;">
+                        <div style="font-size: 0.875rem; font-weight: 600; color: #3498DB; margin-bottom: 8px; text-transform: uppercase;">🏡 Abritel</div>
+                        <div id="countAbritel" style="font-size: 2.5rem; font-weight: 700; color: #2D3436;">-</div>
+                        <div style="font-size: 0.8rem; color: #666;">réservations</div>
                     </div>
-                    <div style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%); padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Gîtes de France</div>
-                        <div id="countGites" style="font-size: 2rem; font-weight: 700;">-</div>
-                        <div style="font-size: 0.875rem; opacity: 0.8;">réservations</div>
+                    <div style="background: white; border: 3px solid #27AE60; padding: 20px; border-radius: 12px; box-shadow: 4px 4px 0 #27AE60;">
+                        <div style="font-size: 0.875rem; font-weight: 600; color: #27AE60; margin-bottom: 8px; text-transform: uppercase;">🌾 Gîtes de France</div>
+                        <div id="countGites" style="font-size: 2.5rem; font-weight: 700; color: #2D3436;">-</div>
+                        <div style="font-size: 0.8rem; color: #666;">réservations</div>
                     </div>
                 </div>
-                
-                <!-- 📈 NOUVELLES STATISTIQUES UTILES -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px;">
-                    <!-- Taux d'occupation Trevoux -->
-                    <div class="card" style="padding: 20px; background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(102,126,234,0.05) 100%);">
-                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">📊 Taux Trevoux</div>
-                        <div id="tauxTrevoux" style="font-size: 2rem; font-weight: 700; color: #667eea;">-%</div>
-                        <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">année en cours</div>
+            </div>
+            
+            <!-- 📊 TAUX D'OCCUPATION PAR GÎTE -->
+            <div class="card" style="background: white; border: 3px solid #667eea; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📊 Taux d'Occupation par Gîte</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    <div id="taux-occupation-container" style="display: contents;">
+                        <!-- Les cartes de taux d'occupation seront générées par JS -->
                     </div>
-                    
-                    <!-- Taux d'occupation Couzon -->
-                    <div class="card" style="padding: 20px; background: linear-gradient(135deg, rgba(245,87,108,0.1) 0%, rgba(245,87,108,0.05) 100%);">
-                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">📊 Taux Couzon</div>
-                        <div id="tauxCouzon" style="font-size: 2rem; font-weight: 700; color: #f5576c;">-%</div>
-                        <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">année en cours</div>
-                    </div>
-                    
+                </div>
+            </div>
+            
+            <!-- 📈 STATISTIQUES AVANCÉES -->
+            <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📈 Statistiques Avancées</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
                     <!-- Prix moyen nuitée -->
-                    <div class="card" style="padding: 20px;">
-                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">💰 Prix moyen/nuit</div>
-                        <div id="prixMoyen" style="font-size: 2rem; font-weight: 700; color: #27AE60;">- €</div>
-                        <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">toutes réservations</div>
+                    <div style="background: white; border: 3px solid #27AE60; padding: 20px; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436;">
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 8px;">💰 Prix moyen/nuit</div>
+                        <div id="prixMoyen" style="font-size: 2.5rem; font-weight: 700; color: #27AE60;">- €</div>
+                        <div style="font-size: 0.7rem; color: #999;">toutes réservations</div>
                     </div>
                     
                     <!-- Durée moyenne séjour -->
-                    <div class="card" style="padding: 20px;">
-                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">📅 Durée moyenne</div>
-                        <div id="dureeMoyenne" style="font-size: 2rem; font-weight: 700; color: #3498DB;">- nuits</div>
-                        <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">par séjour</div>
+                    <div style="background: white; border: 3px solid #3498DB; padding: 20px; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436;">
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 8px;">📅 Durée moyenne</div>
+                        <div id="dureeMoyenne" style="font-size: 2.5rem; font-weight: 700; color: #3498DB;">- nuits</div>
+                        <div style="font-size: 0.7rem; color: #999;">par séjour</div>
                     </div>
                     
                     <!-- Meilleur mois -->
-                    <div class="card" style="padding: 20px;">
-                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">🏆 Meilleur mois</div>
-                        <div id="meilleurMois" style="font-size: 1.3rem; font-weight: 700; color: var(--primary);">-</div>
-                        <div id="meilleurMoisCA" style="font-size: 0.875rem; color: #27AE60; margin-top: 4px; font-weight: 600;">- €</div>
+                    <div style="background: white; border: 3px solid #f5576c; padding: 20px; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436;">
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 8px;">🏆 Meilleur mois</div>
+                        <div id="meilleurMois" style="font-size: 1.5rem; font-weight: 700; color: #f5576c;">-</div>
+                        <div id="meilleurMoisCA" style="font-size: 1.1rem; color: #27AE60; margin-top: 8px; font-weight: 700;">- €</div>
                     </div>
                 </div>
+            </div>
                 
                 
                 <!-- Formulaire caché des données historiques -->
@@ -203,62 +203,42 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="statTotal">0</div>
-                        <div class="stat-label">Réservations totales</div>
+            
+            <!-- 💰 CHIFFRES D'AFFAIRES & RÉSERVATIONS -->
+            <div class="card" style="background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">💰 Chiffres d'Affaires & Réservations</h3>
+                <div style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;">
+                    <div style="background: white; border: 3px solid #2D3436; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; padding: 20px; min-width: 160px; text-align: center; flex-shrink: 0;">
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 8px;">Total</div>
+                        <div style="font-size: 2.5rem; font-weight: 700; color: #2D3436; margin-bottom: 5px;" id="statTotal">0</div>
+                        <div style="font-size: 0.8rem; color: #666;">réservations</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #27ae60; margin-top: 10px;" id="statCA">0 €</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="statTrevoux">0</div>
-                        <div class="stat-label">Trevoux</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="statCouzon">0</div>
-                        <div class="stat-label">Couzon</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="statCA">0 €</div>
-                        <div class="stat-label">CA Total</div>
-                    </div>
-                </div>
-                
-                <!-- Section Graphiques dans un slide collapsible -->
-                <div style="margin-top: 30px; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
-                    <div data-slide-target="slide-graphiques" style="cursor: pointer; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
-                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">
-                            📊 Graphiques Comparatifs
-                        </h3>
-                        <span id="slide-graphiques-icon" style="font-size: 1.5rem; transition: transform 0.3s;">▼</span>
-                    </div>
-                    <div id="slide-graphiques" style="display: none; padding: 20px;">
-                        <!-- Section sélection années pour comparaison -->
-                        <div class="card" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa;">
-                            <h4 style="color: var(--primary); margin-bottom: 15px;">📊 Comparer les années</h4>
-                            <div id="yearComparisonCheckboxes" style="display: flex; flex-wrap: wrap; gap: 15px;">
-                                <!-- Les checkboxes seront générées dynamiquement -->
-                            </div>
-                        </div>
-                        
-                        <div class="chart-container">
-                            <canvas id="caChart"></canvas>
-                        </div>
-                        
-                        <div class="chart-container" style="margin-top: 50px;">
-                            <canvas id="gitesChart"></canvas>
-                        </div>
-                        
-                        <div class="chart-container" style="margin-top: 50px;">
-                            <canvas id="platformsChart"></canvas>
-                        </div>
-                        
-                        <!-- Graphique Bénéfices Mensuels (en ligne) -->
-                        <div class="chart-container" style="margin-top: 50px;">
-                            <canvas id="beneficesChart"></canvas>
-                        </div>
+                    
+                    <!-- Stats par gîte - Généré dynamiquement -->
+                    <div id="stats-gites-container" style="display: flex; gap: 16px; flex-shrink: 0;">
+                        <!-- Les stats par gîte seront générées par JS -->
                     </div>
                 </div>
             </div>
+            
+            <!-- 📊 COMPARAISON CA MENSUEL -->
+            <div class="card" style="background: white; border: 3px solid #667eea; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📊 Comparaison CA Mensuel</h3>
+                
+                <!-- Section sélection années pour comparaison -->
+                <div style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef;">
+                    <h4 style="margin: 0 0 15px 0; font-size: 0.95rem; color: #2D3436; font-weight: 600; text-transform: uppercase;">📅 Comparer les années</h4>
+                    <div id="yearComparisonCheckboxes" style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        <!-- Les checkboxes seront générées dynamiquement -->
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="caChart"></canvas>
+                </div>
+            </div>
+        </div>
 <script>
 // Fonction pour déplier/replier la section graphiques
 window.toggleSlide = function(slideId) {
