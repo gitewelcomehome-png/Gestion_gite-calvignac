@@ -127,8 +127,28 @@
     <!-- Fiscalité Neo Styles (chargé en DERNIER pour priorité) -->
     <link rel="stylesheet" href="css/fiscalite-neo.css?v=1737243600" />
     <link rel="stylesheet" href="css/remplissage-auto.css?v=1.0" />
+    <!-- 📱 Responsive Mobile -->
+    <link rel="stylesheet" href="css/responsive-mobile.css?v=4.4" />
 </head>
 <body>
+    <!-- Menu hamburger mobile -->
+    <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav id="mobile-nav-menu" class="mobile-nav-menu">
+        <div class="mobile-nav-header">
+            <h3>📱 Menu</h3>
+            <button id="mobile-menu-close" class="mobile-menu-close">&times;</button>
+        </div>
+        <div class="mobile-nav-list">
+            <!-- Les onglets seront générés dynamiquement par JS -->
+        </div>
+    </nav>
+    <div id="mobile-nav-overlay" class="mobile-nav-overlay"></div>
+
     <!-- Cadre bouton commit info -->
     <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
         <div style="display: inline-block; position: relative;">

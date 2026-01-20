@@ -1,0 +1,614 @@
+/* ==========================================
+   RESPONSIVE MOBILE - v4.4
+   Adaptation complète du site pour mobile
+   ========================================== */
+
+/* Variables responsive */
+:root {
+    --mobile-padding: 15px;
+    --mobile-gap: 15px;
+    --tablet-padding: 20px;
+    --tablet-gap: 20px;
+}
+
+/* ==========================================
+   TABLET (768px - 1024px)
+   ========================================== */
+@media (max-width: 1024px) {
+    .container {
+        padding: var(--tablet-padding);
+    }
+    
+    body {
+        padding: 10px;
+    }
+    
+    /* Réduire padding cards */
+    .card {
+        padding: 20px !important;
+    }
+    
+    /* Grilles adaptatives */
+    [style*="grid-template-columns: repeat(3, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ==========================================
+   MOBILE (< 768px)
+   ========================================== */
+@media (max-width: 768px) {
+    /* Reset padding global - AUCUNE MARGE */
+    body {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100%;
+    }
+    
+    /* Cards */
+    .card {
+        padding: 4px !important;
+        border-radius: 6px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    /* Titres */
+    h2 {
+        font-size: 0.8rem !important;
+    }
+    
+    h3 {
+        font-size: 0.7rem !important;
+    }
+    
+    p {
+        font-size: 0.65rem !important;
+    }
+    
+    /* Gaps */
+    [style*="gap: 30px"] {
+        gap: 6px !important;
+    }
+    
+    [style*="gap: 25px"] {
+        gap: 5px !important;
+    }
+    
+    [style*="gap: 20px"] {
+        gap: 5px !important;
+    }
+    
+    [style*="gap: 15px"] {
+        gap: 4px !important;
+    }
+    
+    [style*="gap: 10px"] {
+        gap: 3px !important;
+    }
+    
+    /* Grilles forcées 2 colonnes → GARDER 2 colonnes mais plus petites */
+    [style*="grid-template-columns: 1fr 1fr"],
+    [style*="grid-template-columns: repeat(2, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    
+    /* Grilles 3/4 colonnes → 2 colonnes */
+    [style*="grid-template-columns: repeat(3, 1fr)"],
+    [style*="grid-template-columns: repeat(4, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    
+    /* Auto-fit avec minmax - réduire le minmax pour tenir 2 colonnes */
+    [style*="repeat(auto-fit"],
+    [style*="repeat(auto-fill"] {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+        gap: 8px !important;
+    }
+    
+    /* Flex wrap obligatoire */
+    [style*="display: flex"]:not(.tabs-list):not(.mobile-nav-list) {
+        flex-wrap: wrap !important;
+    }
+    
+    /* Boutons */
+    button {
+        font-size: 0.7rem !important;
+        padding: 5px 10px !important;
+    }
+    
+    /* Boutons dans headers - empiler */
+    .card [style*="display: flex"][style*="justify-content: space-between"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    .card [style*="display: flex"][style*="justify-content: space-between"] > div {
+        width: 100%;
+    }
+    
+    .card [style*="display: flex"][style*="justify-content: space-between"] button {
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    /* Modals */
+    .modal {
+        padding: 5px !important;
+    }
+    
+    .modal-content {
+        max-width: 95vw !important;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 12px !important;
+        margin: 5px !important;
+    }
+    
+    /* Formulaires dans modals */
+    .modal-content form [style*="display: grid"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Emojis/Icônes */
+    [style*="font-size: 1.8rem"],
+    [style*="font-size: 2rem"],
+    [style*="font-size: 2.5rem"] {
+        font-size: 1.1rem !important;
+    }
+    
+    [style*="font-size: 1.5rem"] {
+        font-size: 1rem !important;
+    }
+    
+    [style*="font-size: 1.3rem"] {
+        font-size: 0.95rem !important;
+    }
+    
+    [style*="font-size: 1.2rem"] {
+        font-size: 0.9rem !important;
+    }
+    
+    [style*="font-size: 1.1rem"] {
+        font-size: 0.85rem !important;
+    }
+    
+    /* DASHBOARD - VISION GLOBALE - Garder 2 colonnes */
+    .dashboard-mobile-wrapper [style*="grid-template-columns: repeat(auto-fit"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    
+    /* DASHBOARD - VISION ACTIONS - 1 COLONNE UNIQUEMENT */
+    .dashboard-mobile-wrapper > div > div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Sections collapsables */
+    .mobile-collapse-section {
+        margin-bottom: 8px;
+    }
+    
+    .mobile-collapse-header {
+        background: #667eea;
+        color: white;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        border: 2px solid #2D3436;
+        box-shadow: 2px 2px 0 #2D3436;
+    }
+    
+    .mobile-collapse-header:active {
+        transform: translate(2px, 2px);
+        box-shadow: none;
+    }
+    
+    .mobile-collapse-content {
+        display: block;
+        margin-top: 6px;
+    }
+    
+    .mobile-collapse-content.hidden {
+        display: none;
+    }
+    
+    .mobile-collapse-icon {
+        font-size: 1rem;
+        transition: transform 0.3s;
+    }
+    
+    .mobile-collapse-icon.collapsed {
+        transform: rotate(-90deg);
+    }
+    
+    /* Graphiques - MASQUÉS sur mobile */
+    canvas {
+        display: none !important;
+    }
+    
+    /* Masquer les containers de graphiques */
+    [style*="canvas"],
+    div:has(canvas) {
+        display: none !important;
+    }
+    
+    /* RéSERVATIONS - Planning */
+    .week-content-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .week-reservation {
+        font-size: 0.75rem !important;
+        padding: 8px !important;
+    }
+    
+    /* MÉNAGES */
+    .cleaning-week-body {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .cleaning-week-header {
+        flex-direction: column !important;
+        gap: 8px !important;
+        text-align: center !important;
+        padding: 10px !important;
+    }
+    
+    /* INFOS PRATIQUES - Header boutons */
+    .infos-gites-actions {
+        width: 100%;
+        flex-direction: column !important;
+    }
+    
+    .infos-gites-actions button,
+    .infos-gites-actions > div {
+        width: 100% !important;
+    }
+    
+    /* FISCALITÉ - Tableaux */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        font-size: 0.75rem !important;
+    }
+    
+    /* TODO Lists */
+    .todo-item {
+        font-size: 0.75rem !important;
+        padding: 8px !important;
+    }
+    
+    /* Indicateurs dashboard */
+    [style*="font-size: 2.5rem"][id*="dashboard"] {
+        font-size: 1.1rem !important;
+    }
+    
+    [style*="font-size: 1.6rem"] {
+        font-size: 0.9rem !important;
+    }
+    
+    [style*="font-size: 1.8rem"] {
+        font-size: 1rem !important;
+    }
+    
+    /* Labels indicateurs */
+    [style*="font-size: 0.875rem"] {
+        font-size: 0.65rem !important;
+    }
+    
+    [style*="font-size: 0.75rem"] {
+        font-size: 0.6rem !important;
+    }
+    
+    [style*="font-size: 0.8rem"] {
+        font-size: 0.6rem !important;
+    }
+    
+    /* Padding internes cards réduits */
+    [style*="padding: 20px"] {
+        padding: 4px !important;
+    }
+    
+    [style*="padding: 30px"] {
+        padding: 6px !important;
+    }
+    
+    [style*="padding: 15px"] {
+        padding: 4px !important;
+    }
+    
+    [style*="padding: 16px"] {
+        padding: 4px !important;
+    }
+    
+    [style*="padding: 12px"] {
+        padding: 3px !important;
+    }
+    
+    [style*="padding: 10px"] {
+        padding: 3px !important;
+    }
+    
+    /* Boxes individuelles dans grilles (URSSAF, IR, etc) */
+    [style*="background: white"][style*="border-radius: 10px"] {
+        padding: 4px !important;
+        border-radius: 6px !important;
+    }
+}
+
+/* ==========================================
+   MENU HAMBURGER MOBILE
+   ========================================== */
+
+/* Bouton hamburger (visible < 768px uniquement) */
+.mobile-menu-btn {
+    display: none;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1002;
+    background: white;
+    border: 3px solid #2D3436;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 #2D3436;
+    width: 50px;
+    height: 50px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.mobile-menu-btn span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: #2D3436;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+.mobile-menu-btn.open span:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+}
+
+.mobile-menu-btn.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-btn.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+@media (max-width: 768px) {
+    /* Afficher hamburger */
+    .mobile-menu-btn {
+        display: flex;
+        top: 10px;
+        right: 10px;
+        padding: 8px;
+        width: 45px;
+        height: 45px;
+    }
+    
+    .mobile-menu-btn span {
+        width: 22px;
+        height: 2px;
+    }
+    
+    /* Masquer navigation horizontale */
+    .nav-tabs-wrapper {
+        display: none !important;
+    }
+    
+    /* Menu utilisateur repositionné */
+    .user-menu-container {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 998;
+    }
+    
+    .user-menu-button {
+        padding: 6px 10px !important;
+        font-size: 0.75rem !important;
+        gap: 6px !important;
+    }
+    
+    .user-menu-name {
+        font-size: 0.8rem !important;
+        display: none; /* Masquer le nom sur mobile */
+    }
+    
+    .user-menu-role {
+        font-size: 0.65rem !important;
+    }
+    
+    /* Ajuster marge du contenu pour éviter chevauchement */
+    .tab-container {
+        margin-top: 60px !important;
+        padding: 0 3px !important;
+    }
+    
+    /* Headers collapse - afficher sur mobile */
+    .mobile-collapse-header {
+        display: flex !important;
+    }
+    
+    /* Masquer les titres originaux dans les sections */
+    .mobile-collapse-content > div:first-child {
+        display: none !important;
+    }
+}
+
+/* Menu mobile déroulant */
+.mobile-nav-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 85%;
+    max-width: 320px;
+    height: 100vh;
+    background: white;
+    z-index: 1001;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    box-shadow: -4px 0 10px rgba(0,0,0,0.2);
+}
+
+.mobile-nav-menu.open {
+    right: 0;
+}
+
+.mobile-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mobile-nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 3px solid #2D3436;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.mobile-nav-header h3 {
+    margin: 0;
+    font-size: 1.3rem !important;
+    color: white !important;
+}
+
+.mobile-menu-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-nav-list {
+    padding: 15px;
+}
+
+.mobile-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    margin: 8px 0;
+    background: white;
+    border: 3px solid #2D3436;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2D3436;
+    box-shadow: 2px 2px 0 #2D3436;
+}
+
+.mobile-nav-item:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+}
+
+.mobile-nav-item.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.mobile-nav-item svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ==========================================
+   TRÈS PETIT MOBILE (< 480px)
+   ========================================== */
+@media (max-width: 480px) {
+    body {
+        padding: 5px !important;
+    }
+    
+    .card {
+        padding: 12px !important;
+    }
+    
+    h2 {
+        font-size: 1.1rem !important;
+    }
+    
+    button {
+        font-size: 0.8rem !important;
+        padding: 6px 12px !important;
+    }
+    
+    .mobile-nav-menu {
+        width: 90%;
+    }
+}
+
+/* ==========================================
+   CORRECTIONS SPÉCIFIQUES
+   ========================================== */
+
+/* Infos Pratiques - Boutons header */
+@media (max-width: 768px) {
+    #gitesButtonsContainer {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+        width: 100% !important;
+    }
+}
+
+/* Dashboard - Réservations cards */
+@media (max-width: 768px) {
+    #dashboard-reservations {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Statistiques - Cartes indicateurs */
+@media (max-width: 768px) {
+    #statistiques-sources [style*="display: grid"] {
+        grid-template-columns: 1fr !important;
+    }
+}
