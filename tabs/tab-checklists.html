@@ -17,6 +17,23 @@
         </div>
     </div>
     
+    <script>
+        // Charger automatiquement les checklists quand cet onglet est affiché
+        setTimeout(function() {
+            if (typeof window.loadChecklistsTab === 'function') {
+                try {
+                    window.loadChecklistsTab();
+                } catch (error) {
+                    console.error('Erreur chargement checklists:', error);
+                    const container = document.getElementById('checklist-reservations-container');
+                    if (container) {
+                        container.innerHTML = '<p style="color: #e74c3c;">Erreur de chargement. Rechargez la page.</p>';
+                    }
+                }
+            }
+        }, 500);
+    </script>
+    
     <!-- ➕ CRÉER DES ITEMS DE CHECK-LIST -->
     <div class="card" style="background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
         <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">➕ Créer des items de check-list</h3>
@@ -66,7 +83,7 @@
             </div>
             
             <div style="display: flex; gap: 10px;">
-                <button onclick="addChecklistItem()" style="flex: 1; background: #27ae60; color: white; border: 2px solid #2D3436; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
+                <button id="btn-checklist-submit" onclick="addChecklistItem()" style="flex: 1; background: #27ae60; color: white; border: 2px solid #2D3436; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
                     ➕ Ajouter l'item
                 </button>
                 <button onclick="clearChecklistForm()" style="background: white; color: #2D3436; border: 2px solid #2D3436; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">

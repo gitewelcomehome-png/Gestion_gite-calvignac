@@ -1,31 +1,26 @@
 <div class="tab-container">
     <!-- Version: 2026-01-05-v4 -->
     <!-- En-tête avec semaine actuelle -->
-    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 10px; margin-bottom: 12px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📊 Tableau de Bord</h2>
-                <p id="dashboard-week-info" style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Semaine en cours</p>
+                <h2 style="margin: 0; font-size: 1rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📊 Tableau de Bord</h2>
+                <p id="dashboard-week-info" style="margin: 8px 0 0 0; font-size: 0.75rem; color: #666;">Semaine en cours</p>
             </div>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <button onclick="updateFinancialIndicators()" class="btn-neo" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; border-radius: 10px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
-                    🔄 Actualiser
-                </button>
-                <div style="text-align: right;">
-                    <div id="dashboard-date" style="font-size: 1rem; font-weight: 600; color: #2c3e50;">Chargement...</div>
-                    <div id="dashboard-week-number" style="font-size: 0.8rem; opacity: 1; margin-top: 2px; color: #2c3e50;">--</div>
-                </div>
+            <div style="text-align: right;">
+                <div id="dashboard-date" style="font-size: 0.7rem; font-weight: 600; color: #2c3e50;">Chargement...</div>
+                <div id="dashboard-week-number" style="font-size: 0.65rem; opacity: 1; margin-top: 2px; color: #2c3e50;">--</div>
             </div>
         </div>
     </div>
 
     <!-- ⚠️ DEMANDES CLIENTS URGENTES - EN HAUT -->
-    <div id="dashboard-demandes-clients" class="card" style="margin-bottom: 25px; background: white; border: 3px solid #ffeaa7; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; padding: 20px;">
+    <div id="dashboard-demandes-clients" class="card" style="margin-bottom: 12px; background: white; border: 3px solid #ffeaa7; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; padding: 10px; display: none;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-            <h2 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">
+            <h2 style="margin: 0; font-size: 0.85rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">
                 📄 FICHES CLIENTS À ENVOYER
             </h2>
-            <span id="badge-demandes-count" style="background: #ffeaa7; color: #2D3436; padding: 6px 16px; border-radius: 8px; font-size: 1rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">0</span>
+            <span id="badge-demandes-count" style="background: #ffeaa7; color: #2D3436; padding: 6px 16px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">0</span>
         </div>
         <div id="liste-demandes-clients" style="display: flex; flex-direction: column; gap: 12px;">
             <!-- Les demandes seront chargées ici par JS -->
@@ -34,12 +29,12 @@
     </div>
 
     <!-- ⚠️ PROBLÈMES URGENTS UNIQUEMENT -->
-    <div id="dashboard-problemes-urgents" class="card" style="margin-bottom: 25px; background: white; border: 3px solid #ff7675; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; padding: 20px;">
+    <div id="dashboard-problemes-urgents" class="card" style="margin-bottom: 12px; background: white; border: 3px solid #ff7675; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; padding: 10px; display: none;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-            <h2 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">
+            <h2 style="margin: 0; font-size: 0.85rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">
                 ⚠️ PROBLÈMES URGENTS
             </h2>
-            <span id="badge-problemes-urgents-count" style="background: #ff7675; color: white; padding: 6px 16px; border-radius: 8px; font-size: 1rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">0</span>
+            <span id="badge-problemes-urgents-count" style="background: #ff7675; color: white; padding: 6px 16px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">0</span>
         </div>
         <div id="liste-problemes-urgents" style="display: flex; flex-direction: column; gap: 12px;">
             <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème urgent</p>
@@ -47,12 +42,12 @@
     </div>
 
     <!-- 💬 DEMANDES & RETOURS CLIENTS -->
-    <div id="dashboard-demandes-retours" class="card" style="margin-bottom: 25px; background: white; border: 3px solid #74b9ff; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; padding: 20px;">
+    <div id="dashboard-demandes-retours" class="card" style="margin-bottom: 12px; background: white; border: 3px solid #74b9ff; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; padding: 10px; display: none;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-            <h2 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">
+            <h2 style="margin: 0; font-size: 0.85rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">
                 💬 DEMANDES & RETOURS
             </h2>
-            <span id="badge-demandes-retours-count" style="background: #74b9ff; color: white; padding: 6px 16px; border-radius: 8px; font-size: 1rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">0</span>
+            <span id="badge-demandes-retours-count" style="background: #74b9ff; color: white; padding: 6px 16px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">0</span>
         </div>
         <div id="liste-demandes-retours" style="display: flex; flex-direction: column; gap: 12px;">
             <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>
@@ -72,100 +67,100 @@
     <!-- ========================================
          📊 VISION GLOBALE - SECTION ENGLOBANTE
          ======================================== -->
-    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 30px; border-radius: 16px; box-shadow: 4px 4px 0 #2D3436; margin-bottom: 30px;">
-        <h2 style="margin: 0 0 25px 0; font-size: 1.4rem; color: #2D3436; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px solid #2D3436; padding-bottom: 15px;">📊 VISION GLOBALE</h2>
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 15px; border-radius: 16px; box-shadow: 4px 4px 0 #2D3436; margin-bottom: 15px;">
+        <h2 style="margin: 0 0 12px 0; font-size: 0.75rem; color: #2D3436; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px solid #2D3436; padding-bottom: 8px;">📊 VISION GLOBALE</h2>
         
         <!-- Indicateurs fiscaux - Ligne 1 : URSSAF et IR -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px;">
             <!-- URSSAF : 2025 + 2026 -->
-            <div style="background: rgba(102, 126, 234, 0.08); border: 2px solid #667eea; padding: 20px; border-radius: 12px;">
-                <div style="font-size: 1rem; margin-bottom: 16px; font-weight: 600; text-align: center; color: #667eea; text-transform: uppercase;">💼 URSSAF</div>
+            <div style="background: rgba(102, 126, 234, 0.08); border: 2px solid #667eea; padding: 10px; border-radius: 12px;">
+                <div style="font-size: 0.7rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #667eea; text-transform: uppercase;">💼 URSSAF</div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <!-- 2025 -->
-                    <div class="indicator-box" style="background: white; padding: 16px; border-radius: 10px; text-align: center; border: 2px solid #667eea; box-shadow: 2px 2px 0 #667eea;">
-                        <div style="font-size: 0.75rem; color: #555; margin-bottom: 6px;">2025</div>
-                        <div id="dashboard-urssaf-2025" style="font-size: 1.6rem; font-weight: 700; color: #667eea;">-</div>
-                        <div class="indicator-label" data-mobile="Préc." style="font-size: 0.65rem; color: #666; margin-top: 6px;">Année précédente</div>
+                    <div class="indicator-box" style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 2px solid #667eea; box-shadow: 2px 2px 0 #667eea;">
+                        <div style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">2025</div>
+                        <div id="dashboard-urssaf-2025" style="font-size: 0.75rem; font-weight: 700; color: #667eea;">-</div>
+                        <div class="indicator-label" data-mobile="Préc." style="font-size: 0.5rem; color: #666; margin-top: 3px;">Année précédente</div>
                     </div>
                     <!-- 2026 -->
-                    <div class="indicator-box" style="background: white; padding: 16px; border-radius: 10px; text-align: center; border: 2px solid #667eea; box-shadow: 3px 3px 0 #667eea;">
-                        <div style="font-size: 0.75rem; color: #555; margin-bottom: 6px;">2026</div>
-                        <div id="dashboard-urssaf-2026" style="font-size: 1.6rem; font-weight: 700; color: #667eea;">-</div>
-                        <div style="font-size: 0.65rem; color: #666; margin-top: 6px;">En cours</div>
+                    <div class="indicator-box" style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 2px solid #667eea; box-shadow: 3px 3px 0 #667eea;">
+                        <div style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">2026</div>
+                        <div id="dashboard-urssaf-2026" style="font-size: 0.75rem; font-weight: 700; color: #667eea;">-</div>
+                        <div style="font-size: 0.5rem; color: #666; margin-top: 3px;">En cours</div>
                     </div>
                 </div>
             </div>
 
             <!-- IR : 2025 + 2026 -->
-            <div id="dashboard-ir-container" style="background: rgba(231, 76, 60, 0.08); border: 2px solid #E74C3C; padding: 20px; border-radius: 12px;">
-                <div class="box-title" data-mobile="🧾 IMPÔT REV." style="font-size: 1rem; margin-bottom: 16px; font-weight: 600; text-align: center; color: #E74C3C; text-transform: uppercase;">🧾 IMPÔT SUR LE REVENU</div>
+            <div id="dashboard-ir-container" style="background: rgba(231, 76, 60, 0.08); border: 2px solid #E74C3C; padding: 10px; border-radius: 12px;">
+                <div class="box-title" data-mobile="🧾 IMPÔT REV." style="font-size: 0.7rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #E74C3C; text-transform: uppercase;">🧾 IMPÔT SUR LE REVENU</div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <!-- 2025 -->
-                    <div class="indicator-box" style="background: white; padding: 16px; border-radius: 10px; text-align: center; border: 2px solid #E74C3C; box-shadow: 2px 2px 0 #E74C3C;">
-                        <div style="font-size: 0.75rem; color: #555; margin-bottom: 6px;">2025</div>
-                        <div id="dashboard-ir-2025" style="font-size: 1.6rem; font-weight: 700; color: #E74C3C;">-</div>
-                        <div class="indicator-label" data-mobile="Préc." style="font-size: 0.65rem; color: #666; margin-top: 6px;">Année précédente</div>
+                    <div class="indicator-box" style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 2px solid #E74C3C; box-shadow: 2px 2px 0 #E74C3C;">
+                        <div style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">2025</div>
+                        <div id="dashboard-ir-2025" style="font-size: 0.75rem; font-weight: 700; color: #E74C3C;">-</div>
+                        <div class="indicator-label" data-mobile="Préc." style="font-size: 0.5rem; color: #666; margin-top: 3px;">Année précédente</div>
                     </div>
                     <!-- 2026 -->
-                    <div class="indicator-box" style="background: white; padding: 16px; border-radius: 10px; text-align: center; border: 2px solid #E74C3C; box-shadow: 3px 3px 0 #E74C3C;">
-                        <div style="font-size: 0.75rem; color: #555; margin-bottom: 6px;">2026</div>
-                        <div id="dashboard-ir-2026" style="font-size: 1.6rem; font-weight: 700; color: #E74C3C;">-</div>
-                        <div style="font-size: 0.65rem; color: #666; margin-top: 6px;">Estimation</div>
+                    <div class="indicator-box" style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 2px solid #E74C3C; box-shadow: 3px 3px 0 #E74C3C;">
+                        <div style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">2026</div>
+                        <div id="dashboard-ir-2026" style="font-size: 0.75rem; font-weight: 700; color: #E74C3C;">-</div>
+                        <div style="font-size: 0.5rem; color: #666; margin-top: 3px;">Estimation</div>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Indicateurs financiers - Ligne 2 : CA et Bénéfices -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
             <!-- Chiffre d'Affaires -->
-            <div style="background: rgba(102, 126, 234, 0.08); border: 2px solid #667eea; padding: 20px; border-radius: 12px;">
-                <div class="box-title" data-mobile="💰 CA" style="font-size: 0.95rem; margin-bottom: 16px; font-weight: 600; color: #667eea; text-align: center; text-transform: uppercase;">💰 Chiffre d'Affaires</div>
+            <div style="background: rgba(102, 126, 234, 0.08); border: 2px solid #667eea; padding: 10px; border-radius: 12px;">
+                <div class="box-title" data-mobile="💰 CA" style="font-size: 0.7rem; margin-bottom: 8px; font-weight: 600; color: #667eea; text-align: center; text-transform: uppercase;">💰 Chiffre d'Affaires</div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <!-- CA Mois -->
-                    <div class="indicator-box" style="text-align: center; background: white; padding: 16px; border-radius: 12px; border: 2px solid #667eea; box-shadow: 2px 2px 0 #667eea;">
-                        <div class="indicator-label" data-mobile="Mois" style="font-size: 0.75rem; color: #555; margin-bottom: 6px;">Mois en cours</div>
-                        <div id="dashboard-ca-mois" style="font-size: 1.8rem; font-weight: 700; color: #667eea;">-</div>
+                    <div class="indicator-box" style="text-align: center; background: white; padding: 8px; border-radius: 12px; border: 2px solid #667eea; box-shadow: 2px 2px 0 #667eea;">
+                        <div class="indicator-label" data-mobile="Mois" style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">Mois en cours</div>
+                        <div id="dashboard-ca-mois" style="font-size: 1rem; font-weight: 700; color: #667eea;">-</div>
                     </div>
                     
                     <!-- CA Année -->
-                    <div class="indicator-box" style="text-align: center; background: white; padding: 16px; border-radius: 12px; border: 2px solid #667eea; box-shadow: 2px 2px 0 #667eea;">
-                        <div class="indicator-label" data-mobile="Année" style="font-size: 0.75rem; color: #555; margin-bottom: 6px;">Année <span id="annee-ca">2026</span></div>
-                        <div id="dashboard-ca-annee" style="font-size: 1.8rem; font-weight: 700; color: #667eea;">-</div>
+                    <div class="indicator-box" style="text-align: center; background: white; padding: 8px; border-radius: 12px; border: 2px solid #667eea; box-shadow: 2px 2px 0 #667eea;">
+                        <div class="indicator-label" data-mobile="Année" style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">Année <span id="annee-ca">2026</span></div>
+                        <div id="dashboard-ca-annee" style="font-size: 1rem; font-weight: 700; color: #667eea;">-</div>
                     </div>
                 </div>
             </div>
 
             <!-- Bénéfices & Trésorerie -->
-            <div style="background: rgba(39, 174, 96, 0.08); border: 2px solid #27AE60; padding: 20px; border-radius: 12px;">
-                <div class="box-title" data-mobile="📈 BÉNÉF. & TRÉSO" style="font-size: 0.95rem; margin-bottom: 16px; font-weight: 600; color: #27AE60; text-align: center; text-transform: uppercase;">📈 Bénéfices & Trésorerie</div>
+            <div style="background: rgba(39, 174, 96, 0.08); border: 2px solid #27AE60; padding: 10px; border-radius: 12px;">
+                <div class="box-title" data-mobile="📈 BÉNÉF. & TRÉSO" style="font-size: 0.7rem; margin-bottom: 8px; font-weight: 600; color: #27AE60; text-align: center; text-transform: uppercase;">📈 Bénéfices & Trésorerie</div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <!-- Bénéfice -->
-                    <div class="indicator-box" style="text-align: center; background: white; padding: 16px; border-radius: 12px; border: 2px solid #27AE60; box-shadow: 2px 2px 0 #27AE60;">
-                        <div class="indicator-label" data-mobile="Bénéf." style="font-size: 0.75rem; color: #555; margin-bottom: 6px;">Bénéfice <span id="annee-benefice">2026</span></div>
-                        <div id="dashboard-benefice-moyen" style="font-size: 1.8rem; font-weight: 700; color: #27AE60;">-</div>
+                    <div class="indicator-box" style="text-align: center; background: white; padding: 8px; border-radius: 12px; border: 2px solid #27AE60; box-shadow: 2px 2px 0 #27AE60;">
+                        <div class="indicator-label" data-mobile="Bénéf." style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">Bénéfice <span id="annee-benefice">2026</span></div>
+                        <div id="dashboard-benefice-moyen" style="font-size: 1rem; font-weight: 700; color: #27AE60;">-</div>
                     </div>
                     
                     <!-- Trésorerie -->
-                    <div class="indicator-box" style="text-align: center; background: white; padding: 16px; border-radius: 12px; border: 2px solid #27AE60; box-shadow: 2px 2px 0 #27AE60;">
-                        <div class="indicator-label" data-mobile="Tréso" style="font-size: 0.75rem; color: #555; margin-bottom: 6px;">Trésorerie Actuelle</div>
-                        <div id="dashboard-tresorerie" style="font-size: 1.8rem; font-weight: 700; color: #27AE60;">-</div>
+                    <div class="indicator-box" style="text-align: center; background: white; padding: 8px; border-radius: 12px; border: 2px solid #27AE60; box-shadow: 2px 2px 0 #27AE60;">
+                        <div class="indicator-label" data-mobile="Tréso" style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">Trésorerie Actuelle</div>
+                        <div id="dashboard-tresorerie" style="font-size: 1rem; font-weight: 700; color: #27AE60;">-</div>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Graphiques financiers -->
-        <div id="graphiques-dashboard" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-top: 25px;">
+        <div id="graphiques-dashboard" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 10px; margin-top: 25px;">
             <!-- Bénéfices mensuels des gîtes -->
-            <div style="background: white; border: 2px solid #667eea; padding: 20px; border-radius: 12px; box-shadow: 2px 2px 0 #667eea;">
+            <div style="background: white; border: 2px solid #667eea; padding: 10px; border-radius: 12px; box-shadow: 2px 2px 0 #667eea;">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea;">
-                    <span style="font-size: 1.5rem;">💰</span>
-                    <h3 style="margin: 0; font-size: 1rem; color: #667eea; font-weight: 700; text-transform: uppercase;">Bénéfices Mensuels des Gîtes</h3>
+                    <span style="font-size: 1rem;">💰</span>
+                    <h3 style="margin: 0; font-size: 0.7rem; color: #667eea; font-weight: 700; text-transform: uppercase;">Bénéfices Mensuels des Gîtes</h3>
                 </div>
                 <div style="padding: 10px 0;">
                     <canvas id="graphique-benefices-gites" style="max-height: 300px;"></canvas>
@@ -173,10 +168,10 @@
             </div>
 
             <!-- Trésorerie -->
-            <div style="background: white; border: 2px solid #27AE60; padding: 20px; border-radius: 12px; box-shadow: 2px 2px 0 #27AE60;">
+            <div style="background: white; border: 2px solid #27AE60; padding: 10px; border-radius: 12px; box-shadow: 2px 2px 0 #27AE60;">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #27AE60;">
-                    <span style="font-size: 1.5rem;">📈</span>
-                    <h3 style="margin: 0; font-size: 1rem; color: #27AE60; font-weight: 700; text-transform: uppercase;">Évolution Trésorerie</h3>
+                    <span style="font-size: 1rem;">📈</span>
+                    <h3 style="margin: 0; font-size: 0.7rem; color: #27AE60; font-weight: 700; text-transform: uppercase;">Évolution Trésorerie</h3>
                 </div>
                 <div style="padding: 10px 0;">
                     <canvas id="graphique-tresorerie-dashboard" style="max-height: 300px;"></canvas>
@@ -186,119 +181,80 @@
     </div>
 
     <!-- ========================================
-         🎯 VISION ACTION - SECTION ENGLOBANTE
+         🎯 VISION ACTIONS - MODERNE
          ======================================== -->
-    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 30px; border-radius: 16px; box-shadow: 4px 4px 0 #2D3436; margin-bottom: 30px;">
-        <h2 style="margin: 0 0 25px 0; font-size: 1.4rem; color: #2D3436; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px solid #2D3436; padding-bottom: 15px;">VISION ACTIONS</h2>
+    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 10px; border-radius: 16px; box-shadow: 4px 4px 0 #2D3436; margin-bottom: 10px;">
+        <h2 style="margin: 0 0 10px 0; font-size: 0.75rem; color: #2D3436; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px solid #2D3436; padding-bottom: 6px;">🎯 ACTIONS</h2>
         
-        <!-- Layout principal : 2 colonnes adaptatives -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;" id="vision-actions-container">
-        
-        <!-- COLONNE GAUCHE : Réservations + Ménages -->
-        <div>
-            <!-- Réservations de la semaine -->
-            <div class="card mobile-collapse-section" id="section-reservations" style="background: white; border: 3px solid #2D3436; box-shadow: 4px 4px 0 #2D3436; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('reservations')" style="display: none;">
-                    <span>📅 Réservations cette semaine</span>
-                    <span class="mobile-collapse-icon" id="icon-reservations">▼</span>
-                </div>
-                <div class="mobile-collapse-content hidden" id="content-reservations">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #2D3436;">
-                        <span style="font-size: 1.8rem;">📅</span>
-                        <h3 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Réservations cette semaine</h3>
-                    </div>
-                    <div id="dashboard-reservations" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
-                        <p style="text-align: center; color: #999; padding: 40px; grid-column: 1 / -1;">Chargement...</p>
-                    </div>
-                </div>
+        <!-- Réservations -->
+        <div style="background: #f8f9fa; border: 2px solid #667eea; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                <span style="font-size: 0.85rem;">📅</span>
+                <h3 style="margin: 0; font-size: 0.65rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Réservations semaine</h3>
             </div>
-
-            <!-- Ménages prévus -->
-            <div class="card mobile-collapse-section" id="section-menages" style="background: white; border: 3px solid #2D3436; box-shadow: 4px 4px 0 #2D3436; border-radius: 12px; padding: 20px;">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('menages')" style="display: none;">
-                    <span>🧹 Ménages prévus</span>
-                    <span class="mobile-collapse-icon" id="icon-menages">▼</span>
-                </div>
-                <div class="mobile-collapse-content hidden" id="content-menages">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #2D3436;">
-                        <span style="font-size: 1.8rem;">🧹</span>
-                        <h3 style="margin: 0; font-size: 1.2rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Ménages prévus <span id="dashboard-cleanings" style="background: #ffeaa7; color: #2D3436; padding: 3px 10px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 6px; font-size: 0.8rem; margin-left: 8px; font-weight: 700;">0</span></h3>
-                    </div>
-                    <div id="dashboard-menages" style="max-height: 300px; overflow-y: auto;">
-                        <p style="text-align: center; color: #999; padding: 40px;">Chargement...</p>
-                    </div>
-                </div>
-            </div>
+            <div id="dashboard-reservations" style="display: flex; flex-direction: column;">
+                <p style="text-align: center; color: #999; padding: 15px; font-size: 0.7rem;">Chargement...</p>
             </div>
         </div>
 
-        <!-- COLONNE DROITE : Todo listes -->
-        <div>
-            <!-- Todo : Actions Réservations -->
-            <div class="card mobile-collapse-section" id="section-todo-reservations" style="margin-bottom: 20px; border-left: 4px solid #667eea; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('todo-reservations')" style="display: none;">
-                    <span>✅ Actions Réservations</span>
-                    <span class="mobile-collapse-icon" id="icon-todo-reservations">▼</span>
+        <!-- Ménages -->
+        <div style="background: #fffbf0; border: 2px solid #ffeaa7; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.85rem;">🧹</span>
+                    <h3 style="margin: 0; font-size: 0.65rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Ménages prévus</h3>
                 </div>
-                <div class="mobile-collapse-content hidden" id="content-todo-reservations">
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 3px solid #667eea;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.3rem;">✅</span>
-                            <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Actions Réservations <span id="todo-count-reservations" style="background: #667eea; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
-                        </div>
-                        <button onclick="addTodoItem('reservations')" style="background: #667eea; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#5568d3'" onmouseout="this.style.background='#667eea'">+</button>
-                    </div>
-                    <div id="todo-reservations" style="padding: 15px; max-height: 250px; overflow-y: auto;">
-                        <!-- Todos dynamiques -->
-                    </div>
-                </div>
+                <span id="dashboard-cleanings" style="background: #ffeaa7; color: #2D3436; padding: 3px 8px; border: 1px solid #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0</span>
             </div>
+            <div id="dashboard-menages" style="max-height: 150px; overflow-y: auto; font-size: 0.7rem;">
+                <p style="text-align: center; color: #999; padding: 15px;">Chargement...</p>
+            </div>
+        </div>
 
-            <!-- Todo : Travaux par gîte -->
-            <div class="card mobile-collapse-section" id="section-todo-travaux" style="margin-bottom: 20px; border-left: 4px solid #F39C12; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('todo-travaux')" style="display: none;">
-                    <span>🔧 Travaux & Maintenance</span>
-                    <span class="mobile-collapse-icon" id="icon-todo-travaux">▼</span>
+        <!-- Actions Réservations -->
+        <div style="background: #f0f2ff; border: 2px solid #667eea; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.85rem;">✅</span>
+                    <h3 style="margin: 0; font-size: 0.65rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Actions Résa</h3>
                 </div>
-                <div class="mobile-collapse-content hidden" id="content-todo-travaux">
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 3px solid #F39C12;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.3rem;">🔧</span>
-                            <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Travaux & Maintenance <span id="todo-count-travaux" style="background: #F39C12; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
-                        </div>
-                        <button onclick="addTodoItem('travaux')" style="background: #F39C12; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#e67e22'" onmouseout="this.style.background='#F39C12'">+</button>
-                    </div>
-                    <div id="todo-travaux" style="padding: 15px; max-height: 250px; overflow-y: auto;">
-                        <!-- Todos dynamiques -->
-                    </div>
-                </div>
+                <span id="todo-count-reservations" style="background: #667eea; color: white; padding: 3px 8px; border: 1px solid #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0</span>
             </div>
+            <button data-todo-category="reservations" style="width: 100%; background: #667eea; color: white; border: 1px solid #2D3436; padding: 4px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 600; margin-bottom: 4px;">+ Tâche</button>
+            <div id="todo-reservations" style="max-height: 150px; overflow-y: auto; font-size: 0.7rem;"></div>
+        </div>
 
-            <!-- Todo : Achats -->
-            <div class="card mobile-collapse-section" id="section-todo-achats" style="border-left: 4px solid #27AE60; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
-                <div class="mobile-collapse-header" onclick="toggleMobileSection('todo-achats')" style="display: none;">
-                    <span>🛒 Achats & Courses</span>
-                    <span class="mobile-collapse-icon" id="icon-todo-achats">▼</span>
+        <!-- Travaux & Maintenance -->
+        <div style="background: #fff8f0; border: 2px solid #F39C12; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.85rem;">🔧</span>
+                    <h3 style="margin: 0; font-size: 0.65rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Travaux</h3>
                 </div>
-                <div class="mobile-collapse-content hidden" id="content-todo-achats">
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 3px solid #27AE60;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.3rem;">🛒</span>
-                        <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Achats & Courses <span id="todo-count-achats" style="background: #27AE60; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 8px;">0</span></h3>
-                    </div>
-                    <button onclick="addTodoItem('achats')" style="background: #27AE60; border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='#229954'" onmouseout="this.style.background='#27AE60'">+</button>
-                </div>
-                <div id="todo-achats" style="padding: 15px; max-height: 250px; overflow-y: auto;">
-                    <!-- Todos dynamiques -->
-                </div>
+                <span id="todo-count-travaux" style="background: #F39C12; color: white; padding: 3px 8px; border: 1px solid #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0</span>
             </div>
+            <button data-todo-category="travaux" style="width: 100%; background: #F39C12; color: white; border: 1px solid #2D3436; padding: 4px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 600; margin-bottom: 4px;">+ Tâche</button>
+            <div id="todo-travaux" style="max-height: 150px; overflow-y: auto; font-size: 0.7rem;"></div>
+        </div>
+
+        <!-- Achats & Courses -->
+        <div style="background: #f0fff5; border: 2px solid #27AE60; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.85rem;">🛒</span>
+                    <h3 style="margin: 0; font-size: 0.65rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">Achats</h3>
+                </div>
+                <span id="todo-count-achats" style="background: #27AE60; color: white; padding: 3px 8px; border: 1px solid #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0</span>
+            </div>
+            <button data-todo-category="achats" style="width: 100%; background: #27AE60; color: white; border: 1px solid #2D3436; padding: 4px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 600; margin-bottom: 4px;">+ Tâche</button>
+            <div id="todo-achats" style="max-height: 150px; overflow-y: auto; font-size: 0.7rem;"></div>
         </div>
         </div>
     </div>
 </div>
 
 <!-- Modal Ajout Tâche -->
-<div id="addTodoModal" class="modal">
+<div id="addTodoModal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="card-header">
             <span class="card-icon">📝</span>
@@ -380,16 +336,16 @@
     <div class="modal-content" style="max-width: 600px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin: 0; color: #2c3e50;">💬 Répondre au client</h2>
-            <button onclick="closeReponseWhatsappModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #7f8c8d;">×</button>
+            <button onclick="closeReponseWhatsappModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: #7f8c8d;">×</button>
         </div>
         
         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #25D366;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <span style="font-size: 1.1rem;">📍</span>
+                <span style="font-size: 0.75rem;">📍</span>
                 <strong style="color: #2c3e50; font-size: 1.05rem;" id="reponseClientNom">Client</strong>
-                <span style="background: #25D366; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;" id="reponseClientGite">Gîte</span>
+                <span style="background: #25D366; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.55rem; font-weight: 600;" id="reponseClientGite">Gîte</span>
             </div>
-            <div style="color: #555; font-size: 0.9rem; margin-left: 30px;" id="reponseClientSujet">Sujet de la demande</div>
+            <div style="color: #555; font-size: 0.75rem; margin-left: 30px;" id="reponseClientSujet">Sujet de la demande</div>
         </div>
         
         <form id="formReponseWhatsapp">
@@ -398,12 +354,12 @@
             
             <div class="form-group">
                 <label style="font-weight: 600; color: #2c3e50; margin-bottom: 8px; display: block;">Votre message</label>
-                <textarea id="reponseMessage" rows="8" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; resize: vertical; font-family: inherit;" placeholder="Écrivez votre réponse ici..."></textarea>
+                <textarea id="reponseMessage" rows="8" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.7rem; resize: vertical; font-family: inherit;" placeholder="Écrivez votre réponse ici..."></textarea>
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" style="flex: 1; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <span style="font-size: 1.2rem;">💬</span> Envoyer via WhatsApp
+                <button type="submit" style="flex: 1; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span style="font-size: 0.85rem;">💬</span> Envoyer via WhatsApp
                 </button>
                 <button type="button" onclick="closeReponseWhatsappModal()" style="background: #95a5a6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
                     Annuler

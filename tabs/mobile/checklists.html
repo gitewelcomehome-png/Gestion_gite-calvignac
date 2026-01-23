@@ -1,0 +1,77 @@
+<div class="tab-container">
+    <!-- Header -->
+    <div class="card" style="margin-bottom: 15px; padding: 15px;">
+        <h2 style="margin: 0 0 10px 0; font-size: 1.2rem;">✅ Check-lists</h2>
+        <button onclick="window.loadChecklists ? loadChecklists() : location.reload()" class="btn-neo" 
+                style="width: 100%; padding: 12px; margin-bottom: 10px;">
+            🔄 Actualiser
+        </button>
+        <button onclick="window.openAddChecklistModal ? openAddChecklistModal() : alert('Fonction non disponible')" 
+                class="btn-neo" style="width: 100%; padding: 12px; background: #2ecc71; color: white;">
+            ➕ Nouvelle Check-list
+        </button>
+    </div>
+
+    <!-- Filtres -->
+    <div class="mobile-collapse-section">
+        <div class="mobile-collapse-header" onclick="toggleMobileSection('filtres-checklist')">
+            <span>🔍 Filtres</span>
+            <span class="mobile-collapse-icon" id="icon-filtres-checklist">▼</span>
+        </div>
+        <div class="mobile-collapse-content" id="content-filtres-checklist">
+            <div style="padding: 12px;">
+                <select id="filterGiteChecklist" onchange="window.filterChecklists ? filterChecklists() : null" 
+                        style="width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: 2px solid #2D3436;">
+                    <option value="">Tous les gîtes</option>
+                </select>
+                <select id="filterStatutChecklist" onchange="window.filterChecklists ? filterChecklists() : null" 
+                        style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #2D3436;">
+                    <option value="">Tous les statuts</option>
+                    <option value="pending">En cours</option>
+                    <option value="completed">Terminé</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des check-lists -->
+    <div id="checklists-container">
+        <!-- Généré par JavaScript -->
+    </div>
+</div>
+
+<style>
+.checklist-item {
+    background: white;
+    border: 2px solid #2D3436;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 3px 3px 0 #2D3436;
+}
+
+.checklist-item.completed {
+    background: #f0fff4;
+    border-left: 4px solid #2ecc71;
+}
+
+.checklist-item.pending {
+    background: #fffbf0;
+    border-left: 4px solid #f39c12;
+}
+
+.checklist-task {
+    padding: 8px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checklist-task input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
+</style>

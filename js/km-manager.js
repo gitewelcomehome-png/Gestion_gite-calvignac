@@ -275,7 +275,9 @@ const KmManager = (function() {
 
             // Trajet ménage entrée (jour avant arrivée)
             if (configAuto.auto_menage_entree) {
-                const dateEntree = new Date(reservation.date_arrivee);
+                // Support des deux formats : check_in/check_out (Supabase) et date_arrivee/date_depart (legacy)
+                const dateArrivee = reservation.check_in || reservation.date_arrivee;
+                const dateEntree = new Date(dateArrivee);
                 dateEntree.setDate(dateEntree.getDate() - 1);
 
                 trajetsACreer.push({
@@ -297,7 +299,9 @@ const KmManager = (function() {
 
             // Trajet ménage sortie (jour de départ)
             if (configAuto.auto_menage_sortie) {
-                const dateSortie = new Date(reservation.date_depart);
+                // Support des deux formats
+                const dateDepart = reservation.check_out || reservation.date_depart;
+                const dateSortie = new Date(dateDepart);
 
                 trajetsACreer.push({
                     owner_user_id: user.user.id,
@@ -375,6 +379,85 @@ const KmManager = (function() {
             return data;
         } catch (error) {
             console.error('Erreur sauvegarde config auto:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Regénérer tous les trajets automatiques pour une année
+     * Utilisé après modification de la config pour appliquer aux réservations existantes
+     */
+    async function regenererTrajetsAutoAnnee(annee) {
+        try {
+            const { data: user } = await supabaseClient.auth.getUser();
+            if (!user?.user?.id) throw new Error('Non authentifié');
+
+            // 1. Récupérer toutes les réservations de l'année
+            const debutAnnee = `${annee}-01-01`;
+            const finAnnee = `${annee}-12-31`;
+
+            const { data: reservations, error: resaError } = await supabaseClient
+                .from('reservations')
+                .select('id, gite_id, check_in, check_out')
+                .gte('check_in', debutAnnee)
+                .lte('check_in', finAnnee)
+                .eq('owner_user_id', user.user.id)
+                .order('check_in', { ascending: true });
+
+            if (resaError) throw resaError;
+
+            if (!reservations || reservations.length === 0) {
+                console.log(`Aucune réservation pour ${annee}`);
+                return { 
+                    deleted: 0, 
+                    created: 0, 
+                    reservations: 0 
+                };
+            }
+
+            // 2. Supprimer tous les trajets auto-générés de l'année
+            const { error: deleteError } = await supabaseClient
+                .from('km_trajets')
+                .delete()
+                .eq('owner_user_id', user.user.id)
+                .eq('annee_fiscale', annee)
+                .eq('auto_genere', true);
+
+            if (deleteError) throw deleteError;
+
+            // 3. Recréer les trajets pour chaque réservation selon la config actuelle
+            let totalCreated = 0;
+            const gitesSkipped = new Set();
+            
+            for (const reservation of reservations) {
+                const result = await creerTrajetsAutoReservation(reservation);
+                totalCreated += result.created || 0;
+                
+                // Suivre les gîtes ignorés (distance non configurée)
+                if (result.created === 0 && result.error) {
+                    const { data: gite } = await supabaseClient
+                        .from('gites')
+                        .select('name')
+                        .eq('id', reservation.gite_id)
+                        .single();
+                    if (gite) gitesSkipped.add(gite.name);
+                }
+            }
+
+            console.log(`✅ Régénération ${annee}: ${reservations.length} réservations, ${totalCreated} trajets créés`);
+            if (gitesSkipped.size > 0) {
+                console.warn('⚠️ Gîtes ignorés (distance non configurée):', Array.from(gitesSkipped));
+            }
+
+            return {
+                deleted: true,
+                created: totalCreated,
+                reservations: reservations.length,
+                gitesSkipped: Array.from(gitesSkipped)
+            };
+
+        } catch (error) {
+            console.error('Erreur régénération trajets auto:', error);
             throw error;
         }
     }
@@ -534,7 +617,8 @@ const KmManager = (function() {
             parMois[key].totalKm += parseFloat(trajet.distance_totale) || 0;
         });
         
-        return Object.values(parMois).sort((a, b) => b.mois.localeCompare(a.mois));
+        // Trier par ordre chronologique (Janvier → Décembre)
+        return Object.values(parMois).sort((a, b) => a.mois.localeCompare(b.mois));
     }
 
     // ==========================================
@@ -702,6 +786,7 @@ const KmManager = (function() {
         creerTrajetsAutoReservation,
         supprimerTrajetsAutoReservation,
         sauvegarderConfigAuto,
+        regenererTrajetsAutoAnnee,
         
         // Lieux favoris
         ajouterLieuFavori,

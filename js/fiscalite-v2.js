@@ -1291,7 +1291,6 @@ async function chargerListeAnnees() {
 
 // Charger les données d'une année spécifique
 async function chargerAnnee(annee) {
-    console.log(`🔄 [LOAD-ANNEE] Chargement année ${annee}...`);
     try {
         const anneeActuelle = new Date().getFullYear();
         
@@ -1313,7 +1312,6 @@ async function chargerAnnee(annee) {
         
         if (!data) {
             // Aucune donnée pour cette année, créer une nouvelle entrée vide
-            console.log(`📅 [LOAD-ANNEE-EMPTY] Aucune donnée pour ${annee}, création d'une nouvelle année`);
             document.getElementById('annee_simulation').value = annee;
             
             // Réinitialiser le formulaire
@@ -1333,12 +1331,6 @@ async function chargerAnnee(annee) {
             
             return;
         }
-        
-        console.log(`✅ [LOAD-ANNEE-OK] Données trouvées pour ${annee}:`, {
-            ca: data.revenus,
-            nb_travaux: data.donnees_detaillees?.travaux_liste?.length || 0,
-            updated_at: data.updated_at
-        });
         
         // Mettre à jour l'année cachée
         document.getElementById('annee_simulation').value = annee;
@@ -1543,7 +1535,6 @@ async function chargerAnnee(annee) {
         // Restaurer les crédits (reste à vivre)
         if (details.credits_liste) {
             const credits = Array.isArray(details.credits_liste) ? details.credits_liste : [];
-            console.log(`🔄 [LOAD-RESTORE] Restauration de ${credits.length} crédits immobiliers`);
             // Réinitialiser le conteneur des crédits
             const creditsContainer = document.getElementById('credits-liste');
             if (creditsContainer) {
@@ -1557,7 +1548,6 @@ async function chargerAnnee(annee) {
                     const capitalEl = document.getElementById(`credit-capital-${id}`);
                     
                     if (!descEl || !mensuelEl || !capitalEl) {
-                        console.error(`❌ Éléments non trouvés pour credit-${id}`);
                         return;
                     }
                     
@@ -1565,19 +1555,10 @@ async function chargerAnnee(annee) {
                     mensuelEl.value = item.mensuel || 0;
                     capitalEl.value = item.capital || 0;
                     
-                    console.log(`✅ [LOAD-RESTORE] Crédit ${index + 1} restauré:`, {
-                        id,
-                        description: item.description,
-                        mensuel: item.mensuel,
-                        capital: item.capital
-                    });
-                    
                     // Mettre en readonly après restauration
                     toggleEdit(`credit-${id}`);
                 });
             }
-        } else {
-            console.log('ℹ️ [LOAD-RESTORE] Aucun crédit à restaurer');
         }
         
         // Restaurer les crédits personnels (nouveau système)
@@ -1592,12 +1573,9 @@ async function chargerAnnee(annee) {
         
         // Pour l'année en cours, recalculer le CA depuis les réservations
         if (parseInt(annee) === anneeActuelle) {
-            console.log(`📊 [LOAD-ANNEE] Recalcul du CA pour ${annee} depuis les réservations`);
             await calculerCAAutomatique();
         } else {
             // Pour les années passées, garder le CA tel quel
-            console.log(`📋 [LOAD-ANNEE] Année ${annee} : conservation du CA existant`);
-            
             // Vérifier les données sauvegardées
             setTimeout(() => verifierSauvegardeAnnee(annee), 500);
         }
@@ -2460,16 +2438,11 @@ async function genererRecapitulatifCharges() {
 }
 
 async function initFiscalite() {
-    console.log('🚀 [INIT] initFiscalite() appelée');
-    
     const form = document.getElementById('calculateur-lmp');
     if (!form) {
-        console.warn('⚠️ [INIT-FISCALITE] Formulaire non trouvé, nouvelle tentative dans 500ms...');
         setTimeout(initFiscalite, 500);
         return;
     }
-    
-    console.log('✅ [INIT] Formulaire trouvé');
     
     // Générer les blocs de charges par gîte (async)
     await genererBlocsChargesGites();
@@ -2496,16 +2469,12 @@ async function initFiscalite() {
     
     
     // Charger la liste des années disponibles
-    console.log('📋 [INIT] Chargement liste des années...');
     chargerListeAnnees().then(async () => {
         // Charger automatiquement la dernière simulation après avoir chargé la liste
         const anneeSelectionnee = document.getElementById('annee_selector').value;
-        console.log(`📅 [INIT] Année sélectionnée dans selector: "${anneeSelectionnee}"`);
         if (anneeSelectionnee) {
-            console.log(`➡️ [INIT] Appel chargerAnnee(${anneeSelectionnee})`);
             await chargerAnnee(anneeSelectionnee);
         } else {
-            console.log('➡️ [INIT] Appel chargerDerniereSimulation()');
             await chargerDerniereSimulation();
         }
     });
@@ -2786,6 +2755,7 @@ window.calculerFraisKm = calculerFraisKm;
 // Nouvelles fonctions pour frais réels individuels par personne
 window.openFraisReelsSalarieModal = openFraisReelsSalarieModal;
 window.closeFraisReelsSalarieModal = closeFraisReelsSalarieModal;
+window.fermerFraisSalarieModal = closeFraisReelsSalarieModal; // Alias
 window.toggleOptionFraisSalarie = toggleOptionFraisSalarie;
 window.calculerFraisSalarieModal = calculerFraisSalarieModal;
 window.validerFraisSalarie = validerFraisSalarie;
@@ -2855,6 +2825,10 @@ async function chargerSoldesBancaires() {
         return;
     }
     
+    // ❌ Table suivi_soldes_bancaires supprimée - 23/01/2026
+    showToast('❌ Feature suivi bancaire supprimée', 'info');
+    return;
+    
     try {
         const { data, error } = await window.supabaseClient
             .from('suivi_soldes_bancaires')
@@ -2918,6 +2892,10 @@ async function sauvegarderSoldesBancaires() {
         showToast('⚠️ Aucune donnée à sauvegarder', 'error');
         return;
     }
+    
+    // ❌ Table suivi_soldes_bancaires supprimée - 23/01/2026
+    showToast('❌ Feature suivi bancaire supprimée', 'info');
+    return;
     
     try {
         // Upsert (insert ou update) pour chaque mois
@@ -3134,6 +3112,7 @@ function debounce(func, wait) {
 
 // Sauvegarde automatique sans toast
 async function sauvegarderSoldesBancairesAuto() {
+    return; // ❌ Table suivi_soldes_bancaires supprimée - 23/01/2026
     const annee = parseInt(document.getElementById('annee_tresorerie')?.value);
     
     if (!annee || annee < 2020 || annee > 2050) return;
@@ -3919,21 +3898,37 @@ function togglePuissanceField() {
  * Calculer les frais kilométriques
  */
 function calculerFraisKm() {
-    const totalKm = KmManager.calculerTotalKm(trajetsAnnee);
-    const vehiculeType = document.getElementById('vehicule_type')?.value || 'thermique';
-    const puissance = parseInt(document.getElementById('puissance_fiscale')?.value || 5);
-    const montant = KmManager.calculerMontantDeductible(totalKm, puissance, vehiculeType);
-    
-    const kmInput = document.getElementById('km_professionnels');
-    const montantInput = document.getElementById('montant_frais_km');
-    
-    if (kmInput) kmInput.value = Math.round(totalKm);
-    if (montantInput) montantInput.value = montant.toFixed(2);
-    
-    // Afficher/masquer le champ puissance
-    togglePuissanceField();
-    
-    calculerTempsReel();
+    try {
+        // Vérifier que KmManager est disponible
+        if (!window.KmManager || typeof window.KmManager.calculerTotalKm !== 'function') {
+            console.warn('⚠️ KmManager non disponible');
+            return;
+        }
+        
+        // Vérifier que trajetsAnnee existe
+        if (!trajetsAnnee) {
+            trajetsAnnee = [];
+        }
+        
+        const totalKm = window.KmManager.calculerTotalKm(trajetsAnnee);
+        const vehiculeType = document.getElementById('vehicule_type')?.value || 'thermique';
+        const puissance = parseInt(document.getElementById('puissance_fiscale')?.value || 5);
+        const montant = window.KmManager.calculerMontantDeductible(totalKm, puissance, vehiculeType);
+        
+        const kmInput = document.getElementById('km_professionnels');
+        const montantInput = document.getElementById('montant_frais_km');
+        
+        if (kmInput) kmInput.value = Math.round(totalKm);
+        if (montantInput) montantInput.value = montant.toFixed(2);
+        
+        // Afficher/masquer le champ puissance
+        togglePuissanceField();
+        
+        calculerTempsReel();
+    } catch (error) {
+        console.error('❌ Erreur calcul frais km:', error);
+        // Ne pas bloquer l'interface
+    }
 }
 
 /**
@@ -4223,7 +4218,25 @@ async function sauvegarderConfigKm(event) {
         
         fermerModalConfigKm();
         afficherStatusConfigKm();
-        afficherMessage('✅ Configuration enregistrée', 'success');
+        
+        // Regénérer tous les trajets de l'année courante
+        const anneeActuelle = KmManager.getCurrentYear();
+        afficherMessage('⏳ Régénération des trajets en cours...', 'info');
+        
+        const result = await KmManager.regenererTrajetsAutoAnnee(anneeActuelle);
+        
+        // Recharger l'affichage
+        trajetsAnnee = await KmManager.chargerTrajets(anneeActuelle);
+        afficherResumeMensuel();  // 🔄 REFRESH AFFICHAGE + TOTAUX
+        await calculerFraisKm(anneeActuelle);
+        
+        let message = `✅ Configuration enregistrée - ${result.created} trajets générés pour ${result.reservations} réservations`;
+        
+        if (result.gitesSkipped && result.gitesSkipped.length > 0) {
+            message += `\n\n⚠️ Attention: ${result.gitesSkipped.length} gîte(s) sans distance configurée:\n${result.gitesSkipped.join(', ')}\n\nVeuillez configurer la distance dans "Gérer mes lieux"`;
+        }
+        
+        afficherMessage(message, result.gitesSkipped && result.gitesSkipped.length > 0 ? 'warning' : 'success');
     } catch (error) {
         console.error('Erreur sauvegarde config:', error);
         afficherMessage('❌ Erreur sauvegarde', 'error');
@@ -4760,6 +4773,10 @@ async function enregistrerSolde() {
         return;
     }
     
+    // ❌ Table suivi_soldes_bancaires supprimée - 23/01/2026
+    afficherMessage('❌ Feature suivi bancaire supprimée', 'info');
+    return;
+    
     try {
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) {
@@ -4831,6 +4848,7 @@ function fermerModalHistoriqueSoldes() {
  * Charger l'historique des soldes
  */
 async function chargerHistoriqueSoldes() {
+    return; // ❌ Table suivi_soldes_bancaires supprimée - 23/01/2026
     const tbody = document.getElementById('tbody-historique-soldes');
     if (!tbody) return;
     
@@ -4905,6 +4923,7 @@ async function chargerHistoriqueSoldes() {
  * Supprimer un solde
  */
 async function supprimerSolde(id) {
+    return; // ❌ Table suivi_soldes_bancaires supprimée - 23/01/2026
     if (!confirm('Supprimer ce solde ?')) return;
     
     try {
@@ -4933,6 +4952,7 @@ async function supprimerSolde(id) {
  * Exporter soldes en CSV
  */
 async function exporterSoldesCSV() {
+    return; // ❌ Table suivi_soldes_bancaires supprimée - 23/01/2026
     try {
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) return;
@@ -5134,7 +5154,7 @@ function initSyncResidenceToFraisPerso() {
         }
     });
     
-    console.log('✅ Synchronisation résidence → frais personnels activée');
+    // Synchronisation résidence → frais personnels activée
 }
 
 // Exposer globalement
@@ -5143,4 +5163,209 @@ window.initSyncResidenceToFraisPerso = initSyncResidenceToFraisPerso;
 
 // ==========================================
 // FIN GESTION SECTION PERSONNELLE
+// ==========================================
+
+// ==========================================
+// MODALE GESTION TRAJETS
+// ==========================================
+
+/**
+ * Afficher la modale de gestion de tous les trajets
+ */
+async function afficherModalGestionTrajets() {
+    const modal = document.getElementById('modal-gestion-trajets');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    await chargerListeTousTrajets();
+}
+
+function fermerModalGestionTrajets() {
+    const modal = document.getElementById('modal-gestion-trajets');
+    if (modal) modal.style.display = 'none';
+}
+
+/**
+ * Charger et afficher tous les trajets groupés par mois
+ */
+async function chargerListeTousTrajets() {
+    const container = document.getElementById('liste-tous-trajets');
+    if (!container) return;
+    
+    if (trajetsAnnee.length === 0) {
+        window.SecurityUtils.setInnerHTML(container, `
+            <div style="text-align: center; padding: 40px; color: #999;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
+                <p>Aucun trajet enregistré pour l'instant</p>
+            </div>
+        `);
+        return;
+    }
+    
+    const parMois = KmManager.grouperParMois(trajetsAnnee);
+    
+    const typeIcons = {
+        'menage_entree': '🧹',
+        'menage_sortie': '🧹',
+        'courses': '🛒',
+        'maintenance': '🔧',
+        'autre': '📍'
+    };
+    
+    const html = parMois.map(m => {
+        const [annee, mois] = m.mois.split('-');
+        const nomMois = new Date(annee, parseInt(mois) - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+        
+        return `
+            <div style="margin-bottom: 25px;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 15px; border-radius: 8px 8px 0 0;">
+                    <div style="font-size: 1.05rem; font-weight: 600; text-transform: capitalize;">${nomMois}</div>
+                    <div style="font-size: 0.85rem; opacity: 0.9;">${m.trajets.length} trajet${m.trajets.length > 1 ? 's' : ''} • ${m.totalKm.toFixed(0)} km</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 0 0 8px 8px; border: 2px solid #e0e0e0; border-top: none;">
+                    ${m.trajets.map(t => `
+                        <div style="display: grid; grid-template-columns: 90px 1fr 100px 100px 90px; gap: 10px; align-items: center; padding: 12px; background: white; border-radius: 6px; margin-bottom: 8px; border: 1px solid #e0e0e0;">
+                            <span style="color: #666; font-size: 0.85rem; font-weight: 500;">${new Date(t.date_trajet).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.9rem;">${typeIcons[t.type_trajet] || '📍'} ${t.motif}</div>
+                                <div style="font-size: 0.8rem; color: #666;">${t.lieu_depart || 'Domicile'} → ${t.lieu_arrivee}</div>
+                                ${t.auto_genere ? '<span style="font-size: 0.7rem; padding: 2px 6px; background: #e3f2fd; color: #1565c0; border-radius: 3px; margin-top: 3px; display: inline-block;">Auto</span>' : ''}
+                            </div>
+                            <span style="text-align: right; font-size: 0.85rem; color: #666;">${t.distance_aller.toFixed(1)} km ${t.aller_retour ? 'A/R' : ''}</span>
+                            <span style="text-align: right; font-weight: 700; color: #27ae60; font-size: 0.95rem;">${t.distance_totale.toFixed(1)} km</span>
+                            <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                                ${!t.auto_genere ? `
+                                    <button onclick="ouvrirModalModifierTrajet('${t.id}')" class="btn-icon" title="Modifier" style="padding: 6px 10px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                                        ✏️
+                                    </button>
+                                ` : ''}
+                                <button onclick="confirmerSuppressionTrajet('${t.id}', ${t.auto_genere})" class="btn-icon" title="Supprimer" style="padding: 6px 10px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    window.SecurityUtils.setInnerHTML(container, html);
+}
+
+/**
+ * Ouvrir la modale de modification d'un trajet
+ */
+function ouvrirModalModifierTrajet(trajetId) {
+    const trajet = trajetsAnnee.find(t => t.id === trajetId);
+    if (!trajet) return;
+    
+    // Remplir le formulaire
+    document.getElementById('modifier-trajet-id').value = trajet.id;
+    document.getElementById('modifier-trajet-date').value = trajet.date_trajet;
+    document.getElementById('modifier-trajet-motif').value = trajet.motif;
+    document.getElementById('modifier-trajet-destination').value = trajet.lieu_arrivee;
+    document.getElementById('modifier-trajet-distance').value = trajet.distance_aller;
+    document.getElementById('modifier-trajet-aller-retour').checked = trajet.aller_retour;
+    
+    calculerDistanceTotaleModif();
+    
+    // Afficher la modale
+    document.getElementById('modal-modifier-trajet').style.display = 'flex';
+}
+
+function fermerModalModifierTrajet() {
+    document.getElementById('modal-modifier-trajet').style.display = 'none';
+}
+
+/**
+ * Calculer la distance totale lors de la modification
+ */
+function calculerDistanceTotaleModif() {
+    const distanceAller = parseFloat(document.getElementById('modifier-trajet-distance').value) || 0;
+    const allerRetour = document.getElementById('modifier-trajet-aller-retour').checked;
+    const distanceTotale = allerRetour ? distanceAller * 2 : distanceAller;
+    
+    document.getElementById('modifier-distance-totale').textContent = `${distanceTotale.toFixed(1)} km`;
+}
+
+/**
+ * Sauvegarder les modifications du trajet
+ */
+async function sauvegarderModificationTrajet(event) {
+    event.preventDefault();
+    
+    try {
+        const trajetId = document.getElementById('modifier-trajet-id').value;
+        const distanceAller = parseFloat(document.getElementById('modifier-trajet-distance').value);
+        const allerRetour = document.getElementById('modifier-trajet-aller-retour').checked;
+        
+        const updates = {
+            date_trajet: document.getElementById('modifier-trajet-date').value,
+            motif: document.getElementById('modifier-trajet-motif').value,
+            lieu_arrivee: document.getElementById('modifier-trajet-destination').value,
+            distance_aller: distanceAller,
+            aller_retour: allerRetour,
+            distance_totale: allerRetour ? distanceAller * 2 : distanceAller
+        };
+        
+        await KmManager.modifierTrajet(trajetId, updates);
+        
+        // Recharger les données
+        const anneeActuelle = KmManager.getCurrentYear();
+        trajetsAnnee = await KmManager.chargerTrajets(anneeActuelle);
+        afficherResumeMensuel();
+        await calculerFraisKm(anneeActuelle);
+        
+        // Rafraîchir la liste dans la modale
+        await chargerListeTousTrajets();
+        
+        fermerModalModifierTrajet();
+        afficherMessage('✅ Trajet modifié avec succès', 'success');
+    } catch (error) {
+        console.error('Erreur modification trajet:', error);
+        afficherMessage('❌ Erreur lors de la modification', 'error');
+    }
+}
+
+/**
+ * Confirmer la suppression d'un trajet
+ */
+async function confirmerSuppressionTrajet(trajetId, isAuto) {
+    const message = isAuto 
+        ? 'Ce trajet est généré automatiquement. Si vous le supprimez, il pourrait être recréé lors de la prochaine régénération. Confirmer la suppression ?'
+        : 'Êtes-vous sûr de vouloir supprimer ce trajet ?';
+    
+    if (!confirm(message)) return;
+    
+    try {
+        await KmManager.supprimerTrajet(trajetId);
+        
+        // Recharger les données
+        const anneeActuelle = KmManager.getCurrentYear();
+        trajetsAnnee = await KmManager.chargerTrajets(anneeActuelle);
+        afficherResumeMensuel();
+        await calculerFraisKm(anneeActuelle);
+        
+        // Rafraîchir la liste dans la modale
+        await chargerListeTousTrajets();
+        
+        afficherMessage('✅ Trajet supprimé', 'success');
+    } catch (error) {
+        console.error('Erreur suppression trajet:', error);
+        afficherMessage('❌ Erreur lors de la suppression', 'error');
+    }
+}
+
+// Exposer les fonctions globalement
+window.afficherModalGestionTrajets = afficherModalGestionTrajets;
+window.fermerModalGestionTrajets = fermerModalGestionTrajets;
+window.ouvrirModalModifierTrajet = ouvrirModalModifierTrajet;
+window.fermerModalModifierTrajet = fermerModalModifierTrajet;
+window.calculerDistanceTotaleModif = calculerDistanceTotaleModif;
+window.sauvegarderModificationTrajet = sauvegarderModificationTrajet;
+window.confirmerSuppressionTrajet = confirmerSuppressionTrajet;
+
+// ==========================================
+// FIN MODALE GESTION TRAJETS
 // ==========================================

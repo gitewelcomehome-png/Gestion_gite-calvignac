@@ -24,9 +24,7 @@ async function loadActiveCleaningRules() {
     try {
         if (typeof getActiveCleaningRules === 'function') {
             activeCleaningRules = await getActiveCleaningRules();
-            console.log('📋 Règles de ménage chargées:', activeCleaningRules.length);
         } else {
-            console.warn('⚠️ getActiveCleaningRules non disponible - règles hardcodées utilisées');
         }
     } catch (error) {
         console.error('❌ Erreur chargement règles:', error);
@@ -231,8 +229,8 @@ function formatDateShort(date) {
  * Génère le planning de ménage complet pour les 2 prochains mois
  */
 async function genererPlanningMenage() {
-    // Charger d'abord les propositions en attente
-    await chargerPropositionsEnAttente();
+    // Charger d'abord les propositions en attente (fonction désactivée temporairement)
+    // await chargerPropositionsEnAttente();
     
     const reservations = await getAllReservations();
     
@@ -285,6 +283,13 @@ async function genererPlanningMenage() {
         return;
     }
     
+    // Récupérer le user ID pour owner_user_id
+    const { data: { user } } = await window.supabaseClient.auth.getUser();
+    if (!user) {
+        console.error('❌ Utilisateur non authentifié');
+        return;
+    }
+    
     // Sauvegarder les dates calculées dans cleaning_schedule (uniquement si inexistant ou pending)
     for (const p of planning) {
         const reservation = relevant.find(r => r.nom === p.clientName && r.gite_id === p.gite_id);
@@ -311,6 +316,7 @@ async function genererPlanningMenage() {
                     .from('cleaning_schedule')
                     .upsert({
                         reservation_id: reservation.id,
+                        owner_user_id: user.id,
                         gite: p.gite,
                         scheduled_date: p.date.toISOString().split('T')[0],
                         time_of_day: timeOfDay,
@@ -399,29 +405,16 @@ async function afficherPlanningParSemaine() {
         .select('*')
         .eq('owner_user_id', user.id);
     
-    console.log('🗂️ Total cleaning_schedules récupérés:', cleaningSchedules?.length || 0);
-    if (cleaningSchedules && cleaningSchedules.length > 0) {
-        console.log('📊 Détail des cleaning_schedules:', cleaningSchedules);
-    }
-    
     const validationMap = {};
     let pendingModifications = 0;
     if (cleaningSchedules) {
         cleaningSchedules.forEach(cs => {
             validationMap[cs.reservation_id] = cs;
             if (cs.status === 'pending_validation') {
-                console.log('📩 Proposition trouvée:', {
-                    reservationId: cs.reservation_id,
-                    status: cs.status,
-                    proposedBy: cs.proposed_by,
-                    scheduledDate: cs.scheduled_date
-                });
                 pendingModifications++;
             }
         });
     }
-    
-    console.log('🔔 Nombre de modifications en attente:', pendingModifications);
     
     // Afficher le badge de notification si modifications en attente
     const notifBadge = document.getElementById('cleaning-notif-badge');
@@ -674,12 +667,6 @@ function generateMenageCardHTML(menageInfo) {
         statusClass = 'status-waiting';
         // Vérifier qui a proposé
         proposedByCompany = proposedBy === 'company';
-        console.log('🔍 Affichage proposition:', {
-            reservationId: reservation.id,
-            proposedBy: proposedBy,
-            proposedByCompany: proposedByCompany,
-            status: status
-        });
         statusText = proposedByCompany ? 'Proposition société' : 'En attente';
     } else if (status === 'proposed') {
         statusClass = 'status-waiting';
@@ -757,7 +744,7 @@ function generateCleaningItemHTML(menageInfo) {
  */
 async function acceptCompanyProposal(reservationId) {
     try {
-        const { error } = await supabaseClient
+        const { error } = await window.supabaseClient
             .from('cleaning_schedule')
             .update({
                 status: 'validated',
@@ -783,7 +770,7 @@ async function refuseCompanyProposal(reservationId) {
     const raison = prompt('Raison du refus (optionnel):');
     
     try {
-        const { error } = await supabaseClient
+        const { error } = await window.supabaseClient
             .from('cleaning_schedule')
             .update({
                 status: 'pending',
@@ -824,31 +811,17 @@ async function modifierDateMenage(reservationId) {
     }
     
     try {
-        // Récupérer l'utilisateur actuel
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        
-        // Récupérer les infos de la réservation
-        const { data: reservation, error: resError } = await supabaseClient
-            .from('reservations')
-            .select('gite_id, check_out')
-            .eq('id', reservationId)
-            .single();
-        
-        if (resError) throw resError;
-        
-        const { error } = await supabaseClient
+        // UPDATE au lieu d'UPSERT pour éviter les conflits RLS
+        const { error } = await window.supabaseClient
             .from('cleaning_schedule')
-            .upsert({
-                owner_user_id: user.id,
-                reservation_id: reservationId,
-                gite_id: reservation.gite_id,
+            .update({
                 scheduled_date: newDate,
                 time_of_day: newTime,
                 status: 'pending_validation',
                 proposed_by: 'owner',
-                validated_by_company: false,
-                reservation_end: reservation.check_out
-            }, { onConflict: 'reservation_id' });
+                validated_by_company: false
+            })
+            .eq('reservation_id', reservationId);
         
         if (error) throw error;
         
@@ -883,7 +856,7 @@ function telechargerPlanningMenage() {
  * Ouvre la page espace femme de ménage
  */
 function ouvrirPageFemmeMenage() {
-    window.open('femme-menage.html', '_blank');
+    window.open('pages/femme-menage.html', '_blank');
 }
 
 // Exporter les fonctions dans le scope global
@@ -895,3 +868,6 @@ window.afficherPlanningParSemaine = afficherPlanningParSemaine;
 window.generateCleaningItemHTML = generateCleaningItemHTML;
 window.telechargerPlanningMenage = telechargerPlanningMenage;
 window.ouvrirPageFemmeMenage = ouvrirPageFemmeMenage;
+window.acceptCompanyProposal = acceptCompanyProposal;
+window.refuseCompanyProposal = refuseCompanyProposal;
+window.modifierDateMenage = modifierDateMenage;

@@ -125,7 +125,7 @@ body {
     padding: 10px 20px 20px 20px; /* Espace pour l'ombre - Aligné avec .container */
     margin-top: 20px;
     margin-bottom: 40px !important; /* Plus d'espace avant le contenu */
-    justify-content: flex-start; /* Alignement des onglets */
+    justify-content: center; /* Centrer les onglets */
     scrollbar-width: thin;
     scrollbar-color: var(--stroke) transparent;
 }
@@ -551,17 +551,18 @@ select:focus {
 }
 
 .user-menu-dropdown {
-    position: absolute !important;
-    top: 100% !important;
-    right: 0 !important;
-    margin-top: 8px !important;
-    min-width: 200px !important;
-    border: 2px solid var(--stroke) !important;
-    border-radius: 12px !important;
-    box-shadow: var(--shadow-hard) !important;
-    background: white !important;
-    overflow: hidden !important;
-    z-index: 1000 !important;
+    display: none;  /* Caché par défaut */
+    position: fixed;  /* Fixed pour sortir du flux sticky-header */
+    top: 60px;  /* Juste sous le header */
+    right: 30px;  /* Aligné à droite */
+    margin-top: 8px;
+    min-width: 200px;
+    border: 2px solid var(--stroke);
+    border-radius: 12px;
+    box-shadow: var(--shadow-hard);
+    background: white;
+    overflow: hidden;
+    z-index: 1001;  /* Au-dessus du header */
 }
 
 .user-menu-item {

@@ -410,15 +410,8 @@ async function creerTacheTravaux(e) {
 // STOCKS DE DRAPS
 // ================================================================
 
-const ARTICLES_DRAPS = [
-    { id: 'draps_plats_grands', label: 'Draps plats grands' },
-    { id: 'draps_plats_petits', label: 'Draps plats petits' },
-    { id: 'housses_couettes_grandes', label: 'Housses couette grandes' },
-    { id: 'housses_couettes_petites', label: 'Housses couette petites' },
-    { id: 'taies_oreillers', label: 'Taies d\'oreillers' },
-    { id: 'serviettes', label: 'Serviettes' },
-    { id: 'tapis_bain', label: 'Tapis de bain' }
-];
+let besoinsParGite = {};
+let stocksParGite = {};
 
 async function chargerStocksDraps() {
     try {
@@ -428,11 +421,34 @@ async function chargerStocksDraps() {
             return;
         }
 
-        const { data: stocks, error } = await window.supabaseClient
-            .from('linen_stocks')
-            .select('*');
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) throw new Error('Non connecté');
 
-        if (error) throw error;
+        const { data: besoins, error: besoinsError } = await window.supabaseClient
+            .from('linen_needs')
+            .select('gite_id, item_key, item_label')
+            .eq('owner_user_id', user.id);
+
+        if (besoinsError) throw besoinsError;
+
+        const { data: stocks, error: stocksError } = await window.supabaseClient
+            .from('linen_stock_items')
+            .select('gite_id, item_key, quantity')
+            .eq('owner_user_id', user.id);
+
+        if (stocksError) throw stocksError;
+
+        besoinsParGite = {};
+        (besoins || []).forEach(b => {
+            if (!besoinsParGite[b.gite_id]) besoinsParGite[b.gite_id] = [];
+            besoinsParGite[b.gite_id].push(b);
+        });
+
+        stocksParGite = {};
+        (stocks || []).forEach(s => {
+            if (!stocksParGite[s.gite_id]) stocksParGite[s.gite_id] = {};
+            stocksParGite[s.gite_id][s.item_key] = s.quantity || 0;
+        });
 
         // Cibler spécifiquement la section des stocks
         const stocksSection = document.getElementById('section-stocks-draps');
@@ -464,7 +480,8 @@ async function chargerStocksDraps() {
 
         // Créer les grilles pour chaque gîte
         gites.forEach((gite, index) => {
-            const stockGite = stocks?.find(s => s.gite_id === gite.id) || {};
+            const stockGite = stocksParGite[gite.id] || {};
+            const besoinsGite = besoinsParGite[gite.id] || [];
             
             const tabContent = document.createElement('div');
             tabContent.id = `stock-${gite.id}`;
@@ -485,27 +502,27 @@ async function chargerStocksDraps() {
             stocksSection.appendChild(tabContent);
             
             // Afficher la grille
-            afficherGrilleStock(gite.id, stockGite);
+            afficherGrilleStock(gite.id, stockGite, besoinsGite);
         });
     } catch (error) {
         console.error('Erreur chargement stocks:', error);
     }
 }
 
-function afficherGrilleStock(giteId, stocks) {
+function afficherGrilleStock(giteId, stocks, besoinsGite) {
     const container = document.getElementById(`stock-grid-${giteId}`);
     if (!container) return;
     
     let html = '';
 
-    ARTICLES_DRAPS.forEach(article => {
-        const valeur = stocks[article.id] || 0;
+    (besoinsGite || []).forEach(article => {
+        const valeur = stocks[article.item_key] || 0;
         html += `
             <div class="stock-item">
-                <label for="${giteId}-${article.id}">${article.label}</label>
+                <label for="${giteId}-${article.item_key}">${article.item_label}</label>
                 <input 
                     type="number" 
-                    id="${giteId}-${article.id}" 
+                    id="${giteId}-${article.item_key}" 
                     value="${valeur}"
                     min="0"
                 >
@@ -525,22 +542,22 @@ async function sauvegarderStocks(giteId) {
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) throw new Error('Non connecté');
         
-        const stocks = {};
-        
-        ARTICLES_DRAPS.forEach(article => {
-            const input = document.getElementById(`${giteId}-${article.id}`);
-            stocks[article.id] = parseInt(input.value) || 0;
+        const besoinsGite = besoinsParGite[giteId] || [];
+        const items = besoinsGite.map(article => {
+            const input = document.getElementById(`${giteId}-${article.item_key}`);
+            return {
+                owner_user_id: user.id,
+                gite_id: giteId,
+                item_key: article.item_key,
+                quantity: parseInt(input?.value) || 0,
+                updated_at: new Date().toISOString()
+            };
         });
 
         const { error } = await window.supabaseClient
-            .from('linen_stocks')
-            .upsert({
-                owner_user_id: user.id,
-                gite_id: giteId,
-                ...stocks,
-                updated_at: new Date().toISOString()
-            }, {
-                onConflict: 'gite_id'
+            .from('linen_stock_items')
+            .upsert(items, {
+                onConflict: 'gite_id,item_key'
             });
 
         if (error) throw error;
@@ -601,6 +618,10 @@ async function envoyerRetourMenage(e) {
     if (detailsDeroulement) commentaires += `Détails déroulement: ${detailsDeroulement}`;
     
     try {
+        // ❌ Table retours_menage supprimée - 23/01/2026
+        showToast('❌ Feature retours ménage supprimée', 'info');
+        return;
+        
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) throw new Error('Non connecté');
         

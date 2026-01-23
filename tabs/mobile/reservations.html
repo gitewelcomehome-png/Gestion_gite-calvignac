@@ -1,0 +1,412 @@
+<div class="tab-container">
+    <!-- Header Mobile -->
+    <div class="card" style="margin-bottom: 15px; padding: 15px;">
+        <h2 style="margin: 0 0 10px 0; font-size: 1.2rem;">📅 Réservations</h2>
+        <button id="btnRefresh" class="btn-neo" style="width: 100%; padding: 12px; margin-bottom: 10px;">
+            🔄 Actualiser
+        </button>
+        <input type="text" id="searchReservations" placeholder="🔍 Rechercher..." 
+               style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #2D3436; margin-bottom: 10px;">
+        
+        <!-- Sélecteur de mois -->
+        <div id="monthSelectorContainer" style="margin-top: 10px;">
+            <label for="monthSelector" style="font-weight: 700; color: #2D3436; font-size: 0.9rem; display: block; margin-bottom: 6px;">📆 Filtrer par mois :</label>
+            <select id="monthSelector" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #2D3436; font-size: 0.9rem; font-weight: 600; background: white; cursor: pointer;">
+                <option value="all">🗓️ Tous les mois</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Planning -->
+    <div class="card" style="padding: 10px;">
+        <div id="planning-container" class="planning-container">
+            <p style="text-align: center; color: #999; padding: 40px;">Chargement...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 📱 RÉSERVATIONS MOBILE - Grille 2 colonnes
+// ==========================================
+
+// ==========================================
+// 📝 MODAL ÉDITION RÉSERVATION
+// ==========================================
+
+function openEditModal(id) {
+    getAllReservations(true).then(reservations => {
+        const reservation = reservations.find(r => r.id === id);
+        if (!reservation) return;
+        
+        // Créer modal dynamiquement
+        const modal = document.createElement('div');
+        modal.id = 'editModalMobile';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+        
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                <h3 style="margin: 0 0 15px 0; font-size: 1.2rem;">✏️ Modifier réservation</h3>
+                <form id="editFormMobile">
+                    <input type="hidden" id="editId" value="${reservation.id}">
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; font-weight: 600;">Nom *</label>
+                        <input type="text" id="editNom" value="${reservation.client_name || reservation.nom || ''}" style="width: 100%; padding: 8px; border: 2px solid #2D3436; border-radius: 6px; font-size: 0.9rem;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; font-weight: 600;">Téléphone</label>
+                        <input type="tel" id="editTelephone" value="${reservation.client_phone || reservation.telephone || ''}" style="width: 100%; padding: 8px; border: 2px solid #2D3436; border-radius: 6px; font-size: 0.9rem;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; font-weight: 600;">Provenance</label>
+                        <input type="text" id="editProvenance" value="${reservation.provenance || ''}" style="width: 100%; padding: 8px; border: 2px solid #2D3436; border-radius: 6px; font-size: 0.9rem;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; font-weight: 600;">Nb Personnes</label>
+                        <input type="number" id="editNbPersonnes" value="${reservation.nbPersonnes || ''}" style="width: 100%; padding: 8px; border: 2px solid #2D3436; border-radius: 6px; font-size: 0.9rem;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; font-weight: 600;">Montant *</label>
+                        <input type="number" step="0.01" id="editMontant" value="${reservation.montant || 0}" style="width: 100%; padding: 8px; border: 2px solid #2D3436; border-radius: 6px; font-size: 0.9rem;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; font-weight: 600;">Acompte</label>
+                        <input type="number" step="0.01" id="editAcompte" value="${reservation.acompte || 0}" style="width: 100%; padding: 8px; border: 2px solid #2D3436; border-radius: 6px; font-size: 0.9rem;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 0.85rem; font-weight: 600;">Paiement</label>
+                        <select id="editPaiement" style="width: 100%; padding: 8px; border: 2px solid #2D3436; border-radius: 6px; font-size: 0.9rem;">
+                            <option value="especes" ${reservation.paiement === 'especes' ? 'selected' : ''}>Espèces</option>
+                            <option value="carte" ${reservation.paiement === 'carte' ? 'selected' : ''}>Carte</option>
+                            <option value="virement" ${reservation.paiement === 'virement' ? 'selected' : ''}>Virement</option>
+                            <option value="cheque" ${reservation.paiement === 'cheque' ? 'selected' : ''}>Chèque</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button type="button" onclick="document.getElementById('editModalMobile').remove()" style="background: #e74c3c; color: white; border: 2px solid #2D3436; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 600;">❌ Annuler</button>
+                        <button type="submit" style="background: #27ae60; color: white; border: 2px solid #2D3436; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 600;">✅ Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Attacher submit
+        document.getElementById('editFormMobile').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            console.log('📝 Submit formulaire mobile');
+            
+            const id = modal.querySelector('#editId').value;
+            console.log('🆔 ID récupéré:', id, 'Type:', typeof id);
+            
+            const nom = modal.querySelector('#editNom').value.trim();
+            const telephone = modal.querySelector('#editTelephone').value.trim();
+            const provenance = modal.querySelector('#editProvenance').value.trim();
+            const nbPersonnes = modal.querySelector('#editNbPersonnes').value;
+            const montant = parseFloat(modal.querySelector('#editMontant').value);
+            const acompte = parseFloat(modal.querySelector('#editAcompte').value) || 0;
+            const paiement = modal.querySelector('#editPaiement').value;
+            
+            console.log('📦 Données:', { id, nom, telephone, montant, acompte });
+            
+            if (!nom) {
+                showToast('Le nom est obligatoire', 'error');
+                return;
+            }
+            
+            if (isNaN(montant)) {
+                showToast('Le montant est obligatoire', 'error');
+                return;
+            }
+            
+            // Vérifier que updateReservation existe
+            if (typeof updateReservation !== 'function') {
+                console.error('❌ updateReservation non disponible');
+                showToast('Fonction updateReservation manquante', 'error');
+                return;
+            }
+            
+            try {
+                const updates = {
+                    nom: nom,
+                    telephone: telephone,
+                    provenance: provenance,
+                    nbPersonnes: nbPersonnes ? parseInt(nbPersonnes) : null,
+                    montant: montant,
+                    acompte: acompte,
+                    restant: montant - acompte,
+                    paiement: paiement
+                };
+                
+                await updateReservation(id, updates);
+                modal.remove();
+                await updateReservationsList();
+                showToast('Réservation modifiée', 'success');
+            } catch (error) {
+                console.error('❌ Erreur sauvegarde:', error);
+                showToast('Erreur: ' + error.message, 'error');
+            }
+        });
+        
+        // Fermer au clic extérieur
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    });
+}
+
+// ==========================================
+// 📋 LISTE RÉSERVATIONS
+// ==========================================
+
+// Fonction principale réservations mobile
+async function updateReservationsList() {
+    const reservations = await getAllReservations(true);
+    const gites = await window.gitesManager.getAll();
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Filtrer réservations futures
+    let active = reservations.filter(r => {
+        const dateFin = parseLocalDate(r.dateFin);
+        dateFin.setHours(0, 0, 0, 0);
+        return dateFin >= today;
+    });
+    
+    // Remplir le sélecteur de mois avec toutes les réservations
+    if (typeof populateMonthSelector === 'function') {
+        populateMonthSelector(active);
+    }
+    
+    // Appliquer le filtre de mois SEULEMENT si un mois spécifique est sélectionné
+    if (typeof window.currentMonthFilter !== 'undefined' && window.currentMonthFilter !== 'all') {
+        if (typeof filterReservationsBySelectedMonth === 'function') {
+            active = filterReservationsBySelectedMonth(active);
+        }
+    }
+    
+    const container = document.getElementById('planning-container');
+    if (!container) return;
+    
+    if (gites.length === 0) {
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">⚠️ Aucun gîte configuré</p>');
+        return;
+    }
+    
+    if (active.length === 0) {
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation</p>');
+        return;
+    }
+    
+    // Trier par date
+    active.sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
+    
+    let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0;">';
+    
+    active.forEach(r => {
+        const gite = gites.find(g => g.id === r.giteId);
+        const giteColor = gite?.color || '#667eea';
+        const dateDebut = parseLocalDate(r.dateDebut);
+        const dateFin = parseLocalDate(r.dateFin);
+        
+        const dd = String(dateDebut.getDate()).padStart(2, '0');
+        const mm = String(dateDebut.getMonth() + 1).padStart(2, '0');
+        const df = String(dateFin.getDate()).padStart(2, '0');
+        const mf = String(dateFin.getMonth() + 1).padStart(2, '0');
+        
+        const nomEscape = (r.nom || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const tel = r.telephone || '';
+        
+        // Vérifier validation ménage
+        const menageValide = r.menage_valide === true || r.menage_valide === 'true';
+        const iconeMenage = menageValide ? '✅' : '⏳';
+        const texteMenage = menageValide ? 'Ménage validé' : 'Ménage en attente';
+        const colorMenage = menageValide ? '#27AE60' : '#F39C12';
+        
+        html += `
+            <div style="background: white; border: 2px solid ${giteColor}; border-radius: 8px; padding: 8px; box-shadow: 2px 2px 0 #2D3436;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: #2D3436; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nomEscape}</div>
+                ${tel ? `<div style="font-size: 0.6rem; color: #666; margin-bottom: 3px;">📱 ${tel}</div>` : ''}
+                <div style="font-size: 0.6rem; color: ${giteColor}; font-weight: 600; margin-bottom: 4px;">🏠 ${(gite?.name || r.gite || '').replace(/'/g, "\\'")}</div>
+                <div style="font-size: 0.6rem; color: #27AE60; margin-bottom: 2px; font-weight: 600;">Entrée: ${dd}/${mm}</div>
+                <div style="font-size: 0.6rem; color: #E74C3C; margin-bottom: 2px; font-weight: 600;">Sortie: ${df}/${mf}</div>
+                <div style="font-size: 0.55rem; color: ${colorMenage}; margin-bottom: 6px; font-weight: 600;">${iconeMenage} ${texteMenage}</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px;">
+                    <button onclick="openEditModal('${r.id}')" style="background: #667eea; color: white; border: 1px solid #2D3436; padding: 3px; border-radius: 4px; cursor: pointer; font-size: 0.55rem; font-weight: 600;">✏️</button>
+                    <button onclick="aperçuFicheClient('${r.id}')" style="background: #27ae60; color: white; border: 1px solid #2D3436; padding: 3px; border-radius: 4px; cursor: pointer; font-size: 0.55rem; font-weight: 600;">📄</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    window.SecurityUtils.setInnerHTML(container, html);
+}
+
+// Exposer la fonction globalement pour mobile
+window.updateReservationsListMobile = updateReservationsList;
+
+async function filterReservations(term) {
+    if (!term || term.trim() === '') {
+        await updateReservationsList();
+        return;
+    }
+    
+    const reservations = await getAllReservations(true);
+    const gites = await window.gitesManager.getAll();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let active = reservations.filter(r => {
+        const dateFin = parseLocalDate(r.dateFin);
+        dateFin.setHours(0, 0, 0, 0);
+        return dateFin >= today;
+    });
+    
+    const searchTerm = term.toLowerCase().trim();
+    active = active.filter(r => {
+        return (
+            (r.nom && r.nom.toLowerCase().includes(searchTerm)) ||
+            (r.telephone && r.telephone.includes(searchTerm)) ||
+            (r.gite && r.gite.toLowerCase().includes(searchTerm))
+        );
+    });
+    
+    // Afficher les résultats
+    const container = document.getElementById('planning-container');
+    if (!container) return;
+    
+    if (active.length === 0) {
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucun résultat</p>');
+        return;
+    }
+    
+    active.sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
+    
+    let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0;">';
+    
+    active.forEach(r => {
+        const gite = gites.find(g => g.id === r.giteId);
+        const giteColor = gite?.color || '#667eea';
+        const dateDebut = parseLocalDate(r.dateDebut);
+        const dateFin = parseLocalDate(r.dateFin);
+        
+        const dd = String(dateDebut.getDate()).padStart(2, '0');
+        const mm = String(dateDebut.getMonth() + 1).padStart(2, '0');
+        const df = String(dateFin.getDate()).padStart(2, '0');
+        const mf = String(dateFin.getMonth() + 1).padStart(2, '0');
+        
+        const nomEscape = (r.nom || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const tel = r.telephone || '';
+        
+        const menageValide = r.menage_valide === true || r.menage_valide === 'true';
+        const iconeMenage = menageValide ? '✅' : '⏳';
+        const texteMenage = menageValide ? 'Ménage validé' : 'Ménage en attente';
+        const colorMenage = menageValide ? '#27AE60' : '#F39C12';
+        
+        html += `
+            <div style="background: white; border: 2px solid ${giteColor}; border-radius: 8px; padding: 8px; box-shadow: 2px 2px 0 #2D3436;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: #2D3436; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nomEscape}</div>
+                ${tel ? `<div style="font-size: 0.6rem; color: #666; margin-bottom: 3px;">📱 ${tel}</div>` : ''}
+                <div style="font-size: 0.6rem; color: ${giteColor}; font-weight: 600; margin-bottom: 4px;">🏠 ${(gite?.name || r.gite || '').replace(/'/g, "\\'")}</div>
+                <div style="font-size: 0.6rem; color: #27AE60; margin-bottom: 2px; font-weight: 600;">Entrée: ${dd}/${mm}</div>
+                <div style="font-size: 0.6rem; color: #E74C3C; margin-bottom: 2px; font-weight: 600;">Sortie: ${df}/${mf}</div>
+                <div style="font-size: 0.55rem; color: ${colorMenage}; margin-bottom: 6px; font-weight: 600;">${iconeMenage} ${texteMenage}</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px;">
+                    <button onclick="openEditModal('${r.id}')" style="background: #667eea; color: white; border: 1px solid #2D3436; padding: 3px; border-radius: 4px; cursor: pointer; font-size: 0.55rem; font-weight: 600;">✏️</button>
+                    <button onclick="aperçuFicheClient('${r.id}')" style="background: #27ae60; color: white; border: 1px solid #2D3436; padding: 3px; border-radius: 4px; cursor: pointer; font-size: 0.55rem; font-weight: 600;">📄</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    window.SecurityUtils.setInnerHTML(container, html);
+}
+
+async function forceRefreshReservations() {
+    const btn = document.getElementById('btnRefresh');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Actualisation...';
+    }
+    
+    try {
+        invalidateCache('all');
+        await updateReservationsList();
+        showToast('Données actualisées', 'success');
+    } catch (error) {
+        showToast('Erreur actualisation', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+}
+
+// Lancer au chargement
+setTimeout(() => {
+    updateReservationsList();
+    
+    // Attacher les événements
+    const searchInput = document.getElementById('searchReservations');
+    const monthSelector = document.getElementById('monthSelector');
+    const btnRefresh = document.getElementById('btnRefresh');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            filterReservations(e.target.value);
+        });
+    }
+    
+    if (monthSelector) {
+        monthSelector.addEventListener('change', function(e) {
+            if (typeof filterReservationsByMonth === 'function') {
+                filterReservationsByMonth(e.target.value);
+            }
+        });
+    }
+    
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', forceRefreshReservations);
+    }
+}, 500);
+</script>
+
+<style>
+/* Style mobile pour réservations */
+.planning-container {
+    overflow-x: auto;
+}
+
+.week-block {
+    margin-bottom: 15px;
+    border: 2px solid #2D3436;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.week-header-unique {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 10px;
+    color: white;
+    text-align: center;
+}
+
+.reservation-slot {
+    padding: 10px;
+    margin: 8px;
+    border-radius: 8px;
+    border: 2px solid #2D3436;
+    box-shadow: 2px 2px 0 #2D3436;
+}
+
+.gite-column {
+    padding: 8px;
+    min-width: 280px;
+}
+</style>

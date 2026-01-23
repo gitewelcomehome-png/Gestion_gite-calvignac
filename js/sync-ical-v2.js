@@ -15,7 +15,6 @@ let syncInProgress = false;
  */
 async function syncAllCalendars() {
     if (syncInProgress) {
-        console.log('⏳ Synchronisation déjà en cours, ignorée');
         return;
     }
 
@@ -106,7 +105,6 @@ async function syncAllCalendars() {
         throw error;
     } finally {
         syncInProgress = false;
-        console.log('🔓 Verrou de synchronisation libéré');
     }
 }
 
@@ -137,7 +135,13 @@ async function syncCalendar(giteId, platform, url) {
 
     for (const proxyUrl of proxies) {
         try {
-            const response = await fetch(proxyUrl);
+            // Utiliser Promise.race avec timeout manuel pour éviter erreurs console
+            const fetchPromise = fetch(proxyUrl);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), 10000)
+            );
+            
+            const response = await Promise.race([fetchPromise, timeoutPromise]);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -150,6 +154,7 @@ async function syncCalendar(giteId, platform, url) {
             break;
         } catch (err) {
             lastError = err;
+            // Erreurs réseau silencieuses - continuer avec le proxy suivant
             continue;
         }
     }
@@ -297,7 +302,7 @@ async function syncCalendar(giteId, platform, url) {
 async function addReservationFromIcal(reservation) {
     const { data: userData } = await window.supabaseClient.auth.getUser();
     
-    const { error } = await window.supabaseClient
+    const result = await window.supabaseClient
         .from('reservations')
         .insert({
             owner_user_id: userData.user.id,
@@ -319,9 +324,22 @@ async function addReservationFromIcal(reservation) {
             ical_uid: reservation.icalUid,
             last_seen_in_ical: new Date().toISOString(),
             manual_override: false
-        });
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
+    if (result.error) throw result.error;
+    
+    // 🚗 Automatisation des trajets kilométriques
+    if (result.data && typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {
+        try {
+            await window.KmManager.creerTrajetsAutoReservation(result.data);
+        } catch (kmError) {
+            console.error('⚠️ Erreur création trajets auto:', kmError);
+            // Ne pas bloquer la création de réservation si les trajets échouent
+        }
+    }
+    
     window.invalidateCache('reservations');
 }
 
@@ -329,6 +347,13 @@ async function addReservationFromIcal(reservation) {
  * Mettre à jour une réservation depuis iCal
  */
 async function updateReservationFromIcal(reservationId, newData) {
+    // Récupérer la réservation complète avant mise à jour
+    const { data: oldResa } = await window.supabaseClient
+        .from('reservations')
+        .select('*')
+        .eq('id', reservationId)
+        .single();
+    
     const { error } = await window.supabaseClient
         .from('reservations')
         .update({
@@ -340,6 +365,32 @@ async function updateReservationFromIcal(reservationId, newData) {
         .eq('id', reservationId);
 
     if (error) throw error;
+    
+    // 🚗 Si les dates ont changé, recréer les trajets auto
+    if (oldResa && (oldResa.check_in !== newData.dateDebut || oldResa.check_out !== newData.dateFin)) {
+        if (typeof window.KmManager?.supprimerTrajetsAutoReservation === 'function' &&
+            typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {
+            try {
+                // Supprimer les anciens trajets auto
+                await window.KmManager.supprimerTrajetsAutoReservation(reservationId);
+                
+                // Récupérer la réservation mise à jour
+                const { data: updatedResa } = await window.supabaseClient
+                    .from('reservations')
+                    .select('*')
+                    .eq('id', reservationId)
+                    .single();
+                
+                if (updatedResa) {
+                    // Recréer les trajets avec les nouvelles dates
+                    await window.KmManager.creerTrajetsAutoReservation(updatedResa);
+                }
+            } catch (kmError) {
+                console.error('⚠️ Erreur mise à jour trajets auto:', kmError);
+            }
+        }
+    }
+    
     window.invalidateCache('reservations');
 }
 
@@ -356,6 +407,16 @@ async function cancelReservation(reservationId) {
         .eq('id', reservationId);
 
     if (error) throw error;
+    
+    // 🚗 Supprimer les trajets auto liés à cette réservation
+    if (typeof window.KmManager?.supprimerTrajetsAutoReservation === 'function') {
+        try {
+            await window.KmManager.supprimerTrajetsAutoReservation(reservationId);
+        } catch (kmError) {
+            console.error('⚠️ Erreur suppression trajets auto:', kmError);
+        }
+    }
+    
     window.invalidateCache('reservations');
 }
 

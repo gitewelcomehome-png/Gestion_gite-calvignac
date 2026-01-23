@@ -1,11 +1,21 @@
 # Architecture du Projet - Gestion Gîte Calvignac
 
-> **Dernière mise à jour:** 20 janvier 2026  
+> **Dernière mise à jour:** 23 janvier 2026  
 > **Objectif:** Référence centrale pour comprendre l'existant et éviter les régressions
 
 ---
 
-## 📊 Vue d'Ensemble
+## � Documents Essentiels
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Ce fichier (architecture technique)
+- **[DESCRIPTION_COMPLETE_SITE.md](DESCRIPTION_COMPLETE_SITE.md)** - Documentation master complète
+- **[ERREURS_CRITIQUES.md](ERREURS_CRITIQUES.md)** - Historique bugs critiques et solutions
+- **[NETTOYAGE_COMPLET_23JAN2026.md](NETTOYAGE_COMPLET_23JAN2026.md)** - Rapport nettoyage complet
+- **[README.md](README.md)** - Guide de démarrage
+
+---
+
+## �📊 Vue d'Ensemble
 
 **Type:** Application web de gestion de gîtes  
 **Stack:** HTML/CSS/JavaScript + Supabase (PostgreSQL + Auth)  
@@ -56,6 +66,13 @@
 - Relations: FK vers `gites` (contrainte UNIQUE sur `gite_id`)
 - RLS activé
 
+#### 3.1. **linen_stock_items** ⭐ NOUVEAU
+- Stocks de linge **dynamiques** par type (personnalisable par client)
+- Colonnes : `owner_user_id`, `gite_id`, `item_key`, `quantity`, `created_at`, `updated_at`
+- Unicité: `(gite_id, item_key)`
+- Utilisé par les interfaces Desktop/Mobile/Femme‑ménage
+- RLS activé
+
 #### 4. **cleaning_schedule**
 - Planning de ménage
 - FK vers `gites` et `reservations`
@@ -68,7 +85,26 @@
 - 9 règles par défaut (enchainement, jours fériés, week-ends, etc.)
 - Voir [GUIDE_REGLES_MENAGE.md](docs/GUIDE_REGLES_MENAGE.md)
 
-#### 5. **checklists**
+#### 5. **checklist_templates** ⭐ MULTILINGUE (23/01/2026)
+- Templates de checklist pour entrées/sorties par gîte
+- **Colonnes multilingues :** 
+  - `texte` / `texte_en` : Texte principal de l'item
+  - `description` / `description_en` : Description détaillée optionnelle
+- **Traduction automatique :** Les versions anglaises (`_en`) sont générées automatiquement lors de la création/modification via l'API MyMemory
+- Relations : FK vers `gites`, FK vers `auth.users`
+- Utilisé pour génération des fiches clients bilingues
+- Fichiers impliqués : 
+  - `js/checklists.js` : Gestion back-office avec traduction auto
+  - `js/fiche-client-app.js` : Affichage client avec switch FR/EN
+  - `sql/ADD_CHECKLIST_TRANSLATIONS.sql` : Script d'ajout des colonnes
+- RLS activé
+
+#### 5.1. **checklist_progress**
+- Progression des checklists par réservation
+- Relations : FK vers `reservations`, FK vers `checklist_templates`
+- RLS activé
+
+#### 5.2. **checklists** (ancienne table)
 - Tâches à effectuer
 - Liées aux gites
 
@@ -82,6 +118,7 @@
 - Colonnes : `date_trajet`, `motif`, `type_trajet`, `lieu_arrivee`, `gite_id`, `distance_aller`, `aller_retour`, `distance_totale`, `auto_genere`, `reservation_id`
 - Relations : FK vers `gites`, FK vers `reservations`
 - RLS activé
+- **⚠️ Automatisation (22/01/2026) :** Les trajets sont automatiquement créés/mis à jour/supprimés lors des opérations sur les réservations (ajout, modification dates, suppression, sync iCal)
 - Voir [GUIDE_KILOMETRES.md](docs/GUIDE_KILOMETRES.md)
 
 #### 8. **km_config_auto** ⭐ NOUVEAU (19/01/2026)
@@ -119,9 +156,36 @@
 - **Fonctionnalités :** Ajout/édition/suppression activités, filtres par catégorie, export PDF guide client
 - **SQL Structure :** [sql/update_activites_gites_structure.sql](sql/update_activites_gites_structure.sql)
 
-#### 12. **auth.users** (Supabase Auth)
+#### 12. **faq** ⭐ MULTILINGUE (23/01/2026)
+- FAQ (Questions fréquentes) pour les fiches clients
+- **Colonnes multilingues :** 
+  - `question` / `question_en` : Question posée
+  - `answer` / `answer_en` : Réponse détaillée
+- **Traduction automatique :** Les versions anglaises (`_en`) sont générées automatiquement lors de la création/modification via l'API MyMemory
+- Colonnes : `category`, `priority`, `is_visible`, `gite_id` (NULL = tous les gîtes)
+- Relations : FK vers `gites` (optionnel), FK vers `auth.users`
+- Migration automatique `reponse` → `answer` pour rétrocompatibilité
+- Fichiers impliqués : 
+  - `js/faq.js` : Gestion back-office avec traduction auto
+  - `js/fiche-client-app.js` : Affichage client avec switch FR/EN
+  - `sql/ADD_FAQ_TRANSLATIONS.sql` : Script d'ajout des colonnes
+- RLS activé
+
+#### 13. **auth.users** (Supabase Auth)
 - Gestion des utilisateurs
 - Rôles stockés dans `user_roles` (JSON)
+
+### 🌍 Support Multilingue FR/EN (23/01/2026)
+
+**Système de traduction à la volée** dans les fiches clients :
+- **Tables bilingues :** `infos_gites`, `checklist_templates`, `faq`
+- **Colonnes :** Chaque champ texte a sa version `_en`
+- **Traduction automatique :** API MyMemory traduit automatiquement FR→EN lors de la sauvegarde (FAQ, Checklists)
+- **Affichage dynamique :** Switch langue FR/EN instantané via `currentLanguage` (js/fiche-client-app.js)
+- **Fallback automatique :** Si traduction manquante → Affiche FR
+- **Performance :** Mise en cache pour changement instantané
+- **API utilisée :** MyMemory Translation API (gratuite, 10 000 requêtes/jour)
+- **Documentation complète :** [docs/README_TRADUCTION_MULTILINGUE.md](docs/README_TRADUCTION_MULTILINGUE.md)
 
 ### Relations Importantes
 - Toutes les tables sont liées via `owner_user_id` ou `gite_id`
@@ -204,10 +268,16 @@
 - Suivi des draps par réservation
 - État: propre, sale, à laver
 
-### 3. Planning Ménage
-- Interface dédiée pour femme de ménage
-- Affectation des tâches
-- Checklists de nettoyage
+### 3. Planning Ménage ⭐ SYSTÈME COMPLET
+- **Fichiers:** `js/menage.js`, `js/cleaning-rules.js`, `js/cleaning-rules-modal.js`
+- **Table BDD:** `cleaning_schedule` (planning), `cleaning_rules` (règles métier)
+- **Interface site principal:** Visualisation planning par semaines, validation des propositions, modification dates/horaires
+- **Interface femme de ménage:** `pages/femme-menage.html` - Consultation planning, proposition de modifications
+- **Règles métier configurables:** Dimanche, samedi, enchainements, jours fériés, mercredi/jeudi
+- **Statuts:** pending, pending_validation, validated, refused
+- **Calcul automatique:** Date et heure du ménage selon règles métier et enchainements de réservations
+- **⚠️ IMPORTANT:** Toutes les fonctions onclick doivent être exportées dans `window` (cf. CORRECTION_MENAGE_21JAN2026.md)
+- **Fonction principale:** `window.afficherPlanningParSemaine()` - Génère et affiche le planning complet
 
 ### 4. Fiscalité
 - Simulations LMNP

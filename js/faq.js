@@ -9,12 +9,65 @@ let faqData = [];
 let categorieFaqActive = 'all';
 
 // ================================================================
+// TRADUCTION AUTOMATIQUE FR → EN
+// ================================================================
+
+/**
+ * Traduit un texte français vers l'anglais via MyMemory API
+ * @param {string} text - Texte à traduire
+ * @returns {Promise<string>} Texte traduit
+ */
+async function translateToEnglish(text) {
+    if (!text || text.trim() === '') return '';
+    
+    try {
+        const response = await fetch(
+            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`
+        );
+        const data = await response.json();
+        
+        if (data.responseStatus === 200 && data.responseData?.translatedText) {
+            return data.responseData.translatedText;
+        }
+        
+        console.warn('⚠️ Traduction FAQ échouée, texte original conservé');
+        return text; // Fallback sur le texte original
+    } catch (error) {
+        console.error('❌ Erreur traduction FAQ:', error);
+        return text; // Fallback sur le texte original
+    }
+}
+
+// ================================================================
 // INITIALISATION
 // ================================================================
 
 async function initFAQ() {
     await chargerFAQ();
     afficherFAQ();
+}
+
+// Charger les gîtes dans le select (appelé lors de l'ouverture du modal)
+async function chargerGitesOptions() {
+    const select = document.getElementById('question-gite');
+    if (!select) return;
+    
+    try {
+        const gites = await window.gitesManager.getAll();
+        
+        // Garder l'option "Tous"
+        select.innerHTML = '<option value="tous">📍 Tous les gîtes</option>';
+        
+        // Ajouter les gîtes avec leur UUID
+        gites.forEach(gite => {
+            const option = document.createElement('option');
+            option.value = gite.id; // UUID
+            option.textContent = `🏠 ${gite.name}`;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.warn('⚠️ Erreur chargement gîtes pour FAQ:', error);
+    }
 }
 
 // Exposer globalement pour index.html
@@ -29,12 +82,26 @@ async function chargerFAQ() {
         const { data, error } = await window.supabaseClient
             .from('faq')
             .select('*')
-            .order('ordre', { ascending: true })
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        faqData = data || [];
+        // Enrichir avec les infos des gîtes
+        faqData = await Promise.all((data || []).map(async (question) => {
+            if (question.gite_id) {
+                try {
+                    const gite = await window.gitesManager.getById(question.gite_id);
+                    return {
+                        ...question,
+                        gite_name: gite?.name,
+                        gite_color: gite?.color
+                    };
+                } catch (err) {
+                    return question;
+                }
+            }
+            return question;
+        }));
     } catch (error) {
         console.error('Erreur chargement FAQ:', error);
         faqData = [];
@@ -51,7 +118,7 @@ function afficherFAQ() {
 
     const faqFiltrees = categorieFaqActive === 'all' 
         ? faqData 
-        : faqData.filter(q => q.categorie === categorieFaqActive);
+        : faqData.filter(q => q.category === categorieFaqActive);
 
     if (faqFiltrees.length === 0) {
         window.SecurityUtils.setInnerHTML(container, `
@@ -70,9 +137,9 @@ function afficherFAQ() {
         <div class="faq-item" data-id="${question.id}">
             <div class="faq-header" data-action="toggle-faq" data-question-id="${question.id}">
                 <div class="faq-question">
-                    <span class="faq-badge ${question.categorie}">${getCategorieIcon(question.categorie)}</span>
+                    <span class="faq-badge ${question.category}">${getCategorieIcon(question.category)} ${question.category || 'Autre'}</span>
                     <h3>${question.question}</h3>
-                    ${question.gite !== 'tous' ? `<span class="badge">${question.gite}</span>` : ''}
+                    ${question.gite_id && question.gite_name ? `<span class="badge" style="background: ${question.gite_color}; color: white; border: 2px solid #2D3436; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; text-transform: uppercase;">🏠 ${question.gite_name}</span>` : ''}
                 </div>
                 <div class="faq-actions">
                     <button class="btn-icon" data-action="modifier-question" data-question-id="${question.id}" title="Modifier" style="background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s;">
@@ -85,20 +152,63 @@ function afficherFAQ() {
                 </div>
             </div>
             <div class="faq-body">
-                <div class="faq-answer">${question.reponse}</div>
+                <div class="faq-answer">${question.answer}</div>
                 <div class="faq-meta">
-                    <span><i class="fas fa-eye"></i> ${question.visible ? 'Visible dans fiche client' : 'Masqué'}</span>
-                    <span><i class="fas fa-sort-numeric-down"></i> Ordre: ${question.ordre}</span>
+                    <span><i class="fas fa-tag"></i> ${getCategorieIcon(question.category)} ${question.category || 'Non classé'}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> ${question.gite_id && question.gite_name ? `<strong style="color: ${question.gite_color}">${question.gite_name}</strong>` : 'Tous les gîtes'}</span>
+                    <span><i class="fas fa-sort-numeric-down"></i> Ordre: ${question.priority || 0}</span>
                 </div>
             </div>
         </div>
     `).join(''));
+    
+    // 🔧 Gestionnaire d'événements par délégation pour les boutons
+    attachFaqEventListeners(container);
+}
+
+// Attacher les gestionnaires d'événements aux boutons FAQ
+function attachFaqEventListeners(container) {
+    // Supprimer l'ancien listener s'il existe
+    container.removeEventListener('click', handleFaqClick);
+    // Ajouter le nouveau listener
+    container.addEventListener('click', handleFaqClick);
+}
+
+// Gérer les clics sur les boutons FAQ
+function handleFaqClick(e) {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    
+    const action = target.getAttribute('data-action');
+    const questionId = target.getAttribute('data-question-id');
+    
+    e.stopPropagation(); // Empêcher la propagation
+    
+    switch(action) {
+        case 'modifier-question':
+            window.modifierQuestion(questionId);
+            break;
+        case 'supprimer-question':
+            window.supprimerQuestion(questionId);
+            break;
+        case 'toggle-faq':
+            // Gérer l'ouverture/fermeture de la FAQ
+            const faqItem = target.closest('.faq-item');
+            if (faqItem) {
+                faqItem.classList.toggle('open');
+            }
+            break;
+    }
 }
 
 function getCategorieIcon(categorie) {
     const icons = {
         arrivee: '🔑',
         depart: '🚪',
+        equipements: '🏠',
+        localisation: '📍',
+        tarifs: '💰',
+        reglement: '📋',
         autre: 'ℹ️'
     };
     return icons[categorie] || 'ℹ️';
@@ -138,7 +248,7 @@ window.rechercherFAQ = function(terme) {
     // Filtrer par terme de recherche
     const faqFiltrees = faqData.filter(q => {
         const questionMatch = q.question.toLowerCase().includes(termeNormalisé);
-        const reponseMatch = q.reponse.toLowerCase().includes(termeNormalisé);
+        const reponseMatch = q.answer.toLowerCase().includes(termeNormalisé);
         return questionMatch || reponseMatch;
     });
     
@@ -154,7 +264,7 @@ window.rechercherFAQ = function(terme) {
             <div class="faq-item" data-id="${q.id}">
                 <div class="faq-header" data-action="toggle-faq" data-question-id="${q.id}">
                     <div class="faq-question">
-                        <span class="faq-badge ${q.categorie}">${getCategorieIcon(q.categorie)} ${q.categorie}</span>
+                        <span class="faq-badge ${q.category}">${getCategorieIcon(q.category)} ${q.category}</span>
                         <h3>${q.question}</h3>
                         ${q.gite !== 'tous' ? `<span style="background: #e0e0e0; padding: 4px 8px; border-radius: 6px; font-size: 12px;">${q.gite}</span>` : ''}
                     </div>
@@ -169,7 +279,7 @@ window.rechercherFAQ = function(terme) {
                     </div>
                 </div>
                 <div class="faq-body">
-                    <div class="faq-answer">${q.reponse}</div>
+                    <div class="faq-answer">${q.answer}</div>
                 </div>
             </div>
         `;
@@ -200,11 +310,14 @@ window.toggleFAQ = function(id) {
 // MODAL AJOUTER/MODIFIER
 // ================================================================
 
-window.ajouterQuestionFAQ = function() {
+window.ajouterQuestionFAQ = async function() {
     document.getElementById('modal-question-title').textContent = 'Ajouter une Question FAQ';
     document.getElementById('form-question-faq').reset();
     document.getElementById('question-id').value = '';
-    document.getElementById('question-visible').checked = true;
+    
+    // Charger les gîtes dynamiquement
+    await chargerGitesOptions();
+    
     document.getElementById('modal-question-faq').style.display = 'block';
     
     // Validation temps réel
@@ -217,15 +330,18 @@ window.ajouterQuestionFAQ = function() {
 window.modifierQuestion = async function(id) {
     const question = faqData.find(q => q.id === id);
     if (!question) return;
+    
+    // Charger les gîtes dynamiquement
+    await chargerGitesOptions();
+    if (!question) return;
 
     document.getElementById('modal-question-title').textContent = 'Modifier la Question';
     document.getElementById('question-id').value = question.id;
-    document.getElementById('question-categorie').value = question.categorie;
-    document.getElementById('question-gite').value = question.gite || 'tous';
+    document.getElementById('question-categorie').value = question.category;
+    document.getElementById('question-gite').value = question.gite_id || 'tous';
     document.getElementById('question-titre').value = question.question;
-    document.getElementById('question-reponse').value = question.reponse;
-    document.getElementById('question-visible').checked = question.visible;
-    document.getElementById('question-ordre').value = question.ordre || 0;
+    document.getElementById('question-reponse').value = question.answer;
+    document.getElementById('question-ordre').value = question.priority || 0;
     
     document.getElementById('modal-question-faq').style.display = 'block';
 };
@@ -252,21 +368,43 @@ window.sauvegarderQuestionFAQ = async function() {
     }
     
     const id = document.getElementById('question-id').value;
+    const giteValue = document.getElementById('question-gite').value;
+    
+    // Récupérer l'utilisateur connecté
+    const { data: { user } } = await window.supabaseClient.auth.getUser();
+    if (!user) {
+        alert('Vous devez être connecté pour effectuer cette action');
+        return;
+    }
+    
     const data = {
-        categorie: document.getElementById('question-categorie').value,
-        gite: document.getElementById('question-gite').value,
+        owner_user_id: user.id,
+        category: document.getElementById('question-categorie').value,
+        gite_id: (giteValue && giteValue !== 'tous') ? giteValue : null,
         question: document.getElementById('question-titre').value.trim(),
-        reponse: document.getElementById('question-reponse').value.trim(),
-        visible: document.getElementById('question-visible').checked,
-        ordre: parseInt(document.getElementById('question-ordre').value) || 0
+        answer: document.getElementById('question-reponse').value.trim(),
+        priority: parseInt(document.getElementById('question-ordre').value) || 0
     };
 
-    if (!data.question || !data.reponse) {
+    if (!data.question || !data.answer) {
         alert('Veuillez remplir tous les champs obligatoires');
         return;
     }
 
     try {
+        // 🌍 TRADUCTION AUTOMATIQUE FR → EN
+        console.log('🌍 Traduction automatique de la FAQ en anglais...');
+        const [questionEn, answerEn] = await Promise.all([
+            translateToEnglish(data.question),
+            translateToEnglish(data.answer)
+        ]);
+        
+        // Ajouter les traductions au data
+        data.question_en = questionEn;
+        data.answer_en = answerEn;
+        
+        console.log('✅ Traduction FAQ terminée:', { questionEn, answerEn });
+
         if (id) {
             // Mise à jour
             const { error } = await window.supabaseClient
@@ -275,6 +413,7 @@ window.sauvegarderQuestionFAQ = async function() {
                 .eq('id', id);
 
             if (error) throw error;
+            console.log('✅ FAQ mise à jour avec traduction EN');
         } else {
             // Création
             const { error } = await window.supabaseClient
@@ -282,14 +421,19 @@ window.sauvegarderQuestionFAQ = async function() {
                 .insert([data]);
 
             if (error) throw error;
+            console.log('✅ FAQ créée avec traduction EN');
         }
 
         fermerModalQuestion();
         await chargerFAQ();
         afficherFAQ();
     } catch (error) {
-        console.error('Erreur sauvegarde FAQ:', error);
-        alert('Erreur lors de la sauvegarde');
+        if (error?.code === '42P01' || error?.code === '42703' || error?.code === 'PGRST204') {
+            console.warn('⚠️ Erreur structure FAQ:', error.message || error);
+        } else {
+            console.error('Erreur sauvegarde FAQ:', error);
+        }
+        alert('Erreur lors de la sauvegarde: ' + (error.message || 'Erreur inconnue'));
     }
 };
 
@@ -327,10 +471,10 @@ window.exporterFAQHTML = function() {
     // Grouper par catégorie
     const parCategorie = {};
     faqVisibles.forEach(q => {
-        if (!parCategorie[q.categorie]) {
-            parCategorie[q.categorie] = [];
+        if (!parCategorie[q.category]) {
+            parCategorie[q.category] = [];
         }
-        parCategorie[q.categorie].push(q);
+        parCategorie[q.category].push(q);
     });
 
     let html = `
@@ -423,7 +567,7 @@ window.exporterFAQHTML = function() {
                 html += `
         <div class="faq-item">
             <div class="question">❔ ${q.question}</div>
-            <div class="reponse">${q.reponse}</div>
+            <div class="reponse">${q.answer}</div>
         </div>
 `;
             });

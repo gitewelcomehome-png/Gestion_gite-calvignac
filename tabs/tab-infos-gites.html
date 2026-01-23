@@ -15,9 +15,13 @@
                 <div id="gitesButtonsContainer" style="display: flex; gap: 10px;">
                     <!-- Les boutons seront générés dynamiquement par JS -->
                 </div>
-                <!-- Sélecteur de langue -->
-                <button type="button" id="btnToggleLang" onclick="toggleLanguage()" style="background: white; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;" title="Switch to English" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
-                    <img id="flagIcon" src="https://flagcdn.com/w80/fr.png" alt="FR" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                <!-- Bouton langue FR/EN -->
+                <button type="button" id="btnToggleLangInfos" onclick="toggleLanguageInfos()" style="background: #3498db; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; font-weight: 700; font-size: 0.9rem;" title="Basculer FR/EN" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
+                    <span id="langLabelInfos">🇫🇷 FR</span>
+                </button>
+                <!-- Bouton traduire automatiquement -->
+                <button type="button" id="btnAutoTranslateAll" onclick="translateAllFields()" style="background: #9b59b6; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; font-weight: 700; font-size: 0.9rem;" title="Traduire tous les champs FR → EN automatiquement" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
+                    🌐 Traduire tout
                 </button>
                 <!-- Bouton effacer -->
                 <button type="button" onclick="resetGiteInfosQuick()" style="background: #ff7675; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; font-size: 1.2rem; cursor: pointer; padding: 10px; border-radius: 8px; transition: all 0.2s;" title="Effacer toutes les informations" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
@@ -54,11 +58,6 @@
                                 <input type="text" id="infos_adresse" class="form-control" placeholder="12 rue de la République, 01600 Trevoux" style="flex: 1;">
                                 <small style="color: var(--gray); font-style: italic;">📍 Les coordonnées GPS seront calculées automatiquement lors de la sauvegarde</small>
                             </div>
-                            <div style="display: none; grid-column: 1 / -1;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Full Address <span style="color: #ef4444;">*</span></label>
-                                <input type="text" id="infos_adresse_en" class="form-control" placeholder="12 Republic Street, 01600 Trevoux">
-                                <small style="color: var(--gray); font-style: italic;">Exact address with postal code for GPS</small>
-                            </div>
                         </div>
                         
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -66,11 +65,6 @@
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Téléphone urgence 🇫🇷 <span style="color: #ef4444;">*</span></label>
                                 <input type="tel" id="infos_telephone" class="form-control" placeholder="06 12 34 56 78">
                                 <small style="color: var(--gray); font-style: italic;">Joignable 24h/24 pendant le séjour</small>
-                            </div>
-                            <div style="display: none;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Emergency Phone 🇬🇧 <span style="color: #ef4444;">*</span></label>
-                                <input type="tel" id="infos_telephone_en" class="form-control" placeholder="+33 6 12 34 56 78">
-                                <small style="color: var(--gray); font-style: italic;">Available 24/7 during stay</small>
                             </div>
                         </div>
 
@@ -91,10 +85,6 @@
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Email contact 🇫🇷 <span style="color: #ef4444;">*</span></label>
                                 <input type="email" id="infos_email" class="form-control" placeholder="contact@gite-trevoux.fr">
-                            </div>
-                            <div style="display: none;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Contact Email 🇬🇧 <span style="color: #ef4444;">*</span></label>
-                                <input type="email" id="infos_email_en" class="form-control" placeholder="contact@gite-trevoux.fr">
                             </div>
                         </div>
                     </div>
@@ -172,35 +162,6 @@
                         <div>
                             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Zones de meilleure réception 🇫🇷</label>
                             <textarea id="infos_wifiZones" class="form-control" rows="3" placeholder="Excellent dans le salon et la cuisine. Signal plus faible dans la chambre du fond."></textarea>
-                        </div>
-                        
-                        <!-- CHAMPS ANGLAIS (cachés par défaut) -->
-                        <div style="display: none;">
-                            <div style="border-top: 2px dashed #ddd; padding-top: 20px; margin-top: 20px;">
-                                <h4 style="color: #667eea; margin-bottom: 15px;">🇬🇧 English Fields</h4>
-                                <div style="display: grid; gap: 15px;">
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">WiFi Network Name (SSID)</label>
-                                        <input type="text" id="infos_wifiSSID_en" class="form-control" placeholder="Gite_Trevoux_5G">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">WiFi Password</label>
-                                        <input type="text" id="infos_wifiPassword_en" class="form-control" placeholder="MyPassword2024">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Internet Speed</label>
-                                        <input type="text" id="infos_wifiDebit_en" class="form-control" placeholder="Fiber 1 Gb/s">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">WiFi Router Location</label>
-                                        <input type="text" id="infos_wifiLocalisation_en" class="form-control" placeholder="Entrance closet">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Best Reception Areas</label>
-                                        <textarea id="infos_wifiZones_en" class="form-control" rows="3" placeholder="Excellent in living room and kitchen. Weaker signal in back bedroom."></textarea>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -625,6 +586,56 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
                     </div>
                     
                     <div style="display: grid; gap: 25px; padding: 25px;">
+                        <!-- Section 1: Informations de Base (EN) -->
+                        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #f59e0b;">
+                            <h3 style="color: #92400e; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #f59e0b; padding: 8px; border-radius: 10px;">📍</span> Basic Information
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Address</label>
+                                    <input type="text" id="infos_adresse_en" class="form-control" placeholder="12 Republic Street, 01600 Trevoux">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Phone Number</label>
+                                    <input type="tel" id="infos_telephone_en" class="form-control" placeholder="+33 6 12 34 56 78">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Email Address</label>
+                                    <input type="email" id="infos_email_en" class="form-control" placeholder="contact@gite-trevoux.fr">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 2: WiFi (EN) -->
+                        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #22c55e;">
+                            <h3 style="color: #166534; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
+                                <span style="background: #22c55e; padding: 8px; border-radius: 10px;">📶</span> WiFi & Internet
+                            </h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">WiFi Network Name (SSID)</label>
+                                    <input type="text" id="infos_wifiSSID_en" class="form-control" placeholder="Gite_Trevoux_5G">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">WiFi Password</label>
+                                    <input type="text" id="infos_wifiPassword_en" class="form-control" placeholder="MyPassword2024">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Internet Speed</label>
+                                    <input type="text" id="infos_wifiDebit_en" class="form-control" placeholder="Fiber 1 Gb/s">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">WiFi Router Location</label>
+                                    <input type="text" id="infos_wifiLocalisation_en" class="form-control" placeholder="Entrance closet">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Best Reception Areas</label>
+                                    <textarea id="infos_wifiZones_en" class="form-control" rows="3" placeholder="Excellent in living room and kitchen. Weaker signal in back bedroom."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Section 3: Arrivée (EN) -->
                         <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 25px; border-radius: 16px; border-left: 4px solid #3b82f6;">
                             <h3 style="color: #1e3a8a; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 12px; font-weight: 700;">
