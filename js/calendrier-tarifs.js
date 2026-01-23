@@ -53,6 +53,12 @@ document.addEventListener('mouseup', () => {
 });
 
 async function initCalendrierTarifs() {
+    // 🚫 Bloquer en mode mobile (version mobile séparée)
+    if (window.isMobile) {
+        console.log('📱 Mode mobile: initCalendrierTarifs() ignorée (version mobile séparée)');
+        return;
+    }
+    
     try {
         // Initialisation silencieuse
         
@@ -1213,31 +1219,22 @@ async function saveReservationFromModal() {
             return;
         }
         
-        // Récupérer le nom du gîte depuis le bouton actif
-        const activeButton = document.querySelector('.gite-button.active');
-        const giteName = activeButton ? activeButton.textContent.trim().replace('🏡', '').trim() : 'Gîte';
-        
-        // RLS gérera automatiquement owner_user_id = auth.uid()
+        // Utiliser addReservation pour gérer automatiquement les trajets kilométriques
         const reservation = {
-            gite_id: currentGiteId,
-            gite: giteName,
-            check_in: dateArrivee,
-            check_out: dateDepart,
-            client_name: clientNom,
+            giteId: currentGiteId,
+            dateDebut: dateArrivee,
+            dateFin: dateDepart,
+            nom: clientNom,
             telephone: clientTel,
-            client_email: clientEmail,
-            nb_personnes: nbPersonnes,
-            plateforme: origine,
+            email: clientEmail,
+            nbPersonnes: nbPersonnes,
+            site: origine,
             montant: montant,
             acompte: acompte,
             status: 'confirmed'
         };
         
-        const { data, error } = await window.supabaseClient
-            .from('reservations')
-            .insert(reservation);
-        
-        if (error) throw error;
+        await window.addReservation(reservation);
         
         showToast('✅ Réservation enregistrée', 'success');
         closeModalReservation();
@@ -1579,6 +1576,12 @@ function toggleAccordion(sectionId) {
 // ==========================================
 
 function renderCalendrierTarifsTab() {
+    // 🚫 Bloquer en mode mobile (version mobile séparée)
+    if (window.isMobile) {
+        console.log('📱 Mode mobile: renderCalendrierTarifsTab() ignorée (version mobile séparée)');
+        return;
+    }
+    
     // renderCalendrierTarifsTab
     const container = document.getElementById('tab-calendrier-tarifs');
     if (!container) {

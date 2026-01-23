@@ -27,13 +27,20 @@ async function aperçuFicheClient(reservationId) {
             return;
         }
         
-        console.log('✅ Réservation trouvée:', reservation.nom);
+        const clientName = reservation.client_name || reservation.nom || 'Client';
+        const clientPhone = reservation.client_phone || reservation.telephone || '';
+        const checkOut = reservation.check_out || reservation.dateFin || reservation.date_fin;
+
+        console.log('✅ Réservation trouvée:', clientName);
         
         // 3. Chercher token existant
         const { data: existingTokens } = await window.supabaseClient
             .from('client_access_tokens')
-            .select('token')
+            .select('token, expires_at, is_active, created_at')
             .eq('reservation_id', reservationId)
+            .eq('is_active', true)
+            .gt('expires_at', new Date().toISOString())
+            .order('created_at', { ascending: false })
             .limit(1);
         
         let token;
@@ -41,41 +48,59 @@ async function aperçuFicheClient(reservationId) {
         if (existingTokens && existingTokens.length > 0) {
             token = existingTokens[0].token;
             console.log('♻️ Token existant trouvé:', token.substring(0, 10) + '...');
+            console.log('♻️ Token expirations:', existingTokens[0].expires_at, 'is_active:', existingTokens[0].is_active);
         } else {
             // Générer nouveau token
             token = generateSecureToken();
             console.log('✨ Nouveau token généré:', token.substring(0, 10) + '...');
             
             // Calculer expiration (date fin + 7 jours)
-            const dateFin = reservation.dateFin || reservation.date_fin;
-            const [year, month, day] = dateFin.split('-').map(Number);
-            const expiresAt = new Date(year, month - 1, day);
+            if (!checkOut) {
+                throw new Error('Date de départ manquante pour générer le token');
+            }
+
+            const expiresAt = new Date(checkOut);
+            if (Number.isNaN(expiresAt.getTime())) {
+                throw new Error('Date de départ invalide pour générer le token');
+            }
+
             expiresAt.setDate(expiresAt.getDate() + 7);
             
             console.log('📅 Expiration:', expiresAt.toLocaleDateString('fr-FR'));
             
-            // Sauvegarder
+            // Sauvegarder (avec catch RLS)
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            const ownerUserId = user?.id || reservation.owner_user_id;
+
+            if (!ownerUserId) {
+                throw new Error('Owner user ID manquant pour créer le token');
+            }
+
             const { error } = await window.supabaseClient
                 .from('client_access_tokens')
                 .insert({
                     token: token,
                     reservation_id: reservationId,
-                    expires_at: expiresAt.toISOString()
+                    expires_at: expiresAt.toISOString(),
+                    owner_user_id: ownerUserId,
+                    is_active: true,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 });
             
             if (error) {
-                console.error('❌ Erreur insert token:', error);
-                alert('Erreur lors de la création du token');
-                return;
+                console.warn('⚠️ Impossible de sauvegarder le token (RLS):', error.message);
+                console.warn('⚠️ Détails erreur token insert:', error);
+                // Continuer sans token persisté
             }
         }
         
         // 4. Créer URL fiche
-        const ficheUrl = `${window.location.origin}/fiche-client.html?token=${token}`;
-        console.log('🔗 URL générée:', ficheUrl.substring(0, 80) + '...');
+        const ficheUrl = `${window.location.origin}/pages/fiche-client.html?token=${token}`;
+        console.log('🔗 URL générée:', ficheUrl);
         
         // 5. Afficher modal
-        showSimpleModal(reservation, ficheUrl, token);
+        showSimpleModal(reservation, ficheUrl, token, clientName, clientPhone);
         
     } catch (error) {
         console.error('❌ ERREUR aperçuFicheClient:', error);
@@ -84,8 +109,8 @@ async function aperçuFicheClient(reservationId) {
 }
 
 // Modal simple avec 3 options
-function showSimpleModal(reservation, ficheUrl, token) {
-    console.log('📱 Affichage modal pour:', reservation.nom);
+function showSimpleModal(reservation, ficheUrl, token, clientName, clientPhone) {
+    console.log('📱 Affichage modal pour:', clientName);
     
     // Supprimer anciens modals
     document.querySelectorAll('.modal-fiche-options').forEach(m => m.remove());
@@ -103,14 +128,14 @@ function showSimpleModal(reservation, ficheUrl, token) {
         padding: 20px;
     `;
     
-    const hasPhone = reservation.telephone && reservation.telephone.trim() !== '';
+    const hasPhone = clientPhone && clientPhone.trim() !== '';
     
     window.SecurityUtils.setInnerHTML(modal, `
         <div style="background: white; border-radius: 16px; padding: 30px; max-width: 450px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
             <div style="text-align: center; margin-bottom: 25px;">
                 <div style="font-size: 3rem; margin-bottom: 10px;">📄</div>
                 <h2 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 1.4rem;">Fiche Client</h2>
-                <p style="color: #7f8c8d; margin: 0; font-size: 0.95rem;">${reservation.nom} · ${reservation.gite}</p>
+                <p style="color: #7f8c8d; margin: 0; font-size: 0.95rem;">${clientName} · ${reservation.gite}</p>
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">

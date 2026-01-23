@@ -13,6 +13,9 @@ export async function afficherHorairesClients() {
     const container = document.getElementById('widget-horaires-clients');
     if (!container) return;
     
+    // ❌ Table demandes_horaires supprimée - 23/01/2026
+    return;
+    
     // Récupérer d'abord les demandes horaires approuvées
     const { data: demandes, error: errorDemandes } = await window.supabaseClient
         .from('demandes_horaires')

@@ -81,11 +81,16 @@ function initSubTabs() {
 async function loadFichesStats() {
     try {
         // Nombre de fiches générées
-        const { count: nbFiches } = await window.supabaseClient
+        const { count: nbFiches, error: countError } = await window.supabaseClient
             .from('client_access_tokens')
             .select('*', { count: 'exact', head: true });
         
-        document.getElementById('statsNbFiches').textContent = nbFiches || 0;
+        if (countError) {
+            console.warn('⚠️ Impossible de compter les tokens (RLS):', countError.message);
+            document.getElementById('statsNbFiches').textContent = '-';
+        } else {
+            document.getElementById('statsNbFiches').textContent = nbFiches || 0;
+        }
         
         // Nombre total d'ouvertures
         const { data: logs } = await window.supabaseClient
@@ -95,11 +100,8 @@ async function loadFichesStats() {
         const totalOuvertures = logs?.reduce((sum, log) => sum + (log.opened_count || 0), 0) || 0;
         document.getElementById('statsNbOuvertures').textContent = totalOuvertures;
         
-        // Demandes horaires en attente
-        const { count: nbDemandes } = await window.supabaseClient
-            .from('demandes_horaires')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'pending');
+        // ❌ Table demandes_horaires supprimée - 23/01/2026
+        const nbDemandes = 0;
         
         document.getElementById('statsNbDemandesHoraires').textContent = nbDemandes || 0;
         document.getElementById('badgeDemandesEnAttente').textContent = nbDemandes || 0;
@@ -136,7 +138,6 @@ async function loadFichesClientList() {
             .select(`
                 *,
                 token:client_access_tokens(token, expires_at, access_count),
-                demandes:demandes_horaires(id, status),
                 retours:retours_clients(id, status)
             `)
             .order('check_in', { ascending: false });
@@ -294,7 +295,7 @@ async function confirmerGenerationFiche() {
         const expiresAt = new Date(reservation.check_out);
         expiresAt.setDate(expiresAt.getDate() + 7);
         
-        // Enregistrer le token
+        // Enregistrer le token (avec gestion RLS)
         const { error: tokenError } = await window.supabaseClient
             .from('client_access_tokens')
             .upsert({
@@ -304,7 +305,10 @@ async function confirmerGenerationFiche() {
                 access_count: 0
             });
         
-        if (tokenError) throw tokenError;
+        if (tokenError) {
+            console.warn('⚠️ Impossible de sauvegarder le token (RLS):', tokenError.message);
+            // Continuer quand même
+        }
         
         // Logger la génération
         const { error: logError } = await window.supabaseClient
@@ -313,14 +317,14 @@ async function confirmerGenerationFiche() {
                 reservation_id: currentReservationForFiche,
                 type_generation: 'html',
                 generated_by: 'admin', // À adapter avec votre système d'auth
-                fiche_url: `${window.location.origin}/fiche-client.html?token=${token}`,
+                fiche_url: `${window.location.origin}/pages/fiche-client.html?token=${token}`,
                 opened_count: 0
             });
         
         if (logError) throw logError;
         
         // Afficher le résultat
-        const ficheUrl = `${window.location.origin}/fiche-client.html?token=${token}`;
+        const ficheUrl = `${window.location.origin}/pages/fiche-client.html?token=${token}`;
         document.getElementById('ficheUrlGenerated').value = ficheUrl;
         document.getElementById('ficheGenerationForm').style.display = 'none';
         document.getElementById('ficheGenereeInfo').style.display = 'block';
@@ -351,7 +355,7 @@ function copyFicheUrl() {
 }
 
 function openFicheClient(token) {
-    const url = `${window.location.origin}/fiche-client.html?token=${token}`;
+    const url = `${window.location.origin}/pages/fiche-client.html?token=${token}`;
     window.open(url, '_blank');
 }
 
@@ -361,7 +365,7 @@ function sendWhatsAppFicheReservation(reservationId, telephone, token) {
         return;
     }
     
-    const ficheUrl = `${window.location.origin}/fiche-client.html?token=${token}`;
+    const ficheUrl = `${window.location.origin}/pages/fiche-client.html?token=${token}`;
     const message = `Bonjour,
 
 Voici votre guide pour votre séjour :
@@ -387,6 +391,7 @@ Vous y trouverez toutes les informations nécessaires (codes, horaires, activit�
 
 // ==================== DEMANDES HORAIRES ====================
 async function loadDemandesHoraires() {
+    return; // ❌ Table demandes_horaires supprimée - 23/01/2026
     const container = document.getElementById('demandesHorairesContainer');
     window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; padding: 40px;">Chargement...</p>');
     
@@ -529,6 +534,7 @@ function openModalValidation(demandeId, action) {
 }
 
 async function approuverDemande() {
+    return; // ❌ Table demandes_horaires supprimée - 23/01/2026
     try {
         const { error } = await window.supabaseClient
             .from('demandes_horaires')
@@ -558,6 +564,7 @@ function showRefusForm() {
 }
 
 async function refuserDemande() {
+    return; // ❌ Table demandes_horaires supprimée - 23/01/2026
     const raison = document.getElementById('raisonRefus').value.trim();
     
     if (!raison) {

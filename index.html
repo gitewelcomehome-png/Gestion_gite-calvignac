@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<!-- 
+╔══════════════════════════════════════════════════════════════════════════╗
+║  ⚠️ ⚠️ ⚠️  FICHIER DESKTOP - NE PAS MODIFIER  ⚠️ ⚠️ ⚠️                      ║
+║                                                                          ║
+║  Ce fichier est EN PRODUCTION et doit rester STABLE                     ║
+║  Pour le mobile, utiliser les fichiers dans tabs/mobile/                ║
+║  NE TOUCHER À CE FICHIER QUE SUR DEMANDE EXPLICITE                      ║
+╚══════════════════════════════════════════════════════════════════════════╝
+-->
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -22,19 +31,55 @@
             }
             return false;
         };
-        
-        // Supprimer également du console.error
-        const _consoleError = console.error;
-        console.error = function(...args) {
-            const str = args.join(' ');
-            if (str.includes('chrome-extension') || 
-                str.includes('webpage_content_reporter') || 
-                str.includes('Unexpected token') ||
-                str.includes('export')) {
-                return;
-            }
-            _consoleError.apply(console, args);
-        };
+
+        // BLOQUER IMMÉDIATEMENT les scripts injectés qui cassent l'application
+        (function() {
+            // window.onerror DOIT être défini AVANT addEventListener
+            window.onerror = function(msg, source, lineno, colno, error) {
+                const msgStr = String(msg || '');
+                const srcStr = String(source || '');
+                if (msgStr.includes('webpage_content_reporter') || 
+                    srcStr.includes('webpage_content_reporter') ||
+                    msgStr.includes('Unexpected token') ||
+                    msgStr.includes('export') ||
+                    msgStr.includes('import') ||
+                    srcStr.includes('chrome-extension')) {
+                    return true; // Supprimer l'erreur
+                }
+            };
+            
+            // Puis addEventListener en mode capture
+            window.addEventListener('error', function(event) {
+                const msg = event.message || '';
+                const src = event.filename || '';
+                
+                if (src.includes('webpage_content_reporter') || 
+                    msg.includes('webpage_content_reporter') ||
+                    msg.includes('Unexpected token') || 
+                    msg.includes('export') ||
+                    msg.includes('import') ||
+                    src.includes('chrome-extension')) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    event.stopPropagation();
+                    return true;
+                }
+            }, true);
+            
+            // Bloquer console.error
+            const _consoleError = console.error;
+            console.error = function(...args) {
+                const str = args.join(' ');
+                if (str.includes('chrome-extension') || 
+                    str.includes('webpage_content_reporter') || 
+                    str.includes('Unexpected token') ||
+                    str.includes('export') ||
+                    str.includes('import')) {
+                    return;
+                }
+                _consoleError.apply(console, args);
+            };
+        })();
     </script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -61,22 +106,23 @@
     <!-- 🛡️ PHASE 4 SÉCURITÉ: Rate limiting anti-spam -->
     <script src="js/rate-limiter.js"></script>
     <script src="js/init-validation.js?v=3.0"></script>
-    <script src="js/shared-utils.js?v=3.4"></script>
+    <script src="js/shared-utils.js?v=3.6"></script>
     <script src="js/supabase-operations.js"></script>
     <script src="js/icons.js"></script>
     <script src="js/dashboard.js?v=3.4"></script>
     <script src="js/sync-ical-v2.js?v=2.2"></script>
     <script src="js/statistiques.js"></script>
-    <script src="js/menage.js?v=4.1"></script>
+    <script src="js/menage.js?v=1737504444"></script>
     <script src="js/cleaning-rules.js"></script>
     <script src="js/cleaning-rules-modal.js"></script>
     <script src="js/decouvrir.js?v=3.0"></script>
-    <script src="js/reservations.js?v=4.4"></script>
+    <!-- Reservations.js : CHARGÉ POUR DESKTOP ET MOBILE (fonctions de filtrage communes) -->
+    <script src="js/reservations.js?v=4.5"></script>
     <script src="js/archives.js"></script>
     <script src="js/km-manager.js"></script>
     <script src="js/taux-fiscaux-config.js?v=1.0"></script>
     <script src="js/fiscalite-v2.js?v=1737331400"></script>
-    <script src="js/infos-gites.js?v=3.0"></script>
+    <script src="js/infos-gites.js?v=3.3"></script>
     <script src="js/fiche-client.js?v=3.0" type="module"></script>
     <script src="js/widget-horaires-clients.js" type="module"></script>
     <script src="js/faq.js?v=3.0"></script>
@@ -102,6 +148,9 @@
     <!-- Flat Outline Design - Neo-Brutalism Soft -->
     <link rel="stylesheet" href="css/flat-outline.css" />
     
+    <!-- Formulaire Gîtes Neo-Brutalism -->
+    <link rel="stylesheet" href="css/gites-form.css?v=2.0" />
+    
     <!-- CSS principal (ancien inline) -->
     <link rel="stylesheet" href="css/main-inline.css?v=1737243200" />
     
@@ -115,62 +164,67 @@
 
     <script>
     // ⚡ DÉTECTION MOBILE/DESKTOP - CHARGEMENT SÉPARÉ
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    const forceMobileMode = false; // localStorage.getItem('force_mobile') === 'true';
+    const isMobile = forceMobileMode || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    
+    // Ajouter classe sur body pour cibler CSS
+    if (isMobile) {
+        document.documentElement.classList.add('is-mobile');
+    } else {
+        document.documentElement.classList.add('is-desktop');
+    }
     
     // Charger CSS mobile si nécessaire
     if (isMobile) {
         const mobileCss = document.createElement('link');
         mobileCss.rel = 'stylesheet';
-        mobileCss.href = 'css/mobile/main.css?v=2.0';
+        mobileCss.href = 'css/mobile/main.css?v=4.5';
         document.head.appendChild(mobileCss);
         
         // Charger JS mobile
         const mobileJs = document.createElement('script');
-        mobileJs.src = 'js/mobile.js?v=2.0';
+        mobileJs.src = 'js/mobile/init.js?v=4.3';
         document.head.appendChild(mobileJs);
         
-        // Injecter le HTML du menu hamburger
-        document.getElementById('mobile-menu-container').innerHTML = `
-            <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-
-            <nav id="mobile-nav-menu" class="mobile-nav-menu">
-                <div class="mobile-nav-header">
-                    <h3>📱 Menu</h3>
-                    <button id="mobile-menu-close" class="mobile-menu-close">&times;</button>
-                </div>
-                <div class="mobile-nav-list">
-                    <!-- Les onglets seront générés dynamiquement par JS -->
-                </div>
-            </nav>
-            <div id="mobile-nav-overlay" class="mobile-nav-overlay"></div>
-        `;
-        
         console.log('📱 Mode MOBILE détecté - CSS et JS mobile chargés');
-    } else {
-        console.log('💻 Mode DESKTOP détecté');
     }
 
     // Chargement dynamique des onglets
     document.addEventListener('DOMContentLoaded', function() {
-        const cacheBuster = '?v=20260120-mobile-final';
-        const tabFiles = {
-            'tab-dashboard': isMobile ? 'tabs/mobile/dashboard.html' + cacheBuster : 'tabs/tab-dashboard.html' + cacheBuster,
+        const cacheBuster = '?v=' + Date.now();
+        
+        // Liste complète pour DESKTOP
+        const desktopTabs = {
+            'tab-dashboard': 'tabs/tab-dashboard.html' + cacheBuster,
             'tab-gestion': 'tabs/tab-gestion.html',
             'tab-reservations': 'tabs/tab-reservations.html',
             'tab-archives': 'tabs/tab-archives.html',
             'tab-statistiques': 'tabs/tab-statistiques.html',
             'tab-charges': 'tabs/tab-fiscalite-v2.html?v=1737243700',
             'tab-menage': 'tabs/tab-menage.html?v=4.1' + cacheBuster,
-            'tab-infos-gites': 'tabs/tab-infos-gites.html',
+            'tab-infos-gites': 'tabs/tab-infos-gites.html?v=1737649300' + cacheBuster,
             'tab-fiches-clients': 'tabs/tab-fiches-clients.html',
             'tab-decouvrir': 'tabs/tab-decouvrir.html',
             'tab-faq': 'tabs/tab-faq.html',
             'tab-draps': 'tabs/tab-draps.html',
+            'tab-checklists': 'tabs/tab-checklists.html',
         };
+        
+        // Liste RÉDUITE pour MOBILE (onglets exclus du menu mobile)
+        const mobileTabs = {
+            'tab-dashboard': 'tabs/mobile/dashboard.html' + cacheBuster,
+            'tab-gestion': 'tabs/mobile/gestion.html' + cacheBuster,
+            'tab-reservations': 'tabs/mobile/reservations.html' + cacheBuster,
+            'tab-archives': 'tabs/mobile/archives.html' + cacheBuster,
+            'tab-menage': 'tabs/mobile/menage.html' + cacheBuster,
+            'tab-infos-gites': 'tabs/mobile/infos-gites.html' + cacheBuster,
+            'tab-fiches-clients': 'tabs/mobile/fiches-clients.html' + cacheBuster,
+            'tab-draps': 'tabs/mobile/draps.html' + cacheBuster,
+            'tab-checklists': 'tabs/mobile/checklists.html' + cacheBuster,
+            'tab-calendrier-tarifs': 'tabs/mobile/calendrier-tarifs.html?v=1.1' + cacheBuster,
+        };
+        
+        const tabFiles = isMobile ? mobileTabs : desktopTabs;
         for (const [tabId, file] of Object.entries(tabFiles)) {
             fetch(file)
                 .then(r => r.text())
@@ -180,12 +234,21 @@
                         console.error(`❌ Element #${tabId} introuvable dans le DOM!`);
                         return;
                     }
+                    if (tabId === 'tab-dashboard') {
+                        window.MOBILE_DASHBOARD_LOADED = isMobile;
+                    }
                     // Contenu trusted (fichiers HTML statiques du projet)
                     window.SecurityUtils.setInnerHTML(targetElement, html, { trusted: true });
                     // Initialiser le Dashboard après chargement du HTML
                     if (tabId === 'tab-dashboard' && typeof refreshDashboard === 'function') {
                         // Attendre que le DOM soit rendu
-                        setTimeout(() => refreshDashboard(), 100);
+                        setTimeout(() => {
+                            refreshDashboard();
+                            // Pour mobile, initialiser le modal TODO
+                            if (isMobile && typeof initializeTodoModal === 'function') {
+                                setTimeout(() => initializeTodoModal(), 200);
+                            }
+                        }, 100);
                     }
                     // Initialiser la FAQ après chargement du HTML
                     if (tabId === 'tab-faq' && typeof window.initFAQ === 'function') {
@@ -195,8 +258,109 @@
                     if (tabId === 'tab-draps' && typeof window.initDraps === 'function') {
                         window.initDraps();
                     }
+                })
+                .catch(err => {
+                    if (file.includes('tab-dashboard')) {
+                        console.error(`❌ Erreur chargement dashboard: ${file}`, err);
+                    }
                 });
         }
+        
+        // Activer le premier onglet (dashboard) après chargement
+        setTimeout(() => {
+            const dashboardTab = document.getElementById('tab-dashboard');
+            if (dashboardTab) {
+                dashboardTab.classList.add('active');
+            }
+        }, 100);
+        
+        // 🔧 Fonction toggle menu (inline pour éviter les problèmes de chargement)
+        window.toggleUserMenu = function() {
+            const dropdown = document.getElementById('userMenuDropdown');
+            const button = document.getElementById('userMenuButton');
+            if (!dropdown) return;
+            
+            const isVisible = dropdown.classList.contains('open');
+            
+            if (isVisible) {
+                dropdown.classList.remove('open');
+                if (button) button.classList.remove('open');
+                dropdown.style.display = 'none';
+            } else {
+                dropdown.classList.add('open');
+                if (button) button.classList.add('open');
+                dropdown.style.display = 'block';
+            }
+            
+            // Fermer si clic ailleurs
+            if (!isVisible) {
+                setTimeout(() => {
+                    document.addEventListener('click', function closeMenu(e) {
+                        if (!e.target.closest('.user-menu-container')) {
+                            dropdown.classList.remove('open');
+                            if (button) button.classList.remove('open');
+                            dropdown.style.display = 'none';
+                            document.removeEventListener('click', closeMenu);
+                        }
+                    });
+                }, 10);
+            }
+        };
+        
+        // Attacher l'event listener
+        const menuButton = document.getElementById('userMenuButton');
+        if (menuButton) {
+            menuButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.toggleUserMenu();
+            });
+        }
+        
+        // 🔧 Event listeners pour le menu admin
+        // Attendre que tout soit bien chargé (delayed pour éviter les problèmes de timing)
+        setTimeout(() => {
+            const actionButtons = document.querySelectorAll('.user-menu-item[data-action]');
+            
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const action = this.getAttribute('data-action');
+                    
+                    // Fermer le menu
+                    if (window.toggleUserMenu) window.toggleUserMenu();
+                    
+                    // Exécuter l'action
+                    if (action === 'gites') {
+                        if (window.showGitesManager) {
+                            window.showGitesManager();
+                        } else {
+                            console.error('❌ showGitesManager non disponible');
+                        }
+                    } else if (action === 'faq') {
+                        window.switchTab('faq');
+                    } else if (window.handleQuickAction) {
+                        window.handleQuickAction(action);
+                    }
+                });
+            });
+        }, 500);
+        
+        // Bouton logout
+        setTimeout(() => {
+            const logoutBtn = document.getElementById('logoutButton');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.logout) {
+                        window.logout();
+                    }
+                });
+            }
+        }, 500);
     });
     </script>
     </body>
@@ -206,7 +370,7 @@
             <div class="site-title">🏠 Gestion Gîtes</div>
             <!-- Menu admin intégré au header -->
             <div class="user-menu-container" style="position: relative;">
-                <div class="user-menu-button" id="userMenuButton" onclick="toggleUserMenu()" style="padding: 8px 16px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                <div class="user-menu-button" id="userMenuButton" style="padding: 8px 16px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="user-menu-info">
                         <div id="userName" class="user-menu-name" style="font-size: 0.9rem;">Chargement...</div>
                         <div id="userRole" class="user-menu-role" style="font-size: 0.75rem;"></div>
@@ -255,7 +419,7 @@
         
         <!-- Navigation Neo-Brutalism -->
         <div class="nav-tabs-wrapper">
-            <button class="tab-neo" data-tab="dashboard" data-theme="blue">
+            <button class="tab-neo active" data-tab="dashboard" data-theme="blue">
                 <svg class="tab-icon" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="7" height="7"></rect>
                     <rect x="14" y="3" width="7" height="7"></rect>
@@ -265,7 +429,7 @@
                 Tableau de Bord
             </button>
 
-            <button class="tab-neo active" data-tab="reservations" data-theme="blue">
+            <button class="tab-neo" data-tab="reservations" data-theme="blue">
                 <svg class="tab-icon" viewBox="0 0 24 24">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                     <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -307,7 +471,6 @@
                     <path d="M9 15 l2 2 4-4"></path>
                 </svg>
                 Planning Ménage
-                <span id="cleaning-notif-badge" style="display:none; background:#e74c3c; color:white; border-radius:50%; padding:2px 6px; margin-left:5px; font-size:0.8em; font-weight:bold;">0</span>
             </button>
 
             <button class="tab-neo" data-tab="charges" data-theme="yellow">
@@ -317,15 +480,6 @@
                     <line x1="12" y1="18" x2="12" y2="2"></line>
                 </svg>
                 Fiscalité LMNP
-            </button>
-
-            <button class="tab-neo" data-tab="infos-gites" data-theme="red">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-                Infos Pratiques
             </button>
 
             <button class="tab-neo" data-tab="decouvrir" data-theme="green">
@@ -344,6 +498,15 @@
                     <line x1="12" y1="2" x2="12" y2="6"></line>
                 </svg>
                 Calendrier & Tarifs
+            </button>
+
+            <button class="tab-neo" data-tab="infos-gites" data-theme="blue">
+                <svg class="tab-icon" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Infos Gîtes
             </button>
         </div>
         
@@ -576,133 +739,16 @@
         
         // Gestion du menu Actions
         function handleQuickAction(action) {
-            console.log('🎯 handleQuickAction appelée avec:', action);
             if (action === 'gites') {
-                console.log('🏠 Tentative d\'ouverture du gestionnaire de gîtes');
-                console.log('🏠 window.showGitesManager existe?', typeof window.showGitesManager);
                 if (window.showGitesManager) {
                     window.showGitesManager();
                 } else {
                     console.error('❌ window.showGitesManager n\'est pas défini');
                 }
             } else if (action === 'ical') {
-                switchTab('gestion');
+                window.switchTab('gestion');
             } else if (action === 'archives') {
-                switchTab('archives');
-            }
-        }
-        
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-tab, .tab-neo').forEach(btn => btn.classList.remove('active'));
-            const tabElement = document.getElementById('tab-' + tabName);
-            if (tabElement) tabElement.classList.add('active');
-            
-            // Marquer le bouton comme actif
-            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
-            
-            // Initialiser les fonctionnalités spécifiques à chaque onglet
-            // Note: dashboard est initialisé après le chargement du HTML (voir ligne ~368)
-            if (tabName === 'reservations' && typeof updateReservationsList === 'function') {
-                updateReservationsList();
-            }
-            // Charger aussi les réservations si c'est le premier onglet affiché
-            if (tabName === 'dashboard' && typeof updateReservationsList === 'function') {
-                updateReservationsList();
-            }
-            if (tabName === 'statistiques') {
-                if (typeof populateYearFilter === 'function') populateYearFilter();
-                if (typeof displayHistoricalYearsList === 'function') displayHistoricalYearsList();
-                if (typeof updateStats === 'function') updateStats();
-            }
-            if (tabName === 'archives') {
-                if (typeof updateArchivesDisplay === 'function') updateArchivesDisplay();
-                if (typeof updateArchivedTodos === 'function') updateArchivedTodos();
-            }
-            if (tabName === 'charges') {
-                // console.log('💰 [SWITCH-TAB] Onglet Fiscalité activé, initialisation...');
-                // Attendre que le HTML soit complètement chargé
-                setTimeout(() => {
-                    if (typeof initFiscalite === 'function') {
-                        initFiscalite();
-                    } else {
-                        // console.warn('⚠️ [SWITCH-TAB] initFiscalite non disponible');
-                    }
-                }, 100);
-            }
-            if (tabName === 'menage' && typeof afficherPlanningMenageNew === 'function') {
-                // Attendre que le HTML du tab soit complètement chargé
-                setTimeout(() => {
-                    afficherPlanningMenageNew();
-                }, 200);
-            }
-            if (tabName === 'infos-gites') {
-                // Générer les boutons de gîtes dynamiquement
-                if (typeof generateGitesButtons === 'function') {
-                    setTimeout(() => generateGitesButtons(), 100);
-                }
-                if (typeof chargerDonneesInfos === 'function') {
-                    chargerDonneesInfos();
-                }
-                if (typeof chargerActivitesEtSorties === 'function') {
-                    chargerActivitesEtSorties();
-                }
-                // Initialiser la validation après le chargement du contenu
-                setTimeout(() => {
-                    if (typeof initValidationInfosPratiques === 'function') {
-                        initValidationInfosPratiques();
-                    }
-                }, 200);
-            }
-            if (tabName === 'faq' && typeof initFAQ === 'function') {
-                // S'assurer que le HTML est chargé avant d'initialiser
-                const checkFaqReady = () => {
-                    if (document.getElementById('faq-list')) {
-                        initFAQ();
-                    } else {
-                        setTimeout(checkFaqReady, 50);
-                    }
-                };
-                checkFaqReady();
-            }
-            if (tabName === 'draps' && typeof initDraps === 'function') {
-                const checkDrapsReady = () => {
-                    if (document.getElementById('stock-trevoux-draps-grands')) {
-                        initDraps();
-                    } else {
-                        setTimeout(checkDrapsReady, 50);
-                    }
-                };
-                checkDrapsReady();
-            }
-            if (tabName === 'fiches-clients' && typeof initFichesClients === 'function') {
-                initFichesClients();
-            }
-            if (tabName === 'checklists' && typeof initChecklistsTab === 'function') {
-                initChecklistsTab();
-            }
-            if (tabName === 'dashboard') {
-                // Dashboard est déjà initialisé après le chargement du HTML (ligne ~375)
-                // Pas besoin de le rafraîchir ici pour éviter les appels multiples
-                
-                // Charger le widget horaires clients
-                import('./js/widget-horaires-clients.js').then(module => {
-                    if (module.afficherHorairesClients) {
-                        module.afficherHorairesClients();
-                    }
-                });
-            }
-            if (tabName === 'decouvrir') {
-                // Initialiser le module "À Découvrir"
-                if (typeof window.initModuleDecouvrir === 'function') {
-                    window.initModuleDecouvrir();
-                }
-            }
-            if (tabName === 'calendrier-tarifs') {
-                if (typeof renderCalendrierTarifsTab === 'function') {
-                    renderCalendrierTarifsTab();
-                }
+                window.switchTab('archives');
             }
         }
         
@@ -716,6 +762,10 @@
             if (modal) modal.style.display = 'none';
         }
         
+        // Exporter dans le scope global
+        window.showRulesModal = showRulesModal;
+        window.closeRulesModal = closeRulesModal;
+        
         function ouvrirPageValidation() {
             // Ouvrir validation.html dans un nouvel onglet
             window.open('pages/validation.html', '_blank');
@@ -725,6 +775,10 @@
             // Ouvrir dans un nouvel onglet au lieu d'une modal
             window.open('pages/femme-menage.html', '_blank');
         }
+        
+        // Exporter dans le scope global
+        window.ouvrirPageValidation = ouvrirPageValidation;
+        window.ouvrirPageFemmeMenage = ouvrirPageFemmeMenage;
         
         function autoSetDateFin() {
             const dateDebut = document.getElementById('dateDebut').value;
@@ -1490,6 +1544,12 @@
          * Affiche le planning par semaine avec les 2 gîtes
          */
         async function afficherPlanningMenageNew() {
+            // En mode mobile, ne rien faire (la page mobile gère le chargement)
+            if (isMobile) {
+                console.log('📱 Mode mobile: afficherPlanningMenageNew() ignorée');
+                return;
+            }
+            
             console.log('🧹 afficherPlanningMenageNew() appelée');
             
             // Appeler directement la fonction du fichier menage.js qui gère tout
@@ -3572,6 +3632,7 @@
     
     <!-- Chargement dynamique des onglets -->
     <script>
+    /* ⚠️ ANCIEN SYSTÈME DE CHARGEMENT - DÉSACTIVÉ car remplacé par le nouveau système (ligne ~155)
     document.addEventListener('DOMContentLoaded', async function() {
         // 🔐 L'affichage utilisateur est maintenant géré par auth.js dans updateUI()
         // après le chargement des rôles depuis Supabase
@@ -3619,24 +3680,6 @@
             localStorage.setItem('lastAutoSync', now.toString());
             // Lancer en arrière-plan sans bloquer l'UI
             syncAllCalendars().catch(err => console.error('Erreur sync auto:', err));
-        } else {
-        }
-        
-        // Attacher les event listeners aux boutons
-        document.querySelectorAll('.nav-tab, .tab-neo').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tab = btn.getAttribute('data-tab');
-                if (tab && typeof window.switchTab === 'function') {
-                    window.switchTab(tab);
-                }
-            });
-        });
-        
-        // Activer l'onglet Dashboard par défaut
-        const firstTab = document.querySelector('[data-tab="dashboard"]');
-        if (firstTab && typeof window.switchTab === 'function') {
-            window.switchTab('dashboard');
-            firstTab.classList.add('active');
         }
     });
     
@@ -3656,14 +3699,12 @@
         actionButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const action = this.getAttribute('data-action');
-                console.log('🎯 Clic sur bouton action:', action);
                 
                 // Fermer le menu
                 toggleUserMenu();
                 
                 // Exécuter l'action
                 if (action === 'gites') {
-                    console.log('🏠 Ouverture gestionnaire de gîtes');
                     if (window.showGitesManager) {
                         window.showGitesManager();
                     } else {
@@ -3679,13 +3720,32 @@
         const logoutBtn = document.getElementById('logoutButton');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', function() {
-                console.log('🚪 Déconnexion');
                 if (window.logout) {
                     window.logout();
                 }
             });
         }
     });
+    */ // FIN DU SYSTÈME ANCIEN DÉSACTIVÉ
+    
+    // 🔄 ATTACHER LES LISTENERS DES ONGLETS IMMÉDIATEMENT
+    (function attachTabListeners() {
+        const tabButtons = document.querySelectorAll('.nav-tab, .tab-neo');
+        
+        if (tabButtons.length === 0) {
+            setTimeout(attachTabListeners, 100);
+            return;
+        }
+        
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tab = btn.getAttribute('data-tab');
+                if (tab && typeof window.switchTab === 'function') {
+                    window.switchTab(tab);
+                }
+            });
+        });
+    })();
     
     // Fermer le menu si on clique ailleurs
     document.addEventListener('click', function(e) {

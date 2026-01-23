@@ -31,6 +31,732 @@ Ce qu'il faut faire pour éviter que ça se reproduise
 
 ## 🔴 Erreurs Référencées
 
+### [23 Janvier 2026] - Boutons Modifier/Supprimer/Déplacer Checklist non fonctionnels
+
+**Contexte:**
+Dans l'onglet Checklists du back-office, les boutons de gestion des items (Modifier ✏️, Supprimer 🗑️, Monter ⬆️, Descendre ⬇️) ne répondaient pas aux clics.
+
+**Erreur:**
+Aucune erreur console, mais les boutons ne déclenchent aucune action au clic.
+
+**Cause:**
+1. Les boutons utilisaient des attributs `onclick` inline dans du HTML généré via `innerHTML`
+2. Le sélecteur pour trouver le bouton d'ajout (`querySelector('button[onclick*="addChecklistItem"]')`) ne fonctionnait pas correctement
+
+**Problème :** Les event handlers inline (`onclick`) ne sont **PAS évalués** lorsqu'on utilise `innerHTML` ou `insertAdjacentHTML`.
+
+**Solution:**
+✅ **Event delegation** avec attributs `data-action` + **ID sur le bouton d'ajout** :
+
+1. Ajout ID au bouton dans `tabs/tab-checklists.html` :
+```html
+<button id="btn-checklist-submit" onclick="addChecklistItem()">
+    ➕ Ajouter l'item
+</button>
+```
+
+2. Remplacer `onclick` par `data-action` + `data-item-id` dans la génération HTML :
+```javascript
+<button data-action="delete-item" data-item-id="${item.id}">🗑️</button>
+<button data-action="move-up" data-item-id="${item.id}">⬆️</button>
+<button data-action="edit-item" data-item-id="${item.id}">✏️</button>
+```
+
+3. Attacher un listener unique après génération du HTML :
+```javascript
+function attachChecklistEventListeners() {
+    const container = document.getElementById('checklist-items-list');
+    container.addEventListener('click', handleChecklistClick);
+}
+
+function handleChecklistClick(e) {
+    const button = e.target.closest('[data-action]');
+    if (!button) return;
+    
+    const action = button.getAttribute('data-action');
+    const itemId = parseInt(button.getAttribute('data-item-id'));
+    
+    switch(action) {
+        case 'move-up': moveChecklistItem(itemId, 'up'); break;
+        case 'move-down': moveChecklistItem(itemId, 'down'); break;
+        case 'edit-item': editChecklistItem(itemId); break;
+        case 'delete-item': deleteChecklistItem(itemId); break;
+    }
+}
+```
+
+4. Fonction de modification avec sélection correcte du bouton :
+```javascript
+function editChecklistItem(itemId) {
+    // Récupérer le bouton par ID (pas par sélecteur onclick)
+    const btnSubmit = document.getElementById('btn-checklist-submit');
+    if (btnSubmit) {
+        btnSubmit.textContent = '✅ Mettre à jour';
+        btnSubmit.style.background = '#10b981';
+        btnSubmit.onclick = () => updateChecklistItem(itemId);
+        btnSubmit.setAttribute('data-editing-id', itemId);
+    }
+}
+```
+
+5. Réinitialisation correcte du bouton après mise à jour ou annulation :
+```javascript
+function resetSubmitButton() {
+    const btnSubmit = document.getElementById('btn-checklist-submit');
+    if (btnSubmit) {
+        btnSubmit.textContent = '➕ Ajouter l\'item';
+        btnSubmit.style.background = '#27ae60';
+        btnSubmit.onclick = addChecklistItem;
+        btnSubmit.removeAttribute('data-editing-id');
+    }
+}
+```
+
+**Prévention:**
+- ⚠️ **JAMAIS** utiliser `onclick` dans du HTML généré dynamiquement
+- ✅ **TOUJOURS** utiliser l'event delegation avec `data-action`
+- ✅ **TOUJOURS** donner un ID aux boutons qu'on doit manipuler dynamiquement
+- ❌ **NE PAS** utiliser de sélecteurs complexes comme `querySelector('button[onclick*="func"]')`
+- ✅ Pattern : `innerHTML` → `attachEventListeners()` → `handleClick(e)`
+- Même pattern utilisé pour FAQ, à appliquer partout où nécessaire
+
+---
+
+### [23 Janvier 2026] - Onglet Activités ne s'affiche pas + Bouton "Voir sur carte" inactif
+
+**Contexte:**
+L'onglet "Activités et commerces" dans la fiche client ne montrait aucun contenu. Les activités configurées dans le back-office ne s'affichaient pas côté client. La FAQ échouait également avec des erreurs 400, et le bouton "Voir sur carte" ne répondait pas aux clics.
+
+**Erreur:**
+```
+column activites_gites.gite does not exist
+GET https://.../faq?select=*&is_visible=eq.true&... 400 (Bad Request)
+Uncaught SyntaxError: Unexpected end of input
+Bouton "Voir sur carte" non fonctionnel
+```
+
+**Cause:**
+1. **activites_gites** : Table refonte le 20/01/2026 avec passage de `gite` (VARCHAR) vers `gite_id` (UUID FK)
+2. **FAQ** : 
+   - **ERREUR D'ANALYSE** : J'ai supposé que les colonnes étaient `is_visible` et `priority` mais la vraie structure est :
+     - ✅ `gite_id` (UUID FK)
+     - ✅ `ordre` (integer) 
+     - ✅ `question`, `reponse`, `categorie`
+     - ❌ PAS de colonne `visible` ou `is_visible`
+     - ❌ PAS de colonne `priority`
+   - Utilisation de `.eq('is_visible', true)` sur une colonne inexistante → erreur 400
+   - Utilisation de `.order('priority')` au lieu de `.order('ordre')`
+3. **loadEvenementsSemaine()** : Utilisait `.eq('gite', ...)` au lieu de `.eq('gite_id', ...)`
+4. **Bouton "Voir sur carte" inactif** : 
+   - Attribut `onclick` avec `JSON.stringify()` générait des guillemets doubles cassant le HTML
+   - Caractères spéciaux dans le nom d'activité causaient des SyntaxError JavaScript
+5. **Injection XSS potentielle** : Champs nom, description, adresse non échappés
+6. Styles CSS manquants pour les cartes d'activités
+
+**Solution:**
+1. **fiche-client-app.js - loadActivitesForClient()** : 
+   - ✅ `.eq('gite_id', reservationData.gite_id)` au lieu de `.or(variantes)` sur `gite`
+   - ✅ Ajout filtre `.eq('is_active', true)`
+   - ✅ `.order('distance_km')` au lieu de `.order('distance')`
+   
+2. **fiche-client-app.js - loadEvenementsSemaine()** :
+   - ✅ `.eq('gite_id', reservationData.gite_id)` au lieu de `.eq('gite', ...)`
+   - ✅ Ajout filtre `.eq('is_active', true)`
+   - ✅ Masquage silencieux si colonne inexistante (code 42703)
+
+3. **fiche-client-app.js - loadFaqData()** ⭐ CORRECTION FINALE :
+   - ✅ Suppression du filtre inexistant `.eq('is_visible', true)`
+   - ✅ Utilisation de `.order('ordre', { ascending: true })` (colonne réelle)
+   - ✅ Conservation de `.or('gite_id.eq.xxx,gite_id.is.null')` pour FAQ globales
+   - ✅ Lazy loading au clic (pas d'appel à l'initialisation)
+
+4. **fiche-activites-map.js - Bouton "Voir sur carte"** ⭐ SOLUTION PROPRE :
+   - ✅ **Utilisation de data-attributes** au lieu de onclick avec paramètres inline
+   - ✅ `data-lat`, `data-lon`, `data-nom`, `data-id` stockés dans le HTML
+   - ✅ Lecture via `this.dataset` dans onclick → 100% sûr
+   - ✅ Échappement HTML (`<` et `>`) pour protection XSS
+
+5. **fiche-client.html** : 
+   - ✅ Ajout de tous les styles CSS pour les cartes d'activités
+
+**Structure réelle de la table FAQ (vérifiée en BDD) :**
+```sql
+CREATE TABLE public.faq (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_user_id UUID NOT NULL REFERENCES auth.users(id),
+  gite_id UUID NULL REFERENCES gites(id),
+  question TEXT NOT NULL,
+  reponse TEXT NOT NULL,
+  categorie TEXT NULL,
+  ordre INTEGER DEFAULT 0,  -- ⭐ Colonne réelle (pas "priority")
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+-- ❌ PAS de colonne "visible" ou "is_visible"
+```
+
+**Code Final (Requête FAQ corrigée) :**
+```javascript
+// ✅ SOLUTION CORRECTE
+const { data: faqs, error } = await supabase
+    .from('faq')
+    .select('*')
+    .or(`gite_id.eq.${reservationData.gite_id},gite_id.is.null`)
+    .order('ordre', { ascending: true });  // ⭐ Colonne réelle
+```
+
+**Code Final (Bouton sécurisé) :**
+```javascript
+// ✅ SOLUTION PROPRE avec data-attributes
+<button class="btn-show-map" 
+        data-lat="${activite.latitude}" 
+        data-lon="${activite.longitude}" 
+        data-nom="${nomSafe}" 
+        data-id="${activite.id}"
+        onclick="showActivityOnMap(this.dataset.lat, this.dataset.lon, this.dataset.nom, this.dataset.id)">
+    📍 Voir sur carte
+</button>
+```
+
+**Prévention:**
+- ✅ **TOUJOURS vérifier la structure réelle en BDD avant de modifier une requête**
+- ✅ Ne JAMAIS supposer les noms de colonnes sans vérification
+- ✅ Consulter le fichier SQL de création ou faire un `DESCRIBE table` en BDD
+- ✅ Vérifier comment le back-office utilise la même table (référence fiable)
+- ✅ Après une refonte, chercher TOUS les usages (back-office ET fiche client)
+- ✅ **JAMAIS** passer des strings complexes dans onclick - Utiliser data-attributes
+- ✅ Toujours échapper les contenus HTML générés dynamiquement (protection XSS)
+- ✅ Lazy loading pour éviter erreurs 400 au chargement
+- ✅ Documenter la structure exacte dans ARCHITECTURE.md
+
+**Note importante:**
+Les tables `infos_gites` et `cleaning_schedule` conservent temporairement la colonne `gite` (TEXT) en plus de `gite_id` (UUID) pour transition progressive.
+
+---
+
+### [22 Janvier 2026] - Trajets kilométriques non créés automatiquement lors de sync iCal
+
+**Contexte:**
+Plus de 30 réservations étaient présentes dans le système mais seulement 3 trajets kilométriques étaient enregistrés. L'automatisation des trajets ne fonctionnait pas lors de l'import iCal.
+
+**Erreur:**
+Pas d'erreur console, mais les trajets auto n'étaient pas créés pour les réservations importées depuis iCal.
+
+**Cause:**
+- La fonction `addReservationFromIcal()` dans `js/sync-ical-v2.js` n'appelait PAS `window.KmManager.creerTrajetsAutoReservation()`
+- La fonction `updateReservationFromIcal()` ne mettait pas à jour les trajets lors de changement de dates
+- La fonction `cancelReservation()` ne supprimait pas les trajets liés
+- La fonction `saveReservationFromModal()` dans `js/calendrier-tarifs.js` faisait un insert direct sans passer par `addReservation()`
+- Les fonctions `updateReservation()` et `deleteReservation()` dans `js/supabase-operations.js` ne géraient pas les trajets auto
+
+**Solution:**
+1. **sync-ical-v2.js - addReservationFromIcal()** : Ajout de l'appel à `creerTrajetsAutoReservation()` après insert + récupération de la réservation via `.select().single()`
+2. **sync-ical-v2.js - updateReservationFromIcal()** : Ajout détection changement dates + suppression anciens trajets + recréation nouveaux trajets
+3. **sync-ical-v2.js - cancelReservation()** : Ajout suppression trajets auto via `supprimerTrajetsAutoReservation()`
+4. **calendrier-tarifs.js - saveReservationFromModal()** : Remplacement insert direct par appel à `window.addReservation()`
+5. **supabase-operations.js - updateReservation()** : Ajout détection changement dates + recréation trajets
+6. **supabase-operations.js - deleteReservation()** : Ajout suppression trajets auto avant suppression réservation
+
+**Fichiers modifiés:**
+- `js/sync-ical-v2.js` (3 fonctions corrigées)
+- `js/calendrier-tarifs.js` (saveReservationFromModal)
+- `js/supabase-operations.js` (updateReservation, deleteReservation)
+- `ARCHITECTURE.md` (documentation automatisation)
+
+**Prévention:**
+- Toujours utiliser `addReservation()` pour créer des réservations (jamais d'insert direct)
+- Toujours gérer les trajets auto dans update/delete de réservations
+- Documenter les effets de bord des opérations CRUD dans ARCHITECTURE.md
+
+---
+
+### [22 Janvier 2026] - Erreurs 400 sur table todos inexistante
+
+**Contexte:**
+Lors du chargement de l'onglet Draps, des erreurs 400 apparaissaient en console sur des requêtes vers la table `todos` (fonctionnalité de gestion de tâches automatiques).
+
+**Erreur:**
+```
+GET https://...supabase.co/rest/v1/todos?... 400 (Bad Request)
+POST https://...supabase.co/rest/v1/todos 400 (Bad Request)
+```
+
+**Cause:**
+La table `todos` n'existe pas dans la base de données Supabase. Le code dans `draps.js` essayait de créer automatiquement des tâches "Commander draps" mais ne gérait pas le cas où la table n'existe pas.
+
+**Solution:**
+Ajout de gestion d'erreur silencieuse dans `js/draps.js` (lignes 953-980) :
+```javascript
+const { data: tachesExistantes, error: errorTodos } = await window.supabaseClient
+    .from('todos')
+    .select('*')
+    // ...
+
+// Si la table n'existe pas, ignorer silencieusement
+if (errorTodos) {
+    console.warn('⚠️ Table todos non disponible (normal si non créée)');
+    return;
+}
+
+// Créer la tâche seulement si elle n'existe pas déjà
+if (!tachesExistantes || tachesExistantes.length === 0) {
+    const { error: insertError } = await window.supabaseClient
+        .from('todos')
+        .insert({...});
+    
+    if (insertError) {
+        console.warn('⚠️ Erreur insertion todo (table peut-être inexistante)');
+    }
+}
+```
+
+**Fichiers modifiés:**
+- `js/draps.js` - Ajout gestion d'erreur sur requêtes todos
+
+**Prévention:**
+- Toujours catcher les erreurs sur des tables optionnelles
+- Ne pas bloquer l'application si une fonctionnalité secondaire échoue
+- Logger en warning plutôt qu'en erreur pour les tables optionnelles
+
+---
+
+### [22 Janvier 2026] - Calcul kilomètres KO (KmManager non disponible)
+
+**Contexte:**
+Le calcul des frais kilométriques ne fonctionnait pas dans l'onglet Fiscalité. La fonction `calculerFraisKm()` plantait silencieusement.
+
+**Erreur:**
+`TypeError: Cannot read properties of undefined (reading 'calculerTotalKm')`
+
+**Cause:**
+La fonction `calculerFraisKm()` appelait directement `KmManager.calculerTotalKm(trajetsAnnee)` sans vérifier :
+1. Que `KmManager` est chargé et disponible
+2. Que `trajetsAnnee` est défini (peut être undefined si les tables km ne sont pas créées)
+
+**Solution:**
+Ajout de protections dans `js/fiscalite-v2.js` (ligne ~3922) :
+```javascript
+function calculerFraisKm() {
+    try {
+        // Vérifier que KmManager est disponible
+        if (!window.KmManager || typeof window.KmManager.calculerTotalKm !== 'function') {
+            console.warn('⚠️ KmManager non disponible');
+            return;
+        }
+        
+        // Vérifier que trajetsAnnee existe
+        if (!trajetsAnnee) {
+            trajetsAnnee = [];
+        }
+        
+        const totalKm = window.KmManager.calculerTotalKm(trajetsAnnee);
+        // ... suite du calcul
+    } catch (error) {
+        console.error('❌ Erreur calcul frais km:', error);
+        // Ne pas bloquer l'interface
+    }
+}
+```
+
+**Fichiers modifiés:**
+- `js/fiscalite-v2.js` - Ajout protections KmManager
+
+**Prévention:**
+- Toujours vérifier qu'un module/manager est chargé avant de l'utiliser
+- Initialiser les variables à des valeurs par défaut ([] pour arrays)
+- Utiliser try/catch pour éviter que les erreurs ne bloquent l'UI
+- Tester avec les tables SQL non créées pour vérifier la robustesse
+
+---
+
+### [22 Janvier 2026] - Modal frais kilométriques salariés manquante (TypeError null)
+
+**Contexte:**
+Le bouton "⚙️ Frais" à côté des salaires Madame/Monsieur ne fonctionnait pas. Erreur console lors du clic.
+
+**Erreur:**
+```
+fiscalite-v2.js:485 Uncaught TypeError: Cannot set properties of null (setting 'textContent')
+    at openFraisReelsSalarieModal (fiscalite-v2.js:485:23)
+```
+
+**Cause:**
+La fonction `openFraisReelsSalarieModal` essayait d'accéder à l'élément `#titre-personne-modal` qui n'existait pas dans le HTML. La modal `#modal-frais-salarie` n'avait jamais été créée, alors que le code JS essayait de l'utiliser.
+
+**Solution:**
+1. **Ajout de la modal complète** dans `tabs/tab-fiscalite-v2.html` :
+```html
+<div id="modal-frais-salarie" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h3>⚙️ Frais - <span id="titre-personne-modal">Madame</span></h3>
+        <!-- Formulaire avec radio buttons forfaitaire/réel -->
+        <!-- Champs: km, CV, péages -->
+        <!-- Calcul et affichage du total -->
+    </div>
+</div>
+```
+
+2. **Ajout alias fonction** dans `js/fiscalite-v2.js` :
+```javascript
+window.fermerFraisSalarieModal = closeFraisReelsSalarieModal; // Alias pour correspondre au HTML
+```
+
+**Fichiers modifiés:**
+- `tabs/tab-fiscalite-v2.html` - Ajout modal frais salariés
+- `js/fiscalite-v2.js` - Ajout alias fermerFraisSalarieModal
+
+**Prévention:**
+- Toujours créer le HTML avant d'écrire le JS qui l'utilise
+- Vérifier que tous les `getElementById()` correspondent à des éléments existants
+- Tester les modals en cliquant sur les boutons après modification
+
+---
+
+### [22 Janvier 2026] - Automatisation km avec mauvais noms de champs (check_in vs date_arrivee)
+
+**Contexte:**
+L'automatisation des trajets kilométriques créait toujours 3 trajets au lieu de créer un trajet pour chaque réservation. Le code essayait d'accéder à `reservation.date_arrivee` et `reservation.date_depart` mais les réservations Supabase utilisent `check_in` et `check_out`.
+
+**Erreur:**
+`new Date(reservation.date_arrivee)` retournait `Invalid Date` car le champ n'existe pas dans l'objet réservation.
+
+**Cause:**
+Incohérence entre le format de données attendu par `km-manager.js` et le format réel des réservations en base de données. Les réservations utilisent le format Supabase (`check_in`, `check_out`) alors que le code attendait l'ancien format (`date_arrivee`, `date_depart`).
+
+**Solution:**
+Support des deux formats dans `km-manager.js` (lignes 278-279 et 303) :
+```javascript
+// Support des deux formats : check_in/check_out (Supabase) et date_arrivee/date_depart (legacy)
+const dateArrivee = reservation.check_in || reservation.date_arrivee;
+const dateDepart = reservation.check_out || reservation.date_depart;
+```
+
+**Fichiers modifiés:**
+- `js/km-manager.js` - Support double format check_in/date_arrivee
+
+**Prévention:**
+- Toujours vérifier le format des données en base avant d'accéder aux propriétés
+- Utiliser un support de compatibilité descendante lors de migrations de schéma
+- Logger les objets en console pour vérifier leur structure réelle
+- Documenter le format attendu en commentaire au-dessus du code
+
+---
+
+### [22 Janvier 2026] - Menu admin non fonctionnel (event listeners manquants)
+
+**Contexte:**
+Les boutons du menu admin (Gérer mes gîtes, Config iCal, Archives, FAQ, Déconnexion) ne répondaient plus aux clics. Le menu déroulant s'ouvrait mais les actions ne s'exécutaient pas.
+
+**Erreur:**
+Aucune action lors du clic sur les boutons du menu utilisateur.
+
+**Cause:**
+Les event listeners pour les boutons avec `data-action` étaient dans un bloc de code commenté (ligne 3603 de index.html) marqué comme "SYSTÈME ANCIEN DÉSACTIVÉ". Le code de gestion des clics n'était donc jamais exécuté.
+
+**Solution:**
+Ajout des event listeners directement après le DOMContentLoaded existant (ligne ~270) :
+```javascript
+// 🔧 Event listeners pour le menu admin
+const actionButtons = document.querySelectorAll('.user-menu-item[data-action]');
+actionButtons.forEach(button => {
+    button.addEventListener('click', function() {
+        const action = this.getAttribute('data-action');
+        if (window.toggleUserMenu) window.toggleUserMenu();
+        
+        if (action === 'gites') {
+            if (window.showGitesManager) {
+                window.showGitesManager();
+            }
+        } else if (action === 'faq') {
+            window.switchTab('faq');
+        } else if (window.handleQuickAction) {
+            window.handleQuickAction(action);
+        }
+    });
+});
+```
+
+**Fichiers modifiés:**
+- `index.html` - Ajout event listeners menu admin après DOMContentLoaded principal
+
+**Prévention:**
+- Ne jamais commenter du code fonctionnel sans ajouter un remplacement
+- Toujours vérifier que les event listeners sont bien attachés au chargement
+- Tester tous les boutons après modification du code d'initialisation
+
+---
+
+### [22 Janvier 2026] - Automatisation km non déclenchée à la création de réservation
+
+**Contexte:**
+Le système d'automatisation des trajets kilométriques existe (`KmManager.creerTrajetsAutoReservation`) mais n'était jamais appelé lors de l'import iCal ou de la création manuelle de réservations.
+
+**Erreur:**
+Aucun trajet automatique n'était créé malgré la configuration activée dans `km_config_auto`.
+
+**Cause:**
+La fonction `addReservation` dans `supabase-operations.js` n'appelait pas `KmManager.creerTrajetsAutoReservation` après l'insertion réussie d'une réservation.
+
+**Solution:**
+Ajout de l'appel automatique après insertion (ligne ~82 de supabase-operations.js) :
+```javascript
+if (result.error) throw result.error;
+
+// 🚗 Automatisation des trajets kilométriques
+if (result.data && typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {
+    try {
+        await window.KmManager.creerTrajetsAutoReservation(result.data);
+    } catch (kmError) {
+        console.error('⚠️ Erreur création trajets auto:', kmError);
+        // Ne pas bloquer la création de réservation si les trajets échouent
+    }
+}
+```
+
+**Fichiers modifiés:**
+- `js/supabase-operations.js` - Ajout appel automatisation km
+
+**Prévention:**
+- Toujours intégrer les automatisations dans les fonctions centrales (CRUD)
+- Utiliser try/catch pour éviter qu'une erreur d'automatisation ne bloque l'action principale
+- Documenter clairement les hooks d'automatisation dans ARCHITECTURE.md
+
+---
+
+### [22 Janvier 2026] - Onglet Réservations surligné au lieu de Dashboard au démarrage
+
+**Contexte:**
+Au chargement de l'application, l'onglet "Réservations" était surligné alors que le contenu affiché était le Dashboard.
+
+**Erreur:**
+Incohérence entre l'onglet actif visuellement et le contenu affiché.
+
+**Cause:**
+La classe `active` était appliquée au mauvais bouton dans le HTML (ligne 345 de index.html) :
+```html
+<button class="tab-neo" data-tab="dashboard">...</button>
+<button class="tab-neo active" data-tab="reservations">...</button>
+```
+
+**Solution:**
+Inversion des classes `active` :
+```html
+<button class="tab-neo active" data-tab="dashboard">...</button>
+<button class="tab-neo" data-tab="reservations">...</button>
+```
+
+**Fichiers modifiés:**
+- `index.html` - Correction classe active sur bouton dashboard
+
+**Prévention:**
+- Toujours vérifier la cohérence entre l'onglet actif et le contenu affiché
+- Le dashboard doit TOUJOURS être l'onglet par défaut au démarrage
+
+---
+
+### [22 Janvier 2026] - Message checklist trop verbeux
+
+**Contexte:**
+Quand aucun item de checklist n'était trouvé, le message affichait : "Aucun item pour **Calvignac** - **Entrée**".
+
+**Erreur:**
+Message trop long et répétitif (le gîte et le type sont déjà visibles dans l'interface).
+
+**Cause:**
+Template string incluant des informations redondantes (ligne 99 de checklists.js).
+
+**Solution:**
+Simplification du message :
+```javascript
+// AVANT
+<p>Aucun item pour <strong>${currentGiteFilter}</strong> - <strong>${currentTypeFilter === 'entree' ? 'Entrée' : 'Sortie'}</strong></p>
+
+// APRÈS
+<p>Aucun item</p>
+```
+
+**Fichiers modifiés:**
+- `js/checklists.js` - Simplification message vide
+
+**Prévention:**
+- Éviter les redondances dans les messages
+- Privilégier les messages courts et clairs
+- Le contexte (gîte/type) est déjà visible dans les filtres au-dessus
+
+---
+
+### [22 Janvier 2026] - parseInt() sur UUID bloque l'affichage des réservations en calendrier mobile
+
+**Contexte:**
+Dans le calendrier tarifs mobile, les dates réservées n'apparaissaient pas bloquées (pas de 🔒), alors que dans la version desktop elles l'étaient.
+
+**Erreur:**
+48 réservations chargées mais 0 réservation filtrée pour le gîte sélectionné. Les dates réservées n'étaient pas marquées comme bloquées dans le calendrier mobile.
+
+**Cause:**
+Le code utilisait `parseInt()` pour comparer un UUID string :
+```javascript
+reservationsCacheMobile.filter(r => r.gite_id === parseInt(currentGiteIdMobile));
+// currentGiteIdMobile = "5e3af1b2-f344-4f1e-90cb-6b999f87393a"
+// parseInt("5e3af1b2-...") = NaN
+```
+
+`parseInt()` sur un UUID retourne `NaN`, donc le filtre ne correspondait jamais.
+
+**Solution:**
+Comparer directement les strings UUID sans parseInt() :
+```javascript
+reservationsCacheMobile.filter(r => r.gite_id === currentGiteIdMobile);
+```
+
+**Fichiers modifiés:**
+- `tabs/mobile/calendrier-tarifs.html` - Suppression parseInt() ligne ~316
+
+**Prévention:**
+- **JAMAIS** utiliser `parseInt()` sur des UUIDs
+- Les UUIDs sont des strings, toujours comparer avec `===` directement
+- Quand un filtre retourne 0 résultat alors qu'il devrait y en avoir, vérifier les types (string vs number)
+
+---
+
+### [21 Janvier 2026] - Planning ménage mobile écrasé par fonction desktop
+
+**Contexte:**
+Après correction du problème onclick, le planning ménage mobile ne s'affichait plus correctement. Le contenu mobile était écrasé par le rendu desktop.
+
+**Erreur:**
+L'affichage mobile du planning ménage ne s'adaptait pas et affichait le layout desktop (colonnes, semaines, etc.) au lieu du layout mobile (cartes empilées, filtres collapsibles).
+
+**Cause:**
+Dans `js/shared-utils.js`, la fonction `switchTab()` appelait `afficherPlanningParSemaine()` (fonction DESKTOP) sans vérifier si on était en mode mobile. Cette fonction desktop écrasait le contenu HTML mobile chargé depuis `tabs/mobile/menage.html` qui a son propre script `loadMenages()`.
+
+**Solution:**
+Ajout d'une vérification `!isMobile` avant d'appeler la fonction desktop dans `switchTab()` :
+
+```javascript
+} else if (tabName === 'menage') {
+    // DESKTOP uniquement
+    if (!isMobile && typeof window.afficherPlanningParSemaine === 'function') {
+        setTimeout(() => {
+            window.afficherPlanningParSemaine();
+        }, 200);
+    }
+}
+```
+
+**Fichiers modifiés:**
+- `js/shared-utils.js` - Ajout condition `!isMobile` dans switchTab()
+
+**Prévention:**
+- **TOUJOURS** vérifier `isMobile` avant d'appeler une fonction desktop dans `switchTab()`
+- Séparation stricte : `js/menage.js` = DESKTOP, `tabs/mobile/menage.html` = MOBILE
+
+---
+
+### [21 Janvier 2026] - Attributs onclick supprimés par DOMPurify en mode trusted
+
+**Contexte:**
+Les boutons du Planning Ménage (Règles de Ménage, Voir les Règles, Page Validation, Espace Femme de Ménage) ne répondaient pas aux clics. Le HTML source dans `tabs/tab-menage.html` contenait bien les attributs `onclick="showCleaningRulesModal()"` etc., mais le HTML chargé dans le navigateur ne les avait pas.
+
+**Erreur:**
+Les attributs `onclick` étaient présents dans le fichier source mais absents du DOM après chargement par `SecurityUtils.setInnerHTML()`. Les boutons s'affichaient mais ne déclenchaient aucune action.
+
+**Cause:**
+DOMPurify supprimait les attributs `onclick` même en mode `trusted: true` car ils n'étaient pas explicitement autorisés dans la configuration. La config trusted avait :
+```javascript
+const trustedConfig = {
+    ALLOW_DATA_ATTR: true,
+    KEEP_CONTENT: true,
+    FORBID_ATTR: ['onerror', 'onload']  // ❌ Pas de ADD_ATTR pour autoriser onclick
+};
+```
+
+DOMPurify, par défaut, bloque TOUS les event handlers pour la sécurité. Il fallait les autoriser explicitement avec `ADD_ATTR`.
+
+**Solution:**
+Ajout de `ADD_ATTR` dans la configuration trusted de `js/security-utils.js` (ligne ~55) :
+
+```javascript
+const trustedConfig = {
+    ALLOW_DATA_ATTR: true,
+    KEEP_CONTENT: true,
+    ADD_TAGS: ['script', 'style'],
+    ADD_ATTR: ['onclick', 'onmouseover', 'onmouseout', 'onchange', 'oninput', 'onsubmit', 'onfocus', 'onblur'],
+    FORBID_ATTR: ['onerror', 'onload']
+};
+```
+
+**Fichiers modifiés:**
+- `js/security-utils.js` - Ajout ADD_ATTR dans config trusted
+
+**Prévention:**
+- Les attributs `onclick` dans les tabs chargés dynamiquement DOIVENT être listés dans `ADD_ATTR` de DOMPurify
+- Quand un bouton avec onclick ne fonctionne pas, vérifier d'abord si l'attribut est présent dans le DOM (Inspecter l'élément)
+- Si onclick est absent alors qu'il est dans le source, c'est DOMPurify qui le supprime
+- Ne PAS confondre avec le problème des fonctions non exportées dans window (qui donne une erreur console différente)
+
+---
+
+### [21 Janvier 2026] - Boutons onclick Planning Ménage non fonctionnels
+
+**Contexte:**
+Dans l'onglet Planning Ménage (version desktop), plusieurs boutons ne répondaient pas aux clics :
+- Bouton "🎯 Règles de Ménage" (showCleaningRulesModal)
+- Bouton "📋 Voir les Règles" (showRulesModal)
+- Bouton "🏢 Page Validation" (ouvrirPageValidation)
+- Bouton "🧹 Espace Femme de Ménage" (ouvrirPageFemmeMenage)
+- Disparition des icônes de validation
+- Bouton sauvegarder ne fonctionnant pas
+
+**Erreur:**
+Console navigateur : "function is not defined" lors du clic sur les boutons
+
+**Cause:**
+1. **Fonctions non exportées dans window:** Les fonctions `showRulesModal`, `closeRulesModal`, `ouvrirPageValidation`, `ouvrirPageFemmeMenage` étaient déclarées dans `index.html` mais pas exportées dans le scope global `window`, rendant les attributs `onclick` inaccessibles
+2. **Mauvais nom de fonction:** `shared-utils.js` appelait `afficherPlanningMenageNew()` au lieu de `afficherPlanningParSemaine()` lors du changement d'onglet
+
+**Solution:**
+1. **Ajout exports dans index.html** (lignes ~672-675) :
+```javascript
+// Exporter dans le scope global
+window.showRulesModal = showRulesModal;
+window.closeRulesModal = closeRulesModal;
+window.ouvrirPageValidation = ouvrirPageValidation;
+window.ouvrirPageFemmeMenage = ouvrirPageFemmeMenage;
+```
+
+2. **Correction appel fonction dans shared-utils.js** (ligne ~237) :
+```javascript
+// AVANT:
+if (typeof afficherPlanningMenageNew === 'function') {
+    setTimeout(() => {
+        afficherPlanningMenageNew();
+    }, 200);
+}
+
+// APRÈS:
+if (typeof window.afficherPlanningParSemaine === 'function') {
+    setTimeout(() => {
+        window.afficherPlanningParSemaine();
+    }, 200);
+}
+```
+
+**Fichiers modifiés:**
+- `index.html` : Ajout exports window pour fonctions onclick
+- `js/shared-utils.js` : Correction nom fonction afficherPlanningParSemaine
+- Documentation : `CORRECTION_MENAGE_21JAN2026.md`
+- Fichier test : `test-menage-functions.html`
+
+**Prévention:**
+- **TOUJOURS** exporter dans `window` les fonctions utilisées dans des attributs `onclick` HTML
+- Utiliser `window.nomFonction` pour garantir l'accès au scope global
+- Créer des tests de disponibilité des fonctions (cf. test-menage-functions.html)
+- Vérifier dans la console : `typeof window.nomFonction === 'function'`
+- Documenter les exports requis dans ARCHITECTURE.md
+
+---
+
 ### [20 Janvier 2026] - Frais réels impôts : interface globale inadaptée
 
 **Contexte:**
@@ -375,3 +1101,60 @@ onclick="aperçuFicheClient('${r.id}')"
 ---
 
 <!-- NOUVELLES ERREURS À AJOUTER CI-DESSOUS -->
+
+### [23 Janvier 2026] - Boutons Modifier/Supprimer FAQ non fonctionnels
+
+**Contexte:**
+Les boutons "Modifier" et "Supprimer" dans la liste des FAQ du back-office ne répondaient pas aux clics, empêchant toute modification ou suppression de questions existantes.
+
+**Erreur:**
+Aucun événement déclenché au clic sur les boutons. Pas d'erreur console, simplement aucune réaction.
+
+**Cause:**
+Les boutons utilisaient des attributs `data-action="modifier-question"` et `data-question-id="${question.id}"` mais **aucun gestionnaire d'événements n'était attaché** pour écouter ces clics. Le HTML était généré dynamiquement via `innerHTML` sans listeners.
+
+**Solution:**
+Ajout d'un **gestionnaire d'événements par délégation** dans `js/faq.js` :
+1. Création de `attachFaqEventListeners(container)` appelée après chaque affichage
+2. Création de `handleFaqClick(e)` qui gère tous les clics avec `e.target.closest('[data-action]')`
+3. Switch sur `data-action` : 'modifier-question', 'supprimer-question', 'toggle-faq'
+4. Appel des fonctions globales `window.modifierQuestion(id)` et `window.supprimerQuestion(id)`
+
+**Code ajouté (lignes ~163-195) :**
+```javascript
+// Attacher les gestionnaires d'événements aux boutons FAQ
+function attachFaqEventListeners(container) {
+    container.removeEventListener('click', handleFaqClick);
+    container.addEventListener('click', handleFaqClick);
+}
+
+function handleFaqClick(e) {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    
+    const action = target.getAttribute('data-action');
+    const questionId = target.getAttribute('data-question-id');
+    
+    e.stopPropagation();
+    
+    switch(action) {
+        case 'modifier-question':
+            window.modifierQuestion(questionId);
+            break;
+        case 'supprimer-question':
+            window.supprimerQuestion(questionId);
+            break;
+        case 'toggle-faq':
+            target.closest('.faq-item')?.classList.toggle('open');
+            break;
+    }
+}
+```
+
+**Prévention:**
+- ⚠️ **TOUJOURS** attacher des event listeners après génération dynamique de HTML avec `innerHTML`
+- ✅ Utiliser la **délégation d'événements** sur le conteneur parent (écoute sur `#faq-list`)
+- ✅ Pattern recommandé : `data-action` + `data-*` plutôt que `onclick` inline pour le HTML généré
+- ✅ Appeler `attachEventListeners()` systématiquement après `innerHTML = ...`
+
+---

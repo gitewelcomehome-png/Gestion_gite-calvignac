@@ -1,0 +1,77 @@
+╔════════════════════════════════════════════════════════════════╗
+║          🧹 NETTOYAGE COMPLET - 23 JANVIER 2026               ║
+║                  Gestion Gîte Calvignac v4.4                  ║
+╚════════════════════════════════════════════════════════════════╝
+
+📊 STATISTIQUES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Fichiers Archivés:      47
+   Fichiers Actifs:        32
+   Taux Nettoyage:      59.5%
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 STRUCTURE PROPRE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🏠 RACINE (6 fichiers essentiels)
+   ✓ ARCHITECTURE.md
+   ✓ DESCRIPTION_COMPLETE_SITE.md  
+   ✓ ERREURS_CRITIQUES.md
+   ✓ NETTOYAGE_COMPLET_23JAN2026.md
+   ✓ README.md
+   ✓ RESUME_NETTOYAGE_23JAN2026.md
+
+📚 /docs/ (19 fichiers utiles)
+   • Diagnostics (2)
+   • Guides opérationnels (11)
+   • Documentation technique (5)
+   • Projet (1)
+
+💾 /sql/ (4 fichiers actifs)
+   • create_optimized_indexes.sql
+   • SCHEMA_COMPLET_PROD_2026.sql
+   • CLEANUP_TABLES_OBSOLETES_23JAN2026.sql
+   • verify_prod_structure.sql
+
+⚙️ /scripts/ (2 fichiers actifs)
+   • audit-securite.sh
+   • generate-test-token.js
+
+📦 _archives/ (5.4 MB - 47 fichiers)
+   ├── sql_ancien/ (22 fichiers)
+   ├── docs_obsoletes/ (18+ fichiers)
+   └── scripts_obsoletes/ (7 fichiers)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ OPÉRATIONS RÉALISÉES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   ✓ Base de données nettoyée (7 tables obsolètes supprimées)
+   ✓ 22 fichiers SQL archivés (migrations appliquées)
+   ✓ 18 fichiers documentation archivés (obsolètes)
+   ✓ 7 scripts archivés (migrations/tests terminés)
+   ✓ Racine réorganisée (6 fichiers essentiels)
+   ✓ /docs/ restructuré et nettoyé
+   ✓ /sql/ réduit aux scripts production
+   ✓ /scripts/ limité aux outils actifs
+   ✓ Structure _archives/ organisée
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ RAPPELS IMPORTANTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   ❌ NE JAMAIS ré-exécuter les migrations archivées
+   ❌ NE PAS utiliser les scripts obsolètes
+   ❌ NE PAS appliquer les anciens guides
+
+   ✅ TOUJOURS consulter DESCRIPTION_COMPLETE_SITE.md
+   ✅ TOUJOURS vérifier ERREURS_CRITIQUES.md
+   ✅ TOUJOURS utiliser les fichiers /sql/ actifs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Site en production • Version 4.4 • 23 janvier 2026

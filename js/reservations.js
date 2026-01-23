@@ -61,6 +61,77 @@ async function forceRefreshReservations() {
 // �🔍 RECHERCHE RÉSERVATIONS
 // ==========================================
 
+// ==========================================
+// 📆 FILTRAGE PAR MOIS
+// ==========================================
+
+let currentMonthFilter = 'all';
+// Exposer la variable globalement pour vérification
+window.currentMonthFilter = currentMonthFilter;
+
+function filterReservationsByMonth(monthValue) {
+    currentMonthFilter = monthValue;
+    window.currentMonthFilter = monthValue;
+    
+    // Appeler la bonne fonction selon le mode (mobile ou desktop)
+    if (typeof window.updateReservationsListMobile === 'function') {
+        window.updateReservationsListMobile();
+    } else {
+        updateReservationsList(true);
+    }
+}
+
+function populateMonthSelector(reservations) {
+    const selector = document.getElementById('monthSelector');
+    if (!selector) return;
+    
+    // Récupérer tous les mois des réservations
+    const months = new Set();
+    
+    reservations.forEach(r => {
+        const dateDebut = parseLocalDate(r.dateDebut);
+        const monthKey = `${dateDebut.getFullYear()}-${String(dateDebut.getMonth() + 1).padStart(2, '0')}`;
+        months.add(monthKey);
+    });
+    
+    // Trier les mois
+    const sortedMonths = Array.from(months).sort();
+    
+    // Générer les options
+    let html = '<option value="all">🗓️ Tous les mois</option>';
+    
+    const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    
+    sortedMonths.forEach(monthKey => {
+        const [year, month] = monthKey.split('-');
+        const monthName = monthNames[parseInt(month) - 1];
+        const selected = currentMonthFilter === monthKey ? ' selected' : '';
+        html += `<option value="${monthKey}"${selected}>${monthName} ${year}</option>`;
+    });
+    
+    if (window.SecurityUtils && window.SecurityUtils.setInnerHTML) {
+        window.SecurityUtils.setInnerHTML(selector, html);
+    } else {
+        selector.innerHTML = html;
+    }
+}
+
+function filterReservationsBySelectedMonth(reservations) {
+    if (currentMonthFilter === 'all') {
+        return reservations;
+    }
+    
+    const [filterYear, filterMonth] = currentMonthFilter.split('-').map(Number);
+    
+    return reservations.filter(r => {
+        const dateDebut = parseLocalDate(r.dateDebut);
+        const resYear = dateDebut.getFullYear();
+        const resMonth = dateDebut.getMonth() + 1;
+        
+        return resYear === filterYear && resMonth === filterMonth;
+    });
+}
+
 async function filterReservations(searchTerm) {
     // forceRefresh=true pour toujours avoir les dernières données
     const reservations = await getAllReservations(true);
@@ -246,8 +317,8 @@ async function updateReservationsList(keepScrollPosition = false) {
         });
         
         if (hasIcalConfigs) {
-            // Sync en arrière-plan, attendre le résultat pour invalider le cache
-            await syncAllCalendars().catch(err => console.warn('Sync iCal:', err.message));
+            // Sync en arrière-plan, ne pas attendre
+            syncAllCalendars().catch(err => console.warn('Sync iCal:', err.message));
         }
     }
     
@@ -274,11 +345,17 @@ async function updateReservationsList(keepScrollPosition = false) {
     // AFFICHAGE : Réservations en cours ou à venir
     // ============================================
     // RÈGLE : Afficher si check_out >= aujourd'hui (en cours ou futures)
-    const active = reservations.filter(r => {
+    let active = reservations.filter(r => {
         const dateFin = parseLocalDate(r.dateFin);
         dateFin.setHours(0, 0, 0, 0);
         return dateFin >= today;
     });
+    
+    // Populer le sélecteur de mois avec toutes les réservations (avant filtrage)
+    populateMonthSelector(active);
+    
+    // Appliquer le filtre de mois
+    active = filterReservationsBySelectedMonth(active);
     
     const container = document.getElementById('planning-container');
     if (!container) return;
@@ -551,6 +628,7 @@ window.deleteReservationById = deleteReservationById;
 window.updateReservationsList = updateReservationsList;
 window.generateWeekReservations = generateWeekReservations;
 window.getPlatformLogo = getPlatformLogo;
+window.filterReservationsByMonth = filterReservationsByMonth;
 
 // ==========================================
 // 🎯 INITIALISATION

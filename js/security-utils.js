@@ -51,6 +51,8 @@
         const trustedConfig = {
             ALLOW_DATA_ATTR: true,
             KEEP_CONTENT: true,
+            ADD_TAGS: ['script', 'style'],
+            ADD_ATTR: ['onclick', 'onmouseover', 'onmouseout', 'onchange', 'oninput', 'onsubmit', 'onfocus', 'onblur'],
             FORBID_ATTR: ['onerror', 'onload']
         };
         

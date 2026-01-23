@@ -5,6 +5,35 @@
 let currentGiteFilter = null; // UUID du gîte, sera initialisé dynamiquement
 let currentTypeFilter = 'entree';
 
+// =============================================
+// TRADUCTION AUTOMATIQUE
+// =============================================
+
+/**
+ * Traduit un texte du français vers l'anglais via l'API MyMemory
+ * @param {string} text - Texte français à traduire
+ * @returns {Promise<string>} - Texte traduit en anglais
+ */
+async function translateToEnglish(text) {
+    if (!text || text.trim() === '') return '';
+    
+    try {
+        const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`);
+        const data = await response.json();
+        
+        if (data.responseStatus === 200 && data.responseData) {
+            return data.responseData.translatedText;
+        }
+        
+        console.warn('⚠️ Traduction non disponible, texte original conservé');
+        return text;
+        
+    } catch (error) {
+        console.error('❌ Erreur traduction:', error);
+        return text; // Fallback sur texte original
+    }
+}
+
 // Helper : Vérifie si l'erreur est PGRST205 (table non créée)
 function isTableNotFound(error) {
     return error && error.code === 'PGRST205';
@@ -55,7 +84,8 @@ async function initChecklistsTab() {
     
     // Chargement initial
     await loadChecklistItems();
-    await loadReservationsProgress();
+    // NE PAS charger loadReservationsProgress() - géré par dashboard.js / loadChecklistsTab()
+    // await loadReservationsProgress();
 }
 
 // =============================================
@@ -96,7 +126,7 @@ async function loadChecklistItems() {
             window.SecurityUtils.setInnerHTML(container, `
                 <div style="text-align: center; padding: 20px; color: var(--gray-600);">
                     <p style="font-size: 3rem; margin-bottom: 10px;">📋</p>
-                    <p>Aucun item pour <strong>${currentGiteFilter}</strong> - <strong>${currentTypeFilter === 'entree' ? 'Entrée' : 'Sortie'}</strong></p>
+                    <p>Aucun item</p>
                 </div>
             `);
             return;
@@ -105,8 +135,12 @@ async function loadChecklistItems() {
         // Affichage des items
         let html = '';
         data.forEach((item, index) => {
+            // Encoder les données pour éviter les problèmes d'échappement
+            const texteEncoded = encodeURIComponent(item.texte || '');
+            const descriptionEncoded = encodeURIComponent(item.description || '');
+            
             html += `
-                <div class="checklist-item" data-id="${item.id}">
+                <div class="checklist-item" data-id="${item.id}" data-texte="${texteEncoded}" data-description="${descriptionEncoded}">
                     <div style="flex: 1;">
                         <div style="font-weight: 600; margin-bottom: 5px;">
                             ${index + 1}. ${item.texte}
@@ -114,19 +148,24 @@ async function loadChecklistItems() {
                         ${item.description ? `<div style="font-size: 0.9rem; color: var(--gray-600);">${item.description}</div>` : ''}
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button onclick="moveChecklistItem(${item.id}, 'up')" 
+                        <button data-action="move-up" data-item-id="${item.id}" 
                                 ${index === 0 ? 'disabled' : ''}
                                 style="background: var(--gray-200); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 1.2rem;" 
                                 title="Monter">
                             ⬆️
                         </button>
-                        <button onclick="moveChecklistItem(${item.id}, 'down')" 
+                        <button data-action="move-down" data-item-id="${item.id}" 
                                 ${index === data.length - 1 ? 'disabled' : ''}
                                 style="background: var(--gray-200); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 1.2rem;" 
                                 title="Descendre">
                             ⬇️
                         </button>
-                        <button onclick="deleteChecklistItem(${item.id})" 
+                        <button data-action="edit-item" data-item-id="${item.id}" 
+                                style="background: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;" 
+                                title="Modifier">
+                            ✏️
+                        </button>
+                        <button data-action="delete-item" data-item-id="${item.id}" 
                                 style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;" 
                                 title="Supprimer">
                             🗑️
@@ -138,9 +177,62 @@ async function loadChecklistItems() {
         
         window.SecurityUtils.setInnerHTML(container, html);
         
+        // ✅ Attacher les event listeners après génération du HTML
+        attachChecklistEventListeners();
+        
     } catch (error) {
         console.error('❌ Erreur chargement items:', error);
         window.SecurityUtils.setInnerHTML(container, `<p style="color: #ef4444;">Erreur: ${error.message}</p>`);
+    }
+}
+
+// =============================================
+// EVENT DELEGATION POUR BOUTONS DYNAMIQUES
+// =============================================
+
+let checklistListenerAttached = false; // Flag pour éviter les doublons
+
+function attachChecklistEventListeners() {
+    const container = document.getElementById('checklist-items-list');
+    if (!container) return;
+    
+    // Éviter d'attacher plusieurs fois le même listener
+    if (checklistListenerAttached) return;
+    
+    // Event delegation : un seul listener pour tous les boutons
+    container.addEventListener('click', handleChecklistClick);
+    checklistListenerAttached = true;
+}
+
+function handleChecklistClick(e) {
+    // Chercher le bouton même si on clique sur l'emoji
+    const button = e.target.closest('[data-action]');
+    if (!button) return;
+    
+    // Ne pas exécuter si le bouton est désactivé
+    if (button.disabled) return;
+    
+    const action = button.getAttribute('data-action');
+    const itemId = button.getAttribute('data-item-id'); // ✅ Garder comme chaîne (UUID)
+    
+    if (!itemId) {
+        console.error('❌ ID manquant');
+        return;
+    }
+    
+    switch(action) {
+        case 'move-up':
+            moveChecklistItem(itemId, 'up');
+            break;
+        case 'move-down':
+            moveChecklistItem(itemId, 'down');
+            break;
+        case 'edit-item':
+            editChecklistItem(itemId);
+            break;
+        case 'delete-item':
+            deleteChecklistItem(itemId);
+            break;
     }
 }
 
@@ -184,6 +276,14 @@ async function addChecklistItem() {
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) throw new Error('Utilisateur non authentifié');
         
+        // 🌍 TRADUCTION AUTOMATIQUE EN ANGLAIS
+        const description = descriptionInput.value.trim() || null;
+        
+        const [texteEn, descriptionEn] = await Promise.all([
+            translateToEnglish(texte),
+            description ? translateToEnglish(description) : Promise.resolve(null)
+        ]);
+        
         // Insertion
         const { error } = await supabaseClient
             .from('checklist_templates')
@@ -193,7 +293,9 @@ async function addChecklistItem() {
                 type: currentTypeFilter,
                 ordre: nextOrdre,
                 texte: texte,
-                description: descriptionInput.value.trim() || null,
+                texte_en: texteEn,
+                description: description,
+                description_en: descriptionEn,
                 actif: true
             });
         
@@ -214,6 +316,109 @@ async function addChecklistItem() {
     } catch (error) {
         console.error('❌ Erreur ajout item:', error);
         alert(`Erreur lors de l'ajout: ${error.message}`);
+    }
+}
+
+// =============================================
+// MODIFICATION D'UN ITEM
+// =============================================
+
+function editChecklistItem(itemId) {
+    const item = document.querySelector(`.checklist-item[data-id="${itemId}"]`);
+    
+    if (!item) {
+        console.error('❌ Item non trouvé:', itemId);
+        return;
+    }
+    
+    // Décoder les données
+    const texteActuel = decodeURIComponent(item.getAttribute('data-texte') || '');
+    const descriptionActuelle = decodeURIComponent(item.getAttribute('data-description') || '');
+    
+    // Pré-remplir les champs du formulaire
+    const texteInput = document.getElementById('checklist-new-text');
+    const descriptionInput = document.getElementById('checklist-new-description');
+    
+    if (texteInput) texteInput.value = texteActuel;
+    if (descriptionInput) descriptionInput.value = descriptionActuelle;
+    
+    // Modifier le bouton d'ajout en bouton de mise à jour
+    const btnSubmit = document.getElementById('btn-checklist-submit');
+    if (btnSubmit) {
+        btnSubmit.textContent = '✅ Mettre à jour';
+        btnSubmit.style.background = '#10b981';
+        btnSubmit.onclick = () => updateChecklistItem(itemId);
+        // Stocker l'ID pour le reset
+        btnSubmit.setAttribute('data-editing-id', itemId);
+    } else {
+        console.error('❌ Bouton submit non trouvé');
+    }
+    
+    // Scroll vers le formulaire
+    texteInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function updateChecklistItem(itemId) {
+    const texteInput = document.getElementById('checklist-new-text');
+    const descriptionInput = document.getElementById('checklist-new-description');
+    
+    if (!texteInput || !descriptionInput) return;
+    
+    const texte = texteInput.value.trim();
+    if (!texte) {
+        alert('⚠️ Veuillez saisir le texte de l\'item');
+        return;
+    }
+    
+    try {
+        const description = descriptionInput.value.trim() || null;
+        
+        // 🌍 TRADUCTION AUTOMATIQUE
+        console.log('🌍 Traduction automatique en cours...');
+        const [texteEn, descriptionEn] = await Promise.all([
+            translateToEnglish(texte),
+            description ? translateToEnglish(description) : Promise.resolve(null)
+        ]);
+        
+        console.log('✅ Traduction terminée:', { texteEn, descriptionEn });
+        
+        // Mise à jour
+        const { error } = await supabaseClient
+            .from('checklist_templates')
+            .update({
+                texte: texte,
+                texte_en: texteEn,
+                description: description,
+                description_en: descriptionEn
+            })
+            .eq('id', itemId);
+        
+        if (error) {
+            if (isTableNotFound(error)) return;
+            throw error;
+        }
+        
+        // Rafraîchir la liste
+        await loadChecklistItems();
+        
+        // Réinitialiser le formulaire
+        texteInput.value = '';
+        descriptionInput.value = '';
+        
+        // Réinitialiser le bouton
+        const btnSubmit = document.getElementById('btn-checklist-submit');
+        if (btnSubmit) {
+            btnSubmit.textContent = '➕ Ajouter l\'item';
+            btnSubmit.style.background = '#27ae60';
+            btnSubmit.onclick = addChecklistItem;
+            btnSubmit.removeAttribute('data-editing-id');
+        }
+        
+        showNotification('✅ Item modifié avec succès', 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur modification item:', error);
+        alert(`Erreur lors de la modification: ${error.message}`);
     }
 }
 
@@ -309,6 +514,15 @@ function clearChecklistForm() {
     
     if (texteInput) texteInput.value = '';
     if (descriptionInput) descriptionInput.value = '';
+    
+    // Réinitialiser le bouton s'il était en mode "Mise à jour"
+    const btnSubmit = document.getElementById('btn-checklist-submit');
+    if (btnSubmit) {
+        btnSubmit.textContent = '➕ Ajouter l\'item';
+        btnSubmit.style.background = '#27ae60';
+        btnSubmit.onclick = addChecklistItem;
+        btnSubmit.removeAttribute('data-editing-id');
+    }
 }
 
 // =============================================

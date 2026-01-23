@@ -7,7 +7,30 @@
 let stocksActuels = {};
 let derniereSimulation = null; // Stocke les résultats de la dernière simulation
 let gites = []; // Cache des gîtes
-let besoinsCache = {}; // Cache des besoins par gite_id
+let besoinsCache = {}; // Cache des besoins par gite_id (quantités)
+let besoinsMetaCache = {}; // Cache des besoins par gite_id (liste complète)
+
+function getBesoinKeys(giteId) {
+    return (besoinsMetaCache[giteId] || []).map(b => b.item_key);
+}
+
+function getBesoinLabelMap() {
+    const labels = {};
+    Object.values(besoinsMetaCache).forEach(list => {
+        (list || []).forEach(b => {
+            labels[b.item_key] = b.item_label;
+        });
+    });
+    return labels;
+}
+
+function getAllBesoinKeys() {
+    const set = new Set();
+    Object.values(besoinsMetaCache).forEach(list => {
+        (list || []).forEach(b => set.add(b.item_key));
+    });
+    return Array.from(set);
+}
 
 // ================================================================
 // UTILITAIRES
@@ -34,6 +57,7 @@ async function chargerBesoinsGite(giteId) {
         });
         
         besoinsCache[giteId] = result;
+        besoinsMetaCache[giteId] = besoins || [];
         return result;
     } catch (error) {
         console.error('Erreur chargement besoins:', error);
@@ -94,24 +118,27 @@ async function genererHTMLBesoins() {
                 <div style="background: white; border: 3px solid ${color}; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; padding: 20px; flex: 1; min-width: 200px; transition: all 0.2s;" 
                      id="gite-besoins-${gite.id}" 
                      data-gite-besoins='${dataJson}'>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div>
-                            <h3 style="margin: 0; font-size: 1.1rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">
-                                🏠 ${gite.name}
-                            </h3>
-                            <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">
-                                ${besoinsGite.length} types d'items • ${totalItems} pièces
-                            </p>
-                        </div>
-                        <div id="actions-${gite.id}">
-                            <button onclick="editerBesoins('${gite.id}')" 
-                                    style="background: ${color}; color: white; border: 2px solid #2D3436; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;"
-                                    onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'"
-                                    onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
-                                ✏️ Éditer
-                            </button>
-                        </div>
+                    <!-- En-tête avec nom et infos -->
+                    <div style="margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">
+                            🏠 ${gite.name}
+                        </h3>
+                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">
+                            ${besoinsGite.length} types d'items • ${totalItems} pièces
+                        </p>
                     </div>
+                    
+                    <!-- Boutons d'action sous le titre -->
+                    <div id="actions-${gite.id}" style="margin-bottom: 15px;">
+                        <button onclick="editerBesoins('${gite.id}')" 
+                                style="background: ${color}; color: white; border: 2px solid #2D3436; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s; width: 100%;"
+                                onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'"
+                                onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
+                            ✏️ Éditer
+                        </button>
+                    </div>
+                    
+                    <!-- Liste des besoins -->
                     <div id="besoins-list-${gite.id}" style="display: none;">
                         <!-- Contenu masqué par défaut -->
                     </div>
@@ -139,7 +166,8 @@ function genererHTMLStocks() {
         const gite = gites[i];
         const slug = gite.slug;
         const color = colors[i % colors.length];
-        
+        const besoinsMeta = besoinsMetaCache[gite.id] || [];
+
         html += `
             <div style="background: white; border: 3px solid ${color}; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; padding: 0; flex: 1; min-width: 200px;">
                 <!-- Header avec titre -->
@@ -151,36 +179,20 @@ function genererHTMLStocks() {
                 
                 <!-- Liste des stocks -->
                 <div style="padding: 15px;">
-                    <div style="display: grid; gap: 12px;">
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2D3436; font-size: 0.8rem;">Draps plats grands</label>
-                            <input type="number" id="stock-${slug}-draps-grands" min="0" style="width: 100%; padding: 8px 10px; border: 2px solid #dee2e6; border-radius: 6px; font-weight: 700; text-align: center; font-size: 0.95rem;" value="0">
+                    ${besoinsMeta.length === 0 ? `
+                        <div style="text-align: center; color: #666; font-size: 0.85rem; padding: 10px;">
+                            Aucun type de linge configuré
                         </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2D3436; font-size: 0.8rem;">Draps plats petits</label>
-                            <input type="number" id="stock-${slug}-draps-petits" min="0" style="width: 100%; padding: 8px 10px; border: 2px solid #dee2e6; border-radius: 6px; font-weight: 700; text-align: center; font-size: 0.95rem;" value="0">
+                    ` : `
+                        <div style="display: grid; gap: 12px;">
+                            ${besoinsMeta.map(besoin => `
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2D3436; font-size: 0.8rem;">${besoin.item_label}</label>
+                                    <input type="number" id="stock-${slug}-${besoin.item_key}" min="0" style="width: 100%; padding: 8px 10px; border: 2px solid #dee2e6; border-radius: 6px; font-weight: 700; text-align: center; font-size: 0.95rem;" value="0">
+                                </div>
+                            `).join('')}
                         </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2D3436; font-size: 0.8rem;">Housses couette grandes</label>
-                            <input type="number" id="stock-${slug}-housses-grandes" min="0" style="width: 100%; padding: 8px 10px; border: 2px solid #dee2e6; border-radius: 6px; font-weight: 700; text-align: center; font-size: 0.95rem;" value="0">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2D3436; font-size: 0.8rem;">Housses couette petites</label>
-                            <input type="number" id="stock-${slug}-housses-petites" min="0" style="width: 100%; padding: 8px 10px; border: 2px solid #dee2e6; border-radius: 6px; font-weight: 700; text-align: center; font-size: 0.95rem;" value="0">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2D3436; font-size: 0.8rem;">Taies d'oreillers</label>
-                            <input type="number" id="stock-${slug}-taies" min="0" style="width: 100%; padding: 8px 10px; border: 2px solid #dee2e6; border-radius: 6px; font-weight: 700; text-align: center; font-size: 0.95rem;" value="0">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2D3436; font-size: 0.8rem;">Serviettes</label>
-                            <input type="number" id="stock-${slug}-serviettes" min="0" style="width: 100%; padding: 8px 10px; border: 2px solid #dee2e6; border-radius: 6px; font-weight: 700; text-align: center; font-size: 0.95rem;" value="0">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2D3436; font-size: 0.8rem;">Tapis de bain</label>
-                            <input type="number" id="stock-${slug}-tapis" min="0" style="width: 100%; padding: 8px 10px; border: 2px solid #dee2e6; border-radius: 6px; font-weight: 700; text-align: center; font-size: 0.95rem;" value="0">
-                        </div>
-                    </div>
+                    `}
                 </div>
             </div>
         `;
@@ -255,21 +267,21 @@ function editerBesoins(giteId) {
     
     // Changer les boutons d'action
     actionsDiv.innerHTML = `
-        <div style="display: flex; gap: 8px;">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
             <button onclick="ajouterItemPersonnalise('${giteId}')" 
-                    style="background: #f39c12; color: white; border: 2px solid #2D3436; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;"
+                    style="background: #f39c12; color: white; border: 2px solid #2D3436; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s; width: 100%;"
                     onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'"
                     onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
                 ➕ Ajouter
             </button>
             <button onclick="sauvegarderBesoinsGite('${giteId}')" 
-                    style="background: #27ae60; color: white; border: 2px solid #2D3436; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;"
+                    style="background: #27ae60; color: white; border: 2px solid #2D3436; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s; width: 100%;"
                     onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'"
                     onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
                 💾 Sauvegarder
             </button>
             <button onclick="annulerEditionBesoins('${giteId}')" 
-                    style="background: white; color: #2D3436; border: 2px solid #2D3436; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;"
+                    style="background: white; color: #2D3436; border: 2px solid #2D3436; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s; width: 100%;"
                     onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'"
                     onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
                 ✖️ Annuler
@@ -402,6 +414,11 @@ async function ajouterItemPersonnalise(giteId) {
         
         // Focus sur le champ nom
         document.getElementById(`besoin-label-${giteId}-${newItem.id}`).focus();
+
+        // Rafraîchir les caches et les stocks
+        await chargerBesoinsGite(giteId);
+        genererHTMLStocks();
+        await chargerStocks();
         
     } catch (error) {
         console.error('Erreur ajout item:', error);
@@ -419,14 +436,34 @@ async function supprimerItemPersonnalise(giteId, besoinId) {
             return;
         }
         
-        // Supprimer de la BDD
+        // Récupérer l'item_key avant suppression
+        const { data: besoin, error: besoinError } = await window.supabaseClient
+            .from('linen_needs')
+            .select('item_key')
+            .eq('id', besoinId)
+            .eq('owner_user_id', user.id)
+            .single();
+
+        if (besoinError) throw besoinError;
+
+        // Supprimer le besoin
         const { error } = await window.supabaseClient
             .from('linen_needs')
             .delete()
             .eq('id', besoinId)
             .eq('owner_user_id', user.id);
-        
+
         if (error) throw error;
+
+        // Supprimer le stock associé
+        if (besoin?.item_key) {
+            await window.supabaseClient
+                .from('linen_stock_items')
+                .delete()
+                .eq('owner_user_id', user.id)
+                .eq('gite_id', giteId)
+                .eq('item_key', besoin.item_key);
+        }
         
         // Supprimer visuellement
         const container = document.getElementById(`besoins-list-${giteId}`);
@@ -434,6 +471,11 @@ async function supprimerItemPersonnalise(giteId, besoinId) {
             const item = container.querySelector(`[data-besoin-id="${besoinId}"]`);
             if (item) item.remove();
         }
+
+        // Rafraîchir les caches et les stocks
+        await chargerBesoinsGite(giteId);
+        genererHTMLStocks();
+        await chargerStocks();
         
     } catch (error) {
         console.error('Erreur suppression item:', error);
@@ -511,7 +553,6 @@ async function initDraps() {
     
     // Générer le HTML dynamiquement
     await genererHTMLBesoins();
-    genererHTMLStocks();
     
     // Initialiser stocksActuels pour chaque gîte
     gites.forEach(g => {
@@ -520,6 +561,9 @@ async function initDraps() {
     
     // Charger les besoins de tous les gîtes
     await rechargerTousLesBesoins();
+    
+    // Générer les stocks après chargement des besoins
+    genererHTMLStocks();
     
     await chargerStocks();
     await analyserReservations();
@@ -548,10 +592,10 @@ async function chargerStocks() {
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) throw new Error('Utilisateur non connecté');
 
-        // Charger les stocks avec filtre RLS
+        // Charger les stocks dynamiques avec filtre RLS
         const { data, error } = await window.supabaseClient
-            .from('linen_stocks')
-            .select('*')
+            .from('linen_stock_items')
+            .select('gite_id, item_key, quantity')
             .eq('owner_user_id', user.id);
 
         if (error) {
@@ -563,28 +607,21 @@ async function chargerStocks() {
             throw new Error(`Erreur chargement stocks: ${error.message}`);
         }
 
-        data.forEach(stock => {
-            stocksActuels[stock.gite_id] = stock;
-            
-            // Remplir les champs (vérifier qu'ils existent)
-            const gite = gites.find(g => g.id === stock.gite_id);
-            if (!gite) return;
-            
+        (data || []).forEach(item => {
+            if (!stocksActuels[item.gite_id]) {
+                stocksActuels[item.gite_id] = {};
+            }
+            stocksActuels[item.gite_id][item.item_key] = item.quantity || 0;
+        });
+
+        // Remplir les champs selon les besoins configurés
+        gites.forEach(gite => {
             const giteSlug = gite.slug;
-            const fields = [
-                { id: `stock-${giteSlug}-draps-grands`, value: stock.draps_plats_grands },
-                { id: `stock-${giteSlug}-draps-petits`, value: stock.draps_plats_petits },
-                { id: `stock-${giteSlug}-housses-grandes`, value: stock.housses_couettes_grandes },
-                { id: `stock-${giteSlug}-housses-petites`, value: stock.housses_couettes_petites },
-                { id: `stock-${giteSlug}-taies`, value: stock.taies_oreillers },
-                { id: `stock-${giteSlug}-serviettes`, value: stock.serviettes },
-                { id: `stock-${giteSlug}-tapis`, value: stock.tapis_bain }
-            ];
-            
-            fields.forEach(field => {
-                const element = document.getElementById(field.id);
+            const besoinsMeta = besoinsMetaCache[gite.id] || [];
+            besoinsMeta.forEach(besoin => {
+                const element = document.getElementById(`stock-${giteSlug}-${besoin.item_key}`);
                 if (element) {
-                    element.value = field.value || 0;
+                    element.value = stocksActuels[gite.id]?.[besoin.item_key] || 0;
                 }
             });
         });
@@ -609,23 +646,21 @@ async function sauvegarderStocks() {
 
         for (const gite of gites) {
             const slug = gite.slug;
-            
-            const stocks = {
+            const besoinsMeta = besoinsMetaCache[gite.id] || [];
+
+            if (besoinsMeta.length === 0) continue;
+
+            const stockItems = besoinsMeta.map(besoin => ({
                 owner_user_id: user.id,
                 gite_id: gite.id,
-                draps_plats_grands: parseInt(document.getElementById(`stock-${slug}-draps-grands`)?.value) || 0,
-                draps_plats_petits: parseInt(document.getElementById(`stock-${slug}-draps-petits`)?.value) || 0,
-                housses_couettes_grandes: parseInt(document.getElementById(`stock-${slug}-housses-grandes`)?.value) || 0,
-                housses_couettes_petites: parseInt(document.getElementById(`stock-${slug}-housses-petites`)?.value) || 0,
-                taies_oreillers: parseInt(document.getElementById(`stock-${slug}-taies`)?.value) || 0,
-                serviettes: parseInt(document.getElementById(`stock-${slug}-serviettes`)?.value) || 0,
-                tapis_bain: parseInt(document.getElementById(`stock-${slug}-tapis`)?.value) || 0,
+                item_key: besoin.item_key,
+                quantity: parseInt(document.getElementById(`stock-${slug}-${besoin.item_key}`)?.value) || 0,
                 updated_at: new Date().toISOString()
-            };
+            }));
 
             const { error } = await window.supabaseClient
-                .from('linen_stocks')
-                .upsert(stocks, { onConflict: 'gite_id' });
+                .from('linen_stock_items')
+                .upsert(stockItems, { onConflict: 'gite_id,item_key' });
 
             if (error) {
                 console.error('Erreur Supabase sauvegarderStocks:', error);
@@ -704,20 +739,22 @@ function calculerReservationsCouvertes(resaParGite) {
         const color = colors[i % colors.length];
         const stock = stocksActuels[gite.id] || {};
         const besoins = besoinsCache[gite.id] || {};
+        const keys = getBesoinKeys(gite.id);
         
-        // Calculer le minimum pour chaque type de linge
-        const ratios = [
-            Math.floor((stock.draps_plats_grands || 0) / (besoins.draps_plats_grands || 1)),
-            Math.floor((stock.draps_plats_petits || 0) / (besoins.draps_plats_petits || 1)),
-            Math.floor((stock.housses_couettes_grandes || 0) / (besoins.housses_couettes_grandes || 1)),
-            Math.floor((stock.housses_couettes_petites || 0) / (besoins.housses_couettes_petites || 1)),
-            Math.floor((stock.taies_oreillers || 0) / (besoins.taies_oreillers || 1)),
-            Math.floor((stock.serviettes || 0) / (besoins.serviettes || 1)),
-            Math.floor((stock.tapis_bain || 0) / (besoins.tapis_bain || 1))
-        ];
-        
-        const nbReservations = Math.min(...ratios.filter(r => r >= 0));
-        const reservations = resaParGite[gite.id];
+        // ✅ Déclarer reservations AVANT de l'utiliser
+        const reservations = resaParGite[gite.id] || [];
+
+        let nbReservations = 0;
+        if (keys.length > 0) {
+            const ratios = keys.map(key => {
+                const needQty = besoins[key] || 0;
+                if (needQty <= 0) return Infinity;
+                return Math.floor((stock[key] || 0) / needQty);
+            });
+
+            const minRatio = Math.min(...ratios);
+            nbReservations = Number.isFinite(minRatio) ? minRatio : reservations.length;
+        }
         
         // Trouver jusqu'à quelle date on peut tenir
         let dateJusqua = null;
@@ -733,18 +770,18 @@ function calculerReservationsCouvertes(resaParGite) {
             }
         }
         
-        const isSuccess = nbReservations >= reservations.length;
-        const isWarning = nbReservations >= Math.ceil(reservations.length / 2);
-        const isDanger = nbReservations === 0;
+        const isSuccess = nbReservations >= reservations.length && keys.length > 0;
+        const isWarning = nbReservations >= Math.ceil(reservations.length / 2) && keys.length > 0;
+        const isDanger = keys.length === 0 || nbReservations === 0;
         
         const statusBg = isSuccess ? '#d4edda' : isWarning ? '#fff3cd' : '#f8d7da';
         const statusText = isSuccess ? '#155724' : isWarning ? '#856404' : '#721c24';
         const statusIcon = isSuccess ? '✅' : isDanger ? '❌' : '⚠️';
-        const statusMsg = isSuccess ? 
-            'Stock suffisant' : 
-            isDanger ? 
-            'Stock épuisé' :
-            `${nbReservations}/${reservations.length} résa`;
+        const statusMsg = keys.length === 0 ?
+            'Configurer besoins' :
+            (isSuccess ?
+                'Stock suffisant' :
+                (isDanger ? 'Stock insuffisant' : `${nbReservations}/${reservations.length} résa`));
         
         // Stocker les infos de couverture
         infosCouverture[gite.id] = {
@@ -778,7 +815,10 @@ function calculerReservationsCouvertes(resaParGite) {
         `;
     }
 
-    window.SecurityUtils.setInnerHTML(container, html);
+    const containerCouverture = document.getElementById('reservations-couvertes');
+    if (containerCouverture) {
+        window.SecurityUtils.setInnerHTML(containerCouverture, html);
+    }
     return infosCouverture;
 }
 
@@ -794,9 +834,11 @@ function calculerAEmmener(resaParGite, infosCouverture) {
         const gite = gites[i];
         const color = colors[i % colors.length];
         const infos = infosCouverture[gite.id];
-        const besoins = gite.settings?.linen_needs || {};
+        const besoins = besoinsCache[gite.id] || {};
+        const keys = getBesoinKeys(gite.id);
+        const labels = getBesoinLabelMap();
         
-        if (!infos || infos.nbReservationsCouvertes === 0 || infos.reservations.length === 0) {
+        if (!infos || infos.nbReservationsCouvertes === 0 || infos.reservations.length === 0 || keys.length === 0) {
             html += `
                 <div style="background: white; border: 3px solid ${color}; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; padding: 15px; flex: 1; min-width: 180px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: ${color}; border-radius: 8px; margin-bottom: 12px;">
@@ -804,7 +846,9 @@ function calculerAEmmener(resaParGite, infosCouverture) {
                             🏠 ${gite.name}
                         </h4>
                     </div>
-                    <p style="color: #666; font-size: 0.85rem; text-align: center; padding: 20px 0;">Aucune réservation couverte</p>
+                    <p style="color: #666; font-size: 0.85rem; text-align: center; padding: 20px 0;">
+                        ${keys.length === 0 ? 'Configurer les besoins' : 'Aucune réservation couverte'}
+                    </p>
                 </div>
             `;
             continue;
@@ -814,15 +858,10 @@ function calculerAEmmener(resaParGite, infosCouverture) {
         const nbResa = Math.min(infos.nbReservationsCouvertes, infos.reservations.length);
         const reservationsCouvertes = infos.reservations.slice(0, nbResa);
         
-        const total = {
-            draps_plats_grands: (besoins.draps_plats_grands || 0) * nbResa,
-            draps_plats_petits: (besoins.draps_plats_petits || 0) * nbResa,
-            housses_couettes_grandes: (besoins.housses_couettes_grandes || 0) * nbResa,
-            housses_couettes_petites: (besoins.housses_couettes_petites || 0) * nbResa,
-            taies_oreillers: (besoins.taies_oreillers || 0) * nbResa,
-            serviettes: (besoins.serviettes || 0) * nbResa,
-            tapis_bain: (besoins.tapis_bain || 0) * nbResa
-        };
+        const total = {};
+        keys.forEach(key => {
+            total[key] = (besoins[key] || 0) * nbResa;
+        });
         
         const dateInfo = infos.dateLimite ? 
             ` jusqu'au ${infos.dateLimite.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}` : '';
@@ -839,19 +878,16 @@ function calculerAEmmener(resaParGite, infosCouverture) {
                     <div style="font-size: 0.75rem; color: #666; margin-top: 3px;">${dateInfo}</div>
                 </div>
                 <ul style="font-size: 0.8rem; line-height: 1.6; margin: 0; padding-left: 20px; color: #2D3436;">
-                    <li><strong>${total.draps_plats_grands}</strong> draps plats grands</li>
-                    <li><strong>${total.draps_plats_petits}</strong> draps plats petits</li>
-                    <li><strong>${total.housses_couettes_grandes}</strong> housses couette grandes</li>
-                    <li><strong>${total.housses_couettes_petites}</strong> housses couette petites</li>
-                    <li><strong>${total.taies_oreillers}</strong> taies d'oreillers</li>
-                    <li><strong>${total.serviettes}</strong> serviettes</li>
-                    <li><strong>${total.tapis_bain}</strong> tapis de bain</li>
+                    ${keys.map(key => `<li><strong>${total[key] || 0}</strong> ${(labels[key] || key).toLowerCase()}</li>`).join('')}
                 </ul>
             </div>
         `;
     }
 
-    window.SecurityUtils.setInnerHTML(container, html);
+    const containerEmmener = document.getElementById('a-emmener');
+    if (containerEmmener) {
+        window.SecurityUtils.setInnerHTML(containerEmmener, html);
+    }
 }
 
 // ================================================================
@@ -880,39 +916,30 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture) {
                 }) || [];
                 
                 if (reservations3Semaines.length > 0) {
-                    const besoins = gite.settings?.linen_needs || {};
+                    const besoins = besoinsCache[gite.id] || {};
                     const stock = stocksActuels[gite.id] || {};
+                    const keys = getBesoinKeys(gite.id);
+                    const labels = getBesoinLabelMap();
+
+                    if (keys.length === 0) {
+                        continue;
+                    }
                     
                     // Calculer ce qu'il faut commander
-                    const necessaire = {
-                        draps_plats_grands: (besoins.draps_plats_grands || 0) * reservations3Semaines.length,
-                        draps_plats_petits: (besoins.draps_plats_petits || 0) * reservations3Semaines.length,
-                        housses_couettes_grandes: (besoins.housses_couettes_grandes || 0) * reservations3Semaines.length,
-                        housses_couettes_petites: (besoins.housses_couettes_petites || 0) * reservations3Semaines.length,
-                        taies_oreillers: (besoins.taies_oreillers || 0) * reservations3Semaines.length,
-                        serviettes: (besoins.serviettes || 0) * reservations3Semaines.length,
-                        tapis_bain: (besoins.tapis_bain || 0) * reservations3Semaines.length
-                    };
-                    
-                    const aCommander = {
-                        draps_plats_grands: Math.max(0, necessaire.draps_plats_grands - (stock.draps_plats_grands || 0)),
-                        draps_plats_petits: Math.max(0, necessaire.draps_plats_petits - (stock.draps_plats_petits || 0)),
-                        housses_couettes_grandes: Math.max(0, necessaire.housses_couettes_grandes - (stock.housses_couettes_grandes || 0)),
-                        housses_couettes_petites: Math.max(0, necessaire.housses_couettes_petites - (stock.housses_couettes_petites || 0)),
-                        taies_oreillers: Math.max(0, necessaire.taies_oreillers - (stock.taies_oreillers || 0)),
-                        serviettes: Math.max(0, necessaire.serviettes - (stock.serviettes || 0)),
-                        tapis_bain: Math.max(0, necessaire.tapis_bain - (stock.tapis_bain || 0))
-                    };
+                    const necessaire = {};
+                    const aCommander = {};
+                    keys.forEach(key => {
+                        necessaire[key] = (besoins[key] || 0) * reservations3Semaines.length;
+                        aCommander[key] = Math.max(0, necessaire[key] - (stock[key] || 0));
+                    });
                     
                     // Construire le détail de la commande
                     const details = [];
-                    if (aCommander.draps_plats_grands > 0) details.push(`${aCommander.draps_plats_grands} draps plats grands`);
-                    if (aCommander.draps_plats_petits > 0) details.push(`${aCommander.draps_plats_petits} draps plats petits`);
-                    if (aCommander.housses_couettes_grandes > 0) details.push(`${aCommander.housses_couettes_grandes} housses couette grandes`);
-                    if (aCommander.housses_couettes_petites > 0) details.push(`${aCommander.housses_couettes_petites} housses couette petites`);
-                    if (aCommander.taies_oreillers > 0) details.push(`${aCommander.taies_oreillers} taies d'oreillers`);
-                    if (aCommander.serviettes > 0) details.push(`${aCommander.serviettes} serviettes`);
-                    if (aCommander.tapis_bain > 0) details.push(`${aCommander.tapis_bain} tapis de bain`);
+                    keys.forEach(key => {
+                        if (aCommander[key] > 0) {
+                            details.push(`${aCommander[key]} ${(labels[key] || key).toLowerCase()}`);
+                        }
+                    });
                     
                     if (details.length > 0) {
                         const dateFormatee = troisSemainesFuture.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
@@ -926,28 +953,42 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture) {
                         const { data: { user } } = await window.supabaseClient.auth.getUser();
                         if (!user) throw new Error('Utilisateur non connecté');
                         
-                        const { data: tachesExistantes } = await window.supabaseClient
+                        const { data: tachesExistantes, error: errorTodos } = await window.supabaseClient
                             .from('todos')
                             .select('*')
                             .eq('owner_user_id', user.id)
                             .eq('category', 'achats')
-                            .eq('gite', gite.name)
+                            .eq('gite_id', gite.id)
                             .eq('completed', false)
                             .ilike('title', '%Commander draps%')
                             .gte('created_at', deuxJoursAvant.toISOString());
                         
+                        // Si la table n'existe pas, ignorer silencieusement (pas d'erreur console)
+                        if (errorTodos) {
+                            if (errorTodos?.code === '42P01' || errorTodos?.code === 'PGRST204') {
+                                // Table inexistante - normal, on ignore
+                                return;
+                            }
+                            console.warn('⚠️ Erreur table todos:', errorTodos.message);
+                            return;
+                        }
+                        
                         // Créer la tâche seulement si elle n'existe pas déjà
                         if (!tachesExistantes || tachesExistantes.length === 0) {
-                            await window.supabaseClient
+                            const { error: insertError } = await window.supabaseClient
                                 .from('todos')
                                 .insert({
                                     owner_user_id: user.id,
+                                    gite_id: gite.id,
                                     category: 'achats',
                                     title: `🛏️ Commander draps pour ${gite.name}`,
                                     description: description,
-                                    gite: gite.name,
                                     completed: false
                                 });
+                            
+                            if (insertError) {
+                                console.warn('⚠️ Erreur insertion todo (table peut-être inexistante)');
+                            }
                         }
                     }
                 }
@@ -1023,25 +1064,8 @@ function afficherResultatsSimulation(resaParGite, dateLimit) {
     ];
     
     // Calculer les totaux globaux tous gîtes confondus
-    const itemsStandard = [
-        'draps_plats_grands',
-        'draps_plats_petits', 
-        'housses_couettes_grandes',
-        'housses_couettes_petites',
-        'taies_oreillers',
-        'serviettes',
-        'tapis_bain'
-    ];
-    
-    const labels = {
-        draps_plats_grands: 'Draps plats grands',
-        draps_plats_petits: 'Draps plats petits',
-        housses_couettes_grandes: 'Housses couette grandes',
-        housses_couettes_petites: 'Housses couette petites',
-        taies_oreillers: 'Taies d\'oreillers',
-        serviettes: 'Serviettes',
-        tapis_bain: 'Tapis de bain'
-    };
+    const labels = getBesoinLabelMap();
+    const itemsStandard = getAllBesoinKeys();
     
     const totauxGlobaux = {};
     
@@ -1102,7 +1126,7 @@ function afficherResultatsSimulation(resaParGite, dateLimit) {
                     <ul style="font-size: 0.75rem; line-height: 1.5; margin: 0; padding-left: 20px; color: #2D3436;">
                         ${itemsStandard.map(key => 
                             detailsParType[key].aCommander > 0 ? 
-                            `<li><strong>${detailsParType[key].aCommander}</strong> ${labels[key].toLowerCase()}</li>` : ''
+                            `<li><strong>${detailsParType[key].aCommander}</strong> ${(labels[key] || key).toLowerCase()}</li>` : ''
                         ).join('')}
                     </ul>
                 ` : ''}
@@ -1140,16 +1164,8 @@ function afficherAEmmenerDepuisSimulation() {
             return;
         }
         
-        // Calculer pour chaque type de linge
-        const itemsStandard = [
-            'draps_plats_grands',
-            'draps_plats_petits',
-            'housses_couettes_grandes',
-            'housses_couettes_petites',
-            'taies_oreillers',
-            'serviettes',
-            'tapis_bain'
-        ];
+        // Calculer pour chaque type de linge (dynamique)
+        const itemsStandard = getBesoinKeys(gite.id);
         
         const totalNecessaire = {};
         const aEmmener = {};
@@ -1162,6 +1178,9 @@ function afficherAEmmenerDepuisSimulation() {
         const totalAEmmener = Object.values(aEmmener).reduce((a, b) => a + b, 0);
         const dateFormatee = new Date(dateLimit).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
         
+        const keys = getBesoinKeys(gite.id);
+        const labels = getBesoinLabelMap();
+
         html += `
             <div class="stat-box">
                 <h4>🏠 ${gite.name}</h4>
@@ -1170,13 +1189,9 @@ function afficherAEmmenerDepuisSimulation() {
                 </p>
                 ${totalAEmmener > 0 ? `
                     <div class="list-items" style="text-align: left;">
-                        ${aEmmener.draps_plats_grands > 0 ? `<div>• Draps plats grands: <strong>${aEmmener.draps_plats_grands}</strong></div>` : ''}
-                        ${aEmmener.draps_plats_petits > 0 ? `<div>• Draps plats petits: <strong>${aEmmener.draps_plats_petits}</strong></div>` : ''}
-                        ${aEmmener.housses_couettes_grandes > 0 ? `<div>• Housses couette grandes: <strong>${aEmmener.housses_couettes_grandes}</strong></div>` : ''}
-                        ${aEmmener.housses_couettes_petites > 0 ? `<div>• Housses couette petites: <strong>${aEmmener.housses_couettes_petites}</strong></div>` : ''}
-                        ${aEmmener.taies_oreillers > 0 ? `<div>• Taies d'oreillers: <strong>${aEmmener.taies_oreillers}</strong></div>` : ''}
-                        ${aEmmener.serviettes > 0 ? `<div>• Serviettes: <strong>${aEmmener.serviettes}</strong></div>` : ''}
-                        ${aEmmener.tapis_bain > 0 ? `<div>• Tapis de bain: <strong>${aEmmener.tapis_bain}</strong></div>` : ''}
+                        ${keys.map(key =>
+                            aEmmener[key] > 0 ? `<div>• ${(labels[key] || key)}: <strong>${aEmmener[key]}</strong></div>` : ''
+                        ).join('')}
                     </div>
                 ` : `
                     <div style="color: #27AE60; font-weight: 600; margin-top: 10px;">✅ Stock suffisant</div>

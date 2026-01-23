@@ -14,9 +14,7 @@
 // ==========================================
 
 async function genererHTMLStatsGites() {
-    console.log('🏗️ genererHTMLStatsGites() appelée');
     const gites = await window.gitesManager.getAll();
-    console.log('🏠 Gîtes récupérés:', gites.length);
     
     // Générer les cartes de taux d'occupation
     const tauxContainer = document.getElementById('taux-occupation-container');
@@ -221,10 +219,8 @@ async function updateAdvancedStats(reservations) {
 // ==========================================
 
 async function populateYearFilter() {
-    console.log('🚀 populateYearFilter() appelée');
     // Générer le HTML dynamique pour les gîtes
     await genererHTMLStatsGites();
-    console.log('✅ HTML des stats gîtes généré');
     
     const reservations = await getAllReservations();
     const years = new Set();
@@ -262,11 +258,8 @@ async function populateYearFilter() {
 }
 
 async function filterStatsByYear() {
-    console.log('🔄 filterStatsByYear() appelée');
     const selectedYear = parseInt(document.getElementById('yearFilterStats').value);
-    console.log('📅 Année sélectionnée:', selectedYear);
     const reservations = await getAllReservations();
-    console.log('📚 Total réservations chargées:', reservations.length);
     
     const filteredReservations = reservations.filter(r => {
         const year = parseLocalDate(r.dateDebut).getFullYear();
@@ -281,24 +274,10 @@ async function filterStatsByYear() {
     let caTotal = 0;
     let totalReservations = 0;
     
-    console.log('🔍 DEBUG Statistiques:');
-    console.log('Total réservations filtrées:', filteredReservations.length);
-    console.log('Gîtes disponibles:', gites.map(g => `${g.name} (id: ${g.id}, slug: ${g.slug})`));
-    
-    // Afficher quelques réservations pour debug
-    if (filteredReservations.length > 0) {
-        console.log('Exemples de réservations:', filteredReservations.slice(0, 3).map(r => ({
-            gite_id: r.gite_id,
-            giteId: r.giteId,
-            gite: r.gite,
-            montant: r.montant,
-            total_price: r.total_price
-        })));
-    }
-    
     gites.forEach(gite => {
         const reservationsGite = filteredReservations.filter(r => {
-            const match = r.gite_id === gite.id || r.gite === gite.name;
+            // Support de tous les formats possibles
+            const match = r.gite_id === gite.id || r.giteId === gite.id || r.gite === gite.name;
             return match;
         });
         
@@ -309,20 +288,14 @@ async function filterStatsByYear() {
         caTotal += caGite;
         totalReservations += reservationsGite.length;
         
-        console.log(`📊 ${gite.name} (${gite.slug}): ${reservationsGite.length} réservations, ${caGite.toFixed(0)} €`);
-        
         const elGite = document.getElementById(`stat${gite.slug}`);
         if (elGite) {
             elGite.textContent = reservationsGite.length;
-        } else {
-            console.warn(`❌ Élément stat${gite.slug} non trouvé`);
         }
         
         const elCA = document.getElementById(`statCA${gite.slug}`);
         if (elCA) {
             elCA.textContent = caGite.toFixed(0) + ' €';
-        } else {
-            console.warn(`❌ Élément statCA${gite.slug} non trouvé`);
         }
     });
     

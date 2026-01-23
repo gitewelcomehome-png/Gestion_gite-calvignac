@@ -1051,6 +1051,7 @@ async function generateGitesButtons() {
         setTimeout(() => {
             captureFormState();
             attachChangeListeners();
+            attachAutoTranslation(); // Activer la traduction auto
             console.log('✅ Système de détection de modifications activé');
         }, 300);
         
@@ -1077,6 +1078,8 @@ window.selectGiteInfos = async function(gite) {
         // Réinitialiser le flag
         window.isDirty = false;
     }
+    
+    console.log(`🏠 Changement de gîte : ${currentGiteInfos} → ${gite} (langue: ${currentLangInfos})`);
     
     // Changer le gîte
     currentGiteInfos = gite;
@@ -1138,7 +1141,7 @@ window.selectGiteInfos = async function(gite) {
     // Appliquer le style aux cards du formulaire
     applyGiteColorToCards(giteColor);
     
-    // Charger les données du nouveau gîte
+    // Charger les données du nouveau gîte (préserve la langue active)
     await chargerDonneesInfos();
     
     // Capturer l'état initial après chargement
@@ -1315,6 +1318,18 @@ async function sauvegarderDonneesInfos() {
         dateModification: new Date().toISOString()
     };
     
+    // Compter les champs FR et EN non vides pour diagnostic
+    const champsFR = Object.keys(formData).filter(k => !k.includes('_en') && formData[k] && formData[k].trim() !== '');
+    const champsEN = Object.keys(formData).filter(k => k.includes('_en') && formData[k] && formData[k].trim() !== '');
+    
+    console.log(`💾 Sauvegarde ${currentGiteInfos}:`, {
+        champsFR: champsFR.length,
+        champsEN: champsEN.length,
+        total: Object.keys(formData).length,
+        exemplesFR: champsFR.slice(0, 3),
+        exemplesEN: champsEN.slice(0, 3)
+    });
+    
     // Détecter si l'adresse a changé
     const addressChanged = formData.adresse && formData.adresse.trim() !== initialAddress.trim();
     
@@ -1356,6 +1371,8 @@ async function sauvegarderDonneesInfos() {
 }
 
 async function chargerDonneesInfos() {
+    console.log(`📥 Chargement des données pour ${currentGiteInfos} (langue active: ${currentLangInfos})`);
+    
     // Charger uniquement depuis Supabase
     const data = await loadInfosGiteFromSupabase(currentGiteInfos);
     
@@ -1370,16 +1387,43 @@ async function chargerDonneesInfos() {
                 }
             });
         }
+        // Appliquer l'affichage selon la langue active
+        applyLanguageDisplay();
         return;
     }
     
-    // Remplir tous les champs avec les données de la base (y compris les vides)
+    // Remplir TOUS les champs (FR + EN) avec les données de la base
+    let champsRemplis = 0;
+    let champsNonTrouves = [];
+    
     Object.keys(data).forEach(key => {
-        const element = document.getElementById('infos_' + key);
+        // Essayer avec préfixe "infos_"
+        let element = document.getElementById('infos_' + key);
+        // Si pas trouvé, essayer sans préfixe pour les champs _en
+        if (!element) {
+            element = document.getElementById(key);
+        }
+        
+        // Remplir si trouvé
         if (element) {
             element.value = data[key] || '';
+            if (data[key]) champsRemplis++;
+        } else {
+            // Champ non trouvé dans le HTML
+            champsNonTrouves.push(key);
         }
     });
+    
+    console.log(`✅ ${champsRemplis} champs remplis (avec valeur)`);
+    console.log(`📊 Total clés dans data: ${Object.keys(data).length}`);
+    
+    if (champsNonTrouves.length > 0) {
+        console.warn(`⚠️ ${champsNonTrouves.length} champs NON TROUVÉS dans le HTML:`, champsNonTrouves);
+    }
+    
+    // Debug : afficher quelques exemples de champs EN chargés
+    const exemplesEN = Object.keys(data).filter(k => k.includes('_en')).slice(0, 5);
+    console.log(`🔍 Exemples champs EN chargés:`, exemplesEN.map(k => `${k}="${data[k]?.substring(0, 30)}..."`));
     
     // Charger les coordonnées depuis la table gites si non présentes
     if (!data.gpsLat || !data.gpsLon) {
@@ -1393,6 +1437,9 @@ async function chargerDonneesInfos() {
     if (typeof updateProgressInfos === 'function') {
         updateProgressInfos();
     }
+    
+    // Appliquer l'affichage selon la langue ACTIVE (préservée)
+    applyLanguageDisplay();
     
     // Générer le QR code WiFi si les données sont présentes
     setTimeout(() => {
@@ -1467,10 +1514,34 @@ function attachChangeListeners() {
     if (!form) return;
     
     const fields = form.querySelectorAll('input, textarea, select');
+    let saveTimeout = null;
+    
     fields.forEach(field => {
+        // Marquer comme modifié
         field.addEventListener('input', markFormAsDirty);
         field.addEventListener('change', markFormAsDirty);
+        
+        // 🔥 SAUVEGARDE AUTO quand on quitte le champ (blur)
+        field.addEventListener('blur', async function() {
+            if (window.isDirty) {
+                // Débounce pour éviter trop de sauvegardes
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(async () => {
+                    console.log('💾 Sauvegarde automatique...');
+                    await sauvegarderDonneesInfos();
+                    window.isDirty = false;
+                    captureFormState();
+                    
+                    // Notification discrète
+                    if (typeof showNotification === 'function') {
+                        showNotification('✓ Sauvegardé', 'success', 1000);
+                    }
+                }, 500); // 500ms après avoir quitté le champ
+            }
+        });
     });
+    
+    console.log('✅ Sauvegarde automatique activée sur tous les champs');
 }
 
 // Sauvegarde manuelle
@@ -1719,76 +1790,6 @@ window.imprimerQRCodeWifi = function() {
 };
 
 // ==========================================
-// 🌍 GESTION MULTILANGUE (FR/EN)
-// ==========================================
-
-// Variable pour suivre la langue actuelle
-let currentLang = 'fr';
-let translationDone = false;
-
-// Fonction pour basculer entre FR et EN
-window.toggleLanguage = function() {
-    const newLang = currentLang === 'fr' ? 'en' : 'fr';
-    
-    const btn = document.getElementById('btnToggleLang');
-    
-    // Liste de tous les champs à basculer
-    const fieldsToSwitch = [
-        'adresse', 'telephone', 'email',
-        'wifiSSID', 'wifiPassword', 'wifiDebit', 'wifiLocalisation', 'wifiZones',
-        'heureArrivee', 'arriveeTardive', 'parkingDispo', 'parkingPlaces', 'parkingDetails',
-        'typeAcces', 'codeAcces', 'instructionsCles', 'etage',
-        'itineraireLogement', 'premiereVisite',
-        'typeChauffage', 'climatisation', 'instructionsChauffage',
-        'equipementsCuisine', 'instructionsFour', 'instructionsPlaques',
-        'instructionsLaveVaisselle', 'instructionsLaveLinge', 'secheLinge',
-        'ferRepasser', 'lingeFourni', 'configurationChambres',
-        'instructionsTri', 'joursCollecte', 'decheterie',
-        'detecteurFumee', 'extincteur', 'coupureEau', 'disjoncteur', 'consignesUrgence',
-        'heureDepart', 'departTardif', 'checklistDepart', 'restitutionCles',
-        'supermarche', 'boulangerie', 'pharmacie', 'medecin', 'hopital', 'restaurants',
-        'transportsCommuns', 'tourisme', 'activites', 'activitesEnfants', 'randonnees', 'plages',
-        'reglesAnimaux', 'reglesFumeur', 'reglesCalme', 'reglesEvenements', 'autresRegles',
-        'autresInfos', 'contactsLocaux', 'recommandations', 'messageClient'
-    ];
-    
-    // SWAP des valeurs entre les champs FR et EN
-    fieldsToSwitch.forEach(field => {
-        const frField = document.getElementById(`infos_${field}`);
-        const enField = document.getElementById(`infos_${field}_en`);
-        
-        if (frField && enField) {
-            const temp = frField.value;
-            frField.value = enField.value;
-            enField.value = temp;
-        }
-    });
-    
-    // Mettre à jour la langue actuelle
-    currentLang = newLang;
-    
-    // Mettre à jour le bouton
-    const flagIcon = document.getElementById('flagIcon');
-    if (btn && flagIcon) {
-        if (currentLang === 'fr') {
-            flagIcon.src = 'https://flagcdn.com/w80/fr.png';
-            flagIcon.alt = 'FR';
-            btn.title = 'Switch to English';
-            if (typeof showNotification === 'function') {
-                showNotification('🇫🇷 Mode français activé', 'info');
-            }
-        } else {
-            flagIcon.src = 'https://flagcdn.com/w80/gb.png';
-            flagIcon.alt = 'EN';
-            btn.title = 'Passer en français';
-            if (typeof showNotification === 'function') {
-                showNotification('🇬🇧 English mode activated', 'info');
-            }
-        }
-    }
-};
-
-// ==========================================
 // GÉOCODAGE AUTOMATIQUE (utilise la fonction existante)
 // ==========================================
 
@@ -1960,6 +1961,304 @@ async function geocodeAddressAuto(address) {
     }
     return null;
 }
+
+// ==========================================
+// 🌍 BASCULER LANGUE FR/EN (AFFICHAGE UNIQUEMENT)
+// ==========================================
+let currentLangInfos = 'fr';
+
+window.toggleLanguageInfos = async function() {
+    // Basculer la langue
+    currentLangInfos = currentLangInfos === 'fr' ? 'en' : 'fr';
+    
+    // 🌍 Si on bascule en EN et que les champs EN sont vides → TRADUIRE AUTO
+    if (currentLangInfos === 'en') {
+        const needsTranslation = checkIfNeedsTranslation();
+        if (needsTranslation) {
+            console.log('🌍 Champs EN vides détectés → Traduction automatique...');
+            if (typeof showNotification === 'function') {
+                showNotification('🌍 Traduction automatique en cours...', 'info', 2000);
+            }
+            await translateAllFields();
+        }
+    }
+    
+    // Appliquer l'affichage
+    applyLanguageDisplay();
+};
+
+// Vérifier si des champs EN sont vides alors que FR est rempli
+function checkIfNeedsTranslation() {
+    const champsFR = document.querySelectorAll('#infosGiteForm input:not([id$="_en"]):not([readonly]), #infosGiteForm textarea:not([id$="_en"])');
+    
+    for (const champFR of champsFR) {
+        const idFR = champFR.id;
+        if (!idFR || idFR.includes('gps') || idFR.includes('Lat') || idFR.includes('Lon')) continue;
+        
+        const texteFR = champFR.value.trim();
+        if (!texteFR) continue;
+        
+        const champEN = document.getElementById(idFR + '_en');
+        if (champEN && !champEN.value.trim()) {
+            return true; // Au moins 1 champ FR rempli avec EN vide
+        }
+    }
+    return false;
+}
+
+// Fonction séparée pour appliquer l'affichage selon la langue active
+function applyLanguageDisplay() {
+    const btn = document.getElementById('btnToggleLangInfos');
+    const label = document.getElementById('langLabelInfos');
+    
+    if (!btn || !label) {
+        console.warn('⚠️ Boutons FR/EN introuvables');
+        return;
+    }
+    
+    // La card EN globale qui contient TOUS les champs anglais
+    const englishCard = document.getElementById('englishFieldsCard');
+    
+    if (!englishCard) {
+        console.error('❌ Card EN (#englishFieldsCard) introuvable !');
+        return;
+    }
+    
+    // Sélectionner toutes les cards du formulaire SAUF la première (boutons) et la englishCard
+    const allCards = Array.from(document.querySelectorAll('#infosGiteForm .card'));
+    const firstCard = allCards[0]; // Card avec les boutons de gîtes
+    const frenchCards = allCards.filter(c => c !== firstCard && c !== englishCard);
+    
+    console.log('🔍 DEBUG applyLanguageDisplay:', {
+        langue: currentLangInfos,
+        totalCards: allCards.length,
+        frenchCards: frenchCards.length,
+        englishCard: englishCard ? 'trouvée' : 'MANQUANTE',
+        englishCardVisible: englishCard ? window.getComputedStyle(englishCard).display : 'N/A'
+    });
+    
+    if (currentLangInfos === 'en') {
+        // Mode ANGLAIS : afficher la card EN, cacher les cards FR
+        btn.style.background = '#27ae60';
+        label.textContent = '🇬🇧 EN';
+        
+        // Afficher la card anglaise globale
+        if (englishCard) {
+            englishCard.style.display = 'block';
+            console.log('✅ Card EN affichée (display: block)');
+        }
+        
+        // Cacher toutes les cards FR (sauf la première avec les boutons)
+        let cachees = 0;
+        frenchCards.forEach(card => {
+            card.style.display = 'none';
+            cachees++;
+        });
+        
+        console.log(`🇬🇧 Mode EN activé : ${cachees} cards FR cachées, 1 card EN affichée`);
+        
+    } else {
+        // Mode FRANÇAIS : cacher la card EN, afficher toutes les cards FR
+        btn.style.background = '#3498db';
+        label.textContent = '🇫🇷 FR';
+        
+        // Cacher la card anglaise globale
+        if (englishCard) {
+            englishCard.style.display = 'none';
+            console.log('✅ Card EN cachée (display: none)');
+        }
+        
+        // Afficher toutes les cards FR
+        let affichees = 0;
+        frenchCards.forEach(card => {
+            card.style.display = '';
+            affichees++;
+        });
+        
+        console.log(`🇫🇷 Mode FR activé : ${affichees} cards FR affichées, 1 card EN cachée`);
+    }
+}
+
+window.applyLanguageDisplay = applyLanguageDisplay;
+
+// ==========================================
+// 🌍 TRADUCTION AUTOMATIQUE FR → EN
+// ==========================================
+let translationQueue = [];
+let translationTimeout = null;
+
+// API de traduction gratuite
+async function translateText(text, fromLang = 'fr', toLang = 'en') {
+    if (!text || text.trim() === '') return '';
+    
+    try {
+        // API MyMemory (gratuite, pas de clé nécessaire)
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromLang}|${toLang}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.responseStatus === 200 && data.responseData) {
+            return data.responseData.translatedText;
+        }
+        return text; // Fallback: retourner le texte original
+    } catch (error) {
+        console.error('Erreur traduction:', error);
+        return text;
+    }
+}
+
+// Attacher les listeners de traduction automatique
+function attachAutoTranslation() {
+    // Tous les champs FR (sauf GPS et techniques)
+    const champsFR = document.querySelectorAll('#infosGiteForm input:not([id$="_en"]):not([readonly]), #infosGiteForm textarea:not([id$="_en"]), #infosGiteForm select:not([id$="_en"])');
+    
+    let champsAvecTraduction = 0;
+    let champsSansCorrespondanceEN = [];
+    
+    champsFR.forEach(champFR => {
+        const idFR = champFR.id;
+        if (!idFR || idFR.includes('gps') || idFR.includes('Lat') || idFR.includes('Lon')) return;
+        
+        const idEN = idFR + '_en';
+        const champEN = document.getElementById(idEN);
+        
+        if (champEN) {
+            champsAvecTraduction++;
+            // Traduction à chaque modification (avec debounce)
+            champFR.addEventListener('input', function() {
+                clearTimeout(translationTimeout);
+                translationTimeout = setTimeout(async () => {
+                    const texteFR = this.value.trim();
+                    if (texteFR) {
+                        // Afficher un indicateur de traduction
+                        champEN.style.background = '#fff3cd';
+                        champEN.value = '⏳ Traduction...';
+                        champEN.disabled = true;
+                        
+                        // Traduire
+                        const texteEN = await translateText(texteFR);
+                        
+                        // Afficher le résultat
+                        champEN.value = texteEN;
+                        champEN.style.background = '#d4edda';
+                        champEN.disabled = false;
+                        
+                        // Retirer la couleur après 2 secondes
+                        setTimeout(() => {
+                            champEN.style.background = '';
+                        }, 2000);
+                    } else {
+                        champEN.value = '';
+                    }
+                }, 1000); // 1 seconde de délai après la dernière frappe
+            });
+        } else {
+            // Champ FR sans correspondance EN
+            champsSansCorrespondanceEN.push(idFR);
+        }
+    });
+    
+    console.log(`✅ Traduction automatique FR → EN activée sur ${champsAvecTraduction} champs`);
+    if (champsSansCorrespondanceEN.length > 0) {
+        console.warn(`⚠️ ${champsSansCorrespondanceEN.length} champs FR sans champ EN:`, champsSansCorrespondanceEN);
+    }
+}
+
+// Activer la traduction automatique au chargement
+window.attachAutoTranslation = attachAutoTranslation;
+
+// Traduire tous les champs FR → EN en une fois
+window.translateAllFields = async function() {
+    const btn = document.getElementById('btnAutoTranslateAll');
+    if (!btn) return;
+    
+    // Désactiver le bouton pendant la traduction
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Traduction en cours...';
+    btn.style.opacity = '0.6';
+    
+    try {
+        // Tous les champs FR non vides (input, textarea, select)
+        const champsFR = document.querySelectorAll('#infosGiteForm input:not([id$="_en"]):not([readonly]), #infosGiteForm textarea:not([id$="_en"]), #infosGiteForm select:not([id$="_en"])');
+        let translated = 0;
+        let total = 0;
+        
+        for (const champFR of champsFR) {
+            const idFR = champFR.id;
+            if (!idFR || idFR.includes('gps') || idFR.includes('Lat') || idFR.includes('Lon')) continue;
+            
+            const texteFR = champFR.value.trim();
+            if (!texteFR) continue; // Ignorer les champs vides
+            
+            const idEN = idFR + '_en';
+            const champEN = document.getElementById(idEN);
+            
+            if (champEN) {
+                total++;
+                // Afficher progression
+                btn.innerHTML = `⏳ ${translated}/${total}...`;
+                
+                // Traduire
+                champEN.style.background = '#fff3cd';
+                champEN.value = '⏳ Traduction...';
+                
+                const texteEN = await translateText(texteFR);
+                
+                champEN.value = texteEN;
+                champEN.style.background = '#d4edda';
+                translated++;
+                
+                // Petit délai pour éviter le rate limiting de l'API
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+        
+        // Succès
+        btn.innerHTML = `✅ ${translated} champs traduits`;
+        btn.style.background = '#27ae60';
+        
+        if (typeof showNotification === 'function') {
+            showNotification(`✅ ${translated} champs traduits - Sauvegarde automatique...`, 'success');
+        }
+        
+        // 🔥 SAUVEGARDE AUTOMATIQUE après traduction
+        console.log('💾 Sauvegarde automatique après traduction...');
+        await sauvegarderDonneesInfos();
+        
+        if (typeof showNotification === 'function') {
+            showNotification(`✅ ${translated} traductions sauvegardées !`, 'success');
+        }
+        
+        // Réinitialiser les styles après 3 secondes
+        setTimeout(() => {
+            const champsEN = document.querySelectorAll('[id$="_en"]');
+            champsEN.forEach(champ => {
+                champ.style.background = '';
+            });
+            btn.innerHTML = '🌐 Traduire tout';
+            btn.style.background = '#9b59b6';
+            btn.style.opacity = '1';
+            btn.disabled = false;
+        }, 3000);
+        
+    } catch (error) {
+        console.error('Erreur traduction globale:', error);
+        btn.innerHTML = '❌ Erreur';
+        btn.style.background = '#e74c3c';
+        
+        setTimeout(() => {
+            btn.innerHTML = '🌐 Traduire tout';
+            btn.style.background = '#9b59b6';
+            btn.style.opacity = '1';
+            btn.disabled = false;
+        }, 3000);
+    }
+};
+
+// ==========================================
+// 🎬 INITIALISATION : Pas besoin de fonction séparée
+// ==========================================
+// La fonction applyLanguageDisplay() gère tout
 
 // Exports supplémentaires
 window.sauvegarderDonneesInfos = sauvegarderDonneesInfos;

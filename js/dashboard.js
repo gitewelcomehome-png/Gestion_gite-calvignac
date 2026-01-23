@@ -1,3 +1,11 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  ⚠️ ⚠️ ⚠️  FICHIER DESKTOP - NE PAS MODIFIER  ⚠️ ⚠️ ⚠️                      ║
+// ║                                                                          ║
+// ║  Ce fichier est EN PRODUCTION et doit rester STABLE                     ║
+// ║  Pour le mobile, utiliser tabs/mobile/dashboard.html avec JS inline     ║
+// ║  NE TOUCHER À CE FICHIER QUE SUR DEMANDE EXPLICITE                      ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
 /**
  * Vue d'ensemble hebdomadaire : réservations, ménages, todos
  * Version: 2.2.0 - Gestion problèmes clients
@@ -6,7 +14,28 @@
 // ==========================================
 // CONFIGURATION FEATURES OPTIONNELLES
 // ==========================================
-let CHECKLIST_FEATURE_ENABLED = false; // Désactivé par défaut (table optionnelle non créée)
+let CHECKLIST_FEATURE_ENABLED = true; // Activé (table checklist_templates créée)
+
+// ==========================================
+// FONCTIONS UTILITAIRES (fallback si shared-utils ne charge pas)
+// ==========================================
+if (typeof window.parseLocalDate !== 'function') {
+    window.parseLocalDate = function(dateStr) {
+        if (!dateStr) return null;
+        if (dateStr instanceof Date) return dateStr;
+        const parts = dateStr.split('-');
+        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    };
+}
+
+if (typeof window.formatDateFromObj !== 'function') {
+    window.formatDateFromObj = function(date) {
+        if (!date) return '';
+        const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+        const months = ['jan', 'fév', 'mar', 'avr', 'mai', 'juin', 'juil', 'août', 'sep', 'oct', 'nov', 'déc'];
+        return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
+    };
+}
 
 // ==========================================
 // ==========================================
@@ -99,33 +128,36 @@ async function updateDashboardAlerts() {
         });
     }
     
-    // Vérifier les retours de ménage en attente de validation
-    const { data: retoursMenage } = await window.supabaseClient
-        .from('retours_menage')
-        .select('*, gites(name)')
-        .eq('validated', false)
-        .order('created_at', { ascending: false });
-    
-    if (retoursMenage && retoursMenage.length > 0) {
-        retoursMenage.forEach(retour => {
-            const giteName = retour.gites?.name || 'Gîte inconnu';
-            const dateFormatee = new Date(retour.date_menage).toLocaleDateString('fr-FR', { 
-                day: 'numeric', 
-                month: 'short' 
-            });
-            
-            const hasComments = retour.commentaires && retour.commentaires.trim().length > 0;
-            const icon = hasComments ? '📝' : '✅';
-            
-            alerts.push({
-                type: 'info',
-                icon: '🧹',
-                message: `Retour ménage ${giteName} du ${dateFormatee} ${icon}`,
-                action: () => afficherDetailsRetourMenage(retour.id),
-                retourId: retour.id
-            });
-        });
-    }
+    // ============================================================
+    // ❌ FEATURE SUPPRIMÉE - 23 JAN 2026
+    // Table retours_menage supprimée de la BDD
+    // ============================================================
+    // const { data: retoursMenage } = await window.supabaseClient
+    //     .from('retours_menage')
+    //     .select('*, gites(name)')
+    //     .eq('validated', false)
+    //     .order('created_at', { ascending: false });
+    // 
+    // if (retoursMenage && retoursMenage.length > 0) {
+    //     retoursMenage.forEach(retour => {
+    //         const giteName = retour.gites?.name || 'Gîte inconnu';
+    //         const dateFormatee = new Date(retour.date_menage).toLocaleDateString('fr-FR', { 
+    //             day: 'numeric', 
+    //             month: 'short' 
+    //         });
+    //         
+    //         const hasComments = retour.commentaires && retour.commentaires.trim().length > 0;
+    //         const icon = hasComments ? '📝' : '✅';
+    //         
+    //         alerts.push({
+    //             type: 'info',
+    //             icon: '🧹',
+    //             message: `Retour ménage ${giteName} du ${dateFormatee} ${icon}`,
+    //             action: () => afficherDetailsRetourMenage(retour.id),
+    //             retourId: retour.id
+    //         });
+    //     });
+    // }
     
     // Afficher les alertes
     const container = document.getElementById('dashboard-alerts');
@@ -239,19 +271,14 @@ async function updateDashboardReservations() {
     today.setHours(0, 0, 0, 0);
     
     // Charger les horaires validées
-    const { data: horairesValidees } = await supabaseClient
-        .from('demandes_horaires')
-        .select('*')
-        .eq('statut', 'validee');
-    
-    // Créer un map pour accès rapide
+    // Charger les horaires depuis les réservations (check_in_time et check_out_time)
     const horairesMap = {};
-    if (horairesValidees) {
-        horairesValidees.forEach(h => {
-            if (!horairesMap[h.reservation_id]) horairesMap[h.reservation_id] = {};
-            horairesMap[h.reservation_id][h.type] = h.heure_validee;
-        });
-    }
+    reservations.forEach(r => {
+        horairesMap[r.id] = {
+            arrivee: r.check_in_time || '17:00',
+            depart: r.check_out_time || '10:00'
+        };
+    });
     
     // Les 7 prochains jours (aujourd'hui + 6 jours)
     const in7Days = new Date(today);
@@ -264,7 +291,7 @@ async function updateDashboardReservations() {
     });
     const uniqueReservations = Object.values(uniqueById);
     
-    // Filtrer les réservations
+    // Filtrer les réservations (7 prochains jours)
     const filtered = uniqueReservations.filter(r => {
         const dateDebut = parseLocalDate(r.dateDebut);
         const dateFin = parseLocalDate(r.dateFin);
@@ -291,7 +318,7 @@ async function updateDashboardReservations() {
     if (!container) return;
     
     if (filtered.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px; grid-column: 1 / -1;">Aucune réservation dans les 7 prochains jours</p>');
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: #999; padding: 40px;">Aucune réservation dans les 7 prochains jours</p>');
         return;
     }
     
@@ -370,46 +397,69 @@ async function updateDashboardReservations() {
             checklistHtml += '</div>';
         }
         
-        html += `
-            <div style="background: white; border: 3px solid ${giteColor}; padding: 15px; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; position: relative; display: flex; flex-direction: column;">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                    <div style="flex: 1; padding-right: ${shouldSendReminder ? '140px' : '0'};">
-                        <strong style="font-size: 1.05rem; color: #2D3436; display: block; margin-bottom: 8px;">${r.nom}</strong>
-                        ${shouldSendReminder ? '<div style="position: absolute; top: 15px; right: 58px; background: #ffeaa7; color: #2D3436; padding: 5px 10px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 8px; font-size: 0.7rem; font-weight: 700;">⚡ J-3 : Fiche</div>' : ''}
-                        <div style="margin-bottom: 8px;">
-                            <span style="background: ${badgeColor}; color: white; padding: 3px 8px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block;">${badge}</span>
+        // 📱 DÉTECTION MOBILE/DESKTOP - Rendu conditionnel
+        const isMobile = window.innerWidth <= 768 || document.documentElement.classList.contains('is-mobile');
+        
+        if (isMobile) {
+            // ========================================
+            // 📱 FORMAT MOBILE - COMPACT 3 LIGNES
+            // ========================================
+            html += `
+                <div style="background: #ffffff; border: 2px solid ${giteColor}; padding: 10px; border-radius: 10px; box-shadow: 2px 2px 0 #2D3436; margin-bottom: 8px;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #2D3436; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${r.nom}</div>
+                    <div style="font-size: 0.7rem; color: #27AE60; margin-bottom: 3px; font-weight: 600;">📥 ${formatDateFromObj(dateDebut).split(' ').slice(0,2).join(' ')} ${horaireArrivee}</div>
+                    <div style="font-size: 0.7rem; color: #E74C3C; margin-bottom: 6px; font-weight: 600;">📤 ${formatDateFromObj(dateFin).split(' ').slice(0,2).join(' ')} ${horaireDepart}</div>
+                    ${showFicheButton ? `<button onclick="aperçuFicheClient('${r.id}')" style="width: 100%; background: #74b9ff; color: white; border: 2px solid #2D3436; padding: 6px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: 600; box-shadow: 2px 2px 0 #2D3436;">📄 Fiche</button>` : ''}
+                </div>
+            `;
+        } else {
+            // ========================================
+            // 💻 FORMAT DESKTOP - DÉTAILS COMPLETS
+            // ========================================
+            html += `
+                <div style="background: white; border: 3px solid ${giteColor}; padding: 15px; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; position: relative; display: flex; flex-direction: column; overflow: hidden; z-index: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <strong style="font-size: 1.05rem; color: #2D3436; display: block; margin-bottom: 8px;">${r.nom}</strong>
+                            ${shouldSendReminder ? '<div style="position: absolute; top: 15px; right: 68px; background: #ffeaa7; color: #2D3436; padding: 5px 10px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 8px; font-size: 0.7rem; font-weight: 700;">⚡ J-3 : Fiche</div>' : ''}
+                            <div style="margin-bottom: 8px;">
+                                <span style="background: ${badgeColor}; color: white; padding: 3px 8px; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block;">${badge}</span>
+                            </div>
+                            <div style="color: #666; font-size: 0.8rem; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                                <svg viewBox="0 0 64 64" style="width:16px;height:16px;flex-shrink:0;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg>
+                                <span style="min-width: 120px;">${formatDateFromObj(dateDebut)}</span>
+                                <strong style="color: #27AE60; display: flex; align-items: center; gap: 2px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;flex-shrink:0;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireArrivee}</strong>
+                            </div>
+                            <div style="color: #666; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+                                <svg viewBox="0 0 64 64" style="width:16px;height:16px;flex-shrink:0;opacity:0;pointer-events:none;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/></svg>
+                                <span style="min-width: 120px;">${formatDateFromObj(dateFin)}</span>
+                                <strong style="color: #E74C3C; display: flex; align-items: center; gap: 2px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;flex-shrink:0;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireDepart}</strong>
+                                <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem;">${r.nuits}n</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; font-size: 0.75rem; color: #666; margin-top: 6px; flex-wrap: wrap;">
+                                <span style="display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="28" width="36" height="28" fill="#ffffff"/><path d="M8 28 L32 8 L56 28" fill="#ff7675"/><rect x="42" y="10" width="6" height="10" fill="#ff7675"/><rect x="26" y="40" width="12" height="16" fill="#0984e3"/><rect x="18" y="34" width="6" height="6" fill="#74b9ff"/></svg> <strong>${r.gite}</strong></span>
+                                <span>👥 <strong>${r.nbPersonnes || '-'}</strong></span>
+                                ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'}; font-weight: 600; display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg> J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
+                            </div>
+                            ${checklistHtml}
                         </div>
-                        <div style="color: #666; font-size: 0.8rem; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            <svg viewBox="0 0 64 64" style="width:16px;height:16px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg>
-                            ${formatDateFromObj(dateDebut)} <strong style="color: #27AE60; display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireArrivee}</strong>
-                        </div>
-                        <div style="color: #666; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            ${formatDateFromObj(dateFin)} <strong style="color: #E74C3C; display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="36" r="18" fill="#ffffff"/><path d="M32 36l4-8" fill="none"/><path d="M32 36l6 4" fill="none"/><path d="M18 16l4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M46 16l-4 4" stroke-width="4" stroke="#ff7675" fill="none"/><path d="M14 12a4 4 0 0 1 6 2" fill="#ff7675"/><path d="M50 12a4 4 0 0 0-6 2" fill="#ff7675"/></svg> ${horaireDepart}</strong>
-                            <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem;">${r.nuits}n</span>
-                        </div>
-                        <div style="display: flex; gap: 10px; font-size: 0.75rem; color: #666; margin-top: 6px; flex-wrap: wrap;">
-                            <span style="display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="28" width="36" height="28" fill="#ffffff"/><path d="M8 28 L32 8 L56 28" fill="#ff7675"/><rect x="42" y="10" width="6" height="10" fill="#ff7675"/><rect x="26" y="40" width="12" height="16" fill="#0984e3"/><rect x="18" y="34" width="6" height="6" fill="#74b9ff"/></svg> <strong>${r.gite}</strong></span>
-                            <span>👥 <strong>${r.nbPersonnes || '-'}</strong></span>
-                            ${daysUntilArrival >= 0 ? `<span style="color: ${daysUntilArrival <= 3 ? '#F39C12' : '#999'}; font-weight: 600; display: flex; align-items: center; gap: 3px;"><svg viewBox="0 0 64 64" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="46" rx="4" fill="#ffffff"/><path d="M8 10h48v12H8z" fill="#0984e3" stroke="none"/><path d="M8 22h48" fill="none"/><line x1="18" y1="6" x2="18" y2="14"/><line x1="46" y1="6" x2="46" y2="14"/><polyline points="22 40 30 48 44 32" stroke="#55efc4" stroke-width="4" fill="none"/></svg> J${daysUntilArrival > 0 ? '-' + daysUntilArrival : ''}</span>` : ''}
-                        </div>
-                        ${checklistHtml}
+                        <span style="font-size: 1.3rem; position: absolute; top: 15px; right: 15px;" title="${r.paiement}">${paiementIcon}</span>
                     </div>
-                    <span style="font-size: 1.3rem; margin-left: 8px;" title="${r.paiement}">${paiementIcon}</span>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #e0e0e0; display: flex; gap: 6px;">
+                        ${showFicheButton ? `
+                        <button onclick="aperçuFicheClient('${r.id}')" class="btn-neo"
+                                style="flex: 1; background: #74b9ff; color: white; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='4px 4px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='2px 2px 0 #2D3436'">
+                            📄 Fiche
+                        </button>
+                        ` : ''}
+                        <button onclick="openEditReservation('${r.id}')" class="btn-neo"
+                                style="background: white; color: #2D3436; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='4px 4px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='2px 2px 0 #2D3436'">
+                            ✏️
+                        </button>
+                    </div>
                 </div>
-                <div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #e0e0e0; display: flex; gap: 6px;">
-                    ${showFicheButton ? `
-                    <button onclick="aperçuFicheClient('${r.id}')" class="btn-neo"
-                            style="flex: 1; background: #74b9ff; color: white; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='4px 4px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='2px 2px 0 #2D3436'">
-                        📄 Fiche
-                    </button>
-                    ` : ''}
-                    <button onclick="openEditReservation('${r.id}')" class="btn-neo"
-                            style="background: white; color: #2D3436; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: transform 0.1s;" onmouseover="this.style.transform='translate(-2px, -2px)';this.style.boxShadow='4px 4px 0 #2D3436'" onmouseout="this.style.transform='translate(0, 0)';this.style.boxShadow='2px 2px 0 #2D3436'">
-                        ✏️
-                    </button>
-                </div>
-            </div>
-        `;
+            `;
+        }
     }
     
     window.SecurityUtils.setInnerHTML(container, html);
@@ -580,130 +630,239 @@ async function updateTodoList(category) {
 }
 
 async function addTodoItem(category) {
-    // Afficher le modal
-    const modal = document.getElementById('addTodoModal');
-    const form = document.getElementById('addTodoForm');
-    const categoryInput = document.getElementById('todoCategory');
-    const giteGroup = document.getElementById('giteSelectGroup');
+    console.log('🎯 addTodoItem appelé pour:', category);
     
-    // Configurer le modal selon la catégorie
-    categoryInput.value = category;
+    // Supprimer ancien modal s'il existe
+    document.querySelectorAll('.modal-todo-dynamic').forEach(m => m.remove());
     
-    // Afficher le sélecteur de gîte uniquement pour "travaux"
-    if (category === 'travaux') {
-        giteGroup.style.display = 'block';
-    } else {
-        giteGroup.style.display = 'none';
+    // Créer le modal dynamiquement (comme fiche-client)
+    const modal = document.createElement('div');
+    modal.className = 'modal-todo-dynamic';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 20px;
+    `;
+    
+    const showGiteSelector = category === 'travaux';
+    
+    window.SecurityUtils.setInnerHTML(modal, `
+        <div style="background: white; border-radius: 16px; padding: 25px; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                <span style="font-size: 1.5rem;">📝</span>
+                <h2 style="margin: 0; font-size: 1.2rem; color: #2c3e50;">Nouvelle Tâche</h2>
+            </div>
+            
+            <form id="addTodoFormDynamic">
+                <input type="hidden" id="todoCategoryDynamic" value="${category}">
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">
+                        Titre <span style="color: #E74C3C;">*</span>
+                    </label>
+                    <input type="text" id="todoTitleDynamic" required 
+                           placeholder="Ex: Réparer robinet"
+                           style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Description</label>
+                    <textarea id="todoDescriptionDynamic" rows="3" 
+                              placeholder="Détails supplémentaires..."
+                              style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+                </div>
+                
+                ${showGiteSelector ? `
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Gîte concerné</label>
+                    <select id="todoGiteDynamic" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                        <option value="">Non spécifié</option>
+                        <option value="Trevoux">Trevoux</option>
+                        <option value="Couzon">Couzon</option>
+                    </select>
+                </div>
+                ` : ''}
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="todoRecurrentDynamic" style="width: 18px; height: 18px; cursor: pointer;">
+                        <span style="font-weight: 600;">🔁 Tâche récurrente</span>
+                    </label>
+                </div>
+                
+                <div id="recurrentOptionsDynamic" style="display: none; margin-left: 26px; margin-bottom: 15px;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Fréquence</label>
+                        <select id="todoFrequencyDynamic" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                            <option value="weekly">Hebdomadaire</option>
+                            <option value="biweekly">Bimensuelle (2 semaines)</option>
+                            <option value="monthly">Mensuelle</option>
+                        </select>
+                    </div>
+                    
+                    <div id="weeklyOptionsDynamic" style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Jour de la semaine</label>
+                        <select id="todoWeekdayDynamic" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                            <option value="1">Lundi</option>
+                            <option value="2">Mardi</option>
+                            <option value="3">Mercredi</option>
+                            <option value="4">Jeudi</option>
+                            <option value="5">Vendredi</option>
+                            <option value="6">Samedi</option>
+                            <option value="0">Dimanche</option>
+                        </select>
+                    </div>
+                    
+                    <div id="monthlyOptionsDynamic" style="display: none; margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Jour du mois</label>
+                        <input type="number" id="todoDayOfMonthDynamic" min="1" max="31" value="1" 
+                               style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" 
+                            style="flex: 1; padding: 12px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        ✓ Créer
+                    </button>
+                    <button type="button" id="btn-cancel-todo" 
+                            style="padding: 12px 20px; background: #95a5a6; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    `);
+    
+    document.body.appendChild(modal);
+    console.log('✅ Modal TODO créé et ajouté au body');
+    
+    // Gestion de la checkbox récurrente
+    const recurrentCheckbox = document.getElementById('todoRecurrentDynamic');
+    const recurrentOptions = document.getElementById('recurrentOptionsDynamic');
+    const frequencySelect = document.getElementById('todoFrequencyDynamic');
+    const weeklyOptions = document.getElementById('weeklyOptionsDynamic');
+    const monthlyOptions = document.getElementById('monthlyOptionsDynamic');
+    
+    if (recurrentCheckbox) {
+        recurrentCheckbox.addEventListener('change', function() {
+            recurrentOptions.style.display = this.checked ? 'block' : 'none';
+        });
     }
     
-    // Réinitialiser le formulaire
-    form.reset();
-    document.getElementById('recurrentOptions').style.display = 'none';
+    if (frequencySelect) {
+        frequencySelect.addEventListener('change', function() {
+            if (this.value === 'monthly') {
+                weeklyOptions.style.display = 'none';
+                monthlyOptions.style.display = 'block';
+            } else {
+                weeklyOptions.style.display = 'block';
+                monthlyOptions.style.display = 'none';
+            }
+        });
+    }
     
-    modal.style.display = 'block';
+    // Bouton annuler
+    document.getElementById('btn-cancel-todo').onclick = () => {
+        console.log('🚪 Annulation');
+        modal.remove();
+    };
+    
+    // Clic sur le fond pour fermer
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    };
+    
+    // Soumission du formulaire
+    document.getElementById('addTodoFormDynamic').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('todoTitleDynamic').value.trim();
+        const description = document.getElementById('todoDescriptionDynamic').value.trim();
+        const isRecurrent = document.getElementById('todoRecurrentDynamic').checked;
+        
+        if (!title) {
+            alert('Le titre est obligatoire');
+            return;
+        }
+        
+        // Récupérer l'user ID (API Supabase v2)
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        
+        const todoData = {
+            owner_user_id: user?.id,
+            category: category,
+            title: title,
+            description: description || null,
+            completed: false,
+            created_at: new Date().toISOString()
+        };
+        
+        // Gîte pour travaux
+        if (showGiteSelector) {
+            const giteSelect = document.getElementById('todoGiteDynamic');
+            if (giteSelect && giteSelect.value) {
+                todoData.gite = giteSelect.value;
+            }
+        }
+        
+        // Récurrence
+        if (isRecurrent) {
+            const frequency = document.getElementById('todoFrequencyDynamic').value;
+            todoData.recurrent = true;
+            todoData.frequency = frequency;
+            
+            if (frequency === 'monthly') {
+                todoData.frequency_detail = document.getElementById('todoDayOfMonthDynamic').value;
+            } else {
+                todoData.frequency_detail = document.getElementById('todoWeekdayDynamic').value;
+            }
+            
+            todoData.next_occurrence = calculateNextOccurrence(frequency, todoData.frequency_detail);
+        }
+        
+        console.log('💾 Création TODO:', todoData);
+        
+        // Insérer dans Supabase
+        const { data, error } = await window.supabaseClient
+            .from('todos')
+            .insert(todoData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.error('❌ Erreur création TODO:', error);
+            alert('Erreur lors de la création de la tâche');
+            return;
+        }
+        
+        console.log('✅ TODO créé:', data);
+        modal.remove();
+        
+        // Rafraîchir la liste
+        await updateTodoList(category);
+    });
 }
 
 function closeAddTodoModal() {
-    document.getElementById('addTodoModal').style.display = 'none';
+    const modal = document.getElementById('addTodoModal');
+    console.log('🚪 Fermeture modal');
+    modal.style.cssText = 'display: none !important;';
+    modal.classList.remove('show');
     document.getElementById('addTodoForm').reset();
 }
 
 // Gestion du formulaire d'ajout de tâche
 let todoModalInitialized = false;
 
-function initializeTodoModal() {
-    // Ne pas réinitialiser si déjà fait
-    if (todoModalInitialized) return;
-    
-    // Validation temps réel
-    if (window.ValidationUtils) {
-        window.ValidationUtils.attachRealtimeValidation('todoTitle', 'text', { required: true });
-    }
-    
-    const recurrentCheckbox = document.getElementById('todoRecurrent');
-    const recurrentOptions = document.getElementById('recurrentOptions');
-    const frequencySelect = document.getElementById('todoFrequency');
-    const weeklyOptions = document.getElementById('weeklyOptions');
-    const monthlyOptions = document.getElementById('monthlyOptions');
-    
-    // Vérifier que les éléments existent
-    if (!recurrentCheckbox || !frequencySelect) return;
-    
-    // Afficher/masquer les options récurrentes
-    recurrentCheckbox.addEventListener('change', function() {
-        recurrentOptions.style.display = this.checked ? 'block' : 'none';
-    });
-    
-    // Afficher/masquer les options selon la fréquence
-    frequencySelect.addEventListener('change', function() {
-        if (this.value === 'monthly') {
-            weeklyOptions.style.display = 'none';
-            monthlyOptions.style.display = 'block';
-        } else {
-            weeklyOptions.style.display = 'block';
-            monthlyOptions.style.display = 'none';
-        }
-    });
-    
-    // Soumission du formulaire
-    const addTodoForm = document.getElementById('addTodoForm');
-    if (addTodoForm) {
-        addTodoForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Validation avec ValidationUtils
-            if (window.ValidationUtils) {
-                const rules = {
-                    todoTitle: { type: 'text', required: true }
-                };
-                
-                const validation = window.ValidationUtils.validateForm(this, rules);
-                if (!validation.valid) {
-                    console.warn('❌ Formulaire todo invalide:', validation.errors);
-                    return;
-                }
-            }
-            
-            const category = document.getElementById('todoCategory')?.value;
-            const title = document.getElementById('todoTitle').value;
-            const description = document.getElementById('todoDescription').value;
-            const giteSelect = document.getElementById('todoGite');
-            const giteValue = giteSelect?.value;
-            
-            // Trouver le gite_id correspondant au nom sélectionné
-            let giteId = null;
-            if (giteValue) {
-                const gites = await window.gitesManager.getAll();
-                const gite = gites.find(g => g.name === giteValue || g.slug === giteValue);
-                giteId = gite ? gite.id : null;
-            }
-            
-            const { error } = await window.supabaseClient
-                .from('todos')
-                .insert({
-                    title: title,
-                    description: description || null,
-                    gite_id: giteId,
-                    completed: false,
-                    priority: 'medium'
-                });
-            
-            if (error) {
-                console.error('Erreur création todo:', error);
-                alert('Erreur lors de la création de la tâche');
-                return;
-            }
-            
-            // Fermer le modal et rafraîchir
-            closeAddTodoModal();
-            await updateTodoList();
-            await updateDashboardStats();
-        });
-    }
-    
-    // Marquer comme initialisé
-    todoModalInitialized = true;
-}
+// Supprimé - le modal est maintenant créé dynamiquement dans addTodoItem()
 
 function calculateNextOccurrence(frequency, frequencyDetail) {
     const now = new Date();
@@ -1204,17 +1363,20 @@ async function updateFinancialIndicators() {
     // Afficher bénéfice
     if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeAnnee);
     
-    // 6. Trésorerie actuelle (dernier mois enregistré)
-    const { data: soldeMois } = await window.supabaseClient
-        .from('suivi_soldes_bancaires')
-        .select('solde')
-        .eq('annee', anneeActuelle)
-        .eq('mois', moisActuel)
-        .maybeSingle();
+    // ============================================================
+    // ❌ FEATURE SUPPRIMÉE - 23 JAN 2026
+    // Table suivi_soldes_bancaires supprimée de la BDD
+    // ============================================================
+    // const { data: soldeMois } = await window.supabaseClient
+    //     .from('suivi_soldes_bancaires')
+    //     .select('solde')
+    //     .eq('annee', anneeActuelle)
+    //     .eq('mois', moisActuel)
+    //     .maybeSingle();
     
     const tresorerieEl = document.getElementById('dashboard-tresorerie');
     if (tresorerieEl) {
-        tresorerieEl.textContent = soldeMois ? formatCurrency(soldeMois.solde) : '-';
+        tresorerieEl.textContent = '-';
     }
     
     // 7. Afficher les graphiques
@@ -1353,12 +1515,16 @@ async function afficherGraphiqueTresorerieDashboard() {
     
     const anneeActuelle = new Date().getFullYear();
     
-    // Récupérer les soldes de l'année en cours
-    const { data: soldes } = await window.supabaseClient
-        .from('suivi_soldes_bancaires')
-        .select('*')
-        .eq('annee', anneeActuelle)
-        .order('mois', { ascending: true });
+    // ============================================================
+    // ❌ FEATURE SUPPRIMÉE - 23 JAN 2026
+    // Table suivi_soldes_bancaires supprimée de la BDD
+    // ============================================================
+    // const { data: soldes } = await window.supabaseClient
+    //     .from('suivi_soldes_bancaires')
+    //     .select('*')
+    //     .eq('annee', anneeActuelle)
+    //     .order('mois', { ascending: true });
+    const soldes = null;
     
     const ctx = canvas.getContext('2d');
     
@@ -1437,8 +1603,14 @@ async function refreshDashboard() {
     await updateTodoLists();
     await updateFinancialIndicators();
     await afficherGraphiqueTresorerieDashboard();
-    initializeTodoModal();
+    // initializeTodoModal(); // Supprimé - modal créé dynamiquement
     initializeReponseWhatsappModal();
+    
+    // Attacher les boutons "+ Tâche" via data-category (SecurityUtils ne supprime pas les attributs data)
+    document.querySelectorAll('[data-todo-category]').forEach(btn => {
+        const category = btn.getAttribute('data-todo-category');
+        btn.addEventListener('click', () => addTodoItem(category));
+    });
     
     // Attacher le bouton Actualiser (SecurityUtils supprime les onclick)
     const btnActualiser = document.querySelector('#tab-dashboard button');
@@ -1477,14 +1649,32 @@ function initializeReponseWhatsappModal() {
 }
 
 // ==========================================
+// ❌ FEATURE SUPPRIMÉE - 23 JAN 2026
 // ⏰ DEMANDES D'HORAIRES CLIENTS
+// Table demandes_horaires supprimée de la BDD
 // ==========================================
 
 async function updateDemandesClients() {
+    return; // ❌ Table demandes_horaires supprimée - 23/01/2026
+    
+    // Cacher la carte puisque la feature est désactivée
+    const card = document.getElementById('dashboard-demandes-clients');
+    const badge = document.getElementById('badge-demandes-count');
+    if (card) card.style.display = 'none';
+    if (badge) badge.textContent = '0';
+    
     try {
         const { data: demandes, error } = await supabaseClient
             .from('demandes_horaires')
-            .select('*')
+            .select(`
+                *,
+                reservations:reservation_id (
+                    client_name,
+                    gite,
+                    check_in,
+                    check_out
+                )
+            `)
             .eq('statut', 'en_attente')
             .order('created_at', { ascending: true });
         
@@ -1513,29 +1703,33 @@ async function updateDemandesClients() {
         demandes.forEach(d => {
             const typeLabel = d.type === 'arrivee' ? '📥 Arrivée' : '📤 Départ';
             const typeColor = d.type === 'arrivee' ? '#27AE60' : '#E74C3C';
-            const clientNom = d.client_nom || 'Client';
-            const clientPrenom = d.client_prenom || '';
-            const gite = d.gite || '';
+            
+            // Récupérer les infos depuis la réservation liée
+            const resa = d.reservations;
+            const clientNom = resa?.client_name || 'Client';
+            const gite = resa?.gite || '';
+            const dateDebut = resa?.check_in;
+            const dateFin = resa?.check_out;
             
             html += `
                 <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
                             <span style="background: ${typeColor}; color: white; padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">${typeLabel}</span>
-                            <strong style="font-size: 1rem;">${clientNom} ${clientPrenom}</strong>
+                            <strong style="font-size: 1rem;">${clientNom}</strong>
                             ${gite ? `<span style="color: #666; font-size: 0.85rem;">• ${gite}</span>` : ''}
                         </div>
                         <div style="color: #666; font-size: 0.9rem;">
-                            📅 ${formatDateFromObj(new Date(d.date_debut))} → ${formatDateFromObj(new Date(d.date_fin))}
+                            📅 ${dateDebut ? formatDateFromObj(new Date(dateDebut)) : 'N/A'} → ${dateFin ? formatDateFromObj(new Date(dateFin)) : 'N/A'}
                             • ⏰ Demande: <strong>${d.heure_demandee}</strong>
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button onclick="validerDemandeHoraire(${d.id}, '${d.heure_demandee}')" 
+                        <button onclick="validerDemandeHoraire('${d.id}', '${d.heure_demandee}')" 
                                 style="background: #27AE60; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
                             ✓ Valider
                         </button>
-                        <button onclick="refuserDemandeHoraire(${d.id})" 
+                        <button onclick="refuserDemandeHoraire('${d.id}')" 
                                 style="background: #E74C3C; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
                             ✗ Refuser
                         </button>
@@ -1551,16 +1745,39 @@ async function updateDemandesClients() {
 }
 
 async function validerDemandeHoraire(demandeId, heureValidee) {
-    const username = sessionStorage.getItem('username') || 'Admin';
-    
+    return; // ❌ Table demandes_horaires supprimée - 23/01/2026
     try {
+        // 1. Récupérer la demande complète pour connaître le type et la réservation
+        const { data: demande, error: fetchError} = await supabaseClient
+            .from('demandes_horaires')
+            .select('*, reservations:reservation_id(id)')
+            .eq('id', demandeId)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        if (!demande || !demande.reservation_id) {
+            alert('❌ Demande ou réservation introuvable');
+            return;
+        }
+        
+        // 2. Mettre à jour l'heure dans la réservation
+        const champHeure = demande.type === 'arrivee' ? 'check_in_time' : 'check_out_time';
+        const { error: updateResaError } = await supabaseClient
+            .from('reservations')
+            .update({ 
+                [champHeure]: heureValidee,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', demande.reservation_id);
+        
+        if (updateResaError) throw updateResaError;
+        
+        // 3. Mettre à jour le statut de la demande
         const { error } = await supabaseClient
             .from('demandes_horaires')
             .update({
                 statut: 'validee',
-                heure_validee: heureValidee,
-                validated_at: new Date().toISOString(),
-                validated_by: username
+                updated_at: new Date().toISOString()
             })
             .eq('id', demandeId);
         
@@ -1576,17 +1793,16 @@ async function validerDemandeHoraire(demandeId, heureValidee) {
 }
 
 async function refuserDemandeHoraire(demandeId) {
+    return; // ❌ Table demandes_horaires supprimée - 23/01/2026
     const raison = prompt('Raison du refus (optionnel):');
-    const username = sessionStorage.getItem('username') || 'Admin';
     
     try {
         const { error } = await supabaseClient
             .from('demandes_horaires')
             .update({
                 statut: 'refusee',
-                raison_refus: raison || 'Non disponible',
-                validated_at: new Date().toISOString(),
-                validated_by: username
+                motif: raison || 'Refusée',
+                updated_at: new Date().toISOString()
             })
             .eq('id', demandeId);
         
@@ -1605,6 +1821,14 @@ async function refuserDemandeHoraire(demandeId) {
 // ==========================================
 
 async function updateProblemesClients() {
+    return; // ❌ Table problemes_signales supprimée - 23/01/2026
+    
+    // Cacher la carte puisque la feature est désactivée
+    const card = document.getElementById('dashboard-problemes-clients');
+    const badge = document.getElementById('badge-problemes-count');
+    if (card) card.style.display = 'none';
+    if (badge) badge.textContent = '0';
+    
     try {
         const { data: problemes, error } = await supabaseClient
             .from('problemes_signales')
@@ -1801,6 +2025,7 @@ function renderProblemeCard(pb, isUrgent) {
 }
 
 async function traiterProbleme(id) {
+    return; // ❌ Table problemes_signales supprimée - 23/01/2026
     if (!confirm('Marquer ce problème comme traité ?\n\nCela le supprimera de la liste.')) return;
     
     try {
@@ -1820,6 +2045,7 @@ async function traiterProbleme(id) {
 }
 
 async function supprimerProbleme(id) {
+    return; // ❌ Table problemes_signales supprimée - 23/01/2026
     if (!confirm('Supprimer ce problème définitivement ?')) return;
     
     try {
@@ -2062,6 +2288,7 @@ function getProgressColorDashboard(percent) {
 // ==========================================
 
 async function afficherDetailsRetourMenage(retourId) {
+    return; // ❌ Table retours_menage supprimée - 23/01/2026
     try {
         const { data: retour, error } = await window.supabaseClient
             .from('retours_menage')
@@ -2142,6 +2369,7 @@ async function afficherDetailsRetourMenage(retourId) {
 }
 
 async function fermerEtValiderRetourMenage(retourId) {
+    return; // ❌ Table retours_menage supprimée - 23/01/2026
     try {
         // Marquer le retour comme validé pour qu'il disparaisse des alertes
         const { error } = await window.supabaseClient
@@ -2201,3 +2429,212 @@ window.affichEtValiderRetourMenage = fermerEtValiderRetourMenage;
 window.fermererDetailsRetourMenage = afficherDetailsRetourMenage;
 window.fermerModalRetourMenage = fermerModalRetourMenage;
 window.chargerGraphiqueTresorerie = afficherGraphiqueTresorerieDashboard;
+
+// =============================================
+// FONCTION ONGLET CHECK-LISTS
+// =============================================
+
+async function loadChecklistsTab() {
+    const container = document.getElementById('checklist-reservations-container');
+    if (!container) return;
+    
+    if (!CHECKLIST_FEATURE_ENABLED) {
+        container.innerHTML = '<p style="color: #e74c3c; font-style: italic;">❌ Fonctionnalité check-lists désactivée (table non disponible)</p>';
+        return;
+    }
+    
+    try {
+        container.innerHTML = '<p style="color: #666; font-style: italic;">⏳ Chargement des réservations...</p>';
+        
+        // Charger les réservations directement depuis Supabase
+        const { data: reservations, error } = await supabaseClient
+            .from('reservations')
+            .select('*')
+            .order('check_in', { ascending: true });
+        
+        if (error) throw error;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Filtrer uniquement les réservations EN COURS (arrivée <= aujourd'hui <= départ)
+        const activeReservations = reservations.filter(r => {
+            const dateDebut = new Date(r.check_in);
+            const dateFin = new Date(r.check_out);
+            dateDebut.setHours(0, 0, 0, 0);
+            dateFin.setHours(0, 0, 0, 0);
+            
+            return dateDebut <= today && dateFin >= today;
+        });
+        
+        if (activeReservations.length === 0) {
+            container.innerHTML = '<p style="color: #666; font-style: italic;">Aucune réservation en cours actuellement</p>';
+            return;
+        }
+        
+        let html = '';
+        for (const r of activeReservations) {
+            const gite = await window.gitesManager.getById(r.gite_id);
+            if (!gite) {
+                console.warn(`⚠️ Gîte non trouvé pour gite_id: ${r.gite_id}`);
+                continue;
+            }
+            
+            const checklistProgress = await getReservationChecklistProgressDashboard(r.id, r.gite_id);
+            
+            const totalEntree = checklistProgress.entree.total;
+            const completedEntree = checklistProgress.entree.completed;
+            const percentEntree = checklistProgress.entree.percent;
+            
+            const totalSortie = checklistProgress.sortie.total;
+            const completedSortie = checklistProgress.sortie.completed;
+            const percentSortie = checklistProgress.sortie.percent;
+            
+            const colorEntree = percentEntree === 100 ? '#27AE60' : percentEntree > 50 ? '#F39C12' : '#E74C3C';
+            const colorSortie = percentSortie === 100 ? '#27AE60' : percentSortie > 50 ? '#F39C12' : '#E74C3C';
+            
+            // Récupérer les détails des items
+            const { data: templatesEntree } = await supabaseClient
+                .from('checklist_templates')
+                .select('*')
+                .eq('gite_id', r.gite_id)
+                .eq('type', 'entree')
+                .eq('actif', true)
+                .order('ordre', { ascending: true });
+            
+            const { data: templatesSortie } = await supabaseClient
+                .from('checklist_templates')
+                .select('*')
+                .eq('gite_id', r.gite_id)
+                .eq('type', 'sortie')
+                .eq('actif', true)
+                .order('ordre', { ascending: true });
+            
+            const { data: progress } = await supabaseClient
+                .from('checklist_progress')
+                .select('*')
+                .eq('reservation_id', r.id);
+            
+            const progressMap = {};
+            if (progress) {
+                progress.forEach(p => {
+                    progressMap[p.template_id] = p.completed;
+                });
+            }
+            
+            html += `
+                <div style="background: white; border: 3px solid ${gite.color}; padding: 15px; border-radius: 12px; box-shadow: 4px 4px 0 #2D3436; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <strong style="font-size: 1.1rem; color: #2D3436;">${r.client_name}</strong>
+                            <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
+                                🏠 ${gite.name} • 📅 ${new Date(r.check_in).toLocaleDateString('fr-FR')} → ${new Date(r.check_out).toLocaleDateString('fr-FR')}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="toggleChecklistDetails('${r.id}')" class="btn-neo" style="background: #fdcb6e; color: #2D3436; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                                <span id="toggle-icon-${r.id}">👁️</span> Détails
+                            </button>
+                            <button onclick="aperçuFicheClient('${r.id}')" class="btn-neo" style="background: #74b9ff; color: white; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                                📄 Fiche
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <!-- Entrée -->
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border: 2px solid ${colorEntree};">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <strong style="font-size: 0.9rem; color: #2D3436;">🏠 Entrée</strong>
+                                <span style="font-size: 0.85rem; font-weight: 600; color: ${colorEntree};">${completedEntree}/${totalEntree}</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="background: ${colorEntree}; height: 100%; width: ${percentEntree}%; transition: width 0.3s;"></div>
+                            </div>
+                            <div style="text-align: right; margin-top: 4px; font-size: 0.75rem; font-weight: 600; color: ${colorEntree};">${percentEntree}%</div>
+                        </div>
+                        
+                        <!-- Sortie -->
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border: 2px solid ${colorSortie};">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <strong style="font-size: 0.9rem; color: #2D3436;">🧳 Sortie</strong>
+                                <span style="font-size: 0.85rem; font-weight: 600; color: ${colorSortie};">${completedSortie}/${totalSortie}</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="background: ${colorSortie}; height: 100%; width: ${percentSortie}%; transition: width 0.3s;"></div>
+                            </div>
+                            <div style="text-align: right; margin-top: 4px; font-size: 0.75rem; font-weight: 600; color: ${colorSortie};">${percentSortie}%</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Liste détaillée (cachée par défaut) -->
+                    <div id="checklist-details-${r.id}" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #e5e7eb;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <!-- Items Entrée -->
+                            <div>
+                                <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #2D3436;">🏠 Checklist Entrée</h4>
+                                ${(templatesEntree && templatesEntree.length > 0) ? templatesEntree.map(t => {
+                                    const isChecked = progressMap[t.id] === true;
+                                    return `
+                                        <div style="padding: 8px; background: ${isChecked ? '#d1fae5' : '#fff'}; border-radius: 6px; margin-bottom: 6px; border: 2px solid ${isChecked ? '#10b981' : '#e5e7eb'};">
+                                            <div style="display: flex; align-items: start; gap: 8px;">
+                                                <span style="font-size: 1.1rem;">${isChecked ? '✅' : '❌'}</span>
+                                                <div style="flex: 1; font-size: 0.85rem;">
+                                                    <div style="font-weight: ${isChecked ? '600' : '400'}; color: ${isChecked ? '#059669' : '#6b7280'};">${t.texte}</div>
+                                                    ${t.description ? `<div style="font-size: 0.8rem; color: var(--gray-600); margin-top: 2px;">${t.description}</div>` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('') : '<p style="color: #666; font-style: italic; font-size: 0.85rem;">Aucun item</p>'}
+                            </div>
+                            
+                            <!-- Items Sortie -->
+                            <div>
+                                <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #2D3436;">🧳 Checklist Sortie</h4>
+                                ${(templatesSortie && templatesSortie.length > 0) ? templatesSortie.map(t => {
+                                    const isChecked = progressMap[t.id] === true;
+                                    return `
+                                        <div style="padding: 8px; background: ${isChecked ? '#d1fae5' : '#fff'}; border-radius: 6px; margin-bottom: 6px; border: 2px solid ${isChecked ? '#10b981' : '#e5e7eb'};">
+                                            <div style="display: flex; align-items: start; gap: 8px;">
+                                                <span style="font-size: 1.1rem;">${isChecked ? '✅' : '❌'}</span>
+                                                <div style="flex: 1; font-size: 0.85rem;">
+                                                    <div style="font-weight: ${isChecked ? '600' : '400'}; color: ${isChecked ? '#059669' : '#6b7280'};">${t.texte}</div>
+                                                    ${t.description ? `<div style="font-size: 0.8rem; color: var(--gray-600); margin-top: 2px;">${t.description}</div>` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('') : '<p style="color: #666; font-style: italic; font-size: 0.85rem;">Aucun item</p>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('❌ Erreur chargement check-lists:', error);
+        container.innerHTML = '<p style="color: #e74c3c;">❌ Erreur lors du chargement</p>';
+    }
+}
+
+// Exposer la fonction globalement
+window.loadChecklistsTab = loadChecklistsTab;
+
+// Fonction pour afficher/masquer les détails de checklist
+function toggleChecklistDetails(reservationId) {
+    const detailsDiv = document.getElementById(`checklist-details-${reservationId}`);
+    const icon = document.getElementById(`toggle-icon-${reservationId}`);
+    
+    if (detailsDiv.style.display === 'none') {
+        detailsDiv.style.display = 'block';
+        icon.textContent = '🙈';
+    } else {
+        detailsDiv.style.display = 'none';
+        icon.textContent = '👁️';
+    }
+}
+
+window.toggleChecklistDetails = toggleChecklistDetails;

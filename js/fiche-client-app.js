@@ -8,8 +8,8 @@
 if (!window.ficheClientAppLoaded) {
     window.ficheClientAppLoaded = true;
 
-    const SUPABASE_URL = 'https://ivqiisnudabxemcxxyru.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2cWlpc251ZGFieGVtY3h4eXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTk0NjMsImV4cCI6MjA4MDk3NTQ2M30.9FwJPgR8bbaP7bAemuaVbAN019EO5ql7uciQO9FeHK4';
+    const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL || window.SUPABASE_URL || 'https://fgqimtpjjhdqeyyaptoj.supabase.co';
+    const SUPABASE_KEY = window.APP_CONFIG?.SUPABASE_KEY || window.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZncWltdHBqamhkcWV5eWFwdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNTU0MjQsImV4cCI6MjA4MzczMTQyNH0.fOuYg0COYts7XXWxgB7AM01Fg6P86f8oz8XVpGdIaNM';
 
     // Initialiser Supabase (une seule fois)
     if (!window.ficheClientSupabase) {
@@ -55,6 +55,89 @@ var supabase = window.ficheClientSupabase;
 function normalizeGiteName(name) {
     if (!name) return '';
     return name.toLowerCase(); // Juste minuscules, on garde les accents !
+}
+
+// 🌍 TRADUCTION AUTOMATIQUE FR → EN
+async function translateText(text) {
+    if (!text || text.trim() === '') return '';
+    
+    try {
+        // API MyMemory (gratuite, 10 000 requêtes/jour)
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.responseStatus === 200 && data.responseData) {
+            return data.responseData.translatedText;
+        }
+        return text; // Fallback si erreur
+    } catch (error) {
+        console.error('❌ Erreur traduction:', error);
+        return text;
+    }
+}
+
+// Traduire automatiquement TOUS les champs vides _en depuis FR
+async function autoTranslateGiteInfoIfNeeded() {
+    if (!giteInfo) return;
+    
+    // Liste des champs à traduire (FR → EN)
+    const fieldsToTranslate = [
+        'adresse', 'telephone', 'email',
+        'wifi_ssid', 'wifi_password', 'wifi_debit', 'wifi_localisation', 'wifi_zones',
+        'heure_arrivee', 'arrivee_tardive', 'parking_dispo', 'parking_places', 'parking_details',
+        'type_acces', 'code_acces', 'instructions_cles', 'etage', 'ascenseur', 
+        'itineraire_logement', 'premiere_visite',
+        'type_chauffage', 'climatisation', 'instructions_chauffage',
+        'equipements_cuisine', 'instructions_four', 'instructions_plaques',
+        'instructions_lave_vaisselle', 'instructions_lave_linge',
+        'seche_linge', 'fer_repasser', 'linge_fourni', 'configuration_chambres',
+        'instructions_tri', 'jours_collecte', 'decheterie',
+        'detecteur_fumee', 'extincteur', 'coupure_eau', 'disjoncteur', 'consignes_urgence',
+        'heure_depart', 'depart_tardif', 'checklist_depart', 'restitution_cles',
+        'tabac', 'animaux', 'nb_max_personnes', 'caution'
+    ];
+    
+    let translated = false;
+    const updates = {};
+    
+    for (const field of fieldsToTranslate) {
+        const valueFR = giteInfo[field];
+        const valueEN = giteInfo[field + '_en'];
+        
+        // Si FR rempli mais EN vide → Traduire
+        if (valueFR && valueFR.trim() !== '' && (!valueEN || valueEN.trim() === '')) {
+            console.log(`🌍 Traduction ${field}: "${valueFR.substring(0, 50)}..."`);
+            
+            // Traduire avec délai pour éviter rate limit (100ms entre chaque)
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const translated_text = await translateText(valueFR);
+            
+            giteInfo[field + '_en'] = translated_text;
+            updates[field + '_en'] = translated_text;
+            translated = true;
+        }
+    }
+    
+    // Sauvegarder les traductions dans la base
+    if (translated && Object.keys(updates).length > 0) {
+        console.log(`💾 Sauvegarde de ${Object.keys(updates).length} traductions automatiques...`);
+        
+        try {
+            const { error } = await supabase
+                .from('infos_gites')
+                .update(updates)
+                .eq('gite', normalizeGiteName(reservationData.gite));
+            
+            if (error) {
+                console.error('❌ Erreur sauvegarde traductions:', error);
+            } else {
+                console.log('✅ Traductions sauvegardées en base de données');
+            }
+        } catch (err) {
+            console.error('❌ Erreur update base:', err);
+        }
+    }
 }
 
 // ==================== VARIABLES GLOBALES ====================
@@ -118,7 +201,52 @@ const translations = {
         demande: '🙋 Demande',
         retour: '💬 Retour',
         amelioration: '💡 Amélioration',
-        probleme: '⚠️ Problème'
+        probleme: '⚠️ Problème',
+        wifi_internet: '📶 WiFi & Internet',
+        parking_title: '🚗 Parking',
+        chauffage_clim: '🌡️ Chauffage & Climatisation',
+        cuisine_electromenager: '🍳 Cuisine & Électroménager',
+        tri_dechets: '♻️ Tri des déchets',
+        securite_urgence: '🚨 Sécurité & Urgence',
+        partager: 'Partager',
+        bienvenue: 'Bienvenue',
+        votre_sejour: 'Votre séjour',
+        chargement: 'Chargement de votre guide...',
+        installer_app: 'Installer l\'application',
+        acces_rapide: 'Accédez rapidement à votre guide, même hors ligne',
+        installer: 'Installer',
+        plus_tard: 'Plus tard',
+        disponibilite: 'Disponibilité',
+        places: 'Places',
+        type_chauffage: 'Type de chauffage',
+        climatisation: 'Climatisation',
+        instructions: 'Instructions',
+        jours_collecte: 'Jours de collecte',
+        decheterie: 'Déchèterie',
+        important: 'Important',
+        horaire_info: 'Les horaires d\'arrivée plus tôt dépendent du ménage avant vous. Si nous pouvons, nous vous permettons l\'arrivée plus tôt.',
+        copier: 'Copier',
+        voir_carte: 'Voir sur la carte',
+        voir_itineraire: 'Voir l\'itinéraire',
+        distance: 'Distance',
+        questions_frequentes: '❓ Questions fréquentes',
+        description_faq: 'Trouvez rapidement des réponses à vos questions',
+        rechercher_faq: '🔍 Rechercher une question...',
+        eval_titre: '⭐ Votre avis compte énormément !',
+        eval_description: 'Comprenez l\'impact de votre notation sur notre activité',
+        eval_comment_notation: '📊 Comment fonctionne la notation ?',
+        eval_5sur5_titre: '✅ 5/5 = Séjour conforme à vos attentes',
+        eval_5sur5_texte: 'C\'est la norme attendue, pas l\'excellence. Tout s\'est bien passé ? C\'est un 5/5 !',
+        eval_4sur5_titre: '⚠️ 4/5 ou moins = Impact majeur sur notre visibilité',
+        eval_4sur5_texte: 'Les plateformes pénalisent sévèrement toute note < 5/5. Une moyenne < 4,8 peut nous déréférencer.',
+        eval_probleme_titre: '💬 Un problème rencontré ?',
+        eval_probleme_texte: 'Contactez-nous AVANT de noter via l\'onglet "Demandes". Nous sommes réactifs et trouverons une solution ensemble !',
+        eval_objectif: '🎯 Notre objectif : Vous offrir un séjour mémorable ! Si nous y sommes parvenus, votre 5/5 + commentaire détaillé nous aidera à continuer d\'accueillir d\'autres voyageurs comme vous. Merci de votre soutien ! 🙏',
+        btn_envoyer: '📤 Envoyer',
+        btn_voir_carte: '📍 Voir sur carte',
+        btn_voir_google_maps: '📍 Voir sur Google Maps',
+        btn_ouvrir_google_maps: '🗺️ Ouvrir dans Google Maps',
+        btn_retour_gite: '🏡 Retour gîte seul'
     },
     en: {
         tab_entree: 'Check-in',
@@ -170,7 +298,52 @@ const translations = {
         demande: '🙋 Request',
         retour: '💬 Feedback',
         amelioration: '💡 Suggestion',
-        probleme: '⚠️ Issue'
+        probleme: '⚠️ Issue',
+        wifi_internet: '📶 WiFi & Internet',
+        parking_title: '🚗 Parking',
+        chauffage_clim: '🌡️ Heating & Air Conditioning',
+        cuisine_electromenager: '🍳 Kitchen & Appliances',
+        tri_dechets: '♻️ Waste Sorting',
+        securite_urgence: '🚨 Safety & Emergency',
+        partager: 'Share',
+        bienvenue: 'Welcome',
+        votre_sejour: 'Your stay',
+        chargement: 'Loading your guide...',
+        installer_app: 'Install the app',
+        acces_rapide: 'Quick access to your guide, even offline',
+        installer: 'Install',
+        plus_tard: 'Later',
+        disponibilite: 'Availability',
+        places: 'Spaces',
+        type_chauffage: 'Heating type',
+        climatisation: 'Air conditioning',
+        instructions: 'Instructions',
+        jours_collecte: 'Collection days',
+        decheterie: 'Waste center',
+        important: 'Important',
+        horaire_info: 'Early check-in depends on cleaning before you. If possible, we allow earlier arrival.',
+        copier: 'Copy',
+        voir_carte: 'View on map',
+        voir_itineraire: 'View directions',
+        distance: 'Distance',
+        questions_frequentes: '❓ Frequently Asked Questions',
+        description_faq: 'Find answers to your questions quickly',
+        rechercher_faq: '🔍 Search for a question...',
+        eval_titre: '⭐ Your opinion matters greatly!',
+        eval_description: 'Understand the impact of your rating on our business',
+        eval_comment_notation: '📊 How does rating work?',
+        eval_5sur5_titre: '✅ 5/5 = Stay met your expectations',
+        eval_5sur5_texte: 'This is the expected standard, not excellence. Everything went well? That\'s a 5/5!',
+        eval_4sur5_titre: '⚠️ 4/5 or less = Major impact on our visibility',
+        eval_4sur5_texte: 'Platforms severely penalize any rating < 5/5. An average < 4.8 can delist us.',
+        eval_probleme_titre: '💬 Encountered a problem?',
+        eval_probleme_texte: 'Contact us BEFORE rating via the "Requests" tab. We are responsive and will find a solution together!',
+        eval_objectif: '🎯 Our goal: To offer you a memorable stay! If we succeeded, your 5/5 + detailed comment will help us continue welcoming other travelers like you. Thank you for your support! 🙏',
+        btn_envoyer: '📤 Send',
+        btn_voir_carte: '📍 View on map',
+        btn_voir_google_maps: '📍 View on Google Maps',
+        btn_ouvrir_google_maps: '🗺️ Open in Google Maps',
+        btn_retour_gite: '🏡 Back to cottage only'
     }
 };
 
@@ -181,7 +354,21 @@ function t(key) {
 function updateTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        el.textContent = t(key);
+        const translation = t(key);
+        
+        // Cas spéciaux : ne pas écraser le contenu dynamique
+        if (key === 'bienvenue' && reservationData?.client_name) {
+            el.textContent = `${translation} ${reservationData.client_name} !`;
+        } else if (key === 'votre_sejour' && reservationData?.gite) {
+            el.textContent = reservationData.gite;
+        } else if (el.tagName === 'BUTTON' || el.tagName === 'SPAN') {
+            // Pour les boutons et spans, seulement mettre à jour si pas de contenu mixte
+            if (!el.querySelector('span')) {
+                el.textContent = translation;
+            }
+        } else {
+            el.textContent = translation;
+        }
     });
     
     // Update select options
@@ -189,6 +376,22 @@ function updateTranslations() {
         const key = el.getAttribute('data-i18n-option');
         el.textContent = t(key);
     });
+    
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        el.placeholder = t(key);
+    });
+    
+    // 🌍 RECHARGER tous les onglets pour appliquer la langue dynamique
+    initOngletEntree();
+    initOngletPendant();
+    initOngletSortie();
+    
+    // Recharger les checklists avec la bonne langue
+    if (typeof loadClientChecklists === 'function') {
+        loadClientChecklists();
+    }
 }
 
 // ==================== INITIALISATION ====================
@@ -264,26 +467,18 @@ async function loadReservationData() {
         // // console.warn('⚠️ Mode DEBUG: Token expiré mais affiché quand même');
     }
     
-    // Mettre à jour les stats d'accès
+    // Mettre à jour le token (colonnes existantes)
     await supabase
         .from('client_access_tokens')
         .update({
-            last_accessed_at: new Date().toISOString(),
-            access_count: tokenData.access_count + 1
+            updated_at: new Date().toISOString(),
+            is_active: true
         })
         .eq('id', tokenData.id);
     
     reservationData = tokenData.reservation;
     
-    // Enregistrer l'ouverture dans les logs
-    await supabase
-        .from('fiche_generation_logs')
-        .update({
-            opened_count: supabase.rpc('increment'),
-            last_opened_at: new Date().toISOString()
-        })
-        .eq('reservation_id', reservationData.id)
-        .eq('type_generation', 'html');
+    // Logs désactivés (table fiche_generation_logs optionnelle)
 }
 
 async function loadGiteInfo() {
@@ -324,26 +519,36 @@ async function loadGiteInfo() {
     
     giteInfo = data;
     
-    // ✅ NOUVEAU: Charger les horaires validés pour cette réservation
-    const { data: horairesValidees } = await supabase
+    // 🌍 TRADUCTION AUTOMATIQUE : Si champs EN vides, traduire depuis FR
+    await autoTranslateGiteInfoIfNeeded();
+    
+    // ❌ Table demandes_horaires supprimée - 23/01/2026 - Feature désactivée
+    // (Code conservé pour référence mais ne sera plus exécuté)
+    /*
+    const { data: horairesValidees, error: horairesError } = await supabase
         .from('demandes_horaires')
-        .select('type, heure_validee, statut')
+        .select('type, heure_demandee, statut')
         .eq('reservation_id', reservationData.id)
         .eq('statut', 'validee')
         .in('type', ['arrivee', 'depart']);
     
-    // Stocker les horaires validées dans giteInfo pour utilisation ultérieure
+    // Ignorer silencieusement si la table n'existe pas
+    if (horairesError) {
+        // Table inexistante - normal
+    }
+    
+    // Stocker les horaires validées dans giteInfo pour affichage
     if (horairesValidees && horairesValidees.length > 0) {
         horairesValidees.forEach(h => {
             if (h.type === 'arrivee') {
-                giteInfo.heure_arrivee_validee = h.heure_validee;
+                giteInfo.heure_arrivee_validee = h.heure_demandee;
             }
             if (h.type === 'depart') {
-                giteInfo.heure_depart_validee = h.heure_validee;
+                giteInfo.heure_depart_validee = h.heure_demandee;
             }
         });
-        // // console.log('✅ Horaires validées trouvées:', giteInfo.heure_arrivee_validee, giteInfo.heure_depart_validee);
     }
+    */
 }
 
 async function loadCleaningSchedule() {
@@ -352,7 +557,7 @@ async function loadCleaningSchedule() {
         .from('cleaning_schedule')
         .select('*')
         .eq('gite', normalizeGiteName(reservationData.gite))
-        .eq('scheduled_date', reservationData.date_debut)
+        .eq('scheduled_date', reservationData.check_in)
         .maybeSingle();
     
     cleaningScheduleAvant = menageAvant;
@@ -362,7 +567,7 @@ async function loadCleaningSchedule() {
         .from('cleaning_schedule')
         .select('*')
         .eq('gite', normalizeGiteName(reservationData.gite))
-        .eq('scheduled_date', reservationData.date_fin)
+        .eq('scheduled_date', reservationData.check_out)
         .maybeSingle();
     
     cleaningScheduleApres = menageApres;
@@ -371,8 +576,9 @@ async function loadCleaningSchedule() {
 function initializeUI() {
     // Nom du client dans l'en-tête
     const clientNameEl = document.getElementById('clientName');
-    if (clientNameEl && reservationData.nom) {
-        clientNameEl.textContent = `Bienvenue ${reservationData.nom} !`;
+    if (clientNameEl && reservationData.client_name) {
+        const welcomeText = t('bienvenue');
+        clientNameEl.textContent = `${welcomeText} ${reservationData.client_name} !`;
     }
     
     // Titre du gîte
@@ -390,8 +596,8 @@ function initializeUI() {
     // Onglet Activités - NE PAS CHARGER ICI (onglet caché)
     // initOngletActivites(); // Sera chargé au premier clic sur l'onglet
     
-    // Onglet FAQ
-    initOngletFaq();
+    // Onglet FAQ - Chargé au clic uniquement
+    // initOngletFaq(); // Sera chargé au premier clic sur l'onglet
     
     // ✅ Nouveaux onglets: Problème et Évaluation
     initProblemeTab();
@@ -437,7 +643,7 @@ function initOngletEntree() {
         // // console.warn('⚠️ heureArriveeDemandee select not found');
         return;
     }
-    window.SecurityUtils.setInnerHTML(selectElement, '');
+    selectElement.innerHTML = '';
     
     // Déterminer l'heure minimum selon le ménage
     const heureMinArrivee = !cleaningScheduleAvant || cleaningScheduleAvant.time_of_day !== 'afternoon' ? 13 : 17;
@@ -544,7 +750,7 @@ function initOngletEntree() {
         const encodedText = encodeURIComponent(wifiString);
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedText}`;
         
-        window.SecurityUtils.setInnerHTML(qrContainer, `
+        qrContainer.innerHTML = `
             <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem; text-align: center;">
                 ${currentLanguage === 'fr' ? '📱 Scannez pour vous connecter' : '📱 Scan to connect'}
             </p>
@@ -581,7 +787,7 @@ function initOngletEntree() {
     
     const parkingSection = document.getElementById('parkingSection');
     if (parkingHTML) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('parkingInfo'), parkingHTML);
+        document.getElementById('parkingInfo').innerHTML = parkingHTML;
         parkingSection.style.display = 'block';
     } else {
         parkingSection.style.display = 'none';
@@ -620,7 +826,7 @@ function initOngletPendant() {
     
     const chauffageSection = document.getElementById('chauffageSection');
     if (chauffageHTML) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('chauffageInfo'), chauffageHTML);
+        document.getElementById('chauffageInfo').innerHTML = chauffageHTML;
         chauffageSection.style.display = 'block';
     } else {
         chauffageSection.style.display = 'none';
@@ -670,7 +876,7 @@ function initOngletPendant() {
     
     const cuisineSection = document.getElementById('cuisineSection');
     if (cuisineHTML) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('cuisineInfo'), cuisineHTML);
+        document.getElementById('cuisineInfo').innerHTML = cuisineHTML;
         cuisineSection.style.display = 'block';
     } else {
         cuisineSection.style.display = 'none';
@@ -704,7 +910,7 @@ function initOngletPendant() {
     
     const dechetsSection = document.getElementById('dechetsSection');
     if (dechetsHTML) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('dechetsInfo'), dechetsHTML);
+        document.getElementById('dechetsInfo').innerHTML = dechetsHTML;
         dechetsSection.style.display = 'block';
     } else {
         dechetsSection.style.display = 'none';
@@ -713,7 +919,7 @@ function initOngletPendant() {
     // Équipements
     if (giteInfo.equipements && giteInfo.equipements.length > 0) {
         const container = document.getElementById('equipementsContainer');
-        window.SecurityUtils.setInnerHTML(container, giteInfo.equipements.map(eq => {
+        container.innerHTML = giteInfo.equipements.map(eq => {
             const nom = currentLanguage === 'fr' ? eq.nom_fr : eq.nom_en;
             return `
                 <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-bottom: 1px solid var(--gray-200);">
@@ -776,7 +982,7 @@ function initOngletPendant() {
     }
     
     if (contactsHTML) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('contactsUrgenceContainer'), contactsHTML);
+        document.getElementById('contactsUrgenceContainer').innerHTML = contactsHTML;
     }
     
     // Charger les événements de la semaine et commerces proximité
@@ -807,7 +1013,7 @@ function initOngletSortie() {
     }
     
     // Règle départ tardif selon le ménage du jour de départ
-    const isDimanche = new Date(reservationData.date_fin).getDay() === 0;
+    const isDimanche = new Date(reservationData.check_out).getDay() === 0;
     
     // Si PAS de ménage l'après-midi du départ, on peut partir plus tard
     const pasDeMenuageApresMidi = !cleaningScheduleApres || cleaningScheduleApres.time_of_day !== 'afternoon';
@@ -824,7 +1030,7 @@ function initOngletSortie() {
     
     const selectDepartElement = document.getElementById('heureDepartDemandee');
     if (selectDepartElement) {
-        window.SecurityUtils.setInnerHTML(selectDepartElement, '');
+        selectDepartElement.innerHTML = '';
         
         // Générer options de 10h jusqu'à l'heure max (incluse)
         for (let h = 10; h <= heureMaxDepart; h++) {
@@ -917,7 +1123,7 @@ function initOngletSortie() {
     }
     
     if (instructionsHTML) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('instructionsSortie'), instructionsHTML);
+        document.getElementById('instructionsSortie').innerHTML = instructionsHTML;
     } else {
         document.getElementById('instructionsSortie').textContent = '';
     }
@@ -928,85 +1134,95 @@ function initOngletSortie() {
 // ==================== ACTIVITÉS ====================
 
 function initOngletActivites() {
-    // Réutiliser la logique de decouvrir.js pour afficher la carte et les activités
+    if (!reservationData || !giteInfo) {
+        document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
+        return;
+    }
+    
     loadActivitesForClient();
 }
 
 function initOngletFaq() {
     if (!reservationData) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('faqListe'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
+        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
         return;
     }
     loadFaqData();
 }
 
 async function loadActivitesForClient() {
-    const giteNormalized = normalizeGiteName(reservationData.gite);
-    
-    const variantes = [
-        giteNormalized,
-        giteNormalized.toLowerCase(),
-        reservationData.gite,
-        reservationData.gite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    ];
-    
-    const { data: activites, error } = await supabase
-        .from('activites_gites')
-        .select('*')
-        .or(variantes.map((v, i) => `gite.eq.${v}`).join(','))
-        .order('distance');
-    
-    if (error) {
-        console.error('Erreur chargement activités:', error);
-        return;
+    try {
+        if (!reservationData || !reservationData.gite_id) {
+            document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
+            return;
+        }
+        
+        // Utiliser gite_id au lieu du nom du gîte
+        const { data: activites, error } = await supabase
+            .from('activites_gites')
+            .select('*')
+            .eq('gite_id', reservationData.gite_id)
+            .eq('is_active', true)
+            .order('distance_km');
+        
+        if (error) {
+            console.error('Erreur chargement activités:', error);
+            document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--danger);">⚠️ Erreur lors du chargement des activités</p>';
+            return;
+        }
+        
+        const giteLat = parseFloat(giteInfo?.gps_lat || giteInfo?.latitude);
+        const giteLon = parseFloat(giteInfo?.gps_lon || giteInfo?.longitude);
+        
+        if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
+            document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
+            document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
+            return;
+        }
+        
+        if (!activites || activites.length === 0) {
+            document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
+            document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
+            return;
+        }
+        
+        // Google Maps iframe avec marqueur gîte visible
+        const mapElement = document.getElementById('mapActivites');
+        
+        mapElement.innerHTML = `
+            <iframe 
+                width="100%" 
+                height="400" 
+                frameborder="0" 
+                scrolling="no" 
+                marginheight="0" 
+                marginwidth="0" 
+                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${giteLat},${giteLon}&zoom=16" 
+                style="border: 1px solid #ccc; border-radius: 8px;">
+            </iframe>
+            <div style="text-align: center; margin-top: 0.5rem;">
+                <strong style="color: #ef4444;">🏡 Votre gîte</strong><br>
+                <a href="https://www.google.com/maps/search/?api=1&query=${giteLat},${giteLon}" 
+                   target="_blank" 
+                   style="color: var(--primary); font-size: 0.875rem;">
+                    📍 Voir sur Google Maps
+                </a>
+            </div>
+        `;
+        
+        // Liste interactive des activités
+        displayActivitesListInteractive(activites, giteLat, giteLon);
+    } catch (error) {
+        console.error('❌ Erreur critique dans loadActivitesForClient:', error);
+        document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--danger);">⚠️ Erreur lors du chargement des activités</p>';
     }
-    
-    const giteLat = parseFloat(giteInfo?.gps_lat || giteInfo?.latitude);
-    const giteLon = parseFloat(giteInfo?.gps_lon || giteInfo?.longitude);
-    
-    if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('mapActivites'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
-        return;
-    }
-    
-    if (!activites || activites.length === 0) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('mapActivites'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
-        return;
-    }
-    
-    // Google Maps iframe avec marqueur gîte visible
-    const mapElement = document.getElementById('mapActivites');
-    
-    window.SecurityUtils.setInnerHTML(mapElement, `
-        <iframe 
-            width="100%" 
-            height="400" 
-            frameborder="0" 
-            scrolling="no" 
-            marginheight="0" 
-            marginwidth="0" 
-            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${giteLat},${giteLon}&zoom=16" 
-            style="border: 1px solid #ccc; border-radius: 8px;">
-        </iframe>
-        <div style="text-align: center; margin-top: 0.5rem;">
-            <strong style="color: #ef4444;">🏡 Votre gîte</strong><br>
-            <a href="https://www.google.com/maps/search/?api=1&query=${giteLat},${giteLon}" 
-               target="_blank" 
-               style="color: var(--primary); font-size: 0.875rem;">
-                📍 Voir sur Google Maps
-            </a>
-        </div>
-    `;
-    
-    // Liste interactive des activités
-    displayActivitesListInteractive(activites, giteLat, giteLon);
 }
 
 function displayActivitesList(activites) {
     const listeContainer = document.getElementById('listeActivites');
     
     if (!activites || activites.length === 0) {
-        window.SecurityUtils.setInnerHTML(listeContainer, `
+        listeContainer.innerHTML = `
             <div class="card" style="text-align: center; padding: 2rem;">
                 <p style="color: var(--gray-600); font-size: 1.125rem;">
                     ${currentLanguage === 'fr' 
@@ -1102,7 +1318,7 @@ function displayActivitesList(activites) {
         return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; // Défaut
     };
     
-    window.SecurityUtils.setInnerHTML(listeContainer, activites.map(activite => {
+    listeContainer.innerHTML = activites.map(activite => {
         const icon = getIconForType(activite.type || activite.categorie);
         const gradient = getGradientForType(activite.type || activite.categorie);
         const hasCoords = activite.latitude && activite.longitude;
@@ -1186,14 +1402,6 @@ async function trackActiviteConsultation(activiteId, action) {
 
 // ==================== EVENT LISTENERS ====================
 function initializeEventListeners() {
-    // Validation temps réel pour formulaires
-    if (window.ValidationUtils) {
-        window.ValidationUtils.attachRealtimeValidation('heureArriveeDemandee', 'hours', { required: true });
-        window.ValidationUtils.attachRealtimeValidation('heureDepartDemandee', 'hours', { required: true });
-        window.ValidationUtils.attachRealtimeValidation('sujetRetour', 'text', { required: true });
-        window.ValidationUtils.attachRealtimeValidation('descriptionRetour', 'text', { required: true });
-    }
-    
     // Changement de langue
     document.querySelectorAll('.language-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1203,6 +1411,12 @@ function initializeEventListeners() {
             updateTranslations();
             // Recharger le contenu dans la nouvelle langue
             initializeUI();
+            // Rafraîchir les checklists avec la nouvelle langue
+            reloadClientChecklists();
+            // Rafraîchir la FAQ si elle est chargée
+            if (cachedFaqs.length > 0) {
+                reloadFaqData();
+            }
         });
     });
     
@@ -1305,21 +1519,9 @@ function switchTab(tabId) {
 }
 
 async function submitDemandeHoraire(type) {
-    const heureFieldId = type === 'arrivee_anticipee' ? 'heureArriveeDemandee' : 'heureDepartDemandee';
-    const formId = type === 'arrivee_anticipee' ? 'formArriveeAnticipee' : 'formDepartTardif';
-    
-    // Validation avec ValidationUtils
-    if (window.ValidationUtils) {
-        const form = document.getElementById(formId);
-        const rules = {};
-        rules[heureFieldId] = { type: 'hours', required: true };
-        
-        const validation = window.ValidationUtils.validateForm(form, rules);
-        if (!validation.valid) {
-            console.warn('❌ Formulaire horaire invalide:', validation.errors);
-            return;
-        }
-    }
+    // ❌ Feature désactivée - Table demandes_horaires supprimée - 23/01/2026
+    showToast('⚠️ Cette fonctionnalité n\'est plus disponible. Contactez directement le gestionnaire.', 'info');
+    return;
     
     const heureDemandee = type === 'arrivee_anticipee' 
         ? document.getElementById('heureArriveeDemandee').value
@@ -1329,6 +1531,7 @@ async function submitDemandeHoraire(type) {
         ? document.getElementById('motifArrivee')?.value || ''
         : document.getElementById('motifDepart')?.value || '';
     
+    // Convertir pour correspondre à la structure BDD existante
     const typeDb = type === 'arrivee_anticipee' ? 'arrivee' : 'depart';
     
     try {
@@ -1361,12 +1564,8 @@ async function submitDemandeHoraire(type) {
                 .from('demandes_horaires')
                 .update({
                     heure_demandee: heureDemandee,
-                    client_nom: reservationData.nom || '',
-                    client_prenom: reservationData.prenom || '',
-                    gite: reservationData.gite || '',
-                    date_debut: reservationData.dateDebut,
-                    date_fin: reservationData.dateFin,
-                    created_at: new Date().toISOString() // Mettre à jour la date
+                    motif: motif || null,
+                    updated_at: new Date().toISOString()
                 })
                 .eq('id', existingDemandes[0].id);
             
@@ -1376,17 +1575,21 @@ async function submitDemandeHoraire(type) {
         } 
         // 3. Sinon, créer une nouvelle demande
         else {
+            // Récupérer l'owner_user_id depuis la session
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                showToast('❌ Erreur d\'authentification');
+                return;
+            }
+            
             const { data, error } = await supabase
                 .from('demandes_horaires')
                 .insert({
+                    owner_user_id: user.id,
                     reservation_id: reservationData.id,
-                    client_nom: reservationData.nom || '',
-                    client_prenom: reservationData.prenom || '',
-                    gite: reservationData.gite || '',
                     type: typeDb,
                     heure_demandee: heureDemandee,
-                    date_debut: reservationData.dateDebut,
-                    date_fin: reservationData.dateFin,
+                    motif: motif || null,
                     statut: 'en_attente'
                 });
             
@@ -1403,6 +1606,20 @@ async function submitDemandeHoraire(type) {
         }
     } catch (error) {
         console.error('❌ Erreur inattendue:', error);
+        
+        // Si erreur 400, c'est que la table n'existe pas
+        if (error?.code === '42P01' || error?.message?.includes('does not exist') || error?.code === 'PGRST204') {
+            console.warn('⚠️ Table demandes_horaires non disponible');
+            showToast('ℹ️ Fonctionnalité non activée. Contactez le propriétaire.');
+            // Cacher le formulaire
+            if (type === 'arrivee_anticipee') {
+                document.getElementById('formArriveeAnticipee').style.display = 'none';
+            } else {
+                document.getElementById('formDepartTardif').style.display = 'none';
+            }
+            return;
+        }
+        
         showToast('❌ Erreur technique');
     }
 }
@@ -1430,7 +1647,7 @@ function calculateAutoApproval(type, heureDemandee) {
     } else { // depart_tardif
         // Règles pour le départ tardif
         
-        const isDimanche = new Date(reservationData.date_fin).getDay() === 0;
+        const isDimanche = new Date(reservationData.check_out).getDay() === 0;
         
         // Si ménage l'après-midi du jour de départ (ou dimanche sans ménage)
         if (isDimanche && (!cleaningSchedule || cleaningSchedule.time_of_day !== 'afternoon')) {
@@ -1446,21 +1663,6 @@ function calculateAutoApproval(type, heureDemandee) {
 }
 
 async function submitRetourClient() {
-    // Validation avec ValidationUtils
-    if (window.ValidationUtils) {
-        const form = document.getElementById('formRetours');
-        const rules = {
-            sujetRetour: { type: 'text', required: true },
-            descriptionRetour: { type: 'text', required: true }
-        };
-        
-        const validation = window.ValidationUtils.validateForm(form, rules);
-        if (!validation.valid) {
-            console.warn('❌ Formulaire retour invalide:', validation.errors);
-            return;
-        }
-    }
-    
     const type = document.getElementById('typeRetour').value;
     const sujet = document.getElementById('sujetRetour').value;
     const description = document.getElementById('descriptionRetour').value;
@@ -1494,15 +1696,15 @@ async function submitRetourClient() {
         complementDiv.style.cssText = 'background: var(--gray-100); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; border-left: 3px solid var(--primary);';
         
         if (type === 'probleme') {
-            window.SecurityUtils.setInnerHTML(complementDiv, currentLanguage === 'fr'
+            complementDiv.innerHTML = currentLanguage === 'fr'
                 ? '<strong>⚠️ Problème urgent ?</strong><br>La réponse par message n\'est pas instantanée.<br>Pour un problème à régler immédiatement :<br>📞 Téléphonez-nous ou 💬 Envoyez un WhatsApp'
                 : '<strong>⚠️ Urgent problem?</strong><br>Response by message is not instant.<br>For immediate assistance:<br>📞 Call us or 💬 Send a WhatsApp';
         } else if (type === 'amelioration' || type === 'retour') {
-            window.SecurityUtils.setInnerHTML(complementDiv, currentLanguage === 'fr'
+            complementDiv.innerHTML = currentLanguage === 'fr'
                 ? '<strong>🙏 Merci de votre retour !</strong><br>Nous ferons le maximum pour prendre en compte votre message et répondre au mieux aux besoins de nos clients.'
                 : '<strong>🙏 Thank you for your feedback!</strong><br>We will do our best to take your message into account and meet our clients\' needs.';
         } else {
-            window.SecurityUtils.setInnerHTML(complementDiv, currentLanguage === 'fr'
+            complementDiv.innerHTML = currentLanguage === 'fr'
                 ? '<strong>📨 Nous avons bien reçu votre message</strong><br>Nous vous répondrons dans les plus brefs délais.'
                 : '<strong>📨 We received your message</strong><br>We will respond as soon as possible.';
         }
@@ -1573,7 +1775,7 @@ function showToast(message, type = 'info') {
 }
 
 function showError(message) {
-    window.SecurityUtils.setInnerHTML(document.getElementById('loadingScreen'), `
+    document.getElementById('loadingScreen').innerHTML = `
         <div style="text-align: center; padding: 2rem;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
             <p style="font-size: 1.25rem; color: var(--danger);">${message}</p>
@@ -1595,17 +1797,23 @@ function hideLoading() {
 // Commerces proximité
 async function loadEvenementsSemaine() {
     const container = document.getElementById('evenementsSemaineContainer');
-    if (!container) return;
+    if (!container || !reservationData?.gite_id) return;
     
     // Charger depuis la table activites_gites avec categorie 'Événement'
     const { data: evenements, error } = await supabase
         .from('activites_gites')
         .select('*')
-        .eq('gite', normalizeGiteName(reservationData.gite))
+        .eq('gite_id', reservationData.gite_id)
         .eq('categorie', 'Événement')
+        .eq('is_active', true)
         .order('nom'); // Tri par nom car date_debut n'existe pas
     
     if (error) {
+        // Si table inexistante ou colonne manquante, masquer silencieusement
+        if (error?.code === '42P01' || error?.message?.includes('does not exist') || error?.code === 'PGRST204' || error?.code === '42703') {
+            container.style.display = 'none';
+            return;
+        }
         console.error('Erreur chargement événements:', error);
         return;
     }
@@ -1618,7 +1826,7 @@ async function loadEvenementsSemaine() {
     container.style.display = 'block';
     const listeContainer = container.querySelector('.evenements-liste');
     
-    window.SecurityUtils.setInnerHTML(listeContainer, evenements.map(evt => {
+    listeContainer.innerHTML = evenements.map(evt => {
         // Note: date_debut n'existe pas dans activites_gites
         // Les événements sont affichés par ordre alphabétique
         
@@ -1654,12 +1862,12 @@ async function loadCommerces() {
     
     if (error) {
         console.error('Erreur chargement commerces:', error);
-        window.SecurityUtils.setInnerHTML(container, '<p style="padding: 1rem); text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
+        container.innerHTML = '<p style="padding: 1rem; text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
         return;
     }
     
     if (!commerces || commerces.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, '<p style="padding: 1rem); text-align: center; color: var(--gray-600);">📋 Aucun commerce ajouté pour le moment</p>';
+        container.innerHTML = '<p style="padding: 1rem; text-align: center; color: var(--gray-600);">📋 Aucun commerce ajouté pour le moment</p>';
         return;
     }
     
@@ -1674,7 +1882,7 @@ async function loadCommerces() {
         'poste': '📮'
     };
     
-    window.SecurityUtils.setInnerHTML(container, commerces.map(commerce => {
+    container.innerHTML = commerces.map(commerce => {
         const sousCategorie = (commerce.sous_categorie || '').toLowerCase();
         const icon = iconMap[sousCategorie] || '🏪';
         
@@ -1750,38 +1958,164 @@ function openItineraire(lat, lng) {
     window.open(url, '_blank');
 }
 
-// Partage de page
+// Partage de page avec options multiples
 async function sharePageLink() {
     const url = window.location.href;
+    const titre = `Fiche Client - ${reservationData.gite}`;
+    const message = `Toutes les infos pour votre séjour : ${url}`;
     
-    // Si le navigateur supporte Web Share API (mobile)
+    // Créer un menu de choix
+    const shareOptions = document.createElement('div');
+    shareOptions.style.cssText = `
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+        padding: 20px;
+        z-index: 10000;
+        animation: slideUp 0.3s ease-out;
+    `;
+    
+    shareOptions.innerHTML = `
+        <style>
+            @keyframes slideUp {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
+            }
+            .share-option {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                padding: 15px;
+                margin: 10px 0;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: background 0.2s;
+                font-size: 16px;
+            }
+            .share-option:hover {
+                background: #f0f0f0;
+            }
+            .share-icon {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                font-size: 24px;
+            }
+            .share-close {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                font-size: 28px;
+                cursor: pointer;
+                color: #666;
+            }
+        </style>
+        <span class="share-close" onclick="this.parentElement.remove()">×</span>
+        <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #2D3436;">Partager la fiche</h3>
+        
+        <div class="share-option" data-method="whatsapp">
+            <div class="share-icon" style="background: #25D366; color: white;">📱</div>
+            <div>
+                <div style="font-weight: 600;">WhatsApp</div>
+                <div style="font-size: 14px; color: #666;">Envoyer via WhatsApp</div>
+            </div>
+        </div>
+        
+        <div class="share-option" data-method="email">
+            <div class="share-icon" style="background: #3498db; color: white;">✉️</div>
+            <div>
+                <div style="font-weight: 600;">Email</div>
+                <div style="font-size: 14px; color: #666;">Envoyer par email</div>
+            </div>
+        </div>
+        
+        <div class="share-option" data-method="copy">
+            <div class="share-icon" style="background: #95a5a6; color: white;">🔗</div>
+            <div>
+                <div style="font-weight: 600;">Copier le lien</div>
+                <div style="font-size: 14px; color: #666;">Copier dans le presse-papier</div>
+            </div>
+        </div>
+        
+        <div class="share-option" data-method="native" style="display: none;">
+            <div class="share-icon" style="background: #8e44ad; color: white;">📤</div>
+            <div>
+                <div style="font-weight: 600;">Autres options</div>
+                <div style="font-size: 14px; color: #666;">Partager avec d'autres apps</div>
+            </div>
+        </div>
+    `;
+    
+    // Afficher l'option native si disponible
     if (navigator.share) {
-        try {
-            await navigator.share({
-                title: `Fiche Client - ${reservationData.gite}`,
-                text: 'Toutes les infos pour votre séjour',
-                url: url
-            });
-            showToast('✓ Lien partagé', 'success');
-        } catch (error) {
-            // Utilisateur a annulé le partage
-        }
-    } else {
-        // Copier dans le presse-papier (desktop)
-        try {
-            await navigator.clipboard.writeText(url);
-            showToast('✓ Lien copié dans le presse-papier', 'success');
-        } catch (error) {
-            // Fallback manuel
-            const input = document.createElement('input');
-            input.value = url;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand('copy');
-            document.body.removeChild(input);
-            showToast('✓ Lien copié', 'success');
-        }
+        shareOptions.querySelector('[data-method="native"]').style.display = 'flex';
     }
+    
+    document.body.appendChild(shareOptions);
+    
+    // Gérer les clics sur les options
+    shareOptions.addEventListener('click', async (e) => {
+        const option = e.target.closest('.share-option');
+        if (!option) return;
+        
+        const method = option.getAttribute('data-method');
+        shareOptions.remove();
+        
+        switch(method) {
+            case 'whatsapp':
+                // Ouvrir WhatsApp
+                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+                showToast('✓ Ouverture de WhatsApp...', 'success');
+                break;
+                
+            case 'email':
+                // Ouvrir client email
+                const emailSubject = encodeURIComponent(titre);
+                const emailBody = encodeURIComponent(`Bonjour,\n\nVoici votre fiche client avec toutes les informations pour votre séjour :\n\n${url}\n\nBon séjour !`);
+                window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
+                showToast('✓ Ouverture du client email...', 'success');
+                break;
+                
+            case 'copy':
+                // Copier dans le presse-papier
+                try {
+                    await navigator.clipboard.writeText(url);
+                    showToast('✓ Lien copié dans le presse-papier', 'success');
+                } catch (error) {
+                    // Fallback manuel
+                    const input = document.createElement('input');
+                    input.value = url;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                    showToast('✓ Lien copié', 'success');
+                }
+                break;
+                
+            case 'native':
+                // Utiliser Web Share API
+                try {
+                    await navigator.share({
+                        title: titre,
+                        text: 'Toutes les infos pour votre séjour',
+                        url: url
+                    });
+                    showToast('✓ Lien partagé', 'success');
+                } catch (error) {
+                    // Utilisateur a annulé
+                }
+                break;
+        }
+    });
 }
 
 // Badges notification sur tabs
@@ -1816,30 +2150,32 @@ function updateBadge(tabId, count) {
 // ==================== FAQ ====================
 let allFaqs = [];
 let currentFaqCategory = 'tous';
+let cachedFaqs = []; // Cache pour rafraîchissement lors changement langue
 
 async function loadFaqData() {
-    if (!reservationData || !reservationData.gite) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('faqListe'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">⏳ Données de réservation non disponibles</p>';
+    if (!reservationData || !reservationData.gite_id) {
+        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Données de réservation non disponibles</p>';
         return;
     }
     
+    // FAQ peut être liée par gite_id ou avec une valeur NULL pour "tous les gîtes"
     const { data: faqs, error } = await supabase
         .from('faq')
         .select('*')
-        .eq('visible', true)
-        .in('gite', ['tous', normalizeGiteName(reservationData.gite)])
-        .order('ordre');
+        .or(`gite_id.eq.${reservationData.gite_id},gite_id.is.null`)
+        .order('ordre', { ascending: true });
     
     if (error) {
         console.error('Erreur chargement FAQs:', error);
-        window.SecurityUtils.setInnerHTML(document.getElementById('faqListe'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
+        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
         return;
     }
     
     allFaqs = faqs || [];
+    cachedFaqs = faqs || []; // Stocker en cache
     
     if (allFaqs.length === 0) {
-        window.SecurityUtils.setInnerHTML(document.getElementById('faqListe'), '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">📋 Aucune FAQ disponible</p>';
+        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">📋 Aucune FAQ disponible</p>';
         return;
     }
     
@@ -1850,18 +2186,36 @@ async function loadFaqData() {
     displayFaqs(allFaqs);
     
     // Écouter la recherche
-    document.getElementById('faqSearch').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        if (searchTerm) {
-            const filtered = allFaqs.filter(faq => 
-                faq.question.toLowerCase().includes(searchTerm) ||
-                faq.reponse.toLowerCase().includes(searchTerm)
-            );
-            displayFaqs(filtered);
-        } else {
-            filterByCategory(currentFaqCategory);
-        }
-    });
+    const searchInput = document.getElementById('faqSearch');
+    if (searchInput) {
+        // Supprimer ancien listener si existant
+        searchInput.removeEventListener('input', handleFaqSearch);
+        searchInput.addEventListener('input', handleFaqSearch);
+    }
+}
+
+function handleFaqSearch(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    if (searchTerm) {
+        const filtered = allFaqs.filter(faq => {
+            const question = currentLanguage === 'fr' ? faq.question : (faq.question_en || faq.question);
+            const answer = currentLanguage === 'fr' ? (faq.answer || faq.reponse) : (faq.answer_en || faq.answer || faq.reponse);
+            return question.toLowerCase().includes(searchTerm) ||
+                   answer.toLowerCase().includes(searchTerm);
+        });
+        displayFaqs(filtered);
+    } else {
+        filterByCategory(currentFaqCategory);
+    }
+}
+
+// Fonction pour rafraîchir l'affichage sans recharger depuis la base
+function reloadFaqData() {
+    if (cachedFaqs.length > 0) {
+        allFaqs = cachedFaqs;
+        renderFaqCategories();
+        filterByCategory(currentFaqCategory);
+    }
 }
 
 function renderFaqCategories() {
@@ -1877,7 +2231,7 @@ function renderFaqCategories() {
     ];
     
     const container = document.getElementById('faqCategories');
-    window.SecurityUtils.setInnerHTML(container, categories.map(cat => {
+    container.innerHTML = categories.map(cat => {
         const label = currentLanguage === 'fr' ? cat.label : cat.labelEn;
         return `
             <button class="faq-category-btn ${cat.key === 'tous' ? 'active' : ''}" 
@@ -1909,21 +2263,34 @@ function displayFaqs(faqs) {
     const container = document.getElementById('faqListe');
     
     if (faqs.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, '<p style="padding: 2rem); text-align: center; color: var(--gray-600);">🔍 Aucun résultat trouvé</p>';
+        const noResultText = currentLanguage === 'fr' 
+            ? '🔍 Aucun résultat trouvé'
+            : '🔍 No results found';
+        container.innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">${noResultText}</p>`;
         return;
     }
     
-    window.SecurityUtils.setInnerHTML(container, faqs.map((faq, index) => `
-        <div class="faq-item" id="faq-${index}">
-            <div class="faq-question" onclick="toggleFaq(${index})">
-                <span>${faq.question}</span>
-                <span class="faq-toggle">▼</span>
+    container.innerHTML = faqs.map((faq, index) => {
+        // Traduction à la volée selon langue active
+        const question = currentLanguage === 'fr' 
+            ? faq.question 
+            : (faq.question_en || faq.question);
+        const answer = currentLanguage === 'fr' 
+            ? (faq.answer || faq.reponse) 
+            : (faq.answer_en || faq.answer || faq.reponse);
+        
+        return `
+            <div class="faq-item" id="faq-${index}">
+                <div class="faq-question" onclick="toggleFaq(${index})">
+                    <span>${question}</span>
+                    <span class="faq-toggle">▼</span>
+                </div>
+                <div class="faq-reponse">
+                    ${answer}
+                </div>
             </div>
-            <div class="faq-reponse">
-                ${faq.reponse}
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function toggleFaq(index) {
@@ -2006,24 +2373,29 @@ window.submitEvaluation = submitEvaluation;
 // GESTION DES CHECKLISTS CLIENT
 // =============================================
 
+// Variables globales pour stocker les templates et progression (cache)
+let cachedTemplatesEntree = [];
+let cachedTemplatesSortie = [];
+let cachedProgressMap = {};
+
 async function loadClientChecklists() {
-    // // console.log('📋 Chargement checklists client...');
-    
     if (!reservationData || !giteInfo) {
-        // // console.log('⚠️ Données manquantes pour checklists');
+        return;
+    }
+    
+    // Vérifier si gite_id existe dans reservationData
+    if (!reservationData.gite_id) {
+        console.error('❌ gite_id manquant dans reservationData');
         return;
     }
     
     try {
-        // Normaliser le nom du gîte (première lettre en majuscule)
-        const giteNormalized = giteInfo.gite.charAt(0).toUpperCase() + giteInfo.gite.slice(1).toLowerCase();
-        // // console.log(`🏠 Gîte recherché: "${giteNormalized}" (original: "${giteInfo.gite}")`);
         
-        // Charger les templates du gîte
+        // Charger les templates du gîte (par gite_id, pas par nom)
         const { data: templatesEntree, error: errorEntree } = await supabase
             .from('checklist_templates')
             .select('*')
-            .eq('gite_id', giteInfo.gite_id)
+            .eq('gite_id', reservationData.gite_id)
             .eq('type', 'entree')
             .eq('actif', true)
             .order('ordre', { ascending: true });
@@ -2031,18 +2403,19 @@ async function loadClientChecklists() {
         const { data: templatesSortie, error: errorSortie } = await supabase
             .from('checklist_templates')
             .select('*')
-            .eq('gite_id', giteInfo.gite_id)
+            .eq('gite_id', reservationData.gite_id)
             .eq('type', 'sortie')
             .eq('actif', true)
             .order('ordre', { ascending: true });
         
         if (errorEntree || errorSortie) {
-            // Table non créée ou colonne inexistante - ignorer silencieusement
-            const err = errorEntree || errorSortie;
-            if (err && (err.code === 'PGRST205' || err.code === '42703' || err.code === '42P01')) {
+            const error = errorEntree || errorSortie;
+            // Si table inexistante, ignorer silencieusement
+            if (error?.code === '42P01' || error?.message?.includes('does not exist') || error?.code === 'PGRST204') {
+                console.warn('⚠️ Table checklist_templates non disponible (fonctionnalité désactivée)');
                 return;
             }
-            console.error('❌ Erreur chargement templates:', err);
+            console.error('❌ Erreur chargement templates:', error);
             return;
         }
         
@@ -2065,36 +2438,41 @@ async function loadClientChecklists() {
             });
         }
         
+        // Stocker en cache pour rafraîchissement lors du changement de langue
+        cachedTemplatesEntree = templatesEntree || [];
+        cachedTemplatesSortie = templatesSortie || [];
+        cachedProgressMap = progressMap;
+        
         // Afficher checklist entrée
-        renderClientChecklist('entree', templatesEntree || [], progressMap);
+        renderClientChecklist('entree', cachedTemplatesEntree, cachedProgressMap);
         
         // Afficher checklist sortie
-        renderClientChecklist('sortie', templatesSortie || [], progressMap);
-        
-        // console.log('✅ Checklists chargées: ...');
+        renderClientChecklist('sortie', cachedTemplatesSortie, cachedProgressMap);
     } catch (error) {
         console.error('❌ Erreur loadClientChecklists:', error);
     }
 }
 
+// Fonction pour rafraîchir l'affichage sans recharger depuis la base
+function reloadClientChecklists() {
+    if (cachedTemplatesEntree.length > 0 || cachedTemplatesSortie.length > 0) {
+        renderClientChecklist('entree', cachedTemplatesEntree, cachedProgressMap);
+        renderClientChecklist('sortie', cachedTemplatesSortie, cachedProgressMap);
+    }
+}
+
 function renderClientChecklist(type, templates, progressMap) {
-    // console.log(`🎨 Render checklist ${type}: ...`);
-    
     const containerId = type === 'entree' ? 'checklistEntreeContainer' : 'checklistSortieContainer';
     const progressBarId = type === 'entree' ? 'progressEntree' : 'progressSortie';
     const progressTextId = type === 'entree' ? 'progressEntreeText' : 'progressSortieText';
     
-    // // console.log(`🔍 Recherche container: ${containerId}`);
     const container = document.getElementById(containerId);
     if (!container) {
-        console.error(`❌ Container ${containerId} introuvable`);
         return;
     }
     
-    // // console.log(`✅ Container trouvé:`, container);
-    
     if (!templates || templates.length === 0) {
-        window.SecurityUtils.setInnerHTML(container, '<p style="color: var(--gray-600)); font-style: italic; text-align: center;">Aucun item configuré</p>';
+        container.innerHTML = '<p style="color: var(--gray-600); font-style: italic; text-align: center;">Aucun item configuré</p>';
         return;
     }
     
@@ -2109,21 +2487,30 @@ function renderClientChecklist(type, templates, progressMap) {
     if (progressBar) progressBar.style.width = percent + '%';
     if (progressText) progressText.textContent = `${completed}/${total} (${percent}%)`;
     
-    // Générer HTML
+    // Générer HTML avec support multilingue
     let html = '';
     templates.forEach(template => {
         const isCompleted = progressMap[template.id] === true;
+        
+        // Traduction à la volée selon langue active
+        const texte = currentLanguage === 'fr' 
+            ? template.texte 
+            : (template.texte_en || template.texte);
+        const description = currentLanguage === 'fr' 
+            ? template.description 
+            : (template.description_en || template.description);
+        
         html += `
             <div class="checkbox-item" style="margin-bottom: 0.75rem; padding: 1rem; background: ${isCompleted ? 'var(--gray-100)' : 'white'}; border: 2px solid ${isCompleted ? 'var(--success)' : 'var(--gray-200)'}; border-radius: 0.5rem; transition: all 0.3s;">
                 <label style="display: flex; align-items: start; gap: 0.75rem; cursor: pointer;">
                     <input type="checkbox" ${isCompleted ? 'checked' : ''} 
-                           onchange="toggleClientChecklistItem(${template.id}, '${type}')"
+                           onchange="toggleClientChecklistItem('${template.id}', '${type}')"
                            style="margin-top: 0.25rem; width: 1.25rem; height: 1.25rem; cursor: pointer;">
                     <div style="flex: 1;">
                         <div style="font-weight: ${isCompleted ? '600' : '400'}; color: ${isCompleted ? 'var(--gray-700)' : 'var(--gray-900)'}; margin-bottom: 0.25rem;">
-                            ${template.texte}
+                            ${texte}
                         </div>
-                        ${template.description ? `<div style="font-size: 0.875rem; color: var(--gray-600);">${template.description}</div>` : ''}
+                        ${description ? `<div style="font-size: 0.875rem; color: var(--gray-600);">${description}</div>` : ''}
                     </div>
                     ${isCompleted ? '<span style="font-size: 1.5rem;">✅</span>' : ''}
                 </label>
@@ -2131,12 +2518,11 @@ function renderClientChecklist(type, templates, progressMap) {
         `;
     });
     
-    window.SecurityUtils.setInnerHTML(container, html);
+    container.innerHTML = html;
 }
 
 async function toggleClientChecklistItem(templateId, type) {
     if (!reservationData) {
-        console.error('❌ Pas de réservation');
         return;
     }
     
@@ -2155,27 +2541,22 @@ async function toggleClientChecklistItem(templateId, type) {
         
         const newCompleted = existing ? !existing.completed : true;
         
-        // Récupérer l'ID utilisateur pour RLS
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Utilisateur non authentifié');
-        
         // Upsert
         const { error: upsertError } = await supabase
             .from('checklist_progress')
             .upsert({
-                owner_user_id: user.id,
+                owner_user_id: reservationData.owner_user_id,
                 reservation_id: reservationData.id,
                 template_id: templateId,
                 completed: newCompleted,
-                completed_at: newCompleted ? new Date().toISOString() : null,
-                completed_by: newCompleted ? user.id : null
+                completed_at: newCompleted ? new Date().toISOString() : null
             }, {
                 onConflict: 'reservation_id,template_id'
             });
         
-        if (upsertError) throw upsertError;
-        
-        // // console.log(`✅ Checklist ${templateId} ${newCompleted ? 'cochée' : 'décochée'}`);
+        if (upsertError) {
+            throw upsertError;
+        }
         
         // Recharger pour mettre à jour l'affichage
         await loadClientChecklists();
@@ -2192,13 +2573,17 @@ async function toggleClientChecklistItem(templateId, type) {
 async function submitRetourDemande(event) {
     event.preventDefault();
     
+    // ❌ Feature désactivée - Table problemes_signales supprimée - 23/01/2026
+    showToast('⚠️ Cette fonctionnalité n\'est plus disponible. Contactez directement le gestionnaire.', 'info');
+    return;
+    
     try {
         const type = document.getElementById('typeRetourDemande').value;
         const urgenceInput = document.querySelector('input[name="urgenceDemande"]:checked');
         
         const formData = {
             reservation_id: reservationData.id, // ✅ FIX: Utiliser reservationData.id au lieu de giteInfo.reservationId
-            gite: giteInfo.gite,
+            gite: reservationData.gite,
             type: type,
             sujet: document.getElementById('sujetRetourDemande').value,
             description: document.getElementById('descriptionRetourDemande').value,
@@ -2331,8 +2716,8 @@ async function submitEvaluation(event) {
         }
         
         const formData = {
-            reservation_id: giteInfo.reservationId,
-            gite: giteInfo.gite,
+            reservation_id: reservationData.id,
+            gite: reservationData.gite,
             note_globale: parseInt(noteGlobale),
             note_proprete: parseInt(noteProprete),
             note_confort: parseInt(noteConfort),

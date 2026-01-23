@@ -1,5 +1,23 @@
 # 📂 Scripts SQL - Gestion Gîtes
 
+## � Organisation des Dossiers
+
+### 🔐 `/securite/` - Suppression Tables BDD
+Scripts de sauvegarde et suppression des **7 tables obsolètes** (23/01/2026)
+
+**Voir** : [README_SECURITE_BDD.md](securite/README_SECURITE_BDD.md)
+
+### 📊 `/rapports/` - Rapports de Nettoyage
+Rapports détaillés des opérations de maintenance BDD
+
+### 🔧 `/fixes/` - Correctifs SQL
+Scripts de correction bugs (RLS, permissions, etc.)
+
+### 🩹 `/patches/` - Patches Code
+Patches appliqués au code JavaScript après nettoyage BDD
+
+---
+
 ## 🎯 Fichiers Essentiels (dans l'ordre)
 
 ### 1️⃣ CRÉATION COMPLÈTE DE LA BDD
@@ -10,6 +28,10 @@
 ---
 
 ### 2️⃣ MAINTENANCE COURANTE
+
+#### 🧺 Stock linge dynamique
+**Fichier** : `update_linen_stock_items.sql`  
+Créer la table `linen_stock_items` (stocks dynamiques par type) + RLS + backfill depuis `linen_stocks`
 
 #### 📊 Comptage
 **Fichier** : `COMPTE_RESERVATIONS.sql`  

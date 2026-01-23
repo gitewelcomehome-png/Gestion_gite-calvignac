@@ -81,6 +81,16 @@ async function addReservation(reservation) {
         
         if (result.error) throw result.error;
         
+        // 🚗 Automatisation des trajets kilométriques
+        if (result.data && typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {
+            try {
+                await window.KmManager.creerTrajetsAutoReservation(result.data);
+            } catch (kmError) {
+                console.error('⚠️ Erreur création trajets auto:', kmError);
+                // Ne pas bloquer la création de réservation si les trajets échouent
+            }
+        }
+        
         // Invalider le cache
         window.invalidateCache('reservations');
         
@@ -109,6 +119,7 @@ async function getAllReservations(forceRefresh) {
         const reservations = (result.data || []).map(function(r) {
             return {
                 id: r.id,
+                gite: r.gite,
                 gite_id: r.gite_id,
                 giteId: r.gite_id,
                 check_in: r.check_in,
@@ -138,7 +149,9 @@ async function getAllReservations(forceRefresh) {
                 status: r.status,
                 nuits: window.calculateNights(r.check_in, r.check_out),
                 timestamp: r.created_at,
-                syncedFrom: r.synced_from
+                syncedFrom: r.synced_from,
+                check_in_time: r.check_in_time,
+                check_out_time: r.check_out_time
             };
         }).filter(function(r) {
             // Garder toutes les réservations réelles (>= 1 nuit)
@@ -159,6 +172,13 @@ async function getAllReservations(forceRefresh) {
 
 async function updateReservation(id, updates) {
     try {
+        // Récupérer la réservation avant mise à jour pour détecter les changements de dates
+        const { data: oldResa } = await window.supabaseClient
+            .from('reservations')
+            .select('check_in, check_out')
+            .eq('id', id)
+            .single();
+        
         const data = {};
         if (updates.gite !== undefined) data.gite_id = updates.gite;
         if (updates.giteId !== undefined) data.gite_id = updates.giteId;
@@ -188,6 +208,33 @@ async function updateReservation(id, updates) {
         
         if (result.error) throw result.error;
         
+        // 🚗 Si les dates ont changé, recréer les trajets auto
+        const datesChanged = (data.check_in && data.check_in !== oldResa?.check_in) || 
+                            (data.check_out && data.check_out !== oldResa?.check_out);
+        
+        if (datesChanged && typeof window.KmManager?.supprimerTrajetsAutoReservation === 'function' &&
+            typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {
+            try {
+                // Supprimer les anciens trajets auto
+                await window.KmManager.supprimerTrajetsAutoReservation(id);
+                
+                // Récupérer la réservation mise à jour
+                const { data: updatedResa } = await window.supabaseClient
+                    .from('reservations')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                
+                if (updatedResa) {
+                    // Recréer les trajets avec les nouvelles dates
+                    await window.KmManager.creerTrajetsAutoReservation(updatedResa);
+                }
+            } catch (kmError) {
+                console.error('⚠️ Erreur mise à jour trajets auto:', kmError);
+                // Ne pas bloquer la mise à jour de la réservation
+            }
+        }
+        
         // Invalider le cache
         window.invalidateCache('reservations');
     } catch (error) {
@@ -198,6 +245,16 @@ async function updateReservation(id, updates) {
 
 async function deleteReservation(id) {
     try {
+        // 🚗 Supprimer d'abord les trajets auto liés à cette réservation
+        if (typeof window.KmManager?.supprimerTrajetsAutoReservation === 'function') {
+            try {
+                await window.KmManager.supprimerTrajetsAutoReservation(id);
+            } catch (kmError) {
+                console.error('⚠️ Erreur suppression trajets auto:', kmError);
+                // Ne pas bloquer la suppression de la réservation
+            }
+        }
+        
         const result = await window.supabaseClient
             .from('reservations')
             .delete()

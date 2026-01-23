@@ -1,3 +1,13 @@
+// shared-utils.js - Utilitaires partagés
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  ⚠️ ⚠️ ⚠️  FICHIER DESKTOP - NE PAS MODIFIER  ⚠️ ⚠️ ⚠️                      ║
+// ║                                                                          ║
+// ║  Ce fichier est EN PRODUCTION et doit rester STABLE                     ║
+// ║  Pour le mobile, créer des versions dédiées dans tabs/mobile/js/        ║
+// ║  NE TOUCHER À CE FICHIER QUE SUR DEMANDE EXPLICITE                      ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
 // ==========================================
 // FONCTIONS UTILITAIRES PARTAGÉES
 // ==========================================
@@ -193,7 +203,7 @@ function switchTab(tabName) {
     });
     
     // Désactiver tous les boutons
-    document.querySelectorAll('.nav-tab').forEach(btn => {
+    document.querySelectorAll('.nav-tab, .tab-neo').forEach(btn => {
         btn.classList.remove('active');
     });
     
@@ -212,30 +222,121 @@ function switchTab(tabName) {
     // Initialiser les fonctions spécifiques par onglet
     if (tabName === 'dashboard' && typeof window.refreshDashboard === 'function') {
         window.refreshDashboard();
-    } else if (tabName === 'reservations' && typeof window.loadReservationsTab === 'function') {
-        window.loadReservationsTab();
-    } else if (tabName === 'statistiques' && typeof window.loadStatistiquesTab === 'function') {
-        window.loadStatistiquesTab();
-    } else if (tabName === 'charges' && typeof window.initFiscalite === 'function') {
-        window.initFiscalite();
-    } else if (tabName === 'menage' && typeof window.loadCleaningSchedule === 'function') {
-        window.loadCleaningSchedule();
-    } else if (tabName === 'infos-gites' && typeof window.initInfosGites === 'function') {
-        window.initInfosGites();
-    } else if (tabName === 'decouvrir' && typeof window.initDecouvrirTab === 'function') {
-        window.initDecouvrirTab();
-    } else if (tabName === 'faq' && typeof window.loadFAQTab === 'function') {
-        window.loadFAQTab();
-    } else if (tabName === 'fiches-clients' && typeof window.initFichesClients === 'function') {
-        window.initFichesClients();
-    } else if (tabName === 'archives' && typeof window.loadArchivesTab === 'function') {
-        window.loadArchivesTab();
+    } else if (tabName === 'reservations') {
+        if (typeof updateReservationsList === 'function') {
+            updateReservationsList();
+        }
+    } else if (tabName === 'statistiques') {
+        if (typeof populateYearFilter === 'function') populateYearFilter();
+        if (typeof displayHistoricalYearsList === 'function') displayHistoricalYearsList();
+        if (typeof updateStats === 'function') updateStats();
+    } else if (tabName === 'charges') {
+        setTimeout(() => {
+            if (typeof initFiscalite === 'function') {
+                initFiscalite();
+            }
+        }, 100);
+    } else if (tabName === 'menage') {
+        // DESKTOP uniquement - le mobile a son propre script dans tabs/mobile/menage.html
+        if (!isMobile && typeof window.afficherPlanningParSemaine === 'function') {
+            setTimeout(() => {
+                window.afficherPlanningParSemaine();
+            }, 200);
+        }
+        // MOBILE : Le script est déjà dans le tab chargé, rien à faire ici
+    } else if (tabName === 'infos-gites') {
+        if (typeof generateGitesButtons === 'function') {
+            setTimeout(() => generateGitesButtons(), 100);
+        }
+        if (typeof chargerDonneesInfos === 'function') {
+            chargerDonneesInfos();
+        }
+        if (typeof chargerActivitesEtSorties === 'function') {
+            chargerActivitesEtSorties();
+        }
+        setTimeout(() => {
+            if (typeof initValidationInfosPratiques === 'function') {
+                initValidationInfosPratiques();
+            }
+        }, 200);
+    } else if (tabName === 'faq' && typeof initFAQ === 'function') {
+        const checkFaqReady = () => {
+            if (document.getElementById('faq-list')) {
+                initFAQ();
+            } else {
+                setTimeout(checkFaqReady, 50);
+            }
+        };
+        checkFaqReady();
+    } else if (tabName === 'draps' && typeof initDraps === 'function') {
+        const checkDrapsReady = () => {
+            if (document.getElementById('stock-trevoux-draps-grands')) {
+                initDraps();
+            } else {
+                setTimeout(checkDrapsReady, 50);
+            }
+        };
+        checkDrapsReady();
+    } else if (tabName === 'fiches-clients' && typeof initFichesClients === 'function') {
+        initFichesClients();
+    } else if (tabName === 'checklists' && typeof initChecklistsTab === 'function') {
+        initChecklistsTab();
+    } else if (tabName === 'archives') {
+        if (typeof updateArchivesDisplay === 'function') updateArchivesDisplay();
+        if (typeof updateArchivedTodos === 'function') updateArchivedTodos();
+    } else if (tabName === 'decouvrir') {
+        if (typeof window.initModuleDecouvrir === 'function') {
+            window.initModuleDecouvrir();
+        }
+    } else if (tabName === 'calendrier-tarifs') {
+        // En mode mobile, ne pas appeler la fonction desktop
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        if (isMobileDevice && document.documentElement.classList.contains('is-mobile')) {
+            console.log('📱 Mode mobile: skip renderCalendrierTarifsTab (version mobile chargée depuis HTML)');
+        } else if (typeof renderCalendrierTarifsTab === 'function') {
+            renderCalendrierTarifsTab();
+        }
     }
 }
 
 // ==========================================
 // MENU ACTIONS RAPIDES
 // ==========================================
+
+/**
+ * Toggle du menu utilisateur (dropdown)
+ */
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userMenuDropdown');
+    const button = document.getElementById('userMenuButton');
+    
+    if (!dropdown) return;
+    
+    // Toggle avec classe .open (utilisée par main-inline.css)
+    const isVisible = dropdown.classList.contains('open');
+    
+    if (isVisible) {
+        dropdown.classList.remove('open');
+        if (button) button.classList.remove('open');
+        dropdown.style.display = 'none';
+    } else {
+        dropdown.classList.add('open');
+        if (button) button.classList.add('open');
+        dropdown.style.display = 'block';
+    }
+    
+    // Fermer le menu si on clique ailleurs
+    if (!isVisible) {
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!e.target.closest('.user-menu-container')) {
+                    dropdown.style.display = 'none';
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }, 100);
+    }
+}
 
 function handleQuickAction(action) {
     if (action === 'archives') {
@@ -280,5 +381,6 @@ window.getPlatformBadgeClass = getPlatformBadgeClass;
 window.getPlatformLogo = getPlatformLogo;
 window.getWeekNumber = getWeekNumber;
 window.getWeekDates = getWeekDates;
+window.toggleUserMenu = toggleUserMenu;
 window.handleQuickAction = handleQuickAction;
 window.toggleSlide = toggleSlide;

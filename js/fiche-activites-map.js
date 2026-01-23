@@ -63,7 +63,7 @@ function initMapActivites(giteLat, giteLon, activites) {
     }
     
     // S'assurer que le conteneur est vide
-    window.SecurityUtils.setInnerHTML(mapContainer, '');
+    mapContainer.innerHTML = '';
     
     // Créer la carte avec zoom plus proche (16 au lieu de 12)
     mapActivitesInstance = L.map(mapContainer).setView([giteLat, giteLon], 16);
@@ -153,11 +153,11 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
     const listeContainer = document.getElementById('listeActivites');
     
     if (!activites || activites.length === 0) {
-        window.SecurityUtils.setInnerHTML(listeContainer, `
+        listeContainer.innerHTML = `
             <div class="card" style="text-align: center; padding: 2rem; color: var(--gray-600);">
                 ℹ️ Aucune activité configurée pour ce gîte
             </div>
-        `);
+        `;
         return;
     }
     
@@ -176,17 +176,27 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
         const emoji = getActivityEmoji(activite.categorie);
         const travel = estimateTravel(activite.distance);
         
+        // Échapper les caractères HTML pour éviter les injections
+        const nomSafe = activite.nom.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const descriptionSafe = activite.description ? activite.description.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
+        const adresseSafe = activite.adresse ? activite.adresse.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
+        
         html += `
             <div class="activite-card" data-activite-id="${activite.id}">
                 <div class="activite-header">
                     <div class="activite-icon">${emoji}</div>
                     <div class="activite-info">
-                        <h4>${activite.nom}</h4>
+                        <h4>${nomSafe}</h4>
                         <span class="activite-categorie">${activite.categorie || 'Autre'}</span>
                         <div class="activite-distance">📏 ${activite.distance.toFixed(1)} km</div>
                     </div>
-                    <button class="btn-show-map" onclick="showActivityOnMap(${activite.latitude}, ${activite.longitude}, '${activite.nom.replace(/'/g, "\\'")}', ${activite.id})">
-                        📍 Voir sur carte
+                    <button class="btn-show-map" 
+                            data-lat="${activite.latitude}" 
+                            data-lon="${activite.longitude}" 
+                            data-nom="${nomSafe}" 
+                            data-id="${activite.id}"
+                            onclick="showActivityOnMap(this.dataset.lat, this.dataset.lon, this.dataset.nom, this.dataset.id)">
+                        <span data-i18n="btn_voir_carte">📍 Voir sur carte</span>
                     </button>
                 </div>
                 <div class="activite-travel" id="travel-${activite.id}" style="display: none;">
@@ -196,8 +206,8 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
                         <span>🚗 ${formatTravelTime(travel.car)}</span>
                     </div>
                 </div>
-                ${activite.description ? `<p class="activite-description">${activite.description}</p>` : ''}
-                ${activite.adresse ? `<p class="activite-adresse">📍 ${activite.adresse}</p>` : ''}
+                ${descriptionSafe ? `<p class="activite-description">${descriptionSafe}</p>` : ''}
+                ${adresseSafe ? `<p class="activite-adresse">📍 ${adresseSafe}</p>` : ''}
                 <a href="https://www.google.com/maps/dir/?api=1&origin=${giteLat},${giteLon}&destination=${activite.latitude},${activite.longitude}" 
                    target="_blank" 
                    class="btn-itineraire"
@@ -208,7 +218,17 @@ function displayActivitesListInteractive(activites, giteLat, giteLon) {
         `;
     });
     
-    window.SecurityUtils.setInnerHTML(listeContainer, html);
+    listeContainer.innerHTML = html;
+    
+    // Appliquer les traductions après génération du contenu dynamique
+    if (typeof updateTranslations === 'function') {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (typeof t === 'function') {
+                el.textContent = t(key);
+            }
+        });
+    }
 }
 
 // Afficher une activité sur la carte
@@ -216,7 +236,7 @@ window.showActivityOnMap = function(actLat, actLon, actName, actId) {
     const mapContainer = document.getElementById('mapActivites');
     
     // Utiliser Google Maps Directions qui montre les 2 points (départ et arrivée)
-    window.SecurityUtils.setInnerHTML(mapContainer, `
+    mapContainer.innerHTML = `
         <iframe 
             width="100%" 
             height="400" 
@@ -231,14 +251,24 @@ window.showActivityOnMap = function(actLat, actLon, actName, actId) {
             <strong style="color: #ef4444;">🏡 Gîte</strong> ➜ <strong style="color: #10b981;">📍 ${actName}</strong><br>
             <a href="https://www.google.com/maps/dir/${currentGiteLat},${currentGiteLon}/${actLat},${actLon}" 
                target="_blank" 
-               style="color: var(--primary); font-size: 0.875rem; margin-right: 1rem;">
+               style="color: var(--primary); font-size: 0.875rem; margin-right: 1rem;"
+               data-i18n="btn_ouvrir_google_maps">
                 🗺️ Ouvrir dans Google Maps
             </a>
-            <button onclick="resetMapToGite()" style="padding: 0.25rem 0.75rem; background: var(--gray-200); border: none; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+            <button onclick="resetMapToGite()" style="padding: 0.25rem 0.75rem; background: var(--gray-200); border: none; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;"
+                    data-i18n="btn_retour_gite">
                 🏡 Retour gîte seul
             </button>
         </div>
     `;
+    
+    // Appliquer les traductions
+    if (typeof t === 'function') {
+        const link = mapContainer.querySelector('[data-i18n="btn_ouvrir_google_maps"]');
+        const btn = mapContainer.querySelector('[data-i18n="btn_retour_gite"]');
+        if (link) link.textContent = t('btn_ouvrir_google_maps');
+        if (btn) btn.textContent = t('btn_retour_gite');
+    }
     
     // Afficher les temps de trajet
     toggleTravelInfo(actId);
@@ -256,7 +286,7 @@ window.showActivityOnMap = function(actLat, actLon, actName, actId) {
 window.resetMapToGite = function() {
     const mapContainer = document.getElementById('mapActivites');
     
-    window.SecurityUtils.setInnerHTML(mapContainer, `
+    mapContainer.innerHTML = `
         <iframe 
             width="100%" 
             height="400" 
@@ -271,11 +301,20 @@ window.resetMapToGite = function() {
             <strong style="color: #ef4444;">🏡 Votre gîte</strong><br>
             <a href="https://www.google.com/maps/search/?api=1&query=${currentGiteLat},${currentGiteLon}" 
                target="_blank" 
-               style="color: var(--primary); font-size: 0.875rem;">
+               style="color: var(--primary); font-size: 0.875rem;"
+               data-i18n="btn_voir_google_maps">
                 📍 Voir sur Google Maps
             </a>
         </div>
     `;
+    
+    // Appliquer les traductions après génération de la carte
+    if (typeof t === 'function') {
+        const link = mapContainer.querySelector('[data-i18n="btn_voir_google_maps"]');
+        if (link) {
+            link.textContent = t('btn_voir_google_maps');
+        }
+    }
     
     // Désélectionner toutes les cards
     document.querySelectorAll('.activite-card').forEach(card => card.classList.remove('selected'));
