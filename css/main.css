@@ -403,8 +403,11 @@ html.theme-dark a {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    position: relative;
-    z-index: 100;
+    justify-content: center;
+    position: sticky;
+    top: 90px;
+    z-index: 999;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .nav-tab,
