@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark" id="app-root" class="style-sidebar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌓 Système de Thèmes - iCalou Pro</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* ========================================
+           VARIABLES CSS ADAPTÉES À TON FICHIER
+           ======================================== */
+        
+        :root[data-theme="light"] {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #64748b;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --btn-neutral: rgba(0, 0, 0, 0.04);
+        }
+        
+        :root[data-theme="dark"] {
+            --bg-primary: #050506;
+            --bg-secondary: #111113;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --btn-neutral: rgba(255, 255, 255, 0.06);
+        }
+
+        /* Couleurs d'accentuation iCalou */
+        .btn-ajouter, .btn-valider, .btn-plus { --btn-clr: #10b981; }
+        .btn-modifier, .btn-rechercher { --btn-clr: #3b82f6; }
+        .btn-supprimer { --btn-clr: #ef4444; }
+        .btn-enregistrer, .btn-telecharger { --btn-clr: #8b5cf6; }
+        .btn-annuler { --btn-clr: #64748b; }
+        .btn-fiche-client, .btn-imprimer { --btn-clr: #6366f1; }
+        .btn-info, .btn-actualiser { --btn-clr: #06b6d4; }
+        .btn-moins { --btn-clr: #f59e0b; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 40px 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* ========================================
+           STYLISATION DES BOUTONS (TES 2 THÈMES)
+           ======================================== */
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            position: relative;
+            color: var(--text-primary);
+            text-decoration: none;
+            outline: none;
+        }
+
+        /* Style 1: SIDEBAR (Liseré latéral) */
+        .style-sidebar .btn-action {
+            background: var(--btn-neutral);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+        .style-sidebar .btn-action::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--btn-clr);
+            box-shadow: 2px 0 10px var(--btn-clr);
+        }
+        .style-sidebar .btn-action:hover {
+            transform: translateX(4px);
+            border-color: var(--btn-clr);
+        }
+
+        /* Style 2: APPLE (Pleine couleur & Net) */
+        .style-apple .btn-action {
+            background: var(--btn-clr);
+            color: #ffffff !important;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 4px 12px -4px rgba(0,0,0,0.2);
+        }
+        .style-apple .btn-action:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 8px 20px -5px var(--btn-clr);
+        }
+        [data-theme="dark"].style-apple .btn-action {
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Icônes Lucide ajustement */
+        .lucide {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.5px;
+        }
+
+        /* ========================================
+           LAYOUT & CONTENEURS
+           ======================================== */
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        h2 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.5;
+            margin-bottom: 25px;
+        }
+
+        /* Barre de navigation des thèmes (Ton interface) */
+        .theme-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .switch-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .switch-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>iCalou <span style="font-weight: 300; opacity: 0.5;">Design System</span></h1>
+    </div>
+
+    <div class="theme-switcher">
+        <button class="switch-btn active" onclick="updateTheme('dark')">MODE NUIT</button>
+        <button class="switch-btn" onclick="updateTheme('light')">MODE JOUR</button>
+        <div style="width: 2px; background: var(--border-color); margin: 0 10px;"></div>
+        <button class="switch-btn active" id="btn-style-sidebar" onclick="updateStyle('sidebar')">STYLE SIDEBAR</button>
+        <button class="switch-btn" id="btn-style-apple" onclick="updateStyle('apple')">STYLE APPLE</button>
+    </div>
+
+    <div class="section">
+        <h2>Actions de Gestion</h2>
+        <div class="grid-buttons">
+            <button class="btn-action btn-ajouter"><i data-lucide="plus-circle"></i> Ajouter</button>
+            <button class="btn-action btn-modifier"><i data-lucide="edit-3"></i> Modifier</button>
+            <button class="btn-action btn-valider"><i data-lucide="check-circle-2"></i> Valider</button>
+            <button class="btn-action btn-supprimer"><i data-lucide="trash-2"></i> Supprimer</button>
+            <button class="btn-action btn-enregistrer"><i data-lucide="save"></i> Enregistrer</button>
+            <button class="btn-action btn-annuler"><i data-lucide="x-circle"></i> Annuler</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Documents & Outils</h2>
+        <div class="grid-buttons">
+            <button class="btn-action btn-fiche-client"><i data-lucide="user-plus"></i> Fiche Client</button>
+            <button class="btn-action btn-telecharger"><i data-lucide="download-cloud"></i> Télécharger</button>
+            <button class="btn-action btn-imprimer"><i data-lucide="printer"></i> Imprimer</button>
+            <button class="btn-action btn-rechercher"><i data-lucide="search"></i> Rechercher</button>
+            <button class="btn-action btn-actualiser"><i data-lucide="refresh-cw"></i> Actualiser</button>
+            <button class="btn-action btn-info"><i data-lucide="info"></i> Détails</button>
+        </div>
+    </div>
+
+    <div class="section" style="text-align: center;">
+        <h2>Incrémentation</h2>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 30px;">
+            <button class="btn-action btn-moins" style="width: 50px; height: 50px; border-radius: 50% !important; padding:0;"><i data-lucide="minus"></i></button>
+            <span style="font-size: 48px; font-weight: 800;">01</span>
+            <button class="btn-action btn-plus" style="width: 50px; height: 50px; border-radius: 50% !important; padding:0;"><i data-lucide="plus"></i></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialisation des icônes Lucide
+    lucide.createIcons();
+
+    // Logique de changement de Thème (Jour/Nuit)
+    function updateTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.switch-btn').forEach(btn => {
+            if(btn.innerText.includes('MODE')) {
+                btn.classList.toggle('active', btn.innerText.toLowerCase().includes(theme));
+            }
+        });
+    }
+
+    // Logique de changement de Style (Sidebar/Apple)
+    function updateStyle(style) {
+        const root = document.getElementById('app-root');
+        root.classList.remove('style-sidebar', 'style-apple');
+        root.classList.add(`style-${style}`);
+        
+        document.getElementById('btn-style-sidebar').classList.toggle('active', style === 'sidebar');
+        document.getElementById('btn-style-apple').classList.toggle('active', style === 'apple');
+    }
+</script>
+
+</body>
+</html>
