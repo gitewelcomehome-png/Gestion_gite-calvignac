@@ -124,7 +124,7 @@
     <!-- 🛡️ PHASE 4 SÉCURITÉ: Rate limiting anti-spam -->
     <script src="js/rate-limiter.js"></script>
     <script src="js/init-validation.js?v=3.0"></script>
-    <script src="js/shared-utils.js?v=3.8"></script>
+    <script src="js/shared-utils.js?v=4.0"></script>
     <script src="js/supabase-operations.js"></script>
     <script src="js/icons.js"></script>
     <script src="js/dashboard.js?v=4.2"></script>
@@ -163,8 +163,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- 🎨 CSS UNIQUE CONSOLIDÉ - V1.2.1 (25 jan 2026) -->
-    <link rel="stylesheet" href="css/main.css?v=1.2.1" />
+    <!-- 🎨 CSS UNIQUE CONSOLIDÉ - V1.3 (25 jan 2026) -->
+    <link rel="stylesheet" href="css/main.css?v=1.3.0" />
 </head>
 <body>
     <!-- 🎨 CONTRÔLES THÈMES -->
@@ -364,16 +364,6 @@
             }
         };
         
-        // Attacher l'event listener
-        const menuButton = document.getElementById('userMenuButton');
-        if (menuButton) {
-            menuButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                window.toggleUserMenu();
-            });
-        }
-        
         
         // 🔧 Event listeners pour le menu admin
         // Attendre que tout soit bien chargé (delayed pour éviter les problèmes de timing)
@@ -445,52 +435,20 @@
                     <p class="brand-tagline" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.35em; opacity: 0.4; margin: 4px 0 0 2px;">Gestion Synchronisée</p>
                 </div>
             </div>
-            <!-- Menu admin intégré au header -->
-            <div class="user-menu-container" style="position: relative;">
-                <div class="user-menu-button" id="userMenuButton" style="padding: 8px 16px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <div class="user-menu-info">
-                        <div id="userName" class="user-menu-name" style="font-size: 0.9rem;">Chargement...</div>
-                        <div id="userRole" class="user-menu-role" style="font-size: 0.75rem;"></div>
-                    </div>
-                    <svg class="user-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
+            <!-- Menu utilisateur - Liste déroulante -->
+            <div class="user-menu-container" style="display: flex; align-items: center; gap: 12px;">
+                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                    <div id="userName" style="font-size: 0.9rem; font-weight: 600; color: var(--text);">Chargement...</div>
+                    <div id="userRole" style="font-size: 0.75rem; color: var(--gray-600);"></div>
                 </div>
-                
-                <div class="user-menu-dropdown" id="userMenuDropdown">
-                    <button class="user-menu-item" data-action="gites">
-                        <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
-                            <rect x="8" y="14" width="32" height="26" rx="2"/>
-                            <path d="M8 20 L24 8 L40 20"/>
-                            <circle cx="24" cy="28" r="2"/>
-                        </svg>
-                        <span>Gérer mes gîtes</span>
-                    </button>
-                    <button class="user-menu-item" data-action="ical">
-                        <span>⚙️</span>
-                        <span>Config iCal</span>
-                    </button>
-                    <button class="user-menu-item" data-action="archives">
-                        <span>📦</span>
-                        <span>Archives</span>
-                    </button>
-                    <button class="user-menu-item" data-action="faq">
-                        <svg class="tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                        <span>FAQ</span>
-                    </button>
-                    <button class="user-menu-item logout" id="logoutButton">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        <span>Déconnexion</span>
-                    </button>
-                </div>
+                <select id="userMenuSelect" onchange="handleUserMenuChange(this.value)" style="padding: 10px 16px; background: var(--card); border: 2px solid var(--border); border-radius: 10px; color: var(--text); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);">
+                    <option value="" disabled selected>⚡ Actions</option>
+                    <option value="gites">🏠 Gérer mes gîtes</option>
+                    <option value="ical">⚙️ Config iCal</option>
+                    <option value="archives">📦 Archives</option>
+                    <option value="faq">❓ FAQ</option>
+                    <option value="logout">🚪 Déconnexion</option>
+                </select>
             </div>
         </div>
         
@@ -3830,19 +3788,6 @@
             });
         });
     })();
-    
-    // Fermer le menu si on clique ailleurs
-    document.addEventListener('click', function(e) {
-        const menu = document.querySelector('.user-menu-container');
-        if (menu && !menu.contains(e.target)) {
-            const button = document.getElementById('userMenuButton');
-            const dropdown = document.getElementById('userMenuDropdown');
-            if (button && dropdown) {
-                button.classList.remove('open');
-                dropdown.classList.remove('open');
-            }
-        }
-    });
     </script>
 
     <!-- 🎨 Initialisation des thèmes au chargement -->
