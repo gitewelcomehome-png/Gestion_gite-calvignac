@@ -274,6 +274,65 @@ body {
     transition: all 0.3s ease;
 }
 
+/* FORCER L'APPLICATION PARTOUT - TOUS LES CONTENEURS */
+.container,
+.tab-content,
+#app-container,
+main,
+.wrapper {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* TOUTES LES CARTES ET SECTIONS */
+.section,
+.card,
+.section-card,
+.dashboard-card,
+.reservation-card,
+.gite-section,
+.charge-item,
+.stat-card,
+[class*="card"],
+[class*="-section"]:not(.container) {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+/* MODALS */
+.modal-content {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+/* FORMS */
+input,
+select,
+textarea {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* TABLES */
+table {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+th, td {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* HEADERS */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary) !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    MODE NUIT - FORCER TOUS LES FONDS
    ═══════════════════════════════════════════════════════════════════════ */
