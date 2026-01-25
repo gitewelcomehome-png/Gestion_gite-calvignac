@@ -124,10 +124,6 @@ html.theme-dark,
 .btn-info, .btn-actualiser { --btn-clr: #06b6d4; }
 .btn-moins { --btn-clr: #f59e0b; }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   STYLES : SIDEBAR (liseré) + APPLE (pleine couleur)
-   ═══════════════════════════════════════════════════════════════════════ */
-
 /* ═══ STYLE APPLE ═══ */
 
 /* APPLE + JOUR : Boutons cyan UpStay */
@@ -488,7 +484,7 @@ button.btn,
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Style 1: SIDEBAR (Liseré latéral) */
+/* ═══ STYLE 1: SIDEBAR (Liseré latéral) ═══ */
 .style-sidebar .btn-action,
 .style-sidebar button.btn,
 .style-sidebar .btn {
@@ -517,7 +513,7 @@ button.btn,
     border-color: var(--btn-clr);
 }
 
-/* Style 2: APPLE (Pleine couleur & Net) */
+/* ═══ STYLE 2: APPLE (Pleine couleur) ═══ */
 .style-apple .btn-action,
 .style-apple button.btn,
 .style-apple .btn {
@@ -540,22 +536,6 @@ button.btn,
 [data-theme="dark"].style-apple button.btn,
 [data-theme="dark"].style-apple .btn {
     border: 1px solid rgba(255,255,255,0.1);
-}
-
-/* Boutons anciens (compatibilité) - Appliquer par défaut le style sidebar */
-button,
-.btn-primary,
-.btn-save {
-    background: var(--btn-neutral);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 12px 24px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: var(--text-primary);
-    position: relative;
 }
     background: #10b981;
     color: white;
