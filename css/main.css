@@ -129,7 +129,56 @@ html.theme-dark,
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ═══ STYLE APPLE ═══ */
-/* Utilise les variables iCalou uniquement */
+
+/* APPLE + JOUR : Boutons cyan UpStay */
+html.theme-light.style-apple .btn-action,
+html.theme-light.style-apple .btn,
+html.theme-light.style-apple .btn-neo,
+html.theme-light.style-apple button:not(.ctrl-btn):not(.nav-tab) {
+    background: #00C2CB !important;
+    color: white !important;
+    border-radius: 10px !important;
+    border: none !important;
+    box-shadow: 0 1px 3px rgba(0, 194, 203, 0.2), 0 1px 2px rgba(0, 194, 203, 0.15) !important;
+    font-weight: 600 !important;
+    font-size: 17px !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-light.style-apple .btn-action:hover,
+html.theme-light.style-apple .btn:hover,
+html.theme-light.style-apple .btn-neo:hover,
+html.theme-light.style-apple button:not(.ctrl-btn):not(.nav-tab):hover {
+    background: #00a8b5 !important;
+    box-shadow: 0 2px 6px rgba(0, 194, 203, 0.25), 0 1px 3px rgba(0, 194, 203, 0.2) !important;
+}
+
+/* APPLE + NUIT : Boutons bleu foncé UpStay */
+html.theme-dark.style-apple .btn-action,
+html.theme-dark.style-apple .btn,
+html.theme-dark.style-apple .btn-neo,
+html.theme-dark.style-apple button:not(.ctrl-btn):not(.nav-tab) {
+    background: #005288 !important;
+    color: white !important;
+    border-radius: 10px !important;
+    border: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+    font-weight: 600 !important;
+    font-size: 17px !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-dark.style-apple .btn-action:hover,
+html.theme-dark.style-apple .btn:hover,
+html.theme-dark.style-apple .btn-neo:hover,
+html.theme-dark.style-apple button:not(.ctrl-btn):not(.nav-tab):hover {
+    background: #00628a !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Apple - Cartes arrondies */
 html.style-apple .card,
 html.style-apple .section-card,
 html.style-apple .modal-content {
@@ -143,15 +192,71 @@ html.style-apple textarea {
 }
 
 /* ═══ STYLE SIDEBAR ═══ */
-/* Utilise les variables iCalou uniquement */
+
+/* SIDEBAR + JOUR : Boutons blancs avec bordure colorée gauche */
+html.theme-light.style-sidebar .btn-action,
+html.theme-light.style-sidebar .btn,
+html.theme-light.style-sidebar .btn-neo,
+html.theme-light.style-sidebar button:not(.ctrl-btn):not(.nav-tab) {
+    background: white !important;
+    color: #3b82f6 !important;
+    border: 2px solid #e5e7eb !important;
+    border-left: 4px solid #3b82f6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-light.style-sidebar .btn-action:hover,
+html.theme-light.style-sidebar .btn:hover,
+html.theme-light.style-sidebar .btn-neo:hover,
+html.theme-light.style-sidebar button:not(.ctrl-btn):not(.nav-tab):hover {
+    background: #f8f9fa !important;
+    border-left-width: 6px !important;
+    transform: translateX(2px) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+}
+
+/* SIDEBAR + NUIT : Boutons sombres avec bordure néon */
+html.theme-dark.style-sidebar .btn-action,
+html.theme-dark.style-sidebar .btn,
+html.theme-dark.style-sidebar .btn-neo,
+html.theme-dark.style-sidebar button:not(.ctrl-btn):not(.nav-tab) {
+    background: #242526 !important;
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-left: 4px solid #3b82f6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.15) !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-dark.style-sidebar .btn-action:hover,
+html.theme-dark.style-sidebar .btn:hover,
+html.theme-dark.style-sidebar .btn-neo:hover,
+html.theme-dark.style-sidebar button:not(.ctrl-btn):not(.nav-tab):hover {
+    background: #3a3b3c !important;
+    border-left-width: 6px !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25) !important;
+    transform: translateX(2px) !important;
+}
+
+/* Sidebar - Bordures nettes */
 html.style-sidebar .card,
 html.style-sidebar .section-card {
+    border: var(--neo-border) !important;
     border-radius: 12px !important;
+    box-shadow: var(--neo-shadow) !important;
 }
 
 html.style-sidebar input,
 html.style-sidebar select,
 html.style-sidebar textarea {
+    border: 2px solid var(--neo-black) !important;
     border-radius: 8px !important;
 }
 
@@ -235,8 +340,8 @@ html.theme-dark .modal-content,
 html.theme-dark .modal-body,
 html.theme-dark .modal-header,
 html.theme-dark .modal-footer {
-    background: var(--bg-secondary) !important;
-    color: var(--text-primary) !important;
+    background: var(--card) !important;
+    color: var(--text) !important;
 }
 
 /* Mode NUIT : Tables en sombre */
@@ -246,23 +351,23 @@ html.theme-dark td,
 html.theme-dark tr,
 html.theme-dark thead,
 html.theme-dark tbody {
-    background: var(--bg-secondary) !important;
-    color: var(--text-primary) !important;
-    border-color: var(--border-color) !important;
+    background: var(--card) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
 }
 
 /* Mode NUIT : Planning en sombre */
 html.theme-dark .planning-container,
 html.theme-dark .planning-weeks,
 html.theme-dark .week-block {
-    background: var(--bg-primary) !important;
+    background: var(--bg) !important;
 }
 
 /* Mode NUIT : Listes et items */
 html.theme-dark ul,
 html.theme-dark ol,
 html.theme-dark li {
-    color: var(--text-primary) !important;
+    color: var(--text) !important;
 }
 
 /* Mode NUIT : Textes */
@@ -276,7 +381,7 @@ html.theme-dark p,
 html.theme-dark span:not([style*="color"]),
 html.theme-dark label,
 html.theme-dark a {
-    color: var(--text-primary) !important;
+    color: var(--text) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -288,28 +393,28 @@ html.theme-dark a {
     left: 0;
     right: 0;
     z-index: 1000;
-    background: var(--bg-secondary) !important;
-    border-bottom: 1px solid var(--border-color) !important;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow);
     height: 70px;
 }
 
 .site-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary) !important;
+    color: var(--text);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
    NAVIGATION TABS - STYLE UPSTAY
    ═══════════════════════════════════════════════════════════════════════ */
 .nav-container {
-    background: var(--bg-secondary) !important;
-    border-bottom: 1px solid var(--border-color) !important;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
     padding: 12px 20px;
     display: flex;
     gap: 10px;
@@ -510,8 +615,8 @@ button,
    ═══════════════════════════════════════════════════════════════════════ */
 .card,
 .section-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px;
     box-shadow: var(--shadow);
@@ -541,10 +646,10 @@ select,
 textarea {
     width: 100%;
     padding: 12px 16px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: 8px;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
+    background: var(--card);
+    color: var(--text);
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 1rem;
     transition: all 0.2s ease;
@@ -562,7 +667,7 @@ label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--text);
     font-size: 0.95rem;
 }
 
@@ -588,7 +693,7 @@ label {
 }
 
 .week-block {
-    background: var(--bg-secondary);
+    background: var(--card);
     border: var(--neo-border);
     border-radius: 16px;
     overflow: hidden;
@@ -598,8 +703,8 @@ label {
 /* Cartes de réservation avec liserets colorés cycliques */
 .week-reservation {
     padding: 20px;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
     border-left: 6px solid var(--gite-blue);
     transition: all 0.2s ease;
 }
@@ -621,7 +726,7 @@ label {
 }
 
 .week-reservation:hover {
-    background: var(--bg-primary);
+    background: var(--bg);
     transform: translateX(4px);
 }
 
@@ -634,7 +739,7 @@ label {
     text-align: center;
     color: var(--text-secondary);
     font-style: italic;
-    background: var(--bg-primary);
+    background: var(--bg);
 }
 
 /* En-têtes de colonnes gîtes avec couleurs cycliques */
@@ -680,7 +785,7 @@ label {
 table {
     width: 100%;
     border-collapse: collapse;
-    background: var(--bg-secondary);
+    background: var(--card);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: var(--shadow);
@@ -699,8 +804,8 @@ th {
 
 td {
     padding: 12px 15px;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
 }
 
 tr:last-child td {
@@ -708,7 +813,7 @@ tr:last-child td {
 }
 
 tbody tr:hover {
-    background: var(--bg-primary);
+    background: var(--bg);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -716,15 +821,15 @@ tbody tr:hover {
    ═══════════════════════════════════════════════════════════════════════ */
 .list-item {
     padding: 15px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 8px;
     margin-bottom: 10px;
     transition: all 0.2s ease;
 }
 
 .list-item:hover {
-    background: var(--bg-primary);
+    background: var(--bg);
     transform: translateX(4px);
 }
 
@@ -786,15 +891,15 @@ tbody tr:hover {
    ═══════════════════════════════════════════════════════════════════════ */
 .cleaning-item {
     padding: 15px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 8px;
     margin-bottom: 10px;
     transition: all 0.2s ease;
 }
 
 .cleaning-item:hover {
-    background: var(--bg-primary);
+    background: var(--bg);
 }
 
 .cleaning-item.validated {
@@ -811,8 +916,8 @@ tbody tr:hover {
    FISCALITÉ
    ═══════════════════════════════════════════════════════════════════════ */
 .fiscal-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
@@ -828,15 +933,15 @@ tbody tr:hover {
    CALENDRIER
    ═══════════════════════════════════════════════════════════════════════ */
 .calendar-day {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--card);
+    border: 1px solid var(--border);
     padding: 10px;
     text-align: center;
     transition: all 0.2s ease;
 }
 
 .calendar-day:hover {
-    background: var(--bg-primary);
+    background: var(--bg);
     border-color: var(--upstay-cyan);
 }
 
@@ -931,7 +1036,7 @@ html.theme-dark .alert-info {
 }
 
 .modal-content {
-    background: var(--bg-secondary);
+    background: var(--card);
     border-radius: 16px;
     padding: 30px;
     max-width: 600px;
@@ -951,7 +1056,7 @@ html.theme-dark .alert-info {
 .modal-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--text);
 }
 
 .modal-close {
@@ -1856,7 +1961,7 @@ html.theme-dark .alert-info {
 
 /* En-tête Dashboard */
 .dashboard-header {
-    background: var(--bg-secondary);
+    background: var(--card);
     border-radius: 16px;
     padding: 24px 32px;
     margin-bottom: 24px;
@@ -1874,7 +1979,7 @@ html.theme-dark .alert-info {
 .dashboard-title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--text);
     margin: 0;
     font-family: 'Work Sans', 'Plus Jakarta Sans', sans-serif;
 }
@@ -1934,15 +2039,15 @@ html.theme-dark .alert-info {
 .date-widget {
     text-align: right;
     padding: 8px 16px;
-    background: var(--bg-primary);
+    background: var(--bg);
     border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
 }
 
 .date-current {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--text);
 }
 
 .date-week {
@@ -1953,12 +2058,12 @@ html.theme-dark .alert-info {
 
 /* Cartes de stats - Style iCalou */
 .stat-card-icalou {
-    background: var(--bg-secondary);
+    background: var(--card);
     border-radius: 16px;
     padding: 24px;
     box-shadow: var(--shadow);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
 }
 
 .stat-card-icalou:hover {
