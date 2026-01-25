@@ -2042,3 +2042,24 @@ html.theme-dark .stat-card-icalou {
 }
 
 
+
+
+/* ========================================
+   USER MENU SELECT
+   ======================================== */
+#userMenuSelect:hover {
+    border-color: #00C2CB;
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.3);
+}
+
+#userMenuSelect:focus {
+    outline: none;
+    border-color: #00C2CB;
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.1);
+}
+
+html.theme-dark #userMenuSelect {
+    background-color: #2D3748;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}

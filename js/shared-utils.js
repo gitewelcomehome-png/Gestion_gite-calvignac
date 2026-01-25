@@ -347,6 +347,45 @@ function handleQuickAction(action) {
 }
 
 // ==========================================
+// GESTION MENU UTILISATEUR SELECT
+// ==========================================
+
+/**
+ * Gère le changement dans le menu utilisateur (select)
+ */
+function handleUserMenuChange(action) {
+    const select = document.getElementById('userMenuSelect');
+    
+    if (!action) return;
+    
+    // Exécuter l'action
+    if (action === 'logout') {
+        if (typeof window.logout === 'function') {
+            window.logout();
+        }
+    } else if (action === 'gites') {
+        if (typeof window.showGiteSelectionModal === 'function') {
+            window.showGiteSelectionModal();
+        }
+    } else if (action === 'ical') {
+        if (typeof window.showIcalConfigModal === 'function') {
+            window.showIcalConfigModal();
+        }
+    } else if (action === 'archives') {
+        window.switchTab('archives');
+    } else if (action === 'faq') {
+        window.switchTab('faq');
+    }
+    
+    // Réinitialiser le select
+    if (select) {
+        setTimeout(() => {
+            select.value = '';
+        }, 100);
+    }
+}
+
+// ==========================================
 // GESTION DES SLIDES COLLAPSIBLES
 // ==========================================
 
@@ -381,6 +420,5 @@ window.getPlatformBadgeClass = getPlatformBadgeClass;
 window.getPlatformLogo = getPlatformLogo;
 window.getWeekNumber = getWeekNumber;
 window.getWeekDates = getWeekDates;
-window.toggleUserMenu = toggleUserMenu;
-window.handleQuickAction = handleQuickAction;
+window.handleUserMenuChange = handleUserMenuChange;
 window.toggleSlide = toggleSlide;
