@@ -1,0 +1,517 @@
+/* ===================================
+   🎨 SYSTÈME DE THÈMES ICALOU - VERSION COMPLÈTE
+   2 Thèmes : Jour/Nuit | 2 Styles : Apple/Sidebar
+   =================================== */
+
+:root { 
+    --transition: all 0.2s ease-in-out;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ===================================
+   🌈 THÈME JOUR (Light) - Identité claire et épurée
+   =================================== */
+html.theme-light,
+.theme-light { 
+    --bg: #f0f2f5; 
+    --bg-secondary: #e4e6eb;
+    --card: #ffffff; 
+    --text: #050505; 
+    --text-secondary: #3a3b3c;
+    --border: rgba(0,0,0,0.2); 
+    --btn-neutral-bg: #ffffff;
+    --shadow: 0 2px 6px rgba(0,0,0,0.15);
+    --shadow-hover: 0 4px 12px rgba(0,0,0,0.25);
+    
+    /* Variables pour calendrier */
+    --calou-bg: #DFE6E9;
+    --calou-card-bg: #ffffff;
+    --calou-text-primary: #2D3436;
+    --calou-border: #2D3436;
+}
+
+/* ===================================
+   🌙 THÈME NUIT (Dark) - Identité moderne et contrastée
+   =================================== */
+html.theme-dark,
+.theme-dark { 
+    --bg: #0a0a0b; 
+    --bg-secondary: #18191a;
+    --card: #242526; 
+    --text: #f5f6f7; 
+    --text-secondary: #b0b3b8;
+    --border: rgba(255,255,255,0.15); 
+    --btn-neutral-bg: #3a3b3c;
+    --shadow: 0 4px 16px rgba(0,0,0,0.8);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.9);
+    
+    /* Variables pour calendrier */
+    --calou-bg: #18191a;
+    --calou-card-bg: #242526;
+    --calou-text-primary: #e4e6eb;
+    --calou-border: rgba(255,255,255,0.3);
+}
+
+/* ===================================
+   🎨 COULEURS ACTIONS (Classes boutons avec couleurs vives)
+   =================================== */
+.btn-ajouter { --btn-clr: #10b981; }
+.btn-modifier { --btn-clr: #3b82f6; }
+.btn-supprimer { --btn-clr: #ef4444; }
+.btn-valider { --btn-clr: #10b981; }
+.btn-enregistrer { --btn-clr: #8b5cf6; }
+.btn-annuler { --btn-clr: #64748b; }
+.btn-fiche-client { --btn-clr: #6366f1; }
+.btn-telecharger { --btn-clr: #8b5cf6; }
+.btn-imprimer { --btn-clr: #6366f1; }
+.btn-rechercher { --btn-clr: #0ea5e9; }
+.btn-actualiser { --btn-clr: #06b6d4; }
+.btn-info { --btn-clr: #0ea5e9; }
+.btn-plus { --btn-clr: #10b981; }
+.btn-moins { --btn-clr: #f59e0b; }
+
+/* Alias pour les anciennes classes */
+.btn-primary { --btn-clr: #3b82f6; }
+.btn-success { --btn-clr: #10b981; }
+.btn-danger { --btn-clr: #ef4444; }
+.btn-warning { --btn-clr: #f59e0b; }
+.btn-special { --btn-clr: #6366f1; }
+
+/* ===================================
+   🎯 APPLICATION GLOBALE DES THÈMES
+   Tous les éléments de l'interface
+   =================================== */
+
+/* Body et conteneurs principaux */
+body,
+html { 
+    background-color: var(--bg) !important; 
+    color: var(--text) !important; 
+    transition: var(--transition);
+}
+
+/* TOUTES les cartes et conteneurs */
+.card,
+.section-card,
+.dashboard-cards,
+.reservation-card,
+div[style*="background: white"],
+div[style*="background: #fff"],
+div[style*="background:#fff"],
+div[style*="background-color: white"],
+div[style*="background-color: #ffffff"],
+section,
+article { 
+    background: var(--card) !important; 
+    border: 1px solid var(--border) !important; 
+    color: var(--text) !important;
+    box-shadow: var(--shadow) !important;
+    transition: var(--transition);
+}
+
+/* Navigation et tabs - DÉSACTIVÉ car géré dans themes-override.css */
+.sticky-header,
+.nav-tabs,
+.tabs-container,
+div[style*="background: #1e3a8a"],
+div[style*="background:#1e3a8a"],
+header {
+    background: var(--card) !important;
+    border-bottom: 2px solid var(--border) !important;
+    box-shadow: var(--shadow) !important;
+}
+
+/* .nav-tab désactivé - géré dans themes-override.css
+.nav-tab,
+.tab-button,
+button[class*="tab"] {
+    background: transparent !important;
+    color: var(--text) !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    transition: var(--transition);
+    font-weight: 600 !important;
+}
+
+.nav-tab.active,
+.tab-button.active,
+button[class*="tab"].active {
+    background: var(--bg-secondary) !important;
+    color: var(--text) !important;
+    border-bottom-color: #3b82f6 !important;
+}
+
+.nav-tab:hover,
+.tab-button:hover,
+button[class*="tab"]:hover {
+    background: var(--bg-secondary) !important;
+    color: var(--text) !important;
+}
+*/
+
+/* Titres et textes */
+h1, h2, h3, h4, h5, h6,
+.section-title,
+.site-title,
+label,
+span,
+p,
+div {
+    color: var(--text) !important;
+    transition: var(--transition);
+}
+
+/* Textes secondaires */
+.section-subtitle,
+small,
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* Inputs et formulaires */
+input,
+select,
+textarea {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    transition: var(--transition);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--btn-clr, #3b82f6) !important;
+    background: var(--card) !important;
+}
+
+/* Navigation tabs - DÉSACTIVÉ car géré dans themes-override.css */
+/*
+.nav-tab,
+.tab-button,
+button[class*="nav"],
+a[class*="nav"] {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    transition: var(--transition);
+}
+
+.nav-tab.active,
+.tab-button.active {
+    background: var(--btn-neutral-bg) !important;
+    border-color: var(--btn-clr, #3b82f6) !important;
+}
+*/
+
+/* ===================================
+   🔘 STRUCTURE BOUTON COMMUN
+   =================================== */
+.btn-action,
+.btn,
+.btn-neo,
+.btn-primary,
+.btn-secondary,
+button:not(.ctrl-btn) {
+    display: inline-flex !important; 
+    align-items: center !important; 
+    justify-content: center !important; 
+    gap: 10px !important;
+    padding: 12px 24px !important; 
+    border-radius: 12px !important; 
+    font-weight: 700 !important; 
+    font-size: 0.9rem !important;
+    cursor: pointer !important; 
+    transition: var(--transition) !important; 
+    border: 1px solid transparent !important;
+    position: relative !important; 
+    overflow: hidden !important;
+    color: var(--text) !important;
+    --btn-clr: #3b82f6; /* Couleur par défaut si non définie */
+}
+
+/* ===================================
+   🍎 STYLE APPLE - Net, coloré et dynamique
+   =================================== */
+
+/* APPLE + JOUR : Style épuré Apple */
+html.theme-light.style-apple .btn-action,
+html.theme-light.style-apple .btn,
+html.theme-light.style-apple .btn-neo,
+html.theme-light.style-apple button:not(.ctrl-btn) {
+    background: #00C2CB !important;
+    color: white !important;
+    border-radius: 10px !important;
+    border: none !important;
+    box-shadow: 0 1px 3px rgba(0, 194, 203, 0.2), 0 1px 2px rgba(0, 194, 203, 0.15) !important;
+    font-weight: 600 !important;
+    font-size: 17px !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-light.style-apple .btn-action:hover,
+html.theme-light.style-apple .btn:hover,
+html.theme-light.style-apple .btn-neo:hover,
+html.theme-light.style-apple button:not(.ctrl-btn):hover {
+    background: #00a8b5 !important;
+    box-shadow: 0 2px 6px rgba(0, 194, 203, 0.25), 0 1px 3px rgba(0, 194, 203, 0.2) !important;
+}
+
+/* APPLE + NUIT : Style épuré Apple */
+html.theme-dark.style-apple .btn-action,
+html.theme-dark.style-apple .btn,
+html.theme-dark.style-apple .btn-neo,
+html.theme-dark.style-apple button:not(.ctrl-btn) {
+    background: #005288 !important;
+    color: white !important;
+    border-radius: 10px !important;
+    border: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+    font-weight: 600 !important;
+    font-size: 17px !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-dark.style-apple .btn-action:hover,
+html.theme-dark.style-apple .btn:hover,
+html.theme-dark.style-apple .btn-neo:hover,
+html.theme-dark.style-apple button:not(.ctrl-btn):hover {
+    background: #00628a !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.style-apple .btn-action::before,
+html.style-apple .btn::before {
+    display: none !important;
+}
+
+/* ===================================
+   📊 STYLE SIDEBAR
+   =================================== */
+
+/* SIDEBAR + JOUR : Bordure colorée claire */
+/* ===================================
+   📋 STYLE SIDEBAR - Élégant et minimal
+   =================================== */
+
+/* SIDEBAR + JOUR : Boutons blancs avec bordure colorée à gauche */
+html.theme-light.style-sidebar .btn-action,
+html.theme-light.style-sidebar .btn,
+html.theme-light.style-sidebar .btn-neo,
+html.theme-light.style-sidebar button:not(.ctrl-btn) {
+    background: white !important;
+    color: var(--btn-clr, #3b82f6) !important;
+    border: 2px solid #e5e7eb !important;
+    border-left: 4px solid var(--btn-clr, #3b82f6) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+}
+
+html.theme-light.style-sidebar .btn-action::before,
+html.theme-light.style-sidebar .btn::before,
+html.theme-light.style-sidebar .btn-neo::before,
+html.theme-light.style-sidebar button:not(.ctrl-btn)::before {
+    display: none !important;
+}
+
+html.theme-light.style-sidebar .btn-action:hover,
+html.theme-light.style-sidebar .btn:hover,
+html.theme-light.style-sidebar .btn-neo:hover,
+html.theme-light.style-sidebar button:not(.ctrl-btn):hover {
+    background: var(--bg, #f8f9fa) !important;
+    border-left-width: 6px !important;
+    transform: translateX(2px) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+}
+
+/* SIDEBAR + NUIT : Boutons sombres avec bordure néon */
+html.theme-dark.style-sidebar .btn-action,
+html.theme-dark.style-sidebar .btn,
+html.theme-dark.style-sidebar .btn-neo,
+html.theme-dark.style-sidebar button:not(.ctrl-btn) {
+    background: var(--card, #242526) !important;
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-left: 4px solid var(--btn-clr, #3b82f6) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.15) !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+}
+
+html.theme-dark.style-sidebar .btn-action::before,
+html.theme-dark.style-sidebar .btn::before,
+html.theme-dark.style-sidebar .btn-neo::before,
+html.theme-dark.style-sidebar button:not(.ctrl-btn)::before {
+    display: none !important;
+}
+
+html.theme-dark.style-sidebar .btn-action:hover,
+html.theme-dark.style-sidebar .btn:hover,
+html.theme-dark.style-sidebar .btn-neo:hover,
+html.theme-dark.style-sidebar button:not(.ctrl-btn):hover {
+    background: rgba(255,255,255,0.05) !important;
+    border-left-width: 6px !important;
+    transform: translateX(2px) !important;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* ===================================
+   🎯 VARIANTES BOUTONS
+   =================================== */
+.btn-icon { 
+    width: 48px; 
+    height: 48px; 
+    padding: 0; 
+    border-radius: 50% !important; 
+}
+
+.btn-full { 
+    width: 100%; 
+}
+
+/* ===================================
+   📐 LAYOUT & STRUCTURE
+   =================================== */
+.grid-layout { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    gap: 16px; 
+}
+
+.section-header {
+    margin-bottom: 24px;
+}
+
+.section-title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.section-subtitle {
+    font-size: 0.875rem;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+}
+
+/* ===================================
+   🔧 INPUTS & FORMS
+   =================================== */
+input,
+select,
+textarea {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 16px;
+    border-radius: 12px;
+    transition: var(--transition);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--btn-clr, #3b82f6);
+}
+
+/* ===================================
+   🎨 ICÔNES FONT AWESOME
+   =================================== */
+.icon-sm { font-size: 1rem; }
+.icon-md { font-size: 1.25rem; }
+.icon-lg { font-size: 1.5rem; }
+.icon-xl { font-size: 2rem; }
+
+/* ===================================
+   📱 RESPONSIVE
+   =================================== */
+@media (max-width: 768px) {
+    .grid-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-card {
+        padding: 20px;
+    }
+}
+
+/* ===================================
+   🎯 ANCIENNES CLASSES (Compatibilité)
+   =================================== */
+.btn-save { --btn-clr: #8b5cf6; }
+.btn-cancel { --btn-clr: #64748b; }
+.btn-add { --btn-clr: #10b981; }
+.btn-edit { --btn-clr: #3b82f6; }
+.btn-delete { --btn-clr: #ef4444; }
+.btn-validate { --btn-clr: #10b981; }
+.btn-refresh { --btn-clr: #06b6d4; }
+
+/* ===================================
+   🎨 BORDURES COLORÉES (Liserets) - Comme sur les captures
+   =================================== */
+
+/* Bordure gauche BLEUE (Semaine 1, 5, etc.) */
+.card[data-theme="blue"],
+.week-block:nth-child(4n+1),
+.reservation-card:nth-child(4n+1),
+div[style*="border-left"][style*="blue"],
+.border-blue {
+    border-left: 4px solid #3b82f6 !important;
+}
+
+/* Bordure gauche ROUGE (Semaine 2, 6, etc.) */
+.card[data-theme="red"],
+.week-block:nth-child(4n+2),
+.reservation-card:nth-child(4n+2),
+div[style*="border-left"][style*="red"],
+.border-red {
+    border-left: 4px solid #ef4444 !important;
+}
+
+/* Bordure gauche VERTE (Semaine 3, 7, etc.) */
+.card[data-theme="green"],
+.week-block:nth-child(4n+3),
+.reservation-card:nth-child(4n+3),
+div[style*="border-left"][style*="green"],
+.border-green {
+    border-left: 4px solid #10b981 !important;
+}
+
+/* Bordure gauche CYAN (Semaine 4, 8, etc.) */
+.card[data-theme="cyan"],
+.week-block:nth-child(4n),
+.reservation-card:nth-child(4n),
+div[style*="border-left"][style*="cyan"],
+.border-cyan {
+    border-left: 4px solid #06b6d4 !important;
+}
+
+/* Bordure TOP pour les réservations (style alternatif) */
+.reservation-card.border-top-blue {
+    border-top: 4px solid #3b82f6 !important;
+    border-left: none !important;
+}
+
+.reservation-card.border-top-red {
+    border-top: 4px solid #ef4444 !important;
+    border-left: none !important;
+}
+
+.reservation-card.border-top-green {
+    border-top: 4px solid #10b981 !important;
+    border-left: none !important;
+}
+
+.reservation-card.border-top-cyan {
+    border-top: 4px solid #06b6d4 !important;
+    border-left: none !important;
+}

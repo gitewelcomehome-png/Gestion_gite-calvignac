@@ -8,11 +8,29 @@
 ║  NE TOUCHER À CE FICHIER QUE SUR DEMANDE EXPLICITE                      ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 -->
-<html lang="fr">
+<html lang="fr" class="theme-dark style-sidebar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion gites - v4.4</title>
+    
+    <!-- ⚡ CHARGEMENT THÈME IMMÉDIAT - AVANT TOUT -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('icalou-theme') || 'dark';
+            const savedStyle = localStorage.getItem('icalou-style') || 'sidebar';
+            document.documentElement.className = 'theme-' + savedTheme + ' style-' + savedStyle;
+        })();
+    </script>
+    
+    <title>UpStay - Gestion Synchronisée</title>
+    
+    <!-- Google Fonts - Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- 🎨 Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     
     <!-- Favicon vide pour éviter requête 404 -->
     <link rel="icon" href="data:,">
@@ -106,10 +124,10 @@
     <!-- 🛡️ PHASE 4 SÉCURITÉ: Rate limiting anti-spam -->
     <script src="js/rate-limiter.js"></script>
     <script src="js/init-validation.js?v=3.0"></script>
-    <script src="js/shared-utils.js?v=3.6"></script>
+    <script src="js/shared-utils.js?v=3.8"></script>
     <script src="js/supabase-operations.js"></script>
     <script src="js/icons.js"></script>
-    <script src="js/dashboard.js?v=3.4"></script>
+    <script src="js/dashboard.js?v=4.0"></script>
     <script src="js/sync-ical-v2.js?v=2.2"></script>
     <script src="js/statistiques.js"></script>
     <script src="js/menage.js?v=1737504444"></script>
@@ -117,7 +135,7 @@
     <script src="js/cleaning-rules-modal.js"></script>
     <script src="js/decouvrir.js?v=3.0"></script>
     <!-- Reservations.js : CHARGÉ POUR DESKTOP ET MOBILE (fonctions de filtrage communes) -->
-    <script src="js/reservations.js?v=4.5"></script>
+    <script src="js/reservations.js?v=5.0"></script>
     <script src="js/archives.js"></script>
     <script src="js/km-manager.js"></script>
     <script src="js/taux-fiscaux-config.js?v=1.0"></script>
@@ -145,20 +163,59 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Flat Outline Design - Neo-Brutalism Soft -->
-    <link rel="stylesheet" href="css/flat-outline.css" />
-    
-    <!-- Formulaire Gîtes Neo-Brutalism -->
-    <link rel="stylesheet" href="css/gites-form.css?v=2.0" />
-    
-    <!-- CSS principal (ancien inline) -->
-    <link rel="stylesheet" href="css/main-inline.css?v=1737243200" />
-    
-    <!-- Fiscalité Neo Styles (chargé en DERNIER pour priorité) -->
-    <link rel="stylesheet" href="css/fiscalite-neo.css?v=1737243600" />
-    <link rel="stylesheet" href="css/remplissage-auto.css?v=1.0" />
+    <!-- 🎨 CSS UNIQUE CONSOLIDÉ - V1.1 (25 jan 2026) -->
+    <link rel="stylesheet" href="css/main.css?v=1.1.1" />
 </head>
 <body>
+    <!-- 🎨 CONTRÔLES THÈMES -->
+    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; background: #000; padding: 5px; border-radius: 15px; display: flex; border: 1px solid rgba(255,255,255,0.2);">
+        <button onclick="setTheme('light')" id="t-light" class="ctrl-btn" style="color: white; font-size: 10px; font-weight: 800; padding: 8px 15px; border-radius: 10px; opacity: 0.4; border: none; background: transparent; cursor: pointer;">JOUR</button>
+        <button onclick="setTheme('dark')" id="t-dark" class="ctrl-btn active" style="color: white; font-size: 10px; font-weight: 800; padding: 8px 15px; border-radius: 10px; opacity: 1; background: rgba(255,255,255,0.2); border: none; cursor: pointer;">NUIT</button>
+        <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2); margin: auto 8px;"></div>
+        <button onclick="setStyle('apple')" id="s-apple" class="ctrl-btn" style="color: white; font-size: 10px; font-weight: 800; padding: 8px 15px; border-radius: 10px; opacity: 0.4; border: none; background: transparent; cursor: pointer;">APPLE</button>
+        <button onclick="setStyle('sidebar')" id="s-sidebar" class="ctrl-btn active" style="color: white; font-size: 10px; font-weight: 800; padding: 8px 15px; border-radius: 10px; opacity: 1; background: rgba(255,255,255,0.2); border: none; cursor: pointer;">SIDEBAR</button>
+    </div>
+
+    <script>
+        function setTheme(theme) {
+            const root = document.documentElement;
+            root.classList.remove('theme-light', 'theme-dark');
+            root.classList.add('theme-' + theme);
+            
+            document.getElementById('t-light').style.opacity = theme === 'light' ? '1' : '0.4';
+            document.getElementById('t-dark').style.opacity = theme === 'dark' ? '1' : '0.4';
+            document.getElementById('t-light').style.background = theme === 'light' ? 'rgba(255,255,255,0.2)' : 'transparent';
+            document.getElementById('t-dark').style.background = theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'transparent';
+            
+            localStorage.setItem('icalou-theme', theme);
+            
+            // Déclencher le nettoyage des styles
+            window.dispatchEvent(new Event('theme-changed'));
+            if (typeof window.cleanThemeStyles === 'function') {
+                setTimeout(() => window.cleanThemeStyles(), 100);
+            }
+        }
+        
+        function setStyle(style) {
+            const root = document.documentElement;
+            root.classList.remove('style-apple', 'style-sidebar');
+            root.classList.add('style-' + style);
+            
+            document.getElementById('s-apple').style.opacity = style === 'apple' ? '1' : '0.4';
+            document.getElementById('s-sidebar').style.opacity = style === 'sidebar' ? '1' : '0.4';
+            document.getElementById('s-apple').style.background = style === 'apple' ? 'rgba(255,255,255,0.2)' : 'transparent';
+            document.getElementById('s-sidebar').style.background = style === 'sidebar' ? 'rgba(255,255,255,0.2)' : 'transparent';
+            
+            localStorage.setItem('icalou-style', style);
+            
+            // Déclencher le nettoyage des styles
+            window.dispatchEvent(new Event('theme-changed'));
+            if (typeof window.cleanThemeStyles === 'function') {
+                setTimeout(() => window.cleanThemeStyles(), 100);
+            }
+        }
+    </script>
+
     <!-- Menu hamburger mobile (injecté dynamiquement) -->
     <div id="mobile-menu-container"></div>
 
@@ -317,6 +374,28 @@
             });
         }
         
+        // 🔧 Event listener pour le bouton engrenage admin (dashboard)
+        const adminSettingsBtn = document.getElementById('adminSettingsButton');
+        if (adminSettingsBtn) {
+            adminSettingsBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof window.openAdminPopup === 'function') {
+                    window.openAdminPopup();
+                }
+            });
+        }
+        
+        // Fermer popup admin si clic sur fond
+        document.addEventListener('click', function(e) {
+            const popup = document.getElementById('adminPopup');
+            if (popup && e.target === popup) {
+                if (typeof window.closeAdminPopup === 'function') {
+                    window.closeAdminPopup();
+                }
+            }
+        });
+        
         // 🔧 Event listeners pour le menu admin
         // Attendre que tout soit bien chargé (delayed pour éviter les problèmes de timing)
         setTimeout(() => {
@@ -367,7 +446,26 @@
     <div class="container">
         <!-- Header Sticky Neo-Brutalism -->
         <div class="sticky-header">
-            <div class="site-title">🏠 Gestion Gîtes</div>
+            <div class="site-title" style="display: flex; align-items: center; gap: 16px;">
+                <!-- Logo UpStay -->
+                <div class="icalou-icon" style="width: 56px; height: 56px; background: linear-gradient(180deg, #00C2CB 0%, #005288 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0, 82, 136, 0.3);">
+                    <svg class="upstay-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 65%; height: 65%;">
+                        <path d="M50 5L15 40H30V90H70V40H85L50 5Z" fill="url(#paint0_linear)"/>
+                        <path d="M50 35L35 50H45V75H55V50H65L50 35Z" fill="white" fill-opacity="0.8"/>
+                        <defs>
+                            <linearGradient id="paint0_linear" x1="50" y1="5" x2="50" y2="90" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#00C2CB"/>
+                                <stop offset="1" stop-color="#005288"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <!-- Nom UpStay -->
+                <div class="brand-identity" style="display: flex; flex-direction: column; justify-content: center;">
+                    <h1 class="brand-name" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.06em; line-height: 0.9; background: linear-gradient(180deg, #00C2CB 0%, #005288 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0;">UPSTAY</h1>
+                    <p class="brand-tagline" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.35em; opacity: 0.4; margin: 4px 0 0 2px;">Gestion Synchronisée</p>
+                </div>
+            </div>
             <!-- Menu admin intégré au header -->
             <div class="user-menu-container" style="position: relative;">
                 <div class="user-menu-button" id="userMenuButton" style="padding: 8px 16px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -417,98 +515,105 @@
             </div>
         </div>
         
-        <!-- Navigation Neo-Brutalism -->
-        <div class="nav-tabs-wrapper">
-            <button class="tab-neo active" data-tab="dashboard" data-theme="blue">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
-                Tableau de Bord
-            </button>
+        <!-- Navigation iCalou Moderne -->
+        <nav class="icalou-modern-nav">
+            <div class="nav-container">
+                <button class="nav-tab active" data-tab="dashboard" data-theme="blue">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span class="tab-label">Tableau de Bord</span>
+                </button>
 
-            <button class="tab-neo" data-tab="reservations" data-theme="blue">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                Réservations
-            </button>
+                <button class="nav-tab" data-tab="reservations" data-theme="blue">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span class="tab-label">Réservations</span>
+                </button>
 
-            <button class="tab-neo" data-tab="statistiques" data-theme="green">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                </svg>
-                Statistiques
-            </button>
+                <button class="nav-tab" data-tab="statistiques" data-theme="green">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <span class="tab-label">Statistiques</span>
+                </button>
 
-            <button class="tab-neo" data-tab="checklists" data-theme="yellow">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <polyline points="9 11 12 14 22 4"></polyline>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                </svg>
-                Check-list
-            </button>
+                <button class="nav-tab" data-tab="checklists" data-theme="yellow">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span class="tab-label">Check-list</span>
+                </button>
 
-            <button class="tab-neo" data-tab="draps" data-theme="blue">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <path d="M2 19h20"></path>
-                    <path d="M4 15h16v4H4z"></path>
-                    <path d="M4 15c0-4 3-7 8-7s8 3 8 7"></path>
-                </svg>
-                Draps
-            </button>
+                <button class="nav-tab" data-tab="draps" data-theme="blue">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span class="tab-label">Draps</span>
+                </button>
 
-            <button class="tab-neo" data-tab="menage" data-theme="blue">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <path d="M9 15 l2 2 4-4"></path>
-                </svg>
-                Planning Ménage
-            </button>
+                <button class="nav-tab" data-tab="menage" data-theme="blue">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    </svg>
+                    <span class="tab-label">Planning Ménage</span>
+                </button>
 
-            <button class="tab-neo" data-tab="charges" data-theme="yellow">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
-                    <line x1="12" y1="18" x2="12" y2="2"></line>
-                </svg>
-                Fiscalité LMNP
-            </button>
+                <button class="nav-tab" data-tab="charges" data-theme="yellow">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <span class="tab-label">Fiscalité LMNP</span>
+                </button>
 
-            <button class="tab-neo" data-tab="decouvrir" data-theme="green">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-                </svg>
-                À Découvrir
-            </button>
+                <button class="nav-tab" data-tab="decouvrir" data-theme="green">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                    <span class="tab-label">À Découvrir</span>
+                </button>
 
-            <button class="tab-neo" data-tab="calendrier-tarifs" data-theme="yellow">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
-                    <line x1="12" y1="18" x2="12" y2="22"></line>
-                    <line x1="12" y1="2" x2="12" y2="6"></line>
-                </svg>
-                Calendrier & Tarifs
-            </button>
+                <button class="nav-tab" data-tab="calendrier-tarifs" data-theme="yellow">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                        <path d="M8 14h.01"></path>
+                        <path d="M12 14h.01"></path>
+                        <path d="M16 14h.01"></path>
+                        <path d="M8 18h.01"></path>
+                        <path d="M12 18h.01"></path>
+                        <path d="M16 18h.01"></path>
+                    </svg>
+                    <span class="tab-label">Calendrier & Tarifs</span>
+                </button>
 
-            <button class="tab-neo" data-tab="infos-gites" data-theme="blue">
-                <svg class="tab-icon" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-                Infos Gîtes
-            </button>
-        </div>
+                <button class="nav-tab" data-tab="infos-gites" data-theme="blue">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span class="tab-label">Infos Gîtes</span>
+                </button>
+            </div>
+        </nav>
         
 
         <!-- Conteneurs dynamiques pour chaque onglet -->
@@ -3760,5 +3865,20 @@
         }
     });
     </script>
+
+    <!-- 🎨 Initialisation des thèmes au chargement -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('icalou-theme') || 'dark';
+            const savedStyle = localStorage.getItem('icalou-style') || 'sidebar';
+            
+            const html = document.documentElement;
+            html.classList.add('theme-' + savedTheme);
+            html.classList.add('style-' + savedStyle);
+        })();
+    </script>
+    
+    <!-- 🎨 Préservation des couleurs de gîtes -->
+    <script src="js/preserve-gite-colors.js?v=3.1"></script>
 </body>
 </html>

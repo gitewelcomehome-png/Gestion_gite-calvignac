@@ -1,0 +1,697 @@
+/* ===================================
+   🎨 SYSTÈME DE THÈMES - Approche Sélective v5
+   Cible UNIQUEMENT les éléments qui doivent changer
+   =================================== */
+
+/* ========== FOND GLOBAL ========== */
+
+html.theme-dark {
+    background: #0a0a0b !important;
+}
+
+html.theme-dark body {
+    background: #0a0a0b !important;
+    color: #e4e6eb !important;
+}
+
+html.theme-light {
+    background: #f0f2f5 !important;
+}
+
+html.theme-light body {
+    background: #f0f2f5 !important;
+    color: #050505 !important;
+}
+
+/* ========== NAVIGATION ========== */
+
+html.theme-dark .sticky-header,
+html.theme-dark header,
+html.theme-dark nav {
+    background: #18191a !important;
+    border-bottom: 2px solid rgba(255,255,255,0.15) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.8) !important;
+}
+
+html.theme-light .sticky-header,
+html.theme-light header,
+html.theme-light nav {
+    background: #ffffff !important;
+    border-bottom: 2px solid rgba(0,0,0,0.15) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+/* ========== CARTES ET CONTENEURS ========== */
+
+/* MODE NUIT - Divs en gris foncé (SANS !important pour laisser inline styles gagner) */
+html.theme-dark div:not([style*="background:"]):not([style*="background-color:"]),
+html.theme-dark section:not([style*="background:"]),
+html.theme-dark article:not([style*="background:"]) {
+    background: #242526;
+    background-color: #242526;
+}
+
+/* Forcer UNIQUEMENT la couleur de texte */
+html.theme-dark div,
+html.theme-dark section,
+html.theme-dark article {
+    color: #e4e6eb !important;
+}
+
+/* MODE JOUR - Divs en blanc (SANS !important pour laisser inline styles gagner) */
+html.theme-light div:not([style*="background:"]):not([style*="background-color:"]),
+html.theme-light section:not([style*="background:"]),
+html.theme-light article:not([style*="background:"]) {
+    background: #ffffff;
+    background-color: #ffffff;
+}
+
+/* Forcer UNIQUEMENT la couleur de texte */
+html.theme-light div,
+html.theme-light section,
+html.theme-light article {
+    color: #050505 !important;
+}
+
+/* ========== TEXTES ========== */
+
+/* MODE NUIT - Tous les textes en gris clair */
+html.theme-dark h1,
+html.theme-dark h2,
+html.theme-dark h3,
+html.theme-dark h4 {
+    color: #ffffff !important;
+}
+
+html.theme-dark p,
+html.theme-dark span,
+html.theme-dark label,
+html.theme-dark li {
+    color: #e4e6eb !important;
+}
+
+/* EXCEPTIONS - Garder les couleurs spécifiques (heures, statuts) */
+html.theme-dark [style*="color: #27AE60"],
+html.theme-dark [style*="color: green"] {
+    color: #27AE60 !important;
+}
+
+html.theme-dark [style*="color: #E74C3C"],
+html.theme-dark [style*="color: red"] {
+    color: #E74C3C !important;
+}
+
+html.theme-dark [style*="color: #3498DB"],
+html.theme-dark [style*="color: blue"] {
+    color: #3498DB !important;
+}
+
+/* MODE JOUR - Tous les textes en noir */
+html.theme-light h1,
+html.theme-light h2,
+html.theme-light h3,
+html.theme-light h4 {
+    color: #050505 !important;
+}
+
+html.theme-light p,
+html.theme-light span,
+html.theme-light label,
+html.theme-light li {
+    color: #050505 !important;
+}
+
+/* EXCEPTIONS - Garder les couleurs spécifiques (heures, statuts) */
+html.theme-light [style*="color: #27AE60"],
+html.theme-light [style*="color: green"] {
+    color: #1e8449 !important;
+}
+
+html.theme-light [style*="color: #E74C3C"],
+html.theme-light [style*="color: red"] {
+    color: #c0392b !important;
+}
+
+html.theme-light [style*="color: #3498DB"],
+html.theme-light [style*="color: blue"] {
+    color: #2874a6 !important;
+}
+
+/* ========== INPUTS ========== */
+
+html.theme-dark input:not([type="button"]):not([type="submit"]),
+html.theme-dark select,
+html.theme-dark textarea {
+    background: #18191a !important;
+    border: 2px solid rgba(255,255,255,0.2) !important;
+    color: #f5f6f7 !important;
+}
+
+html.theme-light input:not([type="button"]):not([type="submit"]),
+html.theme-light select,
+html.theme-light textarea {
+    background: #ffffff !important;
+    border: 2px solid rgba(0,0,0,0.2) !important;
+    color: #050505 !important;
+}
+
+/* ========== TABLES ========== */
+
+html.theme-dark table th {
+    background: #18191a !important;
+    color: #ffffff !important;
+}
+
+html.theme-dark table td {
+    background: #242526 !important;
+    color: #e4e6eb !important;
+}
+
+html.theme-light table th {
+    background: #e4e6eb !important;
+    color: #050505 !important;
+}
+
+html.theme-light table td {
+    background: #ffffff !important;
+    color: #050505 !important;
+}
+
+/* Navigation - Style Facebook */
+.sticky-header,
+header[style*="background"],
+nav,
+.nav-container {
+    background: var(--card) !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* Header mode NUIT - Fond sombre avec ombre forte */
+html.theme-dark .sticky-header,
+html.theme-dark header[style*="background"],
+html.theme-dark nav,
+html.theme-dark .nav-container {
+    background: #18191a !important;
+    border-bottom: 2px solid rgba(255,255,255,0.15) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.8) !important;
+}
+
+/* Tabs - Style avec couleurs UpStay - PRIORITÉ MAXIMALE */
+html body .nav-tab,
+html body .tab-button,
+html body button[onclick*="showTab"] {
+    background: linear-gradient(135deg, #00C2CB 0%, #005288 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    margin-right: 8px !important;
+    cursor: pointer !important;
+}
+
+html body .nav-tab.active,
+html body .tab-button.active {
+    background: linear-gradient(135deg, #005288 0%, #00C2CB 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(0, 82, 136, 0.4) !important;
+    transform: translateY(-2px) !important;
+}
+
+html body .nav-tab:hover,
+html body .tab-button:hover {
+    background: linear-gradient(135deg, #005288 0%, #00C2CB 100%) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(0, 82, 136, 0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* DÉSACTIVER les styles thème JOUR/NUIT pour nav-tab car géré par UpStay */
+
+/* Dashboard cards - Style précis */
+.dashboard-cards {
+    display: grid !important;
+    gap: 20px !important;
+}
+
+.card,
+.section-card,
+.reservation-card,
+.task-card {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    box-shadow: var(--shadow) !important;
+    transition: all 0.2s ease !important;
+}
+
+.card:hover,
+.section-card:hover,
+.reservation-card:hover {
+    box-shadow: var(--shadow-hover) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Cartes mode NUIT - Ombres profondes et bordures lumineuses */
+html.theme-dark .card,
+html.theme-dark .section-card,
+html.theme-dark .reservation-card,
+html.theme-dark .task-card {
+    background: #242526 !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    box-shadow: 
+        0 4px 20px rgba(0,0,0,0.8),
+        0 1px 3px rgba(255,255,255,0.05) !important;
+}
+
+html.theme-dark .card:hover,
+html.theme-dark .section-card:hover,
+html.theme-dark .reservation-card:hover {
+    border-color: rgba(255,255,255,0.25) !important;
+    box-shadow: 
+        0 6px 28px rgba(0,0,0,0.9),
+        0 2px 4px rgba(255,255,255,0.1) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Titres de cartes - NIVEAU 1 : Blanc éclatant */
+.card h2,
+.card h3,
+.section-title {
+    color: var(--text) !important;
+    font-weight: 700 !important;
+    margin: 0 0 16px 0 !important;
+    font-size: 18px !important;
+}
+
+html.theme-dark .card h2,
+html.theme-dark .card h3,
+html.theme-dark .section-title,
+html.theme-dark h1,
+html.theme-dark h2 {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;
+    font-weight: 700 !important;
+}
+
+/* Sous-titres - NIVEAU 2 : Gris clair */
+.section-subtitle,
+.card p,
+.card span {
+    color: var(--text-secondary) !important;
+    font-size: 14px !important;
+}
+
+html.theme-dark .section-subtitle,
+html.theme-dark small {
+    color: #b0b3b8 !important;
+    font-weight: 500 !important;
+}
+
+/* Texte normal - NIVEAU 3 : Gris moyen */
+html.theme-dark p,
+html.theme-dark span:not([style*="color"]),
+html.theme-dark div:not([style*="color"]) {
+    color: #e4e6eb !important;
+}
+
+/* Formulaires - Style propre */
+input:not([type="button"]):not([type="submit"]),
+select,
+textarea {
+    background: var(--bg) !important;
+    border: 2px solid var(--border) !important;
+    color: var(--text) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    transition: all 0.2s ease !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #3b82f6 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Inputs mode NUIT - Fond très sombre avec bordure lumineuse */
+html.theme-dark input:not([type="button"]):not([type="submit"]),
+html.theme-dark select,
+html.theme-dark textarea {
+    background: #18191a !important;
+    border: 2px solid rgba(255,255,255,0.2) !important;
+    color: #f5f6f7 !important;
+}
+
+html.theme-dark input:focus,
+html.theme-dark select:focus,
+html.theme-dark textarea:focus {
+    background: #1e1f20 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Labels */
+label {
+    color: var(--text) !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+    display: block !important;
+}
+
+/* Tables */
+table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+}
+
+th {
+    background: var(--bg-secondary) !important;
+    color: var(--text) !important;
+    font-weight: 700 !important;
+    padding: 12px !important;
+    text-align: left !important;
+    border-bottom: 2px solid var(--border) !important;
+}
+
+td {
+    background: var(--card) !important;
+    color: var(--text) !important;
+    padding: 12px !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+tr:hover td {
+    background: var(--bg-secondary) !important;
+}
+
+/* Tables mode JOUR - Lignes plus visibles */
+html.theme-light th {
+    background: #d8dadf !important;
+    color: #050505 !important;
+    border-bottom: 3px solid rgba(0,0,0,0.3) !important;
+}
+
+html.theme-light td {
+    color: #050505 !important;
+    border-bottom: 2px solid rgba(0,0,0,0.1) !important;
+}
+
+html.theme-light tr:hover td {
+    background: #f5f6f7 !important;
+}
+
+/* Tables mode NUIT - Alternance forte */
+html.theme-dark th {
+    background: #18191a !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid rgba(255,255,255,0.2) !important;
+    font-weight: 700 !important;
+}
+
+html.theme-dark td {
+    background: #242526 !important;
+    color: #e4e6eb !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+html.theme-dark tr:nth-child(even) td {
+    background: #2a2b2c !important;
+}
+
+html.theme-dark tr:hover td {
+    background: #2f3031 !important;
+    border-color: rgba(255,255,255,0.15) !important;
+}
+
+/* Badges et pills */
+.badge,
+.pill,
+span[style*="padding"][style*="border-radius"] {
+    background: var(--bg-secondary) !important;
+    color: var(--text) !important;
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border: 2px solid var(--border) !important;
+}
+
+/* Badges en mode JOUR - Contraste maximum */
+html.theme-light .badge,
+html.theme-light .pill,
+html.theme-light span[style*="padding"][style*="border-radius"] {
+    background: #e4e6eb !important;
+    color: #050505 !important;
+    border: 2px solid rgba(0,0,0,0.2) !important;
+    font-weight: 700 !important;
+}
+
+/* Badges mode NUIT - Très contrastés */
+html.theme-dark .badge,
+html.theme-dark .pill,
+html.theme-dark span[style*="padding"][style*="border-radius"] {
+    background: #3a3b3c !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(255,255,255,0.25) !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+}
+
+/* Alertes et notifications */
+.alert,
+.notification {
+    background: var(--card) !important;
+    border: 2px solid var(--border) !important;
+    border-left: 4px solid #3b82f6 !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+    color: var(--text) !important;
+}
+
+/* Alertes mode NUIT - Bordure lumineuse */
+html.theme-dark .alert,
+html.theme-dark .notification {
+    background: #242526 !important;
+    border: 2px solid rgba(255,255,255,0.15) !important;
+    border-left: 4px solid #3b82f6 !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.6) !important;
+}
+
+/* Modales */
+.modal,
+.dialog {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
+}
+
+/* Modales mode NUIT - Ombre très profonde */
+html.theme-dark .modal,
+html.theme-dark .dialog {
+    background: #242526 !important;
+    border: 2px solid rgba(255,255,255,0.2) !important;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.95) !important;
+}
+
+/* Séparateurs */
+hr {
+    border: none !important;
+    border-top: 1px solid var(--border) !important;
+    margin: 20px 0 !important;
+}
+
+/* Séparateurs mode NUIT - Ligne lumineuse subtile */
+html.theme-dark hr {
+    border-top: 2px solid rgba(255,255,255,0.1) !important;
+    box-shadow: 0 1px 2px rgba(255,255,255,0.05) !important;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+    width: 12px !important;
+    height: 12px !important;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg) !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border) !important;
+    border-radius: 6px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary) !important;
+}
+
+/* ===================================
+   🎯 MODES SPÉCIFIQUES
+   =================================== */
+
+/* MODE JOUR - Clarté maximale avec CONTRASTE FORT */
+html.theme-light .card,
+html.theme-light .section-card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+    border: 2px solid rgba(0,0,0,0.15) !important;
+}
+
+html.theme-light input,
+html.theme-light select,
+html.theme-light textarea {
+    background: #ffffff !important;
+    border: 2px solid rgba(0,0,0,0.2) !important;
+    color: #050505 !important;
+}
+
+/* Textes ULTRA CONTRASTÉS en mode jour */
+html.theme-light h1,
+html.theme-light h2,
+html.theme-light h3,
+html.theme-light h4,
+html.theme-light h5,
+html.theme-light h6,
+html.theme-light .section-title,
+html.theme-light label,
+html.theme-light p,
+html.theme-light span,
+html.theme-light div {
+    color: #050505 !important;
+}
+
+/* Textes secondaires plus foncés */
+html.theme-light .section-subtitle,
+html.theme-light small,
+html.theme-light .text-muted {
+    color: #3a3b3c !important;
+    font-weight: 500 !important;
+}
+
+/* MODE NUIT - Contraste FORT avec hiérarchie */
+html.theme-dark .card,
+html.theme-dark .section-card {
+    background: #242526 !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8), 0 0 1px rgba(255,255,255,0.1) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+}
+
+html.theme-dark .card:hover,
+html.theme-dark .section-card:hover {
+    box-shadow: 0 6px 28px rgba(0,0,0,0.9), 0 0 2px rgba(255,255,255,0.2) !important;
+    border-color: rgba(255,255,255,0.25) !important;
+    transform: translateY(-2px) !important;
+}
+
+html.theme-dark input,
+html.theme-dark select,
+html.theme-dark textarea {
+    background: #18191a !important;
+    border: 2px solid rgba(255,255,255,0.2) !important;
+    color: #f5f6f7 !important;
+}
+
+html.theme-dark input:focus,
+html.theme-dark select:focus,
+html.theme-dark textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+    background: #1e1f20 !important;
+}
+
+/* ===================================
+   🚫 OVERRIDES DE STYLES INLINE
+   =================================== */
+
+/* Retire les backgrounds inline */
+[style*="background: white"],
+[style*="background: #fff"],
+[style*="background:#fff"],
+[style*="background-color: white"],
+[style*="background-color: #ffffff"],
+[style*="background-color:#ffffff"],
+[style*="background: rgb(255, 255, 255)"],
+[style*="background-color: rgb(255, 255, 255)"] {
+    background: var(--card) !important;
+}
+
+/* Retire les couleurs de texte inline */
+[style*="color: black"],
+[style*="color: #000"],
+[style*="color:#000"],
+[style*="color: rgb(0, 0, 0)"],
+[style*="color: #2D3436"],
+[style*="color: #2c3e50"],
+[style*="color: #666"] {
+    color: var(--text) !important;
+}
+
+/* Retire les borders inline problématiques */
+[style*="border: 1px solid #ccc"],
+[style*="border: 1px solid #ddd"],
+[style*="border: 1px solid rgb"],
+[style*="border: 2px solid #2D3436"],
+[style*="border: 3px solid #2D3436"] {
+    border-color: var(--border) !important;
+}
+
+/* ===================================
+   🎨 MODE JOUR - OVERRIDES SPÉCIFIQUES
+   Pour assurer lisibilité maximale
+   =================================== */
+
+/* Sections colorées en mode NUIT - Garder couleurs mais rendre visibles */
+html.theme-dark [style*="background: rgba(231, 76, 60"],
+html.theme-dark [style*="background: rgba(27, 156, 252"],
+html.theme-dark [style*="background: rgba(39, 174, 96"] {
+    background-color: inherit !important;
+    border: 2px solid rgba(255,255,255,0.2) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.6) !important;
+}
+
+/* TOUS les textes en mode jour doivent être NOIRS */
+html.theme-light * {
+    color: #050505 !important;
+}
+
+/* Exceptions pour les éléments colorés (boutons, badges status) */
+html.theme-light button,
+html.theme-light .btn,
+html.theme-light .btn-neo {
+    color: inherit !important;
+}
+
+/* Labels et badges de statut gardent leurs couleurs */
+html.theme-light [style*="color: #27AE60"],
+html.theme-light [style*="color: #E74C3C"],
+html.theme-light [style*="color: #3498DB"],
+html.theme-light [style*="color: green"],
+html.theme-light [style*="color: red"] {
+    color: inherit !important;
+}
+
+/* Timestamps et heures visibles */
+html.theme-light [style*="color: #27AE60"],
+html.theme-light [style*="color: green"] {
+    color: #1e8449 !important;
+    font-weight: 700 !important;
+}
+
+html.theme-light [style*="color: #E74C3C"],
+html.theme-light [style*="color: red"] {
+    color: #c0392b !important;
+    font-weight: 700 !important;
+}
+
+/* Cartes de réservation - bordures colorées bien visibles */
+html.theme-light [style*="border: 1px solid #3498DB"],
+html.theme-light [style*="border: 1px solid #27AE60"],
+html.theme-light [style*="border: 1px solid #E74C3C"] {
+    border-width: 3px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}

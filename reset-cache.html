@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr" class="calou-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Reset Cache CALOU</title>
+    <link rel="stylesheet" href="css/calou.css?v=5.0">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #0a0a0a;
+            color: white;
+            padding: 2rem;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+        }
+        .status {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 1rem;
+        }
+        .success {
+            color: #10b981;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+        code {
+            background: #2a2a2a;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🐺 RESET CACHE CALOU</h1>
+            <p>Cette page va nettoyer le cache et activer le thème CALOU Dark automatiquement.</p>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size: 1.25rem; margin-top: 0;">État actuel</h2>
+            <div id="status" class="status"></div>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size: 1.25rem; margin-top: 0;">Actions</h2>
+            <button class="btn" onclick="resetCache()">🔄 NETTOYER LE CACHE ET ACTIVER CALOU</button>
+            <button class="btn" onclick="goToApp()" style="background: #10b981; margin-left: 1rem;">
+                → ALLER À L'APPLICATION
+            </button>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size: 1.25rem; margin-top: 0;">Informations</h2>
+            <ul style="color: #6b7280; font-size: 13px;">
+                <li>Serveur: <code>http://localhost:5504</code></li>
+                <li>CSS CALOU: <code>css/calou.css?v=5.0</code></li>
+                <li>Dashboard JS: <code>js/dashboard.js?v=5.0</code></li>
+                <li>CALOU Tab JS: <code>js/calou-tab.js?v=5.0</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus() {
+            const calou = localStorage.getItem('calou-theme-enabled');
+            const hasClass = document.documentElement.classList.contains('calou-theme');
+            const cssLoaded = !!document.querySelector('link[href*="calou.css"]');
+            
+            const status = document.getElementById('status');
+            status.innerHTML = `
+                <p>✅ Page de reset chargée</p>
+                <p>CALOU localStorage: <code>${calou || 'null'}</code></p>
+                <p>Classe HTML: <code>${hasClass ? 'calou-theme ✅' : '❌ manquante'}</code></p>
+                <p>CSS chargé: <code>${cssLoaded ? '✅' : '❌'}</code></p>
+                <p>Background actuel: <code>${getComputedStyle(document.body).background}</code></p>
+            `;
+        }
+
+        function resetCache() {
+            console.log('🧹 Nettoyage cache...');
+            
+            // Nettoyer localStorage
+            localStorage.clear();
+            console.log('✅ localStorage vidé');
+            
+            // Activer CALOU
+            localStorage.setItem('calou-theme-enabled', 'true');
+            console.log('✅ CALOU activé');
+            
+            // Ajouter la classe
+            document.documentElement.classList.add('calou-theme');
+            document.body.classList.add('calou-body');
+            console.log('✅ Classes ajoutées');
+            
+            updateStatus();
+            
+            alert('✅ Cache nettoyé et CALOU activé !\n\nCliquez sur "ALLER À L\'APPLICATION" pour voir le nouveau design.');
+        }
+
+        function goToApp() {
+            // Redirection avec timestamp pour forcer reload
+            window.location.href = 'index.html?t=' + Date.now();
+        }
+
+        // Init
+        updateStatus();
+        
+        // Auto-activation CALOU si pas déjà fait
+        if (localStorage.getItem('calou-theme-enabled') !== 'true') {
+            console.log('🐺 Auto-activation CALOU');
+            resetCache();
+        }
+    </script>
+</body>
+</html>

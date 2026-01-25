@@ -167,7 +167,9 @@ function displayFilteredReservations(reservations) {
     
     let html = '<div class="planning-weeks"><h3 style="margin-bottom: 25px; font-size: 1.4rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">🔍 Résultats de recherche (' + reservations.length + ')</h3>';
     
-    reservations.forEach(r => {
+    reservations.forEach((r, index) => {
+        const borderColors = ['#3b82f6', '#ef4444', '#10b981', '#06b6d4'];
+        const borderColor = borderColors[index % 4];
         const platformLogo = getPlatformLogo(r.site);
         const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 700; font-size: 1.1rem;">✓</span>' : '';
         const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.95rem; color: #64748b;">📱 ${r.telephone}</span>` : '';
@@ -178,7 +180,7 @@ function displayFilteredReservations(reservations) {
             '';
         
         html += `
-            <div class="week-reservation" style="margin-bottom: 20px; padding: 20px; border-radius: 12px; background: white; box-shadow: 4px 4px 0 #2D3436; border: 3px solid #2D3436; ${isIncomplete ? 'border-left: 6px solid #ff6b6b;' : ''}">
+            <div class="week-reservation" style="margin-bottom: 20px; padding: 20px; border-radius: 12px; background: white; box-shadow: 4px 4px 0 #2D3436; border-top: 3px solid #2D3436; border-right: 3px solid #2D3436; border-bottom: 3px solid #2D3436; border-left: 6px solid ${isIncomplete ? '#ff6b6b' : borderColor};">
                 <div style="position: relative;">
                     <div style="position: absolute; top: 0; right: 0; display: flex; gap: 8px;">
                         <button onclick="openEditModal('${r.id}')" style="background: white; border: 2px solid #667eea; color: #667eea; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 1.1rem; box-shadow: 2px 2px 0 #667eea; font-weight: 600; transition: all 0.2s; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='3px 3px 0 #667eea'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='2px 2px 0 #667eea'" title="Modifier">✏️</button>
@@ -437,15 +439,14 @@ async function updateReservationsList(keepScrollPosition = false) {
         
         // Générer colonnes pour chaque gîte
         const colors = [
-            '#667eea', '#f5576c', '#27AE60', '#3498DB', '#E67E22', '#9B59B6'
+            '#3b82f6', '#ef4444', '#10b981', '#06b6d4'
         ];
         
         gites.forEach((g, giteIndex) => {
-            const columnStyle = gites.length === 1 ? 'width: 100%; max-width: 800px;' : '';
             const giteColor = colors[giteIndex % colors.length];
             
             html += `
-            <div style="display: flex; flex-direction: column; min-width: 0; ${columnStyle}; flex: 1;">
+            <div style="display: flex; flex-direction: column;">
                 <div style="padding: 12px 20px; background: ${giteColor}; border-radius: 12px 12px 0 0; margin-bottom: 0; border: 3px solid #2D3436; border-bottom: none; box-shadow: 4px 4px 0 #2D3436;">
                     <div style="font-size: 0.8rem; margin-bottom: 2px; color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${g.name}</div>
                     <div style="font-size: 1rem; margin-bottom: 2px; color: white; font-weight: 700; text-transform: uppercase;">Semaine ${weekNum}</div>
@@ -495,7 +496,10 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
     }
     
     let html = '';
-    weekReservations.forEach(r => {
+    const borderColors = ['#3b82f6', '#ef4444', '#10b981', '#06b6d4'];
+    
+    weekReservations.forEach((r, index) => {
+        const borderColor = borderColors[index % 4];
         const platformLogo = getPlatformLogo(r.site);
         
         // Horaires par défaut (les horaires validées seront chargées dynamiquement si nécessaire)
@@ -554,7 +558,7 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         const ficheClientButton = isExpired ? '' : `<button onclick="aperçuFicheClient('${r.id}')" style="background: white; border: 2px solid #27ae60; color: #27ae60; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 1.1rem; font-weight: 600; box-shadow: 2px 2px 0 #27ae60; transition: all 0.2s; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='3px 3px 0 #27ae60'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='2px 2px 0 #27ae60'" title="Page Client">✓</button>`;
         
         html += `
-            <div class="week-reservation ${cssClass}" style="padding: 20px; border-bottom: 2px solid #e5e7eb; background: white; margin-bottom: 8px; border-radius: 8px;">
+            <div class="week-reservation ${cssClass}" style="padding: 20px; background: white; margin-bottom: 8px; border-radius: 8px; border-top: 3px solid #2D3436; border-right: 3px solid #2D3436; border-bottom: 3px solid #2D3436; border-left: 6px solid ${borderColor};">
                 <!-- Boutons en haut -->
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px;">
                     <button onclick="openEditModal('${r.id}')" style="background: white; border: 2px solid #667eea; color: #667eea; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 1.1rem; font-weight: 600; box-shadow: 2px 2px 0 #667eea; transition: all 0.2s; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='3px 3px 0 #667eea'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='2px 2px 0 #667eea'" title="Modifier">✏️</button>

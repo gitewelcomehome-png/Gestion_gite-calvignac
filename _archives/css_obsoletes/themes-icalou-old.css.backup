@@ -1,0 +1,324 @@
+/* ===================================
+   🎨 SYSTÈME DE THÈMES ICALOU V2
+   Design System - Styles Apple & Dark Glass
+   =================================== */
+
+/* 🌈 VARIABLES DE BASE - Palette de Couleurs */
+:root {
+    /* Typographie - Style Apple */
+    --font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    
+    /* Palette principale (selon instructions) */
+    --color-success: #10b981;      /* Ajouter, Valider */
+    --color-danger: #ef4444;       /* Supprimer */
+    --color-primary: #3b82f6;      /* Modifier */
+    --color-special: #667eea;      /* Fiche client, Éléments clés */
+    --color-neutral: #64748b;      /* Annuler */
+    --color-warning: #f59e0b;
+    --color-info: #3b82f6;
+    
+    /* Transitions globales - 0.3s ease */
+    --transition: all 0.3s ease;
+    --transition-fast: all 0.15s ease;
+    
+    /* Structure */
+    --max-width: 1200px;
+}
+
+/* ☀️ MODE JOUR (Light Theme) */
+:root[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --bg-hover: rgba(102, 126, 234, 0.05);
+    
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+    
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* 🌙 MODE NUIT (Dark Theme) */
+:root[data-theme="dark"] {
+    --bg-primary: #1e293b;
+    --bg-secondary: #0f172a;
+    --bg-tertiary: #334155;
+    --bg-hover: rgba(102, 126, 234, 0.15);
+    
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    
+    --border: #334155;
+    --border-hover: #475569;
+    
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+/* ===================================
+   🎨 STYLE A : APPLE / MODERN
+   Moderne & Minimaliste
+   =================================== */
+:root[data-style="modern"] {
+    --btn-radius: 16px;        /* Radius de 12px à 20px pour douceur */
+    --card-radius: 20px;
+    --input-radius: 12px;
+    
+    --btn-shadow: var(--shadow-sm);
+    --card-shadow: var(--shadow-md);
+}
+
+:root[data-style="modern"] body {
+    font-family: var(--font-family);
+}
+
+:root[data-style="modern"] .btn,
+:root[data-style="modern"] button,
+:root[data-style="modern"] .btn-neo,
+:root[data-style="modern"] .btn-primary,
+:root[data-style="modern"] .btn-secondary {
+    border-radius: var(--btn-radius);
+    box-shadow: var(--btn-shadow);
+    transition: var(--transition);
+    border: 1px solid var(--border);
+}
+
+/* Effet hover Apple - légère élévation */
+:root[data-style="modern"] .btn:hover,
+:root[data-style="modern"] button:hover,
+:root[data-style="modern"] .btn-neo:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+:root[data-style="modern"] .card {
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+:root[data-style="modern"] input,
+:root[data-style="modern"] select,
+:root[data-style="modern"] textarea {
+    border-radius: var(--input-radius);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+/* Gradients discrets Apple */
+:root[data-style="modern"] .btn-primary {
+    background: linear-gradient(135deg, var(--color-primary), #60a5fa);
+}
+
+:root[data-style="modern"] .btn-success {
+    background: linear-gradient(135deg, var(--color-success), #34d399);
+}
+
+:root[data-style="modern"] .btn-danger {
+    background: linear-gradient(135deg, var(--color-danger), #f87171);
+}
+
+:root[data-style="modern"] .btn-special {
+    background: linear-gradient(135deg, var(--color-special), #818cf8);
+}
+
+/* ===================================
+   🎨 STYLE B : DARK GLASS
+   Glassmorphism avec fond dégradé profond
+   =================================== */
+:root[data-style="glass"] {
+    --btn-radius: 16px;
+    --card-radius: 20px;
+    --input-radius: 12px;
+    
+    --btn-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    
+    /* Fond en dégradé profond */
+    --glass-gradient: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+}
+
+/* Fond dégradé pour Dark Glass */
+:root[data-style="glass"] body {
+    background: var(--glass-gradient) !important;
+    font-family: var(--font-family);
+}
+
+/* Effet Glass sur tous les éléments */
+:root[data-style="glass"] .card,
+:root[data-style="glass"] .btn,
+:root[data-style="glass"] button,
+:root[data-style="glass"] .btn-neo,
+:root[data-style="glass"] .btn-primary,
+:root[data-style="glass"] .btn-secondary {
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;  /* Bordures claires pour reflet */
+    border-radius: var(--btn-radius);
+    box-shadow: var(--btn-shadow);
+    color: #ffffff !important;
+    transition: var(--transition);
+}
+
+:root[data-style="glass"] .card {
+    border-radius: var(--card-radius);
+}
+
+:root[data-style="glass"] input,
+:root[data-style="glass"] select,
+:root[data-style="glass"] textarea {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--input-radius);
+    color: #ffffff;
+    transition: var(--transition);
+}
+
+/* Hover Glass - légère élévation */
+:root[data-style="glass"] .btn:hover,
+:root[data-style="glass"] button:hover,
+:root[data-style="glass"] .btn-neo:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* ===================================
+   🎨 STYLES MIS DE CÔTÉ (désactivés)
+   Neo-Brutal et Minimal conservés en commentaire
+   =================================== */
+
+/* 
+STYLE NEO-BRUTAL - MIS DE CÔTÉ
+:root[data-style="neo-brutal"] { ... }
+*/
+
+/* 
+STYLE MINIMAL - MIS DE CÔTÉ
+:root[data-style="minimal"] { ... }
+*/
+
+/* ===================================
+   🎨 CLASSES UTILITAIRES
+   =================================== */
+
+/* Conteneur principal centré (max-width: 1200px) */
+.container-main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Classes de couleurs */
+.btn-success {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-special {
+    background-color: var(--color-special);
+    color: white;
+}
+
+.btn-neutral {
+    background-color: var(--color-neutral);
+    color: white;
+}
+
+/* Icônes Font Awesome - tailles */
+.icon-sm {
+    font-size: 1rem;
+}
+
+.icon-md {
+    font-size: 1.25rem;
+}
+
+.icon-lg {
+    font-size: 1.5rem;
+}
+
+.icon-xl {
+    font-size: 2rem;
+}
+
+/* ===================================
+   🎨 THEME SWITCHER UI
+   =================================== */
+#theme-switcher {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+    transition: var(--transition);
+}
+
+#theme-switcher button {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: var(--transition-fast);
+}
+
+#theme-switcher button:hover {
+    background: var(--color-primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+#theme-switcher button.active {
+    background: var(--color-special);
+    color: white;
+    border-color: var(--color-special);
+}
+
+/* ===================================
+   🎨 TRANSITIONS GLOBALES
+   Application de 0.3s ease sur changements de thème
+   =================================== */
+* {
+    transition: background-color 0.3s ease, 
+                color 0.3s ease, 
+                border-color 0.3s ease,
+                box-shadow 0.3s ease;
+}
+
+/* Exceptions pour animations rapides */
+button, .btn, input, select, textarea {
+    transition: all 0.3s ease;
+}
+
+button:hover, .btn:hover {
+    transition: all 0.15s ease;  /* Hover plus rapide */
+}

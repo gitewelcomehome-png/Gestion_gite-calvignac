@@ -1,0 +1,149 @@
+/* ================================================================
+   STYLES ICÔNES SVG MODERNES
+   ================================================================ */
+
+:root {
+    --icon-stroke-color: #2D3436;
+    --icon-fill-blue: #74b9ff;
+    --icon-fill-dark-blue: #0984e3;
+    --icon-fill-red: #ff7675;
+    --icon-fill-yellow: #ffeaa7;
+    --icon-fill-gold: #fdcb6e;
+    --icon-fill-green: #55efc4;
+    --icon-fill-white: #ffffff;
+}
+
+/* Configuration SVG générale */
+.gite-icon,
+.service-icon,
+.info-icon {
+    width: 48px;
+    height: 48px;
+    stroke: var(--icon-stroke-color);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+/* Classes de remplissage pour les SVG */
+.fill-blue { fill: var(--icon-fill-blue); }
+.fill-dark-blue { fill: var(--icon-fill-dark-blue); }
+.fill-red { fill: var(--icon-fill-red); }
+.fill-yellow { fill: var(--icon-fill-yellow); }
+.fill-gold { fill: var(--icon-fill-gold); }
+.fill-green { fill: var(--icon-fill-green); }
+.fill-white { fill: var(--icon-fill-white); }
+
+/* Container pour les icônes */
+.icon-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+}
+
+/* Icônes cliquables */
+.icon-selectable {
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    opacity: 0.7;
+}
+
+.icon-selectable:hover {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.icon-selectable.selected {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+/* Grille d'icônes */
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 12px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.icon-grid .icon-container {
+    background: white;
+    border-radius: 12px;
+    padding: 10px;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.icon-grid .icon-container:hover {
+    border-color: var(--icon-fill-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.icon-grid .icon-container.selected {
+    border-color: var(--icon-fill-blue);
+    background: #e8f4ff;
+    box-shadow: 0 2px 8px rgba(116, 185, 255, 0.3);
+}
+
+/* Icônes dans la navigation */
+.nav-icon .gite-icon,
+.nav-icon .service-icon {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Icônes dans les cartes */
+.card-icon .gite-icon,
+.card-icon .service-icon,
+.card-icon .info-icon {
+    width: 40px;
+    height: 40px;
+}
+
+/* Grandes icônes pour les headers */
+.header-icon .gite-icon,
+.header-icon .service-icon {
+    width: 64px;
+    height: 64px;
+}
+
+/* Animation d'apparition */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.icon-container.animated {
+    animation: fadeInScale 0.3s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .icon-grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 8px;
+        padding: 10px;
+    }
+    
+    .gite-icon,
+    .service-icon,
+    .info-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
