@@ -8,7 +8,7 @@
 ║  NE TOUCHER À CE FICHIER QUE SUR DEMANDE EXPLICITE                      ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 -->
-<html lang="fr" class="theme-dark style-sidebar">
+<html lang="fr" data-theme="dark" id="app-root" class="theme-dark style-sidebar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +18,10 @@
         (function() {
             const savedTheme = localStorage.getItem('icalou-theme') || 'dark';
             const savedStyle = localStorage.getItem('icalou-style') || 'sidebar';
+            const root = document.documentElement;
+            root.setAttribute('data-theme', savedTheme);
+            root.setAttribute('id', 'app-root');
+            root.classList.add(`theme-${savedTheme}`, `style-${savedStyle}`);
             document.documentElement.className = 'theme-' + savedTheme + ' style-' + savedStyle;
         })();
     </script>
@@ -163,8 +167,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- 🎨 CSS UNIQUE CONSOLIDÉ - V1.3.5 (25 jan 2026) -->
-    <link rel="stylesheet" href="css/main.css?v=1.3.5" />
+    <!-- 🎨 CSS UNIQUE CONSOLIDÉ - V2.0.0 ICALOU (25 jan 2026) -->
+    <link rel="stylesheet" href="css/main.css?v=2.0.0" />
 </head>
 <body>
     <!-- 🎨 CONTRÔLES THÈMES -->
