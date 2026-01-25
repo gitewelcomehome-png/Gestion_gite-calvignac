@@ -2045,21 +2045,35 @@ html.theme-dark .stat-card-icalou {
 
 
 /* ========================================
-   USER MENU SELECT
+   USER MENU SELECT - STYLE MODERNE
    ======================================== */
+#userMenuSelect {
+    position: relative;
+}
+
 #userMenuSelect:hover {
-    border-color: #00C2CB;
-    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+}
+
+#userMenuSelect:active {
+    transform: translateY(0);
 }
 
 #userMenuSelect:focus {
     outline: none;
-    border-color: #00C2CB;
-    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.1);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2), 0 4px 12px rgba(102, 126, 234, 0.4) !important;
 }
 
-html.theme-dark #userMenuSelect {
-    background-color: #2D3748;
-    border-color: #4b5563;
+/* Options dropdown */
+#userMenuSelect option {
+    background: white;
+    color: #2D3436;
+    padding: 12px;
+    font-weight: 600;
+}
+
+html.theme-dark #userMenuSelect option {
+    background: #2D3748;
     color: #f3f4f6;
 }
