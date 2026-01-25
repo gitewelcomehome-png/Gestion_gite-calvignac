@@ -347,14 +347,44 @@ function handleQuickAction(action) {
 }
 
 // ==========================================
-// GESTION MENU UTILISATEUR SELECT
+// GESTION MENU UTILISATEUR DROPDOWN
 // ==========================================
 
 /**
- * Gère le changement dans le menu utilisateur (select)
+ * Toggle le dropdown du menu utilisateur
+ */
+function toggleUserMenuDropdown() {
+    const dropdown = document.getElementById('userMenuDropdown');
+    if (!dropdown) return;
+    
+    const isVisible = dropdown.style.display === 'block';
+    
+    if (isVisible) {
+        dropdown.style.display = 'none';
+    } else {
+        dropdown.style.display = 'block';
+        
+        // Fermer si clic ailleurs
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!e.target.closest('.user-menu-container')) {
+                    dropdown.style.display = 'none';
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }, 100);
+    }
+}
+
+/**
+ * Gère le changement dans le menu utilisateur
  */
 function handleUserMenuChange(action) {
-    const select = document.getElementById('userMenuSelect');
+    // Fermer le dropdown
+    const dropdown = document.getElementById('userMenuDropdown');
+    if (dropdown) {
+        dropdown.style.display = 'none';
+    }
     
     if (!action) return;
     
@@ -375,13 +405,6 @@ function handleUserMenuChange(action) {
         window.switchTab('archives');
     } else if (action === 'faq') {
         window.switchTab('faq');
-    }
-    
-    // Réinitialiser le select
-    if (select) {
-        setTimeout(() => {
-            select.value = '';
-        }, 100);
     }
 }
 
@@ -420,5 +443,6 @@ window.getPlatformBadgeClass = getPlatformBadgeClass;
 window.getPlatformLogo = getPlatformLogo;
 window.getWeekNumber = getWeekNumber;
 window.getWeekDates = getWeekDates;
+window.toggleUserMenuDropdown = toggleUserMenuDropdown;
 window.handleUserMenuChange = handleUserMenuChange;
 window.toggleSlide = toggleSlide;

@@ -2045,35 +2045,37 @@ html.theme-dark .stat-card-icalou {
 
 
 /* ========================================
-   USER MENU SELECT - STYLE MODERNE
+   USER MENU DROPDOWN - STYLE MODERNE
    ======================================== */
-#userMenuSelect {
-    position: relative;
-}
-
-#userMenuSelect:hover {
+#userMenuButton:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
 }
 
-#userMenuSelect:active {
+#userMenuButton:active {
     transform: translateY(0);
 }
 
-#userMenuSelect:focus {
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2), 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+.user-menu-item:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #667eea !important;
 }
 
-/* Options dropdown */
-#userMenuSelect option {
-    background: white;
-    color: #2D3436;
-    padding: 12px;
-    font-weight: 600;
+.user-menu-item:last-child:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
 }
 
-html.theme-dark #userMenuSelect option {
-    background: #2D3748;
-    color: #f3f4f6;
+html.theme-dark #userMenuDropdown {
+    background: #2D3748 !important;
+    border-color: #4b5563 !important;
+}
+
+html.theme-dark .user-menu-item {
+    color: #f3f4f6 !important;
+    border-color: #4b5563 !important;
+}
+
+html.theme-dark .user-menu-item:last-child {
+    color: #ef4444 !important;
 }
