@@ -23,6 +23,16 @@
             root.setAttribute('id', 'app-root');
             root.classList.add(`theme-${savedTheme}`, `style-${savedStyle}`);
             document.documentElement.className = 'theme-' + savedTheme + ' style-' + savedStyle;
+            
+            // 🔥 FORCE CACHE BUST : Supprimer le cache CSS ancien
+            if (!sessionStorage.getItem('css-v2.4.1-loaded')) {
+                sessionStorage.setItem('css-v2.4.1-loaded', 'true');
+                // Force rechargement en ajoutant timestamp si pas déjà fait
+                const cssLink = document.querySelector('link[href*="main.css"]');
+                if (cssLink && !cssLink.href.includes('t=')) {
+                    location.reload(true);
+                }
+            }
         })();
     </script>
     
@@ -168,7 +178,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <!-- 🎨 CSS UNIQUE CONSOLIDÉ - V2.1.0 ICALOU COMPLET PARTOUT (25 jan 2026) -->
-    <link rel="stylesheet" href="css/main.css?v=2.4.0" />
+    <link rel="stylesheet" href="css/main.css?v=2.4.1" />
 </head>
 <body>
     <!-- 🎨 CONTRÔLES THÈMES -->
