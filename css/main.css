@@ -2042,45 +2042,21 @@ html.theme-dark .stat-card-icalou {
 }
 
 /* ========================================
-   ADMIN POPUP SETTINGS
+   ADMIN FILTER SELECT
    ======================================== */
-#adminSettingsButton:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+#adminFilterSelect:hover {
+    border-color: #00C2CB;
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.3);
 }
 
-#adminSettingsButton:active {
-    transform: translateY(0) scale(1);
+#adminFilterSelect:focus {
+    outline: none;
+    border-color: #00C2CB;
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.1);
 }
 
-#adminPopup button:not(:last-child):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-}
-
-#adminPopup button:last-child:hover {
-    background: rgba(0,0,0,0.05);
-    border-color: var(--text);
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-    }
-}
-
-html.theme-dark #adminPopup > div {
-    background: #2D3748 !important;
+html.theme-dark #adminFilterSelect {
+    background-color: #2D3748;
+    border-color: #3b82f6;
+    color: #f3f4f6;
 }

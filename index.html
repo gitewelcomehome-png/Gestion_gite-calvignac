@@ -127,7 +127,7 @@
     <script src="js/shared-utils.js?v=3.8"></script>
     <script src="js/supabase-operations.js"></script>
     <script src="js/icons.js"></script>
-    <script src="js/dashboard.js?v=4.0"></script>
+    <script src="js/dashboard.js?v=4.1"></script>
     <script src="js/sync-ical-v2.js?v=2.2"></script>
     <script src="js/statistiques.js"></script>
     <script src="js/menage.js?v=1737504444"></script>
@@ -164,7 +164,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <!-- 🎨 CSS UNIQUE CONSOLIDÉ - V1.1 (25 jan 2026) -->
-    <link rel="stylesheet" href="css/main.css?v=1.1.1" />
+    <link rel="stylesheet" href="css/main.css?v=1.2.0" />
 </head>
 <body>
     <!-- 🎨 CONTRÔLES THÈMES -->
@@ -374,27 +374,6 @@
             });
         }
         
-        // 🔧 Event listener pour le bouton engrenage admin (dashboard)
-        const adminSettingsBtn = document.getElementById('adminSettingsButton');
-        if (adminSettingsBtn) {
-            adminSettingsBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (typeof window.openAdminPopup === 'function') {
-                    window.openAdminPopup();
-                }
-            });
-        }
-        
-        // Fermer popup admin si clic sur fond
-        document.addEventListener('click', function(e) {
-            const popup = document.getElementById('adminPopup');
-            if (popup && e.target === popup) {
-                if (typeof window.closeAdminPopup === 'function') {
-                    window.closeAdminPopup();
-                }
-            }
-        });
         
         // 🔧 Event listeners pour le menu admin
         // Attendre que tout soit bien chargé (delayed pour éviter les problèmes de timing)

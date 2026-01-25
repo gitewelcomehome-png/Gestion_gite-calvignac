@@ -7,13 +7,11 @@
             <p id="dashboard-week-info" class="dashboard-subtitle">Semaine en cours</p>
         </div>
         <div class="header-right">
-            <!-- Bouton Engrenage Admin -->
-            <button id="adminSettingsButton" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s ease;" title="Paramètres admin">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
-                </svg>
-            </button>
+            <!-- Liste déroulante Admin -->
+            <select id="adminFilterSelect" onchange="handleAdminFilterChange(this.value)" style="padding: 10px 16px; background: var(--card); border: 2px solid #3b82f6; border-radius: 10px; color: var(--text); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);">
+                <option value="current">👤 Mon compte uniquement</option>
+                <option value="all">👥 Tous les utilisateurs</option>
+            </select>
             <button onclick="updateFinancialIndicators()" class="btn-refresh">
                 🔄 Actualiser
             </button>

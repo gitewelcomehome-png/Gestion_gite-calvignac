@@ -24,27 +24,20 @@ let CHECKLIST_FEATURE_ENABLED = true; // Activé (table checklist_templates cré
 let ADMIN_FILTER_MODE = 'current'; // 'all' ou 'current'
 
 /**
- * Ouvre la popup admin settings
+ * Gère le changement de filtre admin depuis le select
  */
-function openAdminPopup() {
-    const popup = document.getElementById('adminPopup');
-    if (popup) {
-        popup.style.display = 'flex';
-        popup.style.animation = 'fadeIn 0.3s ease';
+function handleAdminFilterChange(mode) {
+    ADMIN_FILTER_MODE = mode;
+    
+    console.log(`🔄 Filtre admin changé: ${mode}`);
+    
+    // Recharger les données
+    if (typeof loadDashboard === 'function') {
+        loadDashboard();
     }
-}
-
-/**
- * Ferme la popup admin settings
- */
-function closeAdminPopup() {
-    const popup = document.getElementById('adminPopup');
-    if (popup) {
-        popup.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => {
-            popup.style.display = 'none';
-        }, 300);
-    }
+    
+    // Notification
+    showAdminFilterMessage(mode);
 }
 document.addEventListener('click', function(e) {
     const container = document.querySelector('.admin-menu-container');
@@ -60,8 +53,11 @@ document.addEventListener('click', function(e) {
 function selectAdminFilter(mode) {
     ADMIN_FILTER_MODE = mode;
     
-    // Fermer la popup
-    closeAdminPopup();
+    // Mettre à jour le select si il existe
+    const select = document.getElementById('adminFilterSelect');
+    if (select) {
+        select.value = mode;
+    }
     
     console.log(`🔄 Filtre admin changé: ${mode}`);
     
@@ -2728,6 +2724,5 @@ function toggleChecklistDetails(reservationId) {
 }
 
 window.toggleChecklistDetails = toggleChecklistDetails;
-window.openAdminPopup = openAdminPopup;
-window.closeAdminPopup = closeAdminPopup;
+window.handleAdminFilterChange = handleAdminFilterChange;
 window.selectAdminFilter = selectAdminFilter;
