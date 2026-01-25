@@ -172,12 +172,12 @@
 </head>
 <body>
     <!-- 🎨 CONTRÔLES THÈMES -->
-    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; background: #000; padding: 5px; border-radius: 15px; display: flex; border: 1px solid rgba(255,255,255,0.2);">
-        <button onclick="setTheme('light')" id="t-light" class="ctrl-btn" style="color: white; font-size: 10px; font-weight: 800; padding: 8px 15px; border-radius: 10px; opacity: 0.4; border: none; background: transparent; cursor: pointer;">JOUR</button>
-        <button onclick="setTheme('dark')" id="t-dark" class="ctrl-btn active" style="color: white; font-size: 10px; font-weight: 800; padding: 8px 15px; border-radius: 10px; opacity: 1; background: rgba(255,255,255,0.2); border: none; cursor: pointer;">NUIT</button>
-        <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2); margin: auto 8px;"></div>
-        <button onclick="setStyle('apple')" id="s-apple" class="ctrl-btn" style="color: white; font-size: 10px; font-weight: 800; padding: 8px 15px; border-radius: 10px; opacity: 0.4; border: none; background: transparent; cursor: pointer;">APPLE</button>
-        <button onclick="setStyle('sidebar')" id="s-sidebar" class="ctrl-btn active" style="color: white; font-size: 10px; font-weight: 800; padding: 8px 15px; border-radius: 10px; opacity: 1; background: rgba(255,255,255,0.2); border: none; cursor: pointer;">SIDEBAR</button>
+    <div class="theme-controls">
+        <button onclick="setTheme('light')" id="t-light" class="ctrl-btn">JOUR</button>
+        <button onclick="setTheme('dark')" id="t-dark" class="ctrl-btn active">NUIT</button>
+        <div class="ctrl-separator"></div>
+        <button onclick="setStyle('apple')" id="s-apple" class="ctrl-btn">APPLE</button>
+        <button onclick="setStyle('sidebar')" id="s-sidebar" class="ctrl-btn active">SIDEBAR</button>
     </div>
 
     <script>
@@ -186,10 +186,11 @@
             root.classList.remove('theme-light', 'theme-dark');
             root.classList.add('theme-' + theme);
             
-            document.getElementById('t-light').style.opacity = theme === 'light' ? '1' : '0.4';
-            document.getElementById('t-dark').style.opacity = theme === 'dark' ? '1' : '0.4';
-            document.getElementById('t-light').style.background = theme === 'light' ? 'rgba(255,255,255,0.2)' : 'transparent';
-            document.getElementById('t-dark').style.background = theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'transparent';
+            // Gestion des boutons actifs via classes CSS
+            const lightBtn = document.getElementById('t-light');
+            const darkBtn = document.getElementById('t-dark');
+            lightBtn.classList.toggle('active', theme === 'light');
+            darkBtn.classList.toggle('active', theme === 'dark');
             
             localStorage.setItem('icalou-theme', theme);
             
@@ -205,10 +206,11 @@
             root.classList.remove('style-apple', 'style-sidebar');
             root.classList.add('style-' + style);
             
-            document.getElementById('s-apple').style.opacity = style === 'apple' ? '1' : '0.4';
-            document.getElementById('s-sidebar').style.opacity = style === 'sidebar' ? '1' : '0.4';
-            document.getElementById('s-apple').style.background = style === 'apple' ? 'rgba(255,255,255,0.2)' : 'transparent';
-            document.getElementById('s-sidebar').style.background = style === 'sidebar' ? 'rgba(255,255,255,0.2)' : 'transparent';
+            // Gestion des boutons actifs via classes CSS
+            const appleBtn = document.getElementById('s-apple');
+            const sidebarBtn = document.getElementById('s-sidebar');
+            appleBtn.classList.toggle('active', style === 'apple');
+            sidebarBtn.classList.toggle('active', style === 'sidebar');
             
             localStorage.setItem('icalou-style', style);
             
@@ -419,10 +421,10 @@
     <div class="container">
         <!-- Header Sticky Neo-Brutalism -->
         <div class="sticky-header">
-            <div class="site-title" style="display: flex; align-items: center; gap: 16px;">
+            <div class="site-title">
                 <!-- Logo UpStay -->
-                <div class="icalou-icon" style="width: 56px; height: 56px; background: linear-gradient(180deg, #00C2CB 0%, #005288 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0, 82, 136, 0.3);">
-                    <svg class="upstay-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 65%; height: 65%;">
+                <div class="icalou-icon">
+                    <svg class="upstay-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M50 5L15 40H30V90H70V40H85L50 5Z" fill="url(#paint0_linear)"/>
                         <path d="M50 35L35 50H45V75H55V50H65L50 35Z" fill="white" fill-opacity="0.8"/>
                         <defs>
@@ -434,30 +436,20 @@
                     </svg>
                 </div>
                 <!-- Nom UpStay -->
-                <div class="brand-identity" style="display: flex; flex-direction: column; justify-content: center;">
-                    <h1 class="brand-name" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.06em; line-height: 0.9; background: linear-gradient(180deg, #00C2CB 0%, #005288 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0;">UPSTAY</h1>
-                    <p class="brand-tagline" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.35em; opacity: 0.4; margin: 4px 0 0 2px;">Gestion Synchronisée</p>
+                <div class="brand-identity">
+                    <h1 class="brand-name">UPSTAY</h1>
+                    <p class="brand-tagline">Gestion Synchronisée</p>
                 </div>
             </div>
             <!-- Menu utilisateur - Dropdown personnalisé avec icônes -->
-            <div class="user-menu-container" style="display: flex; align-items: center; gap: 16px; position: relative;">
-                <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                    <div id="userName" style="font-size: 0.95rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em;">Chargement...</div>
-                    <div id="userRole" style="font-size: 0.75rem; font-weight: 600; color: #667eea; text-transform: uppercase; letter-spacing: 0.05em;"></div>
+            <div class="user-menu-container">
+                <div class="user-info">
+                    <div id="userName" class="user-name">Chargement...</div>
+                    <div id="userRole" class="user-role"></div>
                 </div>
                 
                 <!-- Bouton dropdown -->
-                <button id="userMenuButton" onclick="toggleUserMenuDropdown()" style="
-                    padding: 12px 16px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    border: none;
-                    border-radius: 12px;
-                    color: white;
-                    font-size: 0.9rem;
-                    font-weight: 700;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+                <button id="userMenuButton" class="user-menu-button" onclick="toggleUserMenuDropdown()">
                     display: flex;
                     align-items: center;
                     gap: 8px;
@@ -483,7 +475,7 @@
                     border: 3px solid #667eea;
                     padding: 8px;
                 ">
-                    <button class="user-menu-item" onclick="handleUserMenuChange('gites')" style="width: 100%; padding: 14px 16px; background: white; border: none; color: #2D3436; font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 14px; border-radius: 10px; margin-bottom: 6px;">
+                    <button class="user-menu-item" onclick="handleUserMenuChange('gites')">
                         <svg width="20" height="20" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
                             <rect x="8" y="14" width="32" height="26" rx="2"/>
                             <path d="M8 20 L24 8 L40 20"/>
@@ -491,14 +483,14 @@
                         </svg>
                         <span>Gérer mes gîtes</span>
                     </button>
-                    <button class="user-menu-item" onclick="handleUserMenuChange('ical')" style="width: 100%; padding: 14px 16px; background: white; border: none; color: #2D3436; font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 14px; border-radius: 10px; margin-bottom: 6px;">
+                    <button class="user-menu-item" onclick="handleUserMenuChange('ical')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="3"/>
                             <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"/>
                         </svg>
                         <span>Config iCal</span>
                     </button>
-                    <button class="user-menu-item" onclick="handleUserMenuChange('archives')" style="width: 100%; padding: 14px 16px; background: white; border: none; color: #2D3436; font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 14px; border-radius: 10px; margin-bottom: 6px;">
+                    <button class="user-menu-item" onclick="handleUserMenuChange('archives')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="21 8 21 21 3 21 3 8"/>
                             <rect x="1" y="3" width="22" height="5"/>
@@ -506,7 +498,7 @@
                         </svg>
                         <span>Archives</span>
                     </button>
-                    <button class="user-menu-item" onclick="handleUserMenuChange('faq')" style="width: 100%; padding: 14px 16px; background: white; border: none; color: #2D3436; font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 14px; border-radius: 10px; margin-bottom: 8px;">
+                    <button class="user-menu-item" onclick="handleUserMenuChange('faq')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
                             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
@@ -515,8 +507,8 @@
                         <span>FAQ</span>
                     </button>
                     <!-- Séparateur visible -->
-                    <div style="height: 2px; background: linear-gradient(90deg, transparent, #667eea, transparent); margin: 8px 0;"></div>
-                    <button class="user-menu-item" onclick="handleUserMenuChange('logout')" style="width: 100%; padding: 14px 16px; background: white; border: none; color: #ef4444; font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 14px; border-radius: 10px;">
+                    <div class="user-menu-separator"></div>
+                    <button class="user-menu-item user-menu-logout" onclick="handleUserMenuChange('logout')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                             <polyline points="16 17 21 12 16 7"/>
@@ -2131,10 +2123,10 @@
                     <strong>⚠️ Modification proposée par la société de ménage</strong><br>
                     Nouvelle date: ${displayDate.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })} - ${savedTime === 'morning' ? '🌅 Matin' : '☀️ Après-midi'}
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button class="btn-small" onclick="approveModification(${reservation.id})" style="flex: 1; background: #27ae60;">
+                        <button class="btn-small btn-valider" onclick="approveModification(${reservation.id})">
                             ✓ Approuver
                         </button>
-                        <button class="btn-small" onclick="rejectModification(${reservation.id})" style="flex: 1; background: #e74c3c;">
+                        <button class="btn-small btn-supprimer" onclick="rejectModification(${reservation.id})">
                             ✗ Refuser
                         </button>
                     </div>
@@ -2160,7 +2152,7 @@
                         </select>
                     </div>
                     <div class="cleaning-actions">
-                        <button class="btn-small" onclick="modifierDateMenage(${reservation.id})" style="width: 100%;">
+                        <button class="btn-small btn-modifier" onclick="modifierDateMenage(${reservation.id})">
                             ✏️ Enregistrer
                         </button>
                     </div>
