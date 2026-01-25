@@ -466,7 +466,14 @@ html.theme-dark a {
 /* Base commune pour tous les boutons */
 .btn-action,
 button.btn,
-.btn {
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-danger,
+.btn-warning,
+.btn-info,
+button:not(.nav-tab):not(.ctrl-btn):not(.switch-btn) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -487,55 +494,104 @@ button.btn,
 /* ═══ STYLE 1: SIDEBAR (Liseré latéral) ═══ */
 .style-sidebar .btn-action,
 .style-sidebar button.btn,
-.style-sidebar .btn {
-    background: var(--btn-neutral);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
+.style-sidebar .btn,
+.style-sidebar .btn-primary,
+.style-sidebar .btn-secondary,
+.style-sidebar .btn-success,
+.style-sidebar .btn-danger,
+.style-sidebar .btn-warning,
+.style-sidebar .btn-info,
+.style-sidebar button:not(.nav-tab):not(.ctrl-btn):not(.switch-btn) {
+    background: var(--btn-neutral) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px !important;
 }
 
 .style-sidebar .btn-action::before,
 .style-sidebar button.btn::before,
-.style-sidebar .btn::before {
+.style-sidebar .btn::before,
+.style-sidebar .btn-primary::before,
+.style-sidebar .btn-secondary::before,
+.style-sidebar .btn-success::before,
+.style-sidebar .btn-danger::before,
+.style-sidebar .btn-warning::before,
+.style-sidebar .btn-info::before,
+.style-sidebar button:not(.nav-tab):not(.ctrl-btn):not(.switch-btn)::before {
     content: '';
     position: absolute;
     left: 0;
     width: 4px;
     height: 100%;
-    background: var(--btn-clr);
-    box-shadow: 2px 0 10px var(--btn-clr);
+    background: var(--btn-clr, #3b82f6);
+    box-shadow: 2px 0 10px var(--btn-clr, #3b82f6);
     border-radius: 10px 0 0 10px;
 }
 
+/* Couleurs spécifiques pour les boutons classiques */
+.style-sidebar .btn-success::before { background: #10b981; box-shadow: 2px 0 10px #10b981; }
+.style-sidebar .btn-danger::before { background: #ef4444; box-shadow: 2px 0 10px #ef4444; }
+.style-sidebar .btn-warning::before { background: #f59e0b; box-shadow: 2px 0 10px #f59e0b; }
+.style-sidebar .btn-info::before { background: #06b6d4; box-shadow: 2px 0 10px #06b6d4; }
+
 .style-sidebar .btn-action:hover,
 .style-sidebar button.btn:hover,
-.style-sidebar .btn:hover {
-    transform: translateX(4px);
-    border-color: var(--btn-clr);
+.style-sidebar .btn:hover,
+.style-sidebar .btn-primary:hover,
+.style-sidebar .btn-secondary:hover,
+.style-sidebar .btn-success:hover,
+.style-sidebar .btn-danger:hover,
+.style-sidebar .btn-warning:hover,
+.style-sidebar .btn-info:hover,
+.style-sidebar button:not(.nav-tab):not(.ctrl-btn):not(.switch-btn):hover {
+    transform: translateX(4px) !important;
+    border-color: var(--btn-clr, #3b82f6) !important;
 }
 
 /* ═══ STYLE 2: APPLE (Pleine couleur) ═══ */
 .style-apple .btn-action,
 .style-apple button.btn,
-.style-apple .btn {
-    background: var(--btn-clr);
+.style-apple .btn,
+.style-apple .btn-primary,
+.style-apple .btn-secondary,
+.style-apple .btn-success,
+.style-apple .btn-danger,
+.style-apple .btn-warning,
+.style-apple .btn-info,
+.style-apple button:not(.nav-tab):not(.ctrl-btn):not(.switch-btn) {
+    background: var(--btn-clr, #3b82f6) !important;
     color: #ffffff !important;
-    border-radius: 50px;
-    border: none;
+    border-radius: 50px !important;
+    border: none !important;
     box-shadow: 0 4px 12px -4px rgba(0,0,0,0.2);
 }
 
+/* Couleurs spécifiques pour les boutons classiques */
+.style-apple .btn-primary { background: #3b82f6 !important; }
+.style-apple .btn-success { background: #10b981 !important; }
+.style-apple .btn-danger { background: #ef4444 !important; }
+.style-apple .btn-warning { background: #f59e0b !important; }
+.style-apple .btn-info { background: #06b6d4 !important; }
+.style-apple .btn-secondary { background: #64748b !important; }
+
 .style-apple .btn-action:hover,
 .style-apple button.btn:hover,
-.style-apple .btn:hover {
-    transform: translateY(-2px);
+.style-apple .btn:hover,
+.style-apple .btn-primary:hover,
+.style-apple .btn-secondary:hover,
+.style-apple .btn-success:hover,
+.style-apple .btn-danger:hover,
+.style-apple .btn-warning:hover,
+.style-apple .btn-info:hover,
+.style-apple button:not(.nav-tab):not(.ctrl-btn):not(.switch-btn):hover {
+    transform: translateY(-2px) !important;
     filter: brightness(1.1);
-    box-shadow: 0 8px 20px -5px var(--btn-clr);
+    box-shadow: 0 8px 20px -5px var(--btn-clr, rgba(59, 130, 246, 0.5));
 }
 
 [data-theme="dark"].style-apple .btn-action,
 [data-theme="dark"].style-apple button.btn,
 [data-theme="dark"].style-apple .btn {
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.1) !important;
 }
     background: #10b981;
     color: white;
