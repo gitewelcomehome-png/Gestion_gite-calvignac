@@ -595,7 +595,7 @@ html.theme-dark,
     align-items: center;
     gap: 8px;
     padding: 10px 15px;
-    background: white;
+    background: var(--bg-secondary);
     border: 2px solid var(--border-color);
     border-radius: 8px;
     cursor: pointer;
@@ -626,7 +626,7 @@ html.theme-dark,
    LIENS & BOUTONS EXTERNES
    ═══════════════════════════════════════════════════════════════════════ */
 .link-maps {
-    background: white;
+    background: var(--bg-secondary);
     color: #ef4444;
     border: 2px solid #ef4444;
     border-radius: 8px;
@@ -648,7 +648,7 @@ html.theme-dark,
 }
 
 .link-website {
-    background: white;
+    background: var(--bg-secondary);
     color: #3b82f6;
     border: 2px solid #3b82f6;
     border-radius: 8px;
@@ -685,7 +685,7 @@ html.theme-dark,
 }
 
 .link-event {
-    background: white;
+    background: var(--bg-secondary);
     color: #667eea;
     padding: 10px 20px;
     border-radius: 8px;
@@ -840,9 +840,9 @@ html.theme-light.style-sidebar .btn-action,
 html.theme-light.style-sidebar .btn,
 html.theme-light.style-sidebar .btn-neo,
 html.theme-light.style-sidebar button:not(.ctrl-btn):not(.nav-tab) {
-    background: white !important;
+    background: var(--bg-secondary) !important;
     color: #3b82f6 !important;
-    border: 2px solid #e5e7eb !important;
+    border: 2px solid var(--border-color) !important;
     border-left: 4px solid #3b82f6 !important;
     border-radius: 8px !important;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
@@ -1337,13 +1337,13 @@ button:not(.nav-tab):not(.ctrl-btn):not(.switch-btn) {
 }
 
 .btn-neo {
-    background: white;
-    border: 2px solid var(--neo-black);
-    color: var(--neo-black);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
     padding: 10px 20px;
     border-radius: 8px;
     font-weight: 600;
-    box-shadow: 2px 2px 0 var(--neo-black);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-neo:hover {
@@ -1372,7 +1372,7 @@ button:not(.nav-tab):not(.ctrl-btn):not(.switch-btn) {
 
 /* Cartes néo-brutalisme */
 .card-neo {
-    background: white;
+    background: var(--bg-secondary);
     border: var(--neo-border);
     border-radius: 12px;
     padding: 20px;
@@ -1889,17 +1889,17 @@ html.theme-dark .alert-info {
 
 /* Cards neo-brutalism */
 .card {
-    background: white;
-    border: 3px solid var(--primary-dark);
+    background: var(--bg-secondary);
+    border: 3px solid var(--border-color);
     border-radius: 16px;
     padding: 25px;
     margin-bottom: 25px;
-    box-shadow: 4px 4px 0 var(--primary-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Blocs fiscaux collapsibles */
 .fiscal-bloc {
-    background: white;
+    background: var(--bg-secondary);
     border: 3px solid var(--primary-dark);
     border-radius: 12px;
     margin-bottom: 20px;
@@ -2017,7 +2017,7 @@ html.theme-dark .alert-info {
     font-weight: 600;
     font-size: 0.85rem;
     box-shadow: 2px 2px 0 var(--primary-dark);
-    background: white;
+    background: var(--bg-secondary);
 }
 
 .input-with-select input {
@@ -2085,7 +2085,7 @@ html.theme-dark .alert-info {
 }
 
 .preview-item {
-    background: white;
+    background: var(--bg-secondary);
     border: 2px solid var(--primary-dark);
     border-radius: 8px;
     padding: 15px;
@@ -2112,7 +2112,7 @@ html.theme-dark .alert-info {
 }
 
 .list-item {
-    background: white;
+    background: var(--bg-secondary);
     border: 2px solid var(--primary-dark);
     border-radius: 8px;
     padding: 15px;
@@ -2197,7 +2197,7 @@ html.theme-dark .alert-info {
 
 /* Zone de résultats */
 .results-container {
-    background: white;
+    background: var(--bg-secondary);
     border: 3px solid var(--primary-dark);
     border-radius: 12px;
     padding: 25px;
@@ -2282,7 +2282,7 @@ html.theme-dark .alert-info {
     gap: 10px;
     padding: 8px 12px;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border-color);
     border-radius: 10px;
     align-items: center;
     transition: all 0.3s ease;
@@ -2300,10 +2300,10 @@ html.theme-dark .alert-info {
 .liste-item input[type="text"],
 .liste-item input[type="number"] {
     padding: 8px 12px;
-    border: 1.5px solid #ddd;
+    border: 1.5px solid var(--border-color);
     border-radius: 7px;
     font-size: 0.95rem;
-    background: white;
+    background: var(--bg-secondary);
     transition: all 0.2s;
     height: 38px;
     line-height: 1.4;
@@ -2330,9 +2330,9 @@ html.theme-dark .alert-info {
 
 .liste-item select {
     padding: 8px 12px;
-    border: 1.5px solid #ddd;
+    border: 1.5px solid var(--border-color);
     border-radius: 7px;
-    background: white;
+    background: var(--bg-secondary);
     font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s;
@@ -2419,7 +2419,7 @@ html.theme-dark .alert-info {
     grid-template-columns: 2fr 1fr 1fr auto;
     gap: 10px;
     padding: 12px;
-    background: white;
+    background: var(--bg-secondary);
     border: 2px solid #ffc107;
     border-radius: 8px;
     align-items: center;
@@ -2434,7 +2434,7 @@ html.theme-dark .alert-info {
 .credit-item input[type="text"],
 .credit-item input[type="number"] {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.95rem;
 }
@@ -2472,7 +2472,7 @@ html.theme-dark .alert-info {
     grid-template-columns: 2fr auto 1fr auto;
     gap: 10px;
     padding: 12px;
-    background: white;
+    background: var(--bg-secondary);
     border: 2px solid #2196f3;
     border-radius: 8px;
     align-items: center;
@@ -2487,7 +2487,7 @@ html.theme-dark .alert-info {
 .frais-item input[type="text"],
 .frais-item input[type="number"] {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.95rem;
 }
@@ -2524,7 +2524,7 @@ html.theme-dark .alert-info {
     padding: 8px 20px;
     border: 2px solid var(--primary-dark);
     border-radius: 8px;
-    background: white;
+    background: var(--bg-secondary);
     color: var(--primary-dark);
     font-weight: 600;
     font-size: 0.9rem;
@@ -2592,7 +2592,7 @@ html.theme-dark .alert-info {
 }
 
 .modal-content {
-    background: white;
+    background: var(--bg-secondary);
     border: 3px solid var(--primary-dark);
     border-radius: 16px;
     padding: 30px;
@@ -2617,7 +2617,7 @@ html.theme-dark .alert-info {
 /* Boutons secondaires */
 .btn-neo-secondary {
     padding: 10px 18px;
-    background: white;
+    background: var(--bg-secondary);
     color: var(--primary-dark);
     border: 2px solid var(--primary-dark);
     border-radius: 8px;
@@ -2676,7 +2676,7 @@ html.theme-dark .alert-info {
    ═══════════════════════════════════════════════════════════════════════ */
 
 .login-container {
-    background: white;
+    background: var(--bg-secondary);
     padding: 50px 40px;
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
