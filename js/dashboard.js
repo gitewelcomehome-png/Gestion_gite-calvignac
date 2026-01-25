@@ -2724,5 +2724,3 @@ function toggleChecklistDetails(reservationId) {
 }
 
 window.toggleChecklistDetails = toggleChecklistDetails;
-window.handleAdminFilterChange = handleAdminFilterChange;
-window.selectAdminFilter = selectAdminFilter;
