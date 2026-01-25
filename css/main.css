@@ -2056,24 +2056,35 @@ html.theme-dark .stat-card-icalou {
     transform: translateY(0);
 }
 
+.user-menu-item {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
 .user-menu-item:hover {
-    background: rgba(102, 126, 234, 0.1) !important;
-    color: #667eea !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+
+.user-menu-item:hover svg {
+    stroke: white;
 }
 
 .user-menu-item:last-child:hover {
-    background: rgba(239, 68, 68, 0.1) !important;
-    color: #ef4444 !important;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
 }
 
 html.theme-dark #userMenuDropdown {
     background: #2D3748 !important;
-    border-color: #4b5563 !important;
+    border-color: #667eea !important;
 }
 
 html.theme-dark .user-menu-item {
+    background: #374151 !important;
     color: #f3f4f6 !important;
-    border-color: #4b5563 !important;
 }
 
 html.theme-dark .user-menu-item:last-child {
