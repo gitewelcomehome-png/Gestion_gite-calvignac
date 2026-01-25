@@ -713,7 +713,7 @@
     <!-- Modal Règles Ménage -->
     <div id="rulesModal" class="modal" style="display: none;">
         <div class="modal-content" style="max-width: 800px;">
-            <div class="card-header" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+            <div class="card-header card-header-gradient">
                 <span class="card-icon">📋</span>
                 <h2 class="card-title">Règles de Gestion du Planning Ménage</h2>
             </div>
@@ -749,8 +749,8 @@
                     <li>Temps estimé par ménage : 2h</li>
                 </ul>
 
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
-                    <p style="margin: 0; color: #555;">
+                <div class="alert-info">
+                    <p>
                         <strong>💡 Note :</strong> Ces règles sont appliquées automatiquement lors de la génération du planning. 
                         La société de ménage peut proposer des modifications via la page de validation.
                     </p>
@@ -1080,16 +1080,13 @@
                 const isAuto = isCurrentYear && yearsWithReservations.has(year) && !yearsWithTotal.has(year);
                 // Ne cocher automatiquement QUE l'année en cours
                 const checked = isCurrentYear ? 'checked' : '';
-                const badge = isAuto ? '<span style="background: #27AE60; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 5px;">Auto ⚡</span>' : '';
-                const bgColor = isAuto ? '#e8f5e9' : 'white';
-                const borderColor = isAuto ? '#27AE60' : 'var(--border)';
-                const textColor = isAuto ? '#27AE60' : 'var(--primary)';
+                const badge = isAuto ? '<span class="badge-auto">Auto ⚡</span>' : '';
+                const labelClass = isAuto ? 'year-selector-label auto' : 'year-selector-label';
                 
                 html += `
-                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; background: ${bgColor}; border: 2px solid ${borderColor}; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-                        <input type="checkbox" value="${year}" ${checked} onchange="updateAllCharts()" 
-                            style="width: 18px; height: 18px; cursor: pointer;">
-                        <span style="font-weight: 600; color: ${textColor};">${year}${badge}</span>
+                    <label class="${labelClass}">
+                        <input type="checkbox" value="${year}" ${checked} onchange="updateAllCharts()">
+                        <span>${year}${badge}</span>
                     </label>
                 `;
             });
@@ -2119,10 +2116,10 @@
             
             // Afficher une alerte si modification proposée par la société
             const proposalAlert = status === 'proposed' ? `
-                <div style="background: #fff3cd; border-left: 4px solid #ff9800; padding: 10px; margin: 10px 0; border-radius: 6px;">
+                <div class="alert-warning">
                     <strong>⚠️ Modification proposée par la société de ménage</strong><br>
                     Nouvelle date: ${displayDate.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })} - ${savedTime === 'morning' ? '🌅 Matin' : '☀️ Après-midi'}
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <div class="flex-gap-10" style="margin-top: 10px;">
                         <button class="btn-small btn-valider" onclick="approveModification(${reservation.id})">
                             ✓ Approuver
                         </button>
@@ -2728,9 +2725,9 @@
             
             if (activitesFiltrees.length === 0) {
                 window.SecurityUtils.setInnerHTML(container, `
-                    <div style="text-align: center; padding: 40px; background: #fff3cd; border-radius: 12px; border-left: 4px solid #f59e0b;">
-                        <h3 style="color: #856404; margin-bottom: 10px;">Aucun résultat pour "${categorieRecherchee}"</h3>
-                        <p style="color: #666;">Essayez d'ajouter des activités de cette catégorie manuellement ci-dessous.</p>
+                    <div class="alert-no-results">
+                        <h3>Aucun résultat pour "${categorieRecherchee}"</h3>
+                        <p>Essayez d'ajouter des activités de cette catégorie manuellement ci-dessous.</p>
                     </div>
                 `);
                 return;
@@ -2744,7 +2741,7 @@
                         <h3 style="color: var(--primary); font-size: 1.3rem; border-bottom: 2px solid var(--border); padding-bottom: 10px; flex: 1;">
                             ${categorieRecherchee} (${activitesFiltrees.length})
                         </h3>
-                        <button onclick="afficherActivites('${gite}')" class="btn" style="background: #6c757d; color: white; padding: 8px 16px; font-size: 0.9rem;">
+                        <button onclick="afficherActivites('${gite}')" class="btn btn-show-activities">
                             🔄 Tout Afficher
                         </button>
                     </div>
@@ -2757,14 +2754,14 @@
                 const prixText = act.prix || '';
                 
                 html += `
-                    <div style="background: #f8f9fa; border-left: 4px solid var(--primary); padding: 20px; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                            <h4 style="margin: 0; font-size: 1.1rem; color: #2C5F7D;">${act.nom}</h4>
-                            <div style="display: flex; gap: 8px;">
-                                <button onclick="modifierActivite(${act.id})" title="Modifier" style="background: transparent; border: none; cursor: pointer; font-size: 1.4rem; padding: 4px 8px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <h4>${act.nom}</h4>
+                            <div class="activity-actions">
+                                <button onclick="modifierActivite(${act.id})" title="Modifier" class="btn-icon">
                                     ✏️
                                 </button>
-                                <button onclick="supprimerActivite(${act.id})" title="Supprimer" style="background: transparent; border: none; cursor: pointer; font-size: 1.4rem; padding: 4px 8px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                                <button onclick="supprimerActivite(${act.id})" title="Supprimer" class="btn-icon">
                                     🗑️
                                 </button>
                             </div>
@@ -2781,14 +2778,14 @@
                         ${act.adresse ? `<p style="margin: 10px 0 5px 0; color: #666; font-size: 0.9rem;">📍 ${act.adresse}</p>` : ''}
                         ${act.telephone ? `<p style="margin: 5px 0; color: #666; font-size: 0.9rem;">📞 ${act.telephone}</p>` : ''}
                         
-                        <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                        <div class="flex-gap-10-mt-wrap">
                             ${act.google_maps_link ? `
-                                <a href="${act.google_maps_link}" target="_blank" title="Itinéraire Google Maps" style="background: white; color: #ef4444; border: 2px solid #ef4444; border-radius: 8px; padding: 10px 16px; text-decoration: none; font-size: 1.2rem; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);" onmouseover="this.style.background='#fef2f2'; this.style.borderColor='#dc2626'; this.style.color='#dc2626'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='white'; this.style.borderColor='#ef4444'; this.style.color='#ef4444'; this.style.transform='translateY(0)'">
+                                <a href="${act.google_maps_link}" target="_blank" title="Itinéraire Google Maps" class="link-maps">
                                     <img src="./images/location-pin.svg" alt="Localisation" style="width: 20px; height: 20px; object-fit: contain;">
                                 </a>
                             ` : ''}
                             ${act.website ? `
-                                <a href="${act.website}" target="_blank" title="Site web" style="background: white; color: #3b82f6; border: 2px solid #3b82f6; border-radius: 8px; padding: 10px 16px; text-decoration: none; font-size: 1.2rem; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);" onmouseover="this.style.background='#f0f9ff'; this.style.borderColor='#1e40af'; this.style.color='#1e40af'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='white'; this.style.borderColor='#3b82f6'; this.style.color='#3b82f6'; this.style.transform='translateY(0)'">
+                                <a href="${act.website}" target="_blank" title="Site web" class="link-website">
                                     <img src="./images/web-redirect.svg" alt="Web" style="width: 20px; height: 20px; object-fit: contain;">
                                 </a>
                             ` : ''}
@@ -3027,22 +3024,22 @@
             }
             
             let html = `
-                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <div class="event-header">
                     <strong>📅 ${evenementsFiltres.length} événement(s) autour de ${gite}</strong> (≤ ${maxDistance} km)<br>
-                    <small style="color: #666;">Mis à jour le ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</small>
+                    <small>Mis à jour le ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</small>
                 </div>
             `;
             
             evenementsFiltres.forEach(event => {
                 html += `
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                        <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.5rem;">${event.icone}</span> ${event.titre}
+                    <div class="event-card">
+                        <h3>
+                            <span>${event.icone}</span> ${event.titre}
                         </h3>
-                        <p style="margin: 5px 0; opacity: 0.95; font-size: 0.95rem;"><strong>📍</strong> ${event.lieu} <span style="background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.85rem; margin-left: 8px;">${event.distance} km</span></p>
-                        <p style="margin: 5px 0; opacity: 0.95; font-size: 0.95rem;"><strong>🗓️</strong> ${event.date}</p>
-                        <p style="margin: 15px 0; line-height: 1.5;">${event.description}</p>
-                        <a href="${event.lien}" target="_blank" style="background: white; color: #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <p><strong>📍</strong> ${event.lieu} <span class="badge-distance">${event.distance} km</span></p>
+                        <p><strong>🗓️</strong> ${event.date}</p>
+                        <p>${event.description}</p>
+                        <a href="${event.lien}" target="_blank" class="link-event">
                             🔗 Plus d'infos
                         </a>
                     </div>
@@ -3232,7 +3229,7 @@
             if (giteSelectionne && giteCoords[giteSelectionne]) {
                 const coords = giteCoords[giteSelectionne];
                 const giteIconHtml = `
-                    <div style="background: #ff5a5f; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 12px rgba(255,90,95,0.5); border: 4px solid white;">
+                    <div class="gite-icon-marker">
                         🏠
                     </div>
                 `;
@@ -3270,14 +3267,14 @@
                         <h3 style="margin: 0 0 10px 0; color: #667eea; font-size: 1.1rem;">
                             ${item.titre || item.nom}
                         </h3>
-                        ${item.categorie ? `<p style="margin: 5px 0; font-size: 0.85rem; display: inline-block; padding: 4px 10px; border-radius: 16px; background: #f0f4f8; color: #667eea; font-weight: 600;"><strong>📂</strong> ${item.categorie}</p>` : ''}
+                        ${item.categorie ? `<p class="badge-category"><strong>📂</strong> ${item.categorie}</p>` : ''}
                         <p style="margin: 8px 0; font-size: 0.9rem;"><strong>📍</strong> ${item.lieu || item.adresse || 'Non spécifié'}</p>
                         ${item.date ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>🗓️</strong> ${item.date}</p>` : ''}
                         ${item.distance ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>📏</strong> ${item.distance} km</p>` : ''}
                         ${item.description ? `<p style="margin: 10px 0; font-size: 0.85rem; line-height: 1.4;">${item.description}</p>` : ''}
                         ${item.note ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>⭐</strong> ${item.note}/5</p>` : ''}
                         ${item.telephone ? `<p style="margin: 5px 0; font-size: 0.9rem;"><strong>📞</strong> ${item.telephone}</p>` : ''}
-                        ${item.lien ? `<a href="${item.lien}" target="_blank" style="display: inline-block; margin-top: 10px; padding: 8px 15px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85rem;">🔗 Plus d'infos</a>` : ''}
+                        ${item.lien ? `<a href="${item.lien}" target="_blank" class="link-info">🔗 Plus d'infos</a>` : ''}
                     </div>
                 `;
                 
