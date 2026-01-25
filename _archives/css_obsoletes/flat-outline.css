@@ -1,0 +1,792 @@
+/* =========================================
+   FLAT OUTLINE DESIGN - NEO-BRUTALISM SOFT
+   =========================================
+   Style "Flat Outline" pour Gestion Gîtes
+   Contours nets, ombres dures, couleurs vives
+   ========================================= */
+
+/* --- CHARTE GRAPHIQUE FLAT OUTLINE --- */
+:root {
+    --stroke: #2D3436;
+    --bg-page: #f1f2f6;
+    --white: #ffffff;
+    --c-blue: #74b9ff;
+    --c-yellow: #ffeaa7;
+    --c-red: #ff7675;
+    --c-green: #55efc4;
+    --shadow-hard: 4px 4px 0px var(--stroke);
+    /* Alias pour compatibilité */
+    --blue-accent: #74b9ff;
+    --dark-blue: #0984e3;
+    --red-accent: #ff7675;
+    --yellow-accent: #ffeaa7;
+    --green-accent: #55efc4;
+    --card-bg: #ffffff;
+}
+
+body {
+    background-color: var(--bg-page) !important;
+    font-family: 'Segoe UI', 'Roboto', sans-serif !important;
+    color: var(--stroke) !important;
+    padding-top: 80px !important; /* Espace pour le header fixe */
+}
+
+/* =========================================
+   1. HEADER FIXE (STICKY)
+   ========================================= */
+.sticky-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    background: white !important;
+    border-bottom: 3px solid var(--stroke) !important;
+    padding: 15px 30px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.05) !important;
+}
+
+.site-title {
+    font-size: 1.8rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    color: var(--stroke) !important;
+    letter-spacing: 1px !important;
+}
+
+.property-name {
+    font-size: 1.3rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    color: var(--stroke) !important;
+    background: var(--yellow-accent) !important;
+    padding: 8px 20px !important;
+    border: 2px solid var(--stroke) !important;
+    border-radius: 8px !important;
+    box-shadow: 3px 3px 0 var(--stroke) !important;
+}
+
+/* =========================================
+   2. BOUTONS (GROS & CLICKY)
+   ========================================= */
+.btn-neo {
+    padding: 12px 24px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    border: 2px solid var(--stroke) !important;
+    border-radius: 10px !important;
+    background: white !important;
+    color: var(--stroke) !important;
+    box-shadow: var(--shadow-hard) !important;
+    cursor: pointer !important;
+    transition: transform 0.1s !important;
+    margin-right: 10px !important;
+    font-size: 0.95rem !important;
+}
+
+.btn-neo:active {
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0 var(--stroke) !important;
+}
+
+.btn-neo:hover {
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0 var(--stroke) !important;
+}
+
+.btn-save, .btn-neo.save {
+    background-color: var(--blue-accent) !important;
+    color: white !important;
+}
+
+.btn-delete, .btn-neo.delete {
+    background-color: var(--red-accent) !important;
+    color: white !important;
+}
+
+.btn-valid, .btn-neo.valid {
+    background-color: var(--green-accent) !important;
+    color: var(--stroke) !important;
+}
+
+/* =========================================
+   3. NAVIGATION (ONGLETS NEO-BRUTALISM)
+   ========================================= */
+
+/* CONTENEUR DES ONGLETS (Responsive - une seune ligne) */
+.nav-tabs-wrapper {
+    display: flex;
+    flex-wrap: nowrap; /* Toujours sur une seule ligne */
+    gap: 8px;
+    overflow-x: auto; /* Scroll si nécessaire uniquement en très petit écran */
+    padding: 10px 20px 20px 20px; /* Espace pour l'ombre - Aligné avec .container */
+    margin-top: 20px;
+    margin-bottom: 40px !important; /* Plus d'espace avant le contenu */
+    justify-content: center; /* Centrer les onglets */
+    scrollbar-width: thin;
+    scrollbar-color: var(--stroke) transparent;
+}
+
+/* SCROLLBAR STYLE (Chrome/Safari) */
+.nav-tabs-wrapper::-webkit-scrollbar { 
+    height: 6px; 
+}
+.nav-tabs-wrapper::-webkit-scrollbar-thumb { 
+    background: var(--stroke); 
+    border-radius: 10px; 
+}
+.nav-tabs-wrapper::-webkit-scrollbar-track { 
+    background: rgba(0,0,0,0.05); 
+}
+
+/* STYLE DE L'ONGLET */
+.tab-neo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: white;
+    border: 2px solid transparent; /* Invisible par défaut */
+    border-radius: 12px;
+    color: #636e72;
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap; /* Empêche le texte de passer à la ligne */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none; /* Si c'est un lien <a> */
+    flex-shrink: 0; /* Ne pas rétrécir les onglets */
+}
+
+/* Responsive : Cacher le texte sur écrans moyens et petits, garder seulement les icônes */
+@media (max-width: 1200px) {
+    .tab-neo {
+        padding: 10px; /* Rendre carré quand mode icône seule */
+        gap: 0;
+    }
+    
+    /* Cacher tous les textes sauf l'icône */
+    .tab-neo > *:not(.tab-icon) {
+        display: none;
+    }
+    
+    .tab-icon {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+/* L'ONGLET AU SURVOL */
+.tab-neo:hover {
+    background: #e9ecef;
+    color: var(--stroke);
+}
+
+/* L'ONGLET ACTIF (Sélectionné) */
+.tab-neo.active {
+    background: white;
+    border: 2px solid var(--stroke);
+    color: var(--stroke);
+    box-shadow: var(--shadow-hard);
+    transform: translateY(-2px);
+}
+
+/* STYLE DES MINI ICONES SVG */
+.tab-icon {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor; /* Prend la couleur du texte */
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: all 0.2s;
+}
+
+/* Quand l'onglet est actif, on remplit l'icône avec une couleur */
+.tab-neo.active .tab-icon {
+    fill: var(--c-yellow); /* Petit fond jaune sympa */
+    stroke: var(--stroke);
+}
+
+/* Variantes de couleurs au clic selon le thème */
+.tab-neo.active[data-theme="blue"] .tab-icon { fill: var(--c-blue); }
+.tab-neo.active[data-theme="green"] .tab-icon { fill: var(--c-green); }
+.tab-neo.active[data-theme="red"] .tab-icon { fill: var(--c-red); }
+.tab-neo.active[data-theme="yellow"] .tab-icon { fill: var(--c-yellow); }
+
+/* COMPATIBILITÉ ANCIENNE NAVIGATION */
+.nav-tabs {
+    display: flex !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    padding: 10px 5px 20px 5px !important;
+    margin-top: 20px !important;
+}
+
+.nav-tab {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 18px !important;
+    background: white !important;
+    border: 2px solid transparent !important;
+    border-radius: 12px !important;
+    color: #636e72 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.nav-tab:hover {
+    background: #e9ecef !important;
+    color: var(--stroke) !important;
+}
+
+.nav-tab.active {
+    background: white !important;
+    border: 2px solid var(--stroke) !important;
+    color: var(--stroke) !important;
+    box-shadow: var(--shadow-hard) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* --- 1. LES BOUTONS DE NAVIGATION (Tableau de bord, etc) --- */
+.nav-button, .btn {
+    border: 2px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    background-color: white !important;
+    color: var(--stroke) !important;
+    font-weight: 700 !important;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.1) !important; /* Légère ombre */
+    transition: all 0.2s ease !important;
+}
+
+.nav-button.active, .btn-primary {
+    background-color: var(--blue-accent) !important;
+    color: white !important;
+    box-shadow: var(--shadow-hard) !important; /* Ombre dure active */
+    transform: translate(-2px, -2px) !important;
+}
+
+.nav-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-hard) !important;
+}
+
+/* --- 2. LA CARTE "TRÉVOUX" (Transformation majeure) --- */
+/* Style Neo-Brutalism comme le tableau de bord */
+.gite-label {
+    background: white !important;
+    border: 3px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    box-shadow: 6px 6px 0 var(--stroke) !important;
+    padding: 12px 20px !important;
+    position: relative !important;
+    overflow: visible !important;
+    color: var(--stroke) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+}
+
+/* Retirer le ::before (bande bleue en haut) */
+.gite-label::before {
+    display: none !important;
+}
+
+.property-title {
+    margin: 0 !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: var(--stroke) !important;
+}
+
+/* --- 3. LES EN-TÊTES DE SEMAINE --- */
+.week-header-unique {
+    background-color: var(--stroke) !important;
+    color: var(--yellow-accent) !important;
+    border-radius: 12px !important;
+    border: 2px solid var(--stroke) !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    box-shadow: var(--shadow-hard) !important;
+}
+
+.week-number-big {
+    color: var(--yellow-accent) !important;
+    font-weight: 900 !important;
+}
+
+.week-dates-small {
+    color: rgba(255, 234, 167, 0.8) !important;
+}
+
+/* --- 4. LES BLOCS DE RÉSERVATIONS --- */
+.week-reservation {
+    background: white !important;
+    border: 3px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+    padding: 15px !important;
+    box-shadow: var(--shadow-hard) !important;
+    transition: all 0.2s ease !important;
+}
+
+.week-reservation:hover {
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0px var(--stroke) !important;
+}
+
+/* Colonnes de gîtes */
+.gite-column-inline {
+    background: white !important;
+    border: 3px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    box-shadow: var(--shadow-hard) !important;
+}
+
+/* --- 5. BARRE DE SUCCÈS (Le bandeau vert) --- */
+.alert-success, .success-banner {
+    background-color: var(--yellow-accent) !important;
+    color: var(--stroke) !important;
+    border: 2px solid var(--stroke) !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.05) !important;
+    padding: 12px 20px !important;
+}
+
+/* --- 6. BOUTONS D'ACTION (Modifier, Supprimer, etc.) --- */
+button[style*="background: #e3f2fd"],
+button[style*="background: #e8f5e9"],
+button[style*="background: #ffebee"] {
+    border: 2px solid var(--stroke) !important;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.1) !important;
+}
+
+button[style*="background: #e3f2fd"]:hover,
+button[style*="background: #e8f5e9"]:hover,
+button[style*="background: #ffebee"]:hover {
+    transform: translate(-1px, -1px) !important;
+    box-shadow: 3px 3px 0px var(--stroke) !important;
+}
+
+/* --- 7. HEADER STICKY (Bande en haut avec Trévoux) --- */
+.planning-weeks > div[style*="position: sticky"] {
+    background: linear-gradient(180deg, #ffffff 0%, var(--bg-page) 100%) !important;
+    border-bottom: 3px solid var(--stroke) !important;
+    box-shadow: 0 6px 0px rgba(45, 52, 54, 0.15) !important;
+    position: sticky !important;
+    top: 80px !important; /* En dessous du header principal */
+    z-index: 999 !important;
+}
+
+/* Conteneur principal des semaines */
+.planning-weeks {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Week blocks adaptés au contenu */
+.week-block {
+    width: 100% !important;
+    max-width: 100% !important;
+    transition: all 0.3s ease !important;
+}
+
+.week-block:hover .week-header-unique {
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0px var(--stroke) !important;
+}
+
+/* --- 8. CARTES DE STATISTIQUES, WIDGETS, DASHBOARD --- */
+.stat-card, .widget-card, .dashboard-card, .card {
+    background: white !important;
+    border: 3px solid var(--stroke) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-hard) !important;
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+    transition: all 0.2s ease !important;
+}
+
+.card:hover {
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0px var(--stroke) !important;
+}
+
+/* En-têtes de cartes */
+.card-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 2px solid var(--stroke) !important;
+}
+
+.card-icon {
+    font-size: 1.5rem !important;
+    line-height: 1 !important;
+}
+
+.card-title {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    color: var(--stroke) !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* --- 9. INPUTS ET FORMULAIRES --- */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+    border: 2px solid var(--stroke) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none !important;
+    border-color: var(--blue-accent) !important;
+    box-shadow: 0 0 0 3px rgba(116, 185, 255, 0.2) !important;
+}
+
+/* --- 10. MODALES --- */
+.modal-content {
+    border: 3px solid var(--stroke) !important;
+    border-radius: 20px !important;
+    box-shadow: 8px 8px 0px var(--stroke) !important;
+}
+
+.modal-header {
+    background-color: var(--blue-accent) !important;
+    color: white !important;
+    border-bottom: 3px solid var(--stroke) !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+}
+
+/* --- 11. BADGES ET ÉTIQUETTES --- */
+.badge {
+    border: 2px solid var(--stroke) !important;
+    border-radius: 8px !important;
+    padding: 4px 12px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.1) !important;
+}
+
+.badge-airbnb {
+    background-color: #ff5a5f !important;
+    color: white !important;
+}
+
+.badge-abritel {
+    background-color: #0057FF !important;
+    color: white !important;
+}
+
+.badge-gdf {
+    background-color: #00A651 !important;
+    color: white !important;
+}
+
+/* =========================================
+   12. MENU UTILISATEUR (compact sur le côté)
+   ========================================= */
+.user-menu-container {
+    position: relative !important;
+}
+
+.user-menu-button {
+    padding: 6px 12px !important;
+    border: 2px solid var(--stroke) !important;
+    border-radius: 8px !important;
+    background: white !important;
+    cursor: pointer !important;
+    box-shadow: 2px 2px 0 var(--stroke) !important;
+    transition: all 0.2s ease !important;
+    font-size: 0.85rem !important;
+}
+
+.user-menu-button:hover {
+    transform: translate(-1px, -1px) !important;
+    box-shadow: 3px 3px 0 var(--stroke) !important;
+}
+
+.user-menu-name {
+    font-weight: 600 !important;
+    color: var(--stroke) !important;
+}
+
+.user-menu-role {
+    font-size: 0.75rem !important;
+    color: #666 !important;
+}
+
+.user-menu-dropdown {
+    display: none;  /* Caché par défaut */
+    position: fixed;  /* Fixed pour sortir du flux sticky-header */
+    top: 60px;  /* Juste sous le header */
+    right: 30px;  /* Aligné à droite */
+    margin-top: 8px;
+    min-width: 200px;
+    border: 2px solid var(--stroke);
+    border-radius: 12px;
+    box-shadow: var(--shadow-hard);
+    background: white;
+    overflow: hidden;
+    z-index: 1001;  /* Au-dessus du header */
+}
+
+.user-menu-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    border: none !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+    padding: 12px 16px !important;
+    background: white !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+}
+
+.user-menu-item:last-child {
+    border-bottom: none !important;
+}
+
+.user-menu-item:hover {
+    background: var(--c-blue) !important;
+    color: white !important;
+    transform: translateX(4px) !important;
+}
+
+.user-menu-item.logout:hover {
+    background: var(--c-red) !important;
+}
+
+/* =========================================
+   STYLES MODERNES (Remplacement Neo-Brutalism)
+   ========================================= */
+
+/* Boutons modernes avec gradients */
+.btn-modern {
+    padding: 10px 20px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-modern:active {
+    transform: translateY(0);
+}
+
+.btn-modern.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-modern.success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.btn-modern.danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-modern.info {
+    background: #3498db;
+    color: white;
+}
+
+.btn-modern.secondary {
+    background: white;
+    color: #2D3436;
+    border: 1px solid #ddd;
+}
+
+/* Badge/Compteur moderne */
+.badge-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Carte activité moderne */
+.card-activite-modern {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.card-activite-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+/* Boutons icônes modernes (éditer, supprimer) */
+.btn-icon-modern {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+}
+
+.btn-icon-modern.edit {
+    background: linear-gradient(135deg, #667eea 0%, #5568d3 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-icon-modern.edit:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-icon-modern.delete {
+    background: linear-gradient(135deg, #ff5252 0%, #e74c3c 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.btn-icon-modern.delete:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+/* Boutons petits modernes (fiscalité) */
+.btn-small-modern {
+    width: 38px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.btn-small-modern.edit {
+    background: linear-gradient(135deg, #667eea 0%, #5568d3 100%);
+    color: white;
+    box-shadow: 0 3px 6px rgba(102, 126, 234, 0.35);
+}
+
+.btn-small-modern.edit:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #4556bc 100%);
+    transform: scale(1.12);
+}
+
+.btn-small-modern.delete {
+    background: linear-gradient(135deg, #ff5252 0%, #e74c3c 100%);
+    color: white;
+    box-shadow: 0 3px 6px rgba(231, 76, 60, 0.35);
+}
+
+.btn-small-modern.delete:hover {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    transform: scale(1.12);
+}
+
+.btn-small-modern.valid {
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    color: white;
+}
+
+/* Modal moderne */
+.modal-modern {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    border: 1px solid #e0e0e0;
+}
+
+.modal-modern .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 24px;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+}
+
+.modal-modern .btn-close {
+    background: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.modal-modern .btn-close:hover {
+    transform: scale(1.1);
+}
+
+/* =========================================
+   FISCALITÉ - STYLES SPÉCIFIQUES
+   ========================================= */
+/* ⚠️ TOUS LES STYLES FISCALITÉ SONT DANS fiscalite-neo.css
+   Ne pas ajouter de styles fiscalité ici pour éviter les conflits !
+   Fichier: css/fiscalite-neo.css
+*/

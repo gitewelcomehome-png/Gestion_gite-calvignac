@@ -16,8 +16,17 @@ python3 -m http.server 8080
 
 ## �� Documentation
 
-- **[README_DEV.md](README_DEV.md)** : Guide technique complet
-- **[STATUS_PROJET.md](STATUS_PROJET.md)** : État d'avancement détaillé
+### Documents Essentiels
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Architecture technique complète
+- **[DESCRIPTION_COMPLETE_SITE.md](DESCRIPTION_COMPLETE_SITE.md)** - Documentation master
+- **[ERREURS_CRITIQUES.md](ERREURS_CRITIQUES.md)** - Historique bugs et solutions
+- **[STRUCTURE_PROJET.md](STRUCTURE_PROJET.md)** - Structure du projet
+- **[MODULES_JAVASCRIPT.md](MODULES_JAVASCRIPT.md)** - Documentation JavaScript
+
+### Documentation Complémentaire
+- **[docs/](docs/)** - Guides, démos et documentation technique
+- **[docs/guides/](docs/guides/)** - Guides de migration et intégration
+- **[docs/demos/](docs/demos/)** - Fichiers de démonstration HTML
 
 ## 🏗️ Architecture
 
@@ -38,5 +47,6 @@ Voir documentation complète dans `README_DEV.md`.
 
 ---
 
-**Version** : 2.0  
-**Dernière mise à jour** : 8 janvier 2026
+**Version** : 2.1  
+**Dernière mise à jour** : 25 janvier 2026  
+**Nettoyage racine** : ✅ Organisé (25/01/2026)

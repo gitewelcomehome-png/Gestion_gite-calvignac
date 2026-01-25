@@ -1,0 +1,27 @@
+/* ===================================
+   🎯 PRE-LOAD THÈME - Évite le flash blanc
+   Chargé EN PREMIER pour application immédiate
+   =================================== */
+
+/* Mode NUIT par défaut */
+html.theme-dark {
+    background: #0a0a0b;
+    color: #e4e6eb;
+}
+
+html.theme-dark body {
+    background: #0a0a0b;
+    color: #e4e6eb;
+}
+
+/* Mode JOUR */
+html.theme-light {
+    background: #f0f2f5;
+    color: #050505;
+}
+
+html.theme-light body {
+    background: #f0f2f5;
+    color: #050505;
+}
+

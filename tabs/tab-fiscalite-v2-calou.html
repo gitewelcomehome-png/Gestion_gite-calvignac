@@ -1,0 +1,174 @@
+<div class="tab-container">
+    <!-- Header CALOU -->
+    <div class="calou-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.75rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-calou-icon="euro" class="calou-icon" style="width: 32px; height: 32px;"></i>
+                    FISCALITÉ LMNP
+                </h2>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--calou-text-secondary);">Optimisez votre déclaration et calculez vos charges</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+                <button type="button" onclick="afficherModalOptions()" class="calou-btn-secondary">
+                    <i data-calou-icon="settings" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Options
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre de gestion d'années -->
+    <div class="calou-card" style="background: rgba(99, 102, 241, 0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <label style="font-weight: 600; color: var(--calou-text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-calou-icon="calendar" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Année fiscale :
+                </label>
+                <select id="annee_selector" onchange="chargerAnnee(this.value)" class="calou-input">
+                    <!-- Rempli dynamiquement -->
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+                <button type="button" onclick="creerNouvelleAnnee()" class="calou-btn-primary" title="Créer l'année suivante">
+                    <i data-calou-icon="plus-circle" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Nouvelle Année
+                </button>
+            </div>
+        </div>
+        <div class="calou-alert" style="margin-top: 1rem; background: rgba(99, 102, 241, 0.1); border-left: 4px solid var(--calou-primary); padding: 0.75rem;">
+            <span style="display: flex; align-items: center; gap: 0.5rem;">
+                <i data-calou-icon="info" class="calou-icon" style="width: 16px; height: 16px;"></i>
+                CA calculé automatiquement | Sauvegarde automatique activée
+            </span>
+        </div>
+    </div>
+
+    <div class="calou-card">
+        <form id="calculateur-lmp" onsubmit="calculerFiscalite(event)">
+            
+            <!-- Année cachée (gérée par le sélecteur) -->
+            <input type="hidden" id="annee_simulation" value=""  />
+            
+            <!-- BLOC 1 : Chiffre d'affaires -->
+            <div class="fiscal-bloc" style="margin-bottom: 2rem;">
+                <div style="background: linear-gradient(135deg, var(--calou-primary) 0%, var(--calou-secondary) 100%); color: white; padding: 2rem; border-radius: var(--calou-radius-lg); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.9rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-calou-icon="trending-up" class="calou-icon" style="width: 20px; height: 20px;"></i>
+                                Chiffre d'affaires annuel
+                            </div>
+                            <div id="ca-display" style="font-size: 3rem; font-weight: 700; margin-top: 0.75rem;">0,00 €</div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="ca" value="0">
+            </div>
+
+            <!-- BLOC 2 : Charges par gîte (généré dynamiquement) -->
+            <div id="gites-charges-container"></div>
+
+            <!-- BLOC 2C : FRAIS D'EXPLOITATIONS -->
+            <div class="fiscal-bloc collapsible collapsed" style="margin-bottom: 2rem;">
+                <h3 class="fiscal-bloc-title" style="color: var(--calou-text-primary); font-size: 1.3rem; margin-bottom: 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="toggle-icon">▼</span>
+                    <i data-calou-icon="briefcase" class="calou-icon" style="width: 24px; height: 24px;"></i>
+                    FRAIS D'EXPLOITATIONS
+                </h3>
+                <div class="bloc-content">
+                    
+                    <!-- Sous-section Travaux/Réparations -->
+                    <div class="exploitation-section calou-card" style="background: rgba(255, 152, 0, 0.1); border-left: 4px solid #ff9800; margin-bottom: 1.5rem;">
+                        <h4 style="color: #e65100; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+                            <i data-calou-icon="tool" class="calou-icon" style="width: 22px; height: 22px;"></i>
+                            Travaux/Réparations
+                        </h4>
+                        <div style="margin-bottom: 1rem;">
+                            <button type="button" onclick="ajouterTravaux()" class="calou-btn-primary" style="background: #ff9800; border-color: #ff9800;">
+                                <i data-calou-icon="plus" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                                Ajouter un travail
+                            </button>
+                        </div>
+                        <div id="travaux-liste" style="display: grid; gap: 0.75rem;">
+                        </div>
+                    </div>
+
+                    <!-- Sous-section Frais divers -->
+                    <div class="exploitation-section calou-card" style="background: rgba(76, 175, 80, 0.1); border-left: 4px solid #4caf50; margin-bottom: 1.5rem;">
+                        <h4 style="color: #2e7d32; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+                            <i data-calou-icon="file-text" class="calou-icon" style="width: 22px; height: 22px;"></i>
+                            Frais divers
+                        </h4>
+                        <div style="margin-bottom: 1rem;">
+                            <button type="button" onclick="ajouterFraisDivers()" class="calou-btn-primary" style="background: #4caf50; border-color: #4caf50;">
+                                <i data-calou-icon="plus" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                                Ajouter un frais
+                            </button>
+                        </div>
+                        <div id="frais-divers-liste" style="display: grid; gap: 0.75rem;">
+                        </div>
+                    </div>
+
+                    <!-- Sous-section Produits d'accueil -->
+                    <div class="exploitation-section calou-card" style="background: rgba(156, 39, 176, 0.1); border-left: 4px solid #9c27b0;">
+                        <h4 style="color: #6a1b9a; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+                            <i data-calou-icon="package" class="calou-icon" style="width: 22px; height: 22px;"></i>
+                            Produits d'accueil
+                        </h4>
+                        <div style="margin-bottom: 1rem;">
+                            <button type="button" onclick="ajouterProduitAccueil()" class="calou-btn-primary" style="background: #9c27b0; border-color: #9c27b0;">
+                                <i data-calou-icon="plus" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                                Ajouter un produit
+                            </button>
+                        </div>
+                        <div id="produits-accueil-liste" style="display: grid; gap: 0.75rem;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Autres blocs fiscaux générés dynamiquement par JavaScript -->
+            <div id="autres-blocs-fiscaux"></div>
+
+            <!-- Bouton de calcul -->
+            <div style="display: flex; justify-content: center; padding-top: 2rem; border-top: 2px solid var(--calou-border);">
+                <button type="submit" class="calou-btn-primary" style="font-size: 1.1rem; padding: 1rem 2.5rem;">
+                    <i data-calou-icon="calculator" class="calou-icon" style="width: 20px; height: 20px;"></i>
+                    Calculer la fiscalité
+                </button>
+            </div>
+        </form>
+
+        <!-- Résultats (générés par JS) -->
+        <div id="resultats-fiscaux" style="margin-top: 2rem;">
+            <!-- Les résultats seront insérés ici -->
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles CALOU pour Fiscalité */
+:root.calou-theme .fiscal-bloc.collapsible .bloc-content {
+    display: none;
+    margin-top: 1rem;
+}
+
+:root.calou-theme .fiscal-bloc.collapsible:not(.collapsed) .bloc-content {
+    display: block;
+}
+
+:root.calou-theme .fiscal-bloc.collapsible .toggle-icon {
+    transition: transform 0.3s;
+}
+
+:root.calou-theme .fiscal-bloc.collapsible:not(.collapsed) .toggle-icon {
+    transform: rotate(180deg);
+}
+
+:root.calou-theme .exploitation-section {
+    padding: 1.5rem;
+    border-radius: var(--calou-radius-md);
+}
+</style>

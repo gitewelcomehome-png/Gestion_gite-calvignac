@@ -1,0 +1,176 @@
+<div class="tab-container">
+    <!-- Header CALOU -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.75rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-calou-icon="map-pin" class="calou-icon" style="width: 32px; height: 32px;"></i>
+                    À DÉCOUVRIR
+                </h2>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--calou-text-secondary);">Activités, restaurants et sites touristiques autour de vos gîtes</p>
+            </div>
+            <div id="compteurActivites" class="calou-badge" style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+                <i data-calou-icon="map" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                <span id="nbActivites">0</span> activité(s)
+            </div>
+        </div>
+    </div>
+
+    <!-- Sélection Gîte et Filtres -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: end; margin-bottom: 1.5rem;">
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">
+                    <i data-calou-icon="home" class="calou-icon" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle;"></i>
+                    Sélectionner un gîte
+                </label>
+                <select id="selectGiteDecouvrir" class="calou-input" style="width: 100%;">
+                    <option value="">⏳ Chargement...</option>
+                </select>
+            </div>
+            <button id="btnAjouterActivite" class="calou-btn-primary">
+                <i data-calou-icon="plus" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                Ajouter une activité
+            </button>
+        </div>
+
+        <!-- Filtres par catégorie -->
+        <div id="filtresCategories" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; padding-top: 1.5rem; border-top: 2px solid var(--calou-border);">
+            <!-- Généré dynamiquement par JS -->
+        </div>
+    </div>
+
+    <!-- Carte Interactive (toggle) -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-calou-icon="map" class="calou-icon" style="width: 24px; height: 24px;"></i>
+                Carte Interactive
+            </h3>
+            <button id="btnToggleCarte" class="calou-btn-secondary">
+                <i data-calou-icon="map" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                Afficher la carte
+            </button>
+        </div>
+        <div id="mapActivitesContainer" style="display: none; height: 500px; border-radius: var(--calou-radius-md); overflow: hidden; border: 2px solid var(--calou-border);"></div>
+    </div>
+
+    <!-- Grille d'Activités -->
+    <div id="grilleActivites" class="calou-grid" data-cols="3" style="margin-bottom: 2rem;">
+        <!-- Cartes générées dynamiquement par JS -->
+    </div>
+
+    <!-- Message si vide -->
+    <div id="messageVide" class="calou-card" style="display: none; text-align: center; padding: 5rem 1.5rem;">
+        <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.5;">
+            <i data-calou-icon="map-pin" class="calou-icon" style="width: 80px; height: 80px;"></i>
+        </div>
+        <h3 style="color: var(--calou-text-primary); margin-bottom: 0.75rem; font-size: 1.5rem;">Aucune activité trouvée</h3>
+        <p style="color: var(--calou-text-secondary); margin-bottom: 2rem;">Commencez par ajouter des activités pour ce gîte</p>
+        <button class="calou-btn-primary" onclick="document.getElementById('btnAjouterActivite').click()">
+            <i data-calou-icon="plus" class="calou-icon" style="width: 18px; height: 18px;"></i>
+            Ajouter la première activité
+        </button>
+    </div>
+
+    <!-- Modal Ajout/Édition Activité -->
+    <div id="modalActiviteOverlay" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; backdrop-filter: blur(8px);"></div>
+    <div id="modalActiviteDialog" class="modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--calou-glass-bg); backdrop-filter: blur(20px); border-radius: var(--calou-radius-lg); width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.4); border: 2px solid var(--calou-border); z-index: 10000;">
+        
+        <!-- Header Modal -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 2px solid var(--calou-border); background: linear-gradient(135deg, var(--calou-primary) 0%, var(--calou-secondary) 100%); border-radius: calc(var(--calou-radius-lg) - 2px) calc(var(--calou-radius-lg) - 2px) 0 0;">
+            <h2 id="modalTitre" style="margin: 0; color: white; font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                <i data-calou-icon="plus-circle" class="calou-icon" style="width: 28px; height: 28px;"></i>
+                Nouvelle Activité
+            </h2>
+            <button id="btnFermerModal" style="background: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                <i data-calou-icon="x" class="calou-icon" style="width: 20px; height: 20px;"></i>
+            </button>
+        </div>
+
+        <!-- Corps Modal -->
+        <div style="padding: 1.5rem;">
+            <form id="formActivite">
+                <input type="hidden" id="activite_id">
+                <input type="hidden" id="activite_gite_id">
+                
+                <!-- Nom et Catégorie -->
+                <div class="calou-grid" data-cols="2" style="margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">
+                            Nom <span style="color: #f5576c;">*</span>
+                        </label>
+                        <input type="text" id="activite_nom" class="calou-input" placeholder="Ex: Restaurant Le Calvignac" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">
+                            Catégorie <span style="color: #f5576c;">*</span>
+                        </label>
+                        <select id="activite_categorie" class="calou-input" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="restaurant">🍽️ Restaurant</option>
+                            <option value="visite">🏛️ Visite/Musée</option>
+                            <option value="activite">🎯 Activité</option>
+                            <option value="nature">🌲 Nature</option>
+                            <option value="commerce">🛒 Commerce</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">Description</label>
+                    <textarea id="activite_description" class="calou-input" placeholder="Description de l'activité..." rows="3"></textarea>
+                </div>
+
+                <!-- Adresse et Téléphone -->
+                <div class="calou-grid" data-cols="2" style="margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">Adresse</label>
+                        <input type="text" id="activite_adresse" class="calou-input" placeholder="Adresse complète">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">Téléphone</label>
+                        <input type="tel" id="activite_telephone" class="calou-input" placeholder="06 12 34 56 78">
+                    </div>
+                </div>
+
+                <!-- URL et Distance -->
+                <div class="calou-grid" data-cols="2" style="margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">Site web</label>
+                        <input type="url" id="activite_url" class="calou-input" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">Distance (km)</label>
+                        <input type="number" id="activite_distance" class="calou-input" placeholder="5" step="0.1">
+                    </div>
+                </div>
+
+                <!-- Coordonnées GPS -->
+                <div class="calou-grid" data-cols="2" style="margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">Latitude</label>
+                        <input type="number" id="activite_latitude" class="calou-input" placeholder="44.123456" step="0.000001">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary);">Longitude</label>
+                        <input type="number" id="activite_longitude" class="calou-input" placeholder="1.234567" step="0.000001">
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; padding-top: 1rem; border-top: 2px solid var(--calou-border);">
+                    <button type="button" id="btnAnnulerActivite" class="calou-btn-secondary">
+                        <i data-calou-icon="x" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                        Annuler
+                    </button>
+                    <button type="submit" class="calou-btn-primary">
+                        <i data-calou-icon="save" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

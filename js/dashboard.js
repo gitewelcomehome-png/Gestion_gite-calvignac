@@ -6,6 +6,8 @@
 // ║  NE TOUCHER À CE FICHIER QUE SUR DEMANDE EXPLICITE                      ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
 
+console.log('🎯 DASHBOARD.JS CHARGÉ - VERSION 4.0 - 25 JAN 2026 20:15');
+
 /**
  * Vue d'ensemble hebdomadaire : réservations, ménages, todos
  * Version: 2.2.0 - Gestion problèmes clients
@@ -15,6 +17,94 @@
 // CONFIGURATION FEATURES OPTIONNELLES
 // ==========================================
 let CHECKLIST_FEATURE_ENABLED = true; // Activé (table checklist_templates créée)
+
+// ==========================================
+// 👥 FILTRE ADMIN
+// ==========================================
+let ADMIN_FILTER_MODE = 'current'; // 'all' ou 'current'
+
+/**
+ * Ouvre la popup admin settings
+ */
+function openAdminPopup() {
+    const popup = document.getElementById('adminPopup');
+    if (popup) {
+        popup.style.display = 'flex';
+        popup.style.animation = 'fadeIn 0.3s ease';
+    }
+}
+
+/**
+ * Ferme la popup admin settings
+ */
+function closeAdminPopup() {
+    const popup = document.getElementById('adminPopup');
+    if (popup) {
+        popup.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            popup.style.display = 'none';
+        }, 300);
+    }
+}
+document.addEventListener('click', function(e) {
+    const container = document.querySelector('.admin-menu-container');
+    const dropdown = document.getElementById('adminMenuDropdown');
+    if (container && dropdown && !container.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+/**
+ * Sélectionne un filtre admin
+ */
+function selectAdminFilter(mode) {
+    ADMIN_FILTER_MODE = mode;
+    
+    // Fermer la popup
+    closeAdminPopup();
+    
+    console.log(`🔄 Filtre admin changé: ${mode}`);
+    
+    // Recharger les données
+    if (typeof loadDashboard === 'function') {
+        loadDashboard();
+    }
+    
+    // Notification
+    showAdminFilterMessage(mode);
+}
+
+/**
+ * Affiche un message temporaire du changement de filtre
+ */
+function showAdminFilterMessage(mode) {
+    const msg = mode === 'all' ? 
+        '👥 Affichage : Tous les utilisateurs' : 
+        '👤 Affichage : Mon compte uniquement';
+    
+    // Créer une notification temporaire
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+    `;
+    notification.textContent = msg;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, 2000);
+}
 
 // ==========================================
 // FONCTIONS UTILITAIRES (fallback si shared-utils ne charge pas)
@@ -2638,3 +2728,6 @@ function toggleChecklistDetails(reservationId) {
 }
 
 window.toggleChecklistDetails = toggleChecklistDetails;
+window.openAdminPopup = openAdminPopup;
+window.closeAdminPopup = closeAdminPopup;
+window.selectAdminFilter = selectAdminFilter;

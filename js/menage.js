@@ -575,7 +575,7 @@ async function afficherPlanningParSemaine() {
         }
         
         html += `
-            <div style="background: white; border: 3px solid #2D3436; padding: 0; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; overflow: hidden;">
+            <div style="background: white; border: 1px solid var(--icalou-border); padding: 0; margin-bottom: 25px; box-shadow: var(--icalou-shadow); border-radius: 16px; overflow: hidden;">
                 <div style="${gridStyle} padding: 20px; box-sizing: border-box;">
         `;
         
@@ -590,13 +590,13 @@ async function afficherPlanningParSemaine() {
             const giteColor = colors[giteIndex % colors.length];
             
             html += `
-            <div style="display: flex; flex-direction: column; min-width: 0; ${columnStyle}; flex: 1;">
-                <div style="padding: 12px 20px; background: ${giteColor}; border-radius: 12px 12px 0 0; margin-bottom: 0; border: 3px solid #2D3436; border-bottom: none; box-shadow: 4px 4px 0 #2D3436;">
+            <div style="display: flex; flex-direction: column; min-width: 0; ${columnStyle}; flex: 1; overflow: hidden;" data-gite-color="${giteColor}">
+                <div style="padding: 12px 20px; background: ${giteColor}; border-radius: 12px 12px 0 0; margin-bottom: 0; border: 1px solid var(--icalou-border); border-bottom: none; box-shadow: var(--icalou-shadow);">
                     <div style="font-size: 0.8rem; margin-bottom: 2px; color: white; font-weight: 600;">${gite.icon || '🏠'} ${gite.name}</div>
                     <div style="font-size: 1rem; margin-bottom: 2px; color: white; font-weight: 700; text-transform: uppercase;">Semaine ${weekNumber}</div>
                     <div style="font-size: 0.8rem; opacity: 0.95; color: white;">${dateFormatted}</div>
                 </div>
-                <div style="background: white; border: 3px solid #2D3436; border-top: none; border-radius: 0 0 12px 12px; padding: 20px; min-height: 120px; box-shadow: 4px 4px 0 #2D3436;">
+                <div style="background: white; border: 1px solid var(--icalou-border); border-top: none; border-radius: 0 0 12px 12px; padding: 20px; min-height: 120px; box-shadow: var(--icalou-shadow);">
             `;
             
             if (menages.length === 0) {
@@ -689,10 +689,10 @@ function generateMenageCardHTML(menageInfo) {
     const cardClass = validated ? 'menage-card validated' : (status === 'pending_validation' || status === 'proposed' ? 'menage-card pending-validation' : 'menage-card');
     
     return `
-        <div style="background: white; margin-bottom: 15px; padding: 15px; border: 2px solid #2D3436; border-radius: 12px; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s; ${validated ? 'background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-color: #27ae60; box-shadow: 3px 3px 0 #27ae60;' : ''}" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='${validated ? '5px 5px 0 #27ae60' : '5px 5px 0 #2D3436'}'" onmouseout="this.style.transform=''; this.style.boxShadow='${validated ? '3px 3px 0 #27ae60' : '3px 3px 0 #2D3436'}'">
+        <div style="background: white; margin-bottom: 15px; padding: 15px; border: 1px solid var(--icalou-border); border-radius: 12px; box-shadow: var(--icalou-shadow-hover); transition: all 0.2s; ${validated ? 'background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-color: #27ae60; box-shadow: var(--icalou-shadow-hover);' : ''}" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--icalou-shadow-hover)'" onmouseout="this.style.transform=''; this.style.boxShadow='var(--icalou-shadow-hover)'">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <div style="font-size: 0.95rem; font-weight: 700; color: #2D3436;">📅 ${dateStr}</div>
-                <div style="width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436; background: ${validated ? '#55efc4' : '#ffeaa7'}; color: #2D3436;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; border: 1px solid var(--icalou-border); box-shadow: var(--icalou-shadow); background: ${validated ? '#55efc4' : '#ffeaa7'}; color: #2D3436;">
                     ${validated ? '✓' : '⏳'}
                 </div>
             </div>
@@ -703,7 +703,7 @@ function generateMenageCardHTML(menageInfo) {
             ${arriveeInfo ? `<div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">🔑 Arrivée: ${arriveeInfo}</div>` : ''}
             
             ${proposedByCompany ? `
-                <div style="background: #fff3cd; padding: 12px; margin: 10px 0; border: 2px solid #f39c12; border-radius: 8px; box-shadow: 2px 2px 0 #f39c12;">
+                <div style="background: #fff3cd; padding: 12px; margin: 10px 0; border: 1px solid #f39c12; border-radius: 8px; box-shadow: var(--icalou-shadow);">
                     <div style="font-weight: 700; color: #856404; margin-bottom: 5px;">📩 Proposition de la société de ménage</div>
                     <div style="font-size: 0.9rem; color: #856404;">Date proposée : <strong>${dateStr}</strong></div>
                     <div style="font-size: 0.9rem; color: #856404;">Horaire : <strong>${timeDisplay}</strong></div>

@@ -1,20 +1,25 @@
-<div class="tab-container">
-    <!-- Version: 2026-01-05-v4 -->
-    <!-- En-tête avec semaine actuelle -->
-    <div class="card" style="background: white; border: 3px solid #2D3436; padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h2 style="margin: 0; font-size: 1.5rem; color: #2D3436; font-weight: 700; text-transform: uppercase;">📊 Tableau de Bord</h2>
-                <p id="dashboard-week-info" style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Semaine en cours</p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <button onclick="updateFinancialIndicators()" class="btn-neo" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; border-radius: 10px; cursor: pointer; font-weight: 700; box-shadow: 3px 3px 0 #2D3436; transition: all 0.2s;" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436'" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436'">
-                    🔄 Actualiser
-                </button>
-                <div style="text-align: right;">
-                    <div id="dashboard-date" style="font-size: 1rem; font-weight: 600; color: #2c3e50;">29 décembre 2025</div>
-                    <div id="dashboard-week-number" style="font-size: 0.8rem; opacity: 1; margin-top: 2px; color: #2c3e50;">Semaine 52</div>
-                </div>
+<div class="tab-container dashboard-icalou">
+    <!-- DERNIÈRE MISE À JOUR: 25 JAN 2026 - 20:15 - VERSION POPUP -->
+    <!-- En-tête moderne avec sélecteur admin -->
+    <div class="dashboard-header">
+        <div class="header-left">
+            <h1 class="dashboard-title">📊 Tableau de Bord</h1>
+            <p id="dashboard-week-info" class="dashboard-subtitle">Semaine en cours</p>
+        </div>
+        <div class="header-right">
+            <!-- Bouton Engrenage Admin -->
+            <button id="adminSettingsButton" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s ease;" title="Paramètres admin">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
+                </svg>
+            </button>
+            <button onclick="updateFinancialIndicators()" class="btn-refresh">
+                🔄 Actualiser
+            </button>
+            <div class="date-widget">
+                <div id="dashboard-date" class="date-current">25 janvier 2026</div>
+                <div id="dashboard-week-number" class="date-week">Semaine 4</div>
             </div>
         </div>
     </div>

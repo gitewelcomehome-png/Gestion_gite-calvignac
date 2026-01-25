@@ -1,0 +1,979 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   UPSTAY - CSS UNIQUE
+   Un seul fichier CSS pour tout gérer, zéro conflit
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VARIABLES GLOBALES
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+    /* Couleurs UpStay */
+    --upstay-cyan: #00C2CB;
+    --upstay-blue: #005288;
+    --upstay-gradient: linear-gradient(135deg, #00C2CB 0%, #005288 100%);
+    
+    /* Couleurs gîtes */
+    --gite-blue: #3b82f6;
+    --gite-red: #ef4444;
+    --gite-green: #10b981;
+    --gite-cyan: #06b6d4;
+    
+    /* Neo-brutalisme */
+    --neo-black: #2D3436;
+    --neo-white: #ffffff;
+    --neo-border: 3px solid #2D3436;
+    --neo-shadow: 4px 4px 0 #2D3436;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THÈMES : JOUR + NUIT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* JOUR (par défaut) */
+html,
+html.theme-light {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --text-secondary: #64748b;
+    --border: rgba(15, 23, 42, 0.08);
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* NUIT */
+html.theme-dark {
+    --bg: #18191a;
+    --card: #242526;
+    --text: #e4e6eb;
+    --text-secondary: #b0b3b8;
+    --border: rgba(255,255,255,0.15);
+    --shadow: 0 2px 12px rgba(0,0,0,0.8);
+    --shadow-hover: 0 4px 20px rgba(0,0,0,0.9);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STYLES : APPLE (doux) + SIDEBAR (black)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ STYLE APPLE ═══ */
+
+/* APPLE + JOUR : Boutons cyan UpStay */
+html.theme-light.style-apple .btn-action,
+html.theme-light.style-apple .btn,
+html.theme-light.style-apple .btn-neo,
+html.theme-light.style-apple button:not(.ctrl-btn):not(.nav-tab) {
+    background: #00C2CB !important;
+    color: white !important;
+    border-radius: 10px !important;
+    border: none !important;
+    box-shadow: 0 1px 3px rgba(0, 194, 203, 0.2), 0 1px 2px rgba(0, 194, 203, 0.15) !important;
+    font-weight: 600 !important;
+    font-size: 17px !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-light.style-apple .btn-action:hover,
+html.theme-light.style-apple .btn:hover,
+html.theme-light.style-apple .btn-neo:hover,
+html.theme-light.style-apple button:not(.ctrl-btn):not(.nav-tab):hover {
+    background: #00a8b5 !important;
+    box-shadow: 0 2px 6px rgba(0, 194, 203, 0.25), 0 1px 3px rgba(0, 194, 203, 0.2) !important;
+}
+
+/* APPLE + NUIT : Boutons bleu foncé UpStay */
+html.theme-dark.style-apple .btn-action,
+html.theme-dark.style-apple .btn,
+html.theme-dark.style-apple .btn-neo,
+html.theme-dark.style-apple button:not(.ctrl-btn):not(.nav-tab) {
+    background: #005288 !important;
+    color: white !important;
+    border-radius: 10px !important;
+    border: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+    font-weight: 600 !important;
+    font-size: 17px !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-dark.style-apple .btn-action:hover,
+html.theme-dark.style-apple .btn:hover,
+html.theme-dark.style-apple .btn-neo:hover,
+html.theme-dark.style-apple button:not(.ctrl-btn):not(.nav-tab):hover {
+    background: #00628a !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Apple - Cartes arrondies */
+html.style-apple .card,
+html.style-apple .section-card,
+html.style-apple .modal-content {
+    border-radius: 20px !important;
+}
+
+html.style-apple input,
+html.style-apple select,
+html.style-apple textarea {
+    border-radius: 10px !important;
+}
+
+/* ═══ STYLE SIDEBAR ═══ */
+
+/* SIDEBAR + JOUR : Boutons blancs avec bordure colorée gauche */
+html.theme-light.style-sidebar .btn-action,
+html.theme-light.style-sidebar .btn,
+html.theme-light.style-sidebar .btn-neo,
+html.theme-light.style-sidebar button:not(.ctrl-btn):not(.nav-tab) {
+    background: white !important;
+    color: #3b82f6 !important;
+    border: 2px solid #e5e7eb !important;
+    border-left: 4px solid #3b82f6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-light.style-sidebar .btn-action:hover,
+html.theme-light.style-sidebar .btn:hover,
+html.theme-light.style-sidebar .btn-neo:hover,
+html.theme-light.style-sidebar button:not(.ctrl-btn):not(.nav-tab):hover {
+    background: #f8f9fa !important;
+    border-left-width: 6px !important;
+    transform: translateX(2px) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+}
+
+/* SIDEBAR + NUIT : Boutons sombres avec bordure néon */
+html.theme-dark.style-sidebar .btn-action,
+html.theme-dark.style-sidebar .btn,
+html.theme-dark.style-sidebar .btn-neo,
+html.theme-dark.style-sidebar button:not(.ctrl-btn):not(.nav-tab) {
+    background: #242526 !important;
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-left: 4px solid #3b82f6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.15) !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+html.theme-dark.style-sidebar .btn-action:hover,
+html.theme-dark.style-sidebar .btn:hover,
+html.theme-dark.style-sidebar .btn-neo:hover,
+html.theme-dark.style-sidebar button:not(.ctrl-btn):not(.nav-tab):hover {
+    background: #3a3b3c !important;
+    border-left-width: 6px !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25) !important;
+    transform: translateX(2px) !important;
+}
+
+/* Sidebar - Bordures nettes */
+html.style-sidebar .card,
+html.style-sidebar .section-card {
+    border: var(--neo-border) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--neo-shadow) !important;
+}
+
+html.style-sidebar input,
+html.style-sidebar select,
+html.style-sidebar textarea {
+    border: 2px solid var(--neo-black) !important;
+    border-radius: 8px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════════════ */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    line-height: 1.6;
+    padding-top: 80px;
+    transition: all 0.2s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE NUIT - FORCER TOUS LES FONDS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Mode NUIT : Forcer le fond sombre partout */
+html.theme-dark body,
+html.theme-dark .tab-content,
+html.theme-dark #app-container,
+html.theme-dark main,
+html.theme-dark .container,
+html.theme-dark .wrapper,
+html.theme-dark div[style*="background: white"],
+html.theme-dark div[style*="background: #fff"],
+html.theme-dark div[style*="background:#fff"],
+html.theme-dark div[style*="background-color: white"],
+html.theme-dark div[style*="background-color:#fff"],
+html.theme-dark div[style*="background-color: #ffffff"],
+html.theme-dark div[style*="background: #ffffff"] {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+}
+
+/* Mode NUIT : Toutes les cartes en sombre */
+html.theme-dark .card,
+html.theme-dark .section-card,
+html.theme-dark .dashboard-card,
+html.theme-dark .reservation-card,
+html.theme-dark .week-reservation,
+html.theme-dark .cleaning-item,
+html.theme-dark .stat-card,
+html.theme-dark .fiscal-card,
+html.theme-dark .charge-item,
+html.theme-dark [class*="card"],
+html.theme-dark [class*="-card"],
+html.theme-dark [class*="block"],
+html.theme-dark [class*="-block"] {
+    background: var(--card) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+/* Mode NUIT : TOUTES les divs avec background blanc inline */
+html.theme-dark div,
+html.theme-dark section,
+html.theme-dark article,
+html.theme-dark aside {
+    /* Ne pas forcer si déjà transparent ou gradient */
+    background-color: var(--card);
+}
+
+/* Mode NUIT : Divs spécifiques fiscalité */
+html.theme-dark #tab-charges div,
+html.theme-dark .fiscal-section div,
+html.theme-dark .charges-container div {
+    background: var(--card) !important;
+    color: var(--text) !important;
+}
+
+/* Mode NUIT : Formulaires en sombre */
+html.theme-dark input,
+html.theme-dark select,
+html.theme-dark textarea,
+html.theme-dark input[type="text"],
+html.theme-dark input[type="number"],
+html.theme-dark input[type="date"],
+html.theme-dark input[type="email"] {
+    background: var(--card) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+/* Mode NUIT : Modals en sombre */
+html.theme-dark .modal-content,
+html.theme-dark .modal-body,
+html.theme-dark .modal-header,
+html.theme-dark .modal-footer {
+    background: var(--card) !important;
+    color: var(--text) !important;
+}
+
+/* Mode NUIT : Tables en sombre */
+html.theme-dark table,
+html.theme-dark th,
+html.theme-dark td,
+html.theme-dark tr,
+html.theme-dark thead,
+html.theme-dark tbody {
+    background: var(--card) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+/* Mode NUIT : Planning en sombre */
+html.theme-dark .planning-container,
+html.theme-dark .planning-weeks,
+html.theme-dark .week-block {
+    background: var(--bg) !important;
+}
+
+/* Mode NUIT : Listes et items */
+html.theme-dark ul,
+html.theme-dark ol,
+html.theme-dark li {
+    color: var(--text) !important;
+}
+
+/* Mode NUIT : Textes */
+html.theme-dark h1,
+html.theme-dark h2,
+html.theme-dark h3,
+html.theme-dark h4,
+html.theme-dark h5,
+html.theme-dark h6,
+html.theme-dark p,
+html.theme-dark span:not([style*="color"]),
+html.theme-dark label,
+html.theme-dark a {
+    color: var(--text) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HEADER STICKY
+   ═══════════════════════════════════════════════════════════════════════ */
+.sticky-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+
+.site-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   NAVIGATION TABS - STYLE UPSTAY
+   ═══════════════════════════════════════════════════════════════════════ */
+.nav-container {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.nav-tab,
+.tab-button {
+    background: var(--upstay-gradient);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-tab:hover,
+.tab-button:hover {
+    background: linear-gradient(135deg, #005288 0%, #00C2CB 100%);
+    box-shadow: 0 2px 8px rgba(0, 82, 136, 0.3);
+    transform: translateY(-1px);
+}
+
+.nav-tab.active,
+.tab-button.active {
+    background: linear-gradient(135deg, #005288 0%, #00C2CB 100%);
+    box-shadow: 0 4px 12px rgba(0, 82, 136, 0.4);
+    transform: translateY(-2px);
+}
+
+.tab-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOUTONS
+   ═══════════════════════════════════════════════════════════════════════ */
+button,
+.btn {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary,
+.btn-save {
+    background: #10b981;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn-save:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-danger,
+.btn-delete {
+    background: #ef4444;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.btn-danger:hover,
+.btn-delete:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+.btn-secondary,
+.btn-cancel {
+    background: #64748b;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.btn-neo {
+    background: white;
+    border: 2px solid var(--neo-black);
+    color: var(--neo-black);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 2px 2px 0 var(--neo-black);
+}
+
+.btn-neo:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--neo-black);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARTES & CONTENEURS
+   ═══════════════════════════════════════════════════════════════════════ */
+.card,
+.section-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+}
+
+.card:hover,
+.section-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+/* Cartes néo-brutalisme */
+.card-neo {
+    background: white;
+    border: var(--neo-border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--neo-shadow);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FORMULAIRES
+   ═══════════════════════════════════════════════════════════════════════ */
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--upstay-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.1);
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TABS CONTENT
+   ═══════════════════════════════════════════════════════════════════════ */
+.tab-content {
+    display: none;
+    padding: 30px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PLANNING RÉSERVATIONS
+   ═══════════════════════════════════════════════════════════════════════ */
+.planning-weeks {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.week-block {
+    background: var(--card);
+    border: var(--neo-border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--neo-shadow);
+}
+
+/* Cartes de réservation avec liserets colorés cycliques */
+.week-reservation {
+    padding: 20px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    border-left: 6px solid var(--gite-blue);
+    transition: all 0.2s ease;
+}
+
+.week-reservation:nth-child(4n+1) {
+    border-left-color: var(--gite-blue);
+}
+
+.week-reservation:nth-child(4n+2) {
+    border-left-color: var(--gite-red);
+}
+
+.week-reservation:nth-child(4n+3) {
+    border-left-color: var(--gite-green);
+}
+
+.week-reservation:nth-child(4n) {
+    border-left-color: var(--gite-cyan);
+}
+
+.week-reservation:hover {
+    background: var(--bg);
+    transform: translateX(4px);
+}
+
+.week-reservation:last-child {
+    border-bottom: none;
+}
+
+.week-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    background: var(--bg);
+}
+
+/* En-têtes de colonnes gîtes avec couleurs cycliques */
+.gite-column-header {
+    padding: 15px 20px;
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: var(--neo-border);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+}
+
+.gite-column-header:nth-child(4n+1) {
+    background: var(--gite-blue);
+}
+
+.gite-column-header:nth-child(4n+2) {
+    background: var(--gite-red);
+}
+
+.gite-column-header:nth-child(4n+3) {
+    background: var(--gite-green);
+}
+
+.gite-column-header:nth-child(4n) {
+    background: var(--gite-cyan);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DASHBOARD
+   ═══════════════════════════════════════════════════════════════════════ */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TABLES
+   ═══════════════════════════════════════════════════════════════════════ */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+thead {
+    background: var(--upstay-gradient);
+    color: white;
+}
+
+th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background: var(--bg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LISTES
+   ═══════════════════════════════════════════════════════════════════════ */
+.list-item {
+    padding: 15px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.list-item:hover {
+    background: var(--bg);
+    transform: translateX(4px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STATISTIQUES
+   ═══════════════════════════════════════════════════════════════════════ */
+.stat-card {
+    background: var(--upstay-gradient);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.95;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BADGES & LABELS
+   ═══════════════════════════════════════════════════════════════════════ */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: #10b981;
+    color: white;
+}
+
+.badge-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.badge-warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.badge-info {
+    background: var(--upstay-cyan);
+    color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MÉNAGE / PLANNING
+   ═══════════════════════════════════════════════════════════════════════ */
+.cleaning-item {
+    padding: 15px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.cleaning-item:hover {
+    background: var(--bg);
+}
+
+.cleaning-item.validated {
+    border-left: 4px solid #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.cleaning-item.pending {
+    border-left: 4px solid #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FISCALITÉ
+   ═══════════════════════════════════════════════════════════════════════ */
+.fiscal-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.fiscal-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--upstay-blue);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CALENDRIER
+   ═══════════════════════════════════════════════════════════════════════ */
+.calendar-day {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 10px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.calendar-day:hover {
+    background: var(--bg);
+    border-color: var(--upstay-cyan);
+}
+
+.calendar-day.today {
+    background: var(--upstay-gradient);
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-day.reserved {
+    background: #ef4444;
+    color: white;
+}
+
+.calendar-day.available {
+    background: #10b981;
+    color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ALERTES & TOASTS
+   ═══════════════════════════════════════════════════════════════════════ */
+.alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-left: 4px solid #10b981;
+    color: #065f46;
+}
+
+html.theme-dark .alert-success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+}
+
+html.theme-dark .alert-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 4px solid #f59e0b;
+    color: #92400e;
+}
+
+html.theme-dark .alert-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+}
+
+.alert-info {
+    background: rgba(0, 194, 203, 0.1);
+    border-left: 4px solid var(--upstay-cyan);
+    color: #164e63;
+}
+
+html.theme-dark .alert-info {
+    background: rgba(0, 194, 203, 0.2);
+    color: #67e8f9;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODALS
+   ═══════════════════════════════════════════════════════════════════════ */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UTILITAIRES
+   ═══════════════════════════════════════════════════════════════════════ */
+.text-center {
+    text-align: center;
+}
+
+.mb-10 {
+    margin-bottom: 10px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.mb-30 {
+    margin-bottom: 30px;
+}
+
+.mt-10 {
+    margin-top: 10px;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    body {
+        padding-top: 60px;
+    }
+    
+    .sticky-header {
+        padding: 10px 15px;
+    }
+    
+    .nav-tab,
+    .tab-button {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .tab-label {
+        display: none;
+    }
+    
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+}

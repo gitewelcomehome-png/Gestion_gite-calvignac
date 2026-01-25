@@ -1,0 +1,220 @@
+/**
+ * ===================================
+ * 🎨 GESTIONNAIRE DE THÈMES ICALOU
+ * Gestion centralisée des thèmes et styles
+ * ===================================
+ */
+
+class ThemeManager {
+    constructor() {
+        this.THEME_KEY = 'icalou-theme';
+        this.STYLE_KEY = 'icalou-style';
+        
+        // Thèmes disponibles
+        this.themes = {
+            light: '☀️ Jour',
+            dark: '🌙 Nuit'
+        };
+        
+        // Styles disponibles (2 styles : Apple et Sidebar)
+        this.styles = {
+            apple: '🍎 Apple',
+            sidebar: '📊 Sidebar'
+        };
+        
+        this.init();
+    }
+    
+    /**
+     * Initialisation du gestionnaire
+     */
+    init() {
+        // Charger les préférences sauvegardées
+        const savedTheme = this.getSavedTheme();
+        const savedStyle = this.getSavedStyle();
+        
+        // Appliquer les préférences
+        this.setTheme(savedTheme);
+        this.setStyle(savedStyle);
+        
+        // Créer le sélecteur de thème si demandé
+        if (window.ICALOU_SHOW_THEME_SWITCHER !== false) {
+            this.createThemeSwitcher();
+        }
+        
+        console.log('🎨 ThemeManager initialisé:', {
+            theme: savedTheme,
+            style: savedStyle
+        });
+    }
+    
+    /**
+     * Récupérer le thème sauvegardé
+     */
+    getSavedTheme() {
+        return localStorage.getItem(this.THEME_KEY) || 'light';
+    }
+    
+    /**
+     * Récupérer le style sauvegardé
+     */
+    getSavedStyle() {
+        return localStorage.getItem(this.STYLE_KEY) || 'modern';
+    }
+    
+    /**
+     * Définir le thème
+     */
+    setTheme(theme) {
+        if (!this.themes[theme]) {
+            console.warn('Thème invalide:', theme);
+            return;
+        }
+        
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem(this.THEME_KEY, theme);
+        
+        // Mettre à jour le sélecteur si présent
+        this.updateSwitcherButtons();
+        
+        console.log('🎨 Thème changé:', theme);
+    }
+    
+    /**
+     * Définir le style
+     */
+    setStyle(style) {
+        if (!this.styles[style]) {
+            console.warn('Style invalide:', style);
+            return;
+        }
+        
+        document.documentElement.setAttribute('data-style', style);
+        localStorage.setItem(this.STYLE_KEY, style);
+        
+        // Mettre à jour le sélecteur si présent
+        this.updateSwitcherButtons();
+        
+        // Réinitialiser les icônes Lucide pour appliquer les nouveaux styles
+        if (window.lucide) {
+            setTimeout(() => lucide.createIcons(), 100);
+        }
+        
+        console.log('🎨 Style changé:', style);
+    }
+    
+    /**
+     * Basculer entre jour et nuit
+     */
+    toggleTheme() {
+        const currentTheme = this.getSavedTheme();
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        this.setTheme(newTheme);
+    }
+    
+    /**
+     * Créer le sélecteur de thème flottant
+     */
+    createThemeSwitcher() {
+        // Vérifier si déjà créé
+        if (document.getElementById('icalou-theme-switcher')) {
+            return;
+        }
+        
+        const switcher = document.createElement('div');
+        switcher.id = 'icalou-theme-switcher';
+        switcher.className = 'theme-switcher';
+        switcher.innerHTML = `
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <!-- Thème Jour/Nuit -->
+                <button class="theme-btn" data-theme="light" title="Mode Jour">☀️</button>
+                <button class="theme-btn" data-theme="dark" title="Mode Nuit">🌙</button>
+                
+                <div style="width: 1px; height: 30px; background: var(--border); margin: 0 4px;"></div>
+                
+                <!-- Styles -->
+                <button class="style-btn" data-style="modern" title="Modern">✨</button>
+                <button class="style-btn" data-style="neo-brutal" title="Neo-Brutal">⚡</button>
+                <button class="style-btn" data-style="minimal" title="Minimal">🎯</button>
+                <button class="style-btn" data-style="glass" title="Glass">🔮</button>
+            </div>
+        `;
+        
+        document.body.appendChild(switcher);
+        
+        // Ajouter les événements
+        switcher.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                this.setTheme(theme);
+            });
+        });
+        
+        switcher.querySelectorAll('.style-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const style = btn.dataset.style;
+                this.setStyle(style);
+            });
+        });
+        
+        // Mettre à jour l'état initial
+        this.updateSwitcherButtons();
+    }
+    
+    /**
+     * Mettre à jour les boutons actifs du sélecteur
+     */
+    updateSwitcherButtons() {
+        const switcher = document.getElementById('icalou-theme-switcher');
+        if (!switcher) return;
+        
+        const currentTheme = this.getSavedTheme();
+        const currentStyle = this.getSavedStyle();
+        
+        // Mettre à jour les thèmes
+        switcher.querySelectorAll('.theme-btn').forEach(btn => {
+            if (btn.dataset.theme === currentTheme) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Mettre à jour les styles
+        switcher.querySelectorAll('.style-btn').forEach(btn => {
+            if (btn.dataset.style === currentStyle) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    
+    /**
+     * Obtenir les informations du thème actuel
+     */
+    getCurrentTheme() {
+        return {
+            theme: this.getSavedTheme(),
+            style: this.getSavedStyle(),
+            themeName: this.themes[this.getSavedTheme()],
+            styleName: this.styles[this.getSavedStyle()]
+        };
+    }
+}
+
+// Initialisation automatique au chargement
+let themeManager;
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        themeManager = new ThemeManager();
+        window.themeManager = themeManager;
+    });
+} else {
+    themeManager = new ThemeManager();
+    window.themeManager = themeManager;
+}
+
+// Export global
+window.ThemeManager = ThemeManager;

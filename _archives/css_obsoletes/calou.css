@@ -1,0 +1,582 @@
+/* =========================================
+   🐺 CALOU ALPHA SYSTEM - V2.0
+   =========================================
+   Design system glassmorphism premium
+   Mode Jour/Nuit avec transitions fluides
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+/* =========================================
+   VARIABLES - MODE JOUR
+   ========================================= */
+:root.calou-theme {
+    /* Couleurs principales - DARK MODE PAR DÉFAUT */
+    --calou-bg: #0a0a0a;
+    --calou-card: #1a1a1a;
+    --calou-text: #ffffff;
+    --calou-text-muted: #6b7280;
+    --calou-border: rgba(255, 255, 255, 0.1);
+    --calou-accent: #6366f1;
+    --calou-accent-hover: #818cf8;
+    --calou-glow: rgba(99, 102, 241, 0.3);
+    
+    /* Couleurs sémantiques */
+    --calou-success: #10b981;
+    --calou-warning: #f59e0b;
+    --calou-error: #ef4444;
+    --calou-info: #6366f1;
+    
+    /* Espacements */
+    --calou-spacing-xs: 4px;
+    --calou-spacing-sm: 8px;
+    --calou-spacing-md: 16px;
+    --calou-spacing-lg: 24px;
+    --calou-spacing-xl: 32px;
+    --calou-spacing-2xl: 48px;
+    
+    /* Ombres */
+    --calou-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --calou-shadow-md: 0 10px 30px rgba(0, 0, 0, 0.02);
+    --calou-shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.05);
+    --calou-shadow-xl: 0 30px 60px rgba(0, 0, 0, 0.08);
+    
+    /* Border radius */
+    --calou-radius-sm: 12px;
+    --calou-radius-md: 24px;
+    --calou-radius-lg: 28px;
+    
+    /* Font */
+    --calou-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* =========================================
+   VARIABLES - MODE NUIT
+   ========================================= */
+/* Dark mode est le mode par défaut, pas de variante light */
+
+/* =========================================
+   STYLES DE BASE
+   ========================================= */
+:root.calou-theme body {
+    font-family: var(--calou-font) !important;
+    background: var(--calou-bg) !important;
+    color: var(--calou-text) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================
+   ANIMATIONS
+   ========================================= */
+@keyframes pulse-alpha {
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+    50% { 
+        opacity: 0.7; 
+        transform: scale(1.02); 
+    }
+}
+
+@keyframes fade-in {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slide-in {
+    from { 
+        opacity: 0; 
+        transform: translateX(-20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(0); 
+    }
+}
+
+/* =========================================
+   CARTES - EFFET GLASSMORPHISM PREMIUM
+   ========================================= */
+.calou-card {
+    background: var(--calou-card);
+    border: 1px solid var(--calou-border);
+    border-radius: 20px;
+    box-shadow: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.calou-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Carte avec bordure gauche colorée */
+.calou-card-bordered {
+    border-left-width: 6px;
+    border-left-style: solid;
+    padding: 1.5rem;
+}
+
+.calou-card-bordered.border-indigo {
+    border-left-color: #4f46e5;
+}
+
+.calou-card-bordered.border-amber {
+    border-left-color: #f59e0b;
+}
+
+.calou-card-bordered.border-green {
+    border-left-color: #10b981;
+}
+
+.calou-card-bordered.border-rose {
+    border-left-color: #f43f5e;
+}
+
+/* =========================================
+   ALERTES
+   ========================================= */
+.calou-alert {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: var(--calou-radius-md);
+}
+
+.calou-alert:hover {
+    transform: translateX(4px);
+}
+
+.calou-alert-warning {
+    border: 1px solid var(--calou-warning);
+    background: var(--calou-warning-bg);
+}
+
+.calou-alert-error {
+    border: 1px solid var(--calou-error);
+    background: var(--calou-error-bg);
+}
+
+.calou-alert-info {
+    border: 1px solid var(--calou-info);
+    background: var(--calou-info-bg);
+}
+
+.calou-alert-success {
+    border: 1px solid var(--calou-success);
+    background: var(--calou-success-bg);
+}
+
+/* =========================================
+   BOUTONS
+   ========================================= */
+.calou-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.625rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: none;
+    border-radius: var(--calou-radius-sm);
+    cursor: pointer;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.calou-btn:active {
+    transform: scale(0.98);
+}
+
+.calou-btn-primary {
+    background: var(--calou-accent);
+    color: white;
+    box-shadow: 0 0 20px var(--calou-glow);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+}
+
+.calou-btn-primary:hover {
+    background: var(--calou-accent-hover);
+    box-shadow: 0 0 30px var(--calou-glow);
+}
+
+.calou-btn-secondary {
+    background: transparent;
+    border: 2px solid var(--calou-border);
+    color: var(--calou-text);
+}
+
+.calou-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--calou-accent);
+}
+
+.calou-btn-accent {
+    background: var(--calou-accent);
+    color: white;
+    box-shadow: 0 8px 15px var(--calou-glow);
+}
+
+.calou-btn-accent:hover {
+    background: var(--calou-accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px var(--calou-glow);
+}
+
+/* Bouton icône */
+.calou-btn-icon {
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border-radius: var(--calou-radius-md);
+}
+
+/* Bouton Alpha style */
+.btn-alpha {
+    background: var(--calou-accent);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: white;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 0 20px var(--calou-glow);
+}
+
+.btn-alpha:hover {
+    background: var(--calou-accent-hover);
+    box-shadow: 0 0 30px var(--calou-glow);
+    transform: scale(1.05);
+}
+
+/* =========================================
+   NAVIGATION PILLS
+   ========================================= */
+.nav-pill {
+    padding: 0.5rem 1rem;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: var(--calou-radius-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.5;
+}
+
+.nav-pill:hover {
+    opacity: 1;
+}
+
+.nav-pill.active {
+    background: white;
+    color: black !important;
+    opacity: 1;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+:root.calou-theme.dark-mode .nav-pill.active {
+    background: var(--calou-accent);
+    color: white !important;
+}
+
+/* =========================================
+   BADGES
+   ========================================= */
+.calou-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 9px;
+    font-weight: 700;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.calou-badge-primary {
+    background: var(--calou-info-bg);
+    color: var(--calou-info);
+    border: 1px solid var(--calou-info);
+}
+
+.calou-badge-warning {
+    background: var(--calou-warning-bg);
+    color: var(--calou-warning);
+    border: 1px solid var(--calou-warning);
+}
+
+.calou-badge-success {
+    background: var(--calou-success-bg);
+    color: var(--calou-success);
+    border: 1px solid var(--calou-success);
+}
+
+.calou-badge-error {
+    background: var(--calou-error-bg);
+    color: var(--calou-error);
+    border: 1px solid var(--calou-error);
+}
+
+.pulse-badge {
+    animation: pulse-alpha 2s infinite;
+}
+
+/* =========================================
+   ICÔNES CIRCULAIRES
+   ========================================= */
+.calou-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--calou-radius-md);
+    flex-shrink: 0;
+    font-size: 2rem;
+}
+
+.calou-icon-sm {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+}
+
+.calou-icon-md {
+    width: 4rem;
+    height: 4rem;
+    font-size: 2rem;
+}
+
+.calou-icon-lg {
+    width: 5rem;
+    height: 5rem;
+    font-size: 2.5rem;
+}
+
+.calou-icon-indigo {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+}
+
+.calou-icon-amber {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.calou-icon-green {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.calou-icon-rose {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+}
+
+/* =========================================
+   TITRES & TYPOGRAPHIE
+   ========================================= */
+.calou-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+.calou-subtitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    opacity: 0.6;
+}
+
+.calou-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    opacity: 0.3;
+}
+
+.calou-text-accent {
+    color: var(--calou-accent);
+}
+
+/* =========================================
+   LAYOUT UTILITAIRES
+   ========================================= */
+.calou-flex {
+    display: flex;
+}
+
+.calou-flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.calou-items-center {
+    align-items: center;
+}
+
+.calou-justify-between {
+    justify-content: space-between;
+}
+
+.calou-justify-center {
+    justify-content: center;
+}
+
+.calou-gap-1 {
+    gap: 0.25rem;
+}
+
+.calou-gap-2 {
+    gap: 0.5rem;
+}
+
+.calou-gap-3 {
+    gap: 0.75rem;
+}
+
+.calou-gap-4 {
+    gap: 1rem;
+}
+
+.calou-gap-6 {
+    gap: 1.5rem;
+}
+
+/* Marges */
+.calou-mb-1 { margin-bottom: 0.25rem; }
+.calou-mb-2 { margin-bottom: 0.5rem; }
+.calou-mb-3 { margin-bottom: 0.75rem; }
+.calou-mb-4 { margin-bottom: 1rem; }
+.calou-mb-6 { margin-bottom: 1.5rem; }
+.calou-mb-8 { margin-bottom: 2rem; }
+
+.calou-mt-1 { margin-top: 0.25rem; }
+.calou-mt-2 { margin-top: 0.5rem; }
+.calou-mt-3 { margin-top: 0.75rem; }
+.calou-mt-4 { margin-top: 1rem; }
+.calou-mt-6 { margin-top: 1.5rem; }
+
+/* Padding */
+.calou-p-4 { padding: 1rem; }
+.calou-p-6 { padding: 1.5rem; }
+.calou-p-8 { padding: 2rem; }
+
+/* =========================================
+   SCROLLBAR PERSONNALISÉE
+   ========================================= */
+:root.calou-theme ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+:root.calou-theme ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+:root.calou-theme ::-webkit-scrollbar-thumb {
+    background: var(--calou-border);
+    border-radius: 10px;
+}
+
+:root.calou-theme ::-webkit-scrollbar-thumb:hover {
+    background: var(--calou-accent);
+}
+
+/* =========================================
+   GRILLES STATISTIQUES
+   ========================================= */
+.calou-stat-card {
+    padding: 2rem;
+    border-radius: var(--calou-radius-lg);
+}
+
+.calou-stat-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.4;
+}
+
+.calou-stat-value {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    margin-top: 1rem;
+}
+
+.calou-stat-unit {
+    font-size: 1.25rem;
+    opacity: 0.3;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+@media (max-width: 768px) {
+    .calou-card {
+        border-radius: var(--calou-radius-md);
+    }
+    
+    .calou-title {
+        font-size: 1rem;
+    }
+    
+    .calou-stat-value {
+        font-size: 2rem;
+    }
+}
+
+/* =========================================
+   OVERRIDES POUR L'EXISTANT
+   ========================================= */
+:root.calou-theme .reservation-card,
+:root.calou-theme .cleaning-card,
+:root.calou-theme .stat-card {
+    background: var(--calou-card) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid var(--calou-border) !important;
+    border-radius: var(--calou-radius-lg) !important;
+}
+
+:root.calou-theme button {
+    font-family: var(--calou-font) !important;
+}
+
+:root.calou-theme h1,
+:root.calou-theme h2,
+:root.calou-theme h3,
+:root.calou-theme h4 {
+    font-family: var(--calou-font) !important;
+}

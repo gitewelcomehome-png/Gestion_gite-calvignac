@@ -1,0 +1,92 @@
+<div class="tab-container">
+    <!-- Header CALOU -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.75rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-calou-icon="check-square" class="calou-icon" style="width: 32px; height: 32px;"></i>
+                    CHECK-LISTS
+                </h2>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--calou-text-secondary);">Suivi des tâches entrée/sortie</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 📊 RÉSERVATIONS EN COURS -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-calou-icon="calendar-check" class="calou-icon" style="width: 24px; height: 24px;"></i>
+            RÉSERVATIONS EN COURS
+        </h3>
+        <div id="checklist-reservations-container">
+            <p style="color: var(--calou-text-secondary); font-style: italic;">Chargement des réservations...</p>
+        </div>
+    </div>
+    
+    <script>
+        // Charger automatiquement les checklists quand cet onglet est affiché
+        setTimeout(function() {
+            if (typeof window.loadChecklistsTab === 'function') {
+                try {
+                    window.loadChecklistsTab();
+                } catch (error) {
+                    console.error('Erreur chargement checklists:', error);
+                    const container = document.getElementById('checklist-reservations-container');
+                    if (container) {
+                        container.innerHTML = '<div class="calou-alert" style="background: rgba(245, 87, 108, 0.1); border-left: 4px solid #f5576c; padding: 1rem;"><strong style="display: flex; align-items: center; gap: 0.5rem;"><i data-calou-icon="alert-circle" class="calou-icon" style="width: 18px; height: 18px;"></i>Erreur</strong> Erreur de chargement. Rechargez la page.</div>';
+                    }
+                }
+            }
+        }, 500);
+    </script>
+    
+    <!-- ➕ CRÉER DES ITEMS DE CHECK-LIST -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-calou-icon="plus-circle" class="calou-icon" style="width: 24px; height: 24px;"></i>
+            CRÉER DES ITEMS DE CHECK-LIST
+        </h3>
+        
+        <div class="calou-grid" data-cols="2" style="margin-bottom: 1.5rem;">
+            <!-- Sélection gîte -->
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary); font-size: 0.875rem;">Gîte</label>
+                <select id="checklist-gite-select" class="calou-input">
+                    <option value="Trevoux">Trevoux</option>
+                    <option value="Couzon">Couzon</option>
+                </select>
+            </div>
+            
+            <!-- Sélection type -->
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary); font-size: 0.875rem;">Type</label>
+                <select id="checklist-type-select" class="calou-input">
+                    <option value="arrivee">Arrivée</option>
+                    <option value="depart">Départ</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Nouvelle tâche -->
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary); font-size: 0.875rem;">Nouvelle tâche</label>
+            <input type="text" id="new-checklist-task" placeholder="Ex: Vérifier les draps" class="calou-input">
+        </div>
+        
+        <button onclick="addChecklistItem()" class="calou-btn-primary">
+            <i data-calou-icon="plus" class="calou-icon" style="width: 18px; height: 18px;"></i>
+            Ajouter une tâche
+        </button>
+    </div>
+    
+    <!-- 📋 MODÈLES DE CHECK-LISTS -->
+    <div class="calou-card">
+        <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-calou-icon="list" class="calou-icon" style="width: 24px; height: 24px;"></i>
+            MODÈLES DE CHECK-LISTS
+        </h3>
+        <div id="checklist-templates-container">
+            <p style="color: var(--calou-text-secondary); font-style: italic;">Chargement des modèles...</p>
+        </div>
+    </div>
+</div>
