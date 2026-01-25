@@ -692,7 +692,7 @@
                     </select>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <div class="flex-gap-10-mt">
                     <button type="submit" class="btn btn-primary">
                         <span>✓</span> Enregistrer
                     </button>
@@ -756,7 +756,7 @@
                     </p>
                 </div>
 
-                <div style="display: flex; justify-content: center; margin-top: 20px;">
+                <div class="flex-center-mt">
                     <button type="button" class="btn btn-primary" onclick="closeRulesModal()">
                         Fermer
                     </button>
@@ -1177,7 +1177,7 @@
                                 ${c.notes ? '<br>' + c.notes : ''}
                             </div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 15px;">
+                        <div class="flex-items-gap">
                             <div class="charge-amount">${c.montant ? c.montant.toFixed(2) : '0.00'} €</div>
                             <button class="btn btn-danger btn-small" onclick="deleteChargeById(${c.id})">🗑️</button>
                         </div>
@@ -1482,11 +1482,11 @@
                 byYear[d.year][d.gite] = d;
             });
             
-            let html = '<div style="display: flex; flex-wrap: wrap; gap: 15px;">';
+            let html = '<div class="flex-wrap-gap">';
             Object.keys(byYear).sort().reverse().forEach(year => {
                 html += `
-                    <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid var(--border); min-width: 200px;">
-                        <div style="font-weight: 700; color: var(--primary); margin-bottom: 10px; font-size: 1.1rem;">📅 ${year}</div>
+                    <div class="historic-year-card">
+                        <div class="historic-year-title">📅 ${year}</div>
                 `;
                 
                 if (byYear[year]['Total']) {
