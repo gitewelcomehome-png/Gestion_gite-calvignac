@@ -2041,22 +2041,4 @@ html.theme-dark .stat-card-icalou {
     }
 }
 
-/* ========================================
-   ADMIN FILTER SELECT
-   ======================================== */
-#adminFilterSelect:hover {
-    border-color: #00C2CB;
-    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.3);
-}
 
-#adminFilterSelect:focus {
-    outline: none;
-    border-color: #00C2CB;
-    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.1);
-}
-
-html.theme-dark #adminFilterSelect {
-    background-color: #2D3748;
-    border-color: #3b82f6;
-    color: #f3f4f6;
-}
