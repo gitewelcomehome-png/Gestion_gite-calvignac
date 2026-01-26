@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Thème Debug</title>
+    <link rel="stylesheet" href="css/main.css?v=2.4.1" />
+    <style>
+        .debug-box {
+            padding: 20px;
+            margin: 20px;
+            border: 2px solid red;
+        }
+        .test-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            margin: 10px;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 DEBUG THÈME</h1>
+    
+    <button onclick="setTheme('light')">JOUR</button>
+    <button onclick="setTheme('dark')">NUIT</button>
+    
+    <div class="debug-box">
+        <h2>Variables CSS Actuelles :</h2>
+        <div id="vars"></div>
+    </div>
+    
+    <div class="test-card">
+        TEST CARD avec var(--bg-secondary)
+    </div>
+    
+    <div style="background: var(--bg-secondary); padding: 20px; margin: 10px;">
+        TEST DIV INLINE avec var(--bg-secondary)
+    </div>
+    
+    <script>
+        function setTheme(theme) {
+            const root = document.documentElement;
+            root.setAttribute('data-theme', theme);
+            console.log('🎨 Theme changé:', theme);
+            showVars();
+        }
+        
+        function showVars() {
+            const root = document.documentElement;
+            const computed = getComputedStyle(root);
+            const theme = root.getAttribute('data-theme');
+            
+            const vars = {
+                'data-theme': theme,
+                '--bg-primary': computed.getPropertyValue('--bg-primary'),
+                '--bg-secondary': computed.getPropertyValue('--bg-secondary'),
+                '--text-primary': computed.getPropertyValue('--text-primary'),
+                '--border-color': computed.getPropertyValue('--border-color')
+            };
+            
+            document.getElementById('vars').innerHTML = Object.entries(vars)
+                .map(([k, v]) => `<div><strong>${k}:</strong> ${v}</div>`)
+                .join('');
+            
+            console.log('📊 Variables:', vars);
+        }
+        
+        showVars();
+    </script>
+</body>
+</html>

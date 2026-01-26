@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark" id="app-root" class="style-sidebar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌓 Test Intégration iCalou - Lot 1</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* ==========================================================================
+           EXTRAIT DE TON CSS (2936 LIGNES) + OPTIMISATION LOT 1
+           ========================================================================== */
+        
+        :root {
+            --upstay-cyan: #00C2CB;
+            --upstay-blue: #005288;
+            --upstay-gradient: linear-gradient(135deg, #00C2CB 0%, #005288 100%);
+        }
+
+        :root[data-theme="light"] {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #64748b;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --btn-neutral: rgba(0, 0, 0, 0.04);
+        }
+
+        :root[data-theme="dark"] {
+            --bg-primary: #050506;
+            --bg-secondary: #111113;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 24px rgba(0,0,0,0.3);
+            --btn-neutral: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+            margin: 0;
+            padding-top: 80px;
+            transition: all 0.3s ease;
+        }
+
+        /* === CONTENEUR 1 : .container === */
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* === CONTENEUR 2 & 3 : .card & .section-card === */
+        .section-card, .card {
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* === CONTENEUR 5 : .header (Sticky) === */
+        .sticky-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 80px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            z-index: 1000;
+        }
+
+        .brand-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--upstay-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        /* === STYLES DE BOUTONS (Apple vs Sidebar) === */
+        .btn-action {
+            padding: 12px 20px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        /* Logic Style Apple */
+        .style-apple .btn-action {
+            background: var(--upstay-cyan);
+            color: white;
+            border-radius: 50px;
+        }
+
+        /* Logic Style Sidebar */
+        .style-sidebar .btn-action {
+            background: var(--btn-neutral);
+            border-left: 4px solid var(--upstay-cyan);
+            color: var(--text-primary);
+            border-radius: 4px;
+        }
+
+        /* === CONTENEUR 4 : .modal === */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show { display: flex; }
+        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+        .modal-content {
+            position: relative;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            width: 90%; max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Switcher Buttons Styles */
+        .ctrl-group { display: flex; background: #000; padding: 5px; border-radius: 12px; gap: 5px; }
+        .ctrl-btn {
+            background: transparent; color: white; border: none; padding: 8px 15px;
+            font-size: 11px; font-weight: 800; cursor: pointer; opacity: 0.5;
+        }
+        .ctrl-btn.active { opacity: 1; background: rgba(255,255,255,0.1); border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <header class="sticky-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="width: 40px; height: 40px; background: var(--upstay-gradient); border-radius: 10px;"></div>
+            <h1 class="brand-name">iCalou</h1>
+        </div>
+        
+        <div style="display: flex; gap: 20px;">
+            <div class="ctrl-group">
+                <button class="ctrl-btn active" id="btn-dark" onclick="updateTheme('dark')">NUIT</button>
+                <button class="ctrl-btn" id="btn-light" onclick="updateTheme('light')">JOUR</button>
+            </div>
+            <div class="ctrl-group">
+                <button class="ctrl-btn active" id="btn-sidebar" onclick="updateStyle('sidebar')">SIDEBAR</button>
+                <button class="ctrl-btn" id="btn-apple" onclick="updateStyle('apple')">APPLE</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <section class="section-card">
+            <div class="section-header">
+                <h2>Tableau de Bord Migration</h2>
+                <button class="btn-action" onclick="openModal()"><i data-lucide="info"></i> Voir Infos</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <div class="card">
+                    <h3 style="margin-top:0">Statut Lot 1</h3>
+                    <p style="color: var(--text-secondary)">Optimisation des conteneurs card, section, header et modal effectuée.</p>
+                    <button class="btn-action"><i data-lucide="check-circle"></i> Valider</button>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-top:0">Nombre de Gîtes</h3>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 20px; padding: 10px 0;">
+                        <button class="btn-action" style="padding: 10px; border-radius: 50%;"><i data-lucide="minus"></i></button>
+                        <span style="font-size: 2.5rem; font-weight: 800;">04</span>
+                        <button class="btn-action" style="padding: 10px; border-radius: 50%;"><i data-lucide="plus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="modal" id="infoModal">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content">
+            <h2 style="margin-top:0">Test Migration Lot 1</h2>
+            <p>Cette page utilise la structure HTML de votre fichier d'origine fusionnée avec les nouvelles propriétés du Lot 1.</p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn-action" style="background: var(--text-secondary)" onclick="closeModal()">Fermer</button>
+                <button class="btn-action" onclick="closeModal()">Compris</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function updateTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('btn-dark').classList.toggle('active', theme === 'dark');
+            document.getElementById('btn-light').classList.toggle('active', theme === 'light');
+        }
+
+        function updateStyle(style) {
+            const root = document.getElementById('app-root');
+            root.classList.remove('style-sidebar', 'style-apple');
+            root.classList.add(`style-${style}`);
+            document.getElementById('btn-sidebar').classList.toggle('active', style === 'sidebar');
+            document.getElementById('btn-apple').classList.toggle('active', style === 'apple');
+        }
+
+        function openModal() { document.getElementById('infoModal').classList.add('show'); }
+        function closeModal() { document.getElementById('infoModal').classList.remove('show'); }
+    </script>
+</body>
+</html>
