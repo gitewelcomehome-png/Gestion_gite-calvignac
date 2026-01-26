@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark" id="app-root" class="style-sidebar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Test Migration Lot 02 - Boutons</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* ==========================================================================
+           VARIABLES & RESET
+           ========================================================================== */
+        :root {
+            --upstay-cyan: #00C2CB;
+            --upstay-blue: #005288;
+        }
+
+        :root[data-theme="light"] {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #ffffff;
+            --text-primary: #1d1d1f;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --btn-neutral-bg: #e5e7eb;
+        }
+
+        :root[data-theme="dark"] {
+            --bg-primary: #050506;
+            --bg-secondary: #111113;
+            --text-primary: #ffffff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --btn-neutral-bg: #2d2d30;
+        }
+
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; }
+        .section-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; margin-bottom: 30px; }
+
+        /* ==========================================================================
+           LOGIQUE BOUTONS LOT 02 (OPTIMISÉE)
+           ========================================================================== */
+        
+        /* 1/5 : .btn (Base commune) */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        /* 2/5 : .btn-primary */
+        .btn-primary { 
+            --btn-bg: var(--upstay-cyan); 
+            --btn-text: white; 
+        }
+
+        /* 3/5 : .btn-secondary */
+        .btn-secondary { 
+            --btn-bg: var(--btn-neutral-bg); 
+            --btn-text: var(--text-primary); 
+        }
+
+        /* 4/5 : .btn-success */
+        .btn-success { 
+            --btn-bg: #10b981; 
+            --btn-text: white; 
+        }
+
+        /* 5/5 : .btn-danger */
+        .btn-danger { 
+            --btn-bg: #ef4444; 
+            --btn-text: white; 
+        }
+
+        /* === RENDU STYLE APPLE === */
+        .style-apple .btn {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .style-apple .btn:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+        }
+
+        /* === RENDU STYLE SIDEBAR === */
+        .style-sidebar .btn {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--btn-bg);
+            border-radius: 4px;
+        }
+        .style-sidebar .btn:hover {
+            background: var(--btn-bg);
+            color: white;
+            border-color: var(--btn-bg);
+        }
+
+        /* Utilitaires switchers */
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; background: #000; padding: 10px; border-radius: 12px; width: fit-content; }
+        .ctrl-btn { background: #222; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .ctrl-btn.active { background: var(--upstay-cyan); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Migration Lot 02 : Boutons</h1>
+        
+        <div class="controls">
+            <button class="ctrl-btn active" onclick="setTheme('dark', this)">NUIT</button>
+            <button class="ctrl-btn" onclick="setTheme('light', this)">JOUR</button>
+            <span style="color: #444; margin: 0 10px;">|</span>
+            <button class="ctrl-btn active" onclick="setStyle('sidebar', this)">SIDEBAR</button>
+            <button class="ctrl-btn" onclick="setStyle('apple', this)">APPLE</button>
+        </div>
+
+        <div class="section-card">
+            <h3>Variantes de Boutons</h3>
+            <p style="opacity: 0.6; margin-bottom: 20px;">Test des 5 classes principales du Lot 02</p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                <button class="btn btn-secondary">
+                    <i data-lucide="play"></i> .btn (Base)
+                </button>
+
+                <button class="btn btn-primary">
+                    <i data-lucide="zap"></i> .btn-primary
+                </button>
+
+                <button class="btn btn-secondary">
+                    <i data-lucide="settings"></i> .btn-secondary
+                </button>
+
+                <button class="btn btn-success">
+                    <i data-lucide="check"></i> .btn-success
+                </button>
+
+                <button class="btn btn-danger">
+                    <i data-lucide="trash-2"></i> .btn-danger
+                </button>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h3>Exemple d'utilisation (Formulaire)</h3>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn btn-secondary">Annuler</button>
+                <button class="btn btn-primary">Enregistrer les modifications</button>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script>
+        lucide.createIcons();
+
+        function setTheme(theme, btn) {
+            document.documentElement.setAttribute('data-theme', theme);
+            updateActive(btn);
+        }
+
+        function setStyle(style, btn) {
+            const root = document.getElementById('app-root');
+            root.className = style === 'apple' ? 'style-apple' : 'style-sidebar';
+            updateActive(btn);
+        }
+
+        function updateActive(clickedBtn) {
+            const parent = clickedBtn.parentElement;
+            parent.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+            clickedBtn.classList.add('active');
+        }
+    </script>
+</body>
+</html>

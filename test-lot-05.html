@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark" id="app-root" class="theme-dark style-sidebar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏷️ Test LOT 05 - Badges & Labels</title>
+    <link rel="stylesheet" href="css/main.css?v=2.9.0" />
+</head>
+<body>
+    <!-- 🎨 CONTRÔLES THÈMES -->
+    <div class="theme-controls">
+        <button onclick="setTheme('light')" id="t-light" class="ctrl-btn">JOUR</button>
+        <button onclick="setTheme('dark')" id="t-dark" class="ctrl-btn active">NUIT</button>
+        <div class="ctrl-separator"></div>
+        <button onclick="setStyle('apple')" id="s-apple" class="ctrl-btn">APPLE</button>
+        <button onclick="setStyle('sidebar')" id="s-sidebar" class="ctrl-btn active">SIDEBAR</button>
+    </div>
+
+    <div class="container" style="max-width: 1200px; margin: 40px auto; padding: 20px;">
+        <h1 style="text-align: center; margin-bottom: 40px;">🏷️ LOT 05 - Badges & Labels</h1>
+
+        <!-- Badges de statut -->
+        <div class="card" style="margin-bottom: 40px;">
+            <h2>Badges de statut</h2>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
+                <span class="badge badge-success">✅ Confirmé</span>
+                <span class="badge badge-warning">⏳ En attente</span>
+                <span class="badge badge-danger">❌ Annulé</span>
+                <span class="badge badge-info">ℹ️ Information</span>
+                <span class="badge badge-neutral">Neutre</span>
+            </div>
+        </div>
+
+        <!-- Labels -->
+        <div class="card" style="margin-bottom: 40px;">
+            <h2>Labels</h2>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
+                <span class="label label-primary">NOUVEAU</span>
+                <span class="label label-secondary">ARCHIVES</span>
+            </div>
+        </div>
+
+        <!-- Exemples d'utilisation -->
+        <div class="card">
+            <h2>Exemples d'utilisation</h2>
+            <div style="margin-top: 20px;">
+                <h3>Dans un contexte de réservations</h3>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px;">
+                    <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px; min-width: 200px;">
+                        <div style="font-weight: 700; margin-bottom: 8px;">Le Relais</div>
+                        <span class="badge badge-success">✅ Confirmé</span>
+                    </div>
+                    <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px; min-width: 200px;">
+                        <div style="font-weight: 700; margin-bottom: 8px;">La Bergerie</div>
+                        <span class="badge badge-warning">⏳ En attente</span>
+                    </div>
+                    <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px; min-width: 200px;">
+                        <div style="font-weight: 700; margin-bottom: 8px;">Le Chêne</div>
+                        <span class="badge badge-danger">❌ Annulé</span>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 32px;">Avec labels et badges</h3>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px;">
+                    <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px; min-width: 250px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="font-weight: 700;">Réservation #12345</span>
+                            <span class="label label-primary">NOUVEAU</span>
+                        </div>
+                        <span class="badge badge-info">ℹ️ À traiter</span>
+                    </div>
+                    <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px; min-width: 250px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="font-weight: 700;">Réservation #12344</span>
+                            <span class="label label-secondary">ARCHIVES</span>
+                        </div>
+                        <span class="badge badge-neutral">Terminé</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setTheme(theme) {
+            localStorage.setItem('icalou-theme', theme);
+            const root = document.documentElement;
+            root.setAttribute('data-theme', theme);
+            root.classList.remove('theme-light', 'theme-dark');
+            root.classList.add('theme-' + theme);
+            
+            document.querySelectorAll('.theme-controls .ctrl-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('t-' + theme).classList.add('active');
+        }
+
+        function setStyle(style) {
+            localStorage.setItem('icalou-style', style);
+            const root = document.documentElement;
+            root.classList.remove('style-apple', 'style-sidebar');
+            root.classList.add('style-' + style);
+            
+            document.querySelectorAll('.theme-controls .ctrl-btn').forEach(btn => {
+                if (btn.id.startsWith('s-')) btn.classList.remove('active');
+            });
+            document.getElementById('s-' + style).classList.add('active');
+        }
+    </script>
+</body>
+</html>

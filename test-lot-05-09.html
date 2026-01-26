@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark" id="app-root" class="theme-dark style-sidebar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Test LOT 05-09 - Composants UI</title>
+    <link rel="stylesheet" href="css/main.css?v=2.9.0" />
+</head>
+<body>
+    <!-- 🎨 CONTRÔLES THÈMES -->
+    <div class="theme-controls">
+        <button onclick="setTheme('light')" id="t-light" class="ctrl-btn">JOUR</button>
+        <button onclick="setTheme('dark')" id="t-dark" class="ctrl-btn active">NUIT</button>
+        <div class="ctrl-separator"></div>
+        <button onclick="setStyle('apple')" id="s-apple" class="ctrl-btn">APPLE</button>
+        <button onclick="setStyle('sidebar')" id="s-sidebar" class="ctrl-btn active">SIDEBAR</button>
+    </div>
+
+    <div class="container" style="max-width: 1400px; margin: 40px auto; padding: 20px;">
+        <h1 style="text-align: center; margin-bottom: 40px;">🎯 Test LOT 05-09 - Composants UI</h1>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- LOT 05 - BADGES & LABELS -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="card" style="margin-bottom: 40px;">
+            <h2>🏷️ LOT 05 - Badges & Labels</h2>
+            
+            <div style="margin-bottom: 24px;">
+                <h3>Badges de statut</h3>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <span class="badge badge-success">✅ Confirmé</span>
+                    <span class="badge badge-warning">⏳ En attente</span>
+                    <span class="badge badge-danger">❌ Annulé</span>
+                    <span class="badge badge-info">ℹ️ Information</span>
+                    <span class="badge badge-neutral">Neutre</span>
+                </div>
+            </div>
+
+            <div>
+                <h3>Labels</h3>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <span class="label label-primary">NOUVEAU</span>
+                    <span class="label label-secondary">ARCHIVES</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- LOT 06 - MODALES -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="card" style="margin-bottom: 40px;">
+            <h2>📦 LOT 06 - Modales</h2>
+            <button class="btn-primary" onclick="document.getElementById('testModal').classList.add('active')">
+                Ouvrir la modale
+            </button>
+        </div>
+
+        <!-- Modale de test -->
+        <div class="modal" id="testModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Titre de la modale</h2>
+                    <button class="modal-close" onclick="document.getElementById('testModal').classList.remove('active')">×</button>
+                </div>
+                <div class="modal-body">
+                    <p>Ceci est le contenu de la modale. Elle s'affiche avec une animation et un fond flou.</p>
+                    <p>Les modales sont adaptées aux styles APPLE et SIDEBAR.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="document.getElementById('testModal').classList.remove('active')">Annuler</button>
+                    <button class="btn-primary">Confirmer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- LOT 07 - CARTES -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div style="margin-bottom: 40px;">
+            <h2>🃏 LOT 07 - Cartes</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div class="card card-hover">
+                    <div class="card-header">
+                        <span class="card-icon" style="font-size: 2rem;">🏠</span>
+                        <h3 class="card-title">Le Relais</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Gîte de charme avec vue panoramique. Capacité 6 personnes.
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="badge badge-success">Disponible</span>
+                        <button class="btn-primary">Voir</button>
+                    </div>
+                </div>
+
+                <div class="card card-hover">
+                    <div class="card-header">
+                        <span class="card-icon" style="font-size: 2rem;">🏡</span>
+                        <h3 class="card-title">La Bergerie</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Maison de famille authentique. Capacité 8 personnes.
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="badge badge-warning">Réservé</span>
+                        <button class="btn-primary">Voir</button>
+                    </div>
+                </div>
+
+                <div class="card card-hover">
+                    <div class="card-header">
+                        <span class="card-icon" style="font-size: 2rem;">🌳</span>
+                        <h3 class="card-title">Le Chêne</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Gîte moderne avec piscine privée. Capacité 4 personnes.
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="badge badge-danger">Indisponible</span>
+                        <button class="btn-primary">Voir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- LOT 08 - ALERTES -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div style="margin-bottom: 40px;">
+            <h2>⚠️ LOT 08 - Alertes</h2>
+            
+            <div class="alert alert-success">
+                ✅ <strong>Succès :</strong> Votre réservation a été confirmée avec succès !
+            </div>
+
+            <div class="alert alert-warning">
+                ⚠️ <strong>Attention :</strong> Certaines informations sont incomplètes.
+            </div>
+
+            <div class="alert alert-danger">
+                ❌ <strong>Erreur :</strong> Impossible de sauvegarder les données.
+            </div>
+
+            <div class="alert alert-info">
+                ℹ️ <strong>Information :</strong> Une nouvelle fonctionnalité est disponible.
+            </div>
+
+            <div class="alert alert-success alert-dismissible">
+                ✅ <strong>Données sauvegardées :</strong> Toutes vos modifications ont été enregistrées.
+                <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- LOT 09 - TABLEAUX -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div style="margin-bottom: 40px;">
+            <h2>📊 LOT 09 - Tableaux</h2>
+            
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Gîte</th>
+                            <th>Dates</th>
+                            <th>Client</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-label="Gîte">Le Relais</td>
+                            <td data-label="Dates">26/01 - 02/02</td>
+                            <td data-label="Client">Martin Dupont</td>
+                            <td data-label="Montant">850 €</td>
+                            <td data-label="Statut">
+                                <span class="badge badge-success">Confirmé</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td data-label="Gîte">La Bergerie</td>
+                            <td data-label="Dates">02/02 - 09/02</td>
+                            <td data-label="Client">Sophie Martin</td>
+                            <td data-label="Montant">1200 €</td>
+                            <td data-label="Statut">
+                                <span class="badge badge-warning">En attente</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td data-label="Gîte">Le Chêne</td>
+                            <td data-label="Dates">09/02 - 16/02</td>
+                            <td data-label="Client">Pierre Leroy</td>
+                            <td data-label="Montant">980 €</td>
+                            <td data-label="Statut">
+                                <span class="badge badge-success">Confirmé</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td data-label="Gîte">Le Relais</td>
+                            <td data-label="Dates">16/02 - 23/02</td>
+                            <td data-label="Client">Julie Blanc</td>
+                            <td data-label="Montant">920 €</td>
+                            <td data-label="Statut">
+                                <span class="badge badge-danger">Annulé</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td data-label="Gîte">La Bergerie</td>
+                            <td data-label="Dates">23/02 - 02/03</td>
+                            <td data-label="Client">Marc Rousseau</td>
+                            <td data-label="Montant">1100 €</td>
+                            <td data-label="Statut">
+                                <span class="badge badge-info">Pré-réservation</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function setTheme(theme) {
+            localStorage.setItem('icalou-theme', theme);
+            const root = document.documentElement;
+            root.setAttribute('data-theme', theme);
+            root.classList.remove('theme-light', 'theme-dark');
+            root.classList.add('theme-' + theme);
+            
+            document.querySelectorAll('.theme-controls .ctrl-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('t-' + theme).classList.add('active');
+        }
+
+        function setStyle(style) {
+            localStorage.setItem('icalou-style', style);
+            const root = document.documentElement;
+            root.classList.remove('style-apple', 'style-sidebar');
+            root.classList.add('style-' + style);
+            
+            document.querySelectorAll('.theme-controls .ctrl-btn').forEach(btn => {
+                if (btn.id.startsWith('s-')) btn.classList.remove('active');
+            });
+            document.getElementById('s-' + style).classList.add('active');
+        }
+
+        // Fermer modale en cliquant sur le fond
+        document.getElementById('testModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

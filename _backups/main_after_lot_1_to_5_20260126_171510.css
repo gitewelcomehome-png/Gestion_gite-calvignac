@@ -147,17 +147,16 @@ html.theme-dark,
    ═══════════════════════════════════════════════════════════════════════ */
 .theme-controls {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 10000;
     background: #000;
     padding: 5px;
     border-radius: 15px;
     display: flex;
     align-items: center;
-    gap: 5px;
     border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .ctrl-btn {
@@ -180,20 +179,6 @@ html.theme-dark,
 
 .ctrl-btn:hover {
     opacity: 0.7;
-}
-
-.ctrl-btn-admin {
-    opacity: 1 !important;
-    background: rgba(0, 194, 203, 0.2) !important;
-    padding: 8px 10px !important;
-}
-
-.ctrl-btn-admin:hover {
-    background: var(--upstay-cyan) !important;
-}
-
-.ctrl-btn-admin svg {
-    display: block;
 }
 
 .ctrl-separator {
@@ -940,7 +925,7 @@ body {
 main,
 .wrapper {
     width: 100%;
-    max-width: 1600px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -1112,13 +1097,12 @@ html.theme-dark a {
     left: 0;
     right: 0;
     z-index: 1000;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
     box-shadow: var(--shadow);
     height: 70px;
 }
@@ -1126,7 +1110,7 @@ html.theme-dark a {
 .site-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--text);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -1371,7 +1355,7 @@ button.btn-action {
 /* 1. Conteneur principal */
 .container {
     width: 100%;
-    max-width: 1600px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -2004,7 +1988,7 @@ html.theme-dark .alert-info {
 
 /* Container principal */
 .tab-container {
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -2807,7 +2791,7 @@ html.theme-dark .alert-info {
    ═══════════════════════════════════════════════════════════════════════ */
 
 .dashboard-icalou {
-    max-width: 1600px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 

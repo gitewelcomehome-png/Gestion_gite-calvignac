@@ -1,4 +1,4 @@
-# 🏡 Gestion Gîte Calvignac - Application Multi-Tenant
+![alt text](image.png)# 🏡 Gestion Gîte Calvignac - Application Multi-Tenant
 
 Application web de gestion de gîtes et locations saisonnières.
 
