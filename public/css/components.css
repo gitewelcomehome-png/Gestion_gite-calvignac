@@ -1,6 +1,6 @@
-/* Gestion Gîtes - Component Styles */
+/* Gestion Gîtes - Styles des Composants */
 
-/* Statistics Section */
+/* Section Statistiques */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -35,7 +35,7 @@
     height: 350px;
 }
 
-/* Gite Sections */
+/* Sections des Gîtes */
 .gite-section {
     margin-bottom: 30px;
 }
@@ -74,7 +74,7 @@
     overflow: hidden;
 }
 
-/* Planning Components */
+/* Composants du Planning */
 .planning-container {
     width: 100%;
     padding: 20px;
@@ -186,7 +186,7 @@
     color: #4b5563;
 }
 
-/* Month Groups */
+/* Groupes de Mois */
 .month-group {
     margin-bottom: 20px;
 }
@@ -202,7 +202,7 @@
     text-transform: uppercase;
 }
 
-/* Reservation Items */
+/* Éléments de Réservation */
 .reservation-item {
     background: radial-gradient(circle at top left, rgba(248,250,252,0.98), rgba(241,245,249,0.98));
     padding: 15px;
@@ -239,7 +239,7 @@
     flex-wrap: wrap;
 }
 
-/* Platform Badges */
+/* Badges de Plateforme */
 .badge-platform {
     display: inline-flex;
     align-items: center;
@@ -298,7 +298,7 @@
     font-size: 0.9em;
 }
 
-/* Charges Components */
+/* Composants des Charges */
 .charges-list {
     margin-top: 20px;
 }
@@ -328,7 +328,7 @@
     color: var(--danger);
 }
 
-/* Cleaning/Ménage Components */
+/* Composants Ménage/Nettoyage */
 .menage-item {
     background: #f0f8ff;
     padding: 15px;
@@ -465,7 +465,7 @@
     }
 }
 
-/* Blocked Dates */
+/* Dates Bloquées */
 .dates-blocked {
     background: #FCF3CF;
     padding: 10px 15px;
