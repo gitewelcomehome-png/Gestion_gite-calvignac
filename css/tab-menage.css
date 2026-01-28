@@ -1,0 +1,1066 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB MÉNAGE - Styles propres
+   ✅ Créé le 27 janvier 2026
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ HEADER SECTION ═══ */
+.card-header-section {
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-title-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.page-title {
+    margin: 0 0 8px 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.page-subtitle {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    opacity: 0.7;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ═══ BOUTONS HEADER ═══ */
+.btn-neo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-neo:hover {
+    transform: translateY(-2px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE SIDEBAR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.style-sidebar .page-title {
+    color: var(--text);
+}
+
+html.style-sidebar .page-subtitle {
+    color: #64748b;
+}
+
+html.style-sidebar .btn-rules {
+    background: #a29bfe;
+    color: white;
+    border: 3px solid #2D3436;
+    box-shadow: 4px 4px 0 #2D3436;
+    border-radius: 10px;
+}
+
+html.style-sidebar .btn-rules:hover {
+    box-shadow: 5px 5px 0 #2D3436;
+}
+
+html.style-sidebar .btn-show-rules {
+    background: #ffeaa7;
+    color: #2D3436;
+    border: 3px solid #2D3436;
+    box-shadow: 4px 4px 0 #2D3436;
+    border-radius: 10px;
+}
+
+html.style-sidebar .btn-show-rules:hover {
+    box-shadow: 5px 5px 0 #2D3436;
+}
+
+html.style-sidebar .btn-validation {
+    background: #74b9ff;
+    color: white;
+    border: 3px solid #2D3436;
+    box-shadow: 4px 4px 0 #2D3436;
+    border-radius: 10px;
+}
+
+html.style-sidebar .btn-validation:hover {
+    box-shadow: 5px 5px 0 #2D3436;
+}
+
+html.style-sidebar .btn-femme-menage {
+    background: #55efc4;
+    color: #2D3436;
+    border: 3px solid #2D3436;
+    box-shadow: 4px 4px 0 #2D3436;
+    border-radius: 10px;
+}
+
+html.style-sidebar .btn-femme-menage:hover {
+    box-shadow: 5px 5px 0 #2D3436;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE - JOUR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.theme-light.style-apple .card-header-section {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.03) 0%, #ffffff 100%);
+    border: 1px solid rgba(0, 194, 203, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple .page-title {
+    color: #1d1d1f;
+}
+
+html.theme-light.style-apple .page-subtitle {
+    color: #6e6e73;
+}
+
+html.theme-light.style-apple .btn-rules {
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.1) 0%, #ffffff 100%);
+    color: #a29bfe;
+    border: 1px solid rgba(162, 155, 254, 0.3);
+    box-shadow: 0 2px 8px rgba(162, 155, 254, 0.15);
+    border-radius: 12px;
+}
+
+html.theme-light.style-apple .btn-rules:hover {
+    box-shadow: 0 4px 12px rgba(162, 155, 254, 0.25);
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.15) 0%, #ffffff 100%);
+}
+
+html.theme-light.style-apple .btn-show-rules {
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.3) 0%, #ffffff 100%);
+    color: #f39c12;
+    border: 1px solid rgba(243, 156, 18, 0.3);
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.15);
+    border-radius: 12px;
+}
+
+html.theme-light.style-apple .btn-show-rules:hover {
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.25);
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.4) 0%, #ffffff 100%);
+}
+
+html.theme-light.style-apple .btn-validation {
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.1) 0%, #ffffff 100%);
+    color: #74b9ff;
+    border: 1px solid rgba(116, 185, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(116, 185, 255, 0.15);
+    border-radius: 12px;
+}
+
+html.theme-light.style-apple .btn-validation:hover {
+    box-shadow: 0 4px 12px rgba(116, 185, 255, 0.25);
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.15) 0%, #ffffff 100%);
+}
+
+html.theme-light.style-apple .btn-femme-menage {
+    background: linear-gradient(135deg, rgba(85, 239, 196, 0.2) 0%, #ffffff 100%);
+    color: #00b894;
+    border: 1px solid rgba(0, 184, 148, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 184, 148, 0.15);
+    border-radius: 12px;
+}
+
+html.theme-light.style-apple .btn-femme-menage:hover {
+    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.25);
+    background: linear-gradient(135deg, rgba(85, 239, 196, 0.3) 0%, #ffffff 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE - NUIT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.theme-dark.style-apple .card-header-section {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.08) 0%, rgba(30, 30, 30, 0.95) 100%);
+    border: 1px solid rgba(0, 194, 203, 0.25);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+html.theme-dark.style-apple .page-title {
+    color: #f5f5f7;
+}
+
+html.theme-dark.style-apple .page-subtitle {
+    color: #a1a1a6;
+}
+
+html.theme-dark.style-apple .btn-rules {
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.15) 0%, rgba(45, 45, 50, 0.8) 100%);
+    color: #c7c1ff;
+    border: 1px solid rgba(162, 155, 254, 0.4);
+    box-shadow: 0 2px 12px rgba(162, 155, 254, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-apple .btn-rules:hover {
+    box-shadow: 0 4px 16px rgba(162, 155, 254, 0.3);
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.2) 0%, rgba(45, 45, 50, 0.9) 100%);
+}
+
+html.theme-dark.style-apple .btn-show-rules {
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.15) 0%, rgba(45, 45, 50, 0.8) 100%);
+    color: #ffd666;
+    border: 1px solid rgba(243, 156, 18, 0.4);
+    box-shadow: 0 2px 12px rgba(243, 156, 18, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-apple .btn-show-rules:hover {
+    box-shadow: 0 4px 16px rgba(243, 156, 18, 0.3);
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.2) 0%, rgba(45, 45, 50, 0.9) 100%);
+}
+
+html.theme-dark.style-apple .btn-validation {
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.15) 0%, rgba(45, 45, 50, 0.8) 100%);
+    color: #9dd1ff;
+    border: 1px solid rgba(116, 185, 255, 0.4);
+    box-shadow: 0 2px 12px rgba(116, 185, 255, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-apple .btn-validation:hover {
+    box-shadow: 0 4px 16px rgba(116, 185, 255, 0.3);
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.2) 0%, rgba(45, 45, 50, 0.9) 100%);
+}
+
+html.theme-dark.style-apple .btn-femme-menage {
+    background: linear-gradient(135deg, rgba(85, 239, 196, 0.15) 0%, rgba(45, 45, 50, 0.8) 100%);
+    color: #7effd4;
+    border: 1px solid rgba(0, 184, 148, 0.4);
+    box-shadow: 0 2px 12px rgba(0, 184, 148, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-apple .btn-femme-menage:hover {
+    box-shadow: 0 4px 16px rgba(0, 184, 148, 0.3);
+    background: linear-gradient(135deg, rgba(85, 239, 196, 0.2) 0%, rgba(45, 45, 50, 0.9) 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PLANNING MÉNAGE - STRUCTURE (Classes JS existantes)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Conteneur semaine */
+.menage-week-container {
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+}
+
+/* Grille gîtes */
+.menage-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--bg-secondary);
+    padding: 2px;
+}
+}
+
+/* Colonnes gîtes */
+.gite-column {
+    background: var(--card) !important;
+    padding: 0;
+    min-height: 150px;
+    position: relative;
+}
+
+.gite-column-header {
+    padding: 15px 20px;
+    text-align: center;
+    color: white;
+    border-bottom: 3px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Couleurs de header selon data-gite-bg */
+.gite-column-header[data-gite-bg="#667eea"] { background: #667eea; }
+.gite-column-header[data-gite-bg="#f5576c"] { background: #f5576c; }
+.gite-column-header[data-gite-bg="#27AE60"] { background: #27AE60; }
+.gite-column-header[data-gite-bg="#3498DB"] { background: #3498DB; }
+.gite-column-header[data-gite-bg="#E67E22"] { background: #E67E22; }
+.gite-column-header[data-gite-bg="#9B59B6"] { background: #9B59B6; }
+
+.gite-column-header-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.gite-column-header-week {
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0.95;
+    margin-bottom: 4px;
+}
+
+.gite-column-header-dates {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.gite-column-body {
+    padding: 0;
+    background: var(--card) !important;
+}
+
+.gite-column-body-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #95a5a6;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* Cartes ménage */
+.menage-card {
+    background: var(--bg-secondary) !important;
+    margin: 15px;
+    padding: 18px;
+    border-radius: 12px;
+    transition: all 0.2s;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.menage-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.menage-card-validated {
+    background: var(--bg-secondary) !important;
+    border-left: 4px solid #27ae60 !important;
+}
+
+.menage-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.menage-card-date {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.menage-card-time {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.menage-card-info {
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+
+/* Badges status */
+.menage-status-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.menage-status-badge-validated {
+    background: #27ae60;
+    color: white;
+}
+
+.menage-status-badge-pending {
+    background: #f39c12;
+    color: white;
+}
+
+/* Formulaire édition */
+.menage-edit-form {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.menage-edit-inputs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.menage-input-date,
+.menage-input-time {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.menage-input-date {
+    flex: 1;
+    min-width: 140px;
+}
+
+.menage-input-time {
+    min-width: 120px;
+}
+
+.menage-btn-save {
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    background: #27ae60;
+    color: white;
+}
+
+.menage-btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE SIDEBAR - Styles pour le planning
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.style-sidebar .menage-week-container {
+    border: 4px solid #2D3436 !important;
+    border-radius: 0 !important;
+    box-shadow: 6px 6px 0 #2D3436 !important;
+    background: var(--card) !important;
+    padding: 0 !important;
+}
+
+html.style-sidebar .menage-grid-4 {
+    background: #dfe6e9 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    gap: 4px;
+    padding: 4px;
+}
+
+html.style-sidebar .gite-column {
+    border: 3px solid #2D3436 !important;
+    border-left: 3px solid #2D3436 !important;
+    border-right: 3px solid #2D3436 !important;
+    border-top: 3px solid #2D3436 !important;
+    border-bottom: 3px solid #2D3436 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    box-shadow: 3px 3px 0 #2D3436 !important;
+}
+
+html.style-sidebar .gite-column[style*="border-left"],
+html.style-sidebar .gite-column[style*="border-radius"] {
+    border-left: 3px solid #2D3436 !important;
+    border-radius: 0 !important;
+}
+
+html.style-sidebar .gite-column-header {
+    border-bottom: 3px solid rgba(0, 0, 0, 0.2) !important;
+    border-radius: 0 !important;
+}
+
+html.style-sidebar .gite-column-body {
+    background: #ffffff !important;
+}
+
+html.style-sidebar .menage-card {
+    background: var(--bg-secondary) !important;
+    border-radius: 8px !important;
+}
+
+html.style-sidebar .menage-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Textes Sidebar - Style neo-brutalism */
+html.style-sidebar .menage-card-date {
+    font-size: 1.05rem !important;
+    font-weight: 900 !important;
+    color: var(--text) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+html.style-sidebar .menage-card-time {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: var(--text) !important;
+    margin-top: 8px;
+}
+
+html.style-sidebar .menage-card-info {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+    margin-top: 6px;
+}
+
+html.style-sidebar .menage-status-badge {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 4px !important;
+    font-weight: 900 !important;
+    font-size: 1.1rem !important;
+}
+
+/* Cartes de ménage avec liseré gauche selon couleur du gîte parent */
+html.style-sidebar [data-gite-color="#667eea"] .menage-card {
+    border: 2px solid var(--border-color) !important;
+    border-left: 5px solid #667eea !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+html.style-sidebar [data-gite-color="#667eea"] .menage-card:hover {
+    border-left-color: #667eea !important;
+    box-shadow: var(--shadow) !important;
+}
+
+html.style-sidebar [data-gite-color="#f5576c"] .menage-card {
+    border: 2px solid var(--border-color) !important;
+    border-left: 5px solid #f5576c !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+html.style-sidebar [data-gite-color="#f5576c"] .menage-card:hover {
+    border-left-color: #f5576c !important;
+    box-shadow: var(--shadow) !important;
+}
+
+html.style-sidebar [data-gite-color="#27AE60"] .menage-card {
+    border: 2px solid var(--border-color) !important;
+    border-left: 5px solid #27AE60 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+html.style-sidebar [data-gite-color="#27AE60"] .menage-card:hover {
+    border-left-color: #27AE60 !important;
+    box-shadow: var(--shadow) !important;
+}
+
+html.style-sidebar [data-gite-color="#3498DB"] .menage-card {
+    border: 2px solid var(--border-color) !important;
+    border-left: 5px solid #3498DB !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+html.style-sidebar [data-gite-color="#3498DB"] .menage-card:hover {
+    border-left-color: #3498DB !important;
+    box-shadow: var(--shadow) !important;
+}
+
+html.style-sidebar [data-gite-color="#E67E22"] .menage-card {
+    border: 2px solid var(--border-color) !important;
+    border-left: 5px solid #E67E22 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+html.style-sidebar [data-gite-color="#E67E22"] .menage-card:hover {
+    border-left-color: #E67E22 !important;
+    box-shadow: var(--shadow) !important;
+}
+
+html.style-sidebar [data-gite-color="#9B59B6"] .menage-card {
+    border: 2px solid var(--border-color) !important;
+    border-left: 5px solid #9B59B6 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+html.style-sidebar [data-gite-color="#9B59B6"] .menage-card:hover {
+    border-left-color: #9B59B6 !important;
+    box-shadow: var(--shadow) !important;
+}
+
+html.style-sidebar .menage-card-validated {
+    border-left: 6px solid #27ae60 !important;
+    background: var(--bg-secondary) !important;
+}
+
+html.style-sidebar .menage-status-badge {
+    border: 2px solid #2D3436 !important;
+    box-shadow: 2px 2px 0 #2D3436 !important;
+}
+
+html.style-sidebar .menage-input-date,
+html.style-sidebar .menage-input-time {
+    border: 2px solid #2D3436 !important;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    border-radius: 6px !important;
+}
+
+/* Boutons sauvegarder avec couleur du gîte parent */
+html.style-sidebar [data-gite-color="#667eea"] .menage-btn-save {
+    border: 3px solid #667eea !important;
+    box-shadow: 3px 3px 0 #667eea !important;
+    background: #667eea !important;
+    color: white !important;
+}
+
+html.style-sidebar [data-gite-color="#667eea"] .menage-btn-save:hover {
+    box-shadow: 5px 5px 0 #667eea !important;
+}
+
+html.style-sidebar [data-gite-color="#f5576c"] .menage-btn-save {
+    border: 3px solid #f5576c !important;
+    box-shadow: 3px 3px 0 #f5576c !important;
+    background: #f5576c !important;
+    color: white !important;
+}
+
+html.style-sidebar [data-gite-color="#f5576c"] .menage-btn-save:hover {
+    box-shadow: 5px 5px 0 #f5576c !important;
+}
+
+html.style-sidebar [data-gite-color="#27AE60"] .menage-btn-save {
+    border: 3px solid #27AE60 !important;
+    box-shadow: 3px 3px 0 #27AE60 !important;
+    background: #27AE60 !important;
+    color: white !important;
+}
+
+html.style-sidebar [data-gite-color="#27AE60"] .menage-btn-save:hover {
+    box-shadow: 5px 5px 0 #27AE60 !important;
+}
+
+html.style-sidebar [data-gite-color="#3498DB"] .menage-btn-save {
+    border: 3px solid #3498DB !important;
+    box-shadow: 3px 3px 0 #3498DB !important;
+    background: #3498DB !important;
+    color: white !important;
+}
+
+html.style-sidebar [data-gite-color="#3498DB"] .menage-btn-save:hover {
+    box-shadow: 5px 5px 0 #3498DB !important;
+}
+
+html.style-sidebar [data-gite-color="#E67E22"] .menage-btn-save {
+    border: 3px solid #E67E22 !important;
+    box-shadow: 3px 3px 0 #E67E22 !important;
+    background: #E67E22 !important;
+    color: white !important;
+}
+
+html.style-sidebar [data-gite-color="#E67E22"] .menage-btn-save:hover {
+    box-shadow: 5px 5px 0 #E67E22 !important;
+}
+
+html.style-sidebar [data-gite-color="#9B59B6"] .menage-btn-save {
+    border: 3px solid #9B59B6 !important;
+    box-shadow: 3px 3px 0 #9B59B6 !important;
+    background: #9B59B6 !important;
+    color: white !important;
+}
+
+html.style-sidebar [data-gite-color="#9B59B6"] .menage-btn-save:hover {
+    box-shadow: 5px 5px 0 #9B59B6 !important;
+}
+
+html.style-sidebar .gite-column-body-empty {
+    border: 2px solid #2D3436 !important;
+    border-radius: 0 !important;
+    margin: 15px;
+    padding: 40px 20px;
+    color: #2D3436 !important;
+    font-weight: 600;
+    font-style: normal !important;
+    box-shadow: 3px 3px 0 #2D3436 !important;
+}
+
+html.style-sidebar .gite-column-header-title {
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3) !important;
+    font-weight: 900 !important;
+    letter-spacing: 1px !important;
+}
+
+html.style-sidebar .gite-column-header {
+    border-bottom: 3px solid rgba(0, 0, 0, 0.2) !important;
+    border-radius: 0 !important;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+html.style-sidebar .gite-column-header-week {
+    display: none !important;
+}
+
+/* Couleurs de fond sidebar selon data-gite-bg */
+html.style-sidebar .gite-column-header[data-gite-bg="#667eea"] { background: #667eea !important; }
+html.style-sidebar .gite-column-header[data-gite-bg="#f5576c"] { background: #f5576c !important; }
+html.style-sidebar .gite-column-header[data-gite-bg="#27AE60"] { background: #27AE60 !important; }
+html.style-sidebar .gite-column-header[data-gite-bg="#3498DB"] { background: #3498DB !important; }
+html.style-sidebar .gite-column-header[data-gite-bg="#E67E22"] { background: #E67E22 !important; }
+html.style-sidebar .gite-column-header[data-gite-bg="#9B59B6"] { background: #9B59B6 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE - Styles pour le planning
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* MODE JOUR */
+html.theme-light .gite-column {
+    background: #ffffff !important;
+}
+
+html.theme-light .gite-column-body {
+    background: #ffffff !important;
+}
+
+html.theme-light .gite-column-body-empty {
+    color: #95a5a6;
+}
+
+/* MODE NUIT */
+html.theme-dark .gite-column {
+    background: rgba(30, 30, 30, 0.95) !important;
+}
+
+html.theme-dark .gite-column-body {
+    background: rgba(30, 30, 30, 0.95) !important;
+}
+
+html.theme-dark .gite-column-body-empty {
+    color: #a1a1a6;
+}
+
+html.theme-light.style-apple .menage-week-container {
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    background: var(--card) !important;
+}
+
+html.theme-light.style-apple .menage-grid-4 {
+    background: transparent !important;
+    gap: 16px;
+}
+
+html.theme-light.style-apple .gite-column {
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
+    background: var(--card) !important;
+}
+
+html.theme-light.style-apple .gite-column-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+html.theme-light.style-apple .gite-column-body {
+    background: var(--card) !important;
+}
+
+html.theme-light.style-apple .menage-card {
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 20px !important;
+    padding: 24px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    background: var(--bg-secondary) !important;
+}
+
+/* Bordures colorées selon gîte parent */
+html.theme-light.style-apple [data-gite-color="#667eea"] .menage-card {
+    border: 2px solid #667eea !important;
+}
+
+html.theme-light.style-apple [data-gite-color="#f5576c"] .menage-card {
+    border: 2px solid #f5576c !important;
+}
+
+html.theme-light.style-apple [data-gite-color="#27AE60"] .menage-card {
+    border: 2px solid #27AE60 !important;
+}
+
+html.theme-light.style-apple [data-gite-color="#3498DB"] .menage-card {
+    border: 2px solid #3498DB !important;
+}
+
+html.theme-light.style-apple [data-gite-color="#E67E22"] .menage-card {
+    border: 2px solid #E67E22 !important;
+}
+
+html.theme-light.style-apple [data-gite-color="#9B59B6"] .menage-card {
+    border: 2px solid #9B59B6 !important;
+}
+
+html.theme-light.style-apple .menage-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-4px) scale(1.01);
+}
+
+html.theme-light.style-apple .menage-card-validated {
+    border: 2px solid #27ae60 !important;
+    border-radius: 20px !important;
+    padding: 24px !important;
+    box-shadow: 0 2px 12px rgba(39, 174, 96, 0.15) !important;
+    background: var(--bg-secondary) !important;
+}
+
+html.theme-light.style-apple .menage-card-validated:hover {
+    box-shadow: 0 8px 24px rgba(39, 174, 96, 0.2) !important;
+    transform: translateY(-4px) scale(1.01);
+}
+
+/* Textes Apple Light - Style élégant et doux */
+html.theme-light.style-apple .menage-card-date {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+html.theme-light.style-apple .menage-card-time {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    opacity: 0.9;
+}
+
+html.theme-light.style-apple .menage-card-info {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+html.theme-light.style-apple .menage-status-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+html.theme-light.style-apple .menage-input-date,
+html.theme-light.style-apple .menage-input-time {
+    background: var(--bg) !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    color: var(--text) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) inset !important;
+}
+
+html.theme-light.style-apple .menage-btn-save {
+    background: linear-gradient(135deg, #27ae60, #229954) !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2) !important;
+    color: white !important;
+    border-radius: 8px !important;
+}
+
+html.theme-light.style-apple .menage-btn-save:hover {
+    box-shadow: 0 4px 16px rgba(39, 174, 96, 0.3) !important;
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-apple .menage-week-container {
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    background: var(--card) !important;
+}
+
+html.theme-dark.style-apple .menage-grid-4 {
+    background: transparent !important;
+    gap: 16px;
+}
+
+html.theme-dark.style-apple .gite-column {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3) !important;
+    background: var(--card) !important;
+}
+
+html.theme-dark.style-apple .gite-column-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+html.theme-dark.style-apple .gite-column-body {
+    background: var(--card) !important;
+}
+
+html.theme-dark.style-apple .menage-card {
+    background: var(--bg-secondary) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px !important;
+    padding: 24px !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Bordures colorées selon gîte parent */
+html.theme-dark.style-apple [data-gite-color="#667eea"] .menage-card {
+    border: 2px solid #667eea !important;
+}
+
+html.theme-dark.style-apple [data-gite-color="#f5576c"] .menage-card {
+    border: 2px solid #f5576c !important;
+}
+
+html.theme-dark.style-apple [data-gite-color="#27AE60"] .menage-card {
+    border: 2px solid #27AE60 !important;
+}
+
+html.theme-dark.style-apple [data-gite-color="#3498DB"] .menage-card {
+    border: 2px solid #3498DB !important;
+}
+
+html.theme-dark.style-apple [data-gite-color="#E67E22"] .menage-card {
+    border: 2px solid #E67E22 !important;
+}
+
+html.theme-dark.style-apple [data-gite-color="#9B59B6"] .menage-card {
+    border: 2px solid #9B59B6 !important;
+}
+
+html.theme-dark.style-apple .menage-card:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+    transform: translateY(-4px) scale(1.01);
+}
+
+html.theme-dark.style-apple .menage-card-validated {
+    background: var(--bg-secondary) !important;
+    border: 2px solid #27ae60 !important;
+    border-radius: 20px !important;
+    padding: 24px !important;
+    box-shadow: 0 2px 12px rgba(39, 174, 96, 0.2) !important;
+}
+
+html.theme-dark.style-apple .menage-card-validated:hover {
+    box-shadow: 0 8px 32px rgba(39, 174, 96, 0.25) !important;
+    transform: translateY(-4px) scale(1.01);
+}
+
+/* Textes Apple Dark - Style élégant et doux */
+html.theme-dark.style-apple .menage-card-date {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+html.theme-dark.style-apple .menage-card-time {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    opacity: 0.9;
+}
+
+html.theme-dark.style-apple .menage-card-info {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+html.theme-dark.style-apple .menage-status-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+}
+
+html.theme-dark.style-apple .menage-card-date,
+html.theme-dark.style-apple .menage-card-time,
+html.theme-dark.style-apple .menage-card-info {
+    color: #f5f5f7;
+}
+
+html.theme-dark.style-apple .menage-input-date,
+html.theme-dark.style-apple .menage-input-time {
+    background: rgba(45, 45, 50, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f5f5f7;
+}
+
+html.theme-dark.style-apple .menage-btn-save {
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.8) 0%, rgba(39, 174, 96, 0.6) 100%);
+    border: 1px solid rgba(39, 174, 96, 0.4);
+    box-shadow: 0 2px 12px rgba(39, 174, 96, 0.3);
+}
+
+html.theme-dark.style-apple .menage-btn-save:hover {
+    box-shadow: 0 4px 16px rgba(39, 174, 96, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1200px) {
+    .menage-grid-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .menage-grid-4 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-neo {
+        font-size: 0.85rem;
+        padding: 10px 16px;
+    }
+
+    .menage-edit-inputs {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .menage-input-date,
+    .menage-input-time,
+    .menage-btn-save {
+        width: 100%;
+    }
+}

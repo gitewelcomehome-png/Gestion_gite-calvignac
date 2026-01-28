@@ -1,0 +1,261 @@
+<div class="tab-container">
+    <!-- Header CALOU -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.75rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-calou-icon="bar-chart-2" class="calou-icon" style="width: 32px; height: 32px;"></i>
+                    STATISTIQUES
+                </h2>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--calou-text-secondary);">Analyse des performances et réservations</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <label for="yearFilterStats" style="font-weight: 600; color: var(--calou-text-primary); font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-calou-icon="calendar" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Année :
+                </label>
+                <select id="yearFilterStats" onchange="filterStatsByYear()" 
+                    class="calou-input" style="width: 110px; padding: 0.5rem; text-align: center; font-weight: 600; cursor: pointer;">
+                    <option value="">Chargement...</option>
+                </select>
+                <button onclick="toggleHistoricalDataForm()" class="calou-btn-secondary">
+                    <i data-calou-icon="database" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Gérer données
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📊 RÉSERVATIONS PAR PLATEFORME -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-calou-icon="smartphone" class="calou-icon" style="width: 24px; height: 24px;"></i>
+            RÉSERVATIONS PAR PLATEFORME
+        </h3>
+        <div class="calou-grid" data-cols="3">
+            <div class="calou-kpi" style="--kpi-color: #FF5A5F;">
+                <div class="calou-kpi-label">
+                    <i data-calou-icon="home" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Airbnb
+                </div>
+                <div id="countAirbnb" class="calou-kpi-value">-</div>
+                <div class="calou-kpi-subtitle">réservations</div>
+            </div>
+            <div class="calou-kpi" style="--kpi-color: #3498DB;">
+                <div class="calou-kpi-label">
+                    <i data-calou-icon="home" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Abritel
+                </div>
+                <div id="countAbritel" class="calou-kpi-value">-</div>
+                <div class="calou-kpi-subtitle">réservations</div>
+            </div>
+            <div class="calou-kpi" style="--kpi-color: #27AE60;">
+                <div class="calou-kpi-label">
+                    <i data-calou-icon="map-pin" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Gîtes de France
+                </div>
+                <div id="countGites" class="calou-kpi-value">-</div>
+                <div class="calou-kpi-subtitle">réservations</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 📊 TAUX D'OCCUPATION PAR GÎTE -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-calou-icon="bar-chart-2" class="calou-icon" style="width: 24px; height: 24px;"></i>
+            TAUX D'OCCUPATION PAR GÎTE
+        </h3>
+        <div class="calou-grid" data-cols="3">
+            <div id="taux-occupation-container" style="display: contents;">
+                <!-- Les cartes de taux d'occupation seront générées par JS -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 📈 STATISTIQUES AVANCÉES -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-calou-icon="trending-up" class="calou-icon" style="width: 24px; height: 24px;"></i>
+            STATISTIQUES AVANCÉES
+        </h3>
+        <div class="calou-grid" data-cols="3">
+            <!-- Prix moyen nuitée -->
+            <div class="calou-kpi" style="--kpi-color: #27AE60;">
+                <div class="calou-kpi-label">
+                    <i data-calou-icon="euro" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Prix moyen/nuit
+                </div>
+                <div id="prixMoyen" class="calou-kpi-value">- €</div>
+                <div class="calou-kpi-subtitle">toutes réservations</div>
+            </div>
+            
+            <!-- Durée moyenne séjour -->
+            <div class="calou-kpi" style="--kpi-color: #3498DB;">
+                <div class="calou-kpi-label">
+                    <i data-calou-icon="calendar" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Durée moyenne
+                </div>
+                <div id="dureeMoyenne" class="calou-kpi-value">- nuits</div>
+                <div class="calou-kpi-subtitle">par séjour</div>
+            </div>
+            
+            <!-- Meilleur mois -->
+            <div class="calou-kpi" style="--kpi-color: #f5576c;">
+                <div class="calou-kpi-label">
+                    <i data-calou-icon="award" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Meilleur mois
+                </div>
+                <div id="meilleurMois" class="calou-kpi-value" style="font-size: 1.5rem;">-</div>
+                <div id="meilleurMoisCA" style="font-size: 1.1rem; color: #27AE60; margin-top: 0.5rem; font-weight: 700;">- €</div>
+            </div>
+        </div>
+    </div>
+        
+    <!-- Formulaire caché des données historiques -->
+    <div id="historicalDataForm" style="display: none; margin-bottom: 2rem;">
+        <div class="calou-card">
+            <div style="margin-bottom: 1.5rem;">
+                <h3 style="margin: 0 0 1rem 0; color: var(--calou-primary); display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-calou-icon="database" class="calou-icon" style="width: 24px; height: 24px;"></i>
+                    Données Historiques (Années Précédentes)
+                </h3>
+                <div class="calou-alert" style="margin-bottom: 1.5rem; background: rgba(99, 102, 241, 0.1); border-left: 4px solid var(--calou-primary); padding: 1rem;">
+                    <strong style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-calou-icon="info" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                        Info :
+                    </strong> 
+                    Saisissez les chiffres d'affaires des années précédentes pour comparer avec l'année en cours dans les graphiques.
+                </div>
+                
+                <!-- Champ année pour la saisie -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="font-weight: 600; display: block; margin-bottom: 0.75rem; color: var(--calou-text-primary);">
+                        Année à saisir <span style="color: #f5576c;">*</span>
+                    </label>
+                    <input type="number" id="historicalYear" placeholder="Ex: 2024" min="2000" max="2050" 
+                        class="calou-input" style="width: 150px;">
+                    <small style="color: var(--calou-text-secondary); font-size: 0.85rem; margin-left: 0.75rem;">
+                        Année pour laquelle saisir les données
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Tableau Total uniquement -->
+            <div style="overflow-x: auto; margin-bottom: 1.5rem;">
+                <table style="width: 100%; border-collapse: collapse; background: var(--calou-glass-bg); backdrop-filter: blur(10px); border-radius: var(--calou-radius-md); overflow: hidden;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, var(--calou-primary) 0%, var(--calou-secondary) 100%); color: white;">
+                            <th style="padding: 1rem; text-align: left; width: 30%;">Mois</th>
+                            <th style="padding: 1rem; text-align: center;">
+                                <i data-calou-icon="euro" class="calou-icon" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 0.5rem;"></i>
+                                Total CA (€)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Janvier</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_jan" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr style="background: rgba(99, 102, 241, 0.05);">
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Février</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_feb" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Mars</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_mar" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr style="background: rgba(99, 102, 241, 0.05);">
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Avril</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_apr" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Mai</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_may" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr style="background: rgba(99, 102, 241, 0.05);">
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Juin</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_jun" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Juillet</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_jul" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr style="background: rgba(99, 102, 241, 0.05);">
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Août</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_aug" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Septembre</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_sep" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr style="background: rgba(99, 102, 241, 0.05);">
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Octobre</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_oct" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border); font-weight: 600; color: var(--calou-text-primary);">Novembre</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--calou-border);">
+                                <input type="number" id="hist_total_nov" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                        <tr style="background: rgba(99, 102, 241, 0.05);">
+                            <td style="padding: 0.75rem; font-weight: 600; color: var(--calou-text-primary);">Décembre</td>
+                            <td style="padding: 0.75rem;">
+                                <input type="number" id="hist_total_dec" placeholder="0" step="0.01" class="calou-input" style="width: 100%; text-align: right;">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button onclick="saveHistoricalData()" class="calou-btn-primary">
+                    <i data-calou-icon="save" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Sauvegarder
+                </button>
+                <button onclick="toggleHistoricalDataForm()" class="calou-btn-secondary">
+                    <i data-calou-icon="x" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Liste des années historiques -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-calou-icon="archive" class="calou-icon" style="width: 24px; height: 24px;"></i>
+            DONNÉES HISTORIQUES ENREGISTRÉES
+        </h3>
+        <div id="historicalYearsList">
+            <!-- Liste générée dynamiquement -->
+        </div>
+    </div>
+    
+    <!-- Graphiques et autres contenus générés par JS -->
+    <div id="stats-charts-container">
+        <!-- Les graphiques seront insérés ici par le JavaScript -->
+    </div>
+</div>

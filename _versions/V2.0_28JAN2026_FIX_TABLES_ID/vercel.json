@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "name": "gestion-gite-calvignac",
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/webhooks/abritel",
+      "dest": "/api/webhooks/abritel.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "env": {
+    "SUPABASE_URL": "@supabase-url",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
+    "ABRITEL_WEBHOOK_SECRET": "@abritel-webhook-secret"
+  }
+}

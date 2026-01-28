@@ -1,0 +1,908 @@
+/* ============================================
+   TAB CALENDRIER TARIFS - CSS MODULAIRE
+   3 modes: Sidebar, Apple Jour, Apple Nuit
+   ============================================ */
+
+/* ============================================
+   BASE COMMUNE
+   ============================================ */
+
+.cal-container {
+    padding: 6px;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* En-tête avec sélecteur gîte */
+.cal-header {
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+.cal-header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.cal-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.btn-refresh {
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cal-select {
+    width: 100%;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Navigation mois */
+.cal-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+.btn-nav {
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cal-current-month {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* Grille calendrier */
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    margin-bottom: 8px;
+}
+
+/* Légende plateformes */
+.cal-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.legend-label {
+    font-size: 0.7rem;
+}
+
+/* Section règles */
+.cal-section {
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 16px;
+}
+
+.cal-section-title {
+    margin: 0 0 12px 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.form-field {
+    margin-bottom: 12px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.promo-divider {
+    border-top: 1px solid;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.promo-title {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.promo-box {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.promo-label {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.promo-checkbox {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+}
+
+.promo-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.promo-input {
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.btn-save {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-top: 12px;
+    cursor: pointer;
+}
+
+/* Remplissage auto */
+.auto-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+/* Modal */
+.cal-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    overflow-y: auto;
+}
+
+.modal-content-cal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 12px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+}
+
+.modal-header-cal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.modal-title-cal {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.btn-close-cal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    padding: 0;
+    cursor: pointer;
+}
+
+.modal-date-info {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.modal-input-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-modal {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+/* Jours du calendrier */
+.day-header-mobile {
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 0;
+    border-radius: 2px;
+}
+
+.day-card-mobile {
+    min-height: 28px;
+    height: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.day-card-mobile.other-month {
+    cursor: default;
+}
+
+.day-card-mobile.has-tarif {
+    border-width: 2px;
+}
+
+.day-card-mobile.reserved {
+    opacity: 0.9;
+    cursor: not-allowed;
+}
+
+.day-card-mobile:active:not(.other-month):not(.reserved) {
+    transform: scale(0.95);
+}
+
+.day-number-mobile {
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.day-price-mobile {
+    font-size: 0.5rem;
+    font-weight: 600;
+    margin-top: 0;
+    line-height: 1;
+}
+
+/* ============================================
+   MODE SIDEBAR
+   ============================================ */
+
+html.style-sidebar .cal-header {
+    background: linear-gradient(135deg, #00C2CB 0%, #00a8b5 100%);
+    border: 2px solid var(--border-color);
+}
+
+html.style-sidebar .cal-title {
+    color: #ffffff;
+}
+
+html.style-sidebar .btn-refresh {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+html.style-sidebar .btn-refresh:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+html.style-sidebar .cal-select {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+html.style-sidebar .cal-nav {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+}
+
+html.style-sidebar .btn-nav {
+    background: #00C2CB;
+    color: white;
+    border: 2px solid var(--border-color);
+}
+
+html.style-sidebar .btn-nav:hover {
+    background: #00a8b5;
+}
+
+html.style-sidebar .cal-current-month {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .cal-legend {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 4px solid #00C2CB;
+}
+
+html.style-sidebar .legend-label {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .cal-section {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 6px solid #00C2CB;
+}
+
+html.style-sidebar .cal-section-title {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .form-label {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .form-input {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+html.style-sidebar .promo-divider {
+    border-color: var(--border-color);
+}
+
+html.style-sidebar .promo-title {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .promo-box {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+}
+
+html.style-sidebar .promo-input {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+html.style-sidebar .btn-save {
+    background: #00C2CB;
+    color: white;
+    border: 2px solid var(--border-color);
+}
+
+html.style-sidebar .btn-save:hover {
+    background: #00a8b5;
+}
+
+html.style-sidebar .modal-content-cal {
+    background: var(--bg-primary);
+    border: 3px solid var(--border-color);
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+html.style-sidebar .modal-title-cal {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .btn-close-cal {
+    color: var(--text-secondary);
+}
+
+html.style-sidebar .btn-close-cal:hover {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .modal-date-info {
+    color: var(--text-secondary);
+}
+
+html.style-sidebar .modal-input-label {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .modal-input {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+html.style-sidebar .btn-modal {
+    border: 2px solid var(--border-color);
+}
+
+html.style-sidebar .btn-modal:first-child {
+    background: #00C2CB;
+    color: white;
+}
+
+html.style-sidebar .btn-modal:first-child:hover {
+    background: #00a8b5;
+}
+
+html.style-sidebar .btn-modal:last-child {
+    background: #e74c3c;
+    color: white;
+}
+
+html.style-sidebar .btn-modal:last-child:hover {
+    background: #c0392b;
+}
+
+html.style-sidebar .day-header-mobile {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+html.style-sidebar .day-card-mobile {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+}
+
+html.style-sidebar .day-card-mobile.other-month {
+    background: var(--bg-secondary);
+    opacity: 0.5;
+}
+
+html.style-sidebar .day-card-mobile.has-tarif {
+    border-color: #00C2CB;
+    border-left: 4px solid #00C2CB;
+}
+
+html.style-sidebar .day-number-mobile {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .day-price-mobile {
+    color: #00C2CB;
+}
+
+/* ============================================
+   MODE APPLE JOUR
+   ============================================ */
+
+html.theme-light.style-apple .cal-header {
+    background: linear-gradient(135deg, #00C2CB 0%, #00a8b5 100%);
+    box-shadow: 0 2px 8px rgba(0, 194, 203, 0.2);
+}
+
+html.theme-light.style-apple .cal-title {
+    color: #ffffff;
+}
+
+html.theme-light.style-apple .btn-refresh {
+    background: rgba(255,255,255,0.25);
+    color: white;
+}
+
+html.theme-light.style-apple .btn-refresh:hover {
+    background: rgba(255,255,255,0.4);
+}
+
+html.theme-light.style-apple .cal-select {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .cal-nav {
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple .btn-nav {
+    background: #00C2CB;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 194, 203, 0.2);
+}
+
+html.theme-light.style-apple .btn-nav:hover {
+    background: #00a8b5;
+    box-shadow: 0 3px 6px rgba(0, 194, 203, 0.3);
+}
+
+html.theme-light.style-apple .cal-current-month {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .cal-legend {
+    background: rgba(0, 194, 203, 0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+html.theme-light.style-apple .legend-label {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .cal-section {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple .cal-section-title {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .form-label {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .form-input {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .promo-divider {
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple .promo-title {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .promo-box {
+    background: rgba(0, 194, 203, 0.03);
+    border: 1px solid rgba(0, 194, 203, 0.1);
+}
+
+html.theme-light.style-apple .promo-input {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .btn-save {
+    background: #00C2CB;
+    color: white;
+    box-shadow: 0 3px 8px rgba(0, 194, 203, 0.25);
+}
+
+html.theme-light.style-apple .btn-save:hover {
+    background: #00a8b5;
+    box-shadow: 0 5px 12px rgba(0, 194, 203, 0.35);
+}
+
+html.theme-light.style-apple .modal-content-cal {
+    background: #ffffff;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-light.style-apple .modal-title-cal {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .btn-close-cal {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+html.theme-light.style-apple .btn-close-cal:hover {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .modal-date-info {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+html.theme-light.style-apple .modal-input-label {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .modal-input {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .btn-modal:first-child {
+    background: #00C2CB;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 194, 203, 0.2);
+}
+
+html.theme-light.style-apple .btn-modal:first-child:hover {
+    background: #00a8b5;
+    box-shadow: 0 4px 10px rgba(0, 194, 203, 0.3);
+}
+
+html.theme-light.style-apple .btn-modal:last-child {
+    background: #e74c3c;
+    color: white;
+    box-shadow: 0 2px 6px rgba(231, 76, 60, 0.2);
+}
+
+html.theme-light.style-apple .btn-modal:last-child:hover {
+    background: #c0392b;
+    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+}
+
+html.theme-light.style-apple .day-header-mobile {
+    background: rgba(0, 0, 0, 0.03);
+    color: rgba(0, 0, 0, 0.6);
+}
+
+html.theme-light.style-apple .day-card-mobile {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+html.theme-light.style-apple .day-card-mobile.other-month {
+    background: rgba(0, 0, 0, 0.02);
+    opacity: 0.5;
+}
+
+html.theme-light.style-apple .day-card-mobile.has-tarif {
+    background: linear-gradient(135deg, #ffffff 0%, #e0f7fa 100%);
+    border-color: #00C2CB;
+    box-shadow: 0 2px 4px rgba(0, 194, 203, 0.15);
+}
+
+html.theme-light.style-apple .day-number-mobile {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .day-price-mobile {
+    color: #00838f;
+}
+
+/* ============================================
+   MODE APPLE NUIT
+   ============================================ */
+
+html.theme-dark.style-apple .cal-header {
+    background: linear-gradient(135deg, #008891 0%, #006670 100%);
+    box-shadow: 0 2px 8px rgba(0, 194, 203, 0.15);
+}
+
+html.theme-dark.style-apple .cal-title {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .btn-refresh {
+    background: rgba(255,255,255,0.15);
+    color: white;
+}
+
+html.theme-dark.style-apple .btn-refresh:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+html.theme-dark.style-apple .cal-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .cal-nav {
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-dark.style-apple .btn-nav {
+    background: rgba(0, 194, 203, 0.3);
+    color: #00C2CB;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+html.theme-dark.style-apple .btn-nav:hover {
+    background: rgba(0, 194, 203, 0.4);
+    box-shadow: 0 3px 6px rgba(0, 194, 203, 0.2);
+}
+
+html.theme-dark.style-apple .cal-current-month {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .cal-legend {
+    background: rgba(0, 194, 203, 0.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-dark.style-apple .legend-label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+html.theme-dark.style-apple .cal-section {
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+html.theme-dark.style-apple .cal-section-title {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .form-label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+html.theme-dark.style-apple .form-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .promo-divider {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.theme-dark.style-apple .promo-title {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .promo-box {
+    background: rgba(0, 194, 203, 0.08);
+    border: 1px solid rgba(0, 194, 203, 0.2);
+}
+
+html.theme-dark.style-apple .promo-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .btn-save {
+    background: rgba(0, 194, 203, 0.3);
+    color: #00C2CB;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-dark.style-apple .btn-save:hover {
+    background: #00C2CB;
+    color: white;
+    box-shadow: 0 5px 12px rgba(0, 194, 203, 0.3);
+}
+
+html.theme-dark.style-apple .modal-content-cal {
+    background: rgba(26, 26, 26, 0.98);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+html.theme-dark.style-apple .modal-title-cal {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .btn-close-cal {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+html.theme-dark.style-apple .btn-close-cal:hover {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .modal-date-info {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+html.theme-dark.style-apple .modal-input-label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+html.theme-dark.style-apple .modal-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .btn-modal:first-child {
+    background: rgba(0, 194, 203, 0.3);
+    color: #00C2CB;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-dark.style-apple .btn-modal:first-child:hover {
+    background: #00C2CB;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 194, 203, 0.3);
+}
+
+html.theme-dark.style-apple .btn-modal:last-child {
+    background: rgba(231, 76, 60, 0.3);
+    color: #e74c3c;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-dark.style-apple .btn-modal:last-child:hover {
+    background: #e74c3c;
+    color: white;
+    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+}
+
+html.theme-dark.style-apple .day-header-mobile {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+html.theme-dark.style-apple .day-card-mobile {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-dark.style-apple .day-card-mobile.other-month {
+    background: rgba(255, 255, 255, 0.01);
+    opacity: 0.5;
+}
+
+html.theme-dark.style-apple .day-card-mobile.has-tarif {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.15) 0%, rgba(0, 194, 203, 0.08) 100%);
+    border-color: #00C2CB;
+    box-shadow: 0 2px 4px rgba(0, 194, 203, 0.15);
+}
+
+html.theme-dark.style-apple .day-number-mobile {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .day-price-mobile {
+    color: #00C2CB;
+}

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr" id="app-root" class="theme-dark style-sidebar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iCalou - Système Design Intégral</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        
+        /* --- THÈMES --- */
+        .theme-dark { 
+            --bg: #050506; 
+            --card: #111113; 
+            --text: #ffffff; 
+            --border: rgba(255,255,255,0.1); 
+            --btn-neutral: rgba(255, 255, 255, 0.06);
+        }
+        .theme-light { 
+            --bg: #f5f5f7; 
+            --card: #ffffff; 
+            --text: #1d1d1f; 
+            --border: rgba(0,0,0,0.08); 
+            --btn-neutral: rgba(0, 0, 0, 0.04);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            transition: background 0.3s ease;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- COULEURS DÉDIÉES (CLASSES STRICTES) --- */
+        .btn-ajouter, .btn-add, .btn-valider, .btn-confirmer, .btn-plus { --btn-clr: #10b981; }
+        .btn-modifier, .btn-editer, .btn-rechercher { --btn-clr: #3b82f6; }
+        .btn-supprimer, .btn-remove { --btn-clr: #ef4444; }
+        .btn-enregistrer, .btn-sauvegarder, .btn-telecharger, .btn-export { --btn-clr: #8b5cf6; }
+        .btn-annuler { --btn-clr: #64748b; }
+        .btn-fiche-client, .btn-imprimer { --btn-clr: #6366f1; }
+        .btn-info, .btn-details, .btn-actualiser { --btn-clr: #06b6d4; }
+        .btn-moins { --btn-clr: #f59e0b; }
+
+        /* --- STRUCTURE DE BASE DU BOUTON --- */
+        .btn-action {
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px;
+            padding: 14px 28px; 
+            font-weight: 700; 
+            font-size: 0.95rem;
+            cursor: pointer; 
+            transition: var(--transition); 
+            border: 1px solid transparent;
+            position: relative; 
+            overflow: hidden;
+            white-space: nowrap;
+            color: var(--text);
+        }
+
+        /* --- STYLE SIDEBAR (NET) --- */
+        .style-sidebar .btn-action {
+            background: var(--btn-neutral);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        .style-sidebar .btn-action::before {
+            content: ''; 
+            position: absolute; 
+            left: 0; 
+            width: 4px; 
+            height: 100%; 
+            background: var(--btn-clr);
+            box-shadow: 2px 0 10px var(--btn-clr);
+        }
+        .style-sidebar .btn-action:hover {
+            border-color: var(--btn-clr);
+            transform: translateX(5px);
+            background: var(--btn-neutral);
+        }
+
+        /* --- STYLE APPLE (SANS FLOU - COULEURS PLEINES) --- */
+        .style-apple .btn-action {
+            background: var(--btn-clr);
+            color: white !important;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 6px 15px -4px rgba(0,0,0,0.3);
+        }
+        .style-apple .btn-action::before { display: none; }
+        .style-apple .btn-action:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+            box-shadow: 0 10px 20px -5px var(--btn-clr);
+        }
+        /* Correction Spécifique Apple Nuit (Netteté absolue) */
+        .theme-dark.style-apple .btn-action {
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        /* --- VARIANTES DE TAILLES --- */
+        .btn-sm { padding: 8px 16px; font-size: 0.8rem; border-radius: 10px; }
+        .btn-lg { padding: 20px 40px; font-size: 1.1rem; border-radius: 18px; }
+        .btn-full { width: 100%; }
+
+        /* --- BOUTONS ICONES --- */
+        .btn-icon { 
+            width: 52px; 
+            height: 52px; 
+            padding: 0; 
+            border-radius: 50% !important; 
+        }
+        .style-sidebar .btn-icon::before { 
+            left: 50%; 
+            top: auto; 
+            bottom: 0; 
+            width: 50%; 
+            height: 4px; 
+            transform: translateX(-50%); 
+            border-radius: 4px 4px 0 0; 
+        }
+
+        /* --- MISE EN PAGE --- */
+        .section-card { 
+            background: var(--card); 
+            border: 1px solid var(--border); 
+            border-radius: 24px; 
+            padding: 40px; 
+            margin-bottom: 32px; 
+        }
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 20px; 
+        }
+        
+        /* BARRE DE CONTROLES */
+        .controls { 
+            position: fixed; 
+            bottom: 24px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            z-index: 1000; 
+            background: #000; 
+            padding: 6px; 
+            border-radius: 20px; 
+            display: flex; 
+            gap: 4px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        .ctrl-btn { 
+            color: white; 
+            font-size: 11px; 
+            font-weight: 800; 
+            padding: 10px 20px; 
+            border-radius: 14px; 
+            transition: 0.2s; 
+            opacity: 0.4; 
+            text-transform: uppercase;
+        }
+        .ctrl-btn.active { 
+            opacity: 1; 
+            background: rgba(255,255,255,0.15); 
+        }
+    </style>
+</head>
+<body class="p-8 md:p-16 pb-40">
+
+    <div class="controls">
+        <button onclick="changeMode('theme-light')" id="btn-light" class="ctrl-btn">Jour</button>
+        <button onclick="changeMode('theme-dark')" id="btn-dark" class="ctrl-btn active">Nuit</button>
+        <div class="w-px h-5 bg-white/20 my-auto mx-2"></div>
+        <button onclick="changeStyle('style-apple')" id="btn-apple" class="ctrl-btn">Apple</button>
+        <button onclick="changeStyle('style-sidebar')" id="btn-sidebar" class="ctrl-btn active">Sidebar</button>
+    </div>
+
+    <main class="max-w-6xl mx-auto">
+        <header class="mb-20 text-center">
+            <h1 class="text-6xl font-black tracking-tighter mb-4">iCalou</h1>
+            <p class="text-sm font-bold opacity-30 uppercase tracking-[0.5em]">Design System v5.0 • 100% Intégral</p>
+        </header>
+
+        <section class="section-card">
+            <h2 class="text-[11px] font-black uppercase tracking-[0.3em] opacity-40 mb-10 text-center">Actions de Gestion</h2>
+            <div class="grid-container">
+                <button class="btn-action btn-ajouter">Ajouter</button>
+                <button class="btn-action btn-modifier">Modifier</button>
+                <button class="btn-action btn-supprimer">Supprimer</button>
+                <button class="btn-action btn-valider">Valider</button>
+                <button class="btn-action btn-enregistrer">Enregistrer</button>
+                <button class="btn-action btn-annuler">Annuler</button>
+            </div>
+        </section>
+
+        <section class="section-card">
+            <h2 class="text-[11px] font-black uppercase tracking-[0.3em] opacity-40 mb-10 text-center">Documents & Recherche</h2>
+            <div class="grid-container">
+                <button class="btn-action btn-fiche-client">Fiche Client</button>
+                <button class="btn-action btn-telecharger">Télécharger</button>
+                <button class="btn-action btn-imprimer">Imprimer</button>
+                <button class="btn-action btn-rechercher">Rechercher</button>
+                <button class="btn-action btn-actualiser">Actualiser</button>
+                <button class="btn-action btn-info">Détails</button>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <section class="section-card mb-0">
+                <h2 class="text-[11px] font-black uppercase tracking-[0.3em] opacity-40 mb-10">Variantes de tailles</h2>
+                <div class="flex flex-wrap items-center gap-4">
+                    <button class="btn-action btn-modifier btn-sm">Petit</button>
+                    <button class="btn-action btn-modifier">Normal</button>
+                    <button class="btn-action btn-modifier btn-lg">Grand</button>
+                </div>
+            </section>
+            
+            <section class="section-card mb-0">
+                <h2 class="text-[11px] font-black uppercase tracking-[0.3em] opacity-40 mb-10">Compteur & Icônes</h2>
+                <div class="flex items-center gap-6 justify-center">
+                    <button class="btn-action btn-icon btn-moins">-</button>
+                    <span class="text-5xl font-black">01</span>
+                    <button class="btn-action btn-icon btn-plus">+</button>
+                </div>
+            </section>
+        </div>
+
+        <section class="section-card mt-8">
+            <h2 class="text-[11px] font-black uppercase tracking-[0.3em] opacity-40 mb-10">Bouton Pleine Page</h2>
+            <button class="btn-action btn-fiche-client btn-full btn-lg">Générer le récapitulatif annuel du gîte</button>
+        </section>
+    </main>
+
+    <script>
+        function changeMode(mode) {
+            const root = document.getElementById('app-root');
+            root.classList.remove('theme-light', 'theme-dark');
+            root.classList.add(mode);
+            document.getElementById('btn-light').classList.toggle('active', mode === 'theme-light');
+            document.getElementById('btn-dark').classList.toggle('active', mode === 'theme-dark');
+        }
+
+        function changeStyle(style) {
+            const root = document.getElementById('app-root');
+            root.classList.remove('style-apple', 'style-sidebar');
+            root.classList.add(style);
+            document.getElementById('btn-apple').classList.toggle('active', style === 'style-apple');
+            document.getElementById('btn-sidebar').classList.toggle('active', style === 'style-sidebar');
+        }
+    </script>
+</body>
+</html>

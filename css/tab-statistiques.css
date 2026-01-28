@@ -1,0 +1,632 @@
+/* ═══════════════════════════════════════════════════════════════════
+   📊 TAB STATISTIQUES - CSS v2.1
+   Styles pour l'onglet Statistiques avec support multi-modes
+   Date: 27 janvier 2026 17:30
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══ HEADER STATISTIQUES ═══ */
+.stats-header {
+    background: var(--card);
+    padding: 24px 30px;
+    border-radius: 12px;
+    border: 3px solid var(--stroke);
+    box-shadow: 4px 4px 0 var(--stroke);
+    margin-bottom: 30px;
+}
+
+.stats-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.stats-header-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 8px 0;
+    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%);
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: inline-block;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.stats-header-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.stats-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.stats-year-label {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.stats-year-select {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 2px solid var(--stroke);
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.stats-year-select:hover {
+    transform: translateY(-2px);
+    box-shadow: 2px 2px 0 var(--stroke);
+}
+
+.stats-btn-manage {
+    padding: 10px 20px;
+    background: var(--card);
+    color: var(--text);
+    border: 2px solid var(--stroke);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 var(--stroke);
+    transition: all 0.2s;
+}
+
+.stats-btn-manage:hover {
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 var(--stroke);
+}
+
+/* ═══ CARTES STATISTIQUES ═══ */
+.stats-card {
+    background: var(--card);
+    padding: 24px;
+    border-radius: 12px;
+    border: 3px solid var(--stroke);
+    box-shadow: 4px 4px 0 var(--stroke);
+    margin-bottom: 24px;
+    transition: all 0.2s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 0 var(--stroke);
+}
+
+.stats-card-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%);
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ═══ GRILLES STATISTIQUES ═══ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.stats-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+/* Conteneur CA restructuré */
+.stats-ca-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    padding: 0;
+    width: 100%;
+}
+
+.stats-ca-card {
+    background: var(--bg);
+    padding: 24px 20px;
+    border-radius: 12px;
+    border: 3px solid var(--stroke);
+    box-shadow: 4px 4px 0 var(--stroke);
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.stats-ca-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 0 var(--stroke);
+}
+
+/* Container graphique agrandi */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    padding: 20px 0;
+}
+
+.stats-comparison-box {
+    background: var(--bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid var(--stroke);
+    margin-bottom: 30px;
+}
+
+.stats-comparison-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 15px 0;
+}
+
+.stats-comparison-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* ═══ ITEMS STATISTIQUES ═══ */
+.stat-item {
+    background: var(--bg);
+    padding: 24px;
+    border-radius: 12px;
+    border: 3px solid var(--stroke);
+    box-shadow: 4px 4px 0 var(--stroke);
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 0 var(--stroke);
+}
+
+.stat-item-label {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.stat-item-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+    margin: 6px 0;
+}
+
+.stat-item-sublabel {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+/* Petits labels/valeurs */
+.stat-item-label-small {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.stat-item-value-small {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 3px 0;
+}
+
+.stat-item-sublabel-small {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* Valeurs colorées par gîte */
+.stat-item-value-trevoux {
+    color: #3b82f6;
+}
+
+.stat-item-value-couzon {
+    color: #ef4444;
+}
+
+.stat-item-value-3eme {
+    color: #10b981;
+}
+
+.stat-item-value-4eme {
+    color: #06b6d4;
+}
+
+.stat-item-value-colored {
+    font-size: 1.3rem;
+}
+
+/* Valeurs CA réduites */
+.stats-ca-card .stat-item-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin: 6px 0;
+    line-height: 1;
+}
+
+.stats-ca-card .stat-item-value-small {
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.stats-ca-card .stat-item-label-small {
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.stats-ca-card .stat-item-sublabel {
+    font-size: 0.8rem;
+    margin-top: 6px;
+}
+
+/* ═══ FORMULAIRE DONNÉES HISTORIQUES ═══ */
+.historical-data-form {
+    display: none;
+    margin-top: 30px;
+}
+
+.historical-data-form.active {
+    display: block;
+}
+
+.historical-data-card {
+    background: var(--card);
+    padding: 30px;
+}
+
+.historical-data-table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.historical-data-table table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.historical-data-table th {
+    background: var(--bg-secondary);
+    padding: 12px;
+    text-align: left;
+    font-weight: 700;
+    border: 2px solid var(--stroke);
+    color: var(--text);
+}
+
+.historical-data-table td {
+    padding: 12px;
+    border: 2px solid var(--stroke);
+    border-top: none;
+}
+
+.historical-data-table tr:first-child td {
+    border-top: 2px solid var(--stroke);
+}
+
+.historical-data-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid var(--stroke);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 600;
+    text-align: right;
+}
+
+.historical-data-input:focus {
+    outline: none;
+    border-color: var(--upstay-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.1);
+}
+
+/* ═══ ALERTES ═══ */
+.alert {
+    padding: 16px 20px;
+    border-radius: 8px;
+    border: 2px solid;
+    margin-bottom: 20px;
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: var(--text);
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1200px) {
+    .stats-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .stats-grid,
+    .stats-grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-item-value {
+        font-size: 2rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🎨 MODE SIDEBAR (Liseré latéral)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Header en mode Sidebar */
+html.style-sidebar .stats-header {
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--upstay-cyan);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: relative;
+}
+
+html.style-sidebar .stats-header-title {
+    background: none !important;
+    color: #00C2CB !important;
+    padding: 0 !important;
+    text-shadow: none !important;
+}
+
+html.style-sidebar .stats-header:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateX(4px);
+}
+
+/* Cartes en mode Sidebar */
+html.style-sidebar .stats-card {
+    border: 1px solid var(--border-color);
+    border-left: 4px solid #3b82f6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+html.style-sidebar .stats-card-title {
+    background: none !important;
+    color: #00C2CB !important;
+    padding: 0 !important;
+    text-shadow: none !important;
+}
+
+html.style-sidebar .stats-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateX(4px);
+}
+
+/* Items statistiques en mode Sidebar */
+html.style-sidebar .stat-item {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: none;
+    position: relative;
+    overflow: visible;
+}
+
+html.style-sidebar .stat-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 2px 0 8px rgba(59, 130, 246, 0.4);
+    border-radius: 8px 0 0 8px;
+    pointer-events: none;
+}
+
+html.style-sidebar .stat-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Boutons en mode Sidebar */
+html.style-sidebar .stats-btn-manage {
+    border: 1px solid var(--border-color);
+    box-shadow: none;
+}
+
+html.style-sidebar .stats-btn-manage:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🍎 MODE APPLE JOUR (Style épuré minimaliste)
+   ═══════════════════════════════════════════════════════════════════ */
+
+html.theme-light.style-apple .stats-header {
+    background: var(--card);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+html.theme-light.style-apple .stats-header-title {
+    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%) !important;
+    color: #ffffff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    display: inline-block !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.theme-light.style-apple .stats-card {
+    background: var(--card);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+html.theme-light.style-apple .stats-card-title {
+    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%) !important;
+    color: #ffffff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.theme-light.style-apple .stats-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+html.theme-light.style-apple .stat-item {
+    background: var(--bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+html.theme-light.style-apple .stat-item:hover {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+html.theme-light.style-apple .stats-ca-card {
+    background: var(--bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+html.theme-light.style-apple .stats-ca-card:hover {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🌙 MODE APPLE NUIT (Style sombre épuré)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Header en mode Apple Nuit */
+html.theme-dark.style-apple .stats-header {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html.theme-dark.style-apple .stats-header-title {
+    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%) !important;
+    color: #ffffff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    display: inline-block !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Cartes en mode Apple Nuit */
+html.theme-dark.style-apple .stats-card {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html.theme-dark.style-apple .stats-card-title {
+    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%) !important;
+    color: #ffffff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.theme-dark.style-apple .stats-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Items statistiques en mode Apple Nuit */
+html.theme-dark.style-apple .stat-item {
+    background: rgba(30, 30, 30, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-dark.style-apple .stat-item:hover {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+html.theme-dark.style-apple .stat-item-label {
+    color: var(--text-secondary);
+}
+
+html.theme-dark.style-apple .stat-item-value {
+    color: var(--text);
+}
+
+/* Cartes CA en mode Apple Nuit */
+html.theme-dark.style-apple .stats-ca-card {
+    background: rgba(30, 30, 30, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-dark.style-apple .stats-ca-card:hover {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Boutons en mode Apple Nuit */
+html.theme-dark.style-apple .stats-btn-manage {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    box-shadow: none;
+}
+
+html.theme-dark.style-apple .stats-btn-manage:hover {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Select en mode Apple Nuit */
+html.theme-dark.style-apple .stats-year-select {
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+}
+
+/* Inputs en mode Apple Nuit */
+html.theme-dark.style-apple .historical-data-input {
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+}
+
+html.theme-dark.style-apple .historical-data-input:focus {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+}
+
+/* Box comparaison en mode Apple Nuit */
+html.theme-dark.style-apple .stats-comparison-box {
+    background: rgba(30, 30, 30, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}

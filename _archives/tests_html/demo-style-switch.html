@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr" id="master-root" class="style-sidebar">
+<head>
+    <meta charset="UTF-8">
+    <title>Sélecteur de Style iCalou</title>
+    <style>
+        :root {
+            --upstay-cyan: #00C2CB;
+            --bg-dark: #050506;
+            --bg-card: #111113;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: var(--bg-dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+
+        /* --- LE SÉLECTEUR (SWITCH) --- */
+        .style-switcher {
+            margin-bottom: 30px;
+            background: #1c1c1e;
+            padding: 5px;
+            border-radius: 12px;
+            display: flex;
+            gap: 5px;
+            border: 1px solid #333;
+        }
+
+        .style-switcher button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            background: transparent;
+            color: #8e8e93;
+            transition: 0.3s;
+        }
+
+        /* Quand le bouton est actif */
+        .style-switcher button.active {
+            background: var(--upstay-cyan);
+            color: white;
+        }
+
+        /* ==========================================================================
+           LOGIQUE SIDEBAR
+           ========================================================================== */
+        .style-sidebar .modal-content {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 194, 203, 0.2);
+            border-left: 4px solid var(--upstay-cyan);
+            border-radius: 2px;
+            width: 450px;
+        }
+
+        .style-sidebar .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 194, 203, 0.1);
+            color: var(--upstay-cyan);
+            font-family: monospace;
+        }
+
+        /* ==========================================================================
+           LOGIQUE APPLE
+           ========================================================================== */
+        .style-apple .modal-content {
+            background: #1c1c1e;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 450px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+
+        .style-apple .modal-header {
+            padding: 30px;
+            background: linear-gradient(135deg, #00C2CB 0%, #005288 100%);
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Style commun corps formulaire */
+        .modal-body { padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.8rem; opacity: 0.7; }
+        input { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
+        .btn-save { width: 100%; padding: 12px; border: none; border-radius: 8px; background: var(--upstay-cyan); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="style-switcher">
+        <button id="btn-sidebar" class="active" onclick="changeStyle('sidebar')">SIDEBAR</button>
+        <button id="btn-apple" onclick="changeStyle('apple')">APPLE</button>
+    </div>
+
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="header-text">> config_gite_system</span>
+        </div>
+        <div class="modal-body">
+            <div>
+                <label>NOM DU BIEN</label>
+                <input type="text" placeholder="Ex: Villa Calou">
+            </div>
+            <div>
+                <label>VILLAGE</label>
+                <input type="text" placeholder="Ex: Trévoux">
+            </div>
+            <button class="btn-save">SAUVEGARDER</button>
+        </div>
+    </div>
+
+    <script>
+        function changeStyle(nomDuStyle) {
+            // 1. On récupère la balise HTML racine
+            const root = document.getElementById('master-root');
+            
+            // 2. On change la classe (on enlève tout et on met la nouvelle)
+            root.className = 'style-' + nomDuStyle;
+            
+            // 3. On gère l'apparence des boutons du menu
+            document.querySelectorAll('.style-switcher button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // On active le bon bouton
+            if(nomDuStyle === 'sidebar') {
+                document.getElementById('btn-sidebar').classList.add('active');
+                document.getElementById('header-text').innerText = '> config_gite_system';
+            } else {
+                document.getElementById('btn-apple').classList.add('active');
+                document.getElementById('header-text').innerText = 'Configuration Gîte';
+            }
+        }
+    </script>
+</body>
+</html>

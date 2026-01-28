@@ -1,1 +1,1 @@
-V1.0_20260125_1941
+V2.0_28JAN2026_FIX_TABLES_ID - Fix colonnes ID manquantes avec génération UUID automatique (PRODUCTION READY)

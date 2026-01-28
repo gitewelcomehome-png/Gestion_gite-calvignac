@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Test Thèmes - Debug</title>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        body {
+            padding: 40px;
+            min-height: 100vh;
+        }
+        .debug-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card);
+            padding: 20px;
+            border: 3px solid var(--stroke);
+            border-radius: 12px;
+            z-index: 9999;
+            font-family: monospace;
+        }
+        .test-section {
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info">
+        <h3 style="margin-top: 0;">🔍 Debug Info</h3>
+        <div id="debug-classes">Classes: -</div>
+        <div id="debug-border">Border: -</div>
+        <div id="debug-shadow">Shadow: -</div>
+        <div id="debug-radius">Radius: -</div>
+    </div>
+    
+    <h1>🔧 Test des Thèmes</h1>
+    
+    <div class="test-section">
+        <h2>Sélecteur de thème</h2>
+        <select onchange="switchVisualTheme(this.value); updateDebug();" style="padding: 10px; font-size: 16px;">
+            <option value="default">🎨 Rétro (Défaut)</option>
+            <option value="apple-modern">🍎 Apple Moderne</option>
+            <option value="material">📱 Material Design</option>
+        </select>
+        <button onclick="testTheme()" style="padding: 10px 20px; margin-left: 10px;">Test Manuel</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Cartes de test</h2>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+            <div class="card card--spacious">
+                <h3>Carte 1</h3>
+                <p>Texte de test</p>
+            </div>
+            <div class="section section--spaced">
+                <h3>Section 1</h3>
+                <p>Texte de test</p>
+            </div>
+            <div class="section-alert section-alert--danger">
+                <header class="section-header">
+                    <h3 class="section-title">Alerte</h3>
+                </header>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Indicateurs</h2>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+            <div class="indicator indicator--primary">
+                <div class="indicator__label">Primary</div>
+                <div class="indicator__value">1234</div>
+            </div>
+            <div class="indicator indicator--success">
+                <div class="indicator__label">Success</div>
+                <div class="indicator__value">5678</div>
+            </div>
+            <div class="indicator indicator--warning">
+                <div class="indicator__label">Warning</div>
+                <div class="indicator__value">9012</div>
+            </div>
+            <div class="indicator indicator--danger">
+                <div class="indicator__label">Danger</div>
+                <div class="indicator__value">3456</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/visual-themes.js"></script>
+    <script>
+        function updateDebug() {
+            const classes = Array.from(document.body.classList).join(', ');
+            const testCard = document.querySelector('.card');
+            const styles = testCard ? window.getComputedStyle(testCard) : null;
+            
+            document.getElementById('debug-classes').textContent = 'Classes: ' + (classes || 'none');
+            document.getElementById('debug-border').textContent = 'Border: ' + (styles ? styles.borderWidth : '-');
+            document.getElementById('debug-shadow').textContent = 'Shadow: ' + (styles ? styles.boxShadow.substring(0, 50) : '-');
+            document.getElementById('debug-radius').textContent = 'Radius: ' + (styles ? styles.borderRadius : '-');
+            
+            console.log('🔍 Body classes:', document.body.className);
+            console.log('🔍 Test card styles:', {
+                borderWidth: styles?.borderWidth,
+                boxShadow: styles?.boxShadow,
+                borderRadius: styles?.borderRadius
+            });
+        }
+        
+        function testTheme() {
+            console.log('--- TEST MANUEL ---');
+            console.log('Body classes AVANT:', document.body.className);
+            
+            // Tester ajout direct de classe
+            document.body.classList.add('theme-apple-modern');
+            
+            console.log('Body classes APRÈS:', document.body.className);
+            updateDebug();
+        }
+        
+        // Mise à jour initiale
+        setTimeout(updateDebug, 500);
+        
+        // Mise à jour toutes les 2 secondes
+        setInterval(updateDebug, 2000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Test Thèmes Interchangeables</title>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        body {
+            padding: 40px;
+            min-height: 100vh;
+        }
+        
+        .theme-showcase {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .theme-selector-bar {
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+            background: var(--card);
+            padding: 20px;
+            border-radius: var(--border-radius-lg);
+            border: 3px solid var(--stroke);
+            box-shadow: var(--shadow-retro-lg);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .theme-button {
+            flex: 1;
+            padding: 15px 25px;
+            border: 3px solid var(--stroke);
+            border-radius: var(--border-radius-md);
+            background: var(--card);
+            color: var(--text);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-retro-sm);
+        }
+        
+        .theme-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-retro-md);
+        }
+        
+        .theme-button.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-retro-lg);
+        }
+        
+        .demo-section {
+            margin-bottom: 60px;
+        }
+        
+        .demo-title {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: var(--text);
+            border-bottom: 3px solid var(--stroke);
+            padding-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-showcase">
+        <!-- Barre de sélection de thème -->
+        <div class="theme-selector-bar">
+            <button class="theme-button active" onclick="switchTheme('default', this)">
+                🎨 RÉTRO (Défaut)
+            </button>
+            <button class="theme-button" onclick="switchTheme('apple-modern', this)">
+                🍎 APPLE MODERNE
+            </button>
+            <button class="theme-button" onclick="switchTheme('material', this)">
+                📱 MATERIAL DESIGN
+            </button>
+        </div>
+        
+        <!-- Header Example -->
+        <div class="demo-section">
+            <h2 class="demo-title">📋 Headers</h2>
+            
+            <header class="page-header">
+                <div class="page-header__content">
+                    <h1 class="page-title">📊 Tableau de Bord</h1>
+                    <p class="page-subtitle">Semaine 4 - Janvier 2026</p>
+                </div>
+                <div class="page-header__actions">
+                    <button class="btn btn--refresh">🔄 Actualiser</button>
+                    <div class="widget-date">
+                        <div class="widget-date__current">26 janvier 2026</div>
+                        <div class="widget-date__week">Semaine 4</div>
+                    </div>
+                </div>
+            </header>
+        </div>
+        
+        <!-- Alerts Example -->
+        <div class="demo-section">
+            <h2 class="demo-title">⚠️ Sections d'Alerte</h2>
+            
+            <div class="grid grid--2 gap-lg">
+                <section class="section-alert section-alert--danger">
+                    <header class="section-header">
+                        <h3 class="section-title">⚠️ Problèmes Urgents</h3>
+                        <span class="badge badge--danger badge--count">3</span>
+                    </header>
+                    <div class="section-content section-content--compact">
+                        <p>Chauffe-eau en panne - Gîte A</p>
+                        <p>Fuite d'eau - Gîte B</p>
+                    </div>
+                </section>
+                
+                <section class="section-alert section-alert--warning">
+                    <header class="section-header">
+                        <h3 class="section-title">📄 Fiches Clients</h3>
+                        <span class="badge badge--warning badge--count">5</span>
+                    </header>
+                    <div class="section-content section-content--compact">
+                        <p>5 fiches à envoyer avant ce soir</p>
+                    </div>
+                </section>
+                
+                <section class="section-alert section-alert--info">
+                    <header class="section-header">
+                        <h3 class="section-title">💬 Demandes & Retours</h3>
+                        <span class="badge badge--info badge--count">12</span>
+                    </header>
+                    <div class="section-content section-content--compact">
+                        <p>12 messages clients en attente</p>
+                    </div>
+                </section>
+                
+                <section class="section-alert section-alert--success">
+                    <header class="section-header">
+                        <h3 class="section-title">✅ Tout va bien</h3>
+                        <span class="badge badge--success badge--count">0</span>
+                    </header>
+                    <div class="section-content section-content--compact">
+                        <p>Aucun problème détecté !</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <!-- Indicators Example -->
+        <div class="demo-section">
+            <h2 class="demo-title">📊 Indicateurs Chiffrés</h2>
+            
+            <section class="section section--spaced">
+                <h3 class="section-title mb-lg">💼 Vision Globale</h3>
+                
+                <div class="grid grid--4 gap-lg">
+                    <div class="card card--spacious">
+                        <h4 class="section-title mb-md">💼 URSSAF</h4>
+                        <div class="grid grid--2 gap-sm">
+                            <div class="indicator indicator--warning">
+                                <div class="indicator__label">2025</div>
+                                <div class="indicator__value">15 420 €</div>
+                                <div class="indicator__sublabel">Année précédente</div>
+                            </div>
+                            <div class="indicator indicator--warning">
+                                <div class="indicator__label">2026</div>
+                                <div class="indicator__value">3 250 €</div>
+                                <div class="indicator__sublabel">En cours</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card card--spacious">
+                        <h4 class="section-title mb-md">🧾 Impôt Revenu</h4>
+                        <div class="grid grid--2 gap-sm">
+                            <div class="indicator indicator--info">
+                                <div class="indicator__label">2025</div>
+                                <div class="indicator__value">22 890 €</div>
+                                <div class="indicator__sublabel">Année précédente</div>
+                            </div>
+                            <div class="indicator indicator--info">
+                                <div class="indicator__label">2026</div>
+                                <div class="indicator__value">5 120 €</div>
+                                <div class="indicator__sublabel">En cours</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card card--spacious">
+                        <h4 class="section-title mb-md">💰 Chiffre d'Affaires</h4>
+                        <div class="grid grid--2 gap-sm">
+                            <div class="indicator indicator--success">
+                                <div class="indicator__label">Mois</div>
+                                <div class="indicator__value">12 450 €</div>
+                            </div>
+                            <div class="indicator indicator--success">
+                                <div class="indicator__label">Année</div>
+                                <div class="indicator__value">85 230 €</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card card--spacious">
+                        <h4 class="section-title mb-md">📈 Bénéfices</h4>
+                        <div class="grid grid--2 gap-sm">
+                            <div class="indicator indicator--primary">
+                                <div class="indicator__label">Bénéfice 2026</div>
+                                <div class="indicator__value">42 850 €</div>
+                                <div class="indicator__sublabel">CA - Charges</div>
+                            </div>
+                            <div class="indicator indicator--primary">
+                                <div class="indicator__label">Trésorerie</div>
+                                <div class="indicator__value">18 920 €</div>
+                                <div class="indicator__sublabel">Solde bancaire</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Cards & Badges Example -->
+        <div class="demo-section">
+            <h2 class="demo-title">🃏 Cartes & Badges</h2>
+            
+            <div class="grid grid--3 gap-lg">
+                <div class="card card--spacious">
+                    <header class="section-header">
+                        <h3 class="section-title">
+                            <span>📅</span>
+                            Réservations
+                        </h3>
+                        <span class="badge badge--primary">42</span>
+                    </header>
+                    <div class="section-content">
+                        <p>42 réservations cette semaine</p>
+                    </div>
+                </div>
+                
+                <div class="card card--spacious">
+                    <header class="section-header">
+                        <h3 class="section-title">
+                            <span>🧹</span>
+                            Ménages
+                        </h3>
+                        <span class="badge badge--warning">12</span>
+                    </header>
+                    <div class="section-content">
+                        <p>12 ménages à programmer</p>
+                    </div>
+                </div>
+                
+                <div class="card card--spacious">
+                    <header class="section-header">
+                        <h3 class="section-title">
+                            <span>✅</span>
+                            Tâches
+                        </h3>
+                        <div class="section-actions">
+                            <span class="badge badge--success badge--count">8</span>
+                            <button class="btn btn--icon btn--success">+</button>
+                        </div>
+                    </header>
+                    <div class="section-content">
+                        <p>8 tâches en cours</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Buttons Example -->
+        <div class="demo-section">
+            <h2 class="demo-title">🔘 Boutons</h2>
+            
+            <div class="flex flex--wrap gap-lg">
+                <button class="btn btn--refresh">🔄 Actualiser</button>
+                <button class="btn btn--icon btn--primary">+</button>
+                <button class="btn btn--icon btn--success">✓</button>
+                <button class="btn btn--icon btn--warning">⚠</button>
+                <button class="btn btn--icon btn--danger">✕</button>
+                <button class="btn btn--icon btn--info">ℹ</button>
+            </div>
+            
+            <div class="mt-lg">
+                <span class="badge badge--primary">Primary Badge</span>
+                <span class="badge badge--success">Success Badge</span>
+                <span class="badge badge--warning">Warning Badge</span>
+                <span class="badge badge--danger">Danger Badge</span>
+                <span class="badge badge--info">Info Badge</span>
+            </div>
+        </div>
+        
+        <!-- Grids Example -->
+        <div class="demo-section">
+            <h2 class="demo-title">📐 Grilles & Layouts</h2>
+            
+            <section class="section section--spaced">
+                <h3 class="section-title mb-md">Grid 4 colonnes</h3>
+                <div class="grid grid--4 gap-md">
+                    <div class="card p-md">Colonne 1</div>
+                    <div class="card p-md">Colonne 2</div>
+                    <div class="card p-md">Colonne 3</div>
+                    <div class="card p-md">Colonne 4</div>
+                </div>
+            </section>
+            
+            <section class="section section--spaced mt-lg">
+                <h3 class="section-title mb-md">Grid Auto-responsive</h3>
+                <div class="grid grid--auto gap-lg">
+                    <div class="card card--spacious">
+                        <h4>Carte 1</h4>
+                        <p>Contenu adaptatif</p>
+                    </div>
+                    <div class="card card--spacious">
+                        <h4>Carte 2</h4>
+                        <p>Contenu adaptatif</p>
+                    </div>
+                    <div class="card card--spacious">
+                        <h4>Carte 3</h4>
+                        <p>Contenu adaptatif</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <script>
+        // Fonction de switch de thème
+        function switchTheme(themeName, button) {
+            // Retirer tous les thèmes
+            document.body.classList.remove('theme-apple-modern', 'theme-material');
+            
+            // Ajouter le nouveau thème si différent de default
+            if (themeName !== 'default') {
+                document.body.classList.add('theme-' + themeName);
+            }
+            
+            // Sauvegarder le thème
+            localStorage.setItem('selectedTheme', themeName);
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('.theme-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            console.log('✅ Thème changé:', themeName);
+        }
+        
+        // Restaurer le thème au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+            
+            if (savedTheme !== 'default') {
+                document.body.classList.add('theme-' + savedTheme);
+            }
+            
+            // Activer le bon bouton
+            const buttons = document.querySelectorAll('.theme-button');
+            buttons.forEach(btn => {
+                const btnText = btn.textContent.toLowerCase();
+                if (
+                    (savedTheme === 'default' && btnText.includes('rétro')) ||
+                    (savedTheme === 'apple-modern' && btnText.includes('apple')) ||
+                    (savedTheme === 'material' && btnText.includes('material'))
+                ) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            console.log('🎨 Thème restauré:', savedTheme);
+        });
+    </script>
+</body>
+</html>
