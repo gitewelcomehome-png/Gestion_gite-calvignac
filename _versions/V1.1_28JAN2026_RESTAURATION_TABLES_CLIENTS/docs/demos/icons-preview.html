@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Icônes Modernes - Preview</title>
+<link rel="stylesheet" href="css/icons-modern.css">
+<style>
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Plus Jakarta Sans', sans-serif; padding: 24px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:16px; }
+  .card { border:1px solid #e5e7eb; border-radius:12px; padding:16px; }
+  .name { font-size:12px; color:#64748b; margin-top:8px; }
+  .demo { display:flex; align-items:center; gap:8px; }
+  .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size:12px; color:#334155; margin-top:8px; }
+</style>
+</head>
+<body>
+  <!-- inject sprite -->
+  <div id="sprite"></div>
+  <script>fetch('assets/icons-modern/sprite.svg').then(r=>r.text()).then(svg=>{document.getElementById('sprite').innerHTML=svg});</script>
+
+  <h1>Icônes Modernes</h1>
+  <p>Utilisation :
+    <code>&lt;svg class="icon icon-primary"&gt;&lt;use href="#icon-home" /&gt;&lt;/svg&gt;</code>
+  </p>
+
+  <div class="grid">
+    <!-- List icons -->
+    <div class="card"><div class="demo"><svg class="icon icon-primary"><use href="#icon-home"/></svg> Accueil</div><div class="name">icon-home</div></div>
+    <div class="card"><div class="demo"><svg class="icon icon-primary"><use href="#icon-calendar"/></svg> Calendrier</div><div class="name">icon-calendar</div></div>
+    <div class="card"><div class="demo"><svg class="icon icon-success"><use href="#icon-broom"/></svg> Ménage</div><div class="name">icon-broom</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-linen"/></svg> Linge</div><div class="name">icon-linen</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-dashboard"/></svg> Dashboard</div><div class="name">icon-dashboard</div></div>
+    <div class="card"><div class="demo"><svg class="icon icon-warning"><use href="#icon-alert"/></svg> Alerte</div><div class="name">icon-alert</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-settings"/></svg> Réglages</div><div class="name">icon-settings</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-user"/></svg> Utilisateur</div><div class="name">icon-user</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-wifi"/></svg> WiFi</div><div class="name">icon-wifi</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-key"/></svg> Clé / Code</div><div class="name">icon-key</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-parking"/></svg> Parking</div><div class="name">icon-parking</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-bed"/></svg> Couchages</div><div class="name">icon-bed</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-map"/></svg> Carte</div><div class="name">icon-map</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-euro"/></svg> Tarifs</div><div class="name">icon-euro</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-doc"/></svg> Document</div><div class="name">icon-doc</div></div>
+    <div class="card"><div class="demo"><svg class="icon"><use href="#icon-share"/></svg> Partage</div><div class="name">icon-share</div></div>
+  </div>
+</body>
+</html>

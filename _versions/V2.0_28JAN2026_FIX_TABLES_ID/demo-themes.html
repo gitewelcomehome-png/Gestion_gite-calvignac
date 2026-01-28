@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iCalou Pro - Interface Unifiée</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* ========================================
+           VARIABLES DE THÈMES (APPLE & DARK GLASS)
+           ======================================== */
+        :root {
+            --sidebar-width: 260px;
+            --transition-speed: 0.4s;
+            --apple-blue: #007AFF;
+            --glass-purple: #BF5AF2;
+        }
+
+        /* ☀️ STYLE : APPLE LIGHT */
+        :root[data-theme="light"] {
+            --bg-body: #F5F5F7;
+            --bg-sidebar: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --text-main: #1D1D1F;
+            --text-sub: #86868B;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --accent-color: var(--apple-blue);
+            --glass-blur: 0px;
+            --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            --card-radius: 18px;
+        }
+
+        /* 🌙 STYLE : DARK GLASS */
+        :root[data-theme="dark"] {
+            --bg-body: #000000;
+            --bg-sidebar: rgba(28, 28, 30, 0.8);
+            --bg-card: rgba(44, 44, 46, 0.6);
+            --text-main: #FFFFFF;
+            --text-sub: #A1A1A6;
+            --border-color: rgba(255, 255, 255, 0.15);
+            --accent-color: var(--glass-purple);
+            --glass-blur: 20px;
+            --sidebar-shadow: 5px 0 20px rgba(0,0,0,0.3);
+            --card-radius: 22px;
+        }
+
+        /* ========================================
+           STRUCTURE GÉNÉRALE
+           ======================================== */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            transition: background-color var(--transition-speed);
+        }
+
+        /* Fond dégradé spécifique au mode DARK */
+        :root[data-theme="dark"] body {
+            background: radial-gradient(circle at top right, #1e1b4b, #000000);
+        }
+
+        /* ========================================
+           SIDEBAR MODERNE
+           ======================================== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            box-shadow: var(--sidebar-shadow);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--accent-color);
+        }
+
+        .nav-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            margin: 20px 0 10px 10px;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: var(--text-main);
+            border-radius: 12px;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-item i { width: 20px; height: 20px; }
+
+        .nav-item:hover { background-color: var(--border-color); }
+
+        .nav-item.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* ========================================
+           CONTENU PRINCIPAL
+           ======================================== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border-color);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        .btn {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+        
+        .btn i,
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+        }
+        
+        .btn:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        /* SWITCHER DE THÈME */
+        .theme-switcher {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 4px;
+            border-radius: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .sw-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-sub);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .sw-btn i,
+        .sw-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+        }
+        
+        .sw-btn:hover {
+            color: var(--text-main);
+            background: rgba(128, 128, 128, 0.1);
+        }
+
+        .sw-btn.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* STYLE DES ICÔNES */
+        .icon-theme { stroke-width: 2; }
+        
+        /* Bouton retour */
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 12px;
+            color: var(--text-main);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .btn-back i,
+        .btn-back svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+        }
+        
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <i data-lucide="layers" class="icon-theme"></i> iCalou Pro
+        </div>
+        
+        <nav>
+            <div class="nav-label">Menu Principal</div>
+            <a href="index.html" class="nav-item"><i data-lucide="home"></i> Retour Dashboard</a>
+            <a href="#" class="nav-item active"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="#" class="nav-item"><i data-lucide="calendar"></i> Calendrier</a>
+            <a href="#" class="nav-item"><i data-lucide="users"></i> Clients</a>
+            
+            <div class="nav-label">Logistique</div>
+            <a href="#" class="nav-item"><i data-lucide="sparkles"></i> Ménage</a>
+            <a href="#" class="nav-item"><i data-lucide="bed"></i> Linge & Draps</a>
+            
+            <div class="nav-label">Finance</div>
+            <a href="#" class="nav-item"><i data-lucide="wallet"></i> Fiscalité</a>
+            
+            <div class="nav-section" style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <a href="#" class="nav-item"><i data-lucide="settings"></i> Paramètres</a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <a href="index.html" class="btn-back">
+            <i data-lucide="arrow-left"></i> Retour au site principal
+        </a>
+        
+        <header class="header">
+            <div>
+                <h1 id="style-title">Style : Dark Glass</h1>
+                <p style="color: var(--text-sub);">Démonstration des thèmes - Gestion de vos gîtes en temps réel.</p>
+            </div>
+
+            <div class="theme-switcher">
+                <button id="btn-light" class="sw-btn" onclick="setTheme('light')">
+                    <i data-lucide="sun"></i> Apple Light
+                </button>
+                <button id="btn-dark" class="sw-btn active" onclick="setTheme('dark')">
+                    <i data-lucide="moon"></i> Dark Glass
+                </button>
+            </div>
+        </header>
+
+        <div class="card-grid">
+            <div class="card">
+                <h3><i data-lucide="bell" style="color: var(--accent-color); margin-right: 10px;"></i> Notifications</h3>
+                <p style="color: var(--text-sub);">Mme. Martin arrive à 15h00 au Gîte du Soleil.</p>
+                <button class="btn"><i data-lucide="check-circle"></i> Confirmer</button>
+            </div>
+
+            <div class="card">
+                <h3><i data-lucide="trending-up" style="color: #34c759; margin-right: 10px;"></i> Performance</h3>
+                <p style="font-size: 28px; font-weight: 800; margin: 10px 0;">+ 15%</p>
+                <p style="color: var(--text-sub);">De réservations ce mois-ci.</p>
+            </div>
+            
+            <div class="card">
+                <h3><i data-lucide="calendar-check" style="color: #ff9500; margin-right: 10px;"></i> Prochaines Arrivées</h3>
+                <p style="color: var(--text-sub);">3 arrivées prévues cette semaine</p>
+                <button class="btn"><i data-lucide="eye"></i> Voir le planning</button>
+            </div>
+            
+            <div class="card">
+                <h3><i data-lucide="sparkles" style="color: #30d158; margin-right: 10px;"></i> Ménages</h3>
+                <p style="color: var(--text-sub);">2 ménages planifiés aujourd'hui</p>
+                <button class="btn"><i data-lucide="check-square"></i> Gérer</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialisation immédiate des icônes Lucide
+        lucide.createIcons();
+
+        function setTheme(mode) {
+            const html = document.documentElement;
+            const btnLight = document.getElementById('btn-light');
+            const btnDark = document.getElementById('btn-dark');
+            const title = document.getElementById('style-title');
+
+            html.setAttribute('data-theme', mode);
+
+            if (mode === 'light') {
+                btnLight.classList.add('active');
+                btnDark.classList.remove('active');
+                title.innerText = "Style : Apple Light";
+            } else {
+                btnDark.classList.add('active');
+                btnLight.classList.remove('active');
+                title.innerText = "Style : Dark Glass";
+            }
+            
+            // Rafraîchir les icônes si nécessaire
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

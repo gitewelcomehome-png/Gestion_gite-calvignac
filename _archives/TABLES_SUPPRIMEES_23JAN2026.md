@@ -78,9 +78,17 @@ CREATE INDEX idx_checklists_gite ON public.checklists USING btree (gite_id);
 
 ## 🔴 FEATURES NON IMPLÉMENTÉES (7 tables)
 
-### 3. **demandes_horaires** 🔴 FEATURE NON DÉVELOPPÉE
+### 3. **demandes_horaires** ⚠️ ERREUR - FEATURE ACTIVE
 
-**Raison suppression** : Feature jamais implémentée dans l'interface
+**⚠️ CORRECTION 28/01/2026** : Cette table a été supprimée PAR ERREUR !
+La feature ÉTAIT implémentée et fonctionnelle dans :
+- `pages/fiche-client.html` - Formulaires clients
+- `js/fiche-client-app.js` (lignes 1550-1690)
+- Utilisée par les clients en production
+
+**RESTAURÉE le 28/01/2026** via `sql/RESTAURATION_URGENTE_28JAN2026.sql`
+
+**Raison suppression ERRONÉE** : Feature jamais implémentée dans l'interface ← FAUX
 
 **Structure complète** :
 ```sql
@@ -158,9 +166,18 @@ CREATE INDEX idx_evaluations_reservation ON public.evaluations_sejour USING btre
 
 ---
 
-### 5. **problemes_signales** 🔴 FEATURE NON DÉVELOPPÉE
+### 5. **problemes_signales** ⚠️ ERREUR - FEATURE ACTIVE
 
-**Raison suppression** : Feature jamais implémentée
+**⚠️ CORRECTION 28/01/2026** : Cette table a été supprimée PAR ERREUR !
+La feature ÉTAIT implémentée et fonctionnelle dans :
+- `pages/fiche-client.html` - Formulaires clients
+- `js/fiche-client-app.js` (lignes 2585-2660)
+- Utilisée par les clients en production
+- Permet signalement problèmes, demandes, retours, améliorations
+
+**RESTAURÉE le 28/01/2026** via `sql/RESTAURATION_URGENTE_28JAN2026.sql`
+
+**Raison suppression ERRONÉE** : Feature jamais implémentée ← FAUX
 
 **Structure complète** :
 ```sql
