@@ -13,7 +13,7 @@
  */
 
 const RESEND_CONFIG = {
-    apiKey: 're_BwzvVNhc_6YwfFBe1nnv2wCKUgpqf89Wk',
+    apiKey: window.ENV?.RESEND_API_KEY || null, // À configurer dans Vercel Environment Variables
     fromEmail: 'notifications@liveownerunit.fr',
     fromName: 'Gîte Welcome Home'
 };
