@@ -419,83 +419,18 @@ window.debugModalLabels = function() {
 window.debugEditModal = function() {
     setTimeout(() => {
         const modal = document.querySelector('.modal');
-        if (!modal) {
-            console.log('❌ Modal non trouvée');
-            return;
-        }
+        if (!modal) return;
         
-        const htmlClasses = document.documentElement.className;
-        const htmlElement = document.documentElement;
-        const modalContent = modal.querySelector('.modal-content');
-        const inputs = modal.querySelectorAll('.form-group input, .form-group select');
-        const labels = modal.querySelectorAll('.form-group label');
-        
-        console.log('=== 🔍 DEBUG COMPLET MODAL ===');
-        console.log('');
-        console.log('📌 CONTEXTE HTML:');
-        console.log('  ├─ Classes:', htmlClasses);
-        console.log('  ├─ style-apple?', htmlClasses.includes('style-apple'));
-        console.log('  ├─ theme-light?', htmlClasses.includes('theme-light'));
-        console.log('  └─ Selecteur attendu: html.theme-light.style-apple');
-        
-        // Test de sélecteur
-        const testApple = document.querySelectorAll('html.theme-light.style-apple .modal-content');
-        const testGeneric = document.querySelectorAll('.modal-content');
-        console.log('');
-        console.log('🎯 TESTS SÉLECTEURS:');
-        console.log('  ├─ html.theme-light.style-apple .modal-content:', testApple.length);
-        console.log('  └─ .modal-content (générique):', testGeneric.length);
-        
-        // Styles appliqués
-        const modalComputed = window.getComputedStyle(modalContent);
-        console.log('');
-        console.log('📦 MODAL-CONTENT COMPUTED:');
-        console.log('  ├─ background:', modalComputed.background);
-        console.log('  ├─ backgroundColor:', modalComputed.backgroundColor);
-        console.log('  ├─ color:', modalComputed.color);
-        console.log('  └─ borderRadius:', modalComputed.borderRadius);
-        
-        // Premier label
-        if (labels.length > 0) {
-            const labelComputed = window.getComputedStyle(labels[0]);
-            console.log('');
-            console.log('📋 LABEL[0] "' + labels[0].textContent.trim() + '":');
-            console.log('  ├─ color:', labelComputed.color);
-            console.log('  ├─ fontSize:', labelComputed.fontSize);
-            console.log('  └─ fontWeight:', labelComputed.fontWeight);
-        }
-        
-        // Premier input
-        if (inputs.length > 0) {
-            const inputComputed = window.getComputedStyle(inputs[0]);
-            console.log('');
-            console.log('📝 INPUT[0]:');
-            console.log('  ├─ background:', inputComputed.background);
-            console.log('  ├─ backgroundColor:', inputComputed.backgroundColor);
-            console.log('  ├─ color:', inputComputed.color);
-            console.log('  ├─ value:', inputs[0].value);
-            console.log('  └─ borderRadius:', inputComputed.borderRadius);
-        }
-        
-        // Vérifier les règles CSS spécifiques
-        console.log('');
-        console.log('🔎 ANALYSE CSS (vérifier dans DevTools):');
-        console.log('  → Ouvrir DevTools > Elements');
-        console.log('  → Sélectionner .modal-content');
-        console.log('  → Onglet "Computed" pour voir quelle règle gagne');
-        console.log('  → Chercher "background" et voir d\'où vient la valeur');
-        
-        console.log('');
-        console.log('========================');
+        // Debug modal (code silencieux pour analyse si nécessaire)
     }, 250);
 };
 
-// Auto-debug au clic sur un bouton d'édition
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.btn-edit') || e.target.textContent.includes('✏️')) {
-        setTimeout(window.debugEditModal, 300);
-    }
-});
+// Auto-debug au clic sur un bouton d'édition (désactivé)
+// document.addEventListener('click', function(e) {
+//     if (e.target.closest('.btn-edit') || e.target.textContent.includes('✏️')) {
+//         setTimeout(window.debugEditModal, 300);
+//     }
+// });
 
 // Mise à jour visuelle des boutons de switch modal
 (function() {

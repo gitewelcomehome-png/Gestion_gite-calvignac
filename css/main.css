@@ -319,7 +319,7 @@ html.theme-light {
     box-shadow: 0 10px 20px rgba(0, 82, 136, 0.3);
 }
 
-.upstay-logo {
+.liveownerunit-logo {
     width: 65%;
     height: 65%;
 }
@@ -334,14 +334,19 @@ html.theme-light {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 2rem;
     font-weight: 800;
-    text-transform: uppercase;
     letter-spacing: -0.06em;
     line-height: 0.9;
-    background: linear-gradient(180deg, #00C2CB 0%, #005288 100%);
+    margin: 0;
+    color: var(--text-primary);
+}
+
+/* Lettres L, O, U en cyan */
+.brand-cyan {
+    background: linear-gradient(135deg, #00C2CB 0%, #06b6d4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin: 0;
+    text-transform: uppercase;
 }
 
 .brand-tagline {
@@ -1448,15 +1453,6 @@ button.btn-action {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.brand-name {
-    font-size: 1.8rem;
-    font-weight: 800;
-    background: var(--upstay-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

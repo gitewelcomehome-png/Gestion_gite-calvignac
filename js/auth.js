@@ -61,6 +61,11 @@ class AuthManager {
                 this.currentUser = session.user;
                 await this.loadUserRoles();
                 this.updateUI();
+                
+                // 🔒 Démarrer le Email Confirmation Guard
+                if (window.emailConfirmationGuard) {
+                    await window.emailConfirmationGuard.start();
+                }
             } else {
                 this.redirectToLogin();
             }
@@ -280,7 +285,7 @@ class AuthManager {
     /**
      * Actions après authentification réussie
      */
-    onAuthSuccess() {
+    async onAuthSuccess() {
         const now = Date.now();
         if (this.redirectCount >= 3 && (now - this.lastRedirectTime) < 5000) {
             console.error('❌ Boucle de redirection détectée');
@@ -292,12 +297,40 @@ class AuthManager {
             this.redirectCount++;
             this.lastRedirectTime = now;
             this.isRedirecting = true;
-            window.location.href = '/index.html';
+            
+            // Vérifier si c'est la première connexion (compte créé il y a moins de 5 minutes)
+            const isFirstLogin = await this.isFirstLogin();
+            
+            if (isFirstLogin) {
+                // Rediriger vers dashboard avec flag pour ouvrir "Gérer mes Gîtes"
+                window.location.href = '/index.html?firstLogin=true';
+            } else {
+                window.location.href = '/index.html';
+            }
             return;
         }
         
         // Déjà sur page protégée: juste mettre à jour l'UI
         this.updateUI();
+    }
+    
+    /**
+     * Vérifier si c'est la première connexion de l'utilisateur
+     */
+    async isFirstLogin() {
+        if (!this.currentUser) return false;
+        
+        try {
+            const accountCreatedAt = new Date(this.currentUser.created_at).getTime();
+            const now = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+            
+            // Si le compte a été créé il y a moins de 5 minutes, c'est la première connexion
+            return (now - accountCreatedAt) < fiveMinutes;
+        } catch (error) {
+            console.error('Erreur vérification première connexion:', error);
+            return false;
+        }
     }
 
     /**

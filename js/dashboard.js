@@ -6,7 +6,7 @@
 // ║  NE TOUCHER À CE FICHIER QUE SUR DEMANDE EXPLICITE                      ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
 
-console.log('🎯 DASHBOARD.JS CHARGÉ - VERSION 4.0 - 25 JAN 2026 20:15');
+// Dashboard.js v4.0 - 25 Jan 2026
 
 /**
  * Vue d'ensemble hebdomadaire : réservations, ménages, todos
