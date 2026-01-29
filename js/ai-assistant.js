@@ -354,7 +354,7 @@ async function improveAllTexts(tone = 'warm') {
         { id: 'infos_instructionsPoubelles', label: 'Instructions poubelles' },
         { id: 'infos_itineraireLogement', label: 'Itinéraire logement' },
         { id: 'infos_premiereVisite', label: 'Première visite' },
-        { id: 'infos_coupureEau', label: 'Coupure d'eau' }
+        { id: 'infos_coupureEau', label: 'Coupure d\'eau' }
     ];
 
     // Récupérer les champs avec contenu
