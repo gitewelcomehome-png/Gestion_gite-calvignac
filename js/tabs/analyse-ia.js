@@ -13,12 +13,24 @@
         setTimeout(initAnalyseIA, 500);
     }
 
+    // Événement personnalisé pour réinitialiser quand on arrive sur l'onglet
+    document.addEventListener('tabSwitched', (e) => {
+        if (e.detail === 'analyse-ia') {
+            setTimeout(initAnalyseIA, 200);
+        }
+    });
+
     function initAnalyseIA() {
+        console.log('🤖 Initialisation Analyse IA...');
         const form = document.getElementById('analyseForm');
         if (!form) {
+            console.log('⚠️ Formulaire non trouvé, réessai...');
             // L'onglet n'est pas encore chargé, réessayer plus tard
+            setTimeout(initAnalyseIA, 200);
             return;
         }
+
+        console.log('✅ Formulaire trouvé');
 
         const analyseBtn = document.getElementById('analyseBtn');
         const saveUrlBtn = document.getElementById('saveUrlBtn');
@@ -33,15 +45,19 @@
 
         // Éviter de réattacher les listeners plusieurs fois
         if (form.dataset.initialized) {
+            console.log('ℹ️ Déjà initialisé');
             return;
         }
         form.dataset.initialized = 'true';
+        console.log('✅ Listeners attachés');
 
         // Charger et afficher les URLs sauvegardées
         loadSavedUrls();
 
         // Sauvegarder une URL
-        saveUrlBtn.addEventListener('click', () => {
+        saveUrlBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('💾 Clic sur sauvegarder');
             const url = annonceUrl.value.trim();
             if (!url) {
                 showError('Veuillez entrer une URL avant de sauvegarder');
@@ -58,6 +74,7 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('🚀 Début analyse...');
             
             // Réinitialiser
             errorAlert.classList.remove('active');
@@ -65,6 +82,7 @@
             results.classList.remove('active');
             
             const url = annonceUrl.value.trim();
+            console.log('URL:', url);
             
             if (!url) {
                 showError('Veuillez fournir l\'URL de votre annonce');
@@ -74,8 +92,10 @@
             // Afficher loader
             analyseBtn.disabled = true;
             loader.classList.add('active');
+            console.log('⏳ Loader activé');
 
             try {
+                console.log('📤 Envoi requête OpenAI...');
                 const prompt = `Tu es un expert en optimisation d'annonces de location saisonnière. Analyse l'annonce à cette URL : ${url}
 
 Fournis une analyse COMPLÈTE et DÉTAILLÉE avec :
@@ -133,27 +153,34 @@ Sois PRÉCIS, CONSTRUCTIF et donne des exemples concrets.`;
                     })
                 });
 
+                console.log('📥 Réponse reçue:', response.status);
+
                 if (!response.ok) {
-                    throw new Error('Erreur lors de l\'analyse');
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('❌ Erreur API:', errorData);
+                    throw new Error(errorData.error || 'Erreur lors de l\'analyse');
                 }
 
                 const data = await response.json();
                 const content = data.content;
+                console.log('✅ Contenu reçu:', content.substring(0, 100) + '...');
 
                 // Afficher les résultats
                 displayResults(content);
                 showSuccess('Analyse complète terminée !');
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Une erreur est survenue lors de l\'analyse. Veuillez réessayer.');
+                console.error('❌ Erreur:', error);
+                showError('Une erreur est survenue lors de l\'analyse: ' + error.message);
             } finally {
+                console.log('🔄 Fin analyse');
                 analyseBtn.disabled = false;
                 loader.classList.remove('active');
             }
         });
 
         function displayResults(content) {
+            console.log('📊 Affichage résultats...');
             // Convertir le markdown en HTML avec structure
             const sections = content.split(/\*\*\d+\./);
             let html = '';
