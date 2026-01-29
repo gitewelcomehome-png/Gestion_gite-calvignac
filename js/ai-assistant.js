@@ -15,6 +15,13 @@ class AIAssistant {
         this.apiEndpoint = '/api/openai';
         this.model = 'gpt-4o-mini'; // Modèle économique et rapide
         this.isGenerating = false;
+        this.tones = {
+            professional: 'professionnel et formel',
+            warm: 'chaleureux et accueillant',
+            concise: 'concis et direct',
+            descriptive: 'détaillé et descriptif'
+        };
+        this.currentTone = 'warm'; // Ton par défaut
     }
 
     /**
@@ -330,6 +337,270 @@ function showAIAssistantModal(targetFieldId, fieldType = 'general') {
     }, 100);
 }
 
+/**
+ * Améliorer tous les textes du formulaire en un seul appel
+ */
+async function improveAllTexts(tone = 'warm') {
+    const assistant = window.aiAssistant;
+    
+    // Liste des champs à améliorer
+    const fieldsToImprove = [
+        { id: 'infos_instructionsCles', label: 'Instructions récupération clés' },
+        { id: 'infos_lingeFourni', label: 'Linge fourni' },
+        { id: 'infos_instructionsLaveLinge', label: 'Instructions lave-linge' },
+        { id: 'infos_configurationChambres', label: 'Configuration chambres' },
+        { id: 'infos_instructionsCheminee', label: 'Instructions cheminée' },
+        { id: 'infos_instructionsChauffage', label: 'Instructions chauffage' },
+        { id: 'infos_instructionsPoubelles', label: 'Instructions poubelles' },
+        { id: 'infos_itineraireLogement', label: 'Itinéraire logement' },
+        { id: 'infos_premiereVisite', label: 'Première visite' },
+        { id: 'infos_coupureEau', label: 'Coupure d'eau' }
+    ];
+
+    // Récupérer les champs avec contenu
+    const fieldsWithContent = fieldsToImprove
+        .map(field => ({
+            ...field,
+            content: document.getElementById(field.id)?.value?.trim() || ''
+        }))
+        .filter(field => field.content.length > 0);
+
+    if (fieldsWithContent.length === 0) {
+        alert('Aucun champ texte à améliorer. Veuillez d\'abord remplir quelques champs.');
+        return;
+    }
+
+    // Afficher modal de progression
+    showImprovementModal(fieldsWithContent, tone);
+}
+
+/**
+ * Modal de sélection du ton et progression
+ */
+function showImprovementModal(fields, defaultTone) {
+    const modal = document.createElement('div');
+    modal.id = 'aiImprovementModal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.2s;
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        ">
+            <h3 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 1.5rem;">
+                ✨ Amélioration automatique des textes
+            </h3>
+
+            <p style="margin-bottom: 20px; color: #7f8c8d;">
+                L'IA va reformuler <strong>${fields.length} champ(s)</strong> pour les rendre plus professionnels.
+            </p>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #34495e;">
+                    Choisissez le ton :
+                </label>
+                <select id="toneSelector" style="
+                    width: 100%;
+                    padding: 12px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                ">
+                    <option value="warm" selected>🏡 Chaleureux et accueillant</option>
+                    <option value="professional">💼 Professionnel et formel</option>
+                    <option value="concise">⚡ Concis et direct</option>
+                    <option value="descriptive">📝 Détaillé et descriptif</option>
+                </select>
+            </div>
+
+            <div id="progressContainer" style="display: none; margin: 20px 0;">
+                <div style="
+                    background: #ecf0f1;
+                    height: 8px;
+                    border-radius: 4px;
+                    overflow: hidden;
+                ">
+                    <div id="progressBar" style="
+                        background: linear-gradient(90deg, #3498db, #2ecc71);
+                        height: 100%;
+                        width: 0%;
+                        transition: width 0.3s;
+                    "></div>
+                </div>
+                <p id="progressText" style="margin-top: 10px; text-align: center; color: #7f8c8d; font-size: 0.9rem;">
+                    Préparation...
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="btnStartImprovement" style="
+                    flex: 1;
+                    padding: 14px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    ✨ Améliorer tous les textes
+                </button>
+                <button id="btnCancelImprovement" style="
+                    padding: 14px 24px;
+                    background: #ecf0f1;
+                    color: #7f8c8d;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                ">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Gestion des événements
+    document.getElementById('btnStartImprovement').onclick = async () => {
+        const selectedTone = document.getElementById('toneSelector').value;
+        await processAllFields(fields, selectedTone, modal);
+    };
+
+    document.getElementById('btnCancelImprovement').onclick = () => modal.remove();
+}
+
+/**
+ * Traiter tous les champs en un seul appel API
+ */
+async function processAllFields(fields, tone, modal) {
+    const assistant = window.aiAssistant;
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const btnStart = document.getElementById('btnStartImprovement');
+
+    // Afficher la progression
+    progressContainer.style.display = 'block';
+    btnStart.disabled = true;
+    btnStart.style.opacity = '0.5';
+    progressText.textContent = 'Envoi de la requête à l\'IA...';
+    progressBar.style.width = '30%';
+
+    try {
+        // Préparer le prompt avec tous les champs
+        const fieldsList = fields.map((f, i) => 
+            `${i + 1}. **${f.label}** :\n${f.content}`
+        ).join('\n\n');
+
+        const toneDescriptions = {
+            professional: 'un ton professionnel et formel',
+            warm: 'un ton chaleureux et accueillant',
+            concise: 'un style concis et direct',
+            descriptive: 'un style détaillé et descriptif'
+        };
+
+        const prompt = `Tu dois reformuler les textes suivants avec ${toneDescriptions[tone]}.
+
+RÈGLES IMPORTANTES :
+- NE PAS inventer d'informations
+- SEULEMENT reformuler ce qui est écrit
+- Garder TOUS les détails (codes, horaires, noms, etc.)
+- Améliorer la clarté et la structure
+- Corriger l'orthographe et la grammaire
+- Rester fidèle au contenu original
+
+TEXTES À REFORMULER :
+
+${fieldsList}
+
+Réponds UNIQUEMENT en JSON avec ce format exact :
+{
+  "fields": [
+    { "index": 1, "improved": "texte reformulé" },
+    { "index": 2, "improved": "texte reformulé" }
+  ]
+}`;
+
+        progressText.textContent = 'Génération des textes améliorés...';
+        progressBar.style.width = '60%';
+
+        // Appel API
+        const response = await assistant.generateContent(prompt, 2000);
+        
+        progressText.textContent = 'Application des modifications...';
+        progressBar.style.width = '90%';
+
+        // Parser la réponse JSON
+        let improvedFields;
+        try {
+            // Nettoyer la réponse si elle contient des balises de code
+            let cleanResponse = response.trim();
+            if (cleanResponse.startsWith('```json')) {
+                cleanResponse = cleanResponse.replace(/```json\n?/g, '').replace(/```\n?$/g, '');
+            }
+            const parsed = JSON.parse(cleanResponse);
+            improvedFields = parsed.fields;
+        } catch (e) {
+            console.error('Erreur parsing JSON:', e);
+            throw new Error('Format de réponse invalide de l\'IA');
+        }
+
+        // Appliquer les textes améliorés aux champs
+        let updatedCount = 0;
+        improvedFields.forEach(improved => {
+            const field = fields[improved.index - 1];
+            if (field && improved.improved) {
+                const element = document.getElementById(field.id);
+                if (element) {
+                    element.value = improved.improved;
+                    // Animation visuelle
+                    element.style.transition = 'background-color 0.5s';
+                    element.style.backgroundColor = '#d4edda';
+                    setTimeout(() => {
+                        element.style.backgroundColor = '';
+                    }, 2000);
+                    updatedCount++;
+                }
+            }
+        });
+
+        progressBar.style.width = '100%';
+        progressText.textContent = `✅ ${updatedCount} champ(s) amélioré(s) avec succès !`;
+        progressText.style.color = '#27ae60';
+        progressText.style.fontWeight = '600';
+
+        // Fermer après 2 secondes
+        setTimeout(() => {
+            modal.remove();
+        }, 2000);
+
+    } catch (error) {
+        console.error('❌ Erreur amélioration:', error);
+        progressText.textContent = `❌ Erreur : ${error.message}`;
+        progressText.style.color = '#e74c3c';
+        btnStart.disabled = false;
+        btnStart.style.opacity = '1';
+    }
+}
+
 // ==========================================
 // 🌐 EXPORTS GLOBAUX
 // ==========================================
@@ -337,3 +608,4 @@ function showAIAssistantModal(targetFieldId, fieldType = 'general') {
 window.AIAssistant = AIAssistant;
 window.aiAssistant = new AIAssistant();
 window.showAIAssistantModal = showAIAssistantModal;
+window.improveAllTexts = improveAllTexts;

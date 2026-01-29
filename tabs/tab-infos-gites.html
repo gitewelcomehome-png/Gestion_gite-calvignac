@@ -7,6 +7,26 @@
                 <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Informations essentielles pour vos clients</p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
+                <!-- NOUVEAU: Bouton amélioration globale -->
+                <button type="button" onclick="improveAllTexts()" style="
+                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                    border: 3px solid #2D3436;
+                    box-shadow: 3px 3px 0 #2D3436;
+                    color: white;
+                    cursor: pointer;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                    font-weight: 700;
+                    font-size: 1rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                " title="Améliorer tous les textes avec l'IA" 
+                   onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" 
+                   onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
+                    <span style="font-size: 1.3rem;">✨</span> Améliorer tous les textes
+                </button>
                 <!-- Bouton configuration IA -->
                 <button type="button" onclick="window.aiAssistant.showApiKeyModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;" title="Configurer l'Assistant IA" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
                     <span style="font-size: 1.2rem;">✨</span> Assistant IA

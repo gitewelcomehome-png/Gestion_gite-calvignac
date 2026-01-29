@@ -53,7 +53,7 @@ export default async function handler(req, res) {
                 messages: [
                     {
                         role: 'system',
-                        content: 'Tu es un assistant qui génère du contenu clair et professionnel pour des fiches d\'information de gîtes. Réponds de manière concise et structurée.'
+                        content: 'Tu es un assistant qui reformule et améliore des textes pour des fiches d\'information de gîtes. RÈGLES STRICTES : 1) NE JAMAIS inventer d\'informations 2) SEULEMENT reformuler ce qui est fourni 3) Garder TOUS les détails (codes, horaires, noms, lieux) 4) Améliorer la clarté et corriger l\'orthographe 5) Rester fidèle au contenu original. Si on te demande un JSON, réponds UNIQUEMENT en JSON valide sans texte supplémentaire.'
                     },
                     {
                         role: 'user',
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
                     }
                 ],
                 max_tokens: maxTokens,
-                temperature: 0.7
+                temperature: 0.3 // Basse température pour rester factuel
             })
         });
 
