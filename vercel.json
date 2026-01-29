@@ -1,31 +1,13 @@
 {
-  "version": 2,
-  "name": "gestion-gite-calvignac",
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/openai",
-      "dest": "/api/openai.js"
-    },
-    {
-      "src": "/api/webhooks/abritel",
-      "dest": "/api/webhooks/abritel.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
     }
-  ],
-  "env": {
-    "TIMEZONE": "Europe/Paris"
-  }
+  ]
 }
