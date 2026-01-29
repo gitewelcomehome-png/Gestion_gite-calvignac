@@ -26,10 +26,6 @@
     }
   ],
   "env": {
-    "SUPABASE_URL": "@supabase-url",
-    "SUPABASE_KEY": "@supabase-key",
-    "OPENAI_API_KEY": "@openai-api-key",
-    "TIMEZONE": "@timezone",
-    "ABRITEL_WEBHOOK_SECRET": "@abritel-webhook-secret"
+    "TIMEZONE": "Europe/Paris"
   }
 }
