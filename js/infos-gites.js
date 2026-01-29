@@ -997,7 +997,7 @@ async function generateGitesButtons() {
             select.appendChild(option);
         });
 
-        console.log(`✅ ${gites.length} gîtes ajoutés à la liste déroulante`);
+        // console.log(`✅ ${gites.length} gîtes ajoutés à la liste déroulante`);
         
         // Appliquer la couleur du premier gîte à la section englobante via CSS variables
         const firstGiteColor = gites[0]?.color || colors[0];
@@ -1054,7 +1054,7 @@ async function generateGitesButtons() {
             captureFormState();
             attachChangeListeners();
             attachAutoTranslation(); // Activer la traduction auto
-            console.log('✅ Système de détection de modifications activé');
+            // console.log('✅ Système de détection de modifications activé');
         }, 300);
         
     } catch (error) {
@@ -1087,7 +1087,7 @@ window.selectGiteFromDropdown = async function(giteName) {
         window.isDirty = false;
     }
     
-    console.log(`🏠 Changement de gîte : ${currentGiteInfos} → ${giteName} (langue: ${currentLangInfos})`);
+    // console.log(`🏠 Changement de gîte : ${currentGiteInfos} → ${giteName} (langue: ${currentLangInfos})`);
     
     // Changer le gîte
     currentGiteInfos = giteName;
@@ -1383,7 +1383,7 @@ async function sauvegarderDonneesInfos() {
 }
 
 async function chargerDonneesInfos() {
-    console.log(`📥 Chargement des données pour ${currentGiteInfos} (langue active: ${currentLangInfos})`);
+    // console.log(`📥 Chargement des données pour ${currentGiteInfos} (langue active: ${currentLangInfos})`);
     
     // Charger uniquement depuis Supabase
     const data = await loadInfosGiteFromSupabase(currentGiteInfos);
@@ -1553,7 +1553,7 @@ function attachChangeListeners() {
         });
     });
     
-    console.log('✅ Sauvegarde automatique activée sur tous les champs');
+    // console.log('✅ Sauvegarde automatique activée sur tous les champs');
 }
 
 // Sauvegarde manuelle
@@ -1832,7 +1832,7 @@ async function syncGiteCoordinates(giteName, address, latitude, longitude) {
         if (updateError) {
             console.error('❌ Erreur sync coordonnées gites:', updateError);
         } else {
-            console.log('✅ Coordonnées synchronisées dans la table gites');
+            // console.log('✅ Coordonnées synchronisées dans la table gites');
         }
     } catch (error) {
         console.error('❌ Erreur syncGiteCoordinates:', error);
@@ -2057,7 +2057,7 @@ function applyLanguageDisplay() {
         // Afficher la card anglaise globale
         if (englishCard) {
             englishCard.style.display = 'block';
-            console.log('✅ Card EN affichée (display: block)');
+            // console.log('✅ Card EN affichée (display: block)');
         }
         
         // Cacher toutes les cards FR (sauf la première avec les boutons)
@@ -2077,7 +2077,7 @@ function applyLanguageDisplay() {
         // Cacher la card anglaise globale
         if (englishCard) {
             englishCard.style.display = 'none';
-            console.log('✅ Card EN cachée (display: none)');
+            // console.log('✅ Card EN cachée (display: none)');
         }
         
         // Afficher toutes les cards FR

@@ -74,7 +74,7 @@ window.initValidationInfosPratiques = function() {
     
     const infos_telephone_en = document.getElementById('infos_telephone_en');
     if (infos_telephone_en) {
-        console.log('✅ Standardisation téléphone EN activée');
+        // console.log('✅ Standardisation téléphone EN activée');
         
         // Filtrage temps réel
         infos_telephone_en.addEventListener('input', function(e) {
@@ -99,7 +99,7 @@ window.initValidationInfosPratiques = function() {
         });
     }
     
-    console.log('✅ Filtrage + standardisation téléphone activés');
+    // console.log('✅ Filtrage + standardisation téléphone activés');
 };
 
 // Attendre que ValidationUtils soit chargé
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            console.log('✅ Formulaire valide, valeurs sanitized:', validation.values);
+            // console.log('✅ Formulaire valide, valeurs sanitized:', validation.values);
             // Le formulaire continue sa soumission normale
         }, true); // capture = true pour s'exécuter en premier
     }

@@ -345,7 +345,7 @@ async function improveAllTexts(tone = 'warm') {
     
     // Vérifier qu'un gîte est sélectionné
     const currentGite = window.currentGiteInfos || 'Trévoux';
-    console.log('🏠 Amélioration IA pour le gîte:', currentGite);
+    // console.log('🏠 Amélioration IA pour le gîte:', currentGite);
     
     // Récupérer TOUS les champs input et textarea du formulaire
     // SAUF ceux de type contact, téléphone, email, adresse, GPS, numéros
@@ -390,7 +390,7 @@ async function improveAllTexts(tone = 'warm') {
         return;
     }
 
-    console.log(`📊 ${fieldsToImprove.length} champs trouvés pour le gîte ${currentGite}`);
+    // console.log(`📊 ${fieldsToImprove.length} champs trouvés pour le gîte ${currentGite}`);
 
     // Afficher modal de progression
     showImprovementModal(fieldsToImprove, tone, currentGite);
@@ -672,4 +672,4 @@ window.aiAssistant = new AIAssistant();
 window.showAIAssistantModal = showAIAssistantModal;
 window.improveAllTexts = improveAllTexts;
 
-console.log('✅ AI Assistant chargé - improveAllTexts disponible:', typeof window.improveAllTexts);
+// console.log('✅ AI Assistant chargé - improveAllTexts disponible:', typeof window.improveAllTexts);
