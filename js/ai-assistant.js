@@ -343,6 +343,10 @@ function showAIAssistantModal(targetFieldId, fieldType = 'general') {
 async function improveAllTexts(tone = 'warm') {
     const assistant = window.aiAssistant;
     
+    // Vérifier qu'un gîte est sélectionné
+    const currentGite = window.currentGiteInfos || 'Trévoux';
+    console.log('🏠 Amélioration IA pour le gîte:', currentGite);
+    
     // Récupérer TOUS les champs input et textarea du formulaire
     // SAUF ceux de type contact, téléphone, email, adresse, GPS, numéros
     const form = document.getElementById('infosGiteForm');
@@ -386,14 +390,16 @@ async function improveAllTexts(tone = 'warm') {
         return;
     }
 
+    console.log(`📊 ${fieldsToImprove.length} champs trouvés pour le gîte ${currentGite}`);
+
     // Afficher modal de progression
-    showImprovementModal(fieldsToImprove, tone);
+    showImprovementModal(fieldsToImprove, tone, currentGite);
 }
 
 /**
  * Modal de sélection du ton et progression
  */
-function showImprovementModal(fields, defaultTone) {
+function showImprovementModal(fields, defaultTone, giteName) {
     const modal = document.createElement('div');
     modal.id = 'aiImprovementModal';
     modal.style.cssText = `
@@ -421,7 +427,7 @@ function showImprovementModal(fields, defaultTone) {
             </h3>
 
             <p style="margin-bottom: 20px; color: #7f8c8d;">
-                L'IA va reformuler <strong>${fields.length} champ(s)</strong> pour les rendre plus professionnels.
+                L'IA va reformuler <strong>${fields.length} champ(s)</strong> pour le gîte <strong style="color: #3498db;">${giteName}</strong>.
             </p>
 
             <div style="margin-bottom: 20px;">
@@ -521,10 +527,18 @@ async function processAllFields(fields, tone, modal) {
     progressBar.style.width = '30%';
 
     try {
-        // Préparer le prompt avec tous les champs
-        const fieldsList = fields.map((f, i) => 
-            `${i + 1}. **${f.label}** :\n${f.content}`
-        ).join('\n\n');
+        // Préparer le prompt avec tous les champs (échapper les guillemets)
+        const fieldsList = fields.map((f, i) => {
+            // Échapper les caractères spéciaux pour éviter les erreurs JSON
+            const escapedContent = f.content
+                .replace(/\\/g, '\\\\')  // Échapper les backslashes
+                .replace(/"/g, '\\"')      // Échapper les guillemets
+                .replace(/\n/g, ' ')        // Remplacer retours à la ligne par espaces
+                .replace(/\r/g, ' ')        // Remplacer carriage returns
+                .replace(/\t/g, ' ');       // Remplacer tabs
+            
+            return `${i + 1}. **${f.label}** : ${escapedContent}`;
+        }).join('\n\n');
 
         const toneDescriptions = {
             professional: 'un ton professionnel et formel',
