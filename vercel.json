@@ -13,6 +13,10 @@
   ],
   "routes": [
     {
+      "src": "/api/openai",
+      "dest": "/api/openai.js"
+    },
+    {
       "src": "/api/webhooks/abritel",
       "dest": "/api/webhooks/abritel.js"
     },
@@ -23,7 +27,9 @@
   ],
   "env": {
     "SUPABASE_URL": "@supabase-url",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
+    "SUPABASE_KEY": "@supabase-key",
+    "OPENAI_API_KEY": "@openai-api-key",
+    "TIMEZONE": "@timezone",
     "ABRITEL_WEBHOOK_SECRET": "@abritel-webhook-secret"
   }
 }

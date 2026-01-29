@@ -1,6 +1,63 @@
-# Fichiers à ignorer lors du déploiement
-.git
-.DS_Store
+# ===================================================================
+# .vercelignore - Fichiers à ne PAS déployer sur Vercel
+# ===================================================================
+# Réduit la taille du déploiement et accélère le build
+# ===================================================================
+
+# Archives et backups
+_archives/
+_backups/
+_versions/
+
+# Documentation
+docs/
 *.md
 README*
-node_modules
+
+# Fichiers SQL (déjà dans Supabase)
+sql/
+
+# Tests et demos
+tests_debug_2026/
+tests_html/
+fichiers_test/
+js_tests/
+demos/
+demo-themes.html
+test-*.html
+
+# CSS obsolètes
+css_obsoletes/
+css_20260125/
+css_site_optimized.css
+
+# JavaScript obsolètes
+js_obsoletes/
+
+# Scripts obsolètes
+scripts_obsoletes/
+scripts/
+
+# Business plan (pas nécessaire en prod)
+business-plan/
+
+# Fichiers de développement
+.env
+.env.local
+.env.development
+*.log
+
+# Éditeurs et OS
+.vscode/
+.idea/
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Scripts locaux
+*.sh
+
+# Node modules
+node_modules/
