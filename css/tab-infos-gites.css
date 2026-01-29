@@ -171,6 +171,16 @@ html.theme-light #gite-content-wrapper {
     text-align: center !important;
 }
 
+/* Indicateur en mode light */
+html.theme-light #gite-indicator {
+    background: rgba(102, 126, 234, 0.08) !important;
+}
+
+/* Indicateur en mode sidebar + light */
+html.style-sidebar.theme-light #gite-indicator {
+    background: #f8f9fa !important;
+}
+
 #gite-indicator div {
     font-size: 1.1rem !important;
     font-weight: 700 !important;
@@ -244,11 +254,18 @@ html.style-sidebar #gite-indicator {
     border-left: 4px solid var(--gite-color, #667eea) !important;
 }
 
-/* Cards internes en mode sidebar */
+/* Cards internes en mode sidebar - MODE NUIT PAR DÉFAUT */
 html.style-sidebar #gite-content-wrapper .infos-card {
     border: 3px solid rgba(255, 255, 255, 0.15) !important;
     border-left: 4px solid var(--gite-color, #667eea) !important;
     background: #1a1a1d !important;
+}
+
+/* Cards internes en mode sidebar - MODE JOUR */
+html.style-sidebar.theme-light #gite-content-wrapper .infos-card {
+    background: #ffffff !important;
+    border: 3px solid rgba(0, 0, 0, 0.1) !important;
+    border-left: 4px solid var(--gite-color, #667eea) !important;
 }
 
 html.style-sidebar #gite-content-wrapper .infos-card:hover {
@@ -264,8 +281,19 @@ html.style-sidebar #gite-content-wrapper .infos-card-header {
     border-bottom: 3px solid var(--gite-color, #667eea) !important;
 }
 
+/* Header en mode sidebar + jour */
+html.style-sidebar.theme-light #gite-content-wrapper .infos-card-header {
+    background: #f8f9fa !important;
+    color: #1d1d1f !important;
+}
+
 html.style-sidebar #gite-content-wrapper .infos-card-title {
     color: #ffffff !important;
+}
+
+/* Titre en mode sidebar + jour */
+html.style-sidebar.theme-light #gite-content-wrapper .infos-card-title {
+    color: #1d1d1f !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
