@@ -343,35 +343,51 @@ function showAIAssistantModal(targetFieldId, fieldType = 'general') {
 async function improveAllTexts(tone = 'warm') {
     const assistant = window.aiAssistant;
     
-    // Liste des champs à améliorer
-    const fieldsToImprove = [
-        { id: 'infos_instructionsCles', label: 'Instructions récupération clés' },
-        { id: 'infos_lingeFourni', label: 'Linge fourni' },
-        { id: 'infos_instructionsLaveLinge', label: 'Instructions lave-linge' },
-        { id: 'infos_configurationChambres', label: 'Configuration chambres' },
-        { id: 'infos_instructionsCheminee', label: 'Instructions cheminée' },
-        { id: 'infos_instructionsChauffage', label: 'Instructions chauffage' },
-        { id: 'infos_instructionsPoubelles', label: 'Instructions poubelles' },
-        { id: 'infos_itineraireLogement', label: 'Itinéraire logement' },
-        { id: 'infos_premiereVisite', label: 'Première visite' },
-        { id: 'infos_coupureEau', label: 'Coupure d\'eau' }
+    // Récupérer TOUS les champs input et textarea du formulaire
+    // SAUF ceux de type contact, téléphone, email, adresse, GPS, numéros
+    const form = document.getElementById('infosGiteForm');
+    if (!form) {
+        alert('❌ Formulaire introuvable');
+        return;
+    }
+
+    const excludedIds = [
+        'infos_adresse',
+        'infos_telephone',
+        'infos_telephoneEN',
+        'infos_gpsLat',
+        'infos_gpsLon',
+        'infos_email',
+        'infos_numeroSiren',
+        'infos_numeroRegistreCommerce'
     ];
 
-    // Récupérer les champs avec contenu
-    const fieldsWithContent = fieldsToImprove
-        .map(field => ({
-            ...field,
-            content: document.getElementById(field.id)?.value?.trim() || ''
-        }))
-        .filter(field => field.content.length > 0);
+    const fieldsToImprove = [];
+    
+    // Récupérer tous les inputs et textareas
+    const allInputs = form.querySelectorAll('input[type="text"], textarea');
+    allInputs.forEach(input => {
+        if (!excludedIds.includes(input.id) && input.id && input.value.trim().length > 0) {
+            // Trouver le label associé
+            const label = form.querySelector(`label[for="${input.id}"]`)?.textContent?.trim() || 
+                          input.previousElementSibling?.textContent?.trim() || 
+                          input.id;
+            
+            fieldsToImprove.push({
+                id: input.id,
+                label: label.replace('*', '').trim(),
+                content: input.value.trim()
+            });
+        }
+    });
 
-    if (fieldsWithContent.length === 0) {
+    if (fieldsToImprove.length === 0) {
         alert('Aucun champ texte à améliorer. Veuillez d\'abord remplir quelques champs.');
         return;
     }
 
     // Afficher modal de progression
-    showImprovementModal(fieldsWithContent, tone);
+    showImprovementModal(fieldsToImprove, tone);
 }
 
 /**
@@ -571,12 +587,23 @@ Réponds UNIQUEMENT en JSON avec ce format exact :
                 const element = document.getElementById(field.id);
                 if (element) {
                     element.value = improved.improved;
-                    // Animation visuelle
-                    element.style.transition = 'background-color 0.5s';
-                    element.style.backgroundColor = '#d4edda';
-                    setTimeout(() => {
+                    
+                    // FOND ROUGE jusqu'au clic
+                    element.style.transition = 'background-color 0.3s';
+                    element.style.backgroundColor = '#ffebee'; // Rouge clair
+                    element.style.borderColor = '#e74c3c'; // Bordure rouge
+                    
+                    // Enlever le fond rouge au clic dans le champ
+                    const removeRedBackground = () => {
                         element.style.backgroundColor = '';
-                    }, 2000);
+                        element.style.borderColor = '';
+                        element.removeEventListener('focus', removeRedBackground);
+                        element.removeEventListener('click', removeRedBackground);
+                    };
+                    
+                    element.addEventListener('focus', removeRedBackground);
+                    element.addEventListener('click', removeRedBackground);
+                    
                     updatedCount++;
                 }
             }
