@@ -572,25 +572,51 @@ Réponds UNIQUEMENT en JSON avec ce format exact :
         progressText.textContent = 'Génération des textes améliorés...';
         progressBar.style.width = '60%';
 
-        // Appel API
-        const response = await assistant.generateContent(prompt, 2000);
+        // Calculer tokens nécessaires (environ 3 tokens par mot)
+        const estimatedTokens = Math.max(3000, fields.length * 150 + 1000);
+        console.log(`📊 Appel IA avec ~${estimatedTokens} tokens pour ${fields.length} champs`);
+
+        // Appel API avec limite adaptée
+        const response = await assistant.generateContent(prompt, estimatedTokens);
         
         progressText.textContent = 'Application des modifications...';
         progressBar.style.width = '90%';
 
+        console.log('🔍 Réponse IA (premiers 200 chars):', response.substring(0, 200));
+
         // Parser la réponse JSON
         let improvedFields;
         try {
-            // Nettoyer la réponse si elle contient des balises de code
+            // Nettoyer la réponse
             let cleanResponse = response.trim();
+            
+            // Enlever les balises markdown si présentes
             if (cleanResponse.startsWith('```json')) {
                 cleanResponse = cleanResponse.replace(/```json\n?/g, '').replace(/```\n?$/g, '');
+            } else if (cleanResponse.startsWith('```')) {
+                cleanResponse = cleanResponse.replace(/```\n?/g, '').replace(/```\n?$/g, '');
             }
+            
+            // Trouver le JSON entre accolades si le texte contient autre chose
+            const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                cleanResponse = jsonMatch[0];
+            }
+            
+            console.log('🧹 JSON nettoyé (premiers 200 chars):', cleanResponse.substring(0, 200));
+            
             const parsed = JSON.parse(cleanResponse);
             improvedFields = parsed.fields;
+            
+            if (!improvedFields || !Array.isArray(improvedFields)) {
+                throw new Error('La propriété "fields" est manquante ou invalide');
+            }
+            
+            console.log(`✅ ${improvedFields.length} champs parsés avec succès`);
         } catch (e) {
-            console.error('Erreur parsing JSON:', e);
-            throw new Error('Format de réponse invalide de l\'IA');
+            console.error('❌ Erreur parsing JSON:', e);
+            console.error('📄 Réponse complète:', response);
+            throw new Error(`Format de réponse invalide de l'IA: ${e.message}`);
         }
 
         // Appliquer les textes améliorés aux champs
