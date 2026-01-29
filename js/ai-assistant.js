@@ -609,3 +609,5 @@ window.AIAssistant = AIAssistant;
 window.aiAssistant = new AIAssistant();
 window.showAIAssistantModal = showAIAssistantModal;
 window.improveAllTexts = improveAllTexts;
+
+console.log('✅ AI Assistant chargé - improveAllTexts disponible:', typeof window.improveAllTexts);
