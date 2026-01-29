@@ -1,0 +1,102 @@
+<div class="analyse-ia-container">
+    <div class="analyse-header">
+        <h1>🤖 Analyse d'Annonce IA</h1>
+        <p class="subtitle">Optimisez vos annonces de location avec l'intelligence artificielle</p>
+    </div>
+
+    <div class="analyse-main-content">
+        <!-- Section Analyse -->
+        <div class="analyse-card">
+            <h2>📝 Votre Annonce</h2>
+            
+            <div class="alert alert-error" id="analyseErrorAlert"></div>
+            <div class="alert alert-success" id="analyseSuccessAlert"></div>
+
+            <form id="analyseForm">
+                <div class="form-group">
+                    <label for="annonceUrl">🔗 URL de votre annonce :</label>
+                    <input 
+                        type="url" 
+                        id="annonceUrl" 
+                        placeholder="https://www.airbnb.fr/rooms/12345678 ou https://www.booking.com/..." 
+                        required
+                    >
+                    <small style="color: #666; margin-top: 8px; display: block;">
+                        💡 L'IA va analyser automatiquement le contenu complet de votre annonce
+                    </small>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn-analyse-primary" id="analyseBtn" style="flex: 1;">
+                        ✨ Analyser l'annonce
+                    </button>
+                    <button type="button" class="btn-save-url" id="saveUrlBtn">
+                        💾 Sauvegarder
+                    </button>
+                </div>
+            </form>
+
+            <!-- URLs Sauvegardées -->
+            <div class="saved-urls" id="savedUrlsSection" style="display: none;">
+                <h3>📋 Annonces sauvegardées</h3>
+                <div id="savedUrlsList"></div>
+            </div>
+
+            <div class="analyse-loader" id="analyseLoader">
+                <div class="analyse-spinner"></div>
+                <p>Analyse en cours...</p>
+            </div>
+
+            <div class="analyse-results" id="analyseResults">
+                <h3>💡 Conseils d'amélioration</h3>
+                <div id="analyseResultsContent"></div>
+            </div>
+        </div>
+
+        <!-- Section Informations -->
+        <div class="analyse-card">
+            <h2>📊 Guide d'Optimisation</h2>
+            
+            <div class="info-section">
+                <h4>🎯 Éléments clés d'une annonce performante</h4>
+                <ul class="info-list">
+                    <li>
+                        <strong>📸 Photos de qualité :</strong> Minimum 20 photos HD, lumière naturelle, tous les espaces
+                    </li>
+                    <li>
+                        <strong>📝 Titre accrocheur :</strong> 50-60 caractères, mots-clés locaux, points forts
+                    </li>
+                    <li>
+                        <strong>✍️ Description détaillée :</strong> 500+ mots, structurée, tous les équipements
+                    </li>
+                    <li>
+                        <strong>💰 Prix compétitif :</strong> Analysez le marché local, ajustez selon la saison
+                    </li>
+                    <li>
+                        <strong>⚡ Réponse rapide :</strong> Répondez en moins d'1h pour maximiser les réservations
+                    </li>
+                </ul>
+            </div>
+
+            <div class="info-section">
+                <h4>🔍 Optimisation SEO</h4>
+                <p>Utilisez ces mots-clés dans votre annonce :</p>
+                <ul class="info-list">
+                    <li>• Nom de la ville + région</li>
+                    <li>• Points d'intérêt à proximité</li>
+                    <li>• Type de logement (villa, maison, appartement)</li>
+                    <li>• Équipements premium (piscine, jacuzzi, vue mer)</li>
+                    <li>• Capacité d'accueil (famille, groupe)</li>
+                </ul>
+            </div>
+
+            <div class="info-section">
+                <h4>📈 Statistiques importantes</h4>
+                <p><strong>Taux de conversion moyen :</strong> 3-5%</p>
+                <p><strong>Temps de réponse optimal :</strong> &lt; 1 heure</p>
+                <p><strong>Nombre de photos recommandé :</strong> 20-30</p>
+                <p><strong>Taux d'occupation cible :</strong> 60-80%</p>
+            </div>
+        </div>
+    </div>
+</div>

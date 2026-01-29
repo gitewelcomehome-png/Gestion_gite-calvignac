@@ -170,6 +170,7 @@
     <script src="js/taux-fiscaux-config.js?v=1.0"></script>
     <script src="js/fiscalite-v2.js?v=1737331400"></script>
     <script src="js/infos-gites.js?v=3.5"></script>
+    <script src="js/tabs/analyse-ia.js?v=1.0"></script>
     <script src="js/fiche-client.js?v=3.0" type="module"></script>
     <script src="js/widget-horaires-clients.js" type="module"></script>
     <script src="js/faq.js?v=3.0"></script>
@@ -202,6 +203,7 @@
     <link rel="stylesheet" href="css/tab-calendrier-tarifs.css?v=1.0" />
     <link rel="stylesheet" href="css/tab-calendrier.css?v=1.0" />
     <link rel="stylesheet" href="css/tab-statistiques.css?v=2.1" />
+    <link rel="stylesheet" href="css/tab-analyse-ia.css?v=1.0" />
 </head>
 <body>
     <!-- 🎨 CONTRÔLES THÈMES -->
@@ -358,6 +360,7 @@
             'tab-faq': 'tabs/tab-faq.html',
             'tab-draps': 'tabs/tab-draps.html',
             'tab-checklists': 'tabs/tab-checklists.html',
+            'tab-analyse-ia': 'tabs/tab-analyse-ia.html',
         };
         
         // Liste RÉDUITE pour MOBILE (onglets exclus du menu mobile)
@@ -585,6 +588,11 @@
                     <i data-lucide="info" class="tab-icon"></i>
                     <span class="tab-label">Infos</span>
                 </button>
+
+                <button class="nav-tab" data-tab="analyse-ia" data-theme="purple">
+                    <i data-lucide="sparkles" class="tab-icon"></i>
+                    <span class="tab-label">IA</span>
+                </button>
             </div>
         </nav>
         
@@ -603,6 +611,7 @@
         <div id="tab-fiches-clients" class="tab-content"></div>
         <div id="tab-checklists" class="tab-content"></div>
         <div id="tab-decouvrir" class="tab-content"></div>
+        <div id="tab-analyse-ia" class="tab-content"></div>
         <div id="tab-calendrier-tarifs" class="tab-content"></div>
     </div>
     
