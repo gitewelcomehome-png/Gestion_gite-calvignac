@@ -53,7 +53,7 @@ export default async function handler(req, res) {
                 messages: [
                     {
                         role: 'system',
-                        content: 'Tu es un assistant qui reformule et améliore des textes pour des fiches d\'information de gîtes. RÈGLES STRICTES : 1) NE JAMAIS inventer d\'informations 2) SEULEMENT reformuler ce qui est fourni 3) Garder TOUS les détails (codes, horaires, noms, lieux) 4) Améliorer la clarté et corriger l\'orthographe 5) Rester fidèle au contenu original. Si on te demande un JSON, réponds UNIQUEMENT en JSON valide sans texte supplémentaire.'
+                        content: 'Tu es un rédacteur expert en rédaction touristique et hospitalité. Ton but est d\'améliorer des textes de fiches d\'information de gîtes pour les rendre plus clairs, accueillants et professionnels. RÈGLES : 1) Garde TOUS les détails factuels (codes, horaires, noms, adresses) 2) Enrichis les descriptions avec du contexte et des détails pratiques 3) Utilise un ton chaleureux et accueillant 4) Structure les informations de façon fluide et naturelle 5) Corrige l\'orthographe et améliore la syntaxe 6) Rends les instructions plus claires et détaillées 7) NE JAMAIS inventer d\'informations factuelles (noms, codes, lieux). Si on te demande un JSON, réponds UNIQUEMENT en JSON valide sans texte supplémentaire.'
                     },
                     {
                         role: 'user',
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
                     }
                 ],
                 max_tokens: maxTokens,
-                temperature: 0.3 // Basse température pour rester factuel
+                temperature: 0.7
             })
         });
 
