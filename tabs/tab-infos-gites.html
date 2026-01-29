@@ -7,6 +7,10 @@
                 <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Informations essentielles pour vos clients</p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
+                <!-- Bouton configuration IA -->
+                <button type="button" onclick="window.aiAssistant.showApiKeyModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;" title="Configurer l'Assistant IA" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
+                    <span style="font-size: 1.2rem;">✨</span> Assistant IA
+                </button>
                 <!-- Liste déroulante de sélection de gîte -->
                 <select id="giteSelector" onchange="selectGiteFromDropdown(this.value)">
                     <option value=""><i data-lucide="home"></i> Choisir un gîte...</option>
@@ -248,9 +252,16 @@
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions détaillées pour récupérer les clés <span style="color: #ef4444;">*</span></label>
-                                    <textarea id="infos_instructionsCles" class="form-control" rows="6" placeholder="1. Garez-vous sur le parking
+                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                        <textarea id="infos_instructionsCles" class="form-control" rows="6" placeholder="1. Garez-vous sur le parking
 2. La boîte à clés est sur le mur à droite
-3. Composez le code 1234..."></textarea>
+3. Composez le code 1234..." style="flex: 1;"></textarea>
+                                        <button type="button" onclick="showAIAssistantModal('infos_instructionsCles', 'keys')" 
+                                                style="padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; height: 44px; flex-shrink: 0; transition: transform 0.2s;" 
+                                                title="Générer avec l'IA"
+                                                onmouseover="this.style.transform='scale(1.05)'"
+                                                onmouseout="this.style.transform='scale(1)'">✨</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -376,8 +387,15 @@
                             <div style="display: grid; gap: 15px;">
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions Lave-Linge</label>
-                                    <textarea id="infos_instructionsLaveLinge" class="form-control" rows="6" placeholder="Lave-linge Samsung :
-- Lessive fournie..."></textarea>
+                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                        <textarea id="infos_instructionsLaveLinge" class="form-control" rows="6" placeholder="Lave-linge Samsung :
+- Lessive fournie..." style="flex: 1;"></textarea>
+                                        <button type="button" onclick="showAIAssistantModal('infos_instructionsLaveLinge', 'equipment')" 
+                                                style="padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; height: 44px; flex-shrink: 0; transition: transform 0.2s;" 
+                                                title="Générer avec l'IA"
+                                                onmouseover="this.style.transform='scale(1.05)'"
+                                                onmouseout="this.style.transform='scale(1)'">✨</button>
+                                    </div>
                                 </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                     <div>
@@ -396,9 +414,16 @@
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Linge de maison fourni</label>
-                                    <textarea id="infos_lingeFourni" class="form-control" rows="4" placeholder="Fourni :
+                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                        <textarea id="infos_lingeFourni" class="form-control" rows="4" placeholder="Fourni :
 - Draps (lits faits)
-- Serviettes (2 par personne)..."></textarea>
+- Serviettes (2 par personne)..." style="flex: 1;"></textarea>
+                                        <button type="button" onclick="showAIAssistantModal('infos_lingeFourni', 'linen')" 
+                                                style="padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; height: 44px; flex-shrink: 0; transition: transform 0.2s;" 
+                                                title="Générer avec l'IA"
+                                                onmouseover="this.style.transform='scale(1.05)'"
+                                                onmouseout="this.style.transform='scale(1)'">✨</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -408,8 +433,15 @@
                             <h3 style="color: #9c27b0; margin-bottom: 15px; font-size: 1.2rem;"><i data-lucide="bed"></i> Chambres</h3>
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Configuration des chambres</label>
-                                <textarea id="infos_configurationChambres" class="form-control" rows="6" placeholder="CHAMBRE 1 : 1 lit double 160x200cm
-CHAMBRE 2 : 2 lits simples..."></textarea>
+                                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                    <textarea id="infos_configurationChambres" class="form-control" rows="6" placeholder="CHAMBRE 1 : 1 lit double 160x200cm
+CHAMBRE 2 : 2 lits simples..." style="flex: 1;"></textarea>
+                                    <button type="button" onclick="showAIAssistantModal('infos_configurationChambres', 'equipment')" 
+                                            style="padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; height: 44px; flex-shrink: 0; transition: transform 0.2s;" 
+                                            title="Générer avec l'IA"
+                                            onmouseover="this.style.transform='scale(1.05)'"
+                                            onmouseout="this.style.transform='scale(1)'">✨</button>
+                                </div>
                             </div>
                         </div>
                     </div>
