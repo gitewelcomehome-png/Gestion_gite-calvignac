@@ -150,55 +150,116 @@ Format : Sections claires + visuels suggérés + CTA engageant.`
     }
 
     // ================================================================
-    // GÉNÉRATION D'IMAGE
+    // GÉNÉRATION D'IMAGE (Stability AI + DALL-E 3)
     // ================================================================
     if (action === 'generate-image') {
-      const { prompt, style, size } = req.body;
+      const { prompt, style, size, provider = 'stability' } = req.body;
 
-      const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-      
-      if (!OPENAI_API_KEY) {
-        return res.status(500).json({ 
-          error: 'OpenAI API key not configured for DALL-E.' 
-        });
-      }
-
-      // Style mapping
+      // Style mapping amélioré
       const stylePrompts = {
-        'realistic': 'photorealistic, high quality, professional photography',
-        'artistic': 'artistic illustration, creative, vibrant colors',
-        'minimal': 'minimalist design, clean, simple, modern',
-        'vintage': 'vintage style, retro aesthetic, nostalgic'
+        'realistic': 'photorealistic, high quality, professional photography, 4k, detailed, sharp focus',
+        'artistic': 'artistic illustration, creative, vibrant colors, digital art, trending on artstation',
+        'minimal': 'minimalist design, clean, simple, modern, flat design, professional',
+        'vintage': 'vintage style, retro aesthetic, nostalgic, old photograph, film grain'
       };
 
       const enhancedPrompt = `${prompt}. ${stylePrompts[style] || stylePrompts['realistic']}`;
 
-      const dalleResponse = await fetch('https://api.openai.com/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'dall-e-3',
-          prompt: enhancedPrompt,
-          n: 1,
-          size: size || '1024x1024',
-          quality: 'hd'
-        })
-      });
+      // ===== STABILITY AI (Stable Diffusion XL) - PAR DÉFAUT =====
+      if (provider === 'stability') {
+        const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
+        
+        if (!STABILITY_API_KEY) {
+          return res.status(500).json({ 
+            error: 'Stability AI API key not configured.' 
+          });
+        }
 
-      if (!dalleResponse.ok) {
-        const error = await dalleResponse.json();
-        throw new Error(`DALL-E API error: ${error.error?.message || 'Unknown error'}`);
+        // Dimensions mapping
+        const sizeMap = {
+          '1024x1024': { width: 1024, height: 1024 },
+          '1792x1024': { width: 1792, height: 1024 },
+          '1024x1792': { width: 1024, height: 1792 }
+        };
+
+        const dimensions = sizeMap[size] || { width: 1024, height: 1024 };
+
+        const stabilityResponse = await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${STABILITY_API_KEY}`,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            text_prompts: [
+              { text: enhancedPrompt, weight: 1 },
+              { text: 'blurry, bad quality, distorted, ugly, low resolution, text, watermark', weight: -1 }
+            ],
+            cfg_scale: 7,
+            height: dimensions.height,
+            width: dimensions.width,
+            samples: 1,
+            steps: 30
+          })
+        });
+
+        if (!stabilityResponse.ok) {
+          const error = await stabilityResponse.json();
+          throw new Error(`Stability AI error: ${error.message || 'Unknown error'}`);
+        }
+
+        const data = await stabilityResponse.json();
+
+        return res.status(200).json({
+          success: true,
+          imageBase64: data.artifacts[0].base64,
+          provider: 'Stability AI'
+        });
       }
 
-      const data = await dalleResponse.json();
+      // ===== DALL-E 3 (fallback si demandé) =====
+      if (provider === 'dalle') {
+        const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+        
+        if (!OPENAI_API_KEY) {
+          return res.status(500).json({ 
+            error: 'OpenAI API key not configured for DALL-E.' 
+          });
+        }
 
-      return res.status(200).json({
-        success: true,
-        imageUrl: data.data[0].url,
-        revisedPrompt: data.data[0].revised_prompt
+        const dalleResponse = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'dall-e-3',
+            prompt: enhancedPrompt,
+            n: 1,
+            size: size || '1024x1024',
+            quality: 'hd'
+          })
+        });
+
+        if (!dalleResponse.ok) {
+          const error = await dalleResponse.json();
+          throw new Error(`DALL-E API error: ${error.error?.message || 'Unknown error'}`);
+        }
+
+        const data = await dalleResponse.json();
+
+        return res.status(200).json({
+          success: true,
+          imageUrl: data.data[0].url,
+          revisedPrompt: data.data[0].revised_prompt,
+          provider: 'DALL-E 3'
+        });
+      }
+
+      return res.status(400).json({
+        error: 'Invalid provider. Use "stability" or "dalle".'
       });
     }
 

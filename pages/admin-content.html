@@ -299,7 +299,7 @@
             <div class="modal-header">
                 <h2>
                     <i data-lucide="image"></i>
-                    Générer un Visuel avec DALL-E 3
+                    Générer un Visuel avec IA
                 </h2>
                 <button class="modal-close" onclick="closeImageModal()">
                     <i data-lucide="x"></i>
@@ -307,9 +307,25 @@
             </div>
 
             <form id="formImage" style="padding: 1.5rem;">
+                <!-- Choix du Provider -->
+                <div class="form-group">
+                    <label>Moteur IA</label>
+                    <select id="imageProvider" style="font-weight: 600;">
+                        <option value="stability">🚀 Stability AI (Stable Diffusion XL) - Recommandé</option>
+                        <option value="dalle">🎨 DALL-E 3 (OpenAI) - Artistique</option>
+                    </select>
+                    <small style="display: block; margin-top: 5px; color: #6B7280;">
+                        <strong>Stability AI</strong> : Plus précis, suit mieux vos instructions<br>
+                        <strong>DALL-E 3</strong> : Plus créatif mais interprète librement
+                    </small>
+                </div>
+
                 <div class="form-group">
                     <label>Description du visuel <span style="color: #ef4444;">*</span></label>
-                    <textarea id="imagePrompt" rows="4" placeholder="Ex: Photo professionnelle d'un gîte moderne avec piscine au coucher du soleil" required></textarea>
+                    <textarea id="imagePrompt" rows="4" placeholder="Ex: Photo professionnelle d'un gîte moderne avec piscine au coucher du soleil, ciel bleu, jardin entretenu" required></textarea>
+                    <small style="display: block; margin-top: 5px; color: #6B7280;">
+                        💡 Conseil : Soyez précis et descriptif (couleurs, ambiance, éléments à inclure)
+                    </small>
                 </div>
 
                 <div class="form-group">

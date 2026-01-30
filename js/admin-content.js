@@ -584,8 +584,10 @@ async function generateImage() {
         const prompt = document.getElementById('imagePrompt').value;
         const style = document.getElementById('imageStyle').value;
         const size = document.getElementById('imageSize').value;
+        const provider = document.getElementById('imageProvider').value;
         
-        showToast('🎨 Génération de l\'image en cours...', 'info');
+        const providerName = provider === 'stability' ? 'Stability AI' : 'DALL-E 3';
+        showToast(`🎨 Génération avec ${providerName}...`, 'info');
         
         // Vérifier si API disponible (Vercel uniquement)
         const isVercelDeployed = window.location.hostname.includes('vercel.app');
@@ -593,10 +595,10 @@ async function generateImage() {
         if (!isVercelDeployed) {
             // Mode simulation - afficher une image placeholder
             console.log('⚠️ Mode simulation - Image placeholder affichée');
-            currentGeneratedImage = 'https://via.placeholder.com/1024x1024/667eea/ffffff?text=DALL-E+3+Image+Simulee';
+            currentGeneratedImage = 'https://via.placeholder.com/1024x1024/667eea/ffffff?text=Image+Simulee';
             document.getElementById('generatedImage').src = currentGeneratedImage;
             document.getElementById('imageResult').style.display = 'block';
-            showToast('⚠️ Mode simulation - Déployez sur Vercel pour DALL-E 3', 'info');
+            showToast('⚠️ Mode simulation - Déployez sur Vercel pour vraies images', 'info');
             return;
         }
         
@@ -607,7 +609,29 @@ async function generateImage() {
                 action: 'generate-image',
                 prompt: prompt,
                 style: style,
-                size: size
+                size: size,
+                provider: provider
+            })
+        });
+
+        if (!response.ok) throw new Error('Erreur génération image');
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Stability AI renvoie base64, DALL-E renvoie URL
+            if (data.imageBase64) {
+                currentGeneratedImage = `data:image/png;base64,${data.imageBase64}`;
+            } else if (data.imageUrl) {
+                currentGeneratedImage = data.imageUrl;
+            }
+            
+            document.getElementById('generatedImage').src = currentGeneratedImage;
+            document.getElementById('imageResult').style.display = 'block';
+            showToast(`✅ Image générée avec ${providerName} !`, 'success');
+        } else {
+            throw new Error(data.error || 'Erreur génération');
+        }
             })
         });
         
