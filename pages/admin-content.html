@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content IA - Channel Manager</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="background: #F9FAFB;">
+    <div class="admin-wrapper">
+        <!-- Header -->
+        <header class="admin-header">
+            <button class="btn-back" onclick="window.location.href='admin-channel-manager.html'">
+                <i data-lucide="arrow-left"></i>
+                Retour Dashboard
+            </button>
+            <h1>
+                <i data-lucide="pen-tool"></i>
+                Content IA - Génération Automatique
+            </h1>
+        </header>
+
+        <!-- Actions Rapides -->
+        <section style="margin-bottom: 2rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <button class="action-btn" onclick="showGenerateModal('post')">
+                    <i data-lucide="instagram"></i>
+                    <span>Post Social</span>
+                </button>
+                <button class="action-btn" onclick="showGenerateModal('email')">
+                    <i data-lucide="mail"></i>
+                    <span>Email Marketing</span>
+                </button>
+                <button class="action-btn" onclick="showGenerateModal('blog')">
+                    <i data-lucide="file-text"></i>
+                    <span>Article Blog</span>
+                </button>
+                <button class="action-btn" onclick="showGenerateModal('newsletter')">
+                    <i data-lucide="newspaper"></i>
+                    <span>Newsletter</span>
+                </button>
+                <button class="action-btn" onclick="showImageGenerator()">
+                    <i data-lucide="image"></i>
+                    <span>Génerer Visuel IA</span>
+                </button>
+                <button class="action-btn" onclick="showSocialConnect()">
+                    <i data-lucide="share-2"></i>
+                    <span>Connecter Réseaux</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Bibliothèque de Contenu -->
+        <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                    <i data-lucide="folder"></i>
+                    Bibliothèque de Contenu
+                </h2>
+                <div style="display: flex; gap: 10px;">
+                    <select id="filterType" style="padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px;">
+                        <option value="">Tous types</option>
+                        <option value="post">Post Social</option>
+                        <option value="email">Email</option>
+                        <option value="blog">Blog</option>
+                        <option value="newsletter">Newsletter</option>
+                    </select>
+                    <input type="text" id="searchContent" placeholder="Rechercher..." style="padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; width: 250px;">
+                </div>
+            </div>
+
+            <!-- Table Contenu -->
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB;">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: #6B7280;">Date</th>
+                            <th style="padding: 12px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: #6B7280;">Type</th>
+                            <th style="padding: 12px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: #6B7280;">Titre/Sujet</th>
+                            <th style="padding: 12px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: #6B7280;">Statut</th>
+                            <th style="padding: 12px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: #6B7280;">Performance</th>
+                            <th style="padding: 12px; text-align: center; font-size: 0.85rem; text-transform: uppercase; color: #6B7280;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyContent">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #9CA3AF;">
+                                <i data-lucide="inbox" style="width: 48px; height: 48px; margin: 0 auto 10px;"></i>
+                                <p>Aucun contenu généré. Cliquez sur un bouton ci-dessus pour commencer !</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Templates Suggérés -->
+        <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB;">
+            <h2 style="display: flex; align-items: center; gap: 10px; margin: 0 0 1.5rem 0;">
+                <i data-lucide="sparkles"></i>
+                Templates IA Recommandés
+            </h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <!-- Template 1 -->
+                <div class="template-card" onclick="useTemplate('promo-saisonniere')">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="tag" style="width: 20px; height: 20px; color: white;"></i>
+                        </div>
+                        <h3 style="margin: 0; font-size: 1rem;">Promotion Saisonnière</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Annonce de promotions spéciales pour événements ou saisons</p>
+                </div>
+
+                <!-- Template 2 -->
+                <div class="template-card" onclick="useTemplate('nouvelle-fonctionnalite')">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #3b82f6, #2563eb); display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="zap" style="width: 20px; height: 20px; color: white;"></i>
+                        </div>
+                        <h3 style="margin: 0; font-size: 1rem;">Nouvelle Fonctionnalité</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Présentation d'une nouvelle feature ou mise à jour produit</p>
+                </div>
+
+                <!-- Template 3 -->
+                <div class="template-card" onclick="useTemplate('temoignage-client')">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="heart" style="width: 20px; height: 20px; color: white;"></i>
+                        </div>
+                        <h3 style="margin: 0; font-size: 1rem;">Témoignage Client</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Mise en avant d'un cas client ou success story</p>
+                </div>
+
+                <!-- Template 4 -->
+                <div class="template-card" onclick="useTemplate('conseils-experts')">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="lightbulb" style="width: 20px; height: 20px; color: white;"></i>
+                        </div>
+                        <h3 style="margin: 0; font-size: 1rem;">Conseils d'Experts</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Article de valeur avec tips et best practices</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modal Génération -->
+    <div id="modalGenerate" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>
+                    <i data-lucide="sparkles"></i>
+                    <span id="modalTitle">Générer du Contenu IA</span>
+                </h2>
+                <button class="modal-close" onclick="closeGenerateModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="formGenerate" style="padding: 1.5rem;">
+                <input type="hidden" id="contentType">
+
+                <!-- Sujet/Thème -->
+                <div class="form-group">
+                    <label>Sujet / Thème <span style="color: #ef4444;">*</span></label>
+                    <input type="text" id="contentSubject" placeholder="Ex: Promotion d'été, Nouvelle fonctionnalité..." required>
+                </div>
+
+                <!-- Ton -->
+                <div class="form-group">
+                    <label>Ton de communication</label>
+                    <select id="contentTone">
+                        <option value="professionnel">Professionnel</option>
+                        <option value="amical">Amical</option>
+                        <option value="enthousiaste">Enthousiaste</option>
+                        <option value="informatif">Informatif</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+
+                <!-- Modèle IA -->
+                <div class="form-group">
+                    <label>🤖 Modèle IA</label>
+                    <select id="aiModel">
+                        <option value="gpt-4">OpenAI GPT-4 (Précis & Créatif)</option>
+                        <option value="gpt-4-turbo">OpenAI GPT-4 Turbo (Rapide)</option>
+                        <option value="claude-3-opus">Anthropic Claude 3 Opus (Expert)</option>
+                        <option value="claude-3-sonnet">Anthropic Claude 3 Sonnet (Équilibré)</option>
+                    </select>
+                </div>
+
+                <!-- Points clés -->
+                <div class="form-group">
+                    <label>Points clés à mentionner (optionnel)</label>
+                    <textarea id="contentKeyPoints" rows="3" placeholder="- Point 1&#10;- Point 2&#10;- Point 3"></textarea>
+                </div>
+
+                <!-- CTA -->
+                <div class="form-group">
+                    <label>Appel à l'action (CTA)</label>
+                    <input type="text" id="contentCTA" placeholder="Ex: Profitez de -20% maintenant !">
+                </div>
+
+                <!-- Longueur -->
+                <div class="form-group">
+                    <label>Longueur souhaitée</label>
+                    <select id="contentLength">
+                        <option value="court">Court (< 150 mots)</option>
+                        <option value="moyen" selected>Moyen (150-300 mots)</option>
+                        <option value="long">Long (> 300 mots)</option>
+                    </select>
+                </div>
+
+                <!-- Boutons -->
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem;">
+                    <button type="button" class="btn-secondary" onclick="closeGenerateModal()">Annuler</button>
+                    <button type="submit" class="btn-primary">
+                        <i data-lucide="sparkles"></i>
+                        Générer avec IA
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Prévisualisation -->
+    <div id="modalPreview" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>
+                    <i data-lucide="eye"></i>
+                    Prévisualisation du Contenu
+                </h2>
+                <button class="modal-close" onclick="closePreviewModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div style="padding: 1.5rem;">
+                <!-- Contenu généré -->
+                <div id="previewContent" style="background: #F9FAFB; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; white-space: pre-wrap; line-height: 1.6;">
+                    <!-- Contenu injecté par JS -->
+                </div>
+
+                <!-- Statistiques -->
+                <div style="display: flex; gap: 20px; padding: 1rem; background: #EEF2FF; border-radius: 6px; margin-bottom: 1.5rem;">
+                    <div>
+                        <span style="font-size: 0.85rem; color: #6B7280;">Mots:</span>
+                        <strong id="statWords">0</strong>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.85rem; color: #6B7280;">Caractères:</span>
+                        <strong id="statChars">0</strong>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.85rem; color: #6B7280;">Temps lecture:</span>
+                        <strong id="statReadTime">0 min</strong>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn-secondary" onclick="regenerateContent()">
+                        <i data-lucide="refresh-cw"></i>
+                        Régénérer
+                    </button>
+                    <button class="btn-secondary" onclick="copyContent()">
+                        <i data-lucide="copy"></i>
+                        Copier
+                    </button>
+                    <button class="btn-secondary" onclick="generateVisual()">
+                        <i data-lucide="image"></i>
+                        Créer Visuel
+                    </button>
+                    <button class="btn-primary" onclick="showPublishModal()">
+                        <i data-lucide="share-2"></i>
+                        Publier
+                    </button>
+                    <button class="btn-primary" onclick="saveContent()">
+                        <i data-lucide="save"></i>
+                        Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Génération Visuel -->
+    <div id="modalImage" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>
+                    <i data-lucide="image"></i>
+                    Générer un Visuel avec DALL-E 3
+                </h2>
+                <button class="modal-close" onclick="closeImageModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="formImage" style="padding: 1.5rem;">
+                <div class="form-group">
+                    <label>Description du visuel <span style="color: #ef4444;">*</span></label>
+                    <textarea id="imagePrompt" rows="4" placeholder="Ex: Photo professionnelle d'un gîte moderne avec piscine au coucher du soleil" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Style artistique</label>
+                    <select id="imageStyle">
+                        <option value="realistic">Réaliste (Photo)</option>
+                        <option value="artistic">Artistique (Illustration)</option>
+                        <option value="minimal">Minimaliste</option>
+                        <option value="vintage">Vintage</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Dimensions</label>
+                    <select id="imageSize">
+                        <option value="1024x1024">Carré (1024x1024) - Instagram</option>
+                        <option value="1792x1024">Paysage (1792x1024) - Facebook</option>
+                        <option value="1024x1792">Portrait (1024x1792) - Stories</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem;">
+                    <button type="button" class="btn-secondary" onclick="closeImageModal()">Annuler</button>
+                    <button type="submit" class="btn-primary">
+                        <i data-lucide="sparkles"></i>
+                        Générer Image
+                    </button>
+                </div>
+            </form>
+
+            <!-- Résultat image -->
+            <div id="imageResult" style="display: none; padding: 1.5rem; border-top: 1px solid #E5E7EB;">
+                <img id="generatedImage" style="width: 100%; border-radius: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-secondary" onclick="downloadImage()">
+                        <i data-lucide="download"></i>
+                        Télécharger
+                    </button>
+                    <button class="btn-primary" onclick="useImageInContent()">
+                        <i data-lucide="check"></i>
+                        Utiliser
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Connexion Réseaux Sociaux -->
+    <div id="modalSocial" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>
+                    <i data-lucide="share-2"></i>
+                    Connecter vos Réseaux Sociaux
+                </h2>
+                <button class="modal-close" onclick="closeSocialModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div style="padding: 1.5rem;">
+                <p style="color: #6B7280; margin-bottom: 1.5rem;">Connectez vos comptes pour publier directement depuis Channel Manager</p>
+
+                <!-- Facebook -->
+                <div class="social-connect-card">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 48px; height: 48px; background: #1877F2; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="facebook" style="width: 24px; height: 24px; color: white;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0; font-size: 1rem;">Facebook Page</h3>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6B7280;" id="fbStatus">Non connecté</p>
+                        </div>
+                        <button class="btn-primary" onclick="connectSocial('facebook')">Connecter</button>
+                    </div>
+                </div>
+
+                <!-- Instagram -->
+                <div class="social-connect-card">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 48px; height: 48px; background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="instagram" style="width: 24px; height: 24px; color: white;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0; font-size: 1rem;">Instagram Business</h3>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6B7280;" id="igStatus">Non connecté</p>
+                        </div>
+                        <button class="btn-primary" onclick="connectSocial('instagram')">Connecter</button>
+                    </div>
+                </div>
+
+                <!-- LinkedIn -->
+                <div class="social-connect-card">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 48px; height: 48px; background: #0A66C2; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="linkedin" style="width: 24px; height: 24px; color: white;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0; font-size: 1rem;">LinkedIn</h3>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6B7280;" id="liStatus">Non connecté</p>
+                        </div>
+                        <button class="btn-primary" onclick="connectSocial('linkedin')">Connecter</button>
+                    </div>
+                </div>
+
+                <!-- Twitter/X -->
+                <div class="social-connect-card">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 48px; height: 48px; background: #000000; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="twitter" style="width: 24px; height: 24px; color: white;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0; font-size: 1rem;">X (Twitter)</h3>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6B7280;" id="twStatus">Non connecté</p>
+                        </div>
+                        <button class="btn-primary" onclick="connectSocial('twitter')">Connecter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Publication -->
+    <div id="modalPublish" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>
+                    <i data-lucide="send"></i>
+                    Publier sur les Réseaux Sociaux
+                </h2>
+                <button class="modal-close" onclick="closePublishModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div style="padding: 1.5rem;">
+                <p style="color: #6B7280; margin-bottom: 1.5rem;">Sélectionnez les plateformes où publier</p>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem;">
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; cursor: pointer;">
+                        <input type="checkbox" name="platform" value="facebook" style="width: 20px; height: 20px;">
+                        <i data-lucide="facebook" style="width: 20px; height: 20px; color: #1877F2;"></i>
+                        <span>Facebook Page</span>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; cursor: pointer;">
+                        <input type="checkbox" name="platform" value="instagram" style="width: 20px; height: 20px;">
+                        <i data-lucide="instagram" style="width: 20px; height: 20px; color: #E1306C;"></i>
+                        <span>Instagram</span>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; cursor: pointer;">
+                        <input type="checkbox" name="platform" value="linkedin" style="width: 20px; height: 20px;">
+                        <i data-lucide="linkedin" style="width: 20px; height: 20px; color: #0A66C2;"></i>
+                        <span>LinkedIn</span>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; cursor: pointer;">
+                        <input type="checkbox" name="platform" value="twitter" style="width: 20px; height: 20px;">
+                        <i data-lucide="twitter" style="width: 20px; height: 20px; color: #000000;"></i>
+                        <span>X (Twitter)</span>
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn-secondary" onclick="closePublishModal()">Annuler</button>
+                    <button class="btn-primary" onclick="publishToSocial()">
+                        <i data-lucide="send"></i>
+                        Publier Maintenant
+                    </button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/shared-config.js"></script>
+    <script src="../js/admin-content.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
