@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <!-- 
 ╔══════════════════════════════════════════════════════════════════════════╗
-║  ⚠️ ⚠️ ⚠️  FICHIER DESKTOP - NE PAS MODIFIER  ⚠️ ⚠️ ⚠️                      ║
+║  🚫 🚫 🚫  PAGE CLIENT - INTERDICTION MODIFICATION  🚫 🚫 🚫              ║
+║                                                                          ║
+║  ⛔ CE FICHIER EST LA PAGE CLIENT (propriétaires de gîtes)              ║
+║  ⛔ NE JAMAIS MODIFIER SANS DEMANDE EXPLICITE DE L'UTILISATEUR          ║
+║  ⛔ Pour l'ADMIN Channel Manager: pages/admin-channel-manager.html      ║
+║  ⛔ Pour le SUPPORT: pages/admin-support.html                            ║
 ║                                                                          ║
 ║  Ce fichier est EN PRODUCTION et doit rester STABLE                     ║
-║  Pour le mobile, utiliser les fichiers dans tabs/mobile/                ║
 ║  NE TOUCHER À CE FICHIER QUE SUR DEMANDE EXPLICITE                      ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 -->
@@ -157,6 +161,7 @@
     <script src="js/supabase-operations.js"></script>
     <script src="js/icons.js"></script>
     <script src="js/dashboard.js?v=4.8"></script>
+    <script src="js/dashboard-support-widget.js?v=1.0"></script>
     <script src="js/sync-ical-v2.js?v=2.2"></script>
     <script src="js/statistiques.js"></script>
     <script src="js/menage.js?v=1737504444"></script>
@@ -170,7 +175,6 @@
     <script src="js/taux-fiscaux-config.js?v=1.0"></script>
     <script src="js/fiscalite-v2.js?v=1737331400"></script>
     <script src="js/infos-gites.js?v=3.5"></script>
-    <script src="js/tabs/analyse-ia.js?v=1.0"></script>
     <script src="js/fiche-client.js?v=3.0" type="module"></script>
     <script src="js/widget-horaires-clients.js" type="module"></script>
     <script src="js/faq.js?v=3.0"></script>
@@ -203,7 +207,6 @@
     <link rel="stylesheet" href="css/tab-calendrier-tarifs.css?v=1.0" />
     <link rel="stylesheet" href="css/tab-calendrier.css?v=1.0" />
     <link rel="stylesheet" href="css/tab-statistiques.css?v=2.1" />
-    <link rel="stylesheet" href="css/tab-analyse-ia.css?v=1.0" />
 </head>
 <body>
     <!-- 🎨 CONTRÔLES THÈMES -->
@@ -221,6 +224,10 @@
             </svg>
         </button>
         <div id="adminDropdown" style="display: none; position: fixed; top: 70px; right: 20px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 9999; min-width: 200px; overflow: hidden; border: 2px solid #06b6d4;">
+            <button onclick="window.location.href='pages/admin-channel-manager.html';" style="width: 100%; padding: 12px 16px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: white; transition: all 0.2s;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'">
+                <span><i data-lucide="bar-chart-3"></i></span> <span>📊 Channel Manager</span>
+            </button>
+            <div style="height: 1px; background: #e5e7eb; margin: 4px 0;"></div>
             <button onclick="switchTab('gestion'); hideAdminMenu();" style="width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='white'">
                 <span><i data-lucide="home"></i></span> <span>Gérer mes gîtes</span>
             </button>
@@ -232,6 +239,9 @@
             </button>
             <button onclick="switchTab('faq'); hideAdminMenu();" style="width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='white'">
                 <span>❓</span> <span>FAQ</span>
+            </button>
+            <button onclick="window.location.href='pages/client-support.html'; hideAdminMenu();" style="width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='white'">
+                <span><i data-lucide="headphones"></i></span> <span>🎫 Support & Tickets</span>
             </button>
             <button onclick="if(window.notificationSystem) { hideAdminMenu(); setTimeout(() => window.notificationSystem.openNotificationSettings(), 200); }" style="width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='white'">
                 <span>🔔</span> <span>Préférences Notifications</span>
@@ -360,7 +370,6 @@
             'tab-faq': 'tabs/tab-faq.html',
             'tab-draps': 'tabs/tab-draps.html',
             'tab-checklists': 'tabs/tab-checklists.html',
-            'tab-analyse-ia': 'tabs/tab-analyse-ia.html',
         };
         
         // Liste RÉDUITE pour MOBILE (onglets exclus du menu mobile)
@@ -403,6 +412,10 @@
                         // Attendre que le DOM soit rendu
                         setTimeout(() => {
                             refreshDashboard();
+                            // Charger le widget support
+                            if (typeof loadSupportTickets === 'function') {
+                                loadSupportTickets();
+                            }
                             // Pour mobile, initialiser le modal TODO
                             if (isMobile && typeof initializeTodoModal === 'function') {
                                 setTimeout(() => initializeTodoModal(), 200);
@@ -588,11 +601,6 @@
                     <i data-lucide="info" class="tab-icon"></i>
                     <span class="tab-label">Infos</span>
                 </button>
-
-                <button class="nav-tab" data-tab="analyse-ia" data-theme="purple">
-                    <i data-lucide="sparkles" class="tab-icon"></i>
-                    <span class="tab-label">IA</span>
-                </button>
             </div>
         </nav>
         
@@ -611,7 +619,6 @@
         <div id="tab-fiches-clients" class="tab-content"></div>
         <div id="tab-checklists" class="tab-content"></div>
         <div id="tab-decouvrir" class="tab-content"></div>
-        <div id="tab-analyse-ia" class="tab-content"></div>
         <div id="tab-calendrier-tarifs" class="tab-content"></div>
     </div>
     
@@ -3965,8 +3972,41 @@
 
     <!-- 🎨 Gestion du menu admin -->
     <script>
-        function showAdminMenu() {
+        async function showAdminMenu() {
             const dropdown = document.getElementById('adminDropdown');
+            
+            // Vérifier si l'utilisateur est admin
+            const user = window.authManager?.currentUser;
+            let isAdmin = false;
+            
+            if (user) {
+                // Vérifier d'abord par email (fallback sûr)
+                const userEmail = user.email.toLowerCase();
+                isAdmin = userEmail === 'stephanecalvignac@hotmail.fr';
+                
+                // Si pas admin par email, vérifier dans la BDD
+                if (!isAdmin && window.supabaseClient) {
+                    const { data: roles } = await window.supabaseClient
+                        .from('user_roles')
+                        .select('role')
+                        .eq('user_id', user.id);
+                    
+                    isAdmin = roles && roles.some(r => r.role === 'admin' || r.role === 'owner');
+                }
+            }
+            
+            // Cacher/Afficher le bouton admin selon les droits
+            const adminBtn = dropdown.querySelector('button[onclick*="admin.html"]');
+            if (adminBtn) {
+                adminBtn.style.display = isAdmin ? 'flex' : 'none';
+            }
+            const separator = dropdown.querySelector('div[style*="height: 1px"]:first-of-type');
+            if (separator && !isAdmin) {
+                separator.style.display = 'none';
+            } else if (separator) {
+                separator.style.display = 'block';
+            }
+            
             dropdown.style.display = 'block';
             
             // Fermer au clic extérieur
