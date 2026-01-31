@@ -90,7 +90,12 @@ window.generateWeeklyStrategy = async function() {
         displayStrategy(saved);
         
         // Générer automatiquement la queue de contenus
-        await generateContentQueue(saved.id, strategy);
+        try {
+            await generateContentQueue(saved.id, strategy);
+        } catch (queueError) {
+            console.error('❌ Erreur queue:', queueError);
+            showToast('⚠️ Stratégie OK mais erreur queue: ' + queueError.message, 'warning');
+        }
         
     } catch (error) {
         console.error('❌ Erreur:', error);
@@ -202,66 +207,102 @@ async function generateContentQueue(strategyId, strategy) {
     try {
         showToast('🤖 Génération de la queue de contenus...', 'info');
         
+        console.log('📋 Génération queue pour', strategy.contenus.length, 'contenus');
+        
         const contentPromises = strategy.contenus.map(async (idea, index) => {
-            // Récupérer l'historique pour cohérence
-            const { data: history } = await window.supabaseClient
-                .from('cm_ai_content_history')
-                .select('*')
-                .eq('plateforme', idea.plateforme)
-                .order('published_at', { ascending: false })
-                .limit(3);
-            
-            // Générer le contenu
-            const response = await fetch('/api/content-ai', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'generate-content-from-strategy',
-                    contentIdea: idea,
-                    history,
-                    strategy
-                })
-            });
-            
-            if (!response.ok) throw new Error('Erreur génération contenu');
-            
-            const { content } = await response.json();
-            
-            // Calculer la date de publication (étaler sur 7 jours)
-            const scheduledDate = new Date();
-            scheduledDate.setDate(scheduledDate.getDate() + index);
-            
-            // Parser l'heure (gère "14h", "Mardi 14h", etc.)
-            let hour = 14; // Défaut
-            if (idea.heure_ideale) {
-                const match = idea.heure_ideale.match(/(\d+)h/);
-                if (match) {
-                    hour = parseInt(match[1]);
-                    if (hour < 0 || hour > 23) hour = 14;
-                }
-            }
-            scheduledDate.setHours(hour, 0, 0, 0);
-            
-            // Insérer dans la queue
-            return await window.supabaseClient
-                .from('cm_ai_content_queue')
-                .insert({
-                    strategy_id: strategyId,
-                    type: idea.type,
-                    plateforme: idea.plateforme,
-                    sujet: idea.sujet,
-                    contenu: content.contenu,
-                    image_url: null,
-                    hashtags: content.hashtags || strategy.hashtags.slice(0, 5),
-                    scheduled_date: scheduledDate.toISOString(),
-                    statut: 'en_attente'
+            try {
+                console.log(`📝 Contenu ${index + 1}:`, idea.sujet);
+                
+                // Récupérer l'historique pour cohérence
+                const { data: history } = await window.supabaseClient
+                    .from('cm_ai_content_history')
+                    .select('*')
+                    .eq('plateforme', idea.plateforme)
+                    .order('published_at', { ascending: false })
+                    .limit(3);
+                
+                // Générer le contenu
+                const response = await fetch('/api/content-ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate-content-from-strategy',
+                        contentIdea: idea,
+                        history: history || [],
+                        strategy
+                    })
                 });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Erreur API:', errorText);
+                    throw new Error(`API error: ${response.status} - ${errorText.substring(0, 100)}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ Contenu généré:', result);
+                
+                const content = result.content;
+                
+                // Calculer la date de publication (étaler sur 7 jours)
+                const scheduledDate = new Date();
+                scheduledDate.setDate(scheduledDate.getDate() + index);
+                
+                // Parser l'heure (gère "14h", "Mardi 14h", etc.)
+                let hour = 14; // Défaut
+                if (idea.heure_ideale) {
+                    const match = idea.heure_ideale.match(/(\d+)h/);
+                    if (match) {
+                        hour = parseInt(match[1]);
+                        if (hour < 0 || hour > 23) hour = 14;
+                    }
+                }
+                scheduledDate.setHours(hour, 0, 0, 0);
+                
+                // Insérer dans la queue
+                const { data, error } = await window.supabaseClient
+                    .from('cm_ai_content_queue')
+                    .insert({
+                        strategy_id: strategyId,
+                        type: idea.type,
+                        plateforme: idea.plateforme,
+                        sujet: idea.sujet,
+                        contenu: content.contenu || 'Contenu généré',
+                        image_url: null,
+                        hashtags: content.hashtags || strategy.hashtags?.slice(0, 5) || [],
+                        scheduled_date: scheduledDate.toISOString(),
+                        statut: 'en_attente'
+                    })
+                    .select();
+                
+                if (error) {
+                    console.error('❌ Erreur insert:', error);
+                    throw error;
+                }
+                
+                console.log('✅ Inséré dans queue:', data);
+                return data;
+                
+            } catch (itemError) {
+                console.error(`❌ Erreur contenu ${index + 1}:`, itemError);
+                throw itemError;
+            }
         });
         
-        await Promise.all(contentPromises);
+        const results = await Promise.allSettled(contentPromises);
+        const successes = results.filter(r => r.status === 'fulfilled').length;
+        const failures = results.filter(r => r.status === 'rejected').length;
         
-        showToast('✅ Queue de contenus créée !', 'success');
-        loadContentQueue();
+        console.log(`📊 Résultats: ${successes} succès, ${failures} échecs`);
+        
+        if (successes > 0) {
+            showToast(`✅ ${successes} contenu(s) créé(s) !`, 'success');
+            loadContentQueue();
+        }
+        
+        if (failures > 0) {
+            showToast(`⚠️ ${failures} erreur(s)`, 'warning');
+        }
         
     } catch (error) {
         console.error('❌ Erreur:', error);
