@@ -106,7 +106,7 @@ async function loadDashboardData() {
 async function loadKPIs() {
     try {
         // 1. MRR (Monthly Recurring Revenue)
-        const { data: clients, error: clientsError } = await supabase
+        const { data: clients, error: clientsError } = await window.supabaseClient
             .from('cm_clients')
             .select('montant_mensuel, statut')
             .in('statut', ['actif']);
@@ -121,7 +121,7 @@ async function loadKPIs() {
         document.getElementById('kpiClients').textContent = clientsActifs;
         
         // 3. NPS (basé sur CSAT des tickets résolus)
-        const { data: tickets, error: ticketsError } = await supabase
+        const { data: tickets, error: ticketsError } = await window.supabaseClient
             .from('cm_support_tickets')
             .select('csat_score')
             .eq('statut', 'résolu')
@@ -140,7 +140,7 @@ async function loadKPIs() {
         }
         
         // 4. Taux de Churn (clients résiliés ce mois)
-        const { data: churned, error: churnError } = await supabase
+        const { data: churned, error: churnError } = await window.supabaseClient
             .from('cm_clients')
             .select('id')
             .eq('statut', 'resilié');
@@ -189,7 +189,7 @@ async function loadMRRChart(months = 12) {
             labels.push(monthLabel);
             
             // Récupérer MRR pour ce mois
-            const { data: revenue, error } = await supabase
+            const { data: revenue, error } = await window.supabaseClient
                 .from('cm_revenue_tracking')
                 .select('mrr')
                 .gte('mois', date.toISOString().split('T')[0])
@@ -297,7 +297,7 @@ async function loadAlerts() {
     
     try {
         // 1. Clients à risque de churn (aucune connexion depuis 30j)
-        const { data: inactiveClients, error: inactiveError } = await supabase
+        const { data: inactiveClients, error: inactiveError } = await window.supabaseClient
             .from('cm_activity_logs')
             .select('client_id')
             .eq('type_activite', 'connexion')
@@ -306,7 +306,7 @@ async function loadAlerts() {
         if (!inactiveError) {
             const activeClientIds = [...new Set(inactiveClients.map(l => l.client_id))];
             
-            const { data: allClients } = await supabase
+            const { data: allClients } = await window.supabaseClient
                 .from('cm_clients')
                 .select('id, nom_contact, prenom_contact')
                 .eq('statut', 'actif');
@@ -323,7 +323,7 @@ async function loadAlerts() {
         }
         
         // 2. Tickets en attente > 24h
-        const { data: oldTickets, error: ticketsError } = await supabase
+        const { data: oldTickets, error: ticketsError } = await window.supabaseClient
             .from('cm_support_tickets')
             .select('id')
             .in('statut', ['ouvert', 'en_attente'])
@@ -338,7 +338,7 @@ async function loadAlerts() {
         }
         
         // 3. Erreurs de synchronisation iCal
-        const { data: syncErrors, error: syncError } = await supabase
+        const { data: syncErrors, error: syncError } = await window.supabaseClient
             .from('cm_activity_logs')
             .select('id')
             .eq('type_activite', 'sync_erreur')
@@ -388,7 +388,7 @@ async function loadOpportunities() {
     
     try {
         // 1. Clients éligibles à un upgrade (Basic → Pro)
-        const { data: basicClients, error: basicError } = await supabase
+        const { data: basicClients, error: basicError } = await window.supabaseClient
             .from('cm_clients')
             .select('id, nom_contact, prenom_contact, nb_gites_actuels')
             .eq('type_abonnement', 'basic')
@@ -406,7 +406,7 @@ async function loadOpportunities() {
         }
         
         // 2. Promotions actives
-        const { data: promos, error: promosError } = await supabase
+        const { data: promos, error: promosError } = await window.supabaseClient
             .from('cm_promotions')
             .select('code, nom')
             .eq('actif', true)
@@ -420,7 +420,7 @@ async function loadOpportunities() {
         }
         
         // 3. Clients trial à convertir
-        const { data: trials, error: trialsError } = await supabase
+        const { data: trials, error: trialsError } = await window.supabaseClient
             .from('cm_clients')
             .select('id, nom_contact, prenom_contact')
             .eq('statut', 'trial');
@@ -523,7 +523,7 @@ function switchTab(tabId) {
 
 async function exportDashboardData() {
     try {
-        const { data: clients } = await supabase
+        const { data: clients } = await window.supabaseClient
             .from('cm_clients')
             .select('*');
         
