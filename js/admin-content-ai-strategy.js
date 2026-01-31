@@ -1,0 +1,468 @@
+// ================================================================
+// 🎯 STRATÉGIE IA AUTONOME
+// ================================================================
+// Extension admin-content.js pour stratégie hebdomadaire automatique
+// ================================================================
+
+console.log('🤖 Module Stratégie IA chargé');
+
+// ================================================================
+// NAVIGATION ONGLETS
+// ================================================================
+
+window.switchTab = function(tabName) {
+    // Désactiver tous les onglets
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+    
+    // Activer l'onglet sélectionné
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    document.getElementById(`tab-${tabName}`).style.display = 'block';
+    
+    lucide.createIcons();
+    
+    // Charger les données selon l'onglet
+    if (tabName === 'strategy') {
+        loadCurrentStrategy();
+    } else if (tabName === 'queue') {
+        loadContentQueue();
+    } else if (tabName === 'actions') {
+        loadAIActions();
+    }
+};
+
+// ================================================================
+// GÉNÉRATION STRATÉGIE
+// ================================================================
+
+window.generateWeeklyStrategy = async function() {
+    try {
+        const now = new Date();
+        const weekNumber = getWeekNumber(now);
+        const year = now.getFullYear();
+        
+        showToast('🤖 L\'IA génère votre stratégie...', 'info');
+        
+        // Récupérer l'historique récent
+        const { data: history } = await window.supabaseClient
+            .from('cm_ai_content_history')
+            .select('*')
+            .order('published_at', { ascending: false })
+            .limit(10);
+        
+        const response = await fetch('/api/content-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'generate-weekly-strategy',
+                weekNumber,
+                year,
+                history
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur génération stratégie');
+        }
+        
+        const { strategy } = await response.json();
+        
+        // Sauvegarder dans la base
+        const { data: saved, error } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .upsert({
+                semaine: weekNumber,
+                annee: year,
+                objectif: strategy.objectif,
+                cibles: strategy.cibles,
+                themes: strategy.themes,
+                kpis: strategy.kpis,
+                strategie_complete: JSON.stringify(strategy),
+                statut: 'actif'
+            }, { onConflict: 'semaine,annee' })
+            .select()
+            .single();
+        
+        if (error) throw error;
+        
+        showToast('✅ Stratégie générée avec succès !', 'success');
+        displayStrategy(saved);
+        
+        // Générer automatiquement la queue de contenus
+        await generateContentQueue(saved.id, strategy);
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
+
+// Afficher la stratégie
+function displayStrategy(strategyData) {
+    const strategy = JSON.parse(strategyData.strategie_complete);
+    
+    const html = `
+        <div style="padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 10px 0; font-size: 1.5rem;">📍 Semaine ${strategyData.semaine}/${strategyData.annee}</h3>
+            <p style="margin: 0; font-size: 1.1rem; opacity: 0.9;">${strategy.objectif}</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div style="padding: 15px; background: #F3F4F6; border-radius: 8px;">
+                <h4 style="margin: 0 0 10px 0; color: #374151;">🎯 Cibles</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #6B7280;">
+                    ${strategy.cibles.map(c => `<li>${c}</li>`).join('')}
+                </ul>
+            </div>
+            
+            <div style="padding: 15px; background: #F3F4F6; border-radius: 8px;">
+                <h4 style="margin: 0 0 10px 0; color: #374151;">💡 Thèmes</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #6B7280;">
+                    ${strategy.themes.map(t => `<li>${t}</li>`).join('')}
+                </ul>
+            </div>
+            
+            <div style="padding: 15px; background: #F3F4F6; border-radius: 8px;">
+                <h4 style="margin: 0 0 10px 0; color: #374151;">📊 KPIs</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #6B7280;">
+                    <li>Impressions : ${strategy.kpis.impressions || 'N/A'}</li>
+                    <li>Engagement : ${strategy.kpis.engagement_rate || 'N/A'}%</li>
+                    <li>Leads : ${strategy.kpis.leads || 'N/A'}</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div style="padding: 15px; background: #FFFBEB; border-left: 4px solid #F59E0B; border-radius: 4px; margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0; color: #92400E;">🔥 Angles d'attaque</h4>
+            <ul style="margin: 0; padding-left: 20px; color: #78350F;">
+                ${strategy.angles.map(a => `<li>${a}</li>`).join('')}
+            </ul>
+        </div>
+        
+        <div style="padding: 15px; background: #F9FAFB; border-radius: 8px;">
+            <h4 style="margin: 0 0 15px 0; color: #374151;">📝 Contenus suggérés (${strategy.contenus.length})</h4>
+            <div style="display: grid; gap: 10px;">
+                ${strategy.contenus.map((c, i) => `
+                    <div style="padding: 12px; background: white; border: 1px solid #E5E7EB; border-radius: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <strong style="color: #06b6d4;">${c.plateforme.toUpperCase()}</strong> - ${c.sujet}
+                                <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #6B7280;">${c.angle}</p>
+                                <small style="color: #9CA3AF;">⏰ ${c.heure_ideale || 'À définir'}</small>
+                            </div>
+                            <button class="btn-secondary" onclick="generateFromIdea(${i}, '${strategyData.id}')" style="font-size: 0.85rem;">
+                                Générer
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; padding: 15px; background: #EFF6FF; border-radius: 8px;">
+            <h4 style="margin: 0 0 10px 0; color: #1E40AF;">🏷️ Hashtags stratégiques</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                ${strategy.hashtags.map(h => `<span style="padding: 4px 12px; background: #DBEAFE; color: #1E40AF; border-radius: 20px; font-size: 0.9rem;">${h}</span>`).join('')}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('currentStrategy').innerHTML = html;
+}
+
+// Charger la stratégie actuelle
+async function loadCurrentStrategy() {
+    try {
+        const now = new Date();
+        const weekNumber = getWeekNumber(now);
+        const year = now.getFullYear();
+        
+        const { data, error } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .select('*')
+            .eq('semaine', weekNumber)
+            .eq('annee', year)
+            .eq('statut', 'actif')
+            .single();
+        
+        if (data) {
+            displayStrategy(data);
+        }
+    } catch (error) {
+        console.error('Erreur chargement stratégie:', error);
+    }
+}
+
+// ================================================================
+// GÉNÉRATION QUEUE CONTENUS
+// ================================================================
+
+async function generateContentQueue(strategyId, strategy) {
+    try {
+        showToast('🤖 Génération de la queue de contenus...', 'info');
+        
+        const contentPromises = strategy.contenus.map(async (idea, index) => {
+            // Récupérer l'historique pour cohérence
+            const { data: history } = await window.supabaseClient
+                .from('cm_ai_content_history')
+                .select('*')
+                .eq('plateforme', idea.plateforme)
+                .order('published_at', { ascending: false })
+                .limit(3);
+            
+            // Générer le contenu
+            const response = await fetch('/api/content-ai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'generate-content-from-strategy',
+                    contentIdea: idea,
+                    history,
+                    strategy
+                })
+            });
+            
+            if (!response.ok) throw new Error('Erreur génération contenu');
+            
+            const { content } = await response.json();
+            
+            // Calculer la date de publication (étaler sur 7 jours)
+            const scheduledDate = new Date();
+            scheduledDate.setDate(scheduledDate.getDate() + index);
+            scheduledDate.setHours(parseInt(idea.heure_ideale?.split('h')[0] || 14), 0, 0, 0);
+            
+            // Insérer dans la queue
+            return await window.supabaseClient
+                .from('cm_ai_content_queue')
+                .insert({
+                    strategy_id: strategyId,
+                    type: idea.type,
+                    plateforme: idea.plateforme,
+                    sujet: idea.sujet,
+                    contenu: content.contenu,
+                    image_url: null,
+                    hashtags: content.hashtags || strategy.hashtags.slice(0, 5),
+                    scheduled_date: scheduledDate.toISOString(),
+                    statut: 'en_attente'
+                });
+        });
+        
+        await Promise.all(contentPromises);
+        
+        showToast('✅ Queue de contenus créée !', 'success');
+        loadContentQueue();
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ Erreur génération queue', 'error');
+    }
+}
+
+// Charger la queue de contenus
+async function loadContentQueue() {
+    try {
+        const now = new Date();
+        const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        const { data, error } = await window.supabaseClient
+            .from('cm_ai_content_queue')
+            .select('*')
+            .gte('scheduled_date', now.toISOString())
+            .lte('scheduled_date', in7Days.toISOString())
+            .order('scheduled_date', { ascending: true });
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            document.getElementById('contentQueue').innerHTML = `
+                <p style="text-align: center; color: #9CA3AF; padding: 40px;">
+                    <i data-lucide="calendar" style="width: 48px; height: 48px; margin: 0 auto 10px;"></i><br>
+                    Aucun contenu programmé. L'IA créera automatiquement des publications basées sur votre stratégie.
+                </p>
+            `;
+            return;
+        }
+        
+        const html = `
+            <div style="display: grid; gap: 15px;">
+                ${data.map(item => {
+                    const date = new Date(item.scheduled_date);
+                    const dateStr = date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+                    const timeStr = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    
+                    return `
+                        <div style="padding: 15px; background: white; border: 1px solid #E5E7EB; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                        <span style="padding: 4px 12px; background: #06b6d4; color: white; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">
+                                            ${item.plateforme}
+                                        </span>
+                                        <span style="color: #6B7280; font-size: 0.9rem;">
+                                            📅 ${dateStr} à ${timeStr}
+                                        </span>
+                                        <span style="padding: 4px 12px; background: ${item.statut === 'publié' ? '#10B981' : '#F59E0B'}; color: white; border-radius: 20px; font-size: 0.85rem;">
+                                            ${item.statut === 'publié' ? '✅ Publié' : '⏳ En attente'}
+                                        </span>
+                                    </div>
+                                    <h4 style="margin: 0 0 8px 0; color: #111827;">${item.sujet}</h4>
+                                    <p style="margin: 0; color: #6B7280; font-size: 0.95rem; line-height: 1.5;">
+                                        ${item.contenu.substring(0, 150)}${item.contenu.length > 150 ? '...' : ''}
+                                    </p>
+                                    ${item.hashtags && item.hashtags.length > 0 ? `
+                                        <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px;">
+                                            ${item.hashtags.slice(0, 5).map(h => `<span style="padding: 2px 8px; background: #EFF6FF; color: #2563EB; border-radius: 12px; font-size: 0.8rem;">${h}</span>`).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-left: 15px;">
+                                    <button class="btn-secondary" onclick="editQueueItem('${item.id}')" style="font-size: 0.85rem;">
+                                        Modifier
+                                    </button>
+                                    ${item.statut === 'en_attente' ? `
+                                        <button class="btn-primary" onclick="publishQueueItem('${item.id}')" style="font-size: 0.85rem;">
+                                            Publier
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        
+        document.getElementById('contentQueue').innerHTML = html;
+        lucide.createIcons();
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+    }
+}
+
+// ================================================================
+// ACTIONS PROPOSÉES
+// ================================================================
+
+async function loadAIActions() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .select('*')
+            .in('statut', ['proposé', 'accepté', 'en_cours'])
+            .order('priorite', { ascending: false })
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            document.getElementById('aiActions').innerHTML = `
+                <p style="text-align: center; color: #9CA3AF; padding: 40px;">
+                    <i data-lucide="zap" style="width: 48px; height: 48px; margin: 0 auto 10px;"></i><br>
+                    Aucune action proposée pour le moment.
+                </p>
+            `;
+            return;
+        }
+        
+        const html = `
+            <div style="display: grid; gap: 15px;">
+                ${data.map(action => {
+                    const priorityColor = action.priorite === 'haute' ? '#EF4444' : action.priorite === 'moyenne' ? '#F59E0B' : '#10B981';
+                    const statusColor = action.statut === 'accepté' ? '#10B981' : action.statut === 'en_cours' ? '#3B82F6' : '#6B7280';
+                    
+                    return `
+                        <div style="padding: 15px; background: white; border: 1px solid #E5E7EB; border-left: 4px solid ${priorityColor}; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                        <span style="padding: 4px 12px; background: ${priorityColor}; color: white; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">
+                                            ${action.priorite.toUpperCase()}
+                                        </span>
+                                        <span style="padding: 4px 12px; background: ${statusColor}; color: white; border-radius: 20px; font-size: 0.85rem;">
+                                            ${action.statut}
+                                        </span>
+                                        <span style="color: #9CA3AF; font-size: 0.85rem;">
+                                            ${action.type}
+                                        </span>
+                                    </div>
+                                    <h4 style="margin: 0 0 8px 0; color: #111827;">${action.titre}</h4>
+                                    <p style="margin: 0 0 10px 0; color: #6B7280; line-height: 1.5;">${action.description}</p>
+                                    ${action.justification ? `
+                                        <p style="margin: 0; padding: 10px; background: #F3F4F6; border-radius: 6px; color: #374151; font-size: 0.9rem;">
+                                            💡 ${action.justification}
+                                        </p>
+                                    ` : ''}
+                                </div>
+                                ${action.statut === 'proposé' ? `
+                                    <div style="display: flex; gap: 8px; margin-left: 15px;">
+                                        <button class="btn-secondary" onclick="rejectAction('${action.id}')" style="font-size: 0.85rem;">
+                                            Refuser
+                                        </button>
+                                        <button class="btn-primary" onclick="acceptAction('${action.id}')" style="font-size: 0.85rem;">
+                                            Accepter
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        
+        document.getElementById('aiActions').innerHTML = html;
+        lucide.createIcons();
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+    }
+}
+
+// Accepter/Refuser une action
+window.acceptAction = async function(actionId) {
+    try {
+        const { error } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .update({ statut: 'accepté', decided_at: new Date().toISOString() })
+            .eq('id', actionId);
+        
+        if (error) throw error;
+        
+        showToast('✅ Action acceptée !', 'success');
+        loadAIActions();
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ Erreur', 'error');
+    }
+};
+
+window.rejectAction = async function(actionId) {
+    try {
+        const { error } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .update({ statut: 'refusé', decided_at: new Date().toISOString() })
+            .eq('id', actionId);
+        
+        if (error) throw error;
+        
+        showToast('✅ Action refusée', 'success');
+        loadAIActions();
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ Erreur', 'error');
+    }
+};
+
+// ================================================================
+// UTILITAIRES
+// ================================================================
+
+function getWeekNumber(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+}

@@ -364,7 +364,212 @@ Image description: ${prompt}`;
       });
     }
 
-    return res.status(400).json({ error: 'Invalid action. Use: generate-text, generate-image, or optimize-seo' });
+    // ================================================================
+    // GÉNÉRATION STRATÉGIE HEBDOMADAIRE
+    // ================================================================
+    if (action === 'generate-weekly-strategy') {
+      const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+      
+      if (!OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          error: 'OpenAI API key not configured' 
+        });
+      }
+
+      const { weekNumber, year, history } = req.body;
+
+      const strategyPrompt = `Tu es le stratège marketing senior de LiveOwnerUnit, plateforme SaaS de gestion locative.
+
+CONTEXTE :
+- Semaine ${weekNumber}/${year}
+- Historique récent : ${history ? JSON.stringify(history).substring(0, 500) : 'Nouveau démarrage'}
+
+MISSION : Créer une stratégie marketing complète pour cette semaine.
+
+ANALYSE À FOURNIR :
+1. OBJECTIF PRINCIPAL (SMART) : 1 objectif clair et mesurable
+2. CIBLES PRIORITAIRES : 2-3 segments d'audience à viser
+3. THÈMES À EXPLOITER : 3-4 thèmes de contenu (actualité, saisonnalité, pain points)
+4. KPIs À ATTEINDRE : Métriques précises (impressions, engagement, conversions)
+5. ANGLES D'ATTAQUE : Comment se démarquer cette semaine
+6. CONTENUS SUGGÉRÉS : 5-7 idées de posts/articles avec plateforme recommandée
+7. HASHTAGS STRATÉGIQUES : 10 hashtags pertinents (#location #gestion #vacances etc.)
+8. MEILLEURS HORAIRES : Quand publier (jour + heure) pour maximiser reach
+
+CONTRAINTES :
+- Rester authentique, créé par un vrai loueur professionnel
+- Aucun chiffre mensonger ou promesse exagérée
+- Focus : Synchronisation temps réel, automatisation, gain de temps
+- Ton : Direct, data-driven, pragmatique
+
+FORMAT DE RÉPONSE (JSON) :
+{
+  "objectif": "...",
+  "cibles": ["...", "..."],
+  "themes": ["...", "...", "..."],
+  "kpis": {
+    "impressions": 5000,
+    "engagement_rate": 3.5,
+    "leads": 10
+  },
+  "angles": ["...", "..."],
+  "contenus": [
+    {
+      "type": "post",
+      "plateforme": "linkedin",
+      "sujet": "...",
+      "angle": "...",
+      "heure_ideale": "Mardi 14h"
+    }
+  ],
+  "hashtags": ["#location", "#gestion", ...],
+  "timing_optimal": { "linkedin": "Mar/Jeu 9h-14h", "facebook": "Mer/Ven 12h-20h" }
+}
+
+Réponds UNIQUEMENT avec le JSON, sans texte avant/après.`;
+
+      const strategyResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            {
+              role: 'system',
+              content: 'Tu es un expert en stratégie marketing digital pour le SaaS B2B. Tu fournis des stratégies actionnables et mesurables.'
+            },
+            {
+              role: 'user',
+              content: strategyPrompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000
+        })
+      });
+
+      if (!strategyResponse.ok) {
+        const error = await strategyResponse.json();
+        throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+      }
+
+      const strategyData = await strategyResponse.json();
+      const strategyContent = strategyData.choices[0].message.content;
+
+      // Nettoyer le JSON (enlever markdown)
+      let cleanJSON = strategyContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      try {
+        const parsedStrategy = JSON.parse(cleanJSON);
+        return res.status(200).json({
+          success: true,
+          strategy: parsedStrategy
+        });
+      } catch (parseError) {
+        // Si parsing échoue, retourner le texte brut
+        return res.status(200).json({
+          success: true,
+          strategy: { raw: cleanJSON }
+        });
+      }
+    }
+
+    // ================================================================
+    // GÉNÉRATION CONTENU AUTO (basé sur stratégie)
+    // ================================================================
+    if (action === 'generate-content-from-strategy') {
+      const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+      
+      if (!OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          error: 'OpenAI API key not configured' 
+        });
+      }
+
+      const { contentIdea, history, strategy } = req.body;
+
+      const contentPrompt = `Tu es le content creator de LiveOwnerUnit.
+
+CONTEXTE STRATÉGIQUE :
+${JSON.stringify(strategy, null, 2)}
+
+CONTENU À CRÉER :
+- Type: ${contentIdea.type}
+- Plateforme: ${contentIdea.plateforme}
+- Sujet: ${contentIdea.sujet}
+- Angle: ${contentIdea.angle}
+
+HISTORIQUE RÉCENT (pour cohérence) :
+${history ? JSON.stringify(history).substring(0, 500) : 'N/A'}
+
+MISSION : Créer un contenu engageant qui :
+1. Suit la stratégie de la semaine
+2. Reste cohérent avec les contenus précédents
+3. Utilise les hashtags stratégiques
+4. Optimisé pour la viralité (hooks, storytelling, CTA clair)
+
+FORMAT RÉPONSE (JSON) :
+{
+  "contenu": "Texte complet du post/email/article",
+  "hashtags": ["#location", "#gestion", ...],
+  "cta": "Call-to-action",
+  "image_prompt": "Prompt pour générer l'image associée",
+  "best_time": "Meilleur moment pour publier"
+}
+
+Réponds UNIQUEMENT avec le JSON.`;
+
+      const contentResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            {
+              role: 'system',
+              content: 'Tu es un expert en création de contenu viral pour les réseaux sociaux B2B.'
+            },
+            {
+              role: 'user',
+              content: contentPrompt
+            }
+          ],
+          temperature: 0.8,
+          max_tokens: 1000
+        })
+      });
+
+      if (!contentResponse.ok) {
+        const error = await contentResponse.json();
+        throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+      }
+
+      const contentData = await contentResponse.json();
+      const contentText = contentData.choices[0].message.content;
+
+      let cleanJSON = contentText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      try {
+        const parsedContent = JSON.parse(cleanJSON);
+        return res.status(200).json({
+          success: true,
+          content: parsedContent
+        });
+      } catch (parseError) {
+        return res.status(200).json({
+          success: true,
+          content: { raw: cleanJSON }
+        });
+      }
+    }
+
+    return res.status(400).json({ error: 'Invalid action. Use: generate-text, generate-image, optimize-seo, generate-weekly-strategy, or generate-content-from-strategy' });
 
   } catch (error) {
     console.error('❌ API Error:', error);

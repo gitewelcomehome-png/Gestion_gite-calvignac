@@ -7,6 +7,36 @@
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/admin-dashboard.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Onglets */
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #6B7280;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            color: #06b6d4;
+        }
+        .tab-btn.active {
+            color: #06b6d4;
+            border-bottom-color: #06b6d4;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
 </head>
 <body style="background: #F9FAFB;">
     <div class="admin-wrapper">
@@ -22,35 +52,120 @@
             </h1>
         </header>
 
-        <!-- Actions Rapides -->
-        <section style="margin-bottom: 2rem;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <button class="action-btn" onclick="showGenerateModal('post')">
-                    <i data-lucide="instagram"></i>
-                    <span>Post Social</span>
+        <!-- Onglets Navigation -->
+        <div style="border-bottom: 2px solid #E5E7EB; margin-bottom: 2rem;">
+            <div style="display: flex; gap: 0;">
+                <button class="tab-btn active" onclick="switchTab('generation')" data-tab="generation">
+                    <i data-lucide="pen-tool"></i>
+                    Génération Manuelle
                 </button>
-                <button class="action-btn" onclick="showGenerateModal('email')">
-                    <i data-lucide="mail"></i>
-                    <span>Email Marketing</span>
+                <button class="tab-btn" onclick="switchTab('strategy')" data-tab="strategy">
+                    <i data-lucide="target"></i>
+                    Stratégie IA
                 </button>
-                <button class="action-btn" onclick="showGenerateModal('blog')">
-                    <i data-lucide="file-text"></i>
-                    <span>Article Blog</span>
+                <button class="tab-btn" onclick="switchTab('queue')" data-tab="queue">
+                    <i data-lucide="calendar"></i>
+                    Publications Programmées
                 </button>
-                <button class="action-btn" onclick="showGenerateModal('newsletter')">
-                    <i data-lucide="newspaper"></i>
-                    <span>Newsletter</span>
-                </button>
-                <button class="action-btn" onclick="showImageGenerator()">
-                    <i data-lucide="image"></i>
-                    <span>Génerer Visuel IA</span>
-                </button>
-                <button class="action-btn" onclick="showSocialConnect()">
-                    <i data-lucide="share-2"></i>
-                    <span>Connecter Réseaux</span>
+                <button class="tab-btn" onclick="switchTab('actions')" data-tab="actions">
+                    <i data-lucide="zap"></i>
+                    Actions Proposées
                 </button>
             </div>
-        </section>
+        </div>
+
+        <!-- TAB 1 : GÉNÉRATION MANUELLE -->
+        <div id="tab-generation" class="tab-content active">
+            <!-- Actions Rapides -->
+            <section style="margin-bottom: 2rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <button class="action-btn" onclick="showGenerateModal('post')">
+                        <i data-lucide="instagram"></i>
+                        <span>Post Social</span>
+                    </button>
+                    <button class="action-btn" onclick="showGenerateModal('email')">
+                        <i data-lucide="mail"></i>
+                        <span>Email Marketing</span>
+                    </button>
+                    <button class="action-btn" onclick="showGenerateModal('blog')">
+                        <i data-lucide="file-text"></i>
+                        <span>Article Blog</span>
+                    </button>
+                    <button class="action-btn" onclick="showGenerateModal('newsletter')">
+                        <i data-lucide="newspaper"></i>
+                        <span>Newsletter</span>
+                    </button>
+                    <button class="action-btn" onclick="showImageGenerator()">
+                        <i data-lucide="image"></i>
+                        <span>Génerer Visuel IA</span>
+                    </button>
+                    <button class="action-btn" onclick="showSocialConnect()">
+                        <i data-lucide="share-2"></i>
+                        <span>Connecter Réseaux</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB 2 : STRATÉGIE IA -->
+        <div id="tab-strategy" class="tab-content" style="display: none;">
+            <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                        <i data-lucide="target"></i>
+                        Stratégie de la Semaine
+                    </h2>
+                    <button class="btn-primary" onclick="generateWeeklyStrategy()">
+                        <i data-lucide="sparkles"></i>
+                        Générer Nouvelle Stratégie
+                    </button>
+                </div>
+                <div id="currentStrategy">
+                    <p style="text-align: center; color: #9CA3AF; padding: 40px;">
+                        <i data-lucide="target" style="width: 48px; height: 48px; margin: 0 auto 10px;"></i><br>
+                        Aucune stratégie active. Cliquez sur "Générer" pour créer votre stratégie hebdomadaire !
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB 3 : QUEUE DE PUBLICATIONS -->
+        <div id="tab-queue" class="tab-content" style="display: none;">
+            <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                        <i data-lucide="calendar"></i>
+                        Publications Programmées (7 prochains jours)
+                    </h2>
+                </div>
+                <div id="contentQueue">
+                    <p style="text-align: center; color: #9CA3AF; padding: 40px;">
+                        <i data-lucide="calendar" style="width: 48px; height: 48px; margin: 0 auto 10px;"></i><br>
+                        Aucun contenu programmé. L'IA créera automatiquement des publications basées sur votre stratégie.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB 4 : ACTIONS PROPOSÉES -->
+        <div id="tab-actions" class="tab-content" style="display: none;">
+            <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                        <i data-lucide="zap"></i>
+                        Actions Recommandées par l'IA
+                    </h2>
+                </div>
+                <div id="aiActions">
+                    <p style="text-align: center; color: #9CA3AF; padding: 40px;">
+                        <i data-lucide="zap" style="width: 48px; height: 48px; margin: 0 auto 10px;"></i><br>
+                        Aucune action proposée pour le moment.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- CONTENU COMMUN (visible sur tous les onglets) -->
 
         <!-- Bibliothèque de Contenu -->
         <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
@@ -506,6 +621,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/shared-config.js"></script>
     <script src="../js/admin-content.js"></script>
+    <script src="../js/admin-content-ai-strategy.js"></script>
     <script>lucide.createIcons();</script>
 </body>
 </html>
