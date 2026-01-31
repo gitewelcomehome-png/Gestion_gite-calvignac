@@ -14,16 +14,32 @@
 
             <form id="analyseForm">
                 <div class="form-group">
-                    <label for="annonceUrl">🔗 URL de votre annonce :</label>
-                    <input 
-                        type="url" 
-                        id="annonceUrl" 
-                        placeholder="https://www.airbnb.fr/rooms/12345678 ou https://www.booking.com/..." 
+                    <label for="annonceTexte">📝 Collez le contenu complet de votre annonce :</label>
+                    <textarea 
+                        id="annonceTexte" 
+                        rows="15" 
+                        placeholder="Collez ici :
+- Le TITRE de votre annonce
+- La DESCRIPTION complète
+- La liste des ÉQUIPEMENTS
+- Les RÈGLES de la maison
+- Toutes les informations visibles
+
+Plus vous collez d'informations, meilleure sera l'analyse."
                         required
-                    >
+                    ></textarea>
                     <small style="color: #666; margin-top: 8px; display: block;">
-                        💡 L'IA va analyser automatiquement le contenu complet de votre annonce
+                        💡 Astuce : Ouvrez votre annonce Airbnb/Booking, sélectionnez et copiez tout le texte, puis collez-le ici
                     </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="annonceNom">🏷️ Nom de cette annonce (optionnel) :</label>
+                    <input 
+                        type="text" 
+                        id="annonceNom" 
+                        placeholder="Ex: Trévoux Airbnb, Calvignac Booking..."
+                    >
                 </div>
 
                 <div style="display: flex; gap: 10px;">
@@ -36,7 +52,7 @@
                 </div>
             </form>
 
-            <!-- URLs Sauvegardées -->
+            <!-- Annonces Sauvegardées -->
             <div class="saved-urls" id="savedUrlsSection" style="display: none;">
                 <h3>📋 Annonces sauvegardées</h3>
                 <div id="savedUrlsList"></div>

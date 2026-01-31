@@ -1,0 +1,219 @@
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>⚙️ Administration</h1>
+        <p class="subtitle">Gestion et paramètres du système</p>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="admin-dashboard">
+        <div class="stat-card">
+            <div class="stat-icon">🏠</div>
+            <div class="stat-info">
+                <span class="stat-value" id="totalGites">-</span>
+                <span class="stat-label">Gîtes gérés</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+                <span class="stat-value" id="totalReservations">-</span>
+                <span class="stat-label">Réservations actives</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <span class="stat-value" id="totalNettoyages">-</span>
+                <span class="stat-label">Ménages planifiés</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+                <span class="stat-value" id="totalRevenue">-</span>
+                <span class="stat-label">CA du mois</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sections Admin -->
+    <div class="admin-sections">
+        
+        <!-- Gestion des Gîtes -->
+        <div class="admin-card">
+            <h2><i data-lucide="home"></i> Gestion des Gîtes</h2>
+            <div class="admin-table-container">
+                <table class="admin-table" id="gitesTable">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Capacité</th>
+                            <th>Adresse</th>
+                            <th>Couleur</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gitesTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px;">
+                                <div class="spinner"></div> Chargement...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn-primary" onclick="window.adminManager.showAddGiteModal()">
+                <i data-lucide="plus"></i> Ajouter un gîte
+            </button>
+        </div>
+
+        <!-- Synchronisation iCal -->
+        <div class="admin-card">
+            <h2><i data-lucide="refresh-cw"></i> Synchronisation iCal</h2>
+            <p class="admin-description">Gérez les synchronisations automatiques avec les plateformes de réservation</p>
+            
+            <div class="sync-status">
+                <div class="sync-item">
+                    <span>Dernière synchro :</span>
+                    <strong id="lastSyncDate">-</strong>
+                </div>
+                <div class="sync-item">
+                    <span>Prochaine synchro :</span>
+                    <strong id="nextSyncDate">-</strong>
+                </div>
+            </div>
+
+            <button class="btn-secondary" onclick="window.adminManager.syncAllICal()">
+                <i data-lucide="refresh-cw"></i> Synchroniser maintenant
+            </button>
+        </div>
+
+        <!-- Configuration Système -->
+        <div class="admin-card">
+            <h2><i data-lucide="settings"></i> Configuration Système</h2>
+            
+            <div class="config-section">
+                <h3>Paramètres généraux</h3>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enableNotifications" checked>
+                        Activer les notifications
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enableAutoSync" checked>
+                        Synchronisation automatique iCal
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enableCleaningReminders" checked>
+                        Rappels de ménage automatiques
+                    </label>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <h3>Horaires de synchro iCal</h3>
+                <div class="form-group">
+                    <label>Fréquence de synchronisation</label>
+                    <select id="syncFrequency" class="form-control">
+                        <option value="1">Toutes les heures</option>
+                        <option value="3" selected>Toutes les 3 heures</option>
+                        <option value="6">Toutes les 6 heures</option>
+                        <option value="12">Toutes les 12 heures</option>
+                        <option value="24">Une fois par jour</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="window.adminManager.saveConfig()">
+                <i data-lucide="save"></i> Enregistrer les paramètres
+            </button>
+        </div>
+
+        <!-- Maintenance Base de données -->
+        <div class="admin-card">
+            <h2><i data-lucide="database"></i> Maintenance Base de données</h2>
+            <p class="admin-description">Outils de maintenance et nettoyage</p>
+            
+            <div class="maintenance-actions">
+                <button class="btn-secondary" onclick="window.adminManager.cleanOldReservations()">
+                    <i data-lucide="trash-2"></i> Nettoyer les anciennes réservations
+                </button>
+                <button class="btn-secondary" onclick="window.adminManager.optimizeDatabase()">
+                    <i data-lucide="zap"></i> Optimiser la base
+                </button>
+                <button class="btn-secondary" onclick="window.adminManager.exportData()">
+                    <i data-lucide="download"></i> Exporter les données
+                </button>
+            </div>
+        </div>
+
+        <!-- Logs et Activité -->
+        <div class="admin-card">
+            <h2><i data-lucide="activity"></i> Logs d'activité</h2>
+            <div class="logs-container" id="logsContainer">
+                <div style="text-align: center; padding: 20px; color: #666;">
+                    Chargement des logs...
+                </div>
+            </div>
+        </div>
+
+        <!-- Utilisateurs (si multi-utilisateur) -->
+        <div class="admin-card">
+            <h2><i data-lucide="users"></i> Utilisateurs</h2>
+            <div class="user-info">
+                <p><strong>Email :</strong> <span id="currentUserEmail">-</span></p>
+                <p><strong>ID :</strong> <span id="currentUserId">-</span></p>
+                <p><strong>Rôle :</strong> <span id="currentUserRole">Propriétaire</span></p>
+                <p><strong>Membre depuis :</strong> <span id="memberSince">-</span></p>
+            </div>
+        </div>
+
+        <!-- Zone Danger -->
+        <div class="admin-card danger-zone">
+            <h2><i data-lucide="alert-triangle"></i> Zone de danger</h2>
+            <p class="admin-description">Actions irréversibles - Utilisez avec précaution</p>
+            
+            <div class="danger-actions">
+                <button class="btn-danger" onclick="window.adminManager.resetAllData()">
+                    <i data-lucide="trash"></i> Réinitialiser toutes les données
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Gîte -->
+<div id="addGiteModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Ajouter un nouveau gîte</h2>
+            <button class="modal-close" onclick="window.adminManager.closeModal('addGiteModal')">×</button>
+        </div>
+        <form id="addGiteForm">
+            <div class="form-group">
+                <label>Nom du gîte *</label>
+                <input type="text" id="newGiteName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Capacité (personnes)</label>
+                <input type="number" id="newGiteCapacity" class="form-control" min="1" value="4">
+            </div>
+            <div class="form-group">
+                <label>Adresse</label>
+                <input type="text" id="newGiteAddress" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Couleur</label>
+                <input type="color" id="newGiteColor" class="form-control" value="#667eea">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="window.adminManager.closeModal('addGiteModal')">Annuler</button>
+                <button type="submit" class="btn-primary">Créer le gîte</button>
+            </div>
+        </form>
+    </div>
+</div>

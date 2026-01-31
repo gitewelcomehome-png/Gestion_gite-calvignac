@@ -19,6 +19,19 @@
         </div>
     </header>
 
+    <!-- 🎫 TICKETS SUPPORT EN ATTENTE -->
+    <section id="dashboard-tickets-support" class="section-alert section-alert--warning mb-md" style="display: none;">
+        <header class="section-header">
+            <h2 class="section-title">
+                <i data-lucide="headphones"></i> TICKETS SUPPORT EN ATTENTE
+            </h2>
+            <span id="badge-tickets-count" class="badge badge--warning badge--count">0</span>
+        </header>
+        <div id="liste-tickets-support" class="section-content section-content--compact">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun ticket en attente</p>
+        </div>
+    </section>
+
     <!-- ⚠️ DEMANDES CLIENTS URGENTES -->
     <section id="dashboard-demandes-clients" class="section-alert section-alert--warning mb-md" style="display: none;">
         <header class="section-header">
@@ -492,6 +505,7 @@ window.debugEditModal = function() {
         console.log('🚀 Initialisation style:', savedStyle);
         updateModalSwitchButtons(savedStyle);
     });
+
     
     // Aussi initialiser immédiatement si le DOM est déjà chargé
     if (document.readyState === 'loading') {
@@ -508,3 +522,9 @@ window.debugEditModal = function() {
     }
 })();
 </script>
+
+<!-- Widget Support Dashboard -->
+<script src="../js/dashboard-support-widget.js"></script>
+
+</body>
+</html>

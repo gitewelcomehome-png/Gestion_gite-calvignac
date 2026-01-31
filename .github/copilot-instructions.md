@@ -8,6 +8,14 @@
 - Aucune action dangereuse ou risquée
 - Toujours privilégier la sécurité et la stabilité
 
+### 🚫 INTERDICTION ABSOLUE : Ne JAMAIS modifier index.html
+- **index.html** = Page CLIENT (propriétaires de gîtes utilisant l'application)
+- **pages/admin-channel-manager.html** = Page ADMIN (gestion des clients SaaS)
+- **pages/admin-support.html** = Interface support ADMIN
+- **pages/client-support.html** = Interface support CLIENT
+- ⛔ Ne JAMAIS toucher à index.html sauf demande EXPLICITE de l'utilisateur
+- Toujours confirmer quelle interface avant de modifier (ADMIN vs CLIENT)
+
 ### Ne JAMAIS demander
 - Si le cache a été vidé
 - Des confirmations évidentes pour des opérations standards

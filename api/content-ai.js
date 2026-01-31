@@ -219,6 +219,47 @@ Format : Sections claires + visuels suggérés + CTA engageant.`
         });
       }
 
+      // ===== GEMINI IMAGEN (Google) =====
+      if (provider === 'gemini') {
+        const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+        
+        if (!GEMINI_API_KEY) {
+          return res.status(400).json({ 
+            success: false,
+            error: 'Gemini API key not configured. Get one at https://ai.google.dev and add GEMINI_API_KEY in Vercel environment variables.' 
+          });
+        }
+
+        // Gemini Imagen 3
+        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            prompt: enhancedPrompt,
+            number_of_images: 1,
+            aspect_ratio: size === '1792x1024' ? '16:9' : size === '1024x1792' ? '9:16' : '1:1',
+            safety_filter_level: 'block_some',
+            person_generation: 'allow_adult'
+          })
+        });
+
+        if (!geminiResponse.ok) {
+          const error = await geminiResponse.text();
+          throw new Error(`Gemini API error: ${error}`);
+        }
+
+        const data = await geminiResponse.json();
+
+        // Gemini retourne images en base64 dans data.predictions[0].bytesBase64Encoded
+        return res.status(200).json({
+          success: true,
+          imageBase64: data.predictions[0].bytesBase64Encoded,
+          provider: 'Gemini Imagen'
+        });
+      }
+
       // ===== DALL-E 3 (fallback si demandé) =====
       if (provider === 'dalle') {
         const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -261,7 +302,7 @@ Format : Sections claires + visuels suggérés + CTA engageant.`
       }
 
       return res.status(400).json({
-        error: 'Invalid provider. Use "stability" or "dalle".'
+        error: 'Invalid provider. Use "stability", "gemini" or "dalle".'
       });
     }
 
