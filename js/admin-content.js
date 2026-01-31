@@ -632,21 +632,6 @@ async function generateImage() {
         } else {
             throw new Error(data.error || 'Erreur génération');
         }
-            })
-        });
-        
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Erreur génération image');
-        }
-        
-        const data = await response.json();
-        currentGeneratedImage = data.imageUrl;
-        
-        document.getElementById('generatedImage').src = data.imageUrl;
-        document.getElementById('imageResult').style.display = 'block';
-        
-        showToast('✅ Image générée avec succès !', 'success');
         
     } catch (error) {
         console.error('❌ Erreur:', error);
