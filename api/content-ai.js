@@ -170,8 +170,9 @@ Format : Sections claires + visuels suggérés + CTA engageant.`
         const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
         
         if (!STABILITY_API_KEY) {
-          return res.status(500).json({ 
-            error: 'Stability AI API key not configured.' 
+          return res.status(400).json({ 
+            success: false,
+            error: 'Stability AI API key not configured. Add STABILITY_API_KEY in Vercel environment variables or switch to DALL-E.' 
           });
         }
 
@@ -223,8 +224,9 @@ Format : Sections claires + visuels suggérés + CTA engageant.`
         const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
         
         if (!OPENAI_API_KEY) {
-          return res.status(500).json({ 
-            error: 'OpenAI API key not configured for DALL-E.' 
+          return res.status(400).json({ 
+            success: false,
+            error: 'OpenAI API key not configured for DALL-E. Add OPENAI_API_KEY in Vercel environment variables.' 
           });
         }
 
