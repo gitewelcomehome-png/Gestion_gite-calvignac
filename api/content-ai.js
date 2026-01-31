@@ -27,31 +27,43 @@ export default async function handler(req, res) {
     // ================================================================
     if (action === 'generate-text') {
       
+      // Contexte LiveOwnerUnit pour tout le contenu
+      const brandContext = `CONTEXTE ENTREPRISE - LiveOwnerUnit ("Gestion Synchronisée")
+- Plateforme SaaS de gestion locative pour propriétaires de gîtes/meublés
+- Fonctionnalités : Calendrier synchronisé multi-plateformes, channel manager automatisé, dashboard analytics
+- Cible : Marie, 48 ans, propriétaire de 2 gîtes dans le Lot, veut automatiser sa gestion
+- Promesse : Économiser 10h/semaine + 20% de revenus en plus + 0 surréservation
+- Couleurs : Cyan (#06b6d4), Bleu (#2563eb), Violet (#764ba2)
+- Ton : Direct, orienté données, rassurant, sans jargon technique
+- Différenciation : Synchronisation temps réel vs concurrents (retard 24h)
+
+`;
+      
       // Construire le prompt selon le type de contenu
       const prompts = {
-        'post': `Tu es un expert en social media. Crée un post ${tone} sur le sujet : "${subject}".
+        'post': `${brandContext}Tu es l'expert marketing de LiveOwnerUnit. Crée un post ${tone} sur le sujet : "${subject}".
 Points clés à inclure : ${keyPoints || 'N/A'}
 Call-to-action : ${cta || 'N/A'}
 Longueur : ${length === 'court' ? '100-150 mots' : length === 'moyen' ? '150-300 mots' : '300-500 mots'}
-Format : Texte optimisé pour réseaux sociaux avec emojis pertinents.`,
+Format : Texte optimisé pour réseaux sociaux avec emojis pertinents. Mentionne LiveOwnerUnit et ses bénéfices.`,
         
-        'email': `Tu es un expert en email marketing. Rédige un email ${tone} sur : "${subject}".
+        'email': `${brandContext}Tu es l'expert email marketing de LiveOwnerUnit. Rédige un email ${tone} sur : "${subject}".
 Points clés : ${keyPoints || 'N/A'}
 Call-to-action : ${cta || 'N/A'}
 Longueur : ${length === 'court' ? 'Concis (150 mots max)' : length === 'moyen' ? 'Standard (150-300 mots)' : 'Détaillé (300-500 mots)'}
-Structure : Objet accrocheur + corps du message + CTA clair.`,
+Structure : Objet accrocheur + corps du message personnalisé + CTA clair vers LiveOwnerUnit.`,
         
-        'blog': `Tu es un expert en rédaction SEO. Écris un article de blog ${tone} sur : "${subject}".
+        'blog': `${brandContext}Tu es l'expert SEO de LiveOwnerUnit. Écris un article de blog ${tone} sur : "${subject}".
 Points clés : ${keyPoints || 'N/A'}
 Call-to-action : ${cta || 'N/A'}
 Longueur : ${length === 'court' ? '300-500 mots' : length === 'moyen' ? '500-800 mots' : '800-1200 mots'}
-Structure : Titre H1 + introduction + sections H2 + conclusion.`,
+Structure : Titre H1 optimisé SEO + introduction engageante + sections H2 + étude de cas LiveOwnerUnit + conclusion avec CTA.`,
         
-        'newsletter': `Tu es un expert en newsletters. Crée une newsletter ${tone} sur : "${subject}".
+        'newsletter': `${brandContext}Tu es l'expert newsletters de LiveOwnerUnit. Crée une newsletter ${tone} sur : "${subject}".
 Points clés : ${keyPoints || 'N/A'}
 Call-to-action : ${cta || 'N/A'}
 Longueur : ${length === 'court' ? '200-300 mots' : length === 'moyen' ? '300-500 mots' : '500-800 mots'}
-Format : Sections claires + visuels suggérés + CTA engageant.`
+Format : Sections claires + stats/témoignages LiveOwnerUnit + visuels suggérés + CTA engageant.`
       };
 
       const prompt = prompts[type] || prompts['post'];
@@ -155,6 +167,11 @@ Format : Sections claires + visuels suggérés + CTA engageant.`
     if (action === 'generate-image') {
       const { prompt, style, size, provider = 'stability' } = req.body;
 
+      // Contexte LiveOwnerUnit pour toutes les images
+      const contextPrompt = `Context: LiveOwnerUnit is a SaaS platform for vacation rental management with synchronized calendars and channel manager. Brand colors: cyan (#06b6d4), blue (#2563eb), violet (#764ba2). Modern, professional, tech-focused aesthetic. Target: property owners managing rental properties. 
+
+Image description: ${prompt}`;
+
       // Style mapping amélioré
       const stylePrompts = {
         'realistic': 'photorealistic, high quality, professional photography, 4k, detailed, sharp focus',
@@ -163,7 +180,7 @@ Format : Sections claires + visuels suggérés + CTA engageant.`
         'vintage': 'vintage style, retro aesthetic, nostalgic, old photograph, film grain'
       };
 
-      const enhancedPrompt = `${prompt}. ${stylePrompts[style] || stylePrompts['realistic']}`;
+      const enhancedPrompt = `${contextPrompt}. ${stylePrompts[style] || stylePrompts['realistic']}`;
 
       // ===== STABILITY AI (Stable Diffusion XL) - PAR DÉFAUT =====
       if (provider === 'stability') {
