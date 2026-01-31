@@ -230,7 +230,17 @@ async function generateContentQueue(strategyId, strategy) {
             // Calculer la date de publication (étaler sur 7 jours)
             const scheduledDate = new Date();
             scheduledDate.setDate(scheduledDate.getDate() + index);
-            scheduledDate.setHours(parseInt(idea.heure_ideale?.split('h')[0] || 14), 0, 0, 0);
+            
+            // Parser l'heure (gère "14h", "Mardi 14h", etc.)
+            let hour = 14; // Défaut
+            if (idea.heure_ideale) {
+                const match = idea.heure_ideale.match(/(\d+)h/);
+                if (match) {
+                    hour = parseInt(match[1]);
+                    if (hour < 0 || hour > 23) hour = 14;
+                }
+            }
+            scheduledDate.setHours(hour, 0, 0, 0);
             
             // Insérer dans la queue
             return await window.supabaseClient
@@ -458,6 +468,58 @@ window.rejectAction = async function(actionId) {
 // ================================================================
 // UTILITAIRES
 // ================================================================
+
+// Générer un contenu à partir d'une idée de stratégie
+window.generateFromIdea = async function(ideaIndex, strategyId) {
+    try {
+        showToast('🤖 Génération du contenu...', 'info');
+        
+        // Récupérer la stratégie
+        const { data: strategyData, error: stratError } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .select('*')
+            .eq('id', strategyId)
+            .single();
+        
+        if (stratError) throw stratError;
+        
+        const strategy = JSON.parse(strategyData.strategie_complete);
+        const idea = strategy.contenus[ideaIndex];
+        
+        // Récupérer l'historique
+        const { data: history } = await window.supabaseClient
+            .from('cm_ai_content_history')
+            .select('*')
+            .eq('plateforme', idea.plateforme)
+            .order('published_at', { ascending: false })
+            .limit(3);
+        
+        // Générer le contenu
+        const response = await fetch('/api/content-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'generate-content-from-strategy',
+                contentIdea: idea,
+                history,
+                strategy
+            })
+        });
+        
+        if (!response.ok) throw new Error('Erreur génération');
+        
+        const { content } = await response.json();
+        
+        showToast('✅ Contenu généré !', 'success');
+        
+        // Afficher dans une modal ou rediriger vers l'onglet génération
+        alert(`Contenu généré :\n\n${content.contenu}\n\nHashtags: ${content.hashtags?.join(' ') || 'N/A'}`);
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
 
 function getWeekNumber(date) {
     const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
