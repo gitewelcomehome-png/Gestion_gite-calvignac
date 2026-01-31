@@ -168,12 +168,44 @@ Format : Sections claires + visuels suggérés + CTA engageant.`
       // ===== STABILITY AI (Stable Diffusion XL) - PAR DÉFAUT =====
       if (provider === 'stability') {
         const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
+        const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
         
         if (!STABILITY_API_KEY) {
           return res.status(400).json({ 
             success: false,
             error: 'Stability AI API key not configured. Add STABILITY_API_KEY in Vercel environment variables or switch to DALL-E.' 
           });
+        }
+
+        // Traduire le prompt en anglais si nécessaire (Stability AI = anglais uniquement)
+        let translatedPrompt = enhancedPrompt;
+        if (OPENAI_API_KEY) {
+          try {
+            const translateResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENAI_API_KEY}`
+              },
+              body: JSON.stringify({
+                model: 'gpt-3.5-turbo',
+                messages: [
+                  { role: 'system', content: 'Translate the following image description to English. Keep it concise and descriptive for image generation. Return ONLY the translation, nothing else.' },
+                  { role: 'user', content: enhancedPrompt }
+                ],
+                temperature: 0.3,
+                max_tokens: 200
+              })
+            });
+            
+            if (translateResponse.ok) {
+              const translateData = await translateResponse.json();
+              translatedPrompt = translateData.choices[0].message.content.trim();
+            }
+          } catch (e) {
+            // Si traduction échoue, utiliser le prompt original
+            console.log('Translation failed, using original prompt:', e.message);
+          }
         }
 
         // Dimensions mapping
@@ -194,7 +226,7 @@ Format : Sections claires + visuels suggérés + CTA engageant.`
           },
           body: JSON.stringify({
             text_prompts: [
-              { text: enhancedPrompt, weight: 1 },
+              { text: translatedPrompt, weight: 1 },
               { text: 'blurry, bad quality, distorted, ugly, low resolution, text, watermark', weight: -1 }
             ],
             cfg_scale: 7,
