@@ -6,9 +6,19 @@
 -- ================================================================
 
 -- ================================================================
+-- SUPPRESSION DES TABLES EXISTANTES (si elles existent)
+-- ================================================================
+DROP TABLE IF EXISTS cm_ai_insights CASCADE;
+DROP TABLE IF EXISTS cm_ai_promotions CASCADE;
+DROP TABLE IF EXISTS cm_ai_actions CASCADE;
+DROP TABLE IF EXISTS cm_ai_content_history CASCADE;
+DROP TABLE IF EXISTS cm_ai_content_queue CASCADE;
+DROP TABLE IF EXISTS cm_ai_strategies CASCADE;
+
+-- ================================================================
 -- 1. STRATÉGIES HEBDOMADAIRES
 -- ================================================================
-CREATE TABLE IF NOT EXISTS cm_ai_strategies (
+CREATE TABLE cm_ai_strategies (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     semaine INT NOT NULL, -- Numéro de la semaine (1-52)
     annee INT NOT NULL,
@@ -26,7 +36,7 @@ CREATE TABLE IF NOT EXISTS cm_ai_strategies (
 -- ================================================================
 -- 2. QUEUE DE CONTENU (contenus programmés)
 -- ================================================================
-CREATE TABLE IF NOT EXISTS cm_ai_content_queue (
+CREATE TABLE cm_ai_content_queue (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     strategy_id UUID REFERENCES cm_ai_strategies(id) ON DELETE CASCADE,
     type VARCHAR(50) NOT NULL, -- post, email, blog, newsletter
@@ -49,7 +59,7 @@ CREATE INDEX idx_queue_statut ON cm_ai_content_queue(statut);
 -- ================================================================
 -- 3. HISTORIQUE DE CONTENU (mémoire de l'IA)
 -- ================================================================
-CREATE TABLE IF NOT EXISTS cm_ai_content_history (
+CREATE TABLE cm_ai_content_history (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     strategy_id UUID REFERENCES cm_ai_strategies(id) ON DELETE SET NULL,
     type VARCHAR(50) NOT NULL,
@@ -69,7 +79,7 @@ CREATE INDEX idx_history_viralite ON cm_ai_content_history(score_viralite DESC);
 -- ================================================================
 -- 4. ACTIONS PROPOSÉES PAR L'IA
 -- ================================================================
-CREATE TABLE IF NOT EXISTS cm_ai_actions (
+CREATE TABLE cm_ai_actions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     strategy_id UUID REFERENCES cm_ai_strategies(id) ON DELETE CASCADE,
     type VARCHAR(50) NOT NULL, -- promotion, partenariat, campagne, ajustement
@@ -91,7 +101,7 @@ CREATE INDEX idx_actions_priorite ON cm_ai_actions(priorite);
 -- ================================================================
 -- 5. PROMOTIONS GÉNÉRÉES AUTOMATIQUEMENT
 -- ================================================================
-CREATE TABLE IF NOT EXISTS cm_ai_promotions (
+CREATE TABLE cm_ai_promotions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     action_id UUID REFERENCES cm_ai_actions(id) ON DELETE SET NULL,
     strategy_id UUID REFERENCES cm_ai_strategies(id) ON DELETE SET NULL,
@@ -117,7 +127,7 @@ CREATE INDEX idx_promotions_code ON cm_ai_promotions(code_promo);
 -- ================================================================
 -- 6. INSIGHTS & APPRENTISSAGE (pour améliorer l'IA)
 -- ================================================================
-CREATE TABLE IF NOT EXISTS cm_ai_insights (
+CREATE TABLE cm_ai_insights (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     categorie VARCHAR(50) NOT NULL, -- contenu, hashtag, timing, audience
     insight TEXT NOT NULL,
