@@ -31,11 +31,11 @@ export default async function handler(req, res) {
       const brandContext = `CONTEXTE ENTREPRISE - LiveOwnerUnit ("Gestion Synchronisée")
 - Plateforme SaaS de gestion locative pour propriétaires de gîtes/meublés
 - Fonctionnalités : Calendrier synchronisé multi-plateformes, channel manager automatisé, dashboard analytics
-- Cible : Marie, 48 ans, propriétaire de 2 gîtes dans le Lot, veut automatiser sa gestion
-- Promesse : Économiser 10h/semaine + 20% de revenus en plus + 0 surréservation
+- Créé par un loueur de tourisme professionnel qui connaît le métier et les besoins réels des propriétaires
+- Cible : Propriétaires de gîtes et meublés touristiques cherchant à automatiser leur gestion
 - Couleurs : Cyan (#06b6d4), Bleu (#2563eb), Violet (#764ba2)
 - Ton : Direct, orienté données, rassurant, sans jargon technique
-- Différenciation : Synchronisation temps réel vs concurrents (retard 24h)
+- Différenciation : Synchronisation temps réel vs concurrents (retard 24h), conçu par un professionnel du secteur
 
 `;
       
@@ -168,7 +168,7 @@ Format : Sections claires + stats/témoignages LiveOwnerUnit + visuels suggéré
       const { prompt, style, size, provider = 'stability' } = req.body;
 
       // Contexte LiveOwnerUnit pour toutes les images
-      const contextPrompt = `Context: LiveOwnerUnit is a SaaS platform for vacation rental management with synchronized calendars and channel manager. Brand colors: cyan (#06b6d4), blue (#2563eb), violet (#764ba2). Modern, professional, tech-focused aesthetic. Target: property owners managing rental properties. 
+      const contextPrompt = `Context: LiveOwnerUnit is a SaaS platform for vacation rental management with synchronized calendars and channel manager. Built by a professional vacation rental owner who understands the real needs of the industry. Brand colors: cyan (#06b6d4), blue (#2563eb), violet (#764ba2). Modern, professional, tech-focused aesthetic. 
 
 Image description: ${prompt}`;
 
