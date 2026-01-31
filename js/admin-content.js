@@ -614,24 +614,23 @@ async function generateImage() {
             })
         });
 
-        if (!response.ok) throw new Error('Erreur génération image');
-
         const data = await response.json();
 
-        if (data.success) {
-            // Stability AI renvoie base64, DALL-E renvoie URL
-            if (data.imageBase64) {
-                currentGeneratedImage = `data:image/png;base64,${data.imageBase64}`;
-            } else if (data.imageUrl) {
-                currentGeneratedImage = data.imageUrl;
-            }
-            
-            document.getElementById('generatedImage').src = currentGeneratedImage;
-            document.getElementById('imageResult').style.display = 'block';
-            showToast(`✅ Image générée avec ${providerName} !`, 'success');
-        } else {
-            throw new Error(data.error || 'Erreur génération');
+        // Afficher le message d'erreur détaillé
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Erreur génération image');
         }
+
+        // Stability AI renvoie base64, DALL-E renvoie URL
+        if (data.imageBase64) {
+            currentGeneratedImage = `data:image/png;base64,${data.imageBase64}`;
+        } else if (data.imageUrl) {
+            currentGeneratedImage = data.imageUrl;
+        }
+        
+        document.getElementById('generatedImage').src = currentGeneratedImage;
+        document.getElementById('imageResult').style.display = 'block';
+        showToast(`✅ Image générée avec ${providerName} !`, 'success');
         
     } catch (error) {
         console.error('❌ Erreur:', error);
