@@ -1428,3 +1428,24 @@ window.generateActionPlan = async function(actionId, titre, description, type) {
     }
 }
 
+
+// SAUVEG PLAN + VALIDATION + SUPPRESSION
+window.savePlan = async function(actionId) {
+    const { error } = await window.supabaseClient.from('cm_ai_content_queue').update({ plan_detaille: window.currentPlan }).eq('id', actionId);
+    if (error) { alert('❌ Erreur'); return; }
+    alert('✅ Plan sauvegardé!'); document.getElementById('savePlanBtn').textContent = '✓ Sauvegardé'; document.getElementById('savePlanBtn').disabled = true; loadContentQueue();
+};
+window.validateAction = async function(actionId) {
+    const { error } = await window.supabaseClient.from('cm_ai_content_queue').update({ statut: 'publié' }).eq('id', actionId);
+    if (error) { alert('❌ Erreur'); return; }
+    alert('✅ Validé!'); loadContentQueue();
+};
+window.deleteAction = async function(actionId) {
+    const { error } = await window.supabaseClient.from('cm_ai_content_queue').delete().eq('id', actionId);
+    if (error) { alert('❌ Erreur'); return; }
+    alert('✅ Supprimé'); loadContentQueue();
+};
+function formatPlanDisplay(plan) {
+    return plan.etapes.map((e, i) => `<div style="background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; border-left: 4px solid #667eea;"><div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem;"><span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">${i + 1}</span><h4 style="margin: 0; color: #1e293b;">${e.titre}</h4></div><p style="margin: 0.5rem 0 0.5rem 2.5rem; color: #475569;">${e.description}</p><div style="margin-left: 2.5rem; margin-top: 0.75rem; display: flex; gap: 1rem;"><span style="color: #64748b; font-size: 0.875rem;">📦 ${e.ressources}</span><span style="color: #64748b; font-size: 0.875rem;">⏱️ ${e.duree}</span></div></div>`).join('') + `<div style="background: #d1fae5; border-radius: 8px; padding: 1rem;"><div style="font-weight: 600; color: #065f46;">📊 Métriques</div><p style="margin: 0; color: #047857;">${plan.metriques_succes}</p></div>`;
+}
+
