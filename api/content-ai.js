@@ -26,6 +26,14 @@ export default async function handler(req, res) {
   try {
     const { action, type, subject, tone, keyPoints, cta, length, model } = req.body;
 
+    // DEBUG: Log des variables d'environnement
+    console.log('🔍 DEBUG ENV:', {
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
+      hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
+      action: action
+    });
+
     // ================================================================
     // GESTION PROMPT (GET/SAVE)
     // ================================================================
@@ -74,18 +82,39 @@ export default async function handler(req, res) {
     // PROPOSITIONS QUOTIDIENNES IA
     // ================================================================
     if (action === 'generate-daily-propositions') {
+      console.log('🚀 Génération propositions quotidiennes...');
+      
       const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
       
       if (!ANTHROPIC_API_KEY) {
+        console.error('❌ Anthropic API key manquante');
         return res.status(500).json({ 
           error: 'Anthropic API key not configured' 
         });
       }
 
-      const supabase = createClient(
-        process.env.SUPABASE_URL,
-        process.env.SUPABASE_ANON_KEY
-      );
+      console.log('✅ Anthropic API key présente');
+
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        console.error('❌ Variables Supabase manquantes:', { 
+          hasUrl: !!supabaseUrl, 
+          hasKey: !!supabaseKey 
+        });
+        return res.status(500).json({ 
+          error: 'Supabase configuration missing',
+          details: {
+            supabaseUrl: !!supabaseUrl,
+            supabaseKey: !!supabaseKey
+          }
+        });
+      }
+
+      console.log('✅ Variables Supabase présentes');
+
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Récupérer la stratégie active
       const { data: activeStrategy } = await supabase
