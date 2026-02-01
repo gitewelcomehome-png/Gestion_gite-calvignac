@@ -1133,10 +1133,11 @@ window.approveAction = async function(actionId) {
         
         if (updateError) throw updateError;
         
-        showToast('✅ Action approuvée et ajoutée à la file', 'success');
+        showToast('✅ Action approuvée et programmée dans 3 jours', 'success');
         
         // Recharger UNIQUEMENT la liste des actions (pas de navigation)
         await loadAIActions();
+        await loadContentQueue();
         
     } catch (error) {
         console.error('❌ Erreur approbation:', error);
@@ -1146,17 +1147,22 @@ window.approveAction = async function(actionId) {
 
 window.rejectAction = async function(actionId) {
     try {
-        await window.supabaseClient
+        const { error } = await window.supabaseClient
             .from('cm_ai_actions')
             .update({ statut: 'rejete' })
             .eq('id', actionId);
+        
+        if (error) throw error;
         
         showToast('❌ Action rejetée', 'info');
         
         // Recharger UNIQUEMENT la liste des actions (pas de navigation)
         await loadAIActions();
     } catch (error) {
-        console.error('❌ Erreur:', error);
+        console.error('❌ Erreur rejet:', error);
+        showToast('❌ Erreur: ' + error.message, 'error');
+    }
+}
         showToast('❌ Erreur: ' + error.message, 'error');
     }
 };
