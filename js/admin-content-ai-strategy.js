@@ -512,73 +512,120 @@ window.validateAndArchiveAction = async function(weekNum, actionIdx) {
             throw new Error('Action introuvable');
         }
         
-        // 2. Modal pour saisir les métriques
+        // 2. Modal moderne pour saisir les métriques
         const html = `
-            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;" id="metricsModal">
-                <div style="background: white; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
-                    <h2 style="margin: 0 0 20px 0; color: #333;">📊 Valider et Archiver</h2>
-                    <p style="color: #666; margin-bottom: 20px;"><strong>${action.sujet || action.titre}</strong></p>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">Plateforme de publication</label>
-                        <select id="platformPublished" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                            <option value="linkedin">LinkedIn</option>
-                            <option value="facebook">Facebook</option>
-                            <option value="instagram">Instagram</option>
-                            <option value="blog">Blog</option>
-                            <option value="email">Email</option>
-                            <option value="video">Vidéo (YouTube/TikTok)</option>
-                        </select>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">Date de publication</label>
-                        <input type="datetime-local" id="publishDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" value="${new Date().toISOString().slice(0, 16)}">
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">URL de la publication (optionnel)</label>
-                        <input type="url" id="publishUrl" placeholder="https://linkedin.com/posts/..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">👁️ Vues</label>
-                            <input type="number" id="metricVues" placeholder="150" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.2s ease;" id="metricsModal">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 3px; max-width: 650px; width: 92%; max-height: 92vh; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); animation: slideUp 0.3s ease;">
+                    <div style="background: white; border-radius: 18px; padding: 0; max-height: calc(92vh - 6px); overflow-y: auto;">
+                        <!-- Header avec gradient -->
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px 30px; color: white; border-radius: 18px 18px 0 0;">
+                            <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 2rem;">🎯</span>
+                                Valider & Archiver
+                            </h2>
+                            <p style="margin: 0; opacity: 0.95; font-size: 0.95rem;"><strong>${action.sujet || action.titre}</strong></p>
                         </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">❤️ Likes</label>
-                            <input type="number" id="metricLikes" placeholder="23" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        
+                        <div style="padding: 30px;">
+                            <!-- Plateforme -->
+                            <div style="margin-bottom: 22px;">
+                                <label style="display: block; margin-bottom: 10px; color: #1e293b; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">📱 Plateforme</label>
+                                <select id="platformPublished" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; transition: all 0.3s; cursor: pointer;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                                    <option value="linkedin">🔗 LinkedIn</option>
+                                    <option value="facebook">👍 Facebook</option>
+                                    <option value="instagram">📸 Instagram</option>
+                                    <option value="blog">📝 Blog</option>
+                                    <option value="email">✉️ Email</option>
+                                    <option value="video">🎥 Vidéo (YouTube/TikTok)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Date -->
+                            <div style="margin-bottom: 22px;">
+                                <label style="display: block; margin-bottom: 10px; color: #1e293b; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">📅 Date de publication</label>
+                                <input type="datetime-local" id="publishDate" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; transition: all 0.3s;" value="${new Date().toISOString().slice(0, 16)}" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                            </div>
+                            
+                            <!-- URL -->
+                            <div style="margin-bottom: 22px;">
+                                <label style="display: block; margin-bottom: 10px; color: #1e293b; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">🔗 URL Publication <span style="color: #94a3b8; font-size: 0.75rem; text-transform: none;">(optionnel)</span></label>
+                                <input type="url" id="publishUrl" placeholder="https://linkedin.com/posts/..." style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; transition: all 0.3s;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                            </div>
+                            
+                            <!-- Métriques Grid -->
+                            <div style="margin-bottom: 22px;">
+                                <label style="display: block; margin-bottom: 12px; color: #1e293b; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">📊 Métriques de Performance</label>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                                    <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); padding: 2px; border-radius: 12px;">
+                                        <div style="background: white; border-radius: 11px; padding: 12px;">
+                                            <label style="display: block; margin-bottom: 6px; color: #3B82F6; font-weight: 600; font-size: 0.85rem;">👁️ Vues</label>
+                                            <input type="number" id="metricVues" placeholder="150" style="width: 100%; padding: 10px; border: 1px solid #DBEAFE; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#3B82F6';" onblur="this.style.borderColor='#DBEAFE';">
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); padding: 2px; border-radius: 12px;">
+                                        <div style="background: white; border-radius: 11px; padding: 12px;">
+                                            <label style="display: block; margin-bottom: 6px; color: #EF4444; font-weight: 600; font-size: 0.85rem;">❤️ Likes</label>
+                                            <input type="number" id="metricLikes" placeholder="23" style="width: 100%; padding: 10px; border: 1px solid #FEE2E2; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#EF4444';" onblur="this.style.borderColor='#FEE2E2';">
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); padding: 2px; border-radius: 12px;">
+                                        <div style="background: white; border-radius: 11px; padding: 12px;">
+                                            <label style="display: block; margin-bottom: 6px; color: #8B5CF6; font-weight: 600; font-size: 0.85rem;">💬 Commentaires</label>
+                                            <input type="number" id="metricComments" placeholder="5" style="width: 100%; padding: 10px; border: 1px solid #EDE9FE; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#8B5CF6';" onblur="this.style.borderColor='#EDE9FE';">
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 2px; border-radius: 12px;">
+                                        <div style="background: white; border-radius: 11px; padding: 12px;">
+                                            <label style="display: block; margin-bottom: 6px; color: #10B981; font-weight: 600; font-size: 0.85rem;">🔄 Partages</label>
+                                            <input type="number" id="metricShares" placeholder="2" style="width: 100%; padding: 10px; border: 1px solid #D1FAE5; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#10B981';" onblur="this.style.borderColor='#D1FAE5';">
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); padding: 2px; border-radius: 12px;">
+                                        <div style="background: white; border-radius: 11px; padding: 12px;">
+                                            <label style="display: block; margin-bottom: 6px; color: #F59E0B; font-weight: 600; font-size: 0.85rem;">🖱️ Clics</label>
+                                            <input type="number" id="metricClicks" placeholder="12" style="width: 100%; padding: 10px; border: 1px solid #FEF3C7; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#F59E0B';" onblur="this.style.borderColor='#FEF3C7';">
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 2px; border-radius: 12px;">
+                                        <div style="background: white; border-radius: 11px; padding: 12px;">
+                                            <label style="display: block; margin-bottom: 6px; color: #059669; font-weight: 600; font-size: 0.85rem;">🎯 LEADS</label>
+                                            <input type="number" id="metricLeads" placeholder="3" style="width: 100%; padding: 10px; border: 1px solid #D1FAE5; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#059669';" onblur="this.style.borderColor='#D1FAE5';">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div style="margin-bottom: 25px;">
+                                <label style="display: block; margin-bottom: 10px; color: #1e293b; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">📝 Notes Performance</label>
+                                <textarea id="performanceNotes" placeholder="Ce qui a bien fonctionné, insights, leçons apprises..." style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; min-height: 100px; font-family: inherit; resize: vertical; transition: all 0.3s;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"></textarea>
+                            </div>
+                            
+                            <!-- Boutons -->
+                            <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 10px; border-top: 2px solid #f1f5f9;">
+                                <button onclick="document.getElementById('metricsModal').remove()" style="padding: 14px 28px; border: 2px solid #e2e8f0; background: white; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem; color: #64748b; transition: all 0.3s;" onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='white'; this.style.borderColor='#e2e8f0';">✖️ Annuler</button>
+                                <button onclick="saveMetricsAndArchive(${weekNum}, ${actionIdx})" style="padding: 14px 28px; border: none; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';">✅ Valider & Archiver</button>
+                            </div>
                         </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">💬 Commentaires</label>
-                            <input type="number" id="metricComments" placeholder="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">🔄 Partages</label>
-                            <input type="number" id="metricShares" placeholder="2" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">🖱️ Clics</label>
-                            <input type="number" id="metricClicks" placeholder="12" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">🎯 Leads</label>
-                            <input type="number" id="metricLeads" placeholder="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">📝 Notes sur la performance</label>
-                        <textarea id="performanceNotes" placeholder="Ce qui a bien fonctionné, ce qui n'a pas marché..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; min-height: 80px;"></textarea>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                        <button onclick="document.getElementById('metricsModal').remove()" style="padding: 10px 20px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer;">Annuler</button>
-                        <button onclick="saveMetricsAndArchive(${weekNum}, ${actionIdx})" style="padding: 10px 20px; border: none; background: #10B981; color: white; border-radius: 6px; cursor: pointer;">✅ Valider et Archiver</button>
                     </div>
                 </div>
             </div>
+            
+            <style>
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from { transform: translateY(20px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            </style>
         `;
         
         document.body.insertAdjacentHTML('beforeend', html);
