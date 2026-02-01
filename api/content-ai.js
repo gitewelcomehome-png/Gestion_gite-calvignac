@@ -23,6 +23,55 @@ export default async function handler(req, res) {
     const { action, type, subject, tone, keyPoints, cta, length, model } = req.body;
 
     // ================================================================
+    // GESTION PROMPT (GET/SAVE)
+    // ================================================================
+    if (action === 'get-prompt') {
+      const fs = require('fs');
+      const path = require('path');
+      try {
+        const configPath = path.join(process.cwd(), 'config', 'PROMPT_CLAUDE_BASE.md');
+        const prompt = fs.readFileSync(configPath, 'utf-8');
+        return res.json({ success: true, prompt });
+      } catch (error) {
+        return res.status(500).json({ success: false, error: 'Prompt file not found' });
+      }
+    }
+
+    if (action === 'save-prompt') {
+      const fs = require('fs');
+      const path = require('path');
+      const { prompt, version, notes } = req.body;
+      
+      try {
+        // Sauvegarder dans fichier
+        const configPath = path.join(process.cwd(), 'config', 'PROMPT_CLAUDE_BASE.md');
+        fs.writeFileSync(configPath, prompt, 'utf-8');
+        
+        // Sauvegarder version dans DB
+        const { createClient } = require('@supabase/supabase-js');
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        );
+        
+        await supabase.from('cm_ai_prompt_versions').insert({
+          version,
+          prompt_system: prompt,
+          prompt_user_template: prompt,
+          notes,
+          valide_par: 'stephanecalvignac@hotmail.fr',
+          statut: 'actif',
+          date_activation: new Date().toISOString()
+        });
+        
+        return res.json({ success: true, message: 'Prompt saved and deployed' });
+      } catch (error) {
+        console.error('Save prompt error:', error);
+        return res.status(500).json({ success: false, error: error.message });
+      }
+    }
+
+    // ================================================================
     // GÉNÉRATION DE TEXTE
     // ================================================================
     if (action === 'generate-text') {

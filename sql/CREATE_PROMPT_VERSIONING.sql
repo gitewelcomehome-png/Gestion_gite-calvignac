@@ -100,7 +100,7 @@ INSERT INTO cm_ai_ethique_regles (categorie, regle, exemples_mauvais, severite) 
 ('interdiction', 'AUCUN buzzword bullshit', ARRAY['révolutionnaire', 'disruptif', 'game-changer', 'innovant'], 'moyenne'),
 ('obligation', 'Authenticité : parler comme un loueur', ARRAY['En tant qu''expert...', 'Notre solution corporate...'], 'haute'),
 ('obligation', 'Chaque affirmation = preuve ou source', ARRAY['On est les meilleurs (sans preuve)', 'Tout le monde utilise notre outil (inventé)'], 'haute'),
-('recommandation', 'Storytelling avec histoire vécue', ARRAY[], 'moyenne');
+('recommandation', 'Storytelling avec histoire vécue', ARRAY[]::TEXT[], 'moyenne');
 
 -- Commentaire
 COMMENT ON TABLE cm_ai_ethique_regles IS 'Règles éthiques configurables pour génération contenu Claude';
