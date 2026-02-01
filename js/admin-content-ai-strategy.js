@@ -1355,13 +1355,20 @@ window.generateActionPlan = async function(actionId, titre, description, type) {
         if (!response.ok) {
             let errorMsg = 'Erreur API';
             try {
-                const errorData = await response.json();
-                errorMsg = errorData.error || errorMsg;
+                // Lire le texte brut d'abord
+                const responseText = await response.text();
+                // Essayer de parser en JSON
+                try {
+                    const errorData = JSON.parse(responseText);
+                    errorMsg = errorData.error || errorMsg;
+                } catch {
+                    // Si pas JSON, utiliser le texte brut
+                    errorMsg = responseText || `Erreur ${response.status}`;
+                }
+                console.error('❌ Erreur serveur:', errorMsg);
             } catch (e) {
-                // Si pas JSON, lire le texte brut
-                const errorText = await response.text();
-                errorMsg = errorText || `Erreur ${response.status}`;
-                console.error('❌ Erreur serveur (texte brut):', errorText);
+                errorMsg = `Erreur ${response.status}`;
+                console.error('❌ Impossible de lire la réponse:', e);
             }
             throw new Error(errorMsg);
         }
