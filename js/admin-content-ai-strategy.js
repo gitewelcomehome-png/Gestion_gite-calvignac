@@ -9,7 +9,9 @@ console.log('🤖 Module Stratégie IA chargé');
 // ================================================================
 // ARCHIVAGE AUTOMATIQUE DES SEMAINES PASSÉES
 // ================================================================
-
+// NOTE: Ne pas utiliser pour l'instant - nécessite une date de fin explicite
+// plutôt qu'un numéro de semaine ISO
+/*
 async function archiveOldWeeks() {
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -29,6 +31,7 @@ async function archiveOldWeeks() {
         console.error('❌ Erreur archivage auto:', error);
     }
 }
+*/
 
 // Obtenir le numéro de semaine (1-52)
 function getWeekNumber(date) {
@@ -1034,13 +1037,18 @@ async function loadContentQueue() {
             return;
         }
         
+        console.log('✅ Publications programmées trouvées:', data.length);
+        
         const html = data.map(item => `
-            <div style="padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 10px;">
+            <div style="padding: 15px; background: white; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <strong>${item.type_contenu}</strong>
-                    <span style="font-size: 0.85rem; color: #9CA3AF;">${new Date(item.date_publication).toLocaleDateString('fr-FR')}</span>
+                    <strong style="color: #1e293b;">${item.type} - ${item.plateforme || 'N/A'}</strong>
+                    <span style="font-size: 0.85rem; color: #64748b;">📅 ${new Date(item.scheduled_date).toLocaleDateString('fr-FR')}</span>
                 </div>
-                <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">${item.sujet}</p>
+                <p style="margin: 0; font-size: 0.9rem; color: #475569;">${item.sujet}</p>
+                <span style="display: inline-block; margin-top: 8px; padding: 4px 8px; background: #f1f5f9; border-radius: 4px; font-size: 0.75rem; color: #64748b;">
+                    ${item.statut}
+                </span>
             </div>
         `).join('');
         
@@ -1181,8 +1189,8 @@ function showToast(message, type) {
 
 // Init au chargement
 document.addEventListener('DOMContentLoaded', async () => {
-    // Archiver automatiquement les semaines passées
-    await archiveOldWeeks();
+    // Note: archiveOldWeeks() désactivé - utilise semaine ISO au lieu de 1-12
+    // await archiveOldWeeks();
     
     loadCurrentStrategy();
     loadLongtermPlanFromDB(); // Recharger le plan 12 semaines
