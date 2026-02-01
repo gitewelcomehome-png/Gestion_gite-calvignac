@@ -319,18 +319,18 @@ function displayLongtermPlan(plan) {
                             <strong style="display: block; margin-bottom: 12px; font-size: 1.05rem;">📋 Actions (${s.actions.length})</strong>
                             <div style="display: grid; gap: 12px;">
                                 ${s.actions.map((action, idx) => `
-                                    <div style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid ${action.priorite === 'haute' ? '#EF4444' : action.priorite === 'moyenne' ? '#F59E0B' : '#10B981'};">
-                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                                            <strong style="flex: 1;">${idx + 1}. ${action.sujet || action.titre || 'Action'}</strong>
-                                            <div style="display: flex; gap: 5px;">
-                                                <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">${action.type}</span>
-                                                <button onclick="generateFullContent(${s.numero}, ${idx})" style="background: #10B981; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">✨ Générer</button>
-                                                <button onclick="validateAndArchiveAction(${s.numero}, ${idx})" style="background: #3B82F6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">✅ Valider</button>
+                                    <div style="padding: 18px; background: rgba(255,255,255,0.08); border-radius: 12px; border-left: 4px solid ${action.priorite === 'haute' ? '#EF4444' : action.priorite === 'moyenne' ? '#F59E0B' : '#10B981'}; backdrop-filter: blur(10px); transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'; this.style.transform='translateX(4px)';" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.transform='translateX(0)';">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                                            <strong style="flex: 1; font-size: 1rem; color: white;">${idx + 1}. ${action.sujet || action.titre || 'Action'}</strong>
+                                            <div style="display: flex; gap: 8px;">
+                                                <span style="font-size: 0.75rem; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 6px; color: white; font-weight: 500;">${action.type}</span>
+                                                <button onclick="generateFullContent(${s.numero}, ${idx})" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)';">✨ Générer</button>
+                                                <button onclick="validateAndArchiveAction(${s.numero}, ${idx})" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.3)';">✅ Valider</button>
                                             </div>
                                         </div>
-                                        ${action.timing ? `<div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">⏰ ${action.timing}</div>` : ''}
-                                        ${action.contenu_complet ? `<div style="font-size: 0.9rem; margin-top: 8px; opacity: 0.9; line-height: 1.5; max-height: 100px; overflow: hidden;">${action.contenu_complet.substring(0, 200)}${action.contenu_complet.length > 200 ? '...' : ''}</div>` : ''}
-                                        ${action.kpi_attendu ? `<div style="font-size: 0.8rem; margin-top: 8px; color: #10B181;">📊 ${action.kpi_attendu}</div>` : ''}
+                                        ${action.timing ? `<div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 8px; color: rgba(255,255,255,0.8);">⏰ ${action.timing}</div>` : ''}
+                                        ${action.contenu_complet ? `<div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.95; line-height: 1.6; max-height: 100px; overflow: hidden; color: rgba(255,255,255,0.9);">${action.contenu_complet.substring(0, 200)}${action.contenu_complet.length > 200 ? '...' : ''}</div>` : ''}
+                                        ${action.kpi_attendu ? `<div style="font-size: 0.85rem; margin-top: 10px; padding: 8px 12px; background: rgba(16, 185, 129, 0.15); border-radius: 6px; color: #10B981; font-weight: 500;">📊 ${action.kpi_attendu}</div>` : ''}
                                     </div>
                                 `).join('')}
                             </div>
