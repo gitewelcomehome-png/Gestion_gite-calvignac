@@ -564,7 +564,7 @@ Image description: ${prompt}`;
     }
 
     // ================================================================
-    // GÉNÉRATION PLAN STRATÉGIQUE LONG TERME (12 SEMAINES)
+    // GÉNÉRATION PLAN STRATÉGIQUE LONG TERME (12 SEMAINES EN 3 PHASES)
     // ================================================================
     if (action === 'generate-longterm-plan') {
       const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
@@ -575,7 +575,7 @@ Image description: ${prompt}`;
         });
       }
 
-      const { startWeek, year } = req.body;
+      const { startWeek, year, phase = 1 } = req.body; // phase: 1, 2 ou 3
 
       // Récupérer le prompt validé depuis la config
       let promptConfig = '';
@@ -697,6 +697,36 @@ KPIs Critiques :
 📅 PHASE 2 - CROISSANCE (Semaines 4-8)
 Objectifs :
 - Scaler 50 leads/semaine
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 GÉNÉRATION : Phase ${phase}/3 (4 semaines)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${phase === 1 ? `
+📅 PHASE 1 - DÉMARRAGE (Semaines 1-4)
+Objectifs :
+- Établir présence LinkedIn/Facebook Loueurs
+- Premiers 5-10 leads qualifiés
+- Valider message/problématique produit
+- Créer premières 2-3 conversions gratuites BETA
+
+Stratégies :
+✅ Posts "pain points" loueurs (double-booking, perte CA, chronophage)
+✅ Landing page simple + lead magnet (PDF checklist, calculateur ROI)
+✅ Programme BETA gratuit (10 loueurs test, échange testimonial + feedback)
+✅ DM outreach ciblé (groupes FB loueurs Lot/Dordogne/Cévennes)
+✅ Storytelling fondateur : "Pourquoi j'ai créé LiveOwnerUnit après avoir perdu 2400€"
+
+KPIs :
+- Reach : 3000-5000 impressions
+- Engagement : 2-3% taux
+- Leads : 10 minimum
+- Conversions BETA : 2-3 loueurs
+- CAC : 0€ (acquisition organique)
+` : phase === 2 ? `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 PHASE 2 - CROISSANCE (Semaines 5-8)
+Objectifs :
+- Convertir BETA → payants (objectif 50% soit 1-2 premiers clients MRR)
+- Scaler acquisition (20-30 leads/semaine)
 - Automatiser email nurturing
 - Partenariats offices tourisme Lot/Dordogne
 - 15-20 clients actifs
@@ -714,7 +744,7 @@ KPIs :
 - Taux conversion : 5% → 10%
 - MRR : 300€ → 1000€
 - CAC : < 150€/client
-
+` : `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📅 PHASE 3 - STABILISATION (Semaines 9-12)
 Objectifs :
@@ -736,6 +766,7 @@ KPIs :
 - Churn : < 3%
 - NPS : > 60
 - ROI Marketing : > 300%
+`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ CONTRAINTES IMPÉRATIVES
@@ -789,9 +820,10 @@ KPIs :
       "LTV > 600€ (12 mois rétention moyenne)"
     ]
   },
+  "phase": ${phase},
   "semaines": [
     {
-      "numero": 1,
+      "numero": ${(phase - 1) * 4 + 1},
       "phase": "DÉMARRAGE",
       "objectif_principal": "Lancer présence LinkedIn + validation marché",
       "objectif_mesurable": "10 leads qualifiés + 3000 impressions",
@@ -882,8 +914,9 @@ KPIs :
         "Taux conversion landing page réel",
         "Objections principales prospects (prix ? complexité ? confiance ?)"
       ]
-    }
-    // ... GÉNÉRER 11 AUTRES SEMAINES avec même niveau de détail
+    },
+    // Générer 3 AUTRES SEMAINES pour cette phase (${(phase - 1) * 4 + 2}, ${(phase - 1) * 4 + 3}, ${(phase - 1) * 4 + 4})
+    // IMPORTANT : Générer 4 semaines COMPLÈTES au total avec même niveau de détail
   ],
   "automatisations_prevues": [
     {"semaine": 3, "nom": "Auto-posting LinkedIn 3x/sem", "outil": "Buffer"},
@@ -899,7 +932,7 @@ KPIs :
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ IMPORTANT FINAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Génère les 12 SEMAINES COMPLÈTES
+- Génère 4 SEMAINES COMPLÈTES pour la phase ${phase}
 - Chaque semaine : 4-6 actions détaillées
 - Contenus : PRÊTS À POSTER (pas juste des idées vagues)
 - KPIs : Réalistes et progressifs (pas de x10 magique)

@@ -35,7 +35,7 @@ window.switchTab = function(tabName) {
 // GÉNÉRATION STRATÉGIE
 // ================================================================
 
-// Générer plan stratégique long terme (12 semaines)
+// Générer plan stratégique long terme (12 semaines en 3 phases)
 window.generateLongtermPlan = async function() {
     try {
         const now = new Date();
@@ -47,8 +47,11 @@ window.generateLongtermPlan = async function() {
             <div id="ai-loader" style="text-align: center; padding: 60px 20px;">
                 <div style="display: inline-block; width: 80px; height: 80px; border: 8px solid #E5E7EB; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
                 <h3 style="margin-top: 20px; color: #667eea;">🤖 L'IA génère votre plan 12 semaines...</h3>
-                <p style="color: #9CA3AF; margin-top: 10px;">Cela peut prendre jusqu'à 60 secondes</p>
-                <div id="progress-text" style="margin-top: 15px; font-size: 0.9rem; color: #667eea;">⏳ Connexion à Claude...</div>
+                <p style="color: #9CA3AF; margin-top: 10px;">Génération en 3 phases (4 semaines chacune)</p>
+                <div id="progress-text" style="margin-top: 15px; font-size: 0.9rem; color: #667eea;">⏳ Phase 1/3 - Démarrage...</div>
+                <div style="width: 80%; max-width: 400px; height: 8px; background: #E5E7EB; border-radius: 4px; margin: 20px auto; overflow: hidden;">
+                    <div id="progress-bar" style="height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); width: 0%; transition: width 0.3s;"></div>
+                </div>
             </div>
             <style>
                 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -56,49 +59,124 @@ window.generateLongtermPlan = async function() {
         `;
         document.getElementById('longtermPlan').innerHTML = loaderHtml;
         
-        // Simuler progression pour feedback visuel
-        const progressSteps = [
-            { delay: 2000, text: '📊 Analyse des données...' },
-            { delay: 5000, text: '🎯 Définition des objectifs...' },
-            { delay: 10000, text: '📝 Génération des stratégies...' },
-            { delay: 20000, text: '🔄 Optimisation du plan...' },
-            { delay: 35000, text: '✨ Finalisation...' }
-        ];
+        showToast('🤖 Génération en cours (3 phases)...', 'info');
         
-        progressSteps.forEach(step => {
-            setTimeout(() => {
-                const progressEl = document.getElementById('progress-text');
-                if (progressEl) progressEl.textContent = step.text;
-            }, step.delay);
-        });
+        const allWeeks = [];
+        let planGlobal = null;
         
-        showToast('🤖 Génération en cours...', 'info');
-        
-        // Timeout à 60 secondes au lieu de 30
+        // Timeout à 45 secondes par phase
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
         
-        const response = await fetch('/api/content-ai', {
+        // PHASE 1 : Semaines 1-4
+        document.getElementById('progress-text').textContent = '⏳ Phase 1/3 - Semaines 1-4 (Démarrage)...';
+        document.getElementById('progress-bar').style.width = '10%';
+        
+        const timeoutId1 = setTimeout(() => controller.abort(), 45000);
+        const response1 = await fetch('/api/content-ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'generate-longterm-plan',
                 startWeek,
-                year
+                year,
+                phase: 1
             }),
             signal: controller.signal
         });
+        clearTimeout(timeoutId1);
         
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erreur génération plan');
+        if (!response1.ok) {
+            throw new Error('Erreur Phase 1');
         }
         
-        const { plan } = await response.json();
+        const data1 = await response1.json();
+        allWeeks.push(...data1.plan.semaines);
+        planGlobal = data1.plan.plan_global;
+        document.getElementById('progress-bar').style.width = '33%';
         
-        console.log('📋 Plan généré:', plan);
+        // PHASE 2 : Semaines 5-8
+        document.getElementById('progress-text').textContent = '⏳ Phase 2/3 - Semaines 5-8 (Croissance)...';
+        
+        const timeoutId2 = setTimeout(() => controller.abort(), 45000);
+        const response2 = await fetch('/api/content-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'generate-longterm-plan',
+                startWeek,
+                year,
+                phase: 2
+            }),
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId2);
+        
+        if (!response2.ok) {
+            throw new Error('Erreur Phase 2');
+        }
+        
+        const data2 = await response2.json();
+        allWeeks.push(...data2.plan.semaines);
+        document.getElementById('progress-bar').style.width = '66%';
+        
+        // PHASE 3 : Semaines 9-12
+        document.getElementById('progress-text').textContent = '⏳ Phase 3/3 - Semaines 9-12 (Stabilisation)...';
+        
+        const timeoutId3 = setTimeout(() => controller.abort(), 45000);
+        const response3 = await fetch('/api/content-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'generate-longterm-plan',
+                startWeek,
+                year,
+                phase: 3
+            }),
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId3);
+        
+        if (!response3.ok) {
+            throw new Error('Erreur Phase 3');
+        }
+        
+        const data3 = await response3.json();
+        allWeeks.push(...data3.plan.semaines);
+        document.getElementById('progress-bar').style.width = '100%';
+        
+        const fullPlan = {
+            plan_global: planGlobal,
+            semaines: allWeeks
+        };
+        
+        console.log('📋 Plan complet généré:', fullPlan);
+        
+        // Sauvegarder chaque semaine dans la base
+        const savePromises = fullPlan.semaines.map(async (semaine) => {
+            const weekNum = startWeek + (semaine.numero - 1);
+            
+            return await window.supabaseClient
+                .from('cm_ai_strategies')
+                .upsert({
+                    semaine: weekNum > 52 ? weekNum - 52 : weekNum,
+                    annee: weekNum > 52 ? year + 1 : year,
+                    objectif: semaine.objectif,
+                    cibles: semaine.cibles,
+                    themes: semaine.themes,
+                    kpis: semaine.kpis,
+                    strategie_complete: JSON.stringify(semaine),
+                    statut: semaine.numero === 1 ? 'actif' : 'planifié'
+                }, { onConflict: 'semaine,annee' });
+        });
+        
+        await Promise.all(savePromises);
+        
+        // Générer actions proposées basées sur le plan
+        await generateActionsFromPlan(fullPlan);
+        
+        showToast('✅ Plan 12 semaines généré !', 'success');
+        displayLongtermPlan(fullPlan);
+        loadCurrentStrategy();
         
         // Sauvegarder chaque semaine dans la base
         const savePromises = plan.semaines.map(async (semaine) => {
