@@ -732,6 +732,10 @@ Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
 
       const data = await response.json();
       const content = data.content[0].text;
+      
+      // LOG BRUT pour debug
+      console.log('🔍 RÉPONSE BRUTE CLAUDE:', content.substring(0, 500));
+      
       let cleanJSON = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       
       try {
@@ -743,17 +747,15 @@ Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
           tokens_used: data.usage
         });
       } catch (parseError) {
-        return res.status(200).json({
-          success: true,
-          week: {
-            numero: weekNumber,
-            objectif_principal: "Semaine " + weekNumber,
-            cibles: ["Propriétaires gîtes"],
-            themes: ["Marketing"],
-            actions: [],
-            kpis: {}
-          },
-          plan_global: null
+        console.error('❌ ERREUR PARSING JSON:', parseError.message);
+        console.error('📄 CONTENU QUI A ÉCHOUÉ:', cleanJSON.substring(0, 1000));
+        
+        // Tenter de sauver ce qu'on peut
+        return res.status(500).json({
+          error: 'Erreur parsing réponse Claude',
+          parse_error: parseError.message,
+          raw_content: content.substring(0, 500),
+          success: false
         });
       }
     }
