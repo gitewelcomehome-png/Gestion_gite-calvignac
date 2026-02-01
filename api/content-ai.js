@@ -327,7 +327,11 @@ Format : Sections claires + stats/témoignages LiveOwnerUnit + visuels suggéré
             'anthropic-version': '2023-06-01'
           },
           body: JSON.stringify({
-            model: selectedModel,
+            model: selectedModel === 'claude-sonnet-4-5' ? 'claude-sonnet-4-5-20250929' : 
+                   selectedModel === 'claude-opus-4-5' ? 'claude-opus-4-5-20251101' :
+                   selectedModel === 'claude-3-opus' ? 'claude-3-opus-20240229' :
+                   selectedModel === 'claude-3-sonnet' ? 'claude-3-sonnet-20240229' :
+                   selectedModel,
             max_tokens: length === 'long' ? 1500 : length === 'moyen' ? 800 : 400,
             messages: [
               {
