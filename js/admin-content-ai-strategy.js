@@ -99,22 +99,30 @@ window.generateLongtermPlan = async function() {
     }
 };
 
-// Sauvegarder une semaine
+// Sauvegarder une semaine (SIMPLE: juste 1-12)
 async function saveSingleWeek(semaine, startWeek, year) {
-    const weekNum = startWeek + (semaine.numero - 1);
-    
-    await window.supabaseClient
-        .from('cm_ai_strategies')
-        .upsert({
-            semaine: weekNum > 52 ? weekNum - 52 : weekNum,
-            annee: weekNum > 52 ? year + 1 : year,
-            objectif: semaine.objectif_principal || semaine.objectif,
-            cibles: semaine.cibles || [],
-            themes: semaine.themes || [],
-            kpis: semaine.kpis || {},
-            strategie_complete: JSON.stringify(semaine),
-            statut: semaine.numero === 1 ? 'actif' : 'planifié'
-        }, { onConflict: 'semaine,annee' });
+    try {
+        const { error } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .upsert({
+                semaine: semaine.numero, // Juste 1-12
+                annee: year,
+                objectif: semaine.objectif_principal || semaine.objectif || 'Objectif semaine ' + semaine.numero,
+                cibles: semaine.cibles || [],
+                themes: semaine.themes || [],
+                kpis: semaine.kpis || {},
+                strategie_complete: JSON.stringify(semaine),
+                statut: semaine.numero === 1 ? 'actif' : 'planifié'
+            }, { onConflict: 'semaine,annee' });
+        
+        if (error) {
+            console.error('❌ Erreur sauvegarde semaine', semaine.numero, ':', error);
+        } else {
+            console.log('✅ Semaine', semaine.numero, 'sauvegardée en DB');
+        }
+    } catch (err) {
+        console.error('❌ Erreur saveSingleWeek:', err);
+    }
 }
 
 // Sauvegarder les actions proposées d'une semaine
@@ -171,28 +179,44 @@ async function generateRemainingWeeksBackground(startWeek, year, planGlobal, use
 async function loadLongtermPlanFromDB() {
     try {
         const now = new Date();
-        const startWeek = getWeekNumber(now);
         const year = now.getFullYear();
         
-        // Récupérer toutes les semaines sauvegardées (les 12 dernières)
+        // Récupérer toutes les semaines 1-12 (actif OU planifié)
         const { data, error } = await window.supabaseClient
             .from('cm_ai_strategies')
             .select('*')
             .eq('annee', year)
-            .eq('statut', 'actif')
+            .in('statut', ['actif', 'planifié']) // Les deux statuts
             .gte('semaine', 1)
             .lte('semaine', 12)
             .order('semaine', { ascending: true });
         
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-            // Pas de plan sauvegardé
+        if (error) {
+            console.error('❌ Erreur chargement plan:', error);
             return;
         }
         
+        if (!data || data.length === 0) {
+            console.log('ℹ️ Aucun plan sauvegardé en DB');
+            return;
+        }
+        
+        console.log(`✅ ${data.length} semaines trouvées en DB`);
+        
         // Reconstituer le plan complet
-        const semaines = data.map(row => JSON.parse(row.strategie_complete));
+        const semaines = data.map(row => {
+            try {
+                return JSON.parse(row.strategie_complete);
+            } catch (err) {
+                console.error('❌ Erreur parse semaine', row.semaine);
+                return null;
+            }
+        }).filter(s => s !== null);
+        
+        if (semaines.length === 0) {
+            console.log('⚠️ Aucune semaine valide après parsing');
+            return;
+        }
         
         const plan = {
             plan_global: {
@@ -200,6 +224,19 @@ async function loadLongtermPlanFromDB() {
                 objectifs_finaux: {
                     leads_qualifies: 250,
                     clients_signes: 35,
+                    mrr_cible: "1800€"
+                }
+            },
+            semaines: semaines
+        };
+        
+        displayLongtermPlan(plan);
+        console.log(`✅ Plan 12 semaines rechargé : ${semaines.length} semaines affichées`);
+        
+    } catch (error) {
+        console.error('❌ Erreur rechargement plan:', error);
+    }
+}
                     mrr_cible: "1800€"
                 }
             },
