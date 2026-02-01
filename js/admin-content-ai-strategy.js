@@ -35,6 +35,128 @@ window.switchTab = function(tabName) {
 // GÉNÉRATION STRATÉGIE
 // ================================================================
 
+// Générer plan stratégique long terme (12 semaines)
+window.generateLongtermPlan = async function() {
+    try {
+        const now = new Date();
+        const startWeek = getWeekNumber(now);
+        const year = now.getFullYear();
+        
+        showToast('🤖 L\'IA génère votre plan 12 semaines...', 'info');
+        
+        const response = await fetch('/api/content-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'generate-longterm-plan',
+                startWeek,
+                year
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur génération plan');
+        }
+        
+        const { plan } = await response.json();
+        
+        console.log('📋 Plan généré:', plan);
+        
+        // Sauvegarder chaque semaine dans la base
+        const savePromises = plan.semaines.map(async (semaine) => {
+            const weekNum = startWeek + (semaine.numero - 1);
+            
+            return await window.supabaseClient
+                .from('cm_ai_strategies')
+                .upsert({
+                    semaine: weekNum > 52 ? weekNum - 52 : weekNum,
+                    annee: weekNum > 52 ? year + 1 : year,
+                    objectif: semaine.objectif,
+                    cibles: semaine.cibles,
+                    themes: semaine.themes,
+                    kpis: semaine.kpis,
+                    strategie_complete: JSON.stringify(semaine),
+                    statut: semaine.numero === 1 ? 'actif' : 'planifié'
+                }, { onConflict: 'semaine,annee' });
+        });
+        
+        await Promise.all(savePromises);
+        
+        // Générer actions proposées basées sur le plan
+        await generateActionsFromPlan(plan);
+        
+        showToast('✅ Plan 12 semaines généré !', 'success');
+        displayLongtermPlan(plan);
+        loadCurrentStrategy();
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
+
+// Afficher le plan long terme
+function displayLongtermPlan(plan) {
+    const html = `
+        <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px;">
+            <h3 style="margin: 0 0 10px 0; font-size: 1.2rem;">🎯 Vision 3 mois</h3>
+            <p style="margin: 0; opacity: 0.95;">${plan.plan_global.vision}</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;">
+                <div><strong>Notoriété</strong><br>${plan.plan_global.objectifs_finaux.notoriete}</div>
+                <div><strong>Engagement</strong><br>${plan.plan_global.objectifs_finaux.engagement}</div>
+                <div><strong>Leads</strong><br>${plan.plan_global.objectifs_finaux.leads}</div>
+                <div><strong>Conversions</strong><br>${plan.plan_global.objectifs_finaux.conversions}</div>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+            ${plan.semaines.map(s => `
+                <div style="padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px; border-left: 4px solid ${
+                    s.phase === 'DÉMARRAGE' ? '#10B981' : s.phase === 'CROISSANCE' ? '#F59E0B' : '#3B82F6'
+                };">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <strong style="font-size: 1.1rem;">Semaine ${s.numero}</strong>
+                        <span style="font-size: 0.85rem; opacity: 0.9;">${s.phase}</span>
+                    </div>
+                    <p style="margin: 0 0 10px 0; font-size: 0.95rem; opacity: 0.95;">${s.objectif}</p>
+                    <div style="font-size: 0.85rem; opacity: 0.9;">
+                        <div>📊 ${s.kpis?.leads || 0} leads</div>
+                        <div>👁️ ${s.kpis?.impressions || 0} impressions</div>
+                        <div>📝 ${s.actions?.length || 0} actions</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    document.getElementById('longtermPlan').innerHTML = html;
+}
+
+// Générer actions proposées depuis le plan
+async function generateActionsFromPlan(plan) {
+    try {
+        const actions = [];
+        plan.semaines.forEach(semaine => {
+            semaine.actions?.forEach(action => {
+                if (action.type === 'promotion') {
+                    actions.push({
+                        type: 'promotion',
+                        titre: action.titre,
+                        description: action.sujet || 'Promotion planifiée',
+                        justification: `Prévu plan S${semaine.numero} (${semaine.phase})`,
+                        priorite: action.priorite || 'moyenne',
+                        statut: 'proposé'
+                    });
+                }
+            });
+        });
+        if (actions.length > 0) {
+            await window.supabaseClient.from('cm_ai_actions').insert(actions);
+        }
+    } catch (error) {
+        console.error('❌ Erreur actions:', error);
+    }
+}
+
 window.generateWeeklyStrategy = async function() {
     try {
         const now = new Date();

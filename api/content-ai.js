@@ -365,6 +365,130 @@ Image description: ${prompt}`;
     }
 
     // ================================================================
+    // GÉNÉRATION PLAN STRATÉGIQUE LONG TERME (12 SEMAINES)
+    // ================================================================
+    if (action === 'generate-longterm-plan') {
+      const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+      
+      if (!OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          error: 'OpenAI API key not configured' 
+        });
+      }
+
+      const { startWeek, year } = req.body;
+
+      const planPrompt = `Tu es le stratège marketing senior de LiveOwnerUnit, plateforme SaaS de gestion locative.
+
+MISSION : Créer un PLAN STRATÉGIQUE sur 12 SEMAINES (3 mois).
+
+PHASES :
+- SEMAINES 1-3 : DÉMARRAGE (Notoriété + Acquisition)
+- SEMAINES 4-8 : CROISSANCE (Engagement + Conversion)
+- SEMAINES 9-12 : STABILISATION (Fidélisation + Optimisation)
+
+Pour CHAQUE semaine, définis :
+1. OBJECTIF PRINCIPAL
+2. CIBLES PRIORITAIRES (propriétaires gîtes, agences, multipropriétaires)
+3. THÈMES (saisonnalité, problèmes, solutions)
+4. ACTIONS CONCRÈTES (posts, emails, promotions)
+5. KPIs (impressions, leads, conversions)
+
+CONTRAINTES :
+- Progression cohérente semaine après semaine
+- Adaptation saisonnalité (hiver/printemps/été)
+- Créé par un vrai loueur professionnel (pas de bullshit)
+- Focus : Synchronisation temps réel, automatisation
+
+FORMAT RÉPONSE (JSON) :
+{
+  "plan_global": {
+    "vision": "Vision 3 mois",
+    "objectifs_finaux": {
+      "notoriete": "X impressions",
+      "engagement": "X%",
+      "leads": "X leads qualifiés",
+      "conversions": "X clients"
+    }
+  },
+  "semaines": [
+    {
+      "numero": 1,
+      "phase": "DÉMARRAGE",
+      "objectif": "Lancer présence LinkedIn + Premiers contenus",
+      "cibles": ["Propriétaires 1-2 gîtes"],
+      "themes": ["Problèmes réservations multiples", "Synchronisation calendriers"],
+      "actions": [
+        {
+          "type": "post",
+          "plateforme": "linkedin",
+          "sujet": "Les 3 erreurs fatales en gestion locative",
+          "angle": "Expérience terrain",
+          "priorite": "haute"
+        },
+        {
+          "type": "promotion",
+          "titre": "Offre lancement -30%",
+          "cible": "Early adopters",
+          "duree": "1 semaine"
+        }
+      ],
+      "kpis": {"impressions": 2000, "engagement": 2, "leads": 5},
+      "hashtags": ["#gestionlocative", "#gite", "#calendrier"]
+    }
+  ]
+}
+
+Génère les 12 semaines complètes. Réponds UNIQUEMENT avec le JSON.`;
+
+      const planResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            {
+              role: 'system',
+              content: 'Tu es un expert en stratégie marketing digital long terme pour SaaS B2B. Tu fournis des plans détaillés et actionnables.'
+            },
+            {
+              role: 'user',
+              content: planPrompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 4000
+        })
+      });
+
+      if (!planResponse.ok) {
+        const error = await planResponse.json();
+        throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+      }
+
+      const planData = await planResponse.json();
+      const planContent = planData.choices[0].message.content;
+
+      let cleanJSON = planContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      try {
+        const parsedPlan = JSON.parse(cleanJSON);
+        return res.status(200).json({
+          success: true,
+          plan: parsedPlan
+        });
+      } catch (parseError) {
+        return res.status(200).json({
+          success: true,
+          plan: { raw: cleanJSON }
+        });
+      }
+    }
+
+    // ================================================================
     // GÉNÉRATION STRATÉGIE HEBDOMADAIRE
     // ================================================================
     if (action === 'generate-weekly-strategy') {

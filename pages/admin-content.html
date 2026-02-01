@@ -109,21 +109,37 @@
 
         <!-- TAB 2 : STRATÉGIE IA -->
         <div id="tab-strategy" class="tab-content" style="display: none;">
+            <!-- Plan Long Terme (12 semaines) -->
+            <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; color: white;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                        <i data-lucide="calendar-range"></i>
+                        Plan Stratégique 12 Semaines
+                    </h2>
+                    <button class="btn-primary" onclick="generateLongtermPlan()" style="background: white; color: #667eea;">
+                        <i data-lucide="zap"></i>
+                        Générer Plan Complet
+                    </button>
+                </div>
+                <div id="longtermPlan">
+                    <p style="text-align: center; opacity: 0.9; padding: 20px;">
+                        Aucun plan stratégique. Cliquez sur "Générer" pour créer votre feuille de route 3 mois !
+                    </p>
+                </div>
+            </section>
+
+            <!-- Stratégie Semaine Actuelle -->
             <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
                         <i data-lucide="target"></i>
                         Stratégie de la Semaine
                     </h2>
-                    <button class="btn-primary" onclick="generateWeeklyStrategy()">
-                        <i data-lucide="sparkles"></i>
-                        Générer Nouvelle Stratégie
-                    </button>
                 </div>
                 <div id="currentStrategy">
                     <p style="text-align: center; color: #9CA3AF; padding: 40px;">
                         <i data-lucide="target" style="width: 48px; height: 48px; margin: 0 auto 10px;"></i><br>
-                        Aucune stratégie active. Cliquez sur "Générer" pour créer votre stratégie hebdomadaire !
+                        Le plan générera automatiquement les stratégies hebdomadaires !
                     </p>
                 </div>
             </section>
