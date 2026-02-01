@@ -368,109 +368,323 @@ Image description: ${prompt}`;
     // GÉNÉRATION PLAN STRATÉGIQUE LONG TERME (12 SEMAINES)
     // ================================================================
     if (action === 'generate-longterm-plan') {
-      const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+      const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
       
-      if (!OPENAI_API_KEY) {
+      if (!ANTHROPIC_API_KEY) {
         return res.status(500).json({ 
-          error: 'OpenAI API key not configured' 
+          error: 'Anthropic API key not configured. Get it at console.anthropic.com' 
         });
       }
 
       const { startWeek, year } = req.body;
 
-      const planPrompt = `Tu es le stratège marketing senior de LiveOwnerUnit, plateforme SaaS de gestion locative.
+      // Récupérer l'historique des meilleurs contenus pour contexte
+      let contextHistory = '';
+      try {
+        const { data: history } = await supabase
+          .from('cm_ai_content_history')
+          .select('sujet, performance, score_viralite')
+          .order('score_viralite', { ascending: false })
+          .limit(15);
+        
+        if (history && history.length > 0) {
+          contextHistory = `\n\n📊 HISTORIQUE MEILLEURS CONTENUS (apprends de ce qui marche) :\n${history.map(h => 
+            `- "${h.sujet}" → Viralité ${h.score_viralite}/100, Perf: ${JSON.stringify(h.performance)}`
+          ).join('\n')}`;
+        }
+      } catch (err) {
+        console.log('⚠️ Pas d\'historique disponible (normal si première utilisation)');
+      }
 
-MISSION : Créer un PLAN STRATÉGIQUE sur 12 SEMAINES (3 mois).
+      const planPrompt = `🎯 RÔLE : Directeur Marketing Growth de LiveOwnerUnit - SaaS Gestion Locative Premium
 
-PHASES :
-- SEMAINES 1-3 : DÉMARRAGE (Notoriété + Acquisition)
-- SEMAINES 4-8 : CROISSANCE (Engagement + Conversion)
-- SEMAINES 9-12 : STABILISATION (Fidélisation + Optimisation)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 CONTEXTE PRODUIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏠 Produit : LiveOwnerUnit
+💎 Promesse : Synchronisation TEMPS RÉEL multi-calendriers (Booking.com, Airbnb, VRBO, Google Calendar)
+🎯 USP : ZÉRO double-booking garanti, Dashboard unifié, Automatisation complète
+👤 Créateur : Loueur professionnel 15 ans d'expérience dans le Lot (CRÉDIBILITÉ TERRAIN)
+🎖️ Positionnement : Solution PREMIUM vs concurrence gadget/gratuite
+💰 Cible Prix : 29-49€/mois (valeur perçue : économise 2000-5000€/an en erreurs)
 
-Pour CHAQUE semaine, définis :
-1. OBJECTIF PRINCIPAL
-2. CIBLES PRIORITAIRES (propriétaires gîtes, agences, multipropriétaires)
-3. THÈMES (saisonnalité, problèmes, solutions)
-4. ACTIONS CONCRÈTES (posts, emails, promotions)
-5. KPIs (impressions, leads, conversions)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 MARCHÉ CIBLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👥 Segment 1 (70%) : Propriétaires 1-4 gîtes/locations saisonnières
+   Pain points : Double-bookings fréquents, jonglage entre 5 plateformes, perte CA
+   Pouvoir achat : Moyen-élevé (rentabilité gîte 15-40k€/an)
 
-CONTRAINTES :
-- Progression cohérente semaine après semaine
-- Adaptation saisonnalité (hiver/printemps/été)
-- Créé par un vrai loueur professionnel (pas de bullshit)
-- Focus : Synchronisation temps réel, automatisation
+👥 Segment 2 (20%) : Petites agences immobilières 5-15 biens
+   Pain points : Gestion manuelle calendriers, erreurs coûteuses, équipe débordée
 
-FORMAT RÉPONSE (JSON) :
+👥 Segment 3 (10%) : Multipropriétaires 5+ locations
+   Pain points : Scaling impossible sans outil, besoin dashboard pro
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 MISSION : PLAN STRATÉGIQUE 12 SEMAINES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📅 PHASE 1 - DÉMARRAGE (Semaines 1-3)
+Objectifs :
+- Établir AUTORITÉ sur LinkedIn + Groupes Facebook gîtes
+- 20 leads qualifiés
+- 10k impressions/semaine
+- 2-3 premiers clients (proof of concept)
+
+Stratégies prioritaires :
+✅ Storytelling BRUTAL problèmes vécus (double-bookings qui coûtent 2400€)
+✅ Démonstrations vidéo 30s (synchronisation temps réel en action)
+✅ Posts "J'ai testé tous les outils, voici pourquoi ils sont nuls"
+✅ Ciblage hyper-précis : Groupes FB "Gestion gîtes", "Locations saisonnières France"
+
+KPIs Critiques :
+- Impressions : 2k → 10k progression
+- Taux engagement : 2% → 5%
+- Leads : 0 → 20
+- Conversions : 0 → 3 clients
+- Coût acquisition : 0€ (organique pur)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 PHASE 2 - CROISSANCE (Semaines 4-8)
+Objectifs :
+- Scaler 50 leads/semaine
+- Automatiser email nurturing
+- Partenariats offices tourisme Lot/Dordogne
+- 15-20 clients actifs
+
+Stratégies :
+✅ Cas clients CONCRETS (ROI mesurable, temps gagné)
+✅ Webinaires "Gestion locative 2026 : ce qui marche VRAIMENT"
+✅ Promotions saisonnières (pré-haute-saison été)
+✅ Retargeting LinkedIn Ads (budget 500€/mois si CAC < 150€)
+✅ Programme ambassadeurs (clients = affiliés 20% commission)
+
+KPIs :
+- Leads : 20 → 200 cumulés
+- Conversions : 3 → 20 clients
+- Taux conversion : 5% → 10%
+- MRR : 300€ → 1000€
+- CAC : < 150€/client
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 PHASE 3 - STABILISATION (Semaines 9-12)
+Objectifs :
+- Pipeline acquisition AUTOMATISÉ 80%
+- 30-40 clients actifs
+- Churn < 3%/mois
+- Upsell fonctionnalités premium
+
+Stratégies :
+✅ Contenu SEO (blog + vidéos YouTube)
+✅ Programme affiliation loueurs
+✅ Témoignages vidéo clients (avant/après)
+✅ Optimisation A/B landing pages
+✅ Email automation avancée (triggers comportementaux)
+
+KPIs :
+- MRR : 1000€ → 1800€
+- LTV : +30%
+- Churn : < 3%
+- NPS : > 60
+- ROI Marketing : > 300%
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ CONTRAINTES IMPÉRATIVES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. TON COMMUNICATION : Tu ES un loueur qui parle à des loueurs
+   ❌ INTERDIT : "révolutionnaire", "disruptif", "game-changer", bullshit startup
+   ✅ OBLIGATOIRE : Ton direct, problèmes réels, chiffres concrets, crédibilité terrain
+
+2. STORYTELLING : Chaque contenu = histoire vécue
+   Exemple : "Samedi 3h du mat, un client m'appelle furieux. Double-booking. -2400€. J'ai créé LiveOwnerUnit."
+
+3. PREUVES SOCIALES : Chiffres mesurables uniquement
+   ❌ "Augmentez vos revenus"  
+   ✅ "+2400€/an économisés en moyenne (clients 2025)"
+
+4. SAISONNALITÉ : Adapter urgence selon période
+   - Janv-Mars : Anticipation haute saison
+   - Avril-Juin : URGENCE maximale (bookings été)
+   - Juillet-Sept : Gestion crise / stabilité
+   - Oct-Déc : Bilan année / prépa 2027
+
+5. APPELS À L'ACTION : Toujours LOW-FRICTION
+   ❌ "Abonnez-vous maintenant"  
+   ✅ "Testez 14 jours gratuit, annulez en 1 clic"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 FORMAT RÉPONSE (JSON STRICT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {
   "plan_global": {
-    "vision": "Vision 3 mois",
+    "vision_3_mois": "Devenir LA référence gestion locative en 90 jours",
+    "budget_marketing_estime": "0€ (S1-3), 500€/mois (S4-8), 800€/mois (S9-12)",
     "objectifs_finaux": {
-      "notoriete": "X impressions",
-      "engagement": "X%",
-      "leads": "X leads qualifiés",
-      "conversions": "X clients"
-    }
+      "notoriete_impressions": 120000,
+      "engagement_moyen": "4.2%",
+      "leads_qualifies": 250,
+      "clients_signes": 35,
+      "mrr_cible": "1800€",
+      "roi_marketing": "400%",
+      "nps": 65
+    },
+    "risques_anticipes": [
+      "Saisonnalité basse (oct-fév) : adapter messaging urgence",
+      "Concurrence gratuite Google Calendar : souligner ROI double-booking",
+      "Résistance changement loueurs seniors : vidéos tuto simples"
+    ],
+    "hypotheses_critiques": [
+      "Taux conversion landing page 8-12%",
+      "CAC organique < 50€, payant < 150€",
+      "Churn < 5%/mois si onboarding réussi",
+      "LTV > 600€ (12 mois rétention moyenne)"
+    ]
   },
   "semaines": [
     {
       "numero": 1,
       "phase": "DÉMARRAGE",
-      "objectif": "Lancer présence LinkedIn + Premiers contenus",
-      "cibles": ["Propriétaires 1-2 gîtes"],
-      "themes": ["Problèmes réservations multiples", "Synchronisation calendriers"],
+      "objectif_principal": "Lancer présence LinkedIn + validation marché",
+      "objectif_mesurable": "10 leads qualifiés + 3000 impressions",
+      "cibles_audiences": [
+        {
+          "segment": "Propriétaires 1-3 gîtes",
+          "pain_points": ["Double-bookings récurrents", "Jonglage 5 plateformes", "Perte 2000-5000€/an"],
+          "canaux": ["LinkedIn", "Groupes Facebook gîtes France", "Forums locationssaisonnieres.fr"],
+          "budget": "0€"
+        }
+      ],
+      "themes_contenu": [
+        {
+          "theme": "Le vrai coût des double-bookings",
+          "angle": "Histoire personnelle + calcul perte CA précis",
+          "emotion_cible": "Frustration → Espoir",
+          "formats": ["Post LinkedIn carrousel 5 slides", "Vidéo témoignage 45s"]
+        },
+        {
+          "theme": "J'ai testé 8 outils, ils sont tous nuls (sauf 1)",
+          "angle": "Comparatif brutal sans concession",
+          "emotion_cible": "Curiosité → Confiance",
+          "formats": ["Thread LinkedIn", "PDF comparatif téléchargeable"]
+        }
+      ],
       "actions": [
         {
-          "type": "post",
-          "plateforme": "linkedin",
-          "sujet": "Les 3 erreurs fatales en gestion locative",
-          "angle": "Expérience terrain",
-          "priorite": "haute"
+          "type": "post_linkedin",
+          "sujet": "2400€ perdus en 2023 à cause d'un double-booking. Voici ce que j'ai construit.",
+          "contenu_preview": "Samedi 14 juillet, 3h du matin. Mon téléphone sonne. \"Stéphane, il y a quelqu'un dans NOTRE gîte !\" 😱\n\nDouble-booking. Ma faute. J'avais oublié de bloquer Booking après une résa Airbnb.\n\nRésultat :\n❌ 2 familles furieuses\n❌ Remboursement intégral : -1200€ x2\n❌ Avis 1★ sur Booking\n❌ 6 mois pour réparer ma réputation\n\nCe jour-là, j'ai décidé de créer LiveOwnerUnit.\n\nPlus jamais ça. 👇",
+          "format": "Carrousel 5 slides",
+          "visuels": ["Screenshot calendrier bordélique", "Graphique perte CA", "Interface LiveOwnerUnit clean"],
+          "call_to_action": "Commentez : quel est votre pire cauchemar en gestion locative ?",
+          "heure_ideale": "Mardi 9h",
+          "hashtags": ["#gestionlocative", "#gite", "#airbnb", "#booking"],
+          "budget": "0€",
+          "kpi_cible": "500 impressions, 25 engagements, 5 leads"
+        },
+        {
+          "type": "post_facebook_groupes",
+          "sujet": "Astuce : Comment je gère 3 gîtes sans JAMAIS de double-booking",
+          "groupes_cibles": ["Gestion gîtes et chambres d'hôtes", "Locations saisonnières propriétaires"],
+          "contenu_preview": "Salut à tous ! 👋\n\nProprio de 3 gîtes dans le Lot depuis 15 ans. Je vois souvent passer des galères de double-bookings ici.\n\nVoici mon système (gratuit à partager) :\n1. ✅ Calendrier maître unique\n2. ✅ Synchronisation AUTO toutes les 5 min\n3. ✅ Alertes si conflit détecté\n\nJ'ai automatisé tout ça avec un outil que j'ai créé. Si ça vous intéresse, je partage en MP (pas de spam promis).",
+          "ton": "Entraide communautaire, pas vendeur",
+          "call_to_action": "Répondez si vous galérez avec les calendriers",
+          "budget": "0€",
+          "kpi_cible": "50 vues, 10 commentaires, 3 DMs"
         },
         {
           "type": "promotion",
-          "titre": "Offre lancement -30%",
-          "cible": "Early adopters",
-          "duree": "1 semaine"
+          "nom": "Offre Pionniers -40%",
+          "code_promo": "PIONEER40",
+          "valeur_reduction": 40,
+          "type_reduction": "pourcentage",
+          "cible": "20 premiers early adopters",
+          "justification": "Créer urgence + obtenir ambassadeurs enthousiastes + feedback produit",
+          "duree_jours": 10,
+          "conditions": "Engagement 3 mois minimum",
+          "budget": "0€ (manque à gagner : ~400€, compensé par testimonials)"
+        },
+        {
+          "type": "email_sequence",
+          "nom": "Nurturing Problème Double-Booking",
+          "trigger": "Lead télécharge PDF comparatif",
+          "nb_emails": 5,
+          "timing": ["J0", "J+2", "J+5", "J+8", "J+12"],
+          "sujets": [
+            "Votre PDF + 1 astuce que 90% des loueurs ignorent",
+            "Combien vous COÛTENT vraiment les doubles-bookings ?",
+            "[Vidéo 2min] Comment LiveOwnerUnit évite ce cauchemar",
+            "3 clients racontent leur pire galère (avant LOUnit)",
+            "Offre spéciale -40% expire dans 48h ⏰"
+          ],
+          "kpi_cible": "Taux ouverture 35%, clics 15%, conversion 10%"
         }
       ],
-      "kpis": {"impressions": 2000, "engagement": 2, "leads": 5},
-      "hashtags": ["#gestionlocative", "#gite", "#calendrier"]
+      "kpis": {
+        "impressions": {"cible": 3000, "min_acceptable": 1500},
+        "engagement_taux": {"cible": 2.5, "min_acceptable": 1.5},
+        "leads": {"cible": 10, "min_acceptable": 5},
+        "conversions": {"cible": 1, "min_acceptable": 0},
+        "cout_par_lead": {"max_acceptable": "0€"},
+        "temps_investi": "8h/semaine"  
+      },
+      "apprentissages_a_mesurer": [
+        "Quel pain point génère le plus d'engagement ? (double-booking vs chronophage vs perte CA)",
+        "LinkedIn ou Facebook meilleur canal ?",
+        "Taux conversion landing page réel",
+        "Objections principales prospects (prix ? complexité ? confiance ?)"
+      ]
     }
+    // ... GÉNÉRER 11 AUTRES SEMAINES avec même niveau de détail
+  ],
+  "automatisations_prevues": [
+    {"semaine": 3, "nom": "Auto-posting LinkedIn 3x/sem", "outil": "Buffer"},
+    {"semaine": 5, "nom": "Email nurturing auto", "outil": "Loops.so ou Resend"},
+    {"semaine": 7, "nom": "Retargeting LinkedIn Ads", "budget": "500€/mois"}
+  ],
+  "points_decision": [
+    {"semaine": 4, "decision": "Si CAC < 150€ → Scaler budget ads à 500€/mois"},
+    {"semaine": 8, "decision": "Si churn > 5% → Refonte onboarding client"}
   ]
-}
+}${contextHistory}
 
-Génère les 12 semaines complètes. Réponds UNIQUEMENT avec le JSON.`;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ IMPORTANT FINAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Génère les 12 SEMAINES COMPLÈTES
+- Chaque semaine : 4-6 actions détaillées
+- Contenus : PRÊTS À POSTER (pas juste des idées vagues)
+- KPIs : Réalistes et progressifs (pas de x10 magique)
+- Communication : TON DIRECT, authentique, crédible
 
-      const planResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+Réponds UNIQUEMENT avec le JSON (pas de texte avant/après).`;
+
+      const planResponse = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'gpt-4',
-          messages: [
-            {
-              role: 'system',
-              content: 'Tu es un expert en stratégie marketing digital long terme pour SaaS B2B. Tu fournis des plans détaillés et actionnables.'
-            },
-            {
-              role: 'user',
-              content: planPrompt
-            }
-          ],
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 16000,
           temperature: 0.7,
-          max_tokens: 4000
+          messages: [{
+            role: 'user',
+            content: planPrompt
+          }]
         })
       });
 
       if (!planResponse.ok) {
         const error = await planResponse.json();
-        throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+        throw new Error(`Claude API error: ${error.error?.message || 'Unknown error'}`);
       }
 
       const planData = await planResponse.json();
-      const planContent = planData.choices[0].message.content;
+      // Claude renvoie dans content[0].text, pas choices[0].message.content
+      const planContent = planData.content[0].text;
 
       let cleanJSON = planContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       
@@ -478,12 +692,15 @@ Génère les 12 semaines complètes. Réponds UNIQUEMENT avec le JSON.`;
         const parsedPlan = JSON.parse(cleanJSON);
         return res.status(200).json({
           success: true,
-          plan: parsedPlan
+          plan: parsedPlan,
+          provider: 'Claude 3.5 Sonnet',
+          tokens_used: planData.usage
         });
       } catch (parseError) {
         return res.status(200).json({
           success: true,
-          plan: { raw: cleanJSON }
+          plan: { raw: cleanJSON },
+          error: 'JSON parsing failed, returning raw content'
         });
       }
     }
