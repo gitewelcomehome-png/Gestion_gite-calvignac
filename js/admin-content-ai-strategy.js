@@ -425,15 +425,45 @@ async function loadAIActions() {
 
 window.approveAction = async function(actionId) {
     try {
-        await window.supabaseClient
+        // 1. Récupérer les détails de l'action
+        const { data: action, error: fetchError } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .select('*')
+            .eq('id', actionId)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        // 2. Sauvegarder dans la file de contenu (cm_ai_content_queue)
+        const { error: insertError } = await window.supabaseClient
+            .from('cm_ai_content_queue')
+            .insert({
+                type_contenu: action.type_contenu || 'article',
+                sujet: action.titre,
+                contenu: action.description,
+                statut: 'approuve',
+                created_at: new Date().toISOString()
+            });
+        
+        if (insertError) throw insertError;
+        
+        // 3. Mettre à jour le statut de l'action
+        const { error: updateError } = await window.supabaseClient
             .from('cm_ai_actions')
             .update({ statut: 'approuve' })
             .eq('id', actionId);
         
-        showToast('✅ Action approuvée', 'success');
-        loadAIActions();
+        if (updateError) throw updateError;
+        
+        showToast('✅ Action approuvée et ajoutée à la file de contenu', 'success');
+        
+        // Recharger SANS changer d'onglet
+        await loadAIActions();
+        await loadContentQueue();
+        
     } catch (error) {
-        console.error('❌ Erreur:', error);
+        console.error('❌ Erreur approbation:', error);
+        showToast('❌ Erreur lors de l\'approbation', 'error');
     }
 };
 
