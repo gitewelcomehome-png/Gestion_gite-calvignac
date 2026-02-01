@@ -7,6 +7,40 @@
 console.log('🤖 Module Stratégie IA chargé');
 
 // ================================================================
+// ARCHIVAGE AUTOMATIQUE DES SEMAINES PASSÉES
+// ================================================================
+
+async function archiveOldWeeks() {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentWeek = getWeekNumber(now);
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .update({ statut: 'termine' })
+            .eq('statut', 'actif')
+            .or(`annee.lt.${currentYear},and(annee.eq.${currentYear},semaine.lt.${currentWeek})`);
+        
+        if (error) throw error;
+        
+        console.log('✅ Semaines passées archivées automatiquement');
+    } catch (error) {
+        console.error('❌ Erreur archivage auto:', error);
+    }
+}
+
+// Obtenir le numéro de semaine (1-52)
+function getWeekNumber(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+}
+
+
+// ================================================================
 // NAVIGATION ONGLETS
 // ================================================================
 
@@ -1139,7 +1173,10 @@ function showToast(message, type) {
 }
 
 // Init au chargement
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Archiver automatiquement les semaines passées
+    await archiveOldWeeks();
+    
     loadCurrentStrategy();
     loadLongtermPlanFromDB(); // Recharger le plan 12 semaines
     

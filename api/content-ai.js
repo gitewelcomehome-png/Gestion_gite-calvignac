@@ -987,22 +987,43 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
         console.log('⚠️ Règles éthiques non chargées (table peut-être pas créée)');
       }
 
-      // Récupérer l'historique des meilleurs contenus pour contexte
+      // Récupérer l'historique des actions archivées avec métriques
       let contextHistory = '';
       try {
-        const { data: history } = await supabase
-          .from('cm_ai_content_history')
-          .select('sujet, performance, score_viralite')
-          .order('score_viralite', { ascending: false })
-          .limit(15);
+        const { data: archived } = await supabase
+          .from('cm_ai_actions')
+          .select('titre, type, metriques, plateforme_publie, notes_performance')
+          .eq('archive', true)
+          .not('metriques', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(20);
         
-        if (history && history.length > 0) {
-          contextHistory = `\n\n📊 HISTORIQUE MEILLEURS CONTENUS (apprends de ce qui marche) :\n${history.map(h => 
-            `- "${h.sujet}" → Viralité ${h.score_viralite}/100, Perf: ${JSON.stringify(h.performance)}`
-          ).join('\n')}`;
+        if (archived && archived.length > 0) {
+          // Calculer les meilleures actions par leads
+          const sorted = archived.sort((a, b) => (b.metriques?.leads || 0) - (a.metriques?.leads || 0));
+          const topPerformers = sorted.slice(0, 10);
+          
+          contextHistory = `\n\n📊 APPRENTISSAGE DES SEMAINES PASSÉES (10 meilleures actions) :
+${topPerformers.map(a => {
+  const m = a.metriques || {};
+  return `✅ ${a.type} - "${a.titre}" [${a.plateforme_publie || 'N/A'}]
+   → Vues: ${m.vues || 0} | Leads: ${m.leads || 0} | Engagement: ${(m.likes || 0) + (m.commentaires || 0)}
+   ${a.notes_performance ? `💡 Note: ${a.notes_performance}` : ''}`;
+}).join('\n\n')}
+
+🎯 INSIGHTS À APPLIQUER :
+- Plateforme la plus performante: ${getMostPerformingPlatform(archived)}
+- Type de contenu le plus efficace: ${getMostPerformingType(archived)}
+- Moyenne leads/action: ${(archived.reduce((sum, a) => sum + (a.metriques?.leads || 0), 0) / archived.length).toFixed(1)}
+- Taux engagement moyen: ${(archived.reduce((sum, a) => {
+  const m = a.metriques || {};
+  return sum + ((m.likes || 0) + (m.commentaires || 0)) / (m.vues || 1);
+}, 0) / archived.length * 100).toFixed(2)}%
+
+⚠️ ADAPTE la nouvelle stratégie en fonction de ces performances réelles !`;
         }
       } catch (err) {
-        console.log('⚠️ Pas d\'historique disponible (normal si première utilisation)');
+        console.log('⚠️ Pas d\'historique disponible (normal si première utilisation):', err.message);
       }
 
       // Récupérer feedback précédents pour apprentissage
@@ -1536,6 +1557,41 @@ Réponds UNIQUEMENT avec le JSON.`;
         const parsedContent = JSON.parse(cleanJSON);
         return res.status(200).json({
           success: true,
+          content: parsedContent
+        });
+      } catch (parseError) {
+        console.error('❌ JSON parse error:', parseError);
+        return res.status(500).json({ error: 'Invalid JSON from OpenAI', raw: cleanJSON });
+      }
+    }
+
+  } catch (error) {
+    console.error('❌ ERROR:', error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+// ================================================================
+// HELPERS POUR ANALYTICS
+// ================================================================
+
+function getMostPerformingPlatform(actions) {
+  const platformLeads = {};
+  actions.forEach(a => {
+    const p = a.plateforme_publie || 'Autre';
+    platformLeads[p] = (platformLeads[p] || 0) + (a.metriques?.leads || 0);
+  });
+  return Object.keys(platformLeads).reduce((a, b) => platformLeads[a] > platformLeads[b] ? a : b, 'N/A');
+}
+
+function getMostPerformingType(actions) {
+  const typeLeads = {};
+  actions.forEach(a => {
+    const t = a.type || 'autre';
+    typeLeads[t] = (typeLeads[t] || 0) + (a.metriques?.leads || 0);
+  });
+  return Object.keys(typeLeads).reduce((a, b) => typeLeads[a] > typeLeads[b] ? a : b, 'N/A');
+}
           content: parsedContent
         });
       } catch (parseError) {
