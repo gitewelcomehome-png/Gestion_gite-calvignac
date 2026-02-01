@@ -171,13 +171,6 @@ function updatePlanDisplay(newWeek) {
     }
 }
         
-        // Générer actions proposées basées sur le plan
-        await generateActionsFromPlan(plan);
-        
-        showToast('✅ Plan 12 semaines généré !', 'success');
-        displayLongtermPlan(plan);
-        loadCurrentStrategy();
-        
     } catch (error) {
         console.error('❌ Erreur:', error);
         
