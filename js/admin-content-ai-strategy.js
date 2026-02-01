@@ -178,26 +178,6 @@ window.generateLongtermPlan = async function() {
         displayLongtermPlan(fullPlan);
         loadCurrentStrategy();
         
-        // Sauvegarder chaque semaine dans la base
-        const savePromises = plan.semaines.map(async (semaine) => {
-            const weekNum = startWeek + (semaine.numero - 1);
-            
-            return await window.supabaseClient
-                .from('cm_ai_strategies')
-                .upsert({
-                    semaine: weekNum > 52 ? weekNum - 52 : weekNum,
-                    annee: weekNum > 52 ? year + 1 : year,
-                    objectif: semaine.objectif,
-                    cibles: semaine.cibles,
-                    themes: semaine.themes,
-                    kpis: semaine.kpis,
-                    strategie_complete: JSON.stringify(semaine),
-                    statut: semaine.numero === 1 ? 'actif' : 'planifié'
-                }, { onConflict: 'semaine,annee' });
-        });
-        
-        await Promise.all(savePromises);
-        
         // Générer actions proposées basées sur le plan
         await generateActionsFromPlan(plan);
         
