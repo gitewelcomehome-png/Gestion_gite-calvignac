@@ -378,6 +378,36 @@ Image description: ${prompt}`;
 
       const { startWeek, year } = req.body;
 
+      // Récupérer le prompt validé depuis la config
+      const fs = require('fs');
+      const path = require('path');
+      let promptConfig = '';
+      try {
+        const configPath = path.join(process.cwd(), 'config', 'PROMPT_CLAUDE_BASE.md');
+        promptConfig = fs.readFileSync(configPath, 'utf-8');
+        console.log('✅ Configuration prompt chargée depuis config/PROMPT_CLAUDE_BASE.md');
+      } catch (err) {
+        console.log('⚠️ Fichier config prompt non trouvé, utilisation prompt par défaut');
+      }
+
+      // Récupérer règles éthiques depuis DB
+      let reglesEthiques = '';
+      try {
+        const { data: regles } = await supabase
+          .from('cm_ai_ethique_regles')
+          .select('*')
+          .eq('actif', true)
+          .order('severite', { ascending: false });
+        
+        if (regles && regles.length > 0) {
+          reglesEthiques = `\n\n⚖️ RÈGLES ÉTHIQUES ACTIVES (RESPECT ABSOLU) :\n${regles.map(r => 
+            `${r.categorie.toUpperCase()} [${r.severite}] : ${r.regle}${r.exemples_mauvais?.length ? `\n   ❌ Exemples interdits : ${r.exemples_mauvais.join(', ')}` : ''}`
+          ).join('\n\n')}`;
+        }
+      } catch (err) {
+        console.log('⚠️ Règles éthiques non chargées (table peut-être pas créée)');
+      }
+
       // Récupérer l'historique des meilleurs contenus pour contexte
       let contextHistory = '';
       try {
@@ -394,6 +424,27 @@ Image description: ${prompt}`;
         }
       } catch (err) {
         console.log('⚠️ Pas d\'historique disponible (normal si première utilisation)');
+      }
+
+      // Récupérer feedback précédents pour apprentissage
+      let feedbackLearning = '';
+      try {
+        const { data: feedback } = await supabase
+          .from('cm_ai_content_feedback')
+          .select('type_feedback, raison, mots_problematiques, score_qualite')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        
+        if (feedback && feedback.length > 0) {
+          const rejets = feedback.filter(f => f.type_feedback === 'rejete' || f.type_feedback === 'signale_mensonge');
+          if (rejets.length > 0) {
+            feedbackLearning = `\n\n🚫 APPRENTISSAGE : Contenus rejetés précédemment (NE PAS RÉPÉTER) :\n${rejets.map(f => 
+              `- Raison : ${f.raison}${f.mots_problematiques?.length ? `\n  Mots à éviter : ${f.mots_problematiques.join(', ')}` : ''}`
+            ).join('\n')}`;
+          }
+        }
+      } catch (err) {
+        console.log('⚠️ Feedback non chargé');
       }
 
       const planPrompt = `🎯 RÔLE : Directeur Marketing Growth de LiveOwnerUnit - SaaS Gestion Locative Premium
@@ -657,7 +708,9 @@ KPIs :
 - KPIs : Réalistes et progressifs (pas de x10 magique)
 - Communication : TON DIRECT, authentique, crédible
 
-Réponds UNIQUEMENT avec le JSON (pas de texte avant/après).`;
+Réponds UNIQUEMENT avec le JSON (pas de texte avant/après).${reglesEthiques}${feedbackLearning}
+
+📌 NOTE CRITIQUE : Si une demande viole les principes éthiques, REFUSE et explique pourquoi dans le JSON.`;
 
       const planResponse = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
