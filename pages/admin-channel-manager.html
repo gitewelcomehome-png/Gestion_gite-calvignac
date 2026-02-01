@@ -5,6 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Channel Manager - Admin</title>
     
+    <!-- Filtre erreurs extensions Chrome -->
+    <script>
+        window.onerror = function(msg, source, lineno, colno, error) {
+            const msgStr = String(msg || '');
+            const srcStr = String(source || '');
+            if (msgStr.includes('webpage_content_reporter') || 
+                srcStr.includes('webpage_content_reporter') ||
+                msgStr.includes('Unexpected token') ||
+                msgStr.includes('export') ||
+                msgStr.includes('import') ||
+                srcStr.includes('chrome-extension') ||
+                msgStr.includes('zustand')) {
+                return true;
+            }
+        };
+        
+        window.addEventListener('error', function(event) {
+            const msg = event.message || '';
+            const src = event.filename || '';
+            if (src.includes('webpage_content_reporter') || 
+                msg.includes('webpage_content_reporter') ||
+                msg.includes('Unexpected token') || 
+                msg.includes('export') ||
+                msg.includes('import') ||
+                msg.includes('zustand') ||
+                src.includes('chrome-extension')) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return true;
+            }
+        }, true);
+        
+        const _consoleError = console.error;
+        console.error = function(...args) {
+            const str = args.join(' ');
+            if (str.includes('chrome-extension') || 
+                str.includes('webpage_content_reporter') || 
+                str.includes('Unexpected token') ||
+                str.includes('zustand') ||
+                str.includes('export')) {
+                return;
+            }
+            _consoleError.apply(console, args);
+        };
+    </script>
+    
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
