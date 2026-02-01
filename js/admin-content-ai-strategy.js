@@ -164,13 +164,66 @@ async function generateRemainingWeeksBackground(startWeek, year, planGlobal, use
     
     showToast('✅ Plan 12 semaines complet !', 'success');
     loadCurrentStrategy();
+    loadLongtermPlanFromDB(); // Recharger le plan complet depuis DB
+}
+
+// Charger le plan 12 semaines depuis la DB (après refresh page)
+async function loadLongtermPlanFromDB() {
+    try {
+        const now = new Date();
+        const startWeek = getWeekNumber(now);
+        const year = now.getFullYear();
+        
+        // Récupérer toutes les semaines sauvegardées (les 12 dernières)
+        const { data, error } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .select('*')
+            .eq('annee', year)
+            .eq('statut', 'actif')
+            .gte('semaine', 1)
+            .lte('semaine', 12)
+            .order('semaine', { ascending: true });
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            // Pas de plan sauvegardé
+            return;
+        }
+        
+        // Reconstituer le plan complet
+        const semaines = data.map(row => JSON.parse(row.strategie_complete));
+        
+        const plan = {
+            plan_global: {
+                vision_3_mois: "Devenir référence gestion locative",
+                objectifs_finaux: {
+                    leads_qualifies: 250,
+                    clients_signes: 35,
+                    mrr_cible: "1800€"
+                }
+            },
+            semaines: semaines
+        };
+        
+        displayLongtermPlan(plan);
+        console.log(`✅ Plan 12 semaines rechargé : ${semaines.length} semaines`);
+        
+    } catch (error) {
+        console.error('❌ Erreur rechargement plan:', error);
+    }
 }
 
 // Afficher le plan
 function displayLongtermPlan(plan) {
     const html = `
         <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3)); border-radius: 12px; border-left: 5px solid #667eea;">
-            <h3 style="margin: 0 0 15px 0; font-size: 1.4rem; color: #fff;">🎯 Vision 3 mois</h3>
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 1.4rem; color: #fff;">🎯 Vision 3 mois</h3>
+                <button onclick="improvePlan()" style="background: white; color: #667eea; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+                    <span>✨</span> Améliorer le plan
+                </button>
+            </div>
             <p style="margin: 0 0 20px 0; font-size: 1.1rem; line-height: 1.6;">${plan.plan_global.vision_3_mois || plan.plan_global.vision || 'Devenir référence gestion locative'}</p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
                 <div style="padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px;">
@@ -227,9 +280,12 @@ function displayLongtermPlan(plan) {
                             <div style="display: grid; gap: 12px;">
                                 ${s.actions.map((action, idx) => `
                                     <div style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid ${action.priorite === 'haute' ? '#EF4444' : action.priorite === 'moyenne' ? '#F59E0B' : '#10B981'};">
-                                        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 8px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                                             <strong style="flex: 1;">${idx + 1}. ${action.sujet || action.titre || 'Action'}</strong>
-                                            <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">${action.type}</span>
+                                            <div style="display: flex; gap: 5px;">
+                                                <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">${action.type}</span>
+                                                <button onclick="generateFullContent(${s.numero}, ${idx})" style="background: #10B981; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">✨ Générer</button>
+                                            </div>
                                         </div>
                                         ${action.timing ? `<div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">⏰ ${action.timing}</div>` : ''}
                                         ${action.contenu_complet ? `<div style="font-size: 0.9rem; margin-top: 8px; opacity: 0.9; line-height: 1.5; max-height: 100px; overflow: hidden;">${action.contenu_complet.substring(0, 200)}${action.contenu_complet.length > 200 ? '...' : ''}</div>` : ''}
@@ -257,6 +313,116 @@ function displayLongtermPlan(plan) {
     
     document.getElementById('longtermPlan').innerHTML = html;
 }
+
+// ================================================================
+// AMÉLIORATION & GÉNÉRATION CONTENU
+// ================================================================
+
+// Améliorer le plan complet avec OpenAI
+window.improvePlan = async function() {
+    if (!confirm('Voulez-vous améliorer le plan avec plus d\'actions sur multiple plateformes ?')) return;
+    
+    showToast('🤖 OpenAI enrichit votre plan...', 'info');
+    
+    try {
+        const { data: semaines } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .select('*')
+            .eq('annee', new Date().getFullYear())
+            .eq('statut', 'actif')
+            .order('semaine', { ascending: true });
+        
+        if (!semaines || semaines.length === 0) throw new Error('Aucun plan à améliorer');
+        
+        for (const sem of semaines) {
+            const strategy = JSON.parse(sem.strategie_complete);
+            
+            const prompt = `Enrichis cette semaine marketing avec 5-10 actions CONCRÈTES sur MULTIPLES plateformes (LinkedIn, Facebook, Instagram, Blog, Email, Vidéo).
+
+Semaine ${strategy.numero}: ${strategy.objectif_principal || strategy.objectif}
+
+Ajoute des actions avec:
+- Contenu prêt à publier
+- Suggestion visuel précise
+- Hashtags
+- Timing optimal
+
+JSON uniquement:
+{"actions_enrichies":[{"type":"post_linkedin","plateforme":"LinkedIn","sujet":"...","contenu_complet":"...","visuel_suggestion":"Photo calendrier synchronisé","hashtags":["#tag"],"timing":"Lundi 9h","priorite":"haute","kpi_attendu":"50 vues"}]}`;
+
+            const response = await fetch('/api/openai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, maxTokens: 3000 })
+            });
+            
+            if (!response.ok) continue;
+            
+            const { content } = await response.json();
+            const cleanJSON = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            const improved = JSON.parse(cleanJSON);
+            
+            strategy.actions = [...(strategy.actions || []), ...improved.actions_enrichies];
+            
+            await window.supabaseClient
+                .from('cm_ai_strategies')
+                .update({ strategie_complete: JSON.stringify(strategy) })
+                .eq('id', sem.id);
+            
+            console.log(`✅ Semaine ${strategy.numero} enrichie`);
+        }
+        
+        showToast('✅ Plan enrichi !', 'success');
+        await loadLongtermPlanFromDB();
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
+
+// Générer contenu complet pour une action
+window.generateFullContent = async function(weekNum, actionIdx) {
+    showToast('🤖 Génération contenu...', 'info');
+    
+    try {
+        const { data } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .select('*')
+            .eq('semaine', weekNum)
+            .eq('annee', new Date().getFullYear())
+            .single();
+        
+        const strategy = JSON.parse(data.strategie_complete);
+        const action = strategy.actions[actionIdx];
+        
+        const prompt = `Génère contenu PRÊT À PUBLIER:
+
+Type: ${action.type}
+Sujet: ${action.sujet}
+
+JSON:
+{"titre":"...","contenu":"... (${action.type === 'article_blog' ? '800' : '250'} mots)","visuels":["suggestion 1","suggestion 2"],"hashtags":["#tag1"],"cta":"..."}`;
+
+        const response = await fetch('/api/openai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, maxTokens: 2000 })
+        });
+        
+        const { content } = await response.json();
+        const cleanJSON = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const generated = JSON.parse(cleanJSON);
+        
+        alert(`✅ Contenu généré!\n\n${generated.titre}\n\n${generated.contenu.substring(0, 200)}...\n\nVisuels: ${generated.visuels.join(', ')}`);
+        
+        showToast('✅ Contenu prêt !', 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
 
 // ================================================================
 // STRATÉGIE HEBDOMADAIRE
@@ -530,4 +696,6 @@ function showToast(message, type) {
 // Init au chargement
 document.addEventListener('DOMContentLoaded', () => {
     loadCurrentStrategy();
+    loadLongtermPlanFromDB(); // NOUVEAU : Recharger le plan 12 semaines
+    loadAIActions();
 });
