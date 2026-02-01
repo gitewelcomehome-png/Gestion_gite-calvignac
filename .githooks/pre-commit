@@ -1,0 +1,43 @@
+#!/bin/bash
+# Hook pre-commit pour bloquer les secrets hardcodés
+
+echo "🔍 Vérification des secrets hardcodés..."
+
+# Patterns à détecter
+PATTERNS=(
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"  # JWT Supabase
+    "sk-ant-api"                              # Clé Anthropic
+    "supabaseKey.*=.*['\"]eyJ"                # Variable avec clé Supabase
+    "SUPABASE.*KEY.*=.*['\"]eyJ"              # Variable env avec clé
+)
+
+# Fichiers à scanner (staged)
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|ts|json|sql|sh)$')
+
+if [ -z "$FILES" ]; then
+    echo "✅ Aucun fichier à vérifier"
+    exit 0
+fi
+
+FOUND_SECRET=0
+
+for FILE in $FILES; do
+    for PATTERN in "${PATTERNS[@]}"; do
+        if grep -qE "$PATTERN" "$FILE" 2>/dev/null; then
+            echo "❌ SECRET DÉTECTÉ dans $FILE"
+            echo "   Pattern: $PATTERN"
+            FOUND_SECRET=1
+        fi
+    done
+done
+
+if [ $FOUND_SECRET -eq 1 ]; then
+    echo ""
+    echo "🚨 COMMIT BLOQUÉ - Secrets détectés !"
+    echo "⚠️  Utilise des variables d'environnement au lieu de hardcoder."
+    echo ""
+    exit 1
+fi
+
+echo "✅ Aucun secret détecté - Commit autorisé"
+exit 0
