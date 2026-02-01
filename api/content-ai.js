@@ -964,14 +964,14 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
                 return res.status(400).json({ error: 'Paramètres manquants: titre, description, type requis' });
             }
 
-        const customSection = customInstructions ? `
+            const customSection = customInstructions ? `
 
 **CONSIGNES SPÉCIFIQUES DU CLIENT :**
 ${customInstructions}
 
 ⚠️ RESPECTE ABSOLUMENT ces consignes dans ton plan d'action !` : '';
 
-        const prompt = `Tu es un expert en marketing et exécution stratégique pour LiveOwnerUnit.
+            const prompt = `Tu es un expert en marketing et exécution stratégique pour LiveOwnerUnit.
 
 **Action business à planifier :**
 Type: ${type}
