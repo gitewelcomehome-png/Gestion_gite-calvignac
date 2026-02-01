@@ -1009,37 +1009,54 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
             let plan;
 
             if (req.body.useOpenAI) {
-                // OpenAI
+                // OpenAI avec timeout
                 console.log('🤖 Appel OpenAI GPT-4o...');
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: 'gpt-4o',
-                        messages: [{ role: 'user', content: prompt }],
-                        temperature: 0.7
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
-                    console.error('❌ OpenAI Error:', errorMsg);
-                    throw new Error(`OpenAI: ${errorMsg}`);
-                }
-
-                const data = await response.json();
-                const content = data.choices?.[0]?.message?.content;
                 
-                if (!content) {
-                    throw new Error('OpenAI: Réponse vide');
-                }
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
                 
-                console.log('✅ Réponse OpenAI reçue, parsing JSON...');
-                plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+                try {
+                    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: 'gpt-4o',
+                            messages: [{ role: 'user', content: prompt }],
+                            temperature: 0.7,
+                            max_tokens: 2000
+                        }),
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                        console.error('❌ OpenAI Error:', errorMsg);
+                        throw new Error(`OpenAI: ${errorMsg}`);
+                    }
+
+                    const data = await response.json();
+                    const content = data.choices?.[0]?.message?.content;
+                    
+                    if (!content) {
+                        throw new Error('OpenAI: Réponse vide');
+                    }
+                    
+                    console.log('✅ Réponse OpenAI reçue, parsing JSON...');
+                    plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+                    
+                } catch (fetchError) {
+                    clearTimeout(timeoutId);
+                    if (fetchError.name === 'AbortError') {
+                        throw new Error('OpenAI: Timeout (> 25s)');
+                    }
+                    throw fetchError;
+                }
 
             } else {
                 // Claude
