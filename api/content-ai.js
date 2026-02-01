@@ -946,6 +946,99 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
     }
 
     // ================================================================
+    // GÉNÉRATION PLAN D'ACTION DÉTAILLÉ
+    // ================================================================
+    if (action === 'generate-action-plan') {
+        const apiKey = req.body.useOpenAI ? process.env.OPENAI_API_KEY : process.env.ANTHROPIC_API_KEY;
+        const provider = req.body.useOpenAI ? 'OpenAI' : 'Claude';
+        
+        if (!apiKey) {
+            return res.status(500).json({ error: `${provider} API key not configured` });
+        }
+
+        const { titre, description, type } = req.body;
+
+        const prompt = `Tu es un expert en marketing et exécution stratégique pour LiveOwnerUnit.
+
+**Action business à planifier :**
+Type: ${type}
+Titre: ${titre}
+Description: ${description}
+
+**Ta mission :** Créer un plan d'action détaillé, étape par étape, pour exécuter cette action avec succès.
+
+**Fournis un plan structuré avec :**
+- 5-8 étapes concrètes et actionnables
+- Pour chaque étape :
+  * Titre clair
+  * Description détaillée (2-3 phrases)
+  * Ressources nécessaires (budget, outils, personnes)
+  * Durée estimée
+- Métriques de succès à tracker
+
+Format JSON strict :
+\`\`\`json
+{
+  "etapes": [
+    {
+      "titre": "Définir l'offre et les conditions",
+      "description": "Déterminer précisément le pourcentage de réduction, la durée de validité, les conditions d'éligibilité et les limites (nouveaux clients uniquement, nombre limité, etc.)",
+      "ressources": "Équipe marketing + validation direction",
+      "duree": "2-3 jours"
+    }
+  ],
+  "metriques_succes": "Nombre de conversions, taux d'utilisation du code promo, CA généré, nombre de nouveaux clients acquis"
+}
+\`\`\`
+
+Fournis **uniquement le JSON**, sans texte avant/après.`;
+
+        let plan;
+
+        if (req.body.useOpenAI) {
+            // OpenAI
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.7
+                })
+            });
+
+            const data = await response.json();
+            const content = data.choices[0].message.content;
+            plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+
+        } else {
+            // Claude
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 4000,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+
+            const data = await response.json();
+            const content = data.content[0].text;
+            plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+        }
+
+        return res.json({ success: true, plan });
+    }
+
+    // ================================================================
     // GÉNÉRATION PLAN STRATÉGIQUE LONG TERME (12 SEMAINES EN 3 PHASES)
     // ================================================================
     if (action === 'generate-longterm-plan') {

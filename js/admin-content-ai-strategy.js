@@ -1040,15 +1040,20 @@ async function loadContentQueue() {
         console.log('✅ Publications programmées trouvées:', data.length);
         
         const html = data.map(item => `
-            <div style="padding: 15px; background: white; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <div onclick="openActionDetails('${item.id}')" style="padding: 15px; background: white; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)'">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                     <strong style="color: #1e293b;">${item.type} - ${item.plateforme || 'N/A'}</strong>
                     <span style="font-size: 0.85rem; color: #64748b;">📅 ${new Date(item.scheduled_date).toLocaleDateString('fr-FR')}</span>
                 </div>
                 <p style="margin: 0; font-size: 0.9rem; color: #475569;">${item.sujet}</p>
-                <span style="display: inline-block; margin-top: 8px; padding: 4px 8px; background: #f1f5f9; border-radius: 4px; font-size: 0.75rem; color: #64748b;">
-                    ${item.statut}
-                </span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <span style="display: inline-block; padding: 4px 8px; background: #f1f5f9; border-radius: 4px; font-size: 0.75rem; color: #64748b;">
+                        ${item.statut}
+                    </span>
+                    <span style="color: #667eea; font-size: 0.875rem; font-weight: 500;">
+                        Générer plan détaillé →
+                    </span>
+                </div>
             </div>
         `).join('');
         
@@ -1241,6 +1246,150 @@ window.generateBusinessActions = async function() {
     } catch (error) {
         console.error('❌ Erreur génération actions:', error);
         showToast('❌ Erreur lors de la génération', 'error');
+    }
+}
+
+// ================================================================
+// MODALE PLAN D'ACTION DÉTAILLÉ
+// ================================================================
+
+window.openActionDetails = async function(actionId) {
+    try {
+        // Récupérer les détails depuis cm_ai_content_queue
+        const { data: action, error } = await window.supabaseClient
+            .from('cm_ai_content_queue')
+            .select('*')
+            .eq('id', actionId)
+            .single();
+        
+        if (error) throw error;
+        
+        // Créer la modale
+        const modal = document.createElement('div');
+        modal.id = 'actionDetailsModal';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+        
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 16px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 16px 16px 0 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">${action.sujet}</h2>
+                            <p style="margin: 0; opacity: 0.9;">${action.type} - ${action.plateforme || 'N/A'}</p>
+                        </div>
+                        <button onclick="closeActionModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;">✕</button>
+                    </div>
+                </div>
+                
+                <div style="padding: 2rem;">
+                    <div style="background: #f8fafc; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <h3 style="margin: 0 0 1rem 0; color: #1e293b;">📋 Description</h3>
+                        <p style="margin: 0; color: #475569; line-height: 1.6;">${action.contenu}</p>
+                    </div>
+                    
+                    <div style="background: #eff6ff; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0; color: #1e293b;">🎯 Plan d'Action Détaillé</h3>
+                            <span id="planStatus" style="font-size: 0.875rem; color: #64748b;">Non généré</span>
+                        </div>
+                        <div id="planContent" style="color: #475569; line-height: 1.6;">
+                            <p style="text-align: center; padding: 2rem; color: #94a3b8;">
+                                Cliquez sur "Générer Plan d'Action" pour obtenir un plan étape par étape détaillé
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="generateActionPlan('${action.id}', '${action.sujet.replace(/'/g, "\\'")}', '${action.contenu.replace(/'/g, "\\'")}', '${action.type}')" style="flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(102,126,234,0.3); transition: all 0.3s;">
+                            🤖 Générer Plan d'Action Détaillé
+                        </button>
+                        <button onclick="closeActionModal()" style="background: #e2e8f0; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            Fermer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+    } catch (error) {
+        console.error('❌ Erreur ouverture action:', error);
+        showToast('❌ Erreur: ' + error.message, 'error');
+    }
+}
+
+window.closeActionModal = function() {
+    const modal = document.getElementById('actionDetailsModal');
+    if (modal) modal.remove();
+}
+
+window.generateActionPlan = async function(actionId, titre, description, type) {
+    try {
+        document.getElementById('planStatus').textContent = '⏳ Génération en cours...';
+        document.getElementById('planContent').innerHTML = '<p style="text-align: center; padding: 2rem; color: #94a3b8;">⏳ L\'IA génère votre plan d\'action détaillé...</p>';
+        
+        const response = await fetch('/api/content-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'generate-action-plan',
+                titre: titre,
+                description: description,
+                type: type,
+                useOpenAI: true
+            })
+        });
+        
+        if (!response.ok) throw new Error('Erreur API');
+        
+        const { plan } = await response.json();
+        
+        // Afficher le plan
+        document.getElementById('planStatus').innerHTML = '<span style="color: #10b981;">✅ Plan généré</span>';
+        document.getElementById('planContent').innerHTML = `
+            <div style="background: white; border-radius: 8px; padding: 1.5rem;">
+                ${plan.etapes.map((etape, idx) => `
+                    <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0;">
+                        <div style="display: flex; align-items: start; gap: 1rem;">
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">
+                                ${idx + 1}
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #1e293b; font-size: 1rem;">${etape.titre}</h4>
+                                <p style="margin: 0 0 0.75rem 0; color: #64748b; font-size: 0.9rem;">${etape.description}</p>
+                                ${etape.ressources ? `
+                                    <div style="background: #f8fafc; border-radius: 6px; padding: 0.75rem; font-size: 0.875rem;">
+                                        <strong style="color: #475569;">📦 Ressources nécessaires:</strong><br>
+                                        <span style="color: #64748b;">${etape.ressources}</span>
+                                    </div>
+                                ` : ''}
+                                ${etape.duree ? `
+                                    <div style="margin-top: 0.5rem; color: #64748b; font-size: 0.875rem;">
+                                        ⏱️ Durée estimée: <strong>${etape.duree}</strong>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+                
+                ${plan.metriques_succes ? `
+                    <div style="background: #f0fdf4; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #166534;">📊 Métriques de succès</h4>
+                        <p style="margin: 0; color: #15803d; font-size: 0.9rem;">${plan.metriques_succes}</p>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        
+        showToast('✅ Plan d\'action généré !', 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur génération plan:', error);
+        document.getElementById('planStatus').innerHTML = '<span style="color: #ef4444;">❌ Erreur</span>';
+        document.getElementById('planContent').innerHTML = '<p style="text-align: center; padding: 2rem; color: #ef4444;">❌ Erreur lors de la génération</p>';
+        showToast('❌ Erreur: ' + error.message, 'error');
     }
 }
 
