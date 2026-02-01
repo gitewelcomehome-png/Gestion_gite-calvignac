@@ -159,6 +159,25 @@
                 </div>
             </section>
 
+            <!-- ARCHIVES ET MEILLEURES PERFORMANCES -->
+            <section style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                        <i data-lucide="archive"></i>
+                        📚 Actions Archivées & Top Performances
+                    </h2>
+                    <button class="btn-primary" onclick="loadArchivedActions()" style="background: #10B981;">
+                        <i data-lucide="refresh-cw"></i>
+                        Recharger
+                    </button>
+                </div>
+                <div id="archivedActions">
+                    <p style="text-align: center; color: #666; padding: 20px;">
+                        Cliquez sur "Recharger" pour voir vos actions validées et archivées
+                    </p>
+                </div>
+            </section>
+
             <!-- Stratégie Semaine Actuelle -->
             <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">

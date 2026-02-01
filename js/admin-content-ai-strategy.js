@@ -325,11 +325,12 @@ function displayLongtermPlan(plan) {
                                             <div style="display: flex; gap: 5px;">
                                                 <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">${action.type}</span>
                                                 <button onclick="generateFullContent(${s.numero}, ${idx})" style="background: #10B981; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">✨ Générer</button>
+                                                <button onclick="validateAndArchiveAction(${s.numero}, ${idx})" style="background: #3B82F6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">✅ Valider</button>
                                             </div>
                                         </div>
                                         ${action.timing ? `<div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">⏰ ${action.timing}</div>` : ''}
                                         ${action.contenu_complet ? `<div style="font-size: 0.9rem; margin-top: 8px; opacity: 0.9; line-height: 1.5; max-height: 100px; overflow: hidden;">${action.contenu_complet.substring(0, 200)}${action.contenu_complet.length > 200 ? '...' : ''}</div>` : ''}
-                                        ${action.kpi_attendu ? `<div style="font-size: 0.8rem; margin-top: 8px; color: #10B981;">📊 ${action.kpi_attendu}</div>` : ''}
+                                        ${action.kpi_attendu ? `<div style="font-size: 0.8rem; margin-top: 8px; color: #10B181;">📊 ${action.kpi_attendu}</div>` : ''}
                                     </div>
                                 `).join('')}
                             </div>
@@ -479,6 +480,330 @@ JSON:
         alert(`✅ Contenu généré!\n\n${generated.titre}\n\n${generated.contenu.substring(0, 200)}...\n\nVisuels: ${generated.visuels.join(', ')}`);
         
         showToast('✅ Contenu prêt !', 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
+
+// ================================================================
+// VALIDATION ET ARCHIVAGE AVEC MÉTRIQUES
+// ================================================================
+
+window.validateAndArchiveAction = async function(weekNum, actionIdx) {
+    try {
+        // 1. Charger la stratégie
+        const { data: strategies, error } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .select('*')
+            .eq('semaine', weekNum)
+            .eq('annee', new Date().getFullYear())
+            .in('statut', ['actif', 'planifié']);
+        
+        if (error || !strategies || strategies.length === 0) {
+            throw new Error(`Semaine ${weekNum} non trouvée`);
+        }
+        
+        const strategy = JSON.parse(strategies[0].strategie_complete);
+        const action = strategy.actions[actionIdx];
+        
+        if (!action) {
+            throw new Error('Action introuvable');
+        }
+        
+        // 2. Modal pour saisir les métriques
+        const html = `
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;" id="metricsModal">
+                <div style="background: white; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                    <h2 style="margin: 0 0 20px 0; color: #333;">📊 Valider et Archiver</h2>
+                    <p style="color: #666; margin-bottom: 20px;"><strong>${action.sujet || action.titre}</strong></p>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">Plateforme de publication</label>
+                        <select id="platformPublished" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="blog">Blog</option>
+                            <option value="email">Email</option>
+                            <option value="video">Vidéo (YouTube/TikTok)</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">Date de publication</label>
+                        <input type="datetime-local" id="publishDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" value="${new Date().toISOString().slice(0, 16)}">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">URL de la publication (optionnel)</label>
+                        <input type="url" id="publishUrl" placeholder="https://linkedin.com/posts/..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">👁️ Vues</label>
+                            <input type="number" id="metricVues" placeholder="150" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">❤️ Likes</label>
+                            <input type="number" id="metricLikes" placeholder="23" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">💬 Commentaires</label>
+                            <input type="number" id="metricComments" placeholder="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">🔄 Partages</label>
+                            <input type="number" id="metricShares" placeholder="2" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">🖱️ Clics</label>
+                            <input type="number" id="metricClicks" placeholder="12" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">🎯 Leads</label>
+                            <input type="number" id="metricLeads" placeholder="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">📝 Notes sur la performance</label>
+                        <textarea id="performanceNotes" placeholder="Ce qui a bien fonctionné, ce qui n'a pas marché..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; min-height: 80px;"></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button onclick="document.getElementById('metricsModal').remove()" style="padding: 10px 20px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer;">Annuler</button>
+                        <button onclick="saveMetricsAndArchive(${weekNum}, ${actionIdx})" style="padding: 10px 20px; border: none; background: #10B981; color: white; border-radius: 6px; cursor: pointer;">✅ Valider et Archiver</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', html);
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
+
+window.saveMetricsAndArchive = async function(weekNum, actionIdx) {
+    try {
+        // Récupérer les valeurs
+        const platform = document.getElementById('platformPublished').value;
+        const publishDate = document.getElementById('publishDate').value;
+        const publishUrl = document.getElementById('publishUrl').value;
+        const vues = parseInt(document.getElementById('metricVues').value) || 0;
+        const likes = parseInt(document.getElementById('metricLikes').value) || 0;
+        const comments = parseInt(document.getElementById('metricComments').value) || 0;
+        const shares = parseInt(document.getElementById('metricShares').value) || 0;
+        const clicks = parseInt(document.getElementById('metricClicks').value) || 0;
+        const leads = parseInt(document.getElementById('metricLeads').value) || 0;
+        const notes = document.getElementById('performanceNotes').value;
+        
+        // Calculer taux engagement
+        const engagement = vues > 0 ? (((likes + comments + shares) / vues) * 100).toFixed(2) + '%' : '0%';
+        
+        // Charger la stratégie
+        const { data: strategies } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .select('*')
+            .eq('semaine', weekNum)
+            .eq('annee', new Date().getFullYear())
+            .in('statut', ['actif', 'planifié']);
+        
+        if (!strategies || strategies.length === 0) {
+            throw new Error('Stratégie non trouvée');
+        }
+        
+        const strategy = JSON.parse(strategies[0].strategie_complete);
+        const action = strategy.actions[actionIdx];
+        
+        // Sauvegarder dans cm_ai_actions avec métriques
+        const { error } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .insert({
+                strategy_id: strategies[0].id,
+                type: action.type,
+                titre: action.sujet || action.titre || 'Action',
+                description: action.contenu_complet || action.description || '',
+                priorite: action.priorite || 'moyenne',
+                statut: 'terminé',
+                date_publication: publishDate,
+                plateforme_publie: platform,
+                url_publication: publishUrl,
+                metriques: {
+                    vues,
+                    likes,
+                    commentaires: comments,
+                    partages: shares,
+                    clics: clicks,
+                    leads,
+                    taux_engagement: engagement
+                },
+                archive: true,
+                notes_performance: notes,
+                completed_at: new Date().toISOString()
+            });
+        
+        if (error) {
+            console.error('❌ Erreur sauvegarde:', error);
+            throw error;
+        }
+        
+        // Fermer modal
+        document.getElementById('metricsModal').remove();
+        
+        showToast(`✅ Action archivée ! ${leads > 0 ? leads + ' leads générés 🎯' : ''}`, 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
+
+// ================================================================
+// CHARGER ACTIONS ARCHIVÉES
+// ================================================================
+
+window.loadArchivedActions = async function() {
+    try {
+        showToast('📚 Chargement archives...', 'info');
+        
+        const { data: actions, error } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .select('*')
+            .eq('archive', true)
+            .order('date_publication', { ascending: false })
+            .limit(20);
+        
+        if (error) {
+            console.error('❌ Erreur chargement archives:', error);
+            throw error;
+        }
+        
+        if (!actions || actions.length === 0) {
+            document.getElementById('archivedActions').innerHTML = `
+                <p style="text-align: center; color: #666; padding: 20px;">
+                    Aucune action archivée. Validez vos actions pour les archiver !
+                </p>
+            `;
+            return;
+        }
+        
+        // Trier par leads puis vues
+        actions.sort((a, b) => {
+            const leadsA = (a.metriques?.leads || 0);
+            const leadsB = (b.metriques?.leads || 0);
+            if (leadsA !== leadsB) return leadsB - leadsA;
+            return (b.metriques?.vues || 0) - (a.metriques?.vues || 0);
+        });
+        
+        const html = `
+            <div style="display: grid; gap: 15px;">
+                ${actions.map((action, idx) => {
+                    const m = action.metriques || {};
+                    const isPerfomer = idx < 3; // Top 3
+                    
+                    return `
+                        <div style="padding: 20px; background: ${isPerfomer ? 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)' : '#F9FAFB'}; border-radius: 8px; border-left: 4px solid ${isPerfomer ? '#F59E0B' : '#10B981'};">
+                            ${isPerfomer ? '<div style="display: inline-block; background: #F59E0B; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 10px;">🏆 TOP PERFORMER</div>' : ''}
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div style="flex: 1;">
+                                    <h3 style="margin: 0 0 8px 0; color: #111; font-size: 1.1rem;">${action.titre}</h3>
+                                    <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.85rem; color: #666;">
+                                        <span style="background: white; padding: 4px 10px; border-radius: 4px;">📱 ${action.plateforme_publie}</span>
+                                        <span>📅 ${new Date(action.date_publication).toLocaleDateString('fr-FR')}</span>
+                                        <span style="background: ${action.priorite === 'haute' ? '#FEE2E2' : action.priorite === 'moyenne' ? '#FEF3C7' : '#D1FAE5'}; padding: 4px 10px; border-radius: 4px;">${action.priorite}</span>
+                                    </div>
+                                </div>
+                                ${action.url_publication ? `<a href="${action.url_publication}" target="_blank" style="color: #3B82F6; text-decoration: none; padding: 8px 15px; background: white; border-radius: 6px; font-size: 0.85rem;">🔗 Voir</a>` : ''}
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 15px 0;">
+                                ${m.vues ? `<div style="background: white; padding: 12px; border-radius: 6px; text-align: center;"><div style="font-size: 1.3rem; font-weight: bold; color: #3B82F6;">${m.vues.toLocaleString()}</div><div style="font-size: 0.75rem; color: #666;">👁️ Vues</div></div>` : ''}
+                                ${m.likes ? `<div style="background: white; padding: 12px; border-radius: 6px; text-align: center;"><div style="font-size: 1.3rem; font-weight: bold; color: #EF4444;">${m.likes}</div><div style="font-size: 0.75rem; color: #666;">❤️ Likes</div></div>` : ''}
+                                ${m.commentaires ? `<div style="background: white; padding: 12px; border-radius: 6px; text-align: center;"><div style="font-size: 1.3rem; font-weight: bold; color: #8B5CF6;">${m.commentaires}</div><div style="font-size: 0.75rem; color: #666;">💬 Comments</div></div>` : ''}
+                                ${m.partages ? `<div style="background: white; padding: 12px; border-radius: 6px; text-align: center;"><div style="font-size: 1.3rem; font-weight: bold; color: #10B981;">${m.partages}</div><div style="font-size: 0.75rem; color: #666;">🔄 Partages</div></div>` : ''}
+                                ${m.clics ? `<div style="background: white; padding: 12px; border-radius: 6px; text-align: center;"><div style="font-size: 1.3rem; font-weight: bold; color: #F59E0B;">${m.clics}</div><div style="font-size: 0.75rem; color: #666;">🖱️ Clics</div></div>` : ''}
+                                ${m.leads ? `<div style="background: white; padding: 12px; border-radius: 6px; text-align: center;"><div style="font-size: 1.3rem; font-weight: bold; color: #059669;">${m.leads}</div><div style="font-size: 0.75rem; color: #666;">🎯 LEADS</div></div>` : ''}
+                                ${m.taux_engagement ? `<div style="background: white; padding: 12px; border-radius: 6px; text-align: center;"><div style="font-size: 1.3rem; font-weight: bold; color: #6366F1;">${m.taux_engagement}</div><div style="font-size: 0.75rem; color: #666;">📈 Engagement</div></div>` : ''}
+                            </div>
+                            
+                            ${action.notes_performance ? `
+                                <div style="background: white; padding: 12px; border-radius: 6px; margin-top: 12px;">
+                                    <strong style="display: block; margin-bottom: 6px; font-size: 0.85rem; color: #666;">📝 Notes:</strong>
+                                    <div style="font-size: 0.9rem; color: #333; line-height: 1.5;">${action.notes_performance}</div>
+                                </div>
+                            ` : ''}
+                            
+                            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                                <button onclick="reuseAction('${action.id}')" style="padding: 8px 15px; background: #10B981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">♻️ Réutiliser</button>
+                                <button onclick="duplicateAction('${action.id}')" style="padding: 8px 15px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">📋 Dupliquer</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        
+        document.getElementById('archivedActions').innerHTML = html;
+        showToast(`✅ ${actions.length} actions chargées`, 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
+
+window.reuseAction = async function(actionId) {
+    try {
+        const { data: action, error } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .select('*')
+            .eq('id', actionId)
+            .single();
+        
+        if (error) throw error;
+        
+        alert(`♻️ RÉUTILISER:\n\n${action.titre}\n\nPlateforme: ${action.plateforme_publie}\n\n${action.description.substring(0, 300)}...`);
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
+
+window.duplicateAction = async function(actionId) {
+    try {
+        const { data: action, error } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .select('*')
+            .eq('id', actionId)
+            .single();
+        
+        if (error) throw error;
+        
+        const { error: insertError } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .insert({
+                ...action,
+                id: undefined,
+                titre: action.titre + ' (Copie)',
+                statut: 'proposé',
+                archive: false,
+                date_publication: null,
+                metriques: {},
+                notes_performance: null,
+                created_at: new Date().toISOString()
+            });
+        
+        if (insertError) throw insertError;
+        
+        showToast('✅ Action dupliquée !', 'success');
         
     } catch (error) {
         console.error('❌ Erreur:', error);
