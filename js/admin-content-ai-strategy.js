@@ -410,25 +410,34 @@ window.generateFullContent = async function(weekNum, actionIdx) {
     showToast('🤖 Génération contenu...', 'info');
     
     try {
+        console.log('🔍 Recherche semaine:', weekNum, 'année:', new Date().getFullYear());
+        
         const { data, error } = await window.supabaseClient
             .from('cm_ai_strategies')
             .select('*')
             .eq('semaine', weekNum)
             .eq('annee', new Date().getFullYear());
         
-        if (error) throw error;
+        console.log('📊 Résultat query:', data, 'erreur:', error);
+        
+        if (error) {
+            console.error('❌ Erreur DB:', error);
+            throw error;
+        }
         
         if (!data || data.length === 0) {
-            throw new Error('Semaine non trouvée en DB');
+            throw new Error(`Semaine ${weekNum} non trouvée en DB`);
         }
         
         const strategy = JSON.parse(data[0].strategie_complete);
+        console.log('📋 Stratégie chargée:', strategy);
         
         if (!strategy.actions || !strategy.actions[actionIdx]) {
-            throw new Error('Action non trouvée');
+            throw new Error(`Action ${actionIdx} non trouvée (total: ${strategy.actions?.length || 0})`);
         }
         
         const action = strategy.actions[actionIdx];
+        console.log('🎯 Action:', action);
         
         const prompt = `Génère contenu PRÊT À PUBLIER:
 
