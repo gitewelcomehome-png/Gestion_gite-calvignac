@@ -72,6 +72,106 @@ export default async function handler(req, res) {
     }
 
     // ================================================================
+    // PROPOSITIONS QUOTIDIENNES IA
+    // ================================================================
+    if (action === 'generate-daily-propositions') {
+      const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+      
+      if (!ANTHROPIC_API_KEY) {
+        return res.status(500).json({ 
+          error: 'Anthropic API key not configured' 
+        });
+      }
+
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      );
+
+      // Récupérer la stratégie active
+      const { data: activeStrategy } = await supabase
+        .from('cm_ai_strategies')
+        .select('*')
+        .eq('statut', 'actif')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      const dayOfWeek = new Date().toLocaleDateString('fr-FR', { weekday: 'long' });
+      const date = new Date().toLocaleDateString('fr-FR');
+
+      const prompt = `Tu es Claude, stratège marketing de LiveOwnerUnit.
+
+📅 AUJOURD'HUI : ${dayOfWeek} ${date}
+
+${activeStrategy ? `STRATÉGIE ACTIVE :
+- Objectif : ${activeStrategy.objectif}
+- Cibles : ${activeStrategy.cibles?.join(', ')}
+- Thèmes : ${activeStrategy.themes?.join(', ')}
+` : 'Pas de stratégie active'}
+
+MISSION : Génère 3-5 PROPOSITIONS CONCRÈTES pour aujourd'hui.
+
+Pour chaque proposition, définis :
+{
+  "id": "unique_id",
+  "type": "post|email|promotion|video",
+  "titre": "Titre accrocheur",
+  "apercu": "Description courte 1 phrase",
+  "contenu_complet": "Contenu prêt-à-poster",
+  "potentiel": "Élevé|Moyen|Faible",
+  "timing": "Ce matin|Cet après-midi|Ce soir",
+  "justification": "Pourquoi cette proposition aujourd'hui",
+  "hashtags": ["#gite", "#locationvacances"]
+}
+
+CONTRAINTES :
+- Basé sur stratégie active ou actualité secteur
+- Contenu PRÊT À PUBLIER (pas juste idée)
+- Adapté au jour/moment (lundi matin ≠ vendredi soir)
+- Respecte principes éthiques (pas de mensonge)
+
+Réponds UNIQUEMENT avec :
+{
+  "propositions": [...]
+}`;
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 4000,
+          temperature: 0.8,
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Claude API error');
+      }
+
+      const result = await response.json();
+      const content = result.content[0].text;
+      const cleanJSON = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const parsed = JSON.parse(cleanJSON);
+
+      return res.json({ 
+        success: true, 
+        propositions: parsed.propositions,
+        generated_at: new Date().toISOString()
+      });
+    }
+
+    // ================================================================
     // GÉNÉRATION DE TEXTE
     // ================================================================
     if (action === 'generate-text') {

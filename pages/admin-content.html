@@ -55,11 +55,7 @@
         <!-- Onglets Navigation -->
         <div style="border-bottom: 2px solid #E5E7EB; margin-bottom: 2rem;">
             <div style="display: flex; gap: 0;">
-                <button class="tab-btn active" onclick="switchTab('generation')" data-tab="generation">
-                    <i data-lucide="pen-tool"></i>
-                    Génération Manuelle
-                </button>
-                <button class="tab-btn" onclick="switchTab('strategy')" data-tab="strategy">
+                <button class="tab-btn active" onclick="switchTab('strategy')" data-tab="strategy">
                     <i data-lucide="target"></i>
                     Stratégie IA
                 </button>
@@ -71,11 +67,15 @@
                     <i data-lucide="zap"></i>
                     Actions Proposées
                 </button>
+                <button class="tab-btn" onclick="switchTab('generation')" data-tab="generation">
+                    <i data-lucide="pen-tool"></i>
+                    Génération Manuelle
+                </button>
             </div>
         </div>
 
-        <!-- TAB 1 : GÉNÉRATION MANUELLE -->
-        <div id="tab-generation" class="tab-content active">
+        <!-- TAB 1 : STRATÉGIE IA (ACTIF PAR DÉFAUT) -->
+        <div id="tab-strategy" class="tab-content active">
             <!-- Actions Rapides -->
             <section style="margin-bottom: 2rem;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
@@ -107,8 +107,8 @@
             </section>
         </div>
 
-        <!-- TAB 2 : STRATÉGIE IA -->
-        <div id="tab-strategy" class="tab-content" style="display: none;">
+        <!-- TAB 4 : GÉNÉRATION MANUELLE (FIN) -->
+        <div id="tab-generation" class="tab-content" style="display: none;">
             <!-- Plan Long Terme (12 semaines) -->
             <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; color: white;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
