@@ -852,6 +852,100 @@ Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
     }
 
     // ================================================================
+    // ================================================================
+    // GÉNÉRATION ACTIONS BUSINESS STRATÉGIQUES
+    // ================================================================
+    if (action === 'generate-business-actions') {
+        const apiKey = req.body.useOpenAI ? process.env.OPENAI_API_KEY : process.env.ANTHROPIC_API_KEY;
+        const provider = req.body.useOpenAI ? 'OpenAI' : 'Claude';
+        
+        if (!apiKey) {
+            return res.status(500).json({ error: `${provider} API key not configured` });
+        }
+
+        const prompt = `Tu es un expert en marketing SaaS pour LiveOwnerUnit, une solution de gestion de réservations pour propriétaires de gîtes.
+
+**Génère 5 actions business stratégiques** pour améliorer les performances commerciales, différentes des publications social media classiques :
+
+Types d'actions attendues :
+- **Promotions** : Offres limitées, réductions, packages, cashback
+- **Partenariats** : Collaborations avec influenceurs, plateformes, organisations
+- **Optimisations** : Amélioration site web, tunnel de conversion, pricing
+- **Campagnes spéciales** : Webinaires, challenges, concours
+- **Techniques commerciales** : Cold email, retargeting, referral program
+
+Pour chaque action, fournis :
+- type (promotion/partenariat/optimisation/campagne/technique)
+- titre (accrocheur et précis)
+- description (détaillée, actionnable, 2-3 phrases)
+- justification (pourquoi cette action maintenant ? données à l'appui)
+- priorite (haute/moyenne/basse)
+
+Format JSON strict :
+\`\`\`json
+{
+  "actions": [
+    {
+      "type": "promotion",
+      "titre": "Offre Black Friday : -30% sur l'abonnement annuel",
+      "description": "Lancer une promotion Black Friday avec -30% sur l'abonnement annuel, valable du 25 au 30 novembre. Communiquer via email, réseaux sociaux et bannière site web.",
+      "justification": "Période d'achat forte, concurrence active, opportunité de booster les conversions annuelles qui ont un meilleur LTV.",
+      "priorite": "haute"
+    }
+  ]
+}
+\`\`\`
+
+Fournis **uniquement le JSON**, sans texte avant/après.`;
+
+        let actions;
+
+        if (req.body.useOpenAI) {
+            // OpenAI
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.7
+                })
+            });
+
+            const data = await response.json();
+            const content = data.choices[0].message.content;
+            const parsed = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+            actions = parsed.actions;
+
+        } else {
+            // Claude
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 4000,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+
+            const data = await response.json();
+            const content = data.content[0].text;
+            const parsed = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+            actions = parsed.actions;
+        }
+
+        return res.json({ success: true, actions });
+    }
+
+    // ================================================================
     // GÉNÉRATION PLAN STRATÉGIQUE LONG TERME (12 SEMAINES EN 3 PHASES)
     // ================================================================
     if (action === 'generate-longterm-plan') {

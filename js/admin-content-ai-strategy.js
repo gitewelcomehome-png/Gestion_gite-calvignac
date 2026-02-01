@@ -98,9 +98,6 @@ window.generateLongtermPlan = async function() {
         // ÉTAPE 3 : Sauvegarder semaine 1
         await saveSingleWeek(week, year);
         
-        // ÉTAPE 3.5 : Extraire et sauvegarder les actions proposées
-        await saveActionsFromWeek(week);
-        
         showToast('✅ Semaine 1 prête ! Génération 2-12 en cours...', 'success');
         
         // ÉTAPE 4 : Générer semaines 2-12 en arrière-plan
@@ -181,7 +178,6 @@ async function generateRemainingWeeksBackground(startWeek, year, planGlobal, use
             if (response.ok) {
                 const { week } = await response.json();
                 await saveSingleWeek(week, year);
-                await saveActionsFromWeek(week);
                 console.log(`✅ Semaine ${weekNum}/12 générée`);
             }
         } catch (err) {
@@ -1148,7 +1144,51 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLongtermPlanFromDB(); // Recharger le plan 12 semaines
     
     // Charger actions uniquement si l'élément existe
-    if (document.getElementById('actionsList')) {
+    if (document.getElementById('aiActions')) {
         loadAIActions();
     }
 });
+
+// ================================================================
+// GÉNÉRATION D'ACTIONS BUSINESS STRATÉGIQUES
+// ================================================================
+
+window.generateBusinessActions = async function() {
+    try {
+        showToast('🤖 Génération d\'actions business en cours...', 'info');
+        
+        const response = await fetch('/api/content-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'generate-business-actions'
+            })
+        });
+        
+        if (!response.ok) throw new Error('Erreur API');
+        
+        const { actions } = await response.json();
+        
+        // Sauvegarder dans cm_ai_actions
+        const { error } = await window.supabaseClient
+            .from('cm_ai_actions')
+            .insert(actions.map(a => ({
+                type: a.type,
+                titre: a.titre,
+                description: a.description,
+                justification: a.justification,
+                priorite: a.priorite || 'moyenne',
+                statut: 'propose'
+            })));
+        
+        if (error) throw error;
+        
+        showToast('✅ Actions business générées !', 'success');
+        await loadAIActions();
+        
+    } catch (error) {
+        console.error('❌ Erreur génération actions:', error);
+        showToast('❌ Erreur lors de la génération', 'error');
+    }
+}
+
