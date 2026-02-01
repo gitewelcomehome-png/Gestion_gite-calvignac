@@ -94,6 +94,11 @@ export default async function handler(req, res) {
       }
 
       console.log('✅ Anthropic API key présente');
+      console.log('🔑 API Key format:', {
+        length: ANTHROPIC_API_KEY.length,
+        starts: ANTHROPIC_API_KEY.substring(0, 7),
+        valid_format: ANTHROPIC_API_KEY.startsWith('sk-ant-')
+      });
 
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_ANON_KEY;
@@ -172,7 +177,7 @@ Réponds UNIQUEMENT avec :
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'claude-3-sonnet-20240229',
+          model: 'claude-3-5-sonnet-20241022',
           max_tokens: 4000,
           temperature: 0.8,
           messages: [{
