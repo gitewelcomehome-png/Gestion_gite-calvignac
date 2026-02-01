@@ -107,54 +107,54 @@
             </section>
 
             <!-- Plan Long Terme (12 semaines) -->
-            <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; color: white;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
-                        <i data-lucide="calendar-range"></i>
-                        Plan Stratégique 12 Semaines
+            <section style="background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #f1f5f9;">
+                    <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; color: #1e293b;">
+                        <i data-lucide="calendar-range" style="color: #667eea;"></i>
+                        📅 Plan Stratégique 12 Semaines
                     </h2>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <select id="aiProviderSelect" style="padding: 8px 12px; border-radius: 4px; border: none; background: white; color: #667eea; cursor: pointer;">
+                            <select id="aiProviderSelect" style="padding: 10px 14px; border-radius: 8px; border: 2px solid #e2e8f0; background: #f8fafc; color: #1e293b; cursor: pointer; font-weight: 500; transition: all 0.3s;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
                                 <option value="openai">🤖 OpenAI GPT-4o (Rapide)</option>
                                 <option value="claude">🧠 Claude Sonnet 4.5 (Détaillé)</option>
                             </select>
-                            <button class="btn-primary" onclick="generateLongtermPlan()" style="background: white; color: #667eea;">
+                            <button class="btn-primary" onclick="generateLongtermPlan()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';">
                                 <i data-lucide="zap"></i>
                                 Générer Plan Complet
                             </button>
                         </div>
-                        <div style="background: rgba(255,255,255,0.15); border-radius: 6px; padding: 10px; display: flex; gap: 15px; flex-wrap: wrap;">
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                                <input type="checkbox" id="platform_linkedin" value="linkedin" checked style="cursor: pointer;">
+                        <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; gap: 15px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: #475569; font-weight: 500;">
+                                <input type="checkbox" id="platform_linkedin" value="linkedin" checked style="cursor: pointer; width: 16px; height: 16px;">
                                 <span>LinkedIn</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                                <input type="checkbox" id="platform_facebook" value="facebook" checked style="cursor: pointer;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: #475569; font-weight: 500;">
+                                <input type="checkbox" id="platform_facebook" value="facebook" checked style="cursor: pointer; width: 16px; height: 16px;">
                                 <span>Facebook</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                                <input type="checkbox" id="platform_instagram" value="instagram" checked style="cursor: pointer;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: #475569; font-weight: 500;">
+                                <input type="checkbox" id="platform_instagram" value="instagram" checked style="cursor: pointer; width: 16px; height: 16px;">
                                 <span>Instagram</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                                <input type="checkbox" id="platform_blog" value="blog" style="cursor: pointer;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: #475569; font-weight: 500;">
+                                <input type="checkbox" id="platform_blog" value="blog" style="cursor: pointer; width: 16px; height: 16px;">
                                 <span>Blog</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                                <input type="checkbox" id="platform_email" value="email" style="cursor: pointer;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: #475569; font-weight: 500;">
+                                <input type="checkbox" id="platform_email" value="email" style="cursor: pointer; width: 16px; height: 16px;">
                                 <span>Email Marketing</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                                <input type="checkbox" id="platform_video" value="video" checked style="cursor: pointer;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: #475569; font-weight: 500;">
+                                <input type="checkbox" id="platform_video" value="video" checked style="cursor: pointer; width: 16px; height: 16px;">
                                 <span>Vidéo (YT/TikTok)</span>
                             </label>
                         </div>
                     </div>
                 </div>
                 <div id="longtermPlan">
-                    <p style="text-align: center; opacity: 0.9; padding: 20px;">
-                        Aucun plan stratégique. Cliquez sur "Générer" pour créer votre feuille de route 3 mois !
+                    <p style="text-align: center; color: #64748b; padding: 40px 20px; font-size: 1rem;">
+                        Aucun plan stratégique. Cliquez sur "Générer" pour créer votre feuille de route 3 mois ! 🚀
                     </p>
                 </div>
             </section>

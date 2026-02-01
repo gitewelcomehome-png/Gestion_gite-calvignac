@@ -257,60 +257,60 @@ async function loadLongtermPlanFromDB() {
 // Afficher le plan
 function displayLongtermPlan(plan) {
     const html = `
-        <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3)); border-radius: 12px; border-left: 5px solid #667eea;">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                <h3 style="margin: 0; font-size: 1.4rem; color: #fff;">🎯 Vision 3 mois</h3>
-                <button onclick="improvePlan()" style="background: white; color: #667eea; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+        <div style="margin-bottom: 20px; padding: 24px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.4rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">🎯 Vision 3 mois</h3>
+                <button onclick="improvePlan()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                     <span>✨</span> Améliorer le plan
                 </button>
             </div>
-            <p style="margin: 0 0 20px 0; font-size: 1.1rem; line-height: 1.6;">${plan.plan_global.vision_3_mois || plan.plan_global.vision || 'Devenir référence gestion locative'}</p>
+            <p style="margin: 0 0 20px 0; font-size: 1.05rem; line-height: 1.7; color: #475569;">${plan.plan_global.vision_3_mois || plan.plan_global.vision || 'Devenir référence gestion locative'}</p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
-                <div style="padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px;">
-                    <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">Leads Qualifiés</div>
-                    <div style="font-size: 1.8rem; font-weight: bold;">${plan.plan_global.objectifs_finaux?.leads_qualifies || '250'}</div>
+                <div style="padding: 18px; background: white; border-radius: 10px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.04)';">
+                    <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Leads Qualifiés</div>
+                    <div style="font-size: 1.9rem; font-weight: bold; color: #1e293b;">${plan.plan_global.objectifs_finaux?.leads_qualifies || '250'}</div>
                 </div>
-                <div style="padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px;">
-                    <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">Clients Signés</div>
-                    <div style="font-size: 1.8rem; font-weight: bold;">${plan.plan_global.objectifs_finaux?.clients_signes || '35'}</div>
+                <div style="padding: 18px; background: white; border-radius: 10px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.04)';">
+                    <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Clients Signés</div>
+                    <div style="font-size: 1.9rem; font-weight: bold; color: #1e293b;">${plan.plan_global.objectifs_finaux?.clients_signes || '35'}</div>
                 </div>
-                <div style="padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px;">
-                    <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">MRR Cible</div>
-                    <div style="font-size: 1.8rem; font-weight: bold;">${plan.plan_global.objectifs_finaux?.mrr_cible || '1800€'}</div>
+                <div style="padding: 18px; background: white; border-radius: 10px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.04)';">
+                    <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">MRR Cible</div>
+                    <div style="font-size: 1.9rem; font-weight: bold; color: #1e293b;">${plan.plan_global.objectifs_finaux?.mrr_cible || '1800€'}</div>
                 </div>
             </div>
         </div>
         
         <div style="display: grid; gap: 20px;">
             ${plan.semaines.map(s => `
-                <div style="padding: 25px; background: rgba(255,255,255,0.1); border-radius: 12px; border-left: 5px solid ${s.numero === 1 ? '#10B981' : '#667eea'};">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h4 style="margin: 0; font-size: 1.3rem;">📅 Semaine ${s.numero}</h4>
-                        <span style="background: ${s.numero === 1 ? '#10B981' : '#667eea'}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
+                <div style="padding: 28px; background: white; border-radius: 12px; border-left: 5px solid ${s.numero === 1 ? '#10B981' : '#667eea'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'; this.style.transform='translateY(0)';">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                        <h4 style="margin: 0; font-size: 1.3rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">📅 Semaine ${s.numero}</h4>
+                        <span style="background: linear-gradient(135deg, ${s.numero === 1 ? '#10B981' : '#667eea'} 0%, ${s.numero === 1 ? '#059669' : '#764ba2'} 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 6px ${s.numero === 1 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(102, 126, 234, 0.3)'};">
                             ${s.numero === 1 ? 'ACTIVE' : 'PLANIFIÉE'}
                         </span>
                     </div>
                     
-                    <div style="margin-bottom: 20px;">
-                        <h5 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #10B981;">🎯 ${s.objectif_principal || s.objectif}</h5>
+                    <div style="margin-bottom: 20px; padding: 18px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 10px; border-left: 3px solid #10B981;">
+                        <h5 style="margin: 0 0 12px 0; font-size: 1.1rem; color: #059669; font-weight: 600;">🎯 ${s.objectif_principal || s.objectif}</h5>
                         ${s.sous_objectifs ? `
-                            <ul style="margin: 10px 0; padding-left: 20px; opacity: 0.9;">
-                                ${s.sous_objectifs.map(so => `<li style="margin: 5px 0;">${so}</li>`).join('')}
+                            <ul style="margin: 10px 0; padding-left: 20px; color: #475569;">
+                                ${s.sous_objectifs.map(so => `<li style="margin: 6px 0; line-height: 1.5;">${so}</li>`).join('')}
                             </ul>
                         ` : ''}
                     </div>
                     
-                    <div style="margin-bottom: 15px;">
-                        <strong style="display: block; margin-bottom: 8px; opacity: 0.9;">👥 Cibles:</strong>
+                    <div style="margin-bottom: 18px;">
+                        <strong style="display: block; margin-bottom: 10px; color: #1e293b; font-size: 0.95rem;">👥 Cibles:</strong>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            ${(s.cibles || []).map(c => `<span style="background: rgba(102,126,234,0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">${c}</span>`).join('')}
+                            ${(s.cibles || []).map(c => `<span style="background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%); color: #5b21b6; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; border: 1px solid #c4b5fd;">${c}</span>`).join('')}
                         </div>
                     </div>
                     
-                    <div style="margin-bottom: 15px;">
-                        <strong style="display: block; margin-bottom: 8px; opacity: 0.9;">🔑 Thèmes clés:</strong>
+                    <div style="margin-bottom: 18px;">
+                        <strong style="display: block; margin-bottom: 10px; color: #1e293b; font-size: 0.95rem;">🔑 Thèmes clés:</strong>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            ${(s.themes || []).map(t => `<span style="background: rgba(16,185,129,0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">${t}</span>`).join('')}
+                            ${(s.themes || []).map(t => `<span style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; border: 1px solid #6ee7b7;">${t}</span>`).join('')}
                         </div>
                     </div>
                     
