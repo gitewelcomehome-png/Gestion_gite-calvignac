@@ -145,17 +145,20 @@ async function saveActionsFromWeek(week) {
     if (!week.actions || week.actions.length === 0) return;
     
     const actions = week.actions.map(action => ({
-        type_contenu: action.type || 'article',
+        type: action.type || 'article',
         titre: action.sujet || action.titre || 'Action semaine ' + week.numero,
         description: action.contenu_complet || action.description || 'Contenu à définir',
         statut: 'propose',
-        priorite: action.priorite || 'moyenne',
-        created_at: new Date().toISOString()
+        priorite: action.priorite || 'moyenne'
     }));
     
-    await window.supabaseClient
+    const { error } = await window.supabaseClient
         .from('cm_ai_actions')
         .insert(actions);
+    
+    if (error) {
+        console.error('❌ Erreur insertion actions:', error);
+    }
 }
 
 // Générer semaines 2-12 en arrière-plan (sans bloquer UI)
