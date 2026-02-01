@@ -793,61 +793,44 @@ KPIs :
    ✅ "Testez 14 jours gratuit, annulez en 1 clic"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 FORMAT RÉPONSE (JSON STRICT)
+⚠️ FORMAT RÉPONSE SIMPLIFIÉ (JSON STRICT)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {
   "plan_global": {
-    "vision_3_mois": "Devenir LA référence gestion locative en 90 jours",
-    "budget_marketing_estime": "0€ (S1-3), 500€/mois (S4-8), 800€/mois (S9-12)",
+    "vision_3_mois": "Devenir référence gestion locative",
     "objectifs_finaux": {
-      "notoriete_impressions": 120000,
-      "engagement_moyen": "4.2%",
       "leads_qualifies": 250,
       "clients_signes": 35,
-      "mrr_cible": "1800€",
-      "roi_marketing": "400%",
-      "nps": 65
-    },
-    "risques_anticipes": [
-      "Saisonnalité basse (oct-fév) : adapter messaging urgence",
-      "Concurrence gratuite Google Calendar : souligner ROI double-booking",
-      "Résistance changement loueurs seniors : vidéos tuto simples"
-    ],
-    "hypotheses_critiques": [
-      "Taux conversion landing page 8-12%",
-      "CAC organique < 50€, payant < 150€",
-      "Churn < 5%/mois si onboarding réussi",
-      "LTV > 600€ (12 mois rétention moyenne)"
-    ]
+      "mrr_cible": "1800€"
+    }
   },
   "phase": ${phase},
   "semaines": [
     {
       "numero": ${(phase - 1) * 4 + 1},
-      "phase": "DÉMARRAGE",
-      "objectif_principal": "Lancer présence LinkedIn + validation marché",
-      "objectif_mesurable": "10 leads qualifiés + 3000 impressions",
-      "cibles_audiences": [
+      "objectif_principal": "Description courte objectif semaine",
+      "cibles": ["Propriétaires 1-3 gîtes", "Loueurs débutants"],
+      "themes": ["Pain point 1", "Pain point 2"],
+      "actions": [
         {
-          "segment": "Propriétaires 1-3 gîtes",
-          "pain_points": ["Double-bookings récurrents", "Jonglage 5 plateformes", "Perte 2000-5000€/an"],
-          "canaux": ["LinkedIn", "Groupes Facebook gîtes France", "Forums locationssaisonnieres.fr"],
-          "budget": "0€"
-        }
-      ],
-      "themes_contenu": [
-        {
-          "theme": "Le vrai coût des double-bookings",
-          "angle": "Histoire personnelle + calcul perte CA précis",
-          "emotion_cible": "Frustration → Espoir",
-          "formats": ["Post LinkedIn carrousel 5 slides", "Vidéo témoignage 45s"]
+          "type": "post_linkedin",
+          "sujet": "Titre court accrocheur",
+          "contenu_court": "3-4 lignes maximum texte prêt à poster"
         },
         {
-          "theme": "J'ai testé 8 outils, ils sont tous nuls (sauf 1)",
-          "angle": "Comparatif brutal sans concession",
-          "emotion_cible": "Curiosité → Confiance",
-          "formats": ["Thread LinkedIn", "PDF comparatif téléchargeable"]
+          "type": "email_lead_magnet",
+          "sujet": "Titre email",
+          "lead_magnet": "PDF checklist ou calculateur"
         }
+      ],
+      "kpis": {
+        "leads": {"cible": 10},
+        "impressions": {"cible": 3000}
+      }
+    }
+    // GÉNÉRER 3 AUTRES SEMAINES (${(phase - 1) * 4 + 2}, ${(phase - 1) * 4 + 3}, ${(phase - 1) * 4 + 4})
+  ]
+}
       ],
       "actions": [
         {
@@ -914,33 +897,21 @@ KPIs :
         "Taux conversion landing page réel",
         "Objections principales prospects (prix ? complexité ? confiance ?)"
       ]
-    },
-    // Générer 3 AUTRES SEMAINES pour cette phase (${(phase - 1) * 4 + 2}, ${(phase - 1) * 4 + 3}, ${(phase - 1) * 4 + 4})
-    // IMPORTANT : Générer 4 semaines COMPLÈTES au total avec même niveau de détail
-  ],
-  "automatisations_prevues": [
-    {"semaine": 3, "nom": "Auto-posting LinkedIn 3x/sem", "outil": "Buffer"},
-    {"semaine": 5, "nom": "Email nurturing auto", "outil": "Loops.so ou Resend"},
-    {"semaine": 7, "nom": "Retargeting LinkedIn Ads", "budget": "500€/mois"}
-  ],
-  "points_decision": [
-    {"semaine": 4, "decision": "Si CAC < 150€ → Scaler budget ads à 500€/mois"},
-    {"semaine": 8, "decision": "Si churn > 5% → Refonte onboarding client"}
+    }
+    // GÉNÉRER 3 AUTRES SEMAINES (${(phase - 1) * 4 + 2}, ${(phase - 1) * 4 + 3}, ${(phase - 1) * 4 + 4})
   ]
-}${contextHistory}
+}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ IMPORTANT FINAL
+⚡ RÈGLES GÉNÉRATION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Génère 4 SEMAINES COMPLÈTES pour la phase ${phase}
-- Chaque semaine : 4-6 actions détaillées
-- Contenus : PRÊTS À POSTER (pas juste des idées vagues)
-- KPIs : Réalistes et progressifs (pas de x10 magique)
-- Communication : TON DIRECT, authentique, crédible
+- 4 semaines COURTES (pas de détails excessifs)
+- 3-4 actions max par semaine
+- Contenus: Titre + 2-3 lignes (pas de pavés)
+- KPIs: 2-3 chiffres clés seulement
+- JSON uniquement, aucun texte avant/après
 
-Réponds UNIQUEMENT avec le JSON (pas de texte avant/après).${reglesEthiques}${feedbackLearning}
-
-📌 NOTE CRITIQUE : Si une demande viole les principes éthiques, REFUSE et explique pourquoi dans le JSON.`;
+Réponds AVEC LE JSON COMPLET.${reglesEthiques}`;
 
       const planResponse = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -951,7 +922,7 @@ Réponds UNIQUEMENT avec le JSON (pas de texte avant/après).${reglesEthiques}${
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5-20250929',
-          max_tokens: 16000,
+          max_tokens: 8000,
           temperature: 0.7,
           messages: [{
             role: 'user',
