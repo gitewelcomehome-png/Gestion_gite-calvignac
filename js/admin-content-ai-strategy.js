@@ -85,6 +85,9 @@ window.generateLongtermPlan = async function() {
         // ÉTAPE 3 : Sauvegarder semaine 1
         await saveSingleWeek(week, startWeek, year);
         
+        // ÉTAPE 3.5 : Extraire et sauvegarder les actions proposées
+        await saveActionsFromWeek(week);
+        
         showToast('✅ Semaine 1 prête ! Génération 2-12 en cours...', 'success');
         
         // ÉTAPE 4 : Générer semaines 2-12 en arrière-plan
@@ -114,6 +117,24 @@ async function saveSingleWeek(semaine, startWeek, year) {
         }, { onConflict: 'semaine,annee' });
 }
 
+// Sauvegarder les actions proposées d'une semaine
+async function saveActionsFromWeek(week) {
+    if (!week.actions || week.actions.length === 0) return;
+    
+    const actions = week.actions.map(action => ({
+        type_contenu: action.type || 'article',
+        titre: action.sujet || action.titre || 'Action semaine ' + week.numero,
+        description: action.contenu_complet || action.description || 'Contenu à définir',
+        statut: 'propose',
+        priorite: action.priorite || 'moyenne',
+        created_at: new Date().toISOString()
+    }));
+    
+    await window.supabaseClient
+        .from('cm_ai_actions')
+        .insert(actions);
+}
+
 // Générer semaines 2-12 en arrière-plan (sans bloquer UI)
 async function generateRemainingWeeksBackground(startWeek, year, planGlobal, useOpenAI = false) {
     for (let weekNum = 2; weekNum <= 12; weekNum++) {
@@ -133,6 +154,7 @@ async function generateRemainingWeeksBackground(startWeek, year, planGlobal, use
             if (response.ok) {
                 const { week } = await response.json();
                 await saveSingleWeek(week, startWeek, year);
+                await saveActionsFromWeek(week);
                 console.log(`✅ Semaine ${weekNum}/12 générée`);
             }
         } catch (err) {
@@ -462,15 +484,14 @@ window.approveAction = async function(actionId) {
         
         if (updateError) throw updateError;
         
-        showToast('✅ Action approuvée et ajoutée à la file de contenu', 'success');
+        showToast('✅ Action approuvée et ajoutée à la file', 'success');
         
-        // Recharger SANS changer d'onglet
+        // Recharger UNIQUEMENT la liste des actions (pas de navigation)
         await loadAIActions();
-        await loadContentQueue();
         
     } catch (error) {
         console.error('❌ Erreur approbation:', error);
-        showToast('❌ Erreur lors de l\'approbation', 'error');
+        showToast('❌ Erreur: ' + error.message, 'error');
     }
 };
 
@@ -482,9 +503,12 @@ window.rejectAction = async function(actionId) {
             .eq('id', actionId);
         
         showToast('❌ Action rejetée', 'info');
-        loadAIActions();
+        
+        // Recharger UNIQUEMENT la liste des actions (pas de navigation)
+        await loadAIActions();
     } catch (error) {
         console.error('❌ Erreur:', error);
+        showToast('❌ Erreur: ' + error.message, 'error');
     }
 };
 
