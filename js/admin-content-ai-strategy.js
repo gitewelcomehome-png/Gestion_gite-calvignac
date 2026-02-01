@@ -80,7 +80,6 @@ window.generateLongtermPlan = async function() {
         generateRemainingWeeksInBackground(startWeek, year, plan_global);
         
     } catch (error) {
-    } catch (error) {
         console.error('❌ Erreur:', error);
         
         const loaderEl = document.getElementById('longtermPlan');
