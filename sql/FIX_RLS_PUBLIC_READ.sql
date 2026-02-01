@@ -5,9 +5,15 @@
 -- et doivent être accessibles sans authentification
 -- ================================================================
 
--- Ajouter une politique de lecture publique
-CREATE POLICY "Public read strategies" ON cm_ai_strategies
-    FOR SELECT USING (true);
+-- Vérifier les données existantes
+SELECT semaine, annee, statut, 
+       LEFT(strategie_complete::text, 100) as apercu,
+       created_at
+FROM cm_ai_strategies 
+WHERE annee = 2026
+ORDER BY semaine;
 
--- Commentaire
-COMMENT ON POLICY "Public read strategies" ON cm_ai_strategies IS 'Autoriser la lecture publique des stratégies IA (pas de données sensibles)';
+-- Si besoin de recréer la policy :
+-- DROP POLICY IF EXISTS "Public read strategies" ON cm_ai_strategies;
+-- CREATE POLICY "Public read strategies" ON cm_ai_strategies
+--     FOR SELECT USING (true);

@@ -83,7 +83,7 @@ window.generateLongtermPlan = async function() {
         displayLongtermPlan(partialPlan);
         
         // ÉTAPE 3 : Sauvegarder semaine 1
-        await saveSingleWeek(week, startWeek, year);
+        await saveSingleWeek(week, year);
         
         // ÉTAPE 3.5 : Extraire et sauvegarder les actions proposées
         await saveActionsFromWeek(week);
@@ -99,13 +99,15 @@ window.generateLongtermPlan = async function() {
     }
 };
 
-// Sauvegarder une semaine (SIMPLE: juste 1-12)
-async function saveSingleWeek(semaine, startWeek, year) {
+// Sauvegarder une semaine (SIMPLE: juste 1-12, IGNORE startWeek)
+async function saveSingleWeek(semaine, year) {
     try {
+        console.log('💾 Sauvegarde semaine', semaine.numero, '/ 12 pour année', year);
+        
         const { error } = await window.supabaseClient
             .from('cm_ai_strategies')
             .upsert({
-                semaine: semaine.numero, // Juste 1-12
+                semaine: semaine.numero, // TOUJOURS 1-12
                 annee: year,
                 objectif: semaine.objectif_principal || semaine.objectif || 'Objectif semaine ' + semaine.numero,
                 cibles: semaine.cibles || [],
@@ -118,7 +120,7 @@ async function saveSingleWeek(semaine, startWeek, year) {
         if (error) {
             console.error('❌ Erreur sauvegarde semaine', semaine.numero, ':', error);
         } else {
-            console.log('✅ Semaine', semaine.numero, 'sauvegardée en DB');
+            console.log('✅ Semaine', semaine.numero, 'sauvegardée en DB (vraie colonne semaine =', semaine.numero, ')');
         }
     } catch (err) {
         console.error('❌ Erreur saveSingleWeek:', err);
@@ -161,7 +163,7 @@ async function generateRemainingWeeksBackground(startWeek, year, planGlobal, use
             
             if (response.ok) {
                 const { week } = await response.json();
-                await saveSingleWeek(week, startWeek, year);
+                await saveSingleWeek(week, year);
                 await saveActionsFromWeek(week);
                 console.log(`✅ Semaine ${weekNum}/12 générée`);
             }
