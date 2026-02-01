@@ -564,6 +564,104 @@ Image description: ${prompt}`;
     }
 
     // ================================================================
+    // GÉNÉRATION UNE SEULE SEMAINE (OPTIMISÉ RAPIDE)
+    // ================================================================
+    if (action === 'generate-single-week') {
+      const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+      
+      if (!ANTHROPIC_API_KEY) {
+        return res.status(500).json({ 
+          error: 'Anthropic API key not configured' 
+        });
+      }
+
+      const { weekNumber, startWeek, year } = req.body;
+
+      const weekPrompt = `Génère UNIQUEMENT la semaine ${weekNumber} d'un plan marketing pour LiveOwnerUnit (SaaS gestion locative).
+
+Format JSON strict :
+{
+  "plan_global": ${weekNumber === 1 ? `{
+    "vision_3_mois": "Devenir référence gestion locative",
+    "objectifs_finaux": {
+      "leads_qualifies": 250,
+      "clients_signes": 35,
+      "mrr_cible": "1800€"
+    }
+  }` : 'null'},
+  "week": {
+    "numero": ${weekNumber},
+    "objectif_principal": "Objectif court et clair",
+    "cibles": ["Propriétaires 1-3 gîtes"],
+    "themes": ["Pain point 1", "Pain point 2"],
+    "actions": [
+      {
+        "type": "post_linkedin",
+        "sujet": "Titre accrocheur court",
+        "contenu_court": "2-3 lignes texte prêt"
+      }
+    ],
+    "kpis": {
+      "leads": {"cible": 10},
+      "impressions": {"cible": 3000}
+    }
+  }
+}
+
+Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 2000,
+          temperature: 0.7,
+          messages: [{
+            role: 'user',
+            content: weekPrompt
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Claude API error: ${error.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      const content = data.content[0].text;
+      let cleanJSON = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      try {
+        const parsed = JSON.parse(cleanJSON);
+        return res.status(200).json({
+          success: true,
+          week: parsed.week,
+          plan_global: parsed.plan_global,
+          tokens_used: data.usage
+        });
+      } catch (parseError) {
+        return res.status(200).json({
+          success: true,
+          week: {
+            numero: weekNumber,
+            objectif_principal: "Semaine " + weekNumber,
+            cibles: ["Propriétaires gîtes"],
+            themes: ["Marketing"],
+            actions: [],
+            kpis: {}
+          },
+          plan_global: null
+        });
+      }
+    }
+
+    // ================================================================
     // GÉNÉRATION PLAN STRATÉGIQUE LONG TERME (12 SEMAINES EN 3 PHASES)
     // ================================================================
     if (action === 'generate-longterm-plan') {
