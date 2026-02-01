@@ -173,26 +173,8 @@ function displayLongtermPlan(plan) {
 // ================================================================
 // STRATÉGIE HEBDOMADAIRE
 // ================================================================
-        
-        showToast('✅ Plan 12 semaines généré !', 'success');
-        displayLongtermPlan(plan);
-        loadCurrentStrategy();
-        
-    } catch (error) {
-        console.error('❌ Erreur:', error);
-        
-        const loaderEl = document.getElementById('longtermPlan');
-        
-        if (error.name === 'AbortError') {
-            // Timeout - Afficher message avec option retry
-            loaderEl.innerHTML = `
-                <div style="text-align: center; padding: 40px; background: #FEF2F2; border-radius: 8px; border: 1px solid #FCA5A5;">
-                    <div style="font-size: 48px; margin-bottom: 15px;">⏱️</div>
-                    <h3 style="color: #DC2626; margin-bottom: 10px;">Timeout - L'IA prend trop de temps</h3>
-                    <p style="color: #7F1D1D; margin-bottom: 20px;">La génération dépasse 60 secondes. Vercel limite les réponses.</p>
-                    <button onclick="generateLongtermPlan()" class="btn-primary" style="background: #667eea;">
-                        <i data-lucide="refresh-cw"></i>
-                        Réessayer
+// STRATÉGIE HEBDOMADAIRE
+// ================================================================
                     </button>
                     <p style="margin-top: 15px; font-size: 0.85rem; color: #9CA3AF;">💡 Le plan peut être sauvegardé partiellement en base</p>
                 </div>
