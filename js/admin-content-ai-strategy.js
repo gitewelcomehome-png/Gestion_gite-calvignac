@@ -58,7 +58,10 @@ window.generateLongtermPlan = async function() {
         
         const { week, plan_global } = await response.json();
         
-        // ÉTAPE 2 : Afficher semaine 1 immédiatement
+        // DEBUG: Voir ce que Claude a vraiment généré
+        console.log('📊 CONTENU GÉNÉRÉ PAR CLAUDE:', JSON.stringify(week, null, 2));
+        
+        // Afficher semaine 1 immédiatement
         const partialPlan = {
             plan_global: plan_global || {
                 vision_3_mois: "Devenir référence gestion locative",
@@ -137,29 +140,87 @@ async function generateRemainingWeeksBackground(startWeek, year, planGlobal) {
 // Afficher le plan
 function displayLongtermPlan(plan) {
     const html = `
-        <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px;">
-            <h3 style="margin: 0 0 10px 0; font-size: 1.2rem;">🎯 Vision 3 mois</h3>
-            <p style="margin: 0; opacity: 0.95;">${plan.plan_global.vision_3_mois || plan.plan_global.vision || 'Devenir référence gestion locative'}</p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;">
-                <div><strong>Leads</strong><br>${plan.plan_global.objectifs_finaux?.leads_qualifies || '250'}</div>
-                <div><strong>Clients</strong><br>${plan.plan_global.objectifs_finaux?.clients_signes || '35'}</div>
-                <div><strong>MRR Cible</strong><br>${plan.plan_global.objectifs_finaux?.mrr_cible || '1800€'}</div>
+        <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3)); border-radius: 12px; border-left: 5px solid #667eea;">
+            <h3 style="margin: 0 0 15px 0; font-size: 1.4rem; color: #fff;">🎯 Vision 3 mois</h3>
+            <p style="margin: 0 0 20px 0; font-size: 1.1rem; line-height: 1.6;">${plan.plan_global.vision_3_mois || plan.plan_global.vision || 'Devenir référence gestion locative'}</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+                <div style="padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px;">
+                    <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">Leads Qualifiés</div>
+                    <div style="font-size: 1.8rem; font-weight: bold;">${plan.plan_global.objectifs_finaux?.leads_qualifies || '250'}</div>
+                </div>
+                <div style="padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px;">
+                    <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">Clients Signés</div>
+                    <div style="font-size: 1.8rem; font-weight: bold;">${plan.plan_global.objectifs_finaux?.clients_signes || '35'}</div>
+                </div>
+                <div style="padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px;">
+                    <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">MRR Cible</div>
+                    <div style="font-size: 1.8rem; font-weight: bold;">${plan.plan_global.objectifs_finaux?.mrr_cible || '1800€'}</div>
+                </div>
             </div>
         </div>
         
-        <div style="display: grid; gap: 15px;">
+        <div style="display: grid; gap: 20px;">
             ${plan.semaines.map(s => `
-                <div style="padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px; border-left: 4px solid #10B981;">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                        <strong style="font-size: 1.1rem;">Semaine ${s.numero}</strong>
-                        <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">
+                <div style="padding: 25px; background: rgba(255,255,255,0.1); border-radius: 12px; border-left: 5px solid ${s.numero === 1 ? '#10B981' : '#667eea'};">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h4 style="margin: 0; font-size: 1.3rem;">📅 Semaine ${s.numero}</h4>
+                        <span style="background: ${s.numero === 1 ? '#10B981' : '#667eea'}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
                             ${s.numero === 1 ? 'ACTIVE' : 'PLANIFIÉE'}
                         </span>
                     </div>
-                    <p style="margin: 5px 0; font-weight: 500;">${s.objectif_principal || s.objectif}</p>
-                    <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap;">
-                        ${(s.themes || []).map(t => `<span style="background: rgba(102,126,234,0.2); padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">${t}</span>`).join('')}
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h5 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #10B981;">🎯 ${s.objectif_principal || s.objectif}</h5>
+                        ${s.sous_objectifs ? `
+                            <ul style="margin: 10px 0; padding-left: 20px; opacity: 0.9;">
+                                ${s.sous_objectifs.map(so => `<li style="margin: 5px 0;">${so}</li>`).join('')}
+                            </ul>
+                        ` : ''}
                     </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong style="display: block; margin-bottom: 8px; opacity: 0.9;">👥 Cibles:</strong>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${(s.cibles || []).map(c => `<span style="background: rgba(102,126,234,0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">${c}</span>`).join('')}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong style="display: block; margin-bottom: 8px; opacity: 0.9;">🔑 Thèmes clés:</strong>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${(s.themes || []).map(t => `<span style="background: rgba(16,185,129,0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    
+                    ${s.actions && s.actions.length > 0 ? `
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                            <strong style="display: block; margin-bottom: 12px; font-size: 1.05rem;">📋 Actions (${s.actions.length})</strong>
+                            <div style="display: grid; gap: 12px;">
+                                ${s.actions.map((action, idx) => `
+                                    <div style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid ${action.priorite === 'haute' ? '#EF4444' : action.priorite === 'moyenne' ? '#F59E0B' : '#10B981'};">
+                                        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 8px;">
+                                            <strong style="flex: 1;">${idx + 1}. ${action.sujet || action.titre || 'Action'}</strong>
+                                            <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">${action.type}</span>
+                                        </div>
+                                        ${action.timing ? `<div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">⏰ ${action.timing}</div>` : ''}
+                                        ${action.contenu_complet ? `<div style="font-size: 0.9rem; margin-top: 8px; opacity: 0.9; line-height: 1.5; max-height: 100px; overflow: hidden;">${action.contenu_complet.substring(0, 200)}${action.contenu_complet.length > 200 ? '...' : ''}</div>` : ''}
+                                        ${action.kpi_attendu ? `<div style="font-size: 0.8rem; margin-top: 8px; color: #10B981;">📊 ${action.kpi_attendu}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${s.kpis ? `
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(16,185,129,0.1); border-radius: 8px;">
+                            <strong style="display: block; margin-bottom: 10px;">📊 KPIs</strong>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; font-size: 0.9rem;">
+                                ${s.kpis.leads ? `<div><strong>${s.kpis.leads.cible}</strong> leads ciblés</div>` : ''}
+                                ${s.kpis.impressions ? `<div><strong>${s.kpis.impressions.cible}</strong> impressions</div>` : ''}
+                                ${s.kpis.conversions ? `<div><strong>${s.kpis.conversions.inscriptions || 0}</strong> inscriptions</div>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
                 </div>
             `).join('')}
         </div>
@@ -285,7 +346,7 @@ async function loadContentQueue() {
         const { data, error } = await window.supabaseClient
             .from('cm_ai_content_queue')
             .select('*')
-            .order('date_publication', { ascending: true })
+            .order('created_at', { ascending: false })
             .limit(20);
         
         if (error) throw error;
