@@ -42,7 +42,41 @@ window.generateLongtermPlan = async function() {
         const startWeek = getWeekNumber(now);
         const year = now.getFullYear();
         
-        showToast('🤖 L\'IA génère votre plan 12 semaines...', 'info');
+        // Afficher loader visuel
+        const loaderHtml = `
+            <div id="ai-loader" style="text-align: center; padding: 60px 20px;">
+                <div style="display: inline-block; width: 80px; height: 80px; border: 8px solid #E5E7EB; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <h3 style="margin-top: 20px; color: #667eea;">🤖 L'IA génère votre plan 12 semaines...</h3>
+                <p style="color: #9CA3AF; margin-top: 10px;">Cela peut prendre jusqu'à 60 secondes</p>
+                <div id="progress-text" style="margin-top: 15px; font-size: 0.9rem; color: #667eea;">⏳ Connexion à Claude...</div>
+            </div>
+            <style>
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            </style>
+        `;
+        document.getElementById('longtermPlan').innerHTML = loaderHtml;
+        
+        // Simuler progression pour feedback visuel
+        const progressSteps = [
+            { delay: 2000, text: '📊 Analyse des données...' },
+            { delay: 5000, text: '🎯 Définition des objectifs...' },
+            { delay: 10000, text: '📝 Génération des stratégies...' },
+            { delay: 20000, text: '🔄 Optimisation du plan...' },
+            { delay: 35000, text: '✨ Finalisation...' }
+        ];
+        
+        progressSteps.forEach(step => {
+            setTimeout(() => {
+                const progressEl = document.getElementById('progress-text');
+                if (progressEl) progressEl.textContent = step.text;
+            }, step.delay);
+        });
+        
+        showToast('🤖 Génération en cours...', 'info');
+        
+        // Timeout à 60 secondes au lieu de 30
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
         
         const response = await fetch('/api/content-ai', {
             method: 'POST',
@@ -51,8 +85,11 @@ window.generateLongtermPlan = async function() {
                 action: 'generate-longterm-plan',
                 startWeek,
                 year
-            })
+            }),
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -92,7 +129,41 @@ window.generateLongtermPlan = async function() {
         
     } catch (error) {
         console.error('❌ Erreur:', error);
-        showToast('❌ ' + error.message, 'error');
+        
+        const loaderEl = document.getElementById('longtermPlan');
+        
+        if (error.name === 'AbortError') {
+            // Timeout - Afficher message avec option retry
+            loaderEl.innerHTML = `
+                <div style="text-align: center; padding: 40px; background: #FEF2F2; border-radius: 8px; border: 1px solid #FCA5A5;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">⏱️</div>
+                    <h3 style="color: #DC2626; margin-bottom: 10px;">Timeout - L'IA prend trop de temps</h3>
+                    <p style="color: #7F1D1D; margin-bottom: 20px;">La génération dépasse 60 secondes. Vercel limite les réponses.</p>
+                    <button onclick="generateLongtermPlan()" class="btn-primary" style="background: #667eea;">
+                        <i data-lucide="refresh-cw"></i>
+                        Réessayer
+                    </button>
+                    <p style="margin-top: 15px; font-size: 0.85rem; color: #9CA3AF;">💡 Le plan peut être sauvegardé partiellement en base</p>
+                </div>
+            `;
+            showToast('⏱️ Timeout - L\'IA prend trop de temps. Réessayez.', 'error');
+        } else {
+            // Autre erreur
+            loaderEl.innerHTML = `
+                <div style="text-align: center; padding: 40px; background: #FEF2F2; border-radius: 8px; border: 1px solid #FCA5A5;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                    <h3 style="color: #DC2626; margin-bottom: 10px;">Erreur de génération</h3>
+                    <p style="color: #7F1D1D; margin-bottom: 10px;">${error.message}</p>
+                    <button onclick="generateLongtermPlan()" class="btn-primary" style="background: #667eea; margin-top: 10px;">
+                        <i data-lucide="refresh-cw"></i>
+                        Réessayer
+                    </button>
+                </div>
+            `;
+            showToast('❌ ' + error.message, 'error');
+        }
+        
+        lucide.createIcons();
     }
 };
 
