@@ -43,7 +43,19 @@ window.generateLongtermPlan = async function() {
         const useOpenAI = providerSelect ? providerSelect.value === 'openai' : false;
         const providerName = useOpenAI ? 'OpenAI GPT-4o' : 'Claude Sonnet 4.5';
         
-        showToast(`🤖 Génération semaine 1 avec ${providerName}...`, 'info');
+        // Récupérer les plateformes sélectionnées
+        const platforms = [];
+        ['linkedin', 'facebook', 'instagram', 'blog', 'email', 'video'].forEach(p => {
+            const checkbox = document.getElementById(`platform_${p}`);
+            if (checkbox && checkbox.checked) platforms.push(p);
+        });
+        
+        if (platforms.length === 0) {
+            showToast('⚠️ Sélectionnez au moins une plateforme', 'error');
+            return;
+        }
+        
+        showToast(`🤖 Génération semaine 1 avec ${providerName} (${platforms.join(', ')})...`, 'info');
         
         // ÉTAPE 1 : Générer semaine 1 UNIQUEMENT (rapide, ~5-10s)
         const response = await fetch('/api/content-ai', {
@@ -54,7 +66,8 @@ window.generateLongtermPlan = async function() {
                 weekNumber: 1,
                 startWeek,
                 year,
-                useOpenAI: useOpenAI
+                useOpenAI: useOpenAI,
+                platforms: platforms
             })
         });
         
@@ -91,7 +104,7 @@ window.generateLongtermPlan = async function() {
         showToast('✅ Semaine 1 prête ! Génération 2-12 en cours...', 'success');
         
         // ÉTAPE 4 : Générer semaines 2-12 en arrière-plan
-        generateRemainingWeeksBackground(startWeek, year, plan_global, useOpenAI);
+        generateRemainingWeeksBackground(startWeek, year, plan_global, useOpenAI, platforms);
         
     } catch (error) {
         console.error('❌ Erreur:', error);
@@ -146,7 +159,7 @@ async function saveActionsFromWeek(week) {
 }
 
 // Générer semaines 2-12 en arrière-plan (sans bloquer UI)
-async function generateRemainingWeeksBackground(startWeek, year, planGlobal, useOpenAI = false) {
+async function generateRemainingWeeksBackground(startWeek, year, planGlobal, useOpenAI = false, platforms = []) {
     for (let weekNum = 2; weekNum <= 12; weekNum++) {
         try {
             const response = await fetch('/api/content-ai', {
@@ -157,7 +170,8 @@ async function generateRemainingWeeksBackground(startWeek, year, planGlobal, use
                     weekNumber: weekNum,
                     startWeek,
                     year,
-                    useOpenAI: useOpenAI
+                    useOpenAI: useOpenAI,
+                    platforms: platforms
                 })
             });
             

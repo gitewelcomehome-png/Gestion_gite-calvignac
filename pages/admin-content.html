@@ -113,15 +113,43 @@
                         <i data-lucide="calendar-range"></i>
                         Plan Stratégique 12 Semaines
                     </h2>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <select id="aiProviderSelect" style="padding: 8px 12px; border-radius: 4px; border: none; background: white; color: #667eea; cursor: pointer;">
-                            <option value="openai">🤖 OpenAI GPT-4o (Rapide)</option>
-                            <option value="claude">🧠 Claude Sonnet 4.5 (Détaillé)</option>
-                        </select>
-                        <button class="btn-primary" onclick="generateLongtermPlan()" style="background: white; color: #667eea;">
-                            <i data-lucide="zap"></i>
-                            Générer Plan Complet
-                        </button>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <select id="aiProviderSelect" style="padding: 8px 12px; border-radius: 4px; border: none; background: white; color: #667eea; cursor: pointer;">
+                                <option value="openai">🤖 OpenAI GPT-4o (Rapide)</option>
+                                <option value="claude">🧠 Claude Sonnet 4.5 (Détaillé)</option>
+                            </select>
+                            <button class="btn-primary" onclick="generateLongtermPlan()" style="background: white; color: #667eea;">
+                                <i data-lucide="zap"></i>
+                                Générer Plan Complet
+                            </button>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.15); border-radius: 6px; padding: 10px; display: flex; gap: 15px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" id="platform_linkedin" value="linkedin" checked style="cursor: pointer;">
+                                <span>LinkedIn</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" id="platform_facebook" value="facebook" checked style="cursor: pointer;">
+                                <span>Facebook</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" id="platform_instagram" value="instagram" checked style="cursor: pointer;">
+                                <span>Instagram</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" id="platform_blog" value="blog" style="cursor: pointer;">
+                                <span>Blog</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" id="platform_email" value="email" style="cursor: pointer;">
+                                <span>Email Marketing</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" id="platform_video" value="video" checked style="cursor: pointer;">
+                                <span>Vidéo (YT/TikTok)</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div id="longtermPlan">

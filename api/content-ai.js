@@ -571,7 +571,30 @@ Image description: ${prompt}`;
       const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
       const useOpenAI = req.body.useOpenAI || !ANTHROPIC_API_KEY; // Fallback si pas de Claude
 
-      const { weekNumber, startWeek, year } = req.body;
+      const { weekNumber, startWeek, year, platforms = ['linkedin', 'facebook', 'instagram', 'video'] } = req.body;
+      
+      // Mapping types de contenu par plateforme
+      const platformTypes = {
+        linkedin: 'post_linkedin',
+        facebook: 'post_facebook', 
+        instagram: 'post_instagram',
+        blog: 'article_blog',
+        email: 'email_marketing',
+        video: 'video_youtube_tiktok'
+      };
+      
+      const allowedTypes = platforms.map(p => platformTypes[p]).filter(Boolean);
+      const platformsText = platforms.map(p => {
+        const names = {
+          linkedin: 'LinkedIn',
+          facebook: 'Facebook',
+          instagram: 'Instagram', 
+          blog: 'Blog/SEO',
+          email: 'Email Marketing',
+          video: 'Vidéo (YouTube/TikTok)'
+        };
+        return names[p];
+      }).join(', ');
 
       const weekPrompt = `Tu es un expert marketing SaaS spécialisé dans la gestion locative courte durée (gîtes, chambres d'hôtes).
 
@@ -582,12 +605,17 @@ Cible : Propriétaires de 1-5 gîtes qui perdent du temps avec les calendriers e
 # MISSION
 Génère un plan ULTRA-DÉTAILLÉ pour la semaine ${weekNumber} d'une campagne marketing 12 semaines.
 
+# PLATEFORMES AUTORISÉES
+Tu dois UNIQUEMENT créer des actions pour ces plateformes : ${platformsText}
+Types de contenu autorisés : ${allowedTypes.join(', ')}
+
 # PRINCIPES ABSOLUS
 - Parler COMME un propriétaire de gîtes (pas comme un vendeur)
 - Chaque affirmation = preuve concrète
 - Zéro buzzword ("révolutionnaire", "disruptif", etc.)
 - Problèmes réels uniquement
 - Storytelling authentique
+- NE PAS générer de contenu pour des plateformes non demandées
 
 # FORMAT JSON ATTENDU
 {
@@ -618,7 +646,7 @@ Génère un plan ULTRA-DÉTAILLÉ pour la semaine ${weekNumber} d'une campagne m
       "Pain point concret et précis 3"
     ],
     "actions": [
-      {
+      ${platforms.includes('linkedin') ? `{
         "type": "post_linkedin",
         "priorite": "haute",
         "timing": "Lundi 9h",
@@ -628,8 +656,28 @@ Génère un plan ULTRA-DÉTAILLÉ pour la semaine ${weekNumber} d'une campagne m
         "hashtags": ["#GestionLocative", "#Airbnb", "#BookingCom"],
         "cta": "Call-to-action précis",
         "kpi_attendu": "50 impressions, 3 commentaires"
-      },
-      {
+      },` : ''}
+      ${platforms.includes('facebook') ? `{
+        "type": "post_facebook",
+        "priorite": "moyenne",
+        "timing": "Mardi 14h",
+        "sujet": "Titre engageant pour Facebook",
+        "contenu_complet": "Post Facebook 100-150 mots avec storytelling, visuel suggéré",
+        "hashtags": ["#GestionLocative", "#Airbnb"],
+        "cta": "CTA précis",
+        "kpi_attendu": "40 réactions, 5 partages"
+      },` : ''}
+      ${platforms.includes('instagram') ? `{
+        "type": "post_instagram",
+        "priorite": "moyenne",
+        "timing": "Mercredi 18h",
+        "sujet": "Caption Instagram percutante",
+        "contenu_complet": "Caption 80-120 mots + description visuel suggéré",
+        "hashtags": ["#gestionlocative", "#airbnb", "#gite"],
+        "cta": "CTA dans bio",
+        "kpi_attendu": "60 likes, 3 commentaires"
+      },` : ''}
+      ${platforms.includes('email') ? `{
         "type": "email_marketing",
         "priorite": "moyenne",
         "timing": "Mercredi 10h",
@@ -638,8 +686,8 @@ Génère un plan ULTRA-DÉTAILLÉ pour la semaine ${weekNumber} d'une campagne m
         "contenu_complet": "Email de 100-150 mots PRÊT avec hook, valeur, CTA",
         "cta": "Lien action précise",
         "kpi_attendu": "30% ouverture, 8% clic"
-      },
-      {
+      },` : ''}
+      ${platforms.includes('blog') ? `{
         "type": "article_blog",
         "priorite": "basse",
         "timing": "Vendredi",
@@ -656,7 +704,16 @@ Génère un plan ULTRA-DÉTAILLÉ pour la semaine ${weekNumber} d'une campagne m
         },
         "longueur": "600-800 mots",
         "kpi_attendu": "100 vues, 2 leads"
-      }
+      },` : ''}
+      ${platforms.includes('video') ? `{
+        "type": "video_youtube_tiktok",
+        "priorite": "moyenne",
+        "timing": "Jeudi",
+        "sujet": "Titre vidéo accrocheur",
+        "script": "Script 60-90 secondes avec hook, démonstration, CTA",
+        "format": "Court format vertical (TikTok/Reels) ou YouTube",
+        "kpi_attendu": "200 vues, 10 likes"
+      }` : ''}
     ],
     "kpis": {
       "leads": {
