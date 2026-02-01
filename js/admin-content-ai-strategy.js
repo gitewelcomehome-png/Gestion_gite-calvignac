@@ -1163,9 +1163,6 @@ window.rejectAction = async function(actionId) {
         showToast('❌ Erreur: ' + error.message, 'error');
     }
 }
-        showToast('❌ Erreur: ' + error.message, 'error');
-    }
-};
 
 // ================================================================
 // UTILITAIRES
