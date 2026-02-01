@@ -113,10 +113,16 @@
                         <i data-lucide="calendar-range"></i>
                         Plan Stratégique 12 Semaines
                     </h2>
-                    <button class="btn-primary" onclick="generateLongtermPlan()" style="background: white; color: #667eea;">
-                        <i data-lucide="zap"></i>
-                        Générer Plan Complet
-                    </button>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="aiProviderSelect" style="padding: 8px 12px; border-radius: 4px; border: none; background: white; color: #667eea; cursor: pointer;">
+                            <option value="openai">🤖 OpenAI GPT-4o (Rapide)</option>
+                            <option value="claude">🧠 Claude Sonnet 4.5 (Détaillé)</option>
+                        </select>
+                        <button class="btn-primary" onclick="generateLongtermPlan()" style="background: white; color: #667eea;">
+                            <i data-lucide="zap"></i>
+                            Générer Plan Complet
+                        </button>
+                    </div>
                 </div>
                 <div id="longtermPlan">
                     <p style="text-align: center; opacity: 0.9; padding: 20px;">

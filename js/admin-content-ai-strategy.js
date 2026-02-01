@@ -38,7 +38,12 @@ window.generateLongtermPlan = async function() {
         const startWeek = getWeekNumber(now);
         const year = now.getFullYear();
         
-        showToast('🤖 Génération semaine 1...', 'info');
+        // Récupérer le provider choisi
+        const providerSelect = document.getElementById('aiProviderSelect');
+        const useOpenAI = providerSelect ? providerSelect.value === 'openai' : false;
+        const providerName = useOpenAI ? 'OpenAI GPT-4o' : 'Claude Sonnet 4.5';
+        
+        showToast(`🤖 Génération semaine 1 avec ${providerName}...`, 'info');
         
         // ÉTAPE 1 : Générer semaine 1 UNIQUEMENT (rapide, ~5-10s)
         const response = await fetch('/api/content-ai', {
@@ -48,7 +53,8 @@ window.generateLongtermPlan = async function() {
                 action: 'generate-single-week',
                 weekNumber: 1,
                 startWeek,
-                year
+                year,
+                useOpenAI: useOpenAI
             })
         });
         
@@ -82,7 +88,7 @@ window.generateLongtermPlan = async function() {
         showToast('✅ Semaine 1 prête ! Génération 2-12 en cours...', 'success');
         
         // ÉTAPE 4 : Générer semaines 2-12 en arrière-plan
-        generateRemainingWeeksBackground(startWeek, year, plan_global);
+        generateRemainingWeeksBackground(startWeek, year, plan_global, useOpenAI);
         
     } catch (error) {
         console.error('❌ Erreur:', error);
@@ -109,7 +115,7 @@ async function saveSingleWeek(semaine, startWeek, year) {
 }
 
 // Générer semaines 2-12 en arrière-plan (sans bloquer UI)
-async function generateRemainingWeeksBackground(startWeek, year, planGlobal) {
+async function generateRemainingWeeksBackground(startWeek, year, planGlobal, useOpenAI = false) {
     for (let weekNum = 2; weekNum <= 12; weekNum++) {
         try {
             const response = await fetch('/api/content-ai', {
@@ -119,7 +125,8 @@ async function generateRemainingWeeksBackground(startWeek, year, planGlobal) {
                     action: 'generate-single-week',
                     weekNumber: weekNum,
                     startWeek,
-                    year
+                    year,
+                    useOpenAI: useOpenAI
                 })
             });
             

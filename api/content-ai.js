@@ -568,12 +568,8 @@ Image description: ${prompt}`;
     // ================================================================
     if (action === 'generate-single-week') {
       const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-      
-      if (!ANTHROPIC_API_KEY) {
-        return res.status(500).json({ 
-          error: 'Anthropic API key not configured' 
-        });
-      }
+      const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+      const useOpenAI = req.body.useOpenAI || !ANTHROPIC_API_KEY; // Fallback si pas de Claude
 
       const { weekNumber, startWeek, year } = req.body;
 
@@ -707,31 +703,69 @@ IMPORTANT :
 
 Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-5-20250929',
-          max_tokens: 4000,
-          temperature: 0.8,
-          messages: [{
-            role: 'user',
-            content: weekPrompt
-          }]
-        })
-      });
+      // ================================================================
+      // CHOIX DU PROVIDER : OpenAI ou Claude
+      // ================================================================
+      let response, data, content;
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Claude API error: ${error.error?.message || 'Unknown error'}`);
+      if (useOpenAI) {
+        console.log('🤖 Utilisation OpenAI GPT-4o');
+        response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [{
+              role: 'system',
+              content: 'Tu es un expert marketing SaaS. Réponds UNIQUEMENT en JSON valide, sans markdown.'
+            }, {
+              role: 'user',
+              content: weekPrompt
+            }],
+            max_tokens: 4000,
+            temperature: 0.8
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+        }
+
+        data = await response.json();
+        content = data.choices[0].message.content;
+
+      } else {
+        console.log('🤖 Utilisation Claude Sonnet 4.5');
+        response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-5-20250929',
+            max_tokens: 4000,
+            temperature: 0.8,
+            messages: [{
+              role: 'user',
+              content: weekPrompt
+            }]
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(`Claude API error: ${error.error?.message || 'Unknown error'}`);
+        }
+
+        data = await response.json();
+        content = data.content[0].text;
       }
-
-      const data = await response.json();
-      const content = data.content[0].text;
       
       // LOG BRUT pour debug
       console.log('🔍 RÉPONSE BRUTE CLAUDE:', content.substring(0, 500));
