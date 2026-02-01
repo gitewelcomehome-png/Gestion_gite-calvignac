@@ -50,7 +50,7 @@ export default async function handler(req, res) {
         // Sauvegarder version dans DB
         const supabase = createClient(
           process.env.SUPABASE_URL,
-          process.env.SUPABASE_KEY
+          process.env.SUPABASE_ANON_KEY
         );
         
         await supabase.from('cm_ai_prompt_versions').insert({
@@ -84,7 +84,7 @@ export default async function handler(req, res) {
 
       const supabase = createClient(
         process.env.SUPABASE_URL,
-        process.env.SUPABASE_KEY
+        process.env.SUPABASE_ANON_KEY
       );
 
       // Récupérer la stratégie active
