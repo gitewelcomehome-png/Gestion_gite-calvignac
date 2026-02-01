@@ -993,7 +993,7 @@ async function loadContentQueue() {
         if (error) throw error;
         
         if (!data || data.length === 0) {
-            document.getElementById('queueList').innerHTML = `
+            document.getElementById('contentQueue').innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #9CA3AF;">
                     <p>📅 Aucune publication programmée</p>
                 </div>
@@ -1011,7 +1011,7 @@ async function loadContentQueue() {
             </div>
         `).join('');
         
-        document.getElementById('queueList').innerHTML = html;
+        document.getElementById('contentQueue').innerHTML = html;
         
     } catch (error) {
         console.error('❌ Erreur chargement queue:', error);
@@ -1034,7 +1034,7 @@ async function loadAIActions() {
         if (error) throw error;
         
         if (!data || data.length === 0) {
-            document.getElementById('actionsList').innerHTML = `
+            document.getElementById('aiActions').innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #9CA3AF;">
                     <p>💡 Aucune action proposée</p>
                 </div>
@@ -1057,7 +1057,7 @@ async function loadAIActions() {
             </div>
         `).join('');
         
-        document.getElementById('actionsList').innerHTML = html;
+        document.getElementById('aiActions').innerHTML = html;
         
     } catch (error) {
         console.error('❌ Erreur chargement actions:', error);
