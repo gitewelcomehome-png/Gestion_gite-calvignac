@@ -1109,14 +1109,18 @@ window.approveAction = async function(actionId) {
         if (fetchError) throw fetchError;
         
         // 2. Sauvegarder dans la file de contenu (cm_ai_content_queue)
+        const scheduledDate = new Date();
+        scheduledDate.setDate(scheduledDate.getDate() + 3); // Programmer dans 3 jours
+        
         const { error: insertError } = await window.supabaseClient
             .from('cm_ai_content_queue')
             .insert({
-                type_contenu: action.type_contenu || 'article',
+                type: action.type || 'post',
+                plateforme: action.plateforme_publie || 'linkedin',
                 sujet: action.titre,
                 contenu: action.description,
-                statut: 'approuve',
-                created_at: new Date().toISOString()
+                scheduled_date: scheduledDate.toISOString(),
+                statut: 'en_attente'
             });
         
         if (insertError) throw insertError;
@@ -1124,7 +1128,7 @@ window.approveAction = async function(actionId) {
         // 3. Mettre à jour le statut de l'action
         const { error: updateError } = await window.supabaseClient
             .from('cm_ai_actions')
-            .update({ statut: 'approuve' })
+            .update({ statut: 'accepte' })
             .eq('id', actionId);
         
         if (updateError) throw updateError;
