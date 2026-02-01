@@ -577,36 +577,133 @@ Image description: ${prompt}`;
 
       const { weekNumber, startWeek, year } = req.body;
 
-      const weekPrompt = `Génère UNIQUEMENT la semaine ${weekNumber} d'un plan marketing pour LiveOwnerUnit (SaaS gestion locative).
+      const weekPrompt = `Tu es un expert marketing SaaS spécialisé dans la gestion locative courte durée (gîtes, chambres d'hôtes).
 
-Format JSON strict :
+# CONTEXTE
+LiveOwnerUnit est un SaaS qui aide les propriétaires à gérer leurs locations (calendriers, réservations, iCal sync).
+Cible : Propriétaires de 1-5 gîtes qui perdent du temps avec les calendriers et les doublons.
+
+# MISSION
+Génère un plan ULTRA-DÉTAILLÉ pour la semaine ${weekNumber} d'une campagne marketing 12 semaines.
+
+# PRINCIPES ABSOLUS
+- Parler COMME un propriétaire de gîtes (pas comme un vendeur)
+- Chaque affirmation = preuve concrète
+- Zéro buzzword ("révolutionnaire", "disruptif", etc.)
+- Problèmes réels uniquement
+- Storytelling authentique
+
+# FORMAT JSON ATTENDU
 {
   "plan_global": ${weekNumber === 1 ? `{
-    "vision_3_mois": "Devenir référence gestion locative",
+    "vision_3_mois": "Devenir la référence des propriétaires 1-5 gîtes pour la synchronisation calendrier",
     "objectifs_finaux": {
       "leads_qualifies": 250,
       "clients_signes": 35,
-      "mrr_cible": "1800€"
+      "mrr_cible": "1800€",
+      "impressions_totales": 80000,
+      "taux_conversion": "14%"
     }
   }` : 'null'},
   "week": {
     "numero": ${weekNumber},
-    "objectif_principal": "Objectif court et clair",
-    "cibles": ["Propriétaires 1-3 gîtes"],
-    "themes": ["Pain point 1", "Pain point 2"],
+    "objectif_principal": "Objectif SMART précis de cette semaine",
+    "sous_objectifs": [
+      "Sous-objectif mesurable 1",
+      "Sous-objectif mesurable 2"
+    ],
+    "cibles": [
+      "Propriétaires 1-3 gîtes ruraux (pain: oublis réservations)",
+      "Propriétaires multi-plateformes (pain: calendriers désynchronisés)"
+    ],
+    "themes": [
+      "Pain point concret et précis 1",
+      "Pain point concret et précis 2",
+      "Pain point concret et précis 3"
+    ],
     "actions": [
       {
         "type": "post_linkedin",
-        "sujet": "Titre accrocheur court",
-        "contenu_court": "2-3 lignes texte prêt"
+        "priorite": "haute",
+        "timing": "Lundi 9h",
+        "sujet": "Titre accrocheur qui interpelle sur un pain point",
+        "angle": "Storytelling personnel ou cas concret",
+        "contenu_complet": "Post LinkedIn de 150-200 mots PRÊT À PUBLIER avec hook, développement, CTA. Parler comme un propriétaire, pas comme un commercial.",
+        "hashtags": ["#GestionLocative", "#Airbnb", "#BookingCom"],
+        "cta": "Call-to-action précis",
+        "kpi_attendu": "50 impressions, 3 commentaires"
+      },
+      {
+        "type": "email_marketing",
+        "priorite": "moyenne",
+        "timing": "Mercredi 10h",
+        "sujet": "Objet email percutant",
+        "audience": "Segment précis (ex: inscrits non convertis)",
+        "contenu_complet": "Email de 100-150 mots PRÊT avec hook, valeur, CTA",
+        "cta": "Lien action précise",
+        "kpi_attendu": "30% ouverture, 8% clic"
+      },
+      {
+        "type": "article_blog",
+        "priorite": "basse",
+        "timing": "Vendredi",
+        "sujet": "Titre SEO + pain point",
+        "mots_cles": ["synchronisation calendrier airbnb", "éviter double réservation"],
+        "structure": {
+          "intro": "2-3 phrases qui posent le problème",
+          "points_cles": [
+            "Point 1 : Explication + exemple concret",
+            "Point 2 : Explication + exemple concret",
+            "Point 3 : Explication + solution"
+          ],
+          "conclusion": "Récap + CTA soft"
+        },
+        "longueur": "600-800 mots",
+        "kpi_attendu": "100 vues, 2 leads"
       }
     ],
     "kpis": {
-      "leads": {"cible": 10},
-      "impressions": {"cible": 3000}
-    }
+      "leads": {
+        "cible": 20,
+        "sources": {
+          "linkedin": 8,
+          "email": 6,
+          "blog": 4,
+          "organique": 2
+        }
+      },
+      "impressions": {
+        "cible": 6000,
+        "par_canal": {
+          "linkedin": 3000,
+          "email": 1500,
+          "blog": 1500
+        }
+      },
+      "engagement": {
+        "commentaires": 10,
+        "partages": 3,
+        "taux_ouverture_email": "30%"
+      },
+      "conversions": {
+        "inscriptions": 15,
+        "demos_reservees": 2,
+        "essais_gratuits": 3
+      }
+    },
+    "risques": [
+      "Risque 1 et plan mitigation",
+      "Risque 2 et plan mitigation"
+    ],
+    "apprentissages_semaine_precedente": ${weekNumber > 1 ? '"Ce qui a marché/pas marché semaine précédente"' : 'null'}
   }
 }
+
+IMPORTANT :
+- Les contenus doivent être PRÊTS À PUBLIER (pas de placeholder)
+- Parler avec authenticité de propriétaire
+- KPIs réalistes et mesurables
+- Actions concrètes avec timing précis
 
 Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
 
@@ -619,8 +716,8 @@ Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5-20250929',
-          max_tokens: 2000,
-          temperature: 0.7,
+          max_tokens: 4000,
+          temperature: 0.8,
           messages: [{
             role: 'user',
             content: weekPrompt
