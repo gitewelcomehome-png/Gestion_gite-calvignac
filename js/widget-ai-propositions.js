@@ -132,16 +132,19 @@ window.refreshAIPropositions = async function() {
 
         const data = await response.json();
         
+        console.log('📥 Réponse API:', data);
+        
         if (data.success && data.propositions) {
             displayPropositions(data.propositions);
         } else {
+            console.error('❌ Erreur API:', data);
             throw new Error(data.error || 'Erreur génération');
         }
     } catch (error) {
-        console.error('Erreur propositions IA:', error);
+        console.error('❌ Erreur propositions IA:', error);
         container.innerHTML = `
             <div style="text-align: center; padding: 40px; grid-column: 1/-1; color: rgba(255,255,255,0.9);">
-                <p>⚠️ Erreur lors de la génération</p>
+                <p>⚠️ ${error.message || 'Erreur lors de la génération'}</p>
                 <button onclick="window.refreshAIPropositions()" style="
                     background: rgba(255,255,255,0.2);
                     border: none;

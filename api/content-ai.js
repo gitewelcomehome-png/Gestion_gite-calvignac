@@ -183,8 +183,22 @@ Réponds UNIQUEMENT avec :
       });
 
       if (!response.ok) {
-        throw new Error('Claude API error');
+        const errorBody = await response.text();
+        console.error('❌ Claude API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorBody
+        });
+        return res.status(500).json({ 
+          error: 'Claude API error',
+          details: {
+            status: response.status,
+            message: errorBody
+          }
+        });
       }
+
+      console.log('✅ Réponse Claude reçue');
 
       const result = await response.json();
       const content = result.content[0].text;
