@@ -237,19 +237,6 @@ async function loadLongtermPlanFromDB() {
         console.error('❌ Erreur rechargement plan:', error);
     }
 }
-                    mrr_cible: "1800€"
-                }
-            },
-            semaines: semaines
-        };
-        
-        displayLongtermPlan(plan);
-        console.log(`✅ Plan 12 semaines rechargé : ${semaines.length} semaines`);
-        
-    } catch (error) {
-        console.error('❌ Erreur rechargement plan:', error);
-    }
-}
 
 // Afficher le plan
 function displayLongtermPlan(plan) {
