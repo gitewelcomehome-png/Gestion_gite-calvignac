@@ -956,14 +956,21 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
             return res.status(500).json({ error: `${provider} API key not configured` });
         }
 
-        const { titre, description, type } = req.body;
+        const { titre, description, type, customInstructions = '' } = req.body;
+
+        const customSection = customInstructions ? `
+
+**CONSIGNES SPÉCIFIQUES DU CLIENT :**
+${customInstructions}
+
+⚠️ RESPECTE ABSOLUMENT ces consignes dans ton plan d'action !` : '';
 
         const prompt = `Tu es un expert en marketing et exécution stratégique pour LiveOwnerUnit.
 
 **Action business à planifier :**
 Type: ${type}
 Titre: ${titre}
-Description: ${description}
+Description: ${description}${customSection}
 
 **Ta mission :** Créer un plan d'action détaillé, étape par étape, pour exécuter cette action avec succès.
 
@@ -995,47 +1002,65 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
 
         let plan;
 
-        if (req.body.useOpenAI) {
-            // OpenAI
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4o',
-                    messages: [{ role: 'user', content: prompt }],
-                    temperature: 0.7
-                })
+        try {
+            if (req.body.useOpenAI) {
+                // OpenAI
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o',
+                        messages: [{ role: 'user', content: prompt }],
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`OpenAI Error: ${errorData.error?.message || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+
+            } else {
+                // Claude
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 4000,
+                        messages: [{ role: 'user', content: prompt }]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Claude Error: ${errorData.error?.message || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                const content = data.content[0].text;
+                plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+            }
+
+            return res.json({ success: true, plan });
+            
+        } catch (error) {
+            console.error('❌ Erreur génération plan:', error);
+            return res.status(500).json({ 
+                error: error.message || 'Erreur lors de la génération du plan'
             });
-
-            const data = await response.json();
-            const content = data.choices[0].message.content;
-            plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
-
-        } else {
-            // Claude
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': apiKey,
-                    'anthropic-version': '2023-06-01'
-                },
-                body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 4000,
-                    messages: [{ role: 'user', content: prompt }]
-                })
-            });
-
-            const data = await response.json();
-            const content = data.content[0].text;
-            plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
         }
-
-        return res.json({ success: true, plan });
     }
 
     // ================================================================

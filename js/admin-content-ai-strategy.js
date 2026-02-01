@@ -1292,6 +1292,14 @@ window.openActionDetails = async function(actionId) {
                             <h3 style="margin: 0; color: #1e293b;">🎯 Plan d'Action Détaillé</h3>
                             <span id="planStatus" style="font-size: 0.875rem; color: #64748b;">Non généré</span>
                         </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; color: #475569; font-weight: 500; font-size: 0.9rem;">
+                                💬 Consignes personnalisées (optionnel)
+                            </label>
+                            <textarea id="customInstructions" placeholder="Ex: Focus sur le budget limité, priorité aux canaux gratuits, durée max 2 semaines..." style="width: 100%; min-height: 80px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.9rem; resize: vertical;"></textarea>
+                        </div>
+                        
                         <div id="planContent" style="color: #475569; line-height: 1.6;">
                             <p style="text-align: center; padding: 2rem; color: #94a3b8;">
                                 Cliquez sur "Générer Plan d'Action" pour obtenir un plan étape par étape détaillé
@@ -1326,6 +1334,8 @@ window.closeActionModal = function() {
 
 window.generateActionPlan = async function(actionId, titre, description, type) {
     try {
+        const customInstructions = document.getElementById('customInstructions')?.value || '';
+        
         document.getElementById('planStatus').textContent = '⏳ Génération en cours...';
         document.getElementById('planContent').innerHTML = '<p style="text-align: center; padding: 2rem; color: #94a3b8;">⏳ L\'IA génère votre plan d\'action détaillé...</p>';
         
@@ -1337,11 +1347,15 @@ window.generateActionPlan = async function(actionId, titre, description, type) {
                 titre: titre,
                 description: description,
                 type: type,
+                customInstructions: customInstructions,
                 useOpenAI: true
             })
         });
         
-        if (!response.ok) throw new Error('Erreur API');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur API');
+        }
         
         const { plan } = await response.json();
         
