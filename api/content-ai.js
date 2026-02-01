@@ -4,6 +4,10 @@
 // Intégration OpenAI GPT-4, Claude, DALL-E 3
 // ================================================================
 
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
 export default async function handler(req, res) {
   // Configuration CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -26,8 +30,6 @@ export default async function handler(req, res) {
     // GESTION PROMPT (GET/SAVE)
     // ================================================================
     if (action === 'get-prompt') {
-      const fs = require('fs');
-      const path = require('path');
       try {
         const configPath = path.join(process.cwd(), 'config', 'PROMPT_CLAUDE_BASE.md');
         const prompt = fs.readFileSync(configPath, 'utf-8');
@@ -38,8 +40,6 @@ export default async function handler(req, res) {
     }
 
     if (action === 'save-prompt') {
-      const fs = require('fs');
-      const path = require('path');
       const { prompt, version, notes } = req.body;
       
       try {
@@ -48,7 +48,6 @@ export default async function handler(req, res) {
         fs.writeFileSync(configPath, prompt, 'utf-8');
         
         // Sauvegarder version dans DB
-        const { createClient } = require('@supabase/supabase-js');
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL,
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -83,7 +82,6 @@ export default async function handler(req, res) {
         });
       }
 
-      const { createClient } = require('@supabase/supabase-js');
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -528,8 +526,6 @@ Image description: ${prompt}`;
       const { startWeek, year } = req.body;
 
       // Récupérer le prompt validé depuis la config
-      const fs = require('fs');
-      const path = require('path');
       let promptConfig = '';
       try {
         const configPath = path.join(process.cwd(), 'config', 'PROMPT_CLAUDE_BASE.md');
