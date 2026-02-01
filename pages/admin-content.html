@@ -61,8 +61,8 @@
                         Stratégie IA
                     </button>
                     <button class="tab-btn" onclick="switchTab('queue')" data-tab="queue">
-                        <i data-lucide="calendar"></i>
-                        Publications Programmées
+                        <i data-lucide="check-circle"></i>
+                        Actions Validées
                     </button>
                     <button class="tab-btn" onclick="switchTab('actions')" data-tab="actions">
                         <i data-lucide="zap"></i>
@@ -214,9 +214,10 @@
             <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
-                        <i data-lucide="calendar"></i>
-                        Publications Programmées (7 prochains jours)
+                        <i data-lucide="check-circle"></i>
+                        Actions Validées en Cours
                     </h2>
+                    <span id="validatedCount" style="font-size: 0.875rem; color: #64748b;">0 action(s)</span>
                 </div>
                 <div id="contentQueue">
                     <p style="text-align: center; color: #9CA3AF; padding: 40px;">

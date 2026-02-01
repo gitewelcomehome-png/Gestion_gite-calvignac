@@ -1415,6 +1415,11 @@ window.generateActionPlan = async function(actionId, titre, description, type) {
         
         showToast('✅ Plan d\'action généré !', 'success');
         
+        // Afficher bouton sauvegarder
+        window.currentPlan = plan;
+        const saveBtnHtml = `<button id="savePlanBtn" onclick="savePlan(window.currentActionId)" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; margin-top: 1rem;">💾 Sauvegarder ce Plan</button>`;
+        document.getElementById('planContent').insertAdjacentHTML('afterend', saveBtnHtml);
+        
     } catch (error) {
         console.error('❌ Erreur génération plan:', error);
         document.getElementById('planStatus').innerHTML = '<span style="color: #ef4444;">❌ Erreur</span>';
