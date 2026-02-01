@@ -1755,17 +1755,6 @@ function getMostPerformingType(actions) {
   });
   return Object.keys(typeLeads).reduce((a, b) => typeLeads[a] > typeLeads[b] ? a : b, 'N/A');
 }
-          content: parsedContent
-        });
-      } catch (parseError) {
-        return res.status(200).json({
-          success: true,
-          content: { raw: cleanJSON }
-        });
-      }
-    }
-
-    return res.status(400).json({ error: 'Invalid action. Use: generate-text, generate-image, optimize-seo, generate-weekly-strategy, or generate-content-from-strategy' });
 
   } catch (error) {
     console.error('❌ API Error:', error);
