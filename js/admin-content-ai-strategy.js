@@ -410,20 +410,30 @@ window.generateFullContent = async function(weekNum, actionIdx) {
     showToast('🤖 Génération contenu...', 'info');
     
     try {
-        const { data } = await window.supabaseClient
+        const { data, error } = await window.supabaseClient
             .from('cm_ai_strategies')
             .select('*')
             .eq('semaine', weekNum)
-            .eq('annee', new Date().getFullYear())
-            .single();
+            .eq('annee', new Date().getFullYear());
         
-        const strategy = JSON.parse(data.strategie_complete);
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            throw new Error('Semaine non trouvée en DB');
+        }
+        
+        const strategy = JSON.parse(data[0].strategie_complete);
+        
+        if (!strategy.actions || !strategy.actions[actionIdx]) {
+            throw new Error('Action non trouvée');
+        }
+        
         const action = strategy.actions[actionIdx];
         
         const prompt = `Génère contenu PRÊT À PUBLIER:
 
 Type: ${action.type}
-Sujet: ${action.sujet}
+Sujet: ${action.sujet || action.titre}
 
 JSON:
 {"titre":"...","contenu":"... (${action.type === 'article_blog' ? '800' : '250'} mots)","visuels":["suggestion 1","suggestion 2"],"hashtags":["#tag1"],"cta":"..."}`;
@@ -433,6 +443,8 @@ JSON:
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt, maxTokens: 2000 })
         });
+        
+        if (!response.ok) throw new Error('Erreur API OpenAI');
         
         const { content } = await response.json();
         const cleanJSON = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -720,6 +732,10 @@ function showToast(message, type) {
 // Init au chargement
 document.addEventListener('DOMContentLoaded', () => {
     loadCurrentStrategy();
-    loadLongtermPlanFromDB(); // NOUVEAU : Recharger le plan 12 semaines
-    loadAIActions();
+    loadLongtermPlanFromDB(); // Recharger le plan 12 semaines
+    
+    // Charger actions uniquement si l'élément existe
+    if (document.getElementById('actionsList')) {
+        loadAIActions();
+    }
 });
