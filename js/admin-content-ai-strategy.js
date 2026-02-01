@@ -416,7 +416,8 @@ window.generateFullContent = async function(weekNum, actionIdx) {
             .from('cm_ai_strategies')
             .select('*')
             .eq('semaine', weekNum)
-            .eq('annee', new Date().getFullYear());
+            .eq('annee', new Date().getFullYear())
+            .in('statut', ['actif', 'planifié']); // IMPORTANT: filtrer sur statuts
         
         console.log('📊 Résultat query:', data, 'erreur:', error);
         
