@@ -170,11 +170,10 @@ function updatePlanDisplay(newWeek) {
         container.insertAdjacentHTML('beforeend', weekHtml);
     }
 }
-        
-    } catch (error) {
-        console.error('❌ Erreur:', error);
-        
-        const loaderEl = document.getElementById('longtermPlan');
+
+// ================================================================
+// AFFICHAGE PLAN LONG TERME
+// ================================================================
         
         if (error.name === 'AbortError') {
             // Timeout - Afficher message avec option retry
