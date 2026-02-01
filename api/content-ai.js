@@ -1755,12 +1755,3 @@ function getMostPerformingType(actions) {
   });
   return Object.keys(typeLeads).reduce((a, b) => typeLeads[a] > typeLeads[b] ? a : b, 'N/A');
 }
-
-  } catch (error) {
-    console.error('❌ API Error:', error);
-    return res.status(500).json({ 
-      error: error.message || 'Internal server error',
-      details: error.toString()
-    });
-  }
-}
