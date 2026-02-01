@@ -1353,8 +1353,17 @@ window.generateActionPlan = async function(actionId, titre, description, type) {
         });
         
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erreur API');
+            let errorMsg = 'Erreur API';
+            try {
+                const errorData = await response.json();
+                errorMsg = errorData.error || errorMsg;
+            } catch (e) {
+                // Si pas JSON, lire le texte brut
+                const errorText = await response.text();
+                errorMsg = errorText || `Erreur ${response.status}`;
+                console.error('❌ Erreur serveur (texte brut):', errorText);
+            }
+            throw new Error(errorMsg);
         }
         
         const { plan } = await response.json();

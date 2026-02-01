@@ -949,14 +949,20 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
     // GÉNÉRATION PLAN D'ACTION DÉTAILLÉ
     // ================================================================
     if (action === 'generate-action-plan') {
-        const apiKey = req.body.useOpenAI ? process.env.OPENAI_API_KEY : process.env.ANTHROPIC_API_KEY;
-        const provider = req.body.useOpenAI ? 'OpenAI' : 'Claude';
-        
-        if (!apiKey) {
-            return res.status(500).json({ error: `${provider} API key not configured` });
-        }
+        try {
+            const apiKey = req.body.useOpenAI ? process.env.OPENAI_API_KEY : process.env.ANTHROPIC_API_KEY;
+            const provider = req.body.useOpenAI ? 'OpenAI' : 'Claude';
+            
+            if (!apiKey) {
+                console.error(`❌ ${provider} API key not configured`);
+                return res.status(500).json({ error: `${provider} API key non configurée` });
+            }
 
-        const { titre, description, type, customInstructions = '' } = req.body;
+            const { titre, description, type, customInstructions = '' } = req.body;
+            
+            if (!titre || !description || !type) {
+                return res.status(400).json({ error: 'Paramètres manquants: titre, description, type requis' });
+            }
 
         const customSection = customInstructions ? `
 
@@ -1000,11 +1006,11 @@ Format JSON strict :
 
 Fournis **uniquement le JSON**, sans texte avant/après.`;
 
-        let plan;
+            let plan;
 
-        try {
             if (req.body.useOpenAI) {
                 // OpenAI
+                console.log('🤖 Appel OpenAI GPT-4o...');
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -1019,16 +1025,25 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`OpenAI Error: ${errorData.error?.message || 'Unknown error'}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                    console.error('❌ OpenAI Error:', errorMsg);
+                    throw new Error(`OpenAI: ${errorMsg}`);
                 }
 
                 const data = await response.json();
-                const content = data.choices[0].message.content;
+                const content = data.choices?.[0]?.message?.content;
+                
+                if (!content) {
+                    throw new Error('OpenAI: Réponse vide');
+                }
+                
+                console.log('✅ Réponse OpenAI reçue, parsing JSON...');
                 plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
 
             } else {
                 // Claude
+                console.log('🤖 Appel Claude Sonnet...');
                 const response = await fetch('https://api.anthropic.com/v1/messages', {
                     method: 'POST',
                     headers: {
@@ -1044,19 +1059,32 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`Claude Error: ${errorData.error?.message || 'Unknown error'}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                    console.error('❌ Claude Error:', errorMsg);
+                    throw new Error(`Claude: ${errorMsg}`);
                 }
 
                 const data = await response.json();
-                const content = data.content[0].text;
+                const content = data.content?.[0]?.text;
+                
+                if (!content) {
+                    throw new Error('Claude: Réponse vide');
+                }
+                
+                console.log('✅ Réponse Claude reçue, parsing JSON...');
                 plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
             }
 
+            if (!plan.etapes || !Array.isArray(plan.etapes)) {
+                throw new Error('Format de plan invalide: etapes manquant');
+            }
+
+            console.log(`✅ Plan généré avec ${plan.etapes.length} étapes`);
             return res.json({ success: true, plan });
             
         } catch (error) {
-            console.error('❌ Erreur génération plan:', error);
+            console.error('❌ Erreur génération plan:', error.message);
             return res.status(500).json({ 
                 error: error.message || 'Erreur lors de la génération du plan'
             });
