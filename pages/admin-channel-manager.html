@@ -149,6 +149,35 @@
             </div>
 
             <div class="kpi-card">
+                <div class="kpi-icon" style="background: #fee2e2;">
+                    <i data-lucide="alert-octagon" style="color: #dc2626;"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Erreurs Critiques</div>
+                    <div class="kpi-value" style="display: flex; flex-direction: column; gap: 8px; font-size: 18px; margin-top: 8px;">
+                        <!-- Ligne 1: Par type -->
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span title="Critiques" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="alert-octagon" style="width: 18px; height: 18px; color: #dc2626;"></i>
+                                <strong id="kpiErrorsCritical" style="color: #dc2626; font-size: 18px;">0</strong>
+                            </span>
+                            <span title="Warnings" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="alert-triangle" style="width: 18px; height: 18px; color: #f59e0b;"></i>
+                                <strong id="kpiErrorsWarning" style="color: #f59e0b; font-size: 18px;">0</strong>
+                            </span>
+                        </div>
+                        <!-- Ligne 2: Total 24h -->
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span title="Dernières 24h" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="clock" style="width: 18px; height: 18px; color: #64748b;"></i>
+                                <strong id="kpiErrors24h" style="color: #64748b; font-size: 18px;">0</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
                 <div class="kpi-icon" style="background: #e3f2fd;">
                     <i data-lucide="headphones" style="color: #2196f3;"></i>
                 </div>
@@ -325,7 +354,7 @@
                     <i data-lucide="pen-tool"></i>
                     Content IA
                 </button>
-                <button class="tab-btn" data-tab="monitoring">
+                <button class="tab-btn" data-tab="monitoring" onclick="window.location.href='admin-monitoring.html'">
                     <i data-lucide="activity"></i>
                     Monitoring
                 </button>

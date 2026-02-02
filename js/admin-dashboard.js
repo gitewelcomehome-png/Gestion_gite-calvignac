@@ -150,6 +150,11 @@ async function loadKPIs() {
             document.getElementById('kpiChurn').textContent = churnRate + '%';
         }
         
+        // 5. Erreurs Critiques
+        await loadErrorsKPI();
+        
+        // 6. Support Tickets
+        
         // Réinitialiser les icônes Lucide
         if (window.lucide) lucide.createIcons();
         
@@ -503,6 +508,44 @@ function initEventListeners() {
             switchTab(tabId);
         });
     });
+}
+
+// ================================================================
+// KPI ERREURS
+// ================================================================
+
+async function loadErrorsKPI() {
+    try {
+        // Erreurs non résolues par type
+        const { data: errorsByType, error: errorsError } = await window.supabaseClient
+            .from('cm_error_logs')
+            .select('error_type')
+            .eq('resolved', false);
+        
+        if (!errorsError && errorsByType) {
+            const critical = errorsByType.filter(e => e.error_type === 'critical').length;
+            const warning = errorsByType.filter(e => e.error_type === 'warning').length;
+            
+            document.getElementById('kpiErrorsCritical').textContent = critical;
+            document.getElementById('kpiErrorsWarning').textContent = warning;
+        }
+        
+        // Erreurs dernières 24h
+        const yesterday = new Date();
+        yesterday.setHours(yesterday.getHours() - 24);
+        
+        const { data: errors24h, error: errors24hError } = await window.supabaseClient
+            .from('cm_error_logs')
+            .select('id')
+            .gte('timestamp', yesterday.toISOString());
+        
+        if (!errors24hError && errors24h) {
+            document.getElementById('kpiErrors24h').textContent = errors24h.length;
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur chargement KPI erreurs:', error);
+    }
 }
 
 // ================================================================
