@@ -223,9 +223,6 @@
             </div>
         </section>
 
-        <!-- 🤖 WIDGET IA PROPOSITIONS QUOTIDIENNES -->
-        <div id="aiPropositionsWidget"></div>
-
         <!-- Chart MRR 12 mois -->
         <section class="chart-section">
             <div class="chart-card">
@@ -349,24 +346,6 @@
     <script src="../js/admin-dashboard.js"></script>
     <script src="../js/dashboard-support-widget.js?v=1.0"></script>
     <script src="../js/dashboard-promotions-widget.js?v=1.0"></script>
-    <script src="../js/widget-ai-propositions.js?v=1.0"></script>
-    
-    <script>
-        // Initialiser widget IA au chargement
-        document.addEventListener('DOMContentLoaded', () => {
-            const widgetContainer = document.getElementById('aiPropositionsWidget');
-            if (widgetContainer && window.initAIPropositionsWidget) {
-                widgetContainer.innerHTML = window.initAIPropositionsWidget();
-                
-                // Générer les propositions
-                setTimeout(() => {
-                    if (window.refreshAIPropositions) {
-                        window.refreshAIPropositions();
-                    }
-                }, 1000);
-            }
-        });
-    </script>
     <script>
         // Initialiser Lucide Icons
         lucide.createIcons();
