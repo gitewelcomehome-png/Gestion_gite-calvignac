@@ -231,6 +231,7 @@ const translations = {
         humidity: 'Humidité',
         wind: 'Vent',
         feels_like: 'Ressenti',
+        updated: 'Mis à jour',
         weather_unavailable: 'Météo non disponible',
         disponibilite: 'Disponibilité',
         places: 'Places',
@@ -344,6 +345,7 @@ const translations = {
         humidity: 'Humidity',
         wind: 'Wind',
         feels_like: 'Feels like',
+        updated: 'Updated',
         weather_unavailable: 'Weather unavailable',
         disponibilite: 'Availability',
         places: 'Spaces',
@@ -866,51 +868,48 @@ async function initTimelineSection() {
     generateTimelineSuggestions();
 }
 
-// ✨ Chargement météo OpenWeatherMap
+// ✨ Chargement météo Open-Meteo (gratuit illimité, sans clé API)
 async function loadWeatherData() {
     const weatherWidget = document.getElementById('weatherWidget');
     if (!weatherWidget || !giteInfo.gps_lat || !giteInfo.gps_lon) return;
     
     try {
-        // API OpenWeatherMap (clé de démo publique)
-        const apiKey = 'YOUR_API_KEY_HERE'; // TODO: Remplacer par votre clé API gratuite OpenWeatherMap
         const lat = giteInfo.gps_lat;
         const lon = giteInfo.gps_lon;
-        const lang = currentLanguage;
         
-        // Pour éviter les erreurs pendant les tests sans clé API, on simule des données
-        if (apiKey === 'YOUR_API_KEY_HERE') {
-            throw new Error('API key non configurée');
-        }
-        
+        // Open-Meteo : gratuit, sans clé API, données européennes fiables
         const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=${lang}&appid=${apiKey}`
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=auto`
         );
         
         if (!response.ok) throw new Error('Météo indisponible');
         
         const data = await response.json();
+        const current = data.current;
+        
+        // Conversion WMO weather code → description
+        const weatherInfo = getWeatherInfo(current.weather_code, currentLanguage);
         
         const weatherHTML = `
             <div class="weather-header">
                 <div>
-                    <div class="weather-temp">${Math.round(data.main.temp)}°C</div>
-                    <div class="weather-description">${data.weather[0].description}</div>
+                    <div class="weather-temp">${Math.round(current.temperature_2m)}°C</div>
+                    <div class="weather-description">${weatherInfo.description}</div>
                 </div>
-                <div class="weather-icon">${getWeatherEmoji(data.weather[0].icon)}</div>
+                <div class="weather-icon">${weatherInfo.emoji}</div>
             </div>
             <div class="weather-details">
                 <div class="weather-detail-item">
                     <div class="weather-detail-label" data-i18n="humidity">Humidité</div>
-                    <div class="weather-detail-value">${data.main.humidity}%</div>
+                    <div class="weather-detail-value">${current.relative_humidity_2m}%</div>
                 </div>
                 <div class="weather-detail-item">
                     <div class="weather-detail-label" data-i18n="wind">Vent</div>
-                    <div class="weather-detail-value">${Math.round(data.wind.speed * 3.6)} km/h</div>
+                    <div class="weather-detail-value">${Math.round(current.wind_speed_10m)} km/h</div>
                 </div>
                 <div class="weather-detail-item">
-                    <div class="weather-detail-label" data-i18n="feels_like">Ressenti</div>
-                    <div class="weather-detail-value">${Math.round(data.main.feels_like)}°C</div>
+                    <div class="weather-detail-label" data-i18n="updated">Mis à jour</div>
+                    <div class="weather-detail-value">${new Date(current.time).toLocaleTimeString(currentLanguage === 'fr' ? 'fr-FR' : 'en-GB', {hour: '2-digit', minute: '2-digit'})}</div>
                 </div>
             </div>
         `;
@@ -928,20 +927,37 @@ async function loadWeatherData() {
     }
 }
 
-// Helper : Emoji météo
-function getWeatherEmoji(icon) {
-    const emojiMap = {
-        '01d': '☀️', '01n': '🌙',
-        '02d': '⛅', '02n': '☁️',
-        '03d': '☁️', '03n': '☁️',
-        '04d': '☁️', '04n': '☁️',
-        '09d': '🌧️', '09n': '🌧️',
-        '10d': '🌦️', '10n': '🌧️',
-        '11d': '⛈️', '11n': '⛈️',
-        '13d': '❄️', '13n': '❄️',
-        '50d': '🌫️', '50n': '🌫️'
+// Helper : Conversion WMO weather code → description + emoji
+function getWeatherInfo(code, lang) {
+    const weatherMap = {
+        0: { fr: 'Ciel dégagé', en: 'Clear sky', emoji: '☀️' },
+        1: { fr: 'Principalement dégagé', en: 'Mainly clear', emoji: '🌤️' },
+        2: { fr: 'Partiellement nuageux', en: 'Partly cloudy', emoji: '⛅' },
+        3: { fr: 'Couvert', en: 'Overcast', emoji: '☁️' },
+        45: { fr: 'Brouillard', en: 'Fog', emoji: '🌫️' },
+        48: { fr: 'Brouillard givrant', en: 'Depositing rime fog', emoji: '🌫️' },
+        51: { fr: 'Bruine légère', en: 'Light drizzle', emoji: '🌦️' },
+        53: { fr: 'Bruine modérée', en: 'Moderate drizzle', emoji: '🌦️' },
+        55: { fr: 'Bruine dense', en: 'Dense drizzle', emoji: '🌧️' },
+        61: { fr: 'Pluie faible', en: 'Slight rain', emoji: '🌧️' },
+        63: { fr: 'Pluie modérée', en: 'Moderate rain', emoji: '🌧️' },
+        65: { fr: 'Pluie forte', en: 'Heavy rain', emoji: '⛈️' },
+        71: { fr: 'Neige faible', en: 'Slight snow', emoji: '🌨️' },
+        73: { fr: 'Neige modérée', en: 'Moderate snow', emoji: '❄️' },
+        75: { fr: 'Neige forte', en: 'Heavy snow', emoji: '❄️' },
+        80: { fr: 'Averses légères', en: 'Slight showers', emoji: '🌦️' },
+        81: { fr: 'Averses modérées', en: 'Moderate showers', emoji: '🌧️' },
+        82: { fr: 'Averses violentes', en: 'Violent showers', emoji: '⛈️' },
+        95: { fr: 'Orage', en: 'Thunderstorm', emoji: '⛈️' },
+        96: { fr: 'Orage avec grêle légère', en: 'Thunderstorm with slight hail', emoji: '⛈️' },
+        99: { fr: 'Orage avec forte grêle', en: 'Thunderstorm with heavy hail', emoji: '⛈️' }
     };
-    return emojiMap[icon] || '🌤️';
+    
+    const info = weatherMap[code] || weatherMap[0];
+    return {
+        description: lang === 'fr' ? info.fr : info.en,
+        emoji: info.emoji
+    };
 }
 
 // ✨ Suggestions IA par phase
