@@ -1,1 +1,1 @@
-V2.0_28JAN2026_FIX_TABLES_ID - Fix colonnes ID manquantes avec génération UUID automatique (PRODUCTION READY)
+V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO - Fix colonnes ID manquantes avec génération UUID automatique (PRODUCTION READY)

@@ -1,0 +1,662 @@
+<div class="cal-container">
+    <!-- En-tête avec sélecteur de gîte -->
+    <div class="cal-header">
+        <div class="cal-header-inner">
+            <h2 class="cal-title">📅 Tarifs</h2>
+            <button id="btnRefreshTarifs" class="btn-refresh">
+                🔄
+            </button>
+        </div>
+        
+        <select id="giteSelectTarifs" class="cal-select">
+            <option value="">Chargement...</option>
+        </select>
+    </div>
+
+    <!-- Navigation mois -->
+    <div class="cal-nav">
+        <button id="prevMonthTarifs" class="btn-nav">
+            ◀
+        </button>
+        <div id="currentMonthTarifs" class="cal-current-month"></div>
+        <button id="nextMonthTarifs" class="btn-nav">
+            ▶
+        </button>
+    </div>
+
+    <!-- Calendrier -->
+    <div id="calendrierTarifsMobile" class="cal-grid">
+        <!-- Généré dynamiquement -->
+    </div>
+
+    <!-- Légende plateformes -->
+    <div id="legendePlatformes" class="cal-legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: #FF5A5F;"></div>
+            <span class="legend-label">Airbnb</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #003580;"></div>
+            <span class="legend-label">Booking</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #F5A623;"></div>
+            <span class="legend-label">Abritel</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #27ae60;"></div>
+            <span class="legend-label">Gîtes de France</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #95a5a6;"></div>
+            <span class="legend-label">Autre</span>
+        </div>
+    </div>
+
+    <!-- Section Règles de tarification -->
+    <div class="cal-section">
+        <h3 class="cal-section-title">⚙️ Règles de tarification</h3>
+        
+        <!-- Durée minimale -->
+        <div class="form-field">
+            <label class="form-label">
+                🛏️ Durée min. de séjour (nuits) :
+            </label>
+            <input type="number" id="dureeMinMobile" min="1" value="2" class="form-input">
+        </div>
+
+        <!-- Promotions -->
+        <div class="promo-divider">
+            <h4 class="promo-title">🎉 Promotions automatiques</h4>
+            
+            <!-- Long séjour -->
+            <div class="promo-box">
+                <label class="promo-label">
+                    <input type="checkbox" id="promoLongSejour" class="promo-checkbox">
+                    📆 Réduction long séjour
+                </label>
+                <div class="promo-inputs">
+                    <input type="number" id="longSejourNuits" placeholder="Nuits" min="3" class="promo-input">
+                    <input type="number" id="longSejourPct" placeholder="%" min="1" max="50" class="promo-input">
+                </div>
+            </div>
+
+            <!-- Last minute -->
+            <div class="promo-box">
+                <label class="promo-label">
+                    <input type="checkbox" id="promoLastMinute" class="promo-checkbox">
+                    ⚡ Last Minute
+                </label>
+                <div class="promo-inputs">
+                    <input type="number" id="lastMinuteJours" placeholder="Jours" min="1" max="30" class="promo-input">
+                    <input type="number" id="lastMinutePct" placeholder="%" min="1" max="50" class="promo-input">
+                </div>
+            </div>
+
+            <!-- Early booking -->
+            <div class="promo-box">
+                <label class="promo-label">
+                    <input type="checkbox" id="promoEarlyBooking" class="promo-checkbox">
+                    🎯 Early Booking
+                </label>
+                <div class="promo-inputs">
+                    <input type="number" id="earlyBookingJours" placeholder="Jours" min="30" max="365" class="promo-input">
+                    <input type="number" id="earlyBookingPct" placeholder="%" min="1" max="50" class="promo-input">
+                </div>
+            </div>
+        </div>
+
+        <button id="btnSaveReglesMobile" class="btn-save">
+            💾 Enregistrer les règles
+        </button>
+    </div>
+
+    <!-- Remplissage automatique -->
+    <div class="cal-section">
+        <h3 class="cal-section-title">⚡ Remplissage automatique</h3>
+        
+        <div class="form-field">
+            <label class="form-label">
+                💰 Prix de base par nuit :
+            </label>
+            <input type="number" id="prixAutoMobile" placeholder="Ex: 150" min="0" step="1" class="form-input">
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">
+                📅 Période :
+            </label>
+            <div class="auto-inputs">
+                <input type="date" id="dateDebutAutoMobile" class="form-input">
+                <input type="date" id="dateFinAutoMobile" class="form-input">
+            </div>
+        </div>
+
+        <button id="btnRemplirAutoMobile" class="btn-save">
+            🚀 Remplir automatiquement
+        </button>
+    </div>
+</div>
+
+<!-- Modal pour éditer un tarif -->
+<div id="modalTarifMobile" class="cal-modal">
+    <div class="modal-content-cal">
+        <div class="modal-header-cal">
+            <h3 class="modal-title-cal">💰 Tarif</h3>
+            <button id="closeModalTarifMobile" class="btn-close-cal">✕</button>
+        </div>
+        
+        <div id="dateInfoModal" class="modal-date-info"></div>
+        
+        <label class="modal-input-label">
+            💵 Prix par nuit (€) :
+        </label>
+        <input type="number" id="prixNuitModal" placeholder="Ex: 150" min="0" step="1" class="modal-input">
+        
+        <div class="modal-actions">
+            <button id="btnSaveTarifModal" class="btn-modal">
+                💾 Enregistrer
+            </button>
+            <button id="btnDeleteTarifModal" class="btn-modal">
+                🗑️ Supprimer
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+console.log('🎯 ========================================');
+console.log('🎯 FICHIER MOBILE CALENDRIER-TARIFS.HTML CHARGÉ');
+console.log('🎯 ========================================');
+
+let currentGiteIdMobile = null;
+let currentMonthMobile = new Date().getMonth();
+let currentYearMobile = new Date().getFullYear();
+let tarifsCacheMobile = [];
+let reservationsCacheMobile = [];
+let reglesCacheMobile = null;
+let selectedDateMobile = null;
+
+// Couleurs des plateformes (comme desktop)
+function getPlateformeColorMobile(plateforme) {
+    const colors = {
+        'Airbnb': '#FF5A5F',
+        'Booking': '#003580',
+        'Abritel': '#F5A623',
+        'Gites de France': '#27ae60',
+        'Direct': '#27ae60',
+        'Autre': '#95a5a6'
+    };
+    return colors[plateforme] || colors['Autre'];
+}
+
+async function loadGitesSelectorMobile() {
+    console.log('📅 Chargement sélecteur gîtes mobile...');
+    try {
+        if (!window.gitesManager) {
+            console.error('❌ gitesManager non disponible');
+            showToast('Erreur: gitesManager non disponible', 'error');
+            return;
+        }
+        
+        const gites = await window.gitesManager.getAll();
+        console.log('✅ Gîtes chargés:', gites.length);
+        
+        const selector = document.getElementById('giteSelectTarifs');
+        if (!selector) {
+            console.error('❌ Select #giteSelectTarifs non trouvé');
+            return;
+        }
+        
+        if (gites.length === 0) {
+            selector.innerHTML = '<option value="">Aucun gîte disponible</option>';
+            return;
+        }
+        
+        selector.innerHTML = '<option value="">Sélectionner un gîte</option>';
+        gites.forEach(gite => {
+            selector.innerHTML += `<option value="${gite.id}">${gite.name}</option>`;
+        });
+        
+        // Sélectionner le premier gîte par défaut
+        if (gites.length > 0) {
+            selector.value = gites[0].id;
+            currentGiteIdMobile = gites[0].id;
+            console.log('✅ Gîte sélectionné:', gites[0].name);
+            await loadTarifsMobile();
+        }
+    } catch (error) {
+        console.error('Erreur chargement gîtes:', error);
+        showToast('Erreur chargement gîtes', 'error');
+    }
+}
+
+async function loadTarifsMobile() {
+    console.log('📅 Chargement tarifs pour gîte:', currentGiteIdMobile);
+    if (!currentGiteIdMobile) {
+        console.warn('⚠️ Pas de gîte sélectionné');
+        return;
+    }
+    
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) {
+            console.error('❌ Utilisateur non connecté');
+            return;
+        }
+        
+        console.log('✅ Utilisateur connecté, chargement des données...');
+        
+        // Charger les tarifs depuis le champ JSON tarifs_calendrier de la table gites
+        const { data: giteData, error: errorTarifs } = await window.supabaseClient
+            .from('gites')
+            .select('tarifs_calendrier, regles_tarifs')
+            .eq('id', currentGiteIdMobile)
+            .single();
+        
+        if (errorTarifs) throw errorTarifs;
+        
+        // Convertir le JSON en tableau
+        const tarifData = giteData?.tarifs_calendrier;
+        if (Array.isArray(tarifData)) {
+            tarifsCacheMobile = tarifData;
+        console.log('✅ Tarifs chargés:', tarifsCacheMobile.length);
+        
+        } else if (tarifData && typeof tarifData === 'object') {
+            tarifsCacheMobile = Object.entries(tarifData).map(([date, prix]) => ({
+                date: date,
+                prix_nuit: parseFloat(prix)
+            }));
+        } else {
+            tarifsCacheMobile = [];
+        }
+        
+        // Charger les réservations
+        if (typeof getAllReservations === 'function') {
+            reservationsCacheMobile = await getAllReservations(true);
+            console.log('📋 Réservations totales chargées:', reservationsCacheMobile.length);
+            // ✅ Comparer directement les UUID strings (pas de parseInt!)
+            reservationsCacheMobile = reservationsCacheMobile.filter(r => r.gite_id === currentGiteIdMobile);
+            console.log('📋 Réservations pour gite_id', currentGiteIdMobile, ':', reservationsCacheMobile.length);
+            if (reservationsCacheMobile.length > 0) {
+                console.log('📋 Première réservation:', reservationsCacheMobile[0]);
+            }
+        } else {
+            console.warn('⚠️ getAllReservations non disponible');
+        }
+        
+        // Charger les règles depuis le JSON regles_tarifs
+        if (giteData?.regles_tarifs) {
+            reglesCacheMobile = giteData.regles_tarifs;
+            loadReglesIntoFormMobile();
+        }
+        
+        console.log('✅ Render du calendrier...');
+        renderCalendrierMobile();
+    } catch (error) {
+        console.error('Erreur chargement tarifs:', error);
+        showToast('Erreur chargement données', 'error');
+    }
+}
+
+function loadReglesIntoFormMobile() {
+    if (!reglesCacheMobile) return;
+    
+    const dureeMin = document.getElementById('dureeMinMobile');
+    if (dureeMin) dureeMin.value = reglesCacheMobile.duree_min_defaut || 2;
+    
+    const promos = reglesCacheMobile.promotions || {};
+    
+    if (promos.long_sejour) {
+        document.getElementById('promoLongSejour').checked = promos.long_sejour.actif;
+        document.getElementById('longSejourNuits').value = promos.long_sejour.a_partir_de || 7;
+        document.getElementById('longSejourPct').value = promos.long_sejour.pourcentage || 10;
+    }
+    
+    if (promos.last_minute) {
+        document.getElementById('promoLastMinute').checked = promos.last_minute.actif;
+        document.getElementById('lastMinuteJours').value = promos.last_minute.jours_avant || 7;
+        document.getElementById('lastMinutePct').value = promos.last_minute.pourcentage || 15;
+    }
+    
+    if (promos.early_booking) {
+        document.getElementById('promoEarlyBooking').checked = promos.early_booking.actif;
+        document.getElementById('earlyBookingJours').value = promos.early_booking.jours_avant || 60;
+        document.getElementById('earlyBookingPct').value = promos.early_booking.pourcentage || 10;
+    }
+}
+
+function renderCalendrierMobile() {
+    console.log('🎨 renderCalendrierMobile() appelée');
+    const container = document.getElementById('calendrierTarifsMobile');
+    if (!container) {
+        console.error('❌ Container #calendrierTarifsMobile non trouvé !');
+        return;
+    }
+    
+    console.log('✅ Container trouvé, génération du calendrier...');
+    
+    // Afficher le mois actuel
+    const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
+                        'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    const monthDisplay = document.getElementById('currentMonthTarifs');
+    if (monthDisplay) {
+        monthDisplay.textContent = `${monthNames[currentMonthMobile]} ${currentYearMobile}`;
+    }
+    
+    container.innerHTML = '';
+    
+    // En-têtes des jours
+    const jours = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+    jours.forEach(jour => {
+        const header = document.createElement('div');
+        header.className = 'day-header-mobile';
+        header.textContent = jour;
+        container.appendChild(header);
+    });
+    
+    // Premier jour du mois
+    const firstDay = new Date(currentYearMobile, currentMonthMobile, 1);
+    let dayOfWeek = firstDay.getDay();
+    dayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    
+    // Jours du mois précédent
+    for (let i = 0; i < dayOfWeek; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'day-card-mobile other-month';
+        container.appendChild(emptyDiv);
+    }
+    
+    // Jours du mois
+    const lastDay = new Date(currentYearMobile, currentMonthMobile + 1, 0).getDate();
+    
+    for (let day = 1; day <= lastDay; day++) {
+        const dateObj = new Date(currentYearMobile, currentMonthMobile, day);
+        const dateStr = dateObj.toISOString().split('T')[0];
+        
+        const tarif = tarifsCacheMobile.find(t => t.date === dateStr);
+        
+        // Vérifier si réservé et récupérer les infos de réservation
+        let reservationInfo = null;
+        const currentReservation = reservationsCacheMobile.find(resa => {
+            const checkIn = new Date(resa.date_arrivee || resa.check_in);
+            const checkOut = new Date(resa.date_depart || resa.check_out);
+            return dateObj >= checkIn && dateObj < checkOut;
+        });
+        
+        const isReserved = !!currentReservation;
+        if (isReserved) {
+            reservationInfo = {
+                plateforme: currentReservation.origine_reservation || currentReservation.plateforme || 'Direct',
+                client: currentReservation.nom_client
+            };
+        }
+        
+        const dayCard = document.createElement('div');
+        dayCard.className = 'day-card-mobile';
+        dayCard.dataset.date = dateStr;
+        
+        if (isReserved) {
+            dayCard.classList.add('reserved');
+            // Remplir toute la case avec la couleur de plateforme
+            const plateformeColor = getPlateformeColorMobile(reservationInfo.plateforme);
+            dayCard.style.background = plateformeColor;
+            dayCard.style.border = '2px solid #2D3436';
+        } else if (tarif) {
+            dayCard.classList.add('has-tarif');
+        }
+        
+        dayCard.innerHTML = `
+            <div class="day-number-mobile" style="${isReserved ? 'color: white; font-weight: 700;' : ''}">${day}</div>
+            ${isReserved ? `<div style="font-size: 0.55rem; color: rgba(255,255,255,0.9); font-weight: 600;">🔒</div>` : 
+              tarif ? `<div class="day-price-mobile">${tarif.prix_nuit}€</div>` : 
+              '<div style="font-size: 0.65rem; color: var(--text-secondary);">—</div>'}
+        `;
+        
+        if (!isReserved) {
+            dayCard.addEventListener('click', () => openTarifModalMobile(dateStr));
+        }
+        
+        container.appendChild(dayCard);
+    }
+    
+    console.log(`✅ Calendrier généré: ${lastDay} jours créés`);
+}
+
+function openTarifModalMobile(dateStr) {
+    selectedDateMobile = dateStr;
+    const modal = document.getElementById('modalTarifMobile');
+    const tarif = tarifsCacheMobile.find(t => t.date === dateStr);
+    
+    const date = new Date(dateStr);
+    const dateFormatted = date.toLocaleDateString('fr-FR', { 
+        weekday: 'long', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    });
+    
+    document.getElementById('dateInfoModal').textContent = dateFormatted;
+    document.getElementById('prixNuitModal').value = tarif ? tarif.prix_nuit : '';
+    
+    modal.style.display = 'block';
+}
+
+function closeModalTarifMobile() {
+    document.getElementById('modalTarifMobile').style.display = 'none';
+    selectedDateMobile = null;
+}
+
+async function saveTarifModalMobile() {
+    if (!selectedDateMobile || !currentGiteIdMobile) return;
+    
+    const prix = parseFloat(document.getElementById('prixNuitModal').value);
+    if (!prix || prix <= 0) {
+        showToast('Veuillez saisir un prix valide', 'error');
+        return;
+    }
+    
+    try {
+        // Mettre à jour le cache local
+        const existingIndex = tarifsCacheMobile.findIndex(t => t.date === selectedDateMobile);
+        if (existingIndex > -1) {
+            tarifsCacheMobile[existingIndex].prix_nuit = prix;
+        } else {
+            tarifsCacheMobile.push({ date: selectedDateMobile, prix_nuit: prix });
+        }
+        
+        // Sauvegarder dans le JSON tarifs_calendrier
+        const { error } = await window.supabaseClient
+            .from('gites')
+            .update({ tarifs_calendrier: tarifsCacheMobile })
+            .eq('id', currentGiteIdMobile);
+        
+        if (error) throw error;
+        
+        showToast('✅ Tarif enregistré', 'success');
+        closeModalTarifMobile();
+        renderCalendrierMobile();
+    } catch (error) {
+        console.error('Erreur sauvegarde:', error);
+        showToast('Erreur sauvegarde', 'error');
+    }
+}
+
+async function deleteTarifModalMobile() {
+    if (!selectedDateMobile || !currentGiteIdMobile) return;
+    
+    try {
+        // Supprimer du cache local
+        tarifsCacheMobile = tarifsCacheMobile.filter(t => t.date !== selectedDateMobile);
+        
+        // Sauvegarder dans le JSON tarifs_calendrier
+        const { error } = await window.supabaseClient
+            .from('gites')
+            .update({ tarifs_calendrier: tarifsCacheMobile })
+            .eq('id', currentGiteIdMobile);
+        
+        if (error) throw error;
+        
+        showToast('✅ Tarif supprimé', 'success');
+        closeModalTarifMobile();
+        renderCalendrierMobile();
+    } catch (error) {
+        console.error('Erreur suppression:', error);
+        showToast('Erreur suppression', 'error');
+    }
+}
+
+async function saveReglesMobile() {
+    if (!currentGiteIdMobile) return;
+    
+    try {
+        const regles = {
+            duree_min_defaut: parseInt(document.getElementById('dureeMinMobile').value) || 2,
+            promotions: {
+                long_sejour: {
+                    actif: document.getElementById('promoLongSejour').checked,
+                    a_partir_de: parseInt(document.getElementById('longSejourNuits').value) || 7,
+                    pourcentage: parseInt(document.getElementById('longSejourPct').value) || 10
+                },
+                last_minute: {
+                    actif: document.getElementById('promoLastMinute').checked,
+                    jours_avant: parseInt(document.getElementById('lastMinuteJours').value) || 7,
+                    pourcentage: parseInt(document.getElementById('lastMinutePct').value) || 15
+                },
+                early_booking: {
+                    actif: document.getElementById('promoEarlyBooking').checked,
+                    jours_avant: parseInt(document.getElementById('earlyBookingJours').value) || 60,
+                    pourcentage: parseInt(document.getElementById('earlyBookingPct').value) || 10
+                }
+            }
+        };
+        
+        // Sauvegarder dans le JSON regles_tarifs
+        const { error } = await window.supabaseClient
+            .from('gites')
+            .update({ regles_tarifs: regles })
+            .eq('id', currentGiteIdMobile);
+        
+        if (error) throw error;
+        
+        showToast('✅ Règles enregistrées', 'success');
+        reglesCacheMobile = regles;
+    } catch (error) {
+        console.error('Erreur sauvegarde règles:', error);
+        showToast('Erreur sauvegarde règles', 'error');
+    }
+}
+
+async function remplirAutoMobile() {
+    const prix = parseFloat(document.getElementById('prixAutoMobile').value);
+    const dateDebut = document.getElementById('dateDebutAutoMobile').value;
+    const dateFin = document.getElementById('dateFinAutoMobile').value;
+    
+    if (!prix || prix <= 0) {
+        showToast('Veuillez saisir un prix valide', 'error');
+        return;
+    }
+    
+    if (!dateDebut || !dateFin) {
+        showToast('Veuillez sélectionner une période', 'error');
+        return;
+    }
+    
+    if (new Date(dateDebut) > new Date(dateFin)) {
+        showToast('La date de début doit être avant la date de fin', 'error');
+        return;
+    }
+    
+    if (!currentGiteIdMobile) {
+        showToast('Veuillez sélectionner un gîte', 'error');
+        return;
+    }
+    
+    try {
+        // Générer toutes les dates de la période
+        const current = new Date(dateDebut);
+        const end = new Date(dateFin);
+        let count = 0;
+        
+        while (current <= end) {
+            const dateStr = current.toISOString().split('T')[0];
+            
+            // Ajouter ou mettre à jour dans le cache
+            const existingIndex = tarifsCacheMobile.findIndex(t => t.date === dateStr);
+            if (existingIndex > -1) {
+                tarifsCacheMobile[existingIndex].prix_nuit = prix;
+            } else {
+                tarifsCacheMobile.push({ date: dateStr, prix_nuit: prix });
+            }
+            
+            count++;
+            current.setDate(current.getDate() + 1);
+        }
+        
+        // Sauvegarder dans le JSON tarifs_calendrier
+        const { error } = await window.supabaseClient
+            .from('gites')
+            .update({ tarifs_calendrier: tarifsCacheMobile })
+            .eq('id', currentGiteIdMobile);
+        
+        if (error) throw error;
+        
+        showToast(`✅ ${count} tarifs créés`, 'success');
+        
+        // Reset des champs
+        document.getElementById('prixAutoMobile').value = '';
+        document.getElementById('dateDebutAutoMobile').value = '';
+        document.getElementById('dateFinAutoMobile').value = '';
+        
+        renderCalendrierMobile();
+    } catch (error) {
+        console.error('Erreur remplissage auto:', error);
+        showToast('Erreur remplissage auto', 'error');
+    }
+}
+
+// Event listeners
+setTimeout(() => {
+    loadGitesSelectorMobile();
+    
+    document.getElementById('giteSelectTarifs')?.addEventListener('change', (e) => {
+        currentGiteIdMobile = e.target.value;
+        loadTarifsMobile();
+    });
+    
+    document.getElementById('btnRefreshTarifs')?.addEventListener('click', loadTarifsMobile);
+    
+    document.getElementById('prevMonthTarifs')?.addEventListener('click', () => {
+        if (currentMonthMobile === 0) {
+            currentMonthMobile = 11;
+            currentYearMobile--;
+        } else {
+            currentMonthMobile--;
+        }
+        renderCalendrierMobile();
+    });
+    
+    document.getElementById('nextMonthTarifs')?.addEventListener('click', () => {
+        if (currentMonthMobile === 11) {
+            currentMonthMobile = 0;
+            currentYearMobile++;
+        } else {
+            currentMonthMobile++;
+        }
+        renderCalendrierMobile();
+    });
+    
+    document.getElementById('closeModalTarifMobile')?.addEventListener('click', closeModalTarifMobile);
+    document.getElementById('btnSaveTarifModal')?.addEventListener('click', saveTarifModalMobile);
+    document.getElementById('btnDeleteTarifModal')?.addEventListener('click', deleteTarifModalMobile);
+    document.getElementById('btnSaveReglesMobile')?.addEventListener('click', saveReglesMobile);
+    document.getElementById('btnRemplirAutoMobile')?.addEventListener('click', remplirAutoMobile);
+    
+    // Fermer modal en cliquant sur le fond
+    document.getElementById('modalTarifMobile')?.addEventListener('click', (e) => {
+        if (e.target.id === 'modalTarifMobile') {
+            closeModalTarifMobile();
+        }
+    });
+}, 500);
+</script>

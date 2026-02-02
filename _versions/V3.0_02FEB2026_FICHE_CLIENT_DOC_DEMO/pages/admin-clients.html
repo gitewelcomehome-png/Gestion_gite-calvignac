@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Clients - Channel Manager</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .clients-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px;
+            margin-left: 250px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .clients-table {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .clients-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .clients-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .clients-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .clients-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .clients-table tbody tr:hover {
+            background: #f8fafc;
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-actif { background: #dcfce7; color: #166534; }
+        .badge-trial { background: #dbeafe; color: #1e40af; }
+        .badge-suspendu { background: #fed7aa; color: #c2410c; }
+        .badge-resilie { background: #fecaca; color: #991b1b; }
+
+        .badge-basic { background: #e0e7ff; color: #4338ca; }
+        .badge-pro { background: #fce7f3; color: #be185d; }
+        .badge-premium { background: #fef3c7; color: #92400e; }
+
+        /* Modal Fiche Client */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            max-width: 1200px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .client-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .client-info h2 {
+            margin: 0 0 10px 0;
+            color: #1e293b;
+        }
+
+        .client-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .client-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 25px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .info-card label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .info-card .value {
+            font-size: 17px;
+            color: #1e293b;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 20px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+        }
+
+        .promo-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .promo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .referral-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-box .label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Admin -->
+    <header class="admin-header">
+        <div class="header-left">
+            <h1>
+                <i data-lucide="users"></i>
+                Gestion des Clients
+            </h1>
+        </div>
+        <div class="header-right">
+            <span class="user-email" id="userEmail">stephanecalvignac@hotmail.fr</span>
+            <button class="btn-icon" id="btnLogout" title="Déconnexion">
+                <i data-lucide="log-out"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <section class="tabs-navigation">
+        <div class="tabs-sidebar">
+            <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
+            <button class="tab-btn" onclick="window.location.href='admin-channel-manager.html'">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="tab-btn active">
+                <i data-lucide="users"></i>
+                <span>Clients</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-support.html'">
+                <i data-lucide="headphones"></i>
+                <span>Support</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-promotions.html'">
+                <i data-lucide="tag"></i>
+                <span>Promotions</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-finance.html'">
+                <i data-lucide="bar-chart-2"></i>
+                <span>Finance & BI</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-content.html'">
+                <i data-lucide="pen-tool"></i>
+                <span>Content IA</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-monitoring.html'">
+                <i data-lucide="activity"></i>
+                <span>Monitoring</span>
+            </button>
+            <button class="tab-btn">
+                <i data-lucide="globe"></i>
+                <span>Site Web</span>
+            </button>
+        </div>
+    </section>
+
+    <div class="clients-container">
+        <!-- Stats -->
+        <div class="header-section">
+            <div>
+                <p style="color: #64748b; margin: 0; font-size: 15px;">
+                    <span id="totalClients">0</span> clients •
+                    <span id="activeClients">0</span> actifs •
+                    <span id="trialClients">0</span> en essai
+                </p>
+            </div>
+            <button onclick="window.location.href='admin-clients-ameliorations-demo.html'" 
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                           color: white; 
+                           border: none; 
+                           padding: 12px 24px; 
+                           border-radius: 8px; 
+                           font-weight: 600; 
+                           cursor: pointer; 
+                           display: flex; 
+                           align-items: center; 
+                           gap: 8px;
+                           transition: transform 0.2s, box-shadow 0.2s;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
+                Voir les améliorations proposées
+            </button>
+        </div>
+
+        <!-- Recherche et Filtres -->
+        <div class="search-filters">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Rechercher par nom, email, entreprise...">
+                <i data-lucide="search"></i>
+            </div>
+            <select class="filter-select" id="filterStatut">
+                <option value="">Tous les statuts</option>
+                <option value="actif">Actifs</option>
+                <option value="trial">Essai gratuit</option>
+                <option value="suspendu">Suspendus</option>
+                <option value="resilié">Résiliés</option>
+            </select>
+            <select class="filter-select" id="filterAbonnement">
+                <option value="">Tous les abonnements</option>
+                <option value="basic">Basic</option>
+                <option value="pro">Pro</option>
+                <option value="premium">Premium</option>
+            </select>
+        </div>
+
+        <!-- Table Clients -->
+        <div class="clients-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Email</th>
+                        <th>Entreprise</th>
+                        <th>Abonnement</th>
+                        <th>Statut</th>
+                        <th>MRR</th>
+                        <th>Gîtes</th>
+                        <th>Inscription</th>
+                    </tr>
+                </thead>
+                <tbody id="clientsTableBody">
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px;">
+                            <div class="spinner" style="border: 3px solid #f1f5f9; border-top-color: #667eea; border-radius: 50%; width: 40px; height: 40px; margin: 0 auto; animation: spin 1s linear infinite;"></div>
+                            <p style="margin-top: 15px; color: #64748b;">Chargement des clients...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Fiche Client -->
+    <div id="clientModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 style="margin: 0;" id="modalClientName">Nom Client</h2>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;" id="modalClientEmail">email@example.com</p>
+                </div>
+                <button class="modal-close" onclick="closeClientModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Actions rapides -->
+                <div class="client-actions" style="margin-bottom: 25px;">
+                    <button class="btn btn-primary" onclick="sendPasswordResetEmail()">
+                        <i data-lucide="mail"></i>
+                        Envoyer lien mot de passe
+                    </button>
+                    <button class="btn btn-secondary" onclick="editClient()">
+                        <i data-lucide="edit"></i>
+                        Modifier
+                    </button>
+                    <button class="btn btn-danger" onclick="suspendClient()">
+                        <i data-lucide="user-x"></i>
+                        Suspendre
+                    </button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchClientTab('infos')">
+                        <i data-lucide="user" style="width: 16px; height: 16px;"></i>
+                        Informations
+                    </button>
+                    <button class="tab" onclick="switchClientTab('abonnements')">
+                        <i data-lucide="package" style="width: 16px; height: 16px;"></i>
+                        Abonnements
+                    </button>
+                    <button class="tab" onclick="switchClientTab('promotions')">
+                        <i data-lucide="tag" style="width: 16px; height: 16px;"></i>
+                        Promotions
+                    </button>
+                    <button class="tab" onclick="switchClientTab('parrainage')">
+                        <i data-lucide="users" style="width: 16px; height: 16px;"></i>
+                        Parrainage
+                    </button>
+                    <button class="tab" onclick="switchClientTab('activite')">
+                        <i data-lucide="activity" style="width: 16px; height: 16px;"></i>
+                        Activité
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="tabInfos" class="tab-content active">
+                    <div class="info-grid" id="clientInfoGrid"></div>
+                </div>
+
+                <div id="tabAbonnements" class="tab-content">
+                    <div id="abonnementsContent"></div>
+                </div>
+
+                <div id="tabPromotions" class="tab-content">
+                    <div id="promotionsContent"></div>
+                </div>
+
+                <div id="tabParrainage" class="tab-content">
+                    <div id="parrainageContent"></div>
+                </div>
+
+                <div id="tabActivite" class="tab-content">
+                    <div id="activiteContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/shared-config.js"></script>
+    <script src="../js/error-tracker.js"></script>
+    <script src="../js/admin-clients.js"></script>
+</body>
+</html>

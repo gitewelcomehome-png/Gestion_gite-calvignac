@@ -1,0 +1,215 @@
+/* ================================================================ */
+/* 💰 FINANCE & BI - STYLES PERSONNALISÉS */
+/* ================================================================ */
+
+/* Cartes de prédictions IA */
+.prediction-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #E5E7EB;
+    transition: all 0.3s ease;
+}
+
+.prediction-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.prediction-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.prediction-icon.revenus {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.prediction-icon.clients {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.prediction-icon.churn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.prediction-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.prediction-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6B7280;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.prediction-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+.prediction-confidence {
+    font-size: 0.8rem;
+    color: #9CA3AF;
+    opacity: 0.8;
+}
+
+.prediction-confidence i {
+    width: 12px;
+    height: 12px;
+    margin-right: 4px;
+}
+
+/* Tableau cohort analysis */
+.cohort-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cohort-table thead {
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+    color: white;
+}
+
+.cohort-table thead th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cohort-table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #E5E7EB;
+    font-size: 0.9rem;
+}
+
+.cohort-table tbody tr:hover {
+    background: #F9FAFB;
+}
+
+.cohort-table tbody td:first-child {
+    font-weight: 600;
+    color: #111827;
+}
+
+/* Heat map pour rétention */
+.cohort-table tbody td[style*="background"] {
+    font-weight: 600;
+    color: #047857;
+}
+
+/* Badges statut */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.badge-success {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.badge-warning {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.badge-danger {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.badge-info {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+/* Cartes de graphiques */
+.chart-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #E5E7EB;
+}
+
+.chart-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-card h3 i {
+    width: 20px;
+    height: 20px;
+    color: #3b82f6;
+}
+
+/* Bouton export */
+.btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-export:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-export i {
+    width: 18px;
+    height: 18px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .prediction-value {
+        font-size: 1.5rem;
+    }
+    
+    .cohort-table {
+        font-size: 0.75rem;
+    }
+    
+    .cohort-table thead th,
+    .cohort-table tbody td {
+        padding: 8px;
+    }
+}

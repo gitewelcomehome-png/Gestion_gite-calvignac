@@ -1,0 +1,530 @@
+<div class="tab-container dashboard-icalou">
+    <!-- DERNIÈRE MISE À JOUR: 26 JAN 2026 - RESTRUCTURATION MODULAIRE -->
+    
+    <!-- En-tête principal - Design System P -->
+    <header class="page-header">
+        <div class="page-header__content">
+            <h1 class="page-title"><i data-lucide="layout-grid"></i> Tableau de Bord</h1>
+            <p class="page-subtitle" id="dashboard-week-info">Semaine en cours</p>
+        </div>
+        <div class="page-header__actions">
+            <button onclick="updateFinancialIndicators()" class="btn btn--refresh">
+                <i data-lucide="refresh-cw"></i> Actualiser
+            </button>
+            
+            <div class="widget-date">
+                <div class="widget-date__current" id="dashboard-date">25 janvier 2026</div>
+                <div class="widget-date__week" id="dashboard-week-number">Semaine 4</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 🎫 TICKETS SUPPORT EN ATTENTE -->
+    <section id="dashboard-tickets-support" class="section-alert section-alert--warning mb-md" style="display: none;">
+        <header class="section-header">
+            <h2 class="section-title">
+                <i data-lucide="headphones"></i> TICKETS SUPPORT EN ATTENTE
+            </h2>
+            <span id="badge-tickets-count" class="badge badge--warning badge--count">0</span>
+        </header>
+        <div id="liste-tickets-support" class="section-content section-content--compact">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun ticket en attente</p>
+        </div>
+    </section>
+
+    <!-- ⚠️ DEMANDES CLIENTS URGENTES -->
+    <section id="dashboard-demandes-clients" class="section-alert section-alert--warning mb-md" style="display: none;">
+        <header class="section-header">
+            <h2 class="section-title">
+                <i data-lucide="file-text"></i> FICHES CLIENTS À ENVOYER
+            </h2>
+            <span id="badge-demandes-count" class="badge badge--warning badge--count">0</span>
+        </header>
+        <div id="liste-demandes-clients" class="section-content section-content--compact">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>
+        </div>
+    </section>
+
+    <!-- ⚠️ PROBLÈMES URGENTS -->
+    <section id="dashboard-problemes-urgents" class="section-alert section-alert--danger mb-md" style="display: none;">
+        <header class="section-header">
+            <h2 class="section-title">
+                <i data-lucide="alert-triangle"></i> PROBLÈMES URGENTS
+            </h2>
+            <span id="badge-problemes-urgents-count" class="badge badge--danger badge--count">0</span>
+        </header>
+        <div id="liste-problemes-urgents" class="section-content section-content--compact">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème urgent</p>
+        </div>
+    </section>
+
+    <!-- 💬 DEMANDES & RETOURS CLIENTS -->
+    <section id="dashboard-demandes-retours" class="section-alert section-alert--info mb-md" style="display: none;">
+        <header class="section-header">
+            <h2 class="section-title">
+                <i data-lucide="message-circle"></i> DEMANDES & RETOURS
+            </h2>
+            <span id="badge-demandes-retours-count" class="badge badge--info badge--count">0</span>
+        </header>
+        <div id="liste-demandes-retours" class="section-content section-content--compact">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>
+        </div>
+    </section>
+
+    <!-- Alertes / Notifications importantes -->
+    <div id="dashboard-alerts" class="mb-md"></div>
+
+    <!-- ========================================
+         📊 VISION GLOBALE
+         ======================================== -->
+    <section class="section section--spaced">
+        <h2 class="section-title mb-lg"><i data-lucide="bar-chart-3"></i> VISION GLOBALE</h2>
+        
+        <!-- Indicateurs fiscaux - Grille responsive -->
+        <div class="grid grid--2 gap-lg mb-lg">
+            <!-- URSSAF : 2025 + 2026 -->
+            <div class="card card--spacious dashboard-container-urssaf">
+                <h3 class="section-title mb-md"><i data-lucide="briefcase"></i> URSSAF</h3>
+                
+                <div class="grid grid--2 gap-sm">
+                    <!-- 2025 -->
+                    <div class="indicator indicator--warning">
+                        <div class="indicator__label">2025</div>
+                        <div id="dashboard-urssaf-2025" class="indicator__value">-</div>
+                    </div>
+                    <!-- 2026 -->
+                    <div class="indicator indicator--warning">
+                        <div class="indicator__label">2026</div>
+                        <div id="dashboard-urssaf-2026" class="indicator__value">-</div>
+                        <div class="indicator__sublabel">En cours</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IR : 2025 + 2026 -->
+            <div id="dashboard-ir-container" class="card card--spacious dashboard-container-ir">
+                <h3 class="section-title mb-md"><i data-lucide="receipt"></i> IMPÔT SUR LE REVENU</h3>
+                
+                <div class="grid grid--2 gap-sm">
+                    <!-- 2025 -->
+                    <div class="indicator indicator--info">
+                        <div class="indicator__label">2025</div>
+                        <div id="dashboard-ir-2025" class="indicator__value">-</div>
+                    </div>
+                    <!-- 2026 -->
+                    <div class="indicator indicator--info">
+                        <div class="indicator__label">2026</div>
+                        <div id="dashboard-ir-2026" class="indicator__value">-</div>
+                        <div class="indicator__sublabel">En cours</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Indicateurs financiers - CA et Bénéfices -->
+        <div class="grid grid--2 gap-lg">
+            <!-- Chiffre d'Affaires -->
+            <div class="card card--spacious dashboard-container-ca">
+                <h3 class="section-title mb-md"><i data-lucide="dollar-sign"></i> Chiffre d’Affaires</h3>
+                
+                <div class="grid grid--2 gap-sm">
+                    <!-- CA Mois -->
+                    <div class="indicator indicator--success">
+                        <div class="indicator__label">Mois en cours</div>
+                        <div id="dashboard-ca-mois" class="indicator__value">-</div>
+                    </div>
+                    
+                    <!-- CA Année -->
+                    <div class="indicator indicator--success">
+                        <div class="indicator__label">Année <span id="annee-ca">2026</span></div>
+                        <div id="dashboard-ca-annee" class="indicator__value">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bénéfices & Trésorerie -->
+            <div class="card card--spacious dashboard-container-benefice">
+                <h3 class="section-title mb-md"><i data-lucide="trending-up"></i> Bénéfices & Trésorerie</h3>
+                
+                <div class="grid grid--2 gap-sm">
+                    <!-- Bénéfice -->
+                    <div class="indicator indicator--primary">
+                        <div class="indicator__label">Bénéfice <span id="annee-benefice">2026</span></div>
+                        <div id="dashboard-benefice-moyen" class="indicator__value">-</div>
+                    </div>
+                    
+                    <!-- Trésorerie -->
+                    <div class="indicator indicator--primary">
+                        <div class="indicator__label">Trésorerie Actuelle</div>
+                        <div id="dashboard-tresorerie" class="indicator__value">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Graphiques financiers -->
+        <div class="grid grid--auto-lg gap-lg mt-lg">
+            <!-- Bénéfices mensuels des gîtes -->
+            <div class="card card--spacious dashboard-graph-container-ca">
+                <header class="section-header">
+                    <h3 class="section-title">
+                        <i data-lucide="dollar-sign"></i>
+                        Bénéfices Mensuels des Gîtes
+                    </h3>
+                </header>
+                <div class="dashboard-graph-canvas">
+                    <canvas id="graphique-benefices-gites" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Trésorerie -->
+            <div class="card card--spacious dashboard-graph-container-benefice">
+                <header class="section-header">
+                    <h3 class="section-title">
+                        <i data-lucide="trending-up"></i>
+                        Évolution Trésorerie
+                    </h3>
+                </header>
+                <div class="dashboard-graph-canvas">
+                    <canvas id="graphique-tresorerie-dashboard" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         🎯 VISION ACTION
+         ======================================== -->
+    <section class="section section--spaced">
+        <h2 class="section-title mb-lg"><i data-lucide="target"></i> VISION ACTIONS</h2>
+        
+        <!-- Réservations de la semaine - EN HAUT, PLEINE LARGEUR -->
+        <div class="card card--spacious dashboard-reservations-fullwidth mb-lg">
+            <header class="section-header">
+                <h3 class="section-title">
+                    <i data-lucide="calendar"></i>
+                    Réservations cette semaine
+                </h3>
+            </header>
+            <div id="dashboard-reservations" class="dashboard-reservations-grid">
+                <p>Chargement...</p>
+            </div>
+        </div>
+        
+        <!-- Layout principal : 2 colonnes adaptatives -->
+        <div class="grid grid--2 gap-lg">
+        
+        <!-- COLONNE GAUCHE : Actions Todo -->
+        <div class="flex flex--column gap-lg">
+            <!-- Todo : Actions Réservations -->
+            <div class="card card--spacious dashboard-container-reservations">
+                <header class="section-header">
+                    <h3 class="section-title">
+                        <i data-lucide="check-circle"></i>
+                        Actions Réservations
+                    </h3>
+                    <div class="section-actions">
+                        <span id="todo-count-reservations" class="badge badge--count">0</span>
+                        <button onclick="addTodoItem('reservations')" class="btn btn--icon-sidebar">+</button>
+                    </div>
+                </header>
+                <div id="todo-reservations">
+                    <!-- Todos dynamiques -->
+                </div>
+            </div>
+
+            <!-- Todo : Travaux par gîte -->
+            <div class="card card--spacious dashboard-container-travaux">
+                <header class="section-header">
+                    <h3 class="section-title">
+                        <i data-lucide="wrench"></i>
+                        Travaux & Maintenance
+                    </h3>
+                    <div class="section-actions">
+                        <span id="todo-count-travaux" class="badge badge--count">0</span>
+                        <button onclick="addTodoItem('travaux')" class="btn btn--icon-sidebar">+</button>
+                    </div>
+                </header>
+                <div id="todo-travaux">
+                    <!-- Todos dynamiques -->
+                </div>
+            </div>
+        </div>
+
+        <!-- COLONNE DROITE : Achats + Ménages -->
+        <div class="flex flex--column gap-lg">
+            <!-- Todo : Achats -->
+            <div class="card card--spacious dashboard-container-achats">
+                <header class="section-header">
+                    <h3 class="section-title">
+                        <i data-lucide="shopping-cart"></i>
+                        Achats & Courses
+                    </h3>
+                    <div class="section-actions">
+                        <span id="todo-count-achats" class="badge badge--count">0</span>
+                        <button onclick="addTodoItem('achats')" class="btn btn--icon-sidebar">+</button>
+                    </div>
+                </header>
+                <div id="todo-achats">
+                    <!-- Todos dynamiques -->
+                </div>
+            </div>
+
+            <!-- Ménages prévus -->
+            <div class="card card--spacious">
+                <header class="section-header">
+                    <h3 class="section-title">
+                        <i data-lucide="sparkles"></i>
+                        Ménages prévus
+                    </h3>
+                    <span id="dashboard-cleanings" class="badge badge--count">0</span>
+                </header>
+                <div id="dashboard-menages">
+                    <p>Chargement...</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal Ajout Tâche -->
+<div id="addTodoModal" class="modal">
+    <div class="modal-content">
+        <div class="card-header">
+            <i data-lucide="edit-3" class="card-icon"></i>
+            <h2 class="card-title">Nouvelle Tâche</h2>
+        </div>
+        
+        <form id="addTodoForm">
+            <input type="hidden" id="todoCategory">
+            
+            <div class="form-group">
+                <label>Titre <span class="required">*</span></label>
+                <input type="text" id="todoTitle" placeholder="Ex: Réparer robinet" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="todoDescription" rows="3" placeholder="Détails supplémentaires..."></textarea>
+            </div>
+            
+            <div id="giteSelectGroup" class="form-group" style="display: none;">
+                <label>Gîte concerné</label>
+                <select id="todoGite">
+                    <option value="">Non spécifié</option>
+                    <option value="Trevoux">Trevoux</option>
+                    <option value="Couzon">Couzon</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="todoRecurrent" style="width: 18px; height: 18px;">
+                    <span><i data-lucide="repeat" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>Tâche récurrente</span>
+                </label>
+            </div>
+            
+            <div id="recurrentOptions" style="display: none; margin-left: 26px; margin-top: 10px;">
+                <div class="form-group">
+                    <label>Fréquence</label>
+                    <select id="todoFrequency">
+                        <option value="weekly">Hebdomadaire</option>
+                        <option value="biweekly">Bimensuelle (2 semaines)</option>
+                        <option value="monthly">Mensuelle</option>
+                    </select>
+                </div>
+                
+                <div id="weeklyOptions" class="form-group">
+                    <label>Jour de la semaine</label>
+                    <select id="todoWeekday">
+                        <option value="1">Lundi</option>
+                        <option value="2">Mardi</option>
+                        <option value="3">Mercredi</option>
+                        <option value="4">Jeudi</option>
+                        <option value="5">Vendredi</option>
+                        <option value="6">Samedi</option>
+                        <option value="0">Dimanche</option>
+                    </select>
+                </div>
+                
+                <div id="monthlyOptions" class="form-group" style="display: none;">
+                    <label>Jour du mois</label>
+                    <input type="number" id="todoDayOfMonth" min="1" max="31" value="1">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary">
+                    <span>✓</span> Créer
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddTodoModal()">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Réponse WhatsApp -->
+<div id="reponseWhatsappModal" class="modal-overlay" style="display: none; align-items: flex-start; padding-top: 50px;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #2c3e50;"><i data-lucide="message-square" style="width: 22px; height: 22px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i>Répondre au client</h2>
+            <button onclick="closeReponseWhatsappModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #7f8c8d;">×</button>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #25D366;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
+                <strong style="color: #2c3e50; font-size: 1.05rem;" id="reponseClientNom">Client</strong>
+                <span style="background: #25D366; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;" id="reponseClientGite">Gîte</span>
+            </div>
+            <div style="color: #555; font-size: 0.9rem; margin-left: 30px;" id="reponseClientSujet">Sujet de la demande</div>
+        </div>
+        
+        <form id="formReponseWhatsapp">
+            <input type="hidden" id="reponseProblemeId">
+            <input type="hidden" id="reponseTelephone">
+            
+            <div class="form-group">
+                <label style="font-weight: 600; color: #2c3e50; margin-bottom: 8px; display: block;">Votre message</label>
+                <textarea id="reponseMessage" rows="8" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; resize: vertical; font-family: inherit;" placeholder="Écrivez votre réponse ici..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" style="flex: 1; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i data-lucide="send" style="width: 18px; height: 18px;"></i> Envoyer via WhatsApp
+                </button>
+                <button type="button" onclick="closeReponseWhatsappModal()" style="background: #95a5a6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Fonction de debug pour les labels
+window.debugModalLabels = function() {
+    setTimeout(() => {
+        const modal = document.getElementById('addTodoModal');
+        const htmlClasses = document.documentElement.className;
+        console.log('=== DEBUG MODAL LABELS ===');
+        console.log('🔍 Classes HTML:', htmlClasses);
+        console.log('🎨 Style détecté:', htmlClasses.includes('style-apple') ? 'APPLE' : 'SIDEBAR');
+        
+        const labels = modal.querySelectorAll('.form-group label');
+        console.log('📋 Nombre de labels:', labels.length);
+        
+        labels.forEach((label, i) => {
+            const computed = window.getComputedStyle(label);
+            console.log(`Label ${i+1}: "${label.textContent.trim()}"`);
+            console.log(`  ├─ color: ${computed.color}`);
+            console.log(`  ├─ font-size: ${computed.fontSize}`);
+            console.log(`  ├─ font-weight: ${computed.fontWeight}`);
+            console.log(`  └─ text-transform: ${computed.textTransform}`);
+        });
+        console.log('========================');
+    }, 150);
+};
+
+window.debugEditModal = function() {
+    setTimeout(() => {
+        const modal = document.querySelector('.modal');
+        if (!modal) return;
+        
+        // Debug modal (code silencieux pour analyse si nécessaire)
+    }, 250);
+};
+
+// Auto-debug au clic sur un bouton d'édition (désactivé)
+// document.addEventListener('click', function(e) {
+//     if (e.target.closest('.btn-edit') || e.target.textContent.includes('✏️')) {
+//         setTimeout(window.debugEditModal, 300);
+//     }
+// });
+
+// Mise à jour visuelle des boutons de switch modal
+(function() {
+    // Wrapper pour la fonction setStyle existante
+    const originalSetStyle = window.setStyle;
+    if (originalSetStyle) {
+        window.setStyle = function(style) {
+            console.log('🎨 SWITCH STYLE:', style);
+            console.log('🔍 Classes HTML avant:', document.documentElement.className);
+            
+            // Appel de la fonction originale
+            originalSetStyle.call(this, style);
+            
+            console.log('🔍 Classes HTML après:', document.documentElement.className);
+            
+            // Vérifier les styles appliqués aux labels
+            setTimeout(() => {
+                const labels = document.querySelectorAll('.modal-content .form-group label');
+                console.log('📋 Nombre de labels trouvés:', labels.length);
+                labels.forEach((label, i) => {
+                    const computedStyle = window.getComputedStyle(label);
+                    console.log(`📌 Label ${i+1}:`, {
+                        text: label.textContent.trim(),
+                        color: computedStyle.color,
+                        fontSize: computedStyle.fontSize,
+                        fontWeight: computedStyle.fontWeight
+                    });
+                });
+            }, 100);
+            
+            // Mise à jour des boutons switch dans les modales
+            updateModalSwitchButtons(style);
+        };
+    }
+    
+    // Fonction pour mettre à jour l'apparence des boutons
+    function updateModalSwitchButtons(style) {
+        const sidebarBtn = document.getElementById('modal-btn-sidebar');
+        const appleBtn = document.getElementById('modal-btn-apple');
+        
+        if (sidebarBtn && appleBtn) {
+            if (style === 'sidebar') {
+                sidebarBtn.style.background = 'var(--upstay-cyan, #00C2CB)';
+                sidebarBtn.style.color = 'white';
+                appleBtn.style.background = 'transparent';
+                appleBtn.style.color = '#8e8e93';
+            } else if (style === 'apple') {
+                appleBtn.style.background = 'var(--upstay-cyan, #00C2CB)';
+                appleBtn.style.color = 'white';
+                sidebarBtn.style.background = 'transparent';
+                sidebarBtn.style.color = '#8e8e93';
+            }
+        }
+    }
+    
+    // Initialiser au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedStyle = localStorage.getItem('icalou-style') || 'sidebar';
+        console.log('🚀 Initialisation style:', savedStyle);
+        updateModalSwitchButtons(savedStyle);
+    });
+
+    
+    // Aussi initialiser immédiatement si le DOM est déjà chargé
+    if (document.readyState === 'loading') {
+        // Attendre DOMContentLoaded
+    } else {
+        const savedStyle = localStorage.getItem('icalou-style') || 'sidebar';
+        console.log('🚀 Initialisation immédiate style:', savedStyle);
+        updateModalSwitchButtons(savedStyle);
+    }
+    
+    // Initialiser les icônes Lucide après chargement du dashboard
+    if (typeof lucide !== 'undefined') {
+        setTimeout(() => lucide.createIcons(), 100);
+    }
+})();
+</script>
+
+<!-- Widget Support Dashboard -->
+<script src="../js/dashboard-support-widget.js"></script>
+
+</body>
+</html>

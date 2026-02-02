@@ -1,0 +1,266 @@
+<div class="tab-container">
+    <!-- Header Style Dashboard -->
+    <div class="stats-header">
+        <div class="stats-header-content">
+            <div>
+                <h2 class="stats-header-title"><i data-lucide="bar-chart-3"></i> Statistiques</h2>
+                <p class="stats-header-subtitle">Analyse des performances et réservations</p>
+            </div>
+            <div class="stats-header-actions">
+                <label for="yearFilterStats" class="stats-year-label"><i data-lucide="calendar"></i> Année :</label>
+                <select id="yearFilterStats" onchange="filterStatsByYear()" class="stats-year-select">
+                    <option value="">Chargement...</option>
+                </select>
+                <button onclick="toggleHistoricalDataForm()" class="stats-btn-manage">
+                    <i data-lucide="database"></i> Gérer données
+                </button>
+            </div>
+        </div>
+    </div>
+
+            <!-- 📊 RÉSERVATIONS PAR PLATEFORME -->
+            <div class="stats-card">
+                <h3 class="stats-card-title"><i data-lucide="smartphone"></i> Réservations par Plateforme</h3>
+                <div class="stats-grid">
+                    <div class="stat-item stat-item-airbnb">
+                        <div class="stat-item-label" style="color: #FF5A5F;"><i data-lucide="home"></i> Airbnb</div>
+                        <div id="countAirbnb" class="stat-item-value">-</div>
+                        <div class="stat-item-sublabel">réservations</div>
+                    </div>
+                    <div class="stat-item stat-item-abritel">
+                        <div class="stat-item-label" style="color: #3498DB;"><i data-lucide="house"></i> Abritel</div>
+                        <div id="countAbritel" class="stat-item-value">-</div>
+                        <div class="stat-item-sublabel">réservations</div>
+                    </div>
+                    <div class="stat-item stat-item-gdf">
+                        <div class="stat-item-label" style="color: #27AE60;"><i data-lucide="wheat"></i> Gîtes de France</div>
+                        <div id="countGites" class="stat-item-value">-</div>
+                        <div class="stat-item-sublabel">réservations</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 📊 TAUX D'OCCUPATION PAR GÎTE -->
+            <div class="stats-card" style="border-color: #667eea;">
+                <h3 class="stats-card-title"><i data-lucide="pie-chart"></i> Taux d’Occupation par Gîte</h3>
+                <div class="stats-grid-4">
+                    <div id="taux-occupation-container" style="display: contents;">
+                        <!-- Les cartes de taux d'occupation seront générées par JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 📈 STATISTIQUES AVANCÉES -->
+            <div class="stats-card">
+                <h3 class="stats-card-title"><i data-lucide="trending-up"></i> Statistiques Avancées</h3>
+                <div class="stats-grid-4">
+                    <!-- Prix moyen nuitée -->
+                    <div class="stat-item stat-item-default" style="border-color: #27AE60; box-shadow: 4px 4px 0 var(--stroke);">
+                        <div class="stat-item-label-small"><i data-lucide="dollar-sign"></i> Prix moyen/nuit</div>
+                        <div id="prixMoyen" class="stat-item-value-colored stat-item-value-3eme">- €</div>
+                        <div class="stat-item-sublabel-small">toutes réservations</div>
+                    </div>
+                    
+                    <!-- Durée moyenne séjour -->
+                    <div class="stat-item stat-item-default" style="border-color: #3498DB; box-shadow: 4px 4px 0 var(--stroke);">
+                        <div class="stat-item-label-small"><i data-lucide="calendar-days"></i> Durée moyenne</div>
+                        <div id="dureeMoyenne" class="stat-item-value-colored stat-item-value-4eme">- nuits</div>
+                        <div class="stat-item-sublabel-small">par séjour</div>
+                    </div>
+                    
+                    <!-- Meilleur mois -->
+                    <div class="stat-item stat-item-default" style="border-color: #f5576c; box-shadow: 4px 4px 0 var(--stroke);">
+                        <div class="stat-item-label-small"><i data-lucide="trophy" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>Meilleur mois</div>
+                        <div id="meilleurMois" class="stat-item-value-small stat-item-value-couzon">-</div>
+                        <div id="meilleurMoisCA" class="stat-item-value-small stat-item-value-3eme">- €</div>
+                    </div>
+                </div>
+            </div>
+                
+                
+                <!-- Formulaire caché des données historiques -->
+                <div id="historicalDataForm" class="historical-data-form">
+                    <div class="stats-card historical-data-card">
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 15px 0; color: var(--primary);"><i data-lucide="calendar" style="width: 22px; height: 22px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i>Données Historiques (Années Précédentes)</h3>
+                            <div class="alert alert-info" style="margin-bottom: 20px;">
+                                <strong><i data-lucide="info" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i> Info :</strong> Saisissez les chiffres d'affaires des années précédentes pour comparer avec l'année en cours dans les graphiques.
+                            </div>
+                            
+                            <!-- Champ année pour la saisie -->
+                            <div style="margin-bottom: 20px;">
+                                <label style="font-weight: 600; display: block; margin-bottom: 10px;">Année à saisir <span style="color: red;">*</span></label>
+                                <input type="number" id="historicalYear" placeholder="Ex: 2024" min="2000" max="2050" 
+                                    style="width: 150px; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-weight: 600;">
+                                <small style="color: var(--text-secondary); font-size: 0.85rem; margin-left: 10px;">Année pour laquelle saisir les données</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Tableau Total uniquement -->
+                        <div class="historical-data-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Mois</th>
+                                        <th style="text-align: center;"><i data-lucide="dollar-sign"></i> Total CA (€)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Cadre bouton commit info -->
+
+                                    <tr>
+                                        <td class="historical-data-table td">Janvier</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_jan" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Février</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_feb" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Mars</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_mar" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Avril</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_apr" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Mai</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_may" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Juin</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_jun" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Juillet</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_jul" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Août</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_aug" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Septembre</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_sep" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Octobre</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_oct" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Novembre</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_nov" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="historical-data-table td">Décembre</td>
+                                        <td class="historical-data-table td">
+                                            <input type="number" id="hist_total_dec" placeholder="0" step="0.01" class="historical-data-input">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button type="button" class="btn btn-success" onclick="saveHistoricalDataTotal()">
+                                <i data-lucide="save"></i> Sauvegarder
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadHistoricalDataTotal()">
+                                <i data-lucide="folder-open"></i> Charger données existantes
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="deleteHistoricalDataTotal()">
+                                <i data-lucide="trash-2"></i> Supprimer année
+                            </button>
+                        </div>
+                        
+                        <div id="historicalDataList" style="margin-top: 30px;">
+                            <h4 style="color: var(--primary); margin-bottom: 15px;"><i data-lucide="list"></i> Années enregistrées</h4>
+                            <div id="historicalYearsList"></div>
+                        </div>
+                    </div>
+                </div>
+            
+            <!-- 💰 CHIFFRES D'AFFAIRES & RÉSERVATIONS -->
+            <div class="stats-card" style="border-color: #27ae60;">
+                <h3 class="stats-card-title"><i data-lucide="dollar-sign"></i> Chiffres d’Affaires & Réservations</h3>
+                <div class="stats-ca-container">
+                    <div class="stats-ca-card">
+                        <div class="stat-item-label-small">Total</div>
+                        <div class="stat-item-value" id="statTotal">0</div>
+                        <div class="stat-item-sublabel">réservations</div>
+                        <div class="stat-item-value-small stat-item-value-3eme" id="statCA">0 €</div>
+                    </div>
+                    
+                    <!-- Stats par gîte - Généré dynamiquement -->
+                    <div id="stats-gites-container" class="stats-ca-container" style="padding-left: 0;">
+                        <!-- Les stats par gîte seront générées par JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 📊 COMPARAISON CA MENSUEL -->
+            <div class="stats-card" style="border-color: #667eea;">
+                <h3 class="stats-card-title"><i data-lucide="bar-chart-2"></i> Comparaison CA Mensuel</h3>
+                
+                <!-- Section sélection années pour comparaison -->
+                <div class="stats-comparison-box">
+                    <h4 class="stats-comparison-title"><i data-lucide="calendar-range"></i> Comparer les années</h4>
+                    <div id="yearComparisonCheckboxes" class="stats-comparison-checkboxes">
+                        <!-- Les checkboxes seront générées dynamiquement -->
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="caChart"></canvas>
+                </div>
+            </div>
+        </div>
+<script>
+// Fonction pour déplier/replier la section graphiques
+window.toggleSlide = function(slideId) {
+    const slide = document.getElementById(slideId);
+    const icon = document.getElementById(slideId + '-icon');
+    
+    if (slide.style.display === 'none') {
+        slide.style.display = 'block';
+        icon.textContent = '▲';
+    } else {
+        slide.style.display = 'none';
+        icon.textContent = '▼';
+    }
+};
+
+// Event delegation pour les clics sur les titres dépliables
+document.addEventListener('click', function(e) {
+    const target = e.target.closest('[data-slide-target]');
+    if (target) {
+        const slideId = target.getAttribute('data-slide-target');
+        if (slideId) {
+            window.toggleSlide(slideId);
+        }
+    }
+});
+</script>
