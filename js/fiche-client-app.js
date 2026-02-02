@@ -644,6 +644,9 @@ function initializeUI() {
     initHeroSection();
     initTimelineSection();
     
+    // 🎨 Sélecteur de thème
+    initThemeSwitcher();
+    
     // Appliquer les traductions
     updateTranslations();
 }
@@ -2904,9 +2907,9 @@ async function loadClientChecklists() {
             .select('*')
             .eq('reservation_id', reservationData.id);
         
-        if (progressError) {
+        if (progressError && progressError.code !== 'PGRST116') {
             console.error('❌ Erreur chargement progression:', progressError);
-            return;
+            // Continuer même avec erreur pour afficher les templates
         }
         
         // Map pour accès rapide
@@ -3276,4 +3279,41 @@ function initEvaluationTab() {
         form.addEventListener('submit', submitEvaluation);
     }
 }
+
+// 🎨 Gestion des thèmes (Cyan entreprise / Gîtes de France)
+function initThemeSwitcher() {
+    const themeButtons = document.querySelectorAll('.theme-btn');
+    const header = document.getElementById('mainHeader');
+    const root = document.documentElement;
+    
+    themeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const theme = this.getAttribute('data-theme');
+            
+            // Mise à jour des boutons
+            themeButtons.forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'transparent';
+                b.style.color = 'rgba(255,255,255,0.85)';
+            });
+            this.classList.add('active');
+            this.style.background = 'rgba(255,255,255,0.3)';
+            this.style.color = 'white';
+            
+            // Appliquer le thème
+            if (theme === 'cyan') {
+                // Thème entreprise (Cyan moderne)
+                root.style.setProperty('--primary', '#06b6d4');
+                root.style.setProperty('--primary-dark', '#0891b2');
+                header.style.background = 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)';
+            } else {
+                // Thème Gîtes de France (Vert/Beige nature)
+                root.style.setProperty('--primary', '#68a84f');
+                root.style.setProperty('--primary-dark', '#527f3c');
+                header.style.background = 'linear-gradient(135deg, #68a84f 0%, #8fbd73 100%)';
+            }
+        });
+    });
+}
+
 window.toggleFaq = toggleFaq;

@@ -38,8 +38,9 @@
         }
         
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
+            --primary: #06b6d4;           /* Cyan entreprise */
+            --primary-dark: #0891b2;
+            --primary-light: #22d3ee;
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
@@ -1963,8 +1964,19 @@
     </div>
     
     <!-- Header -->
-    <header class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+    <header class="header" id="mainHeader" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); padding: 1.5rem 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
         <div style="max-width: 1200px; margin: 0 auto;">
+            <!-- Logo + Nom entreprise -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                    <span style="font-size: 2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">🏠</span>
+                </div>
+                <div style="text-align: left;">
+                    <h2 style="color: white; font-size: 1.5rem; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Welcome Home</h2>
+                    <p style="color: rgba(255,255,255,0.85); font-size: 0.85rem; margin: 0;">Gestion de gîtes</p>
+                </div>
+            </div>
+            
             <!-- Nom du client -->
             <div style="text-align: center; margin-bottom: 1rem;">
                 <h1 style="color: white; font-size: 1.8rem; font-weight: 700; margin: 0 0 0.25rem 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);" id="clientName" data-i18n="bienvenue">Bienvenue</h1>
@@ -1973,6 +1985,16 @@
             
             <!-- Contrôles -->
             <div style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <!-- Sélecteur de thème -->
+                <div class="theme-switch" style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.15); border-radius: 0.5rem; padding: 0.25rem; backdrop-filter: blur(10px);">
+                    <button class="theme-btn active" data-theme="cyan" style="padding: 0.5rem 0.75rem; border: none; background: rgba(255,255,255,0.3); border-radius: 0.375rem; cursor: pointer; font-weight: 500; color: white; font-size: 0.75rem; transition: all 0.3s ease;">
+                        🏢 Entreprise
+                    </button>
+                    <button class="theme-btn" data-theme="gite" style="padding: 0.5rem 0.75rem; border: none; background: transparent; border-radius: 0.375rem; cursor: pointer; font-weight: 500; color: rgba(255,255,255,0.85); font-size: 0.75rem; transition: all 0.3s ease;">
+                        🌾 Gîte de France
+                    </button>
+                </div>
+                
                 <div class="language-switch">
                     <button class="language-btn active" data-lang="fr">FR</button>
                     <button class="language-btn" data-lang="en">EN</button>
