@@ -3351,3 +3351,7 @@ function initThemeSwitcher() {
         if (event.data && event.data.type === 'themeChange') {
             applyTheme(event.data.theme);
         }
+    });
+}
+
+window.toggleFaq = toggleFaq;
