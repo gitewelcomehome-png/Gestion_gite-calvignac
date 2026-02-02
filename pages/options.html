@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options - LiveOwnerUnit</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .logo-container {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-container svg {
+            width: 50px;
+            height: 50px;
+            color: white;
+        }
+        
+        h1 {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .card-description {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+        
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .theme-card {
+            border: 3px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .theme-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .theme-card.active {
+            border-color: #06b6d4;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(8, 145, 178, 0.05) 100%);
+        }
+        
+        .theme-card.active.gite {
+            border-color: #68a84f;
+            background: linear-gradient(135deg, rgba(104, 168, 79, 0.05) 0%, rgba(143, 189, 115, 0.05) 100%);
+        }
+        
+        .theme-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .theme-icon.cyan {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+        
+        .theme-icon.gite {
+            background: linear-gradient(135deg, #68a84f 0%, #8fbd73 100%);
+        }
+        
+        .theme-icon img, .theme-icon svg {
+            width: 50px;
+            height: 50px;
+            color: white;
+        }
+        
+        .theme-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .theme-desc {
+            font-size: 0.9rem;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.3);
+        }
+        
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .success-message {
+            background: #10b981;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .theme-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 5L15 40H30V90H70V40H85L50 5Z" fill="white"/>
+                    <path d="M50 35L35 50H45V75H55V50H65L50 35Z" fill="rgba(255,255,255,0.7)"/>
+                </svg>
+            </div>
+            <h1>Options de Personnalisation</h1>
+            <p class="subtitle">Configurez l'apparence de votre Fiche Client</p>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            ✓ Thème enregistré avec succès !
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">
+                <span>🎨</span>
+                Thème de la Fiche Client
+            </h2>
+            <p class="card-description">
+                Choisissez le style visuel qui sera appliqué aux fiches clients de vos locataires. 
+                Le thème change les couleurs, le logo et l'ambiance générale de la page.
+            </p>
+            
+            <div class="theme-options">
+                <div class="theme-card active" id="themeCyan" onclick="selectTheme('cyan')">
+                    <div class="theme-icon cyan">
+                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M50 5L15 40H30V90H70V40H85L50 5Z" fill="white"/>
+                            <path d="M50 35L35 50H45V75H55V50H65L50 35Z" fill="rgba(255,255,255,0.7)"/>
+                        </svg>
+                    </div>
+                    <div class="theme-name">Entreprise (Cyan)</div>
+                    <div class="theme-desc">
+                        Design moderne avec couleurs cyan/bleu. 
+                        Style professionnel et épuré avec le logo LiveOwnerUnit.
+                    </div>
+                </div>
+                
+                <div class="theme-card gite" id="themeGite" onclick="selectTheme('gite')">
+                    <div class="theme-icon gite">
+                        <img src="https://www.gites-de-france.com/templates/custom/img/logo-gdf.svg" 
+                             alt="Gîtes de France" 
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%2368a84f%22/%3E%3Cpath d=%22M50 20L30 40h10v30h20V40h10z%22 fill=%22white%22/%3E%3C/svg%3E'" 
+                             style="width: 60px; height: 60px;">
+                    </div>
+                    <div class="theme-name">Gîtes de France</div>
+                    <div class="theme-desc">
+                        Ambiance nature avec couleurs vertes. 
+                        Intégration du logo officiel Gîtes de France.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">
+                <span>ℹ️</span>
+                À propos de la Timeline
+            </h2>
+            <p class="card-description">
+                La <strong>Timeline Séjour</strong> est affichée en haut de la Fiche Client et montre les 3 phases du séjour :
+            </p>
+            <ul style="color: #6b7280; margin-left: 1.5rem; line-height: 2;">
+                <li><strong>Avant l'arrivée</strong> : Préparatifs et informations utiles</li>
+                <li><strong>Pendant le séjour</strong> : Widget météo et suggestions locales</li>
+                <li><strong>Après le départ</strong> : Remerciements et invitations à évaluer</li>
+            </ul>
+            <p class="card-description" style="margin-top: 1rem;">
+                Le thème choisi affecte les couleurs de la timeline, le logo affiché dans le header, 
+                et l'ensemble de l'interface client.
+            </p>
+        </div>
+        
+        <div class="actions">
+            <button class="btn" onclick="saveTheme()">
+                <span>💾</span>
+                Enregistrer et Appliquer
+            </button>
+            <a href="../index.html" class="btn btn-secondary">
+                <span>←</span>
+                Retour au Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        let selectedTheme = 'cyan'; // Thème par défaut
+        
+        // Charger le thème depuis localStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('ficheClientTheme') || 'cyan';
+            selectTheme(savedTheme);
+        });
+        
+        function selectTheme(theme) {
+            selectedTheme = theme;
+            
+            // Mise à jour visuelle
+            document.querySelectorAll('.theme-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            if (theme === 'cyan') {
+                document.getElementById('themeCyan').classList.add('active');
+            } else {
+                document.getElementById('themeGite').classList.add('active');
+            }
+        }
+        
+        function saveTheme() {
+            // Enregistrer dans localStorage
+            localStorage.setItem('ficheClientTheme', selectedTheme);
+            
+            // Afficher message succès
+            const msg = document.getElementById('successMessage');
+            msg.classList.add('show');
+            
+            setTimeout(() => {
+                msg.classList.remove('show');
+            }, 3000);
+            
+            // Appliquer immédiatement dans la page de démo si ouverte
+            if (window.opener && !window.opener.closed) {
+                window.opener.postMessage({
+                    type: 'themeChange',
+                    theme: selectedTheme
+                }, '*');
+            }
+        }
+    </script>
+</body>
+</html>

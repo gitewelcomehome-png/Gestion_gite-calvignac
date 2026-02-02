@@ -223,8 +223,8 @@
                 <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
             </svg>
         </button>
-        <div id="adminDropdown" style="display: none; position: fixed; top: 70px; right: 20px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 9999; min-width: 200px; overflow: hidden; border: 2px solid #06b6d4;">
-            <button onclick="window.location.href='pages/admin-channel-manager.html';" style="width: 100%; padding: 12px 16px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: white; transition: all 0.2s;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'">
+        <div id="adminDropdown" style="display: none; position: fixed; top: 70px; right: 20px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 9999; min-width: 200px; overflow: hidden; border: 2px solid var(--dropdown-border-color, #06b6d4);">
+            <button onclick="window.location.href='pages/admin-channel-manager.html';" style="width: 100%; padding: 12px 16px; border: none; background: var(--dropdown-header-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: white; transition: all 0.2s;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'">
                 <span><i data-lucide="bar-chart-3"></i></span> <span>📊 Channel Manager</span>
             </button>
             <div style="height: 1px; background: #e5e7eb; margin: 4px 0;"></div>
@@ -239,6 +239,10 @@
             </button>
             <button onclick="switchTab('faq'); hideAdminMenu();" style="width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='white'">
                 <span>❓</span> <span>FAQ</span>
+            </button>
+            <div style="height: 1px; background: #e5e7eb; margin: 4px 0;"></div>
+            <button onclick="window.location.href='pages/options.html';" style="width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='white'">
+                <span>🎨</span> <span>Options & Thèmes</span>
             </button>
             <button onclick="window.location.href='pages/client-support.html'; hideAdminMenu();" style="width: 100%; padding: 12px 16px; border: none; background: white; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='white'">
                 <span><i data-lucide="headphones"></i></span> <span>🎫 Support & Tickets</span>
@@ -255,6 +259,23 @@
 
     <script>
         // ⚡ FONCTIONS THÈME ET STYLE - Disponibles immédiatement
+        
+        // Charger et appliquer le thème Fiche Client au dropdown
+        (function() {
+            const ficheTheme = localStorage.getItem('ficheClientTheme') || 'cyan';
+            const root = document.documentElement;
+            
+            if (ficheTheme === 'gite') {
+                // Thème Gîtes de France (vert)
+                root.style.setProperty('--dropdown-border-color', '#68a84f');
+                root.style.setProperty('--dropdown-header-gradient', 'linear-gradient(135deg, #68a84f 0%, #8fbd73 100%)');
+            } else {
+                // Thème Entreprise (cyan) - par défaut
+                root.style.setProperty('--dropdown-border-color', '#06b6d4');
+                root.style.setProperty('--dropdown-header-gradient', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
+            }
+        })();
+        
         window.setTheme = function(theme) {
             const root = document.documentElement;
             // Retirer TOUTES les classes de thème existantes

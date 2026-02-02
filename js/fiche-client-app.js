@@ -3285,35 +3285,69 @@ function initThemeSwitcher() {
     const themeButtons = document.querySelectorAll('.theme-btn');
     const header = document.getElementById('mainHeader');
     const root = document.documentElement;
+    const logoLiveOwner = document.getElementById('logoLiveOwner');
+    const logoGites = document.getElementById('logoGitesDeFrance');
+    const brandName = document.getElementById('headerBrandName');
     
+    // Charger le thème depuis localStorage
+    const savedTheme = localStorage.getItem('ficheClientTheme') || 'cyan';
+    
+    // Appliquer le thème sauvegardé au chargement
+    applyTheme(savedTheme);
+    
+    // Fonction pour appliquer un thème
+    function applyTheme(theme) {
+        // Mise à jour des boutons
+        themeButtons.forEach(b => {
+            b.classList.remove('active');
+            b.style.background = 'transparent';
+            b.style.color = 'rgba(255,255,255,0.85)';
+        });
+        
+        const activeBtn = document.querySelector(`.theme-btn[data-theme="${theme}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.style.background = 'rgba(255,255,255,0.3)';
+            activeBtn.style.color = 'white';
+        }
+        
+        // Appliquer le thème
+        if (theme === 'cyan') {
+            // Thème entreprise (Cyan moderne)
+            root.style.setProperty('--primary', '#06b6d4');
+            root.style.setProperty('--primary-dark', '#0891b2');
+            header.style.background = 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)';
+            
+            // Afficher logo LiveOwnerUnit
+            if (logoLiveOwner) logoLiveOwner.style.display = 'block';
+            if (logoGites) logoGites.style.display = 'none';
+            if (brandName) brandName.textContent = 'LiveOwnerUnit';
+        } else {
+            // Thème Gîtes de France (Vert/Beige nature)
+            root.style.setProperty('--primary', '#68a84f');
+            root.style.setProperty('--primary-dark', '#527f3c');
+            header.style.background = 'linear-gradient(135deg, #68a84f 0%, #8fbd73 100%)';
+            
+            // Afficher logo Gîtes de France
+            if (logoLiveOwner) logoLiveOwner.style.display = 'none';
+            if (logoGites) logoGites.style.display = 'block';
+            if (brandName) brandName.textContent = 'Gîtes de France';
+        }
+        
+        // Sauvegarder le choix
+        localStorage.setItem('ficheClientTheme', theme);
+    }
+    
+    // Écouter les changements de thème
     themeButtons.forEach(btn => {
         btn.addEventListener('click', function() {
             const theme = this.getAttribute('data-theme');
-            
-            // Mise à jour des boutons
-            themeButtons.forEach(b => {
-                b.classList.remove('active');
-                b.style.background = 'transparent';
-                b.style.color = 'rgba(255,255,255,0.85)';
-            });
-            this.classList.add('active');
-            this.style.background = 'rgba(255,255,255,0.3)';
-            this.style.color = 'white';
-            
-            // Appliquer le thème
-            if (theme === 'cyan') {
-                // Thème entreprise (Cyan moderne)
-                root.style.setProperty('--primary', '#06b6d4');
-                root.style.setProperty('--primary-dark', '#0891b2');
-                header.style.background = 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)';
-            } else {
-                // Thème Gîtes de France (Vert/Beige nature)
-                root.style.setProperty('--primary', '#68a84f');
-                root.style.setProperty('--primary-dark', '#527f3c');
-                header.style.background = 'linear-gradient(135deg, #68a84f 0%, #8fbd73 100%)';
-            }
+            applyTheme(theme);
         });
     });
-}
-
-window.toggleFaq = toggleFaq;
+    
+    // Écouter les messages de la page Options (si ouverte dans une autre fenêtre)
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'themeChange') {
+            applyTheme(event.data.theme);
+        }
