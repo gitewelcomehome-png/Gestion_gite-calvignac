@@ -225,6 +225,13 @@ const translations = {
         quick_wifi: 'WiFi',
         quick_activites: 'Activités',
         quick_contact: 'Contact',
+        timeline_avant: 'Avant votre arrivée',
+        timeline_pendant: 'Pendant votre séjour',
+        timeline_apres: 'Après votre départ',
+        humidity: 'Humidité',
+        wind: 'Vent',
+        feels_like: 'Ressenti',
+        weather_unavailable: 'Météo non disponible',
         disponibilite: 'Disponibilité',
         places: 'Places',
         type_chauffage: 'Type de chauffage',
@@ -331,6 +338,13 @@ const translations = {
         quick_wifi: 'WiFi',
         quick_activites: 'Activities',
         quick_contact: 'Contact',
+        timeline_avant: 'Before your arrival',
+        timeline_pendant: 'During your stay',
+        timeline_apres: 'After departure',
+        humidity: 'Humidity',
+        wind: 'Wind',
+        feels_like: 'Feels like',
+        weather_unavailable: 'Weather unavailable',
         disponibilite: 'Availability',
         places: 'Spaces',
         type_chauffage: 'Heating type',
@@ -624,6 +638,10 @@ function initializeUI() {
     initProblemeTab();
     initEvaluationTab();
     
+    // ✨ Hero Section + Timeline
+    initHeroSection();
+    initTimelineSection();
+    
     // Appliquer les traductions
     updateTranslations();
 }
@@ -782,6 +800,226 @@ function initQuickActions() {
             }
         });
     });
+}
+
+// ✨ NOUVEAU : Initialisation Timeline Séjour
+async function initTimelineSection() {
+    const timelineSection = document.getElementById('timelineSection');
+    if (!timelineSection || !reservationData || !giteInfo) {
+        if (timelineSection) timelineSection.style.display = 'none';
+        return;
+    }
+    
+    const now = new Date();
+    const checkIn = new Date(reservationData.check_in);
+    const checkOut = new Date(reservationData.check_out);
+    
+    // Masquer si séjour terminé
+    if (now > checkOut.setDate(checkOut.getDate() + 7)) {
+        timelineSection.style.display = 'none';
+        return;
+    }
+    
+    timelineSection.style.display = 'block';
+    
+    // Déterminer la phase active
+    const timelineAvant = document.getElementById('timelineAvant');
+    const timelinePendant = document.getElementById('timelinePendant');
+    const timelineApres = document.getElementById('timelineApres');
+    
+    if (now < checkIn) {
+        // Avant arrivée
+        timelineAvant.classList.add('active');
+        timelinePendant.classList.remove('active');
+        timelineApres.classList.remove('active');
+    } else if (now >= checkIn && now <= checkOut) {
+        // Pendant séjour
+        timelineAvant.classList.remove('active');
+        timelinePendant.classList.add('active');
+        timelineApres.classList.remove('active');
+        
+        // Charger météo
+        await loadWeatherData();
+    } else {
+        // Après départ (dans les 7 jours)
+        timelineAvant.classList.remove('active');
+        timelinePendant.classList.remove('active');
+        timelineApres.classList.add('active');
+    }
+    
+    // Afficher les dates
+    const formatDate = (date) => {
+        return date.toLocaleDateString(currentLanguage === 'fr' ? 'fr-FR' : 'en-GB', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+    
+    document.getElementById('timelineAvantDate').textContent = formatDate(new Date(reservationData.check_in));
+    document.getElementById('timelinePendantDate').textContent = 
+        `${formatDate(new Date(reservationData.check_in))} - ${formatDate(new Date(reservationData.check_out))}`;
+    document.getElementById('timelineApresDate').textContent = formatDate(new Date(reservationData.check_out));
+    
+    // Générer suggestions IA
+    generateTimelineSuggestions();
+}
+
+// ✨ Chargement météo OpenWeatherMap
+async function loadWeatherData() {
+    const weatherWidget = document.getElementById('weatherWidget');
+    if (!weatherWidget || !giteInfo.gps_lat || !giteInfo.gps_lon) return;
+    
+    try {
+        // API OpenWeatherMap (clé de démo publique)
+        const apiKey = 'YOUR_API_KEY_HERE'; // TODO: Remplacer par votre clé API gratuite OpenWeatherMap
+        const lat = giteInfo.gps_lat;
+        const lon = giteInfo.gps_lon;
+        const lang = currentLanguage;
+        
+        // Pour éviter les erreurs pendant les tests sans clé API, on simule des données
+        if (apiKey === 'YOUR_API_KEY_HERE') {
+            throw new Error('API key non configurée');
+        }
+        
+        const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=${lang}&appid=${apiKey}`
+        );
+        
+        if (!response.ok) throw new Error('Météo indisponible');
+        
+        const data = await response.json();
+        
+        const weatherHTML = `
+            <div class="weather-header">
+                <div>
+                    <div class="weather-temp">${Math.round(data.main.temp)}°C</div>
+                    <div class="weather-description">${data.weather[0].description}</div>
+                </div>
+                <div class="weather-icon">${getWeatherEmoji(data.weather[0].icon)}</div>
+            </div>
+            <div class="weather-details">
+                <div class="weather-detail-item">
+                    <div class="weather-detail-label" data-i18n="humidity">Humidité</div>
+                    <div class="weather-detail-value">${data.main.humidity}%</div>
+                </div>
+                <div class="weather-detail-item">
+                    <div class="weather-detail-label" data-i18n="wind">Vent</div>
+                    <div class="weather-detail-value">${Math.round(data.wind.speed * 3.6)} km/h</div>
+                </div>
+                <div class="weather-detail-item">
+                    <div class="weather-detail-label" data-i18n="feels_like">Ressenti</div>
+                    <div class="weather-detail-value">${Math.round(data.main.feels_like)}°C</div>
+                </div>
+            </div>
+        `;
+        
+        weatherWidget.innerHTML = weatherHTML;
+    } catch (error) {
+        console.warn('⚠️ Erreur chargement météo:', error);
+        weatherWidget.innerHTML = `
+            <div style="text-align: center; color: rgba(255,255,255,0.8); padding: 1rem;">
+                <i data-lucide="cloud-off"></i>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;" data-i18n="weather_unavailable">Météo non disponible</p>
+            </div>
+        `;
+        lucide.createIcons();
+    }
+}
+
+// Helper : Emoji météo
+function getWeatherEmoji(icon) {
+    const emojiMap = {
+        '01d': '☀️', '01n': '🌙',
+        '02d': '⛅', '02n': '☁️',
+        '03d': '☁️', '03n': '☁️',
+        '04d': '☁️', '04n': '☁️',
+        '09d': '🌧️', '09n': '🌧️',
+        '10d': '🌦️', '10n': '🌧️',
+        '11d': '⛈️', '11n': '⛈️',
+        '13d': '❄️', '13n': '❄️',
+        '50d': '🌫️', '50n': '🌫️'
+    };
+    return emojiMap[icon] || '🌤️';
+}
+
+// ✨ Suggestions IA par phase
+function generateTimelineSuggestions() {
+    const suggestions = {
+        fr: {
+            avant: [
+                { icon: 'check-circle', text: 'Vérifiez votre email pour toutes les infos d\'accès' },
+                { icon: 'map-pin', text: 'Planifiez votre itinéraire (GPS disponible dans l\'onglet Entrée)' },
+                { icon: 'shopping-cart', text: 'Faites vos courses à l\'avance si vous arrivez tard' },
+                { icon: 'phone', text: 'Enregistrez le numéro du propriétaire' }
+            ],
+            pendant: [
+                { icon: 'map', text: 'Découvrez les activités locales dans l\'onglet Activités' },
+                { icon: 'wifi', text: 'Code WiFi disponible dans l\'onglet Entrée' },
+                { icon: 'message-circle', text: 'Besoin d\'aide ? Onglet Demandes pour nous contacter' },
+                { icon: 'star', text: 'Un problème ? Parlez-nous AVANT de laisser un avis' }
+            ],
+            apres: [
+                { icon: 'heart', text: 'Merci pour votre séjour ! On espère vous revoir' },
+                { icon: 'star', text: 'Laissez-nous un avis dans l\'onglet Évaluation' },
+                { icon: 'share-2', text: 'Recommandez-nous à vos proches' },
+                { icon: 'calendar', text: 'Réservez à nouveau pour bénéficier d\'avantages' }
+            ]
+        },
+        en: {
+            avant: [
+                { icon: 'check-circle', text: 'Check your email for all access information' },
+                { icon: 'map-pin', text: 'Plan your route (GPS available in Check-in tab)' },
+                { icon: 'shopping-cart', text: 'Buy groceries in advance if arriving late' },
+                { icon: 'phone', text: 'Save the owner\'s contact number' }
+            ],
+            pendant: [
+                { icon: 'map', text: 'Discover local activities in the Activities tab' },
+                { icon: 'wifi', text: 'WiFi code available in Check-in tab' },
+                { icon: 'message-circle', text: 'Need help? Use the Requests tab to contact us' },
+                { icon: 'star', text: 'Any issues? Talk to us BEFORE leaving a review' }
+            ],
+            apres: [
+                { icon: 'heart', text: 'Thanks for your stay! Hope to see you again' },
+                { icon: 'star', text: 'Leave us a review in the Evaluation tab' },
+                { icon: 'share-2', text: 'Recommend us to your friends' },
+                { icon: 'calendar', text: 'Book again to enjoy special benefits' }
+            ]
+        }
+    };
+    
+    const lang = currentLanguage;
+    
+    // Avant arrivée
+    const avantHTML = suggestions[lang].avant.map(s => `
+        <div class="timeline-suggestion-item">
+            <i data-lucide="${s.icon}"></i>
+            <span>${s.text}</span>
+        </div>
+    `).join('');
+    
+    // Pendant séjour
+    const pendantHTML = suggestions[lang].pendant.map(s => `
+        <div class="timeline-suggestion-item">
+            <i data-lucide="${s.icon}"></i>
+            <span>${s.text}</span>
+        </div>
+    `).join('');
+    
+    // Après départ
+    const apresHTML = suggestions[lang].apres.map(s => `
+        <div class="timeline-suggestion-item">
+            <i data-lucide="${s.icon}"></i>
+            <span>${s.text}</span>
+        </div>
+    `).join('');
+    
+    document.getElementById('timelineAvantSuggestions').innerHTML = avantHTML;
+    document.getElementById('timelinePendantSuggestions').innerHTML = pendantHTML;
+    document.getElementById('timelineApresSuggestions').innerHTML = apresHTML;
+    
+    lucide.createIcons();
 }
 
 function initOngletEntree() {

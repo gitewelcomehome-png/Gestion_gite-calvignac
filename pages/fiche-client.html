@@ -1520,6 +1520,166 @@
             }
         }
         
+        /* ============================================
+           🌤️ TIMELINE SÉJOUR
+           ============================================ */
+        .timeline-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1.5rem;
+            padding: 2rem 1.5rem;
+            margin: 1rem 0 1.5rem 0;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .timeline-container {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+        
+        .timeline-item.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .timeline-icon {
+            width: 3rem;
+            height: 3rem;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .timeline-icon i {
+            width: 1.75rem;
+            height: 1.75rem;
+            color: #667eea;
+        }
+        
+        .timeline-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .timeline-date {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            margin: 0 0 1rem 0;
+            font-weight: 500;
+        }
+        
+        .timeline-suggestions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .timeline-suggestion-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            color: white;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .timeline-suggestion-item i {
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+        
+        .timeline-line {
+            height: 1rem;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 0 auto;
+        }
+        
+        /* Weather Widget */
+        .weather-widget {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        
+        .weather-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .weather-temp {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .weather-icon {
+            font-size: 3rem;
+        }
+        
+        .weather-description {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            text-transform: capitalize;
+        }
+        
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+        
+        .weather-detail-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+        }
+        
+        .weather-detail-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .weather-detail-value {
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
         /* Responsive mobile */
         @media (max-width: 480px) {
             .hero-section {
@@ -1550,6 +1710,27 @@
             
             .quick-action-btn span {
                 font-size: 0.8rem;
+            }
+            
+            .timeline-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .timeline-item {
+                padding: 1.25rem;
+            }
+            
+            .weather-temp {
+                font-size: 2rem;
+            }
+            
+            .weather-icon {
+                font-size: 2.5rem;
+            }
+            
+            .weather-details {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
             }
         }
     </style>
@@ -1671,6 +1852,49 @@
                     <i data-lucide="phone"></i>
                     <span data-i18n="quick_contact">Contact</span>
                 </button>
+            </div>
+        </div>
+        
+        <!-- Timeline Séjour -->
+        <div id="timelineSection" class="timeline-section" style="display: none;">
+            <div class="timeline-container">
+                <div class="timeline-item" id="timelineAvant">
+                    <div class="timeline-icon">
+                        <i data-lucide="calendar-check"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title" data-i18n="timeline_avant">Avant votre arrivée</h3>
+                        <p class="timeline-date" id="timelineAvantDate"></p>
+                        <div class="timeline-suggestions" id="timelineAvantSuggestions"></div>
+                    </div>
+                </div>
+                
+                <div class="timeline-line"></div>
+                
+                <div class="timeline-item active" id="timelinePendant">
+                    <div class="timeline-icon">
+                        <i data-lucide="home"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title" data-i18n="timeline_pendant">Pendant votre séjour</h3>
+                        <p class="timeline-date" id="timelinePendantDate"></p>
+                        <div id="weatherWidget" class="weather-widget"></div>
+                        <div class="timeline-suggestions" id="timelinePendantSuggestions"></div>
+                    </div>
+                </div>
+                
+                <div class="timeline-line"></div>
+                
+                <div class="timeline-item" id="timelineApres">
+                    <div class="timeline-icon">
+                        <i data-lucide="log-out"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title" data-i18n="timeline_apres">Après votre départ</h3>
+                        <p class="timeline-date" id="timelineApresDate"></p>
+                        <div class="timeline-suggestions" id="timelineApresSuggestions"></div>
+                    </div>
+                </div>
             </div>
         </div>
         
