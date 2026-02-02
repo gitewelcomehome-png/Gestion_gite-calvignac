@@ -638,8 +638,17 @@ function initHeroSection() {
     
     // Parser les dates avec gestion d'erreur robuste
     try {
-        const heureArrivee = (giteInfo.heure_arrivee || '17:00').split(':')[0] + ':' + (giteInfo.heure_arrivee || '17:00').split(':')[1];
-        const heureDepart = (giteInfo.heure_depart || '11:00').split(':')[0] + ':' + (giteInfo.heure_depart || '11:00').split(':')[1];
+        // Extraire les heures même si il y a du texte (ex: "À partir de 18h00" -> "18:00")
+        const extractTime = (timeStr) => {
+            const match = (timeStr || '').match(/(\d{1,2})[h:](\d{2})/);
+            if (match) {
+                return `${match[1].padStart(2, '0')}:${match[2]}`;
+            }
+            return null;
+        };
+        
+        const heureArrivee = extractTime(giteInfo.heure_arrivee) || '17:00';
+        const heureDepart = extractTime(giteInfo.heure_depart) || '11:00';
         
         const checkInStr = reservationData.check_in + 'T' + heureArrivee + ':00';
         const checkOutStr = reservationData.check_out + 'T' + heureDepart + ':00';
@@ -763,9 +772,9 @@ function initQuickActions() {
                     if (pendantTab) {
                         pendantTab.click();
                         setTimeout(() => {
-                            const contactSection = document.querySelector('#tab-pendant .card:last-child');
+                            const contactSection = document.getElementById('contactsUrgenceContainer');
                             if (contactSection) {
-                                contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                contactSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }
                         }, 300);
                     }
