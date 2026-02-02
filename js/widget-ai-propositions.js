@@ -130,7 +130,7 @@ window.refreshAIPropositions = async function() {
 
         if (error) throw error;
 
-        if (!strategy || !strategy.strategie_complete?.actions_reseaux) {
+        if (!strategy || !strategy.strategie_complete) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 40px; grid-column: 1/-1; color: rgba(255,255,255,0.9);">
                     <p>✨ Aucune stratégie active</p>
@@ -140,8 +140,13 @@ window.refreshAIPropositions = async function() {
             return;
         }
 
-        const posts = strategy.strategie_complete.actions_reseaux || [];
-        console.log(`📥 ${posts.length} posts de la semaine ${strategy.semaine}`);
+        // Parser le JSON si c'est une string
+        let stratComplete = strategy.strategie_complete;
+        if (typeof stratComplete === 'string') {
+            stratComplete = JSON.parse(stratComplete);
+        }
+
+        const posts = stratComplete.actions_reseaux || [];
         
         displayPropositions(posts, strategy.semaine);
         
@@ -182,7 +187,7 @@ function displayPropositions(posts, semaineNum) {
 
     container.innerHTML = `
         <div style="grid-column: 1/-1; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 14px; opacity: 0.9;">📋 Semaine ${semaineNum || 'en cours'} - ${posts.length} post(s) à publier</span>
+            <span style="font-size: 14px; opacity: 0.9;">📋 Semaine en cours - ${posts.length} action(s) à réaliser</span>
         </div>
     ` + posts.map((post, index) => `
         <div class="proposition-card" onclick="openPostDetails(${index})">

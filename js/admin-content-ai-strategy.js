@@ -44,6 +44,62 @@ function getWeekNumber(date) {
 
 
 // ================================================================
+// VALIDATION SEMAINE EN COURS → PASSAGE À LA SUIVANTE
+// ================================================================
+window.validateCurrentWeek = async function() {
+    try {
+        const year = new Date().getFullYear();
+        
+        // Trouver la semaine active
+        const { data: activeWeek, error: findError } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .select('*')
+            .eq('statut', 'actif')
+            .eq('annee', year)
+            .single();
+
+        if (findError || !activeWeek) {
+            showToast('❌ Aucune semaine active à valider', 'error');
+            return;
+        }
+
+        const currentNum = activeWeek.semaine;
+        
+        // Passer la semaine actuelle en 'terminé'
+        const { error: updateError } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .update({ statut: 'termine' })
+            .eq('id', activeWeek.id);
+
+        if (updateError) throw updateError;
+
+        // Activer la semaine suivante
+        const { error: nextError } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .update({ statut: 'actif' })
+            .eq('semaine', currentNum + 1)
+            .eq('annee', year)
+            .eq('statut', 'planifié');
+
+        if (nextError) {
+            console.warn('⚠️ Pas de semaine suivante à activer');
+        }
+
+        showToast(`✅ Semaine validée ! Passage à la semaine +${currentNum}`, 'success');
+        
+        // Recharger l'affichage
+        await loadLongtermPlanFromDB();
+        if (window.refreshAIPropositions) {
+            window.refreshAIPropositions();
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur validation:', error);
+        showToast('❌ ' + error.message, 'error');
+    }
+};
+
+// ================================================================
 // NAVIGATION ONGLETS
 // ================================================================
 
@@ -74,6 +130,19 @@ window.generateLongtermPlan = async function() {
         const now = new Date();
         const startWeek = getWeekNumber(now);
         const year = now.getFullYear();
+        
+        // ⚠️ VÉRIFIER SI LA SEMAINE ACTIVE EST VALIDÉE
+        const { data: activeWeek, error: checkError } = await window.supabaseClient
+            .from('cm_ai_strategies')
+            .select('*')
+            .eq('statut', 'actif')
+            .eq('annee', year)
+            .single();
+
+        if (!checkError && activeWeek) {
+            showToast('⚠️ Validez la semaine ' + activeWeek.semaine + ' avant de générer la suivante', 'error');
+            return;
+        }
         
         // Récupérer le provider choisi
         const providerSelect = document.getElementById('aiProviderSelect');
@@ -114,9 +183,6 @@ window.generateLongtermPlan = async function() {
         
         const { week, plan_global } = await response.json();
         
-        // DEBUG: Voir ce que Claude a vraiment généré
-        console.log('📊 CONTENU GÉNÉRÉ PAR CLAUDE:', JSON.stringify(week, null, 2));
-        
         // Afficher semaine 1 immédiatement
         const partialPlan = {
             plan_global: plan_global || {
@@ -149,8 +215,6 @@ window.generateLongtermPlan = async function() {
 // Sauvegarder une semaine (SIMPLE: juste 1-12, IGNORE startWeek)
 async function saveSingleWeek(semaine, year) {
     try {
-        console.log('💾 Sauvegarde semaine', semaine.numero, '/ 12 pour année', year);
-        
         const { error } = await window.supabaseClient
             .from('cm_ai_strategies')
             .upsert({
@@ -166,8 +230,6 @@ async function saveSingleWeek(semaine, year) {
         
         if (error) {
             console.error('❌ Erreur sauvegarde semaine', semaine.numero, ':', error);
-        } else {
-            console.log('✅ Semaine', semaine.numero, 'sauvegardée en DB (vraie colonne semaine =', semaine.numero, ')');
         }
     } catch (err) {
         console.error('❌ Erreur saveSingleWeek:', err);
@@ -321,10 +383,15 @@ function displayLongtermPlan(plan) {
             ${plan.semaines.map(s => `
                 <div style="padding: 28px; background: white; border-radius: 12px; border-left: 5px solid ${s.numero === 1 ? '#10B981' : '#667eea'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'; this.style.transform='translateY(0)';">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                        <h4 style="margin: 0; font-size: 1.3rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">📅 Semaine ${s.numero}</h4>
-                        <span style="background: linear-gradient(135deg, ${s.numero === 1 ? '#10B981' : '#667eea'} 0%, ${s.numero === 1 ? '#059669' : '#764ba2'} 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 6px ${s.numero === 1 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(102, 126, 234, 0.3)'};">
-                            ${s.numero === 1 ? 'ACTIVE' : 'PLANIFIÉE'}
-                        </span>
+                        <h4 style="margin: 0; font-size: 1.3rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">📅 ${s.numero === 1 ? 'Semaine en cours' : 'Semaine +' + (s.numero - 1)}</h4>
+                        ${s.numero === 1 ? `
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);">
+                                EN COURS
+                            </span>
+                            <button onclick="validateCurrentWeek()" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.3)';">✓ Valider & Passer à la suivante</button>
+                        </div>
+                        ` : `<span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);">PLANIFIÉE</span>`}
                     </div>
                     
                     <div style="margin-bottom: 20px; padding: 18px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 10px; border-left: 3px solid #10B981;">
