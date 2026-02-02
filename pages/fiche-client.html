@@ -1295,6 +1295,179 @@
             border-radius: 8px;
             overflow: hidden;
         }
+        
+        /* =============================================
+           HERO SECTION MODERNE
+           ============================================= */
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1.5rem;
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            color: white;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            animation: heroFadeIn 0.6s ease;
+        }
+        
+        @keyframes heroFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero-countdown {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .countdown-label {
+            font-size: 1rem;
+            opacity: 0.95;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .countdown-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255,255,255,0.15);
+            padding: 0.75rem 1.25rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            min-width: 70px;
+        }
+        
+        .countdown-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .countdown-unit {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .countdown-separator {
+            font-size: 1.5rem;
+            font-weight: 700;
+            opacity: 0.6;
+        }
+        
+        /* Quick Actions Grid 2x2 */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .quick-action-btn {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 1rem;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .quick-action-btn:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .quick-action-btn:active {
+            transform: translateY(-2px);
+        }
+        
+        .quick-action-btn i {
+            width: 2rem;
+            height: 2rem;
+            stroke-width: 2.5;
+        }
+        
+        .quick-action-btn span {
+            font-size: 0.875rem;
+            line-height: 1.2;
+        }
+        
+        /* Mode "Séjour en cours" */
+        .hero-section.during-stay .countdown-label {
+            color: #fbbf24;
+        }
+        
+        .hero-section.during-stay .countdown-item {
+            background: rgba(251, 191, 36, 0.2);
+            border: 2px solid rgba(251, 191, 36, 0.3);
+        }
+        
+        /* Animation pulse pour highlight */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 50px rgba(102, 126, 234, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3); }
+        }
+        
+        /* Responsive mobile */
+        @media (max-width: 480px) {
+            .hero-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .countdown-value {
+                font-size: 1.75rem;
+            }
+            
+            .countdown-item {
+                min-width: 60px;
+                padding: 0.625rem 1rem;
+            }
+            
+            .quick-actions-grid {
+                gap: 0.75rem;
+            }
+            
+            .quick-action-btn {
+                padding: 1.25rem 0.75rem;
+            }
+            
+            .quick-action-btn i {
+                width: 1.75rem;
+                height: 1.75rem;
+            }
+            
+            .quick-action-btn span {
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1374,6 +1547,49 @@
     
     <!-- Main Content -->
     <main class="main-content">
+        <!-- ✨ NOUVEAU : Hero Section Moderne -->
+        <div id="heroSection" class="hero-section" style="display: none;">
+            <div class="hero-countdown">
+                <div class="countdown-label" data-i18n="countdown_label">Votre séjour commence dans</div>
+                <div class="countdown-timer">
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="daysCount">0</span>
+                        <span class="countdown-unit" data-i18n="jours">jours</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="hoursCount">0</span>
+                        <span class="countdown-unit" data-i18n="heures">h</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="minutesCount">0</span>
+                        <span class="countdown-unit" data-i18n="minutes">min</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions 2x2 Grid -->
+            <div class="quick-actions-grid">
+                <button class="quick-action-btn" data-action="code">
+                    <i data-lucide="key"></i>
+                    <span data-i18n="quick_code">Code d'accès</span>
+                </button>
+                <button class="quick-action-btn" data-action="wifi">
+                    <i data-lucide="wifi"></i>
+                    <span data-i18n="quick_wifi">WiFi</span>
+                </button>
+                <button class="quick-action-btn" data-action="activites">
+                    <i data-lucide="map-pin"></i>
+                    <span data-i18n="quick_activites">Activités</span>
+                </button>
+                <button class="quick-action-btn" data-action="contact">
+                    <i data-lucide="phone"></i>
+                    <span data-i18n="quick_contact">Contact</span>
+                </button>
+            </div>
+        </div>
+        
         <!-- Onglet ENTRÉE -->
         <div class="tab-content active" id="tab-entree">
             <div class="card">

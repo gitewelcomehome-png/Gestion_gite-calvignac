@@ -216,6 +216,15 @@ const translations = {
         acces_rapide: 'Accédez rapidement à votre guide, même hors ligne',
         installer: 'Installer',
         plus_tard: 'Plus tard',
+        countdown_label: 'Votre séjour commence dans',
+        countdown_checkout: 'Fin de votre séjour dans',
+        jours: 'jours',
+        heures: 'h',
+        minutes: 'min',
+        quick_code: 'Code d\'accès',
+        quick_wifi: 'WiFi',
+        quick_activites: 'Activités',
+        quick_contact: 'Contact',
         disponibilite: 'Disponibilité',
         places: 'Places',
         type_chauffage: 'Type de chauffage',
@@ -313,6 +322,15 @@ const translations = {
         acces_rapide: 'Quick access to your guide, even offline',
         installer: 'Install',
         plus_tard: 'Later',
+        countdown_label: 'Your stay starts in',
+        countdown_checkout: 'Your stay ends in',
+        jours: 'days',
+        heures: 'h',
+        minutes: 'min',
+        quick_code: 'Access code',
+        quick_wifi: 'WiFi',
+        quick_activites: 'Activities',
+        quick_contact: 'Contact',
         disponibilite: 'Availability',
         places: 'Spaces',
         type_chauffage: 'Heating type',
@@ -584,6 +602,9 @@ function initializeUI() {
     // Titre du gîte
     document.getElementById('giteName').textContent = `${reservationData.gite}`;
     
+    // ✨ NOUVEAU : Initialiser Hero Section
+    initHeroSection();
+    
     // Onglet Entrée
     initOngletEntree();
     
@@ -605,6 +626,126 @@ function initializeUI() {
     
     // Appliquer les traductions
     updateTranslations();
+}
+
+// ✨ NOUVEAU : Initialisation du Hero Section
+function initHeroSection() {
+    const heroSection = document.getElementById('heroSection');
+    if (!heroSection) return;
+    
+    const checkIn = new Date(reservationData.check_in + 'T' + (giteInfo.heure_arrivee || '17:00'));
+    const checkOut = new Date(reservationData.check_out + 'T' + (giteInfo.heure_depart || '11:00'));
+    const now = new Date();
+    
+    // Afficher le Hero seulement si le séjour n'est pas terminé
+    if (now > checkOut) {
+        heroSection.style.display = 'none';
+        return;
+    }
+    
+    // Afficher le Hero
+    heroSection.style.display = 'block';
+    
+    // Calculer et afficher le countdown
+    updateCountdown(checkIn, checkOut);
+    
+    // Mettre à jour le countdown toutes les minutes
+    setInterval(() => updateCountdown(checkIn, checkOut), 60000);
+    
+    // Initialiser les Quick Actions
+    initQuickActions();
+}
+
+function updateCountdown(checkIn, checkOut) {
+    const now = new Date();
+    const targetDate = now < checkIn ? checkIn : checkOut;
+    const isCheckOut = now >= checkIn;
+    
+    const diff = targetDate - now;
+    
+    if (diff <= 0) {
+        // Séjour terminé
+        document.getElementById('heroSection').style.display = 'none';
+        return;
+    }
+    
+    // Calculer les jours, heures, minutes
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    // Mettre à jour l'affichage
+    document.getElementById('daysCount').textContent = days.toString().padStart(2, '0');
+    document.getElementById('hoursCount').textContent = hours.toString().padStart(2, '0');
+    document.getElementById('minutesCount').textContent = minutes.toString().padStart(2, '0');
+    
+    // Changer le label selon le statut
+    const countdownLabel = document.querySelector('.countdown-label');
+    const heroSection = document.getElementById('heroSection');
+    
+    if (isCheckOut) {
+        // Pendant le séjour → Countdown jusqu'au départ
+        countdownLabel.setAttribute('data-i18n', 'countdown_checkout');
+        countdownLabel.textContent = currentLanguage === 'fr' 
+            ? 'Fin de votre séjour dans' 
+            : 'Your stay ends in';
+        heroSection.classList.add('during-stay');
+    } else {
+        // Avant le séjour → Countdown jusqu'à l'arrivée
+        countdownLabel.setAttribute('data-i18n', 'countdown_label');
+        countdownLabel.textContent = currentLanguage === 'fr' 
+            ? 'Votre séjour commence dans' 
+            : 'Your stay starts in';
+        heroSection.classList.remove('during-stay');
+    }
+}
+
+function initQuickActions() {
+    const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+    
+    quickActionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.getAttribute('data-action');
+            
+            switch(action) {
+                case 'code':
+                    // Scroll vers le code d'entrée
+                    document.getElementById('codeEntree').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Effet de highlight
+                    const codeDisplay = document.querySelector('.code-display');
+                    codeDisplay.style.animation = 'none';
+                    setTimeout(() => {
+                        codeDisplay.style.animation = 'pulse 0.5s ease-in-out 2';
+                    }, 10);
+                    break;
+                    
+                case 'wifi':
+                    // Scroll vers la section WiFi
+                    document.getElementById('wifiSSID').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    break;
+                    
+                case 'activites':
+                    // Changer d'onglet vers Activités
+                    const activitesTab = document.querySelector('[data-tab="activites"]');
+                    if (activitesTab) activitesTab.click();
+                    break;
+                    
+                case 'contact':
+                    // Scroll vers les contacts d'urgence dans l'onglet Pendant
+                    const pendantTab = document.querySelector('[data-tab="pendant"]');
+                    if (pendantTab) {
+                        pendantTab.click();
+                        setTimeout(() => {
+                            const contactSection = document.querySelector('#tab-pendant .card:last-child');
+                            if (contactSection) {
+                                contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }, 300);
+                    }
+                    break;
+            }
+        });
+    });
 }
 
 function initOngletEntree() {
