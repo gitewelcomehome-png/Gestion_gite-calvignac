@@ -147,6 +147,17 @@ window.refreshAIPropositions = async function() {
         }
 
         const posts = stratComplete.actions_reseaux || [];
+        console.log(`📥 ${posts.length} posts trouvés pour semaine ${strategy.semaine}`);
+        
+        if (posts.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; grid-column: 1/-1; color: rgba(255,255,255,0.9);">
+                    <p>📭 Aucune action cette semaine</p>
+                    <p style="font-size: 14px; opacity: 0.8;">Les actions apparaîtront après génération du plan</p>
+                </div>
+            `;
+            return;
+        }
         
         displayPropositions(posts, strategy.semaine);
         

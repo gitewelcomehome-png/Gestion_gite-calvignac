@@ -215,6 +215,7 @@ window.generateLongtermPlan = async function() {
 // Sauvegarder une semaine (SIMPLE: juste 1-12, IGNORE startWeek)
 async function saveSingleWeek(semaine, year) {
     try {
+        // FORCER semaine 1 en 'actif', les autres en 'planifié'
         const { error } = await window.supabaseClient
             .from('cm_ai_strategies')
             .upsert({
@@ -230,6 +231,8 @@ async function saveSingleWeek(semaine, year) {
         
         if (error) {
             console.error('❌ Erreur sauvegarde semaine', semaine.numero, ':', error);
+        } else if (semaine.numero === 1) {
+            console.log('✅ Semaine 1 ACTIVÉE automatiquement');
         }
     } catch (err) {
         console.error('❌ Erreur saveSingleWeek:', err);
