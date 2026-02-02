@@ -878,13 +878,8 @@ async function loadWeatherData() {
         const lon = giteInfo.gps_lon;
         const lang = currentLanguage === 'fr' ? 'fr' : 'en';
         
-        // WeatherAPI.com : 1M appels/mois gratuits, usage commercial OK
-        // Inscription : https://www.weatherapi.com/signup.aspx
-        const apiKey = 'YOUR_WEATHERAPI_KEY'; // TODO: Remplacer par ta clé WeatherAPI.com
-        
-        if (apiKey === 'YOUR_WEATHERAPI_KEY') {
-            throw new Error('API key non configurée - Inscris-toi sur weatherapi.com');
-        }
+        // WeatherAPI.com : 5M appels/mois (trial Pro Plus → Free plan auto après 16/02/2026)
+        const apiKey = '7efc12e29575437a864135709260202';
         
         const response = await fetch(
             `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}&lang=${lang}&aqi=no`
