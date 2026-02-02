@@ -1606,6 +1606,15 @@ function initializeEventListeners() {
         });
     });
     
+    // ✨ NOUVEAU : Bottom navigation (mobile)
+    document.querySelectorAll('.bottom-nav-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tabId = btn.dataset.tab;
+            switchTab(tabId);
+        });
+    });
+    
     // Accordion (désactivé, affichage direct maintenant)
     // document.getElementById('accordionInstructions').addEventListener('click', () => {
     //     const content = document.getElementById('accordionContent');
@@ -1663,18 +1672,26 @@ function initializeEventListeners() {
 function switchTab(tabId) {
     // Désactiver tous les onglets
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.bottom-nav-item').forEach(btn => btn.classList.remove('active')); // ✨ NOUVEAU
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
         content.style.display = 'none';
     });
     
-    // Activer l'onglet sélectionné
-    const button = document.querySelector(`[data-tab="${tabId}"]`);
+    // Activer l'onglet sélectionné (desktop)
+    const button = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
     const content = document.getElementById(`tab-${tabId}`);
     
     if (button) {
         button.classList.add('active');
     }
+    
+    // ✨ NOUVEAU : Activer l'onglet sélectionné (mobile)
+    const mobileButton = document.querySelector(`.bottom-nav-item[data-tab="${tabId}"]`);
+    if (mobileButton) {
+        mobileButton.classList.add('active');
+    }
+    
     if (content) {
         content.classList.add('active');
         content.style.display = 'block';
