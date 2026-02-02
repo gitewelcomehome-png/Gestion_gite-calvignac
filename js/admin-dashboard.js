@@ -481,15 +481,15 @@ function initEventListeners() {
     
     // Actions rapides
     document.getElementById('btnCreatePromo').addEventListener('click', () => {
-        alert('Module "Créer une Promo" - À implémenter dans PROMPT 4');
+        window.location.href = 'admin-promotions.html';
     });
     
     document.getElementById('btnEmailBlast').addEventListener('click', () => {
-        alert('Module "Email Blast" - Fonctionnalité à venir');
+        // Fonctionnalité à venir
     });
     
     document.getElementById('btnGeneratePosts').addEventListener('click', () => {
-        alert('Module "Générer Posts IA" - À implémenter dans PROMPT 6');
+        window.location.href = 'admin-content.html';
     });
     
     document.getElementById('btnExportData').addEventListener('click', async () => {
@@ -515,10 +515,9 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
     
     // Activer le tab sélectionné
-    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+    document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
     
-    // Note: Les panels seront implémentés dans les prochains prompts
-    alert(`Module "${tabId}" - À implémenter dans les prochains prompts`);
+    // Navigation gérée par onclick dans HTML
 }
 
 async function exportDashboardData() {
