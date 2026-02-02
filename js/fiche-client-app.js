@@ -631,72 +631,99 @@ function initializeUI() {
 // ✨ NOUVEAU : Initialisation du Hero Section
 function initHeroSection() {
     const heroSection = document.getElementById('heroSection');
-    if (!heroSection) return;
-    
-    const checkIn = new Date(reservationData.check_in + 'T' + (giteInfo.heure_arrivee || '17:00'));
-    const checkOut = new Date(reservationData.check_out + 'T' + (giteInfo.heure_depart || '11:00'));
-    const now = new Date();
-    
-    // Afficher le Hero seulement si le séjour n'est pas terminé
-    if (now > checkOut) {
-        heroSection.style.display = 'none';
+    if (!heroSection || !reservationData || !giteInfo) {
+        if (heroSection) heroSection.style.display = 'none';
         return;
     }
     
-    // Afficher le Hero
-    heroSection.style.display = 'block';
-    
-    // Calculer et afficher le countdown
-    updateCountdown(checkIn, checkOut);
-    
-    // Mettre à jour le countdown toutes les minutes
-    setInterval(() => updateCountdown(checkIn, checkOut), 60000);
-    
-    // Initialiser les Quick Actions
-    initQuickActions();
+    // Parser les dates avec gestion d'erreur robuste
+    try {
+        const heureArrivee = (giteInfo.heure_arrivee || '17:00').split(':')[0] + ':' + (giteInfo.heure_arrivee || '17:00').split(':')[1];
+        const heureDepart = (giteInfo.heure_depart || '11:00').split(':')[0] + ':' + (giteInfo.heure_depart || '11:00').split(':')[1];
+        
+        const checkInStr = reservationData.check_in + 'T' + heureArrivee + ':00';
+        const checkOutStr = reservationData.check_out + 'T' + heureDepart + ':00';
+        
+        const checkIn = new Date(checkInStr);
+        const checkOut = new Date(checkOutStr);
+        const now = new Date();
+        
+        // Vérifier validité des dates
+        if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+            console.warn('⚠️ Dates invalides pour countdown:', checkInStr, checkOutStr);
+            heroSection.style.display = 'none';
+            return;
+        }
+        
+        // Afficher le Hero seulement si le séjour n'est pas terminé
+        if (now > checkOut) {
+            heroSection.style.display = 'none';
+            return;
+        }
+        
+        // Afficher le Hero
+        heroSection.style.display = 'block';
+        
+        // Calculer et afficher le countdown
+        updateCountdown(checkIn, checkOut);
+        
+        // Mettre à jour le countdown toutes les minutes
+        setInterval(() => updateCountdown(checkIn, checkOut), 60000);
+        
+        // Initialiser les Quick Actions
+        initQuickActions();
+    } catch (error) {
+        console.error('❌ Erreur initialisation Hero Section:', error);
+        heroSection.style.display = 'none';
+    }
 }
 
 function updateCountdown(checkIn, checkOut) {
-    const now = new Date();
-    const targetDate = now < checkIn ? checkIn : checkOut;
-    const isCheckOut = now >= checkIn;
-    
-    const diff = targetDate - now;
-    
-    if (diff <= 0) {
-        // Séjour terminé
-        document.getElementById('heroSection').style.display = 'none';
-        return;
-    }
-    
-    // Calculer les jours, heures, minutes
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    // Mettre à jour l'affichage
-    document.getElementById('daysCount').textContent = days.toString().padStart(2, '0');
-    document.getElementById('hoursCount').textContent = hours.toString().padStart(2, '0');
-    document.getElementById('minutesCount').textContent = minutes.toString().padStart(2, '0');
-    
-    // Changer le label selon le statut
-    const countdownLabel = document.querySelector('.countdown-label');
-    const heroSection = document.getElementById('heroSection');
-    
-    if (isCheckOut) {
-        // Pendant le séjour → Countdown jusqu'au départ
-        countdownLabel.setAttribute('data-i18n', 'countdown_checkout');
-        countdownLabel.textContent = currentLanguage === 'fr' 
-            ? 'Fin de votre séjour dans' 
-            : 'Your stay ends in';
-        heroSection.classList.add('during-stay');
-    } else {
-        // Avant le séjour → Countdown jusqu'à l'arrivée
-        countdownLabel.setAttribute('data-i18n', 'countdown_label');
-        countdownLabel.textContent = currentLanguage === 'fr' 
-            ? 'Votre séjour commence dans' 
-            : 'Your stay starts in';
-        heroSection.classList.remove('during-stay');
+    try {
+        const now = new Date();
+        const targetDate = now < checkIn ? checkIn : checkOut;
+        const isCheckOut = now >= checkIn;
+        
+        const diff = targetDate - now;
+        
+        if (diff <= 0 || isNaN(diff)) {
+            document.getElementById('heroSection').style.display = 'none';
+            return;
+        }
+        
+        // Calculer les jours, heures, minutes
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        // Mettre à jour l'affichage avec protection
+        const daysEl = document.getElementById('daysCount');
+        const hoursEl = document.getElementById('hoursCount');
+        const minutesEl = document.getElementById('minutesCount');
+        
+        if (daysEl) daysEl.textContent = days.toString().padStart(2, '0');
+        if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+        if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+        
+        // Changer le label selon le statut
+        const countdownLabel = document.querySelector('.countdown-label');
+        const heroSection = document.getElementById('heroSection');
+        
+        if (countdownLabel && heroSection) {
+            if (isCheckOut) {
+                countdownLabel.textContent = currentLanguage === 'fr' 
+                    ? 'Fin de votre séjour dans' 
+                    : 'Your stay ends in';
+                heroSection.classList.add('during-stay');
+            } else {
+                countdownLabel.textContent = currentLanguage === 'fr' 
+                    ? 'Votre séjour commence dans' 
+                    : 'Your stay starts in';
+                heroSection.classList.remove('during-stay');
+            }
+        }
+    } catch (error) {
+        console.error('❌ Erreur updateCountdown:', error);
     }
 }
 
