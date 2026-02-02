@@ -223,6 +223,9 @@
             </div>
         </section>
 
+        <!-- 🔴 WIDGET ERREURS CRITIQUES -->
+        <div id="errorsWidget"></div>
+
         <!-- Chart MRR 12 mois -->
         <section class="chart-section">
             <div class="chart-card">
@@ -343,9 +346,28 @@
     </main>
 
     <!-- Scripts -->
+    <script src="../js/error-tracker.js"></script>
     <script src="../js/admin-dashboard.js"></script>
     <script src="../js/dashboard-support-widget.js?v=1.0"></script>
     <script src="../js/dashboard-promotions-widget.js?v=1.0"></script>
+    <script src="../js/widget-errors.js?v=1.0"></script>
+    
+    <script>
+        // Initialiser widget erreurs au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            const errorsContainer = document.getElementById('errorsWidget');
+            if (errorsContainer && window.initErrorsWidget) {
+                errorsContainer.innerHTML = window.initErrorsWidget();
+                
+                // Charger les erreurs
+                setTimeout(() => {
+                    if (window.refreshErrorsWidget) {
+                        window.refreshErrorsWidget();
+                    }
+                }, 1000);
+            }
+        });
+    </script>
     <script>
         // Initialiser Lucide Icons
         lucide.createIcons();
