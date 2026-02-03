@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communications Clients - Admin</title>
+    
+    <!-- Filtre erreurs extensions Chrome -->
+    <script>
+        window.onerror = function(msg, source, lineno, colno, error) {
+            const msgStr = String(msg || '');
+            const srcStr = String(source || '');
+            if (msgStr.includes('webpage_content_reporter') || 
+                srcStr.includes('webpage_content_reporter') ||
+                msgStr.includes('Unexpected token') ||
+                msgStr.includes('export') ||
+                msgStr.includes('import') ||
+                srcStr.includes('chrome-extension') ||
+                msgStr.includes('zustand')) {
+                return true;
+            }
+        };
+        
+        window.addEventListener('error', function(event) {
+            const msg = event.message || '';
+            const src = event.filename || '';
+            if (src.includes('webpage_content_reporter') || 
+                msg.includes('webpage_content_reporter') ||
+                msg.includes('Unexpected token') || 
+                msg.includes('export') ||
+                msg.includes('import') ||
+                msg.includes('zustand') ||
+                src.includes('chrome-extension')) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return true;
+            }
+        }, true);
+        
+        const _consoleError = console.error;
+        console.error = function(...args) {
+            const str = args.join(' ');
+            if (str.includes('chrome-extension') || 
+                str.includes('webpage_content_reporter') || 
+                str.includes('Unexpected token') ||
+                str.includes('zustand') ||
+                str.includes('export')) {
+                return;
+            }
+            _consoleError.apply(console, args);
+        };
+    </script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Config Supabase -->
+    <script src="../js/shared-config.js"></script>
+    
+    <!-- CSS Admin -->
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h1 {
+            margin: 0;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .btn-back {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-back:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .card-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #1e293b;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            min-height: 400px;
+            resize: vertical;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .comm-item {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        
+        .comm-item:hover {
+            border-color: #667eea;
+            transform: translateX(4px);
+        }
+        
+        .comm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+        
+        .comm-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1e293b;
+        }
+        
+        .comm-badges {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-urgent { background: #fee2e2; color: #991b1b; }
+        
+        .btn-delete {
+            background: #fee2e2;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background: #fecaca;
+            transform: scale(1.1);
+        }
+        
+        .comm-message {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .comm-meta {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        
+        .empty-state i {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+        
+        #listeCommunications {
+            max-height: 700px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        
+        #listeCommunications::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #listeCommunications::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        #listeCommunications::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        #listeCommunications::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .mode-btn:hover {
+            border-color: #667eea;
+        }
+        
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .btn-ai {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+        
+        .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <h1>
+            <i data-lucide="megaphone"></i>
+            Communications Clients
+        </h1>
+        <button class="btn-back" onclick="window.location.href='admin-channel-manager.html'">
+            <i data-lucide="arrow-left"></i>
+            Retour Dashboard
+        </button>
+    </header>
+
+    <main class="main-container">
+        <div class="grid-layout">
+            <!-- Formulaire création -->
+            <div class="card">
+                <div class="card-header">
+                    <i data-lucide="plus-circle" style="color: #667eea;"></i>
+                    <h2>Nouvelle Communication</h2>
+                </div>
+                
+                <form id="formCommunication">
+                    <!-- Mode de saisie -->
+                    <div class="form-group">
+                        <label>Mode de création</label>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="mode-btn active" data-mode="text" onclick="switchMode('text')">
+                                <i data-lucide="type"></i> Texte
+                            </button>
+                            <button type="button" class="mode-btn" data-mode="video" onclick="switchMode('video')">
+                                <i data-lucide="video"></i> Vidéo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Mode Vidéo -->
+                    <div id="modeVideo" style="display: none;">
+                        <div class="form-group">
+                            <label for="videoUrl">URL de la vidéo (YouTube, Vimeo, etc.)</label>
+                            <input type="url" id="videoUrl" placeholder="https://youtube.com/watch?v=...">
+                        </div>
+                        <button type="button" class="btn-ai" onclick="analyzeVideo()">
+                            <i data-lucide="sparkles"></i>
+                            Analyser avec l'IA
+                        </button>
+                        <div id="videoAnalysisLoader" style="display: none; text-align: center; padding: 20px; color: #667eea;">
+                            <i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i>
+                            <p>Analyse en cours...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Mode Texte -->
+                    <div id="modeText">
+                        <div class="form-group">
+                            <label for="commTitre">Titre *</label>
+                            <input type="text" id="commTitre" required placeholder="Ex: Nouvelle fonctionnalité disponible">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="commMessage">Message *</label>
+                            <textarea id="commMessage" required placeholder="Décrivez votre communication..."></textarea>
+                        </div>
+                        
+                        <button type="button" class="btn-ai" onclick="improveText()">
+                            <i data-lucide="wand-2"></i>
+                            Améliorer avec l'IA
+                        </button>
+                        <div id="textImprovementLoader" style="display: none; text-align: center; padding: 20px; color: #667eea;">
+                            <i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i>
+                            <p>Amélioration en cours...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="commType">Type *</label>
+                        <select id="commType" required>
+                            <option value="info">ℹ️ Information</option>
+                            <option value="success">✅ Succès</option>
+                            <option value="warning">⚠️ Attention</option>
+                            <option value="urgent">🚨 Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="commCible">Cible *</label>
+                        <select id="commCible" required>
+                            <option value="all">Tous les clients</option>
+                            <option value="actif">Clients actifs uniquement</option>
+                            <option value="trial">En période d'essai</option>
+                            <option value="premium">Premium uniquement</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="commDateFin">Date d'expiration (optionnel)</label>
+                        <input type="date" id="commDateFin">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i data-lucide="send"></i>
+                        Publier la communication
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Liste communications -->
+            <div class="card">
+                <div class="card-header">
+                    <i data-lucide="list" style="color: #667eea;"></i>
+                    <h2>Communications Actives</h2>
+                </div>
+                
+                <div id="listeCommunications">
+                    <div class="empty-state">
+                        <i data-lucide="inbox"></i>
+                        <p>Chargement...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Client Supabase global
+        const supabaseClient = window.supabaseClient;
+        
+        // Détecter si on est en dev local
+        const isDev = window.location.hostname.includes('github.dev') || window.location.hostname === 'localhost';
+        
+        // Switch entre mode texte et vidéo
+        function switchMode(mode) {
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            
+            document.getElementById('modeText').style.display = mode === 'text' ? 'block' : 'none';
+            document.getElementById('modeVideo').style.display = mode === 'video' ? 'block' : 'none';
+            
+            // Reset required
+            if (mode === 'video') {
+                document.getElementById('commTitre').required = false;
+                document.getElementById('commMessage').required = false;
+            } else {
+                document.getElementById('commTitre').required = true;
+                document.getElementById('commMessage').required = true;
+            }
+        }
+        
+        // Analyser une vidéo avec l'IA
+        async function analyzeVideo() {
+            const videoUrl = document.getElementById('videoUrl').value;
+            
+            if (!videoUrl) {
+                alert('⚠️ Veuillez entrer une URL de vidéo');
+                return;
+            }
+            
+            const loader = document.getElementById('videoAnalysisLoader');
+            loader.style.display = 'block';
+            
+            try {
+                let analysis;
+                
+                // Mode démo en développement local
+                if (isDev) {
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Simuler délai
+                    
+                    // Extraire quelques infos de l'URL pour personnaliser
+                    const urlLower = videoUrl.toLowerCase();
+                    let sujetEstime = "gestion et optimisation";
+                    if (urlLower.includes('marketing')) sujetEstime = "stratégies marketing";
+                    else if (urlLower.includes('tech') || urlLower.includes('code')) sujetEstime = "développement technique";
+                    else if (urlLower.includes('business')) sujetEstime = "développement business";
+                    else if (urlLower.includes('manage')) sujetEstime = "management et leadership";
+                    
+                    analysis = {
+                        analyse: `Cette vidéo traite de ${sujetEstime} pour les propriétaires de gîtes. Elle présente des conseils pratiques et des astuces concrètes que vous pouvez appliquer dans votre activité.`,
+                        points_cles: [
+                            "📊 Suivez vos principaux indicateurs : taux d'occupation, prix moyen par nuit, revenus mensuels",
+                            "💡 Automatisez les tâches répétitives pour gagner du temps (réponses automatiques, check-in digital)",
+                            "📈 Ajustez vos tarifs selon la saison et les événements locaux pour maximiser vos revenus",
+                            "🎯 Soignez vos photos et votre description pour vous démarquer de la concurrence",
+                            "⭐ Répondez rapidement aux messages (moins de 1h) pour augmenter vos réservations",
+                            "🔧 Utilisez des outils de gestion pour simplifier votre quotidien"
+                        ],
+                        application: `Commencez par les actions les plus simples et mesurez les résultats. Testez ces conseils sur une courte période avant de les généraliser.`,
+                        plan_action: [
+                            "Améliorer vos photos et description d'annonce",
+                            "Mettre en place des réponses automatiques aux questions fréquentes",
+                            "Ajuster vos tarifs pour la prochaine haute saison"
+                        ],
+                        categorie: "optimisation",
+                        priorite: "moyen",
+                        tags: ["gestion", "optimisation", "conseils"],
+                        cible: "tous"
+                    };
+                    console.log('🧪 Mode démo activé - Simulation IA professionnelle');
+                } else {
+                    // Mode production avec API Claude
+                const response = await fetch('/api/content-ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'analyze-video',
+                        videoUrl: videoUrl
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Erreur inconnue' }));
+                    console.error('Erreur API:', response.status, errorData);
+                    throw new Error(`API Error ${response.status}: ${errorData.error || 'Erreur inconnue'}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Erreur analyse');
+                }
+                
+                analysis = data.analysis;
+                }
+                
+                // Remplir le formulaire (commun aux 2 modes)
+                document.getElementById('commTitre').value = "� Nouvelle Vidéo à Découvrir";
+                
+                let message = '';
+                
+                // Résumé
+                if (analysis.analyse) {
+                    message = `📝 RÉSUMÉ\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n${analysis.analyse}\n\n`;
+                }
+                
+                // Points importants
+                if (analysis.points_cles && analysis.points_cles.length > 0) {
+                    message += '✨ POINTS IMPORTANTS\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+                    analysis.points_cles.forEach((point, index) => {
+                        // Gérer différents formats
+                        if (typeof point === 'string') {
+                            message += `${index + 1}. ${point}\n\n`;
+                        } else if (point.titre && point.explication) {
+                            message += `${index + 1}. ${point.titre}\n   ${point.explication}\n\n`;
+                        } else if (point.texte) {
+                            message += `${index + 1}. ${point.texte}\n\n`;
+                        } else {
+                            message += `${index + 1}. ${JSON.stringify(point)}\n\n`;
+                        }
+                    });
+                }
+                
+                // À faire
+                if (analysis.application) {
+                    message += '💡 CE QUE VOUS POUVEZ FAIRE\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+                    message += `${analysis.application}\n\n`;
+                }
+                
+                // Actions suggérées
+                if (analysis.plan_action && analysis.plan_action.length > 0) {
+                    message += '✅ ACTIONS SUGGÉRÉES\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+                    analysis.plan_action.forEach((action, index) => {
+                        message += `${index + 1}. ${action}\n\n`;
+                    });
+                }
+                
+                // Métadonnées
+                message += '━━━━━━━━━━━━━━━━━━━━━━━━\n📋 INFORMATIONS\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+                
+                if (analysis.categorie) {
+                    message += `📂 Catégorie : ${analysis.categorie}\n`;
+                }
+                
+                if (analysis.priorite) {
+                    const prioriteEmoji = {
+                        'critique': '🔴',
+                        'élevé': '🟠',
+                        'moyen': '🟡',
+                        'faible': '🟢'
+                    };
+                    message += `${prioriteEmoji[analysis.priorite] || '⚪'} Priorité : ${analysis.priorite}\n`;
+                }
+                
+                
+                message += `\n\n🎥 Accéder à la ressource : ${videoUrl}`;
+                
+                if (analysis.tags && analysis.tags.length > 0) {
+                    message += '\n\n🏷️ ' + analysis.tags.map(t => `#${t}`).join(' ');
+                }
+                
+                document.getElementById('commMessage').value = message;
+                
+                // Pré-remplir type et cible selon la catégorie
+                const typeMapping = {
+                    'fonctionnalité': 'info',
+                    'technique': 'info',
+                    'marketing': 'success',
+                    'support': 'warning'
+                };
+                document.getElementById('commType').value = typeMapping[analysis.categorie] || 'info';
+                document.getElementById('commCible').value = analysis.cible || 'all';
+                
+                // Passer en mode texte
+                switchMode('text');
+                
+                lucide.createIcons();
+                
+            } catch (err) {
+                console.error('Erreur analyse vidéo:', err);
+                alert('❌ Erreur lors de l\'analyse. Vérifiez l\'URL et réessayez.');
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+        
+        // Améliorer le texte avec l'IA
+        async function improveText() {
+            const titre = document.getElementById('commTitre').value;
+            const message = document.getElementById('commMessage').value;
+            
+            if (!titre || !message) {
+                alert('⚠️ Veuillez remplir le titre et le message');
+                return;
+            }
+            
+            const loader = document.getElementById('textImprovementLoader');
+            loader.style.display = 'block';
+            
+            try {
+                let improved;
+                
+                // Mode démo en développement local
+                if (isDev) {
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Simuler délai
+                    
+                    // Analyse et amélioration intelligente
+                    const messageLignes = message.split('\n');
+                    const hasEmojis = /[\u{1F300}-\u{1F9FF}]/u.test(message);
+                    const hasStructure = message.includes('\n\n') || message.includes('•') || message.includes('-');
+                    
+                    let improvedMessage = message;
+                    
+                    // Corrections basiques
+                    improvedMessage = improvedMessage.replace(/  +/g, ' '); // Espaces multiples
+                    improvedMessage = improvedMessage.charAt(0).toUpperCase() + improvedMessage.slice(1); // Majuscule
+                    
+                    // Ajouter structure si manquante
+                    if (!hasStructure && messageLignes.length > 3) {
+                        const phrases = improvedMessage.split('. ');
+                        improvedMessage = phrases[0] + '.\n\n' + phrases.slice(1).map((p, i) => {
+                            const emoji = ['💡', '🎯', '⚡', '✨', '📈'][i % 5];
+                            return `${emoji} ${p}`;
+                        }).join('\n\n');
+                    }
+                    
+                    // Ajouter call-to-action
+                    if (!improvedMessage.toLowerCase().includes('question') && !improvedMessage.includes('?')) {
+                        improvedMessage += '\n\n💬 Des questions ? Notre équipe support est à votre disposition !';
+                    }
+                    
+                    improved = {
+                        titre: titre.trim().charAt(0).toUpperCase() + titre.trim().slice(1),
+                        message: improvedMessage,
+                        analyse: `Améliorations appliquées :\n• ${hasEmojis ? 'Emojis optimisés' : 'Ajout d\'émojis pour plus d\'impact visuel'}\n• ${hasStructure ? 'Structure améliorée' : 'Restructuration en points clés'}\n• Correction orthographique et ponctuation\n• Ajout d'un call-to-action\n• Ton professionnel mais chaleureux`,
+                        score_avant: "6",
+                        score_apres: "9",
+                        ameliorations_cles: ["Structure optimisée avec paragraphes", "Emojis stratégiques ajoutés", "Call-to-action engageant"]
+                    };
+                    console.log('🧪 Mode démo activé - Simulation amélioration professionnelle');
+                } else {
+                    // Mode production avec vraie API
+                    const prompt = `Tu es un expert en communication professionnelle B2B SaaS. Améliore cette communication destinée aux clients d'une plateforme de gestion de gîtes et locations saisonnières.
+
+TEXTE ACTUEL :
+─────────────
+TITRE : ${titre}
+MESSAGE : ${message}
+─────────────
+
+TON OBJECTIF : Transformer ce texte en une communication percutante, professionnelle mais chaleureuse, qui :
+1. Capte l'attention immédiatement
+2. Communique clairement la valeur ajoutée
+3. Incite à l'action
+4. Renforce la relation client
+
+RÈGLES D'AMÉLIORATION :
+✓ Corriger TOUTES les fautes (orthographe, grammaire, syntaxe)
+✓ Restructurer pour une lecture fluide et aérée
+✓ Utiliser des emojis stratégiquement (2-4 max, pertinents)
+✓ Ajouter des paragraphes courts (max 3 lignes)
+✓ Inclure un call-to-action si pertinent
+✓ Ton : professionnel mais humain, éviter le jargon excessif
+✓ Longueur : concis et impactant (max 250 mots)
+
+STRUCTURE RECOMMANDÉE :
+1. Hook/Accroche (1-2 lignes)
+2. Corps principal (bénéfices/informations)
+3. Call-to-action ou conclusion
+
+FORMAT DE RÉPONSE REQUIS (JSON strict) :
+{
+  "titre": "Titre amélioré (max 80 caractères, emoji optionnel)",
+  "message": "Message restructuré et amélioré avec sauts de lignes appropriés",
+  "analyse": "Explication concise des améliorations (3-5 points bullet avec emoji)",
+  "score_avant": "Note subjective 0-10 du texte original",
+  "score_apres": "Note subjective 0-10 du texte amélioré",
+  "ameliorations_cles": ["amélioration 1", "amélioration 2", "amélioration 3"]
+}
+
+IMPORTANT : Réponds UNIQUEMENT avec le JSON, sans texte additionnel.`;
+
+                    const response = await fetch('/api/content-ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'improve-text',
+                            titre: titre,
+                            message: message
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'Erreur inconnue' }));
+                        console.error('Erreur API:', response.status, errorData);
+                        throw new Error(`API Error ${response.status}: ${errorData.error || 'Erreur inconnue'}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error(data.error || 'Erreur amélioration');
+                    }
+                    
+                    improved = data.improved;
+                }
+                
+                // Confirmer avant de remplacer
+                const confirmMessage = `✨ TEXTE AMÉLIORÉ\n\nTitre : ${improved.titre}\n\nRemplacer le texte actuel ?`;
+                
+                if (confirm(confirmMessage)) {
+                    document.getElementById('commTitre').value = improved.titre;
+                    document.getElementById('commMessage').value = improved.message;
+                }
+                
+            } catch (err) {
+                console.error('Erreur amélioration texte:', err);
+                alert('❌ Erreur lors de l\'amélioration. Réessayez.');
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+        
+        // Charger les communications au démarrage
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCommunications();
+            lucide.createIcons();
+        });
+        
+        // Charger les communications
+        async function loadCommunications() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('admin_communications')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('listeCommunications');
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i data-lucide="inbox"></i>
+                            <p>Aucune communication active</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                container.innerHTML = data.map(comm => {
+                    const isActive = !comm.date_fin || new Date(comm.date_fin) >= new Date();
+                    const badgeClass = `badge-${comm.type}`;
+                    
+                    return `
+                        <div class="comm-item" style="opacity: ${isActive ? 1 : 0.5}">
+                            <div class="comm-header">
+                                <div class="comm-title">${comm.titre}</div>
+                                <div class="comm-badges">
+                                    <span class="badge ${badgeClass}">${comm.type}</span>
+                                    <button class="btn-delete" onclick="deleteCommunication('${comm.id}')" title="Supprimer">
+                                        <i data-lucide="trash-2" style="width: 14px; height: 14px; color: #dc2626;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="comm-message">${comm.message}</p>
+                            <div class="comm-meta">
+                                <span><i data-lucide="users" style="width: 12px; height: 12px;"></i> ${comm.cible}</span>
+                                <span><i data-lucide="calendar" style="width: 12px; height: 12px;"></i> ${new Date(comm.created_at).toLocaleDateString('fr-FR')}</span>
+                                ${comm.date_fin ? `<span><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Expire le ${new Date(comm.date_fin).toLocaleDateString('fr-FR')}</span>` : '<span>Permanent</span>'}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                lucide.createIcons();
+            } catch (err) {
+                console.error('Erreur chargement communications:', err);
+                document.getElementById('listeCommunications').innerHTML = `
+                    <div class="empty-state">
+                        <p style="color: #dc2626;">❌ Erreur lors du chargement</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Créer une communication
+        document.getElementById('formCommunication').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const comm = {
+                titre: document.getElementById('commTitre').value,
+                message: document.getElementById('commMessage').value,
+                type: document.getElementById('commType').value,
+                date_fin: document.getElementById('commDateFin').value || null,
+                cible: document.getElementById('commCible').value,
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                const { error } = await supabaseClient.from('admin_communications').insert([comm]);
+                if (error) throw error;
+                
+                // Reset form
+                this.reset();
+                loadCommunications();
+                
+                // Notification succès
+                alert('✅ Communication publiée avec succès !');
+            } catch (err) {
+                console.error('Erreur création communication:', err);
+                alert('❌ Erreur: ' + err.message);
+            }
+        });
+        
+        // Supprimer une communication
+        async function deleteCommunication(id) {
+            if (!confirm('Supprimer cette communication ?')) return;
+            
+            try {
+                const { error } = await supabaseClient.from('admin_communications').delete().eq('id', id);
+                if (error) throw error;
+                loadCommunications();
+            } catch (err) {
+                console.error('Erreur suppression:', err);
+                alert('Erreur: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

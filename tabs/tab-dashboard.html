@@ -71,126 +71,11 @@
         </div>
     </section>
 
+    <!-- 💬 COMMUNICATIONS CLIENT -->
+    <div id="clientCommunicationsWidget" class="mb-md" style="display: none;"></div>
+
     <!-- Alertes / Notifications importantes -->
     <div id="dashboard-alerts" class="mb-md"></div>
-
-    <!-- ========================================
-         📊 VISION GLOBALE
-         ======================================== -->
-    <section class="section section--spaced">
-        <h2 class="section-title mb-lg"><i data-lucide="bar-chart-3"></i> VISION GLOBALE</h2>
-        
-        <!-- Indicateurs fiscaux - Grille responsive -->
-        <div class="grid grid--2 gap-lg mb-lg">
-            <!-- URSSAF : 2025 + 2026 -->
-            <div class="card card--spacious dashboard-container-urssaf">
-                <h3 class="section-title mb-md"><i data-lucide="briefcase"></i> URSSAF</h3>
-                
-                <div class="grid grid--2 gap-sm">
-                    <!-- 2025 -->
-                    <div class="indicator indicator--warning">
-                        <div class="indicator__label">2025</div>
-                        <div id="dashboard-urssaf-2025" class="indicator__value">-</div>
-                    </div>
-                    <!-- 2026 -->
-                    <div class="indicator indicator--warning">
-                        <div class="indicator__label">2026</div>
-                        <div id="dashboard-urssaf-2026" class="indicator__value">-</div>
-                        <div class="indicator__sublabel">En cours</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- IR : 2025 + 2026 -->
-            <div id="dashboard-ir-container" class="card card--spacious dashboard-container-ir">
-                <h3 class="section-title mb-md"><i data-lucide="receipt"></i> IMPÔT SUR LE REVENU</h3>
-                
-                <div class="grid grid--2 gap-sm">
-                    <!-- 2025 -->
-                    <div class="indicator indicator--info">
-                        <div class="indicator__label">2025</div>
-                        <div id="dashboard-ir-2025" class="indicator__value">-</div>
-                    </div>
-                    <!-- 2026 -->
-                    <div class="indicator indicator--info">
-                        <div class="indicator__label">2026</div>
-                        <div id="dashboard-ir-2026" class="indicator__value">-</div>
-                        <div class="indicator__sublabel">En cours</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Indicateurs financiers - CA et Bénéfices -->
-        <div class="grid grid--2 gap-lg">
-            <!-- Chiffre d'Affaires -->
-            <div class="card card--spacious dashboard-container-ca">
-                <h3 class="section-title mb-md"><i data-lucide="dollar-sign"></i> Chiffre d’Affaires</h3>
-                
-                <div class="grid grid--2 gap-sm">
-                    <!-- CA Mois -->
-                    <div class="indicator indicator--success">
-                        <div class="indicator__label">Mois en cours</div>
-                        <div id="dashboard-ca-mois" class="indicator__value">-</div>
-                    </div>
-                    
-                    <!-- CA Année -->
-                    <div class="indicator indicator--success">
-                        <div class="indicator__label">Année <span id="annee-ca">2026</span></div>
-                        <div id="dashboard-ca-annee" class="indicator__value">-</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bénéfices & Trésorerie -->
-            <div class="card card--spacious dashboard-container-benefice">
-                <h3 class="section-title mb-md"><i data-lucide="trending-up"></i> Bénéfices & Trésorerie</h3>
-                
-                <div class="grid grid--2 gap-sm">
-                    <!-- Bénéfice -->
-                    <div class="indicator indicator--primary">
-                        <div class="indicator__label">Bénéfice <span id="annee-benefice">2026</span></div>
-                        <div id="dashboard-benefice-moyen" class="indicator__value">-</div>
-                    </div>
-                    
-                    <!-- Trésorerie -->
-                    <div class="indicator indicator--primary">
-                        <div class="indicator__label">Trésorerie Actuelle</div>
-                        <div id="dashboard-tresorerie" class="indicator__value">-</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Graphiques financiers -->
-        <div class="grid grid--auto-lg gap-lg mt-lg">
-            <!-- Bénéfices mensuels des gîtes -->
-            <div class="card card--spacious dashboard-graph-container-ca">
-                <header class="section-header">
-                    <h3 class="section-title">
-                        <i data-lucide="dollar-sign"></i>
-                        Bénéfices Mensuels des Gîtes
-                    </h3>
-                </header>
-                <div class="dashboard-graph-canvas">
-                    <canvas id="graphique-benefices-gites" style="max-height: 300px;"></canvas>
-                </div>
-            </div>
-
-            <!-- Trésorerie -->
-            <div class="card card--spacious dashboard-graph-container-benefice">
-                <header class="section-header">
-                    <h3 class="section-title">
-                        <i data-lucide="trending-up"></i>
-                        Évolution Trésorerie
-                    </h3>
-                </header>
-                <div class="dashboard-graph-canvas">
-                    <canvas id="graphique-tresorerie-dashboard" style="max-height: 300px;"></canvas>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- ========================================
          🎯 VISION ACTION
@@ -199,7 +84,7 @@
         <h2 class="section-title mb-lg"><i data-lucide="target"></i> VISION ACTIONS</h2>
         
         <!-- Réservations de la semaine - EN HAUT, PLEINE LARGEUR -->
-        <div class="card card--spacious dashboard-reservations-fullwidth mb-lg">
+        <div class="card card--spacious dashboard-reservations-fullwidth dashboard-container-semaine mb-lg">
             <header class="section-header">
                 <h3 class="section-title">
                     <i data-lucide="calendar"></i>
@@ -208,6 +93,16 @@
             </header>
             <div id="dashboard-reservations" class="dashboard-reservations-grid">
                 <p>Chargement...</p>
+            </div>
+            <!-- Pagination -->
+            <div id="dashboard-reservations-pagination" class="dashboard-reservations-pagination" style="display: none;">
+                <button onclick="changeDashboardReservationsPage('prev')" id="btn-prev-reservations" class="pagination-btn">
+                    <i data-lucide="chevron-left"></i> Précédent
+                </button>
+                <span id="pagination-info-reservations" class="pagination-info">Page 1/1</span>
+                <button onclick="changeDashboardReservationsPage('next')" id="btn-next-reservations" class="pagination-btn">
+                    Suivant <i data-lucide="chevron-right"></i>
+                </button>
             </div>
         </div>
         
@@ -271,7 +166,7 @@
             </div>
 
             <!-- Ménages prévus -->
-            <div class="card card--spacious">
+            <div class="card card--spacious dashboard-container-menages">
                 <header class="section-header">
                     <h3 class="section-title">
                         <i data-lucide="sparkles"></i>
@@ -286,7 +181,202 @@
         </div>
         </div>
     </section>
-</div>
+
+    <!-- ========================================
+         📊 VISION GLOBALE
+         ======================================== -->
+    <section class="section section--spaced">
+        <h2 class="section-title mb-lg"><i data-lucide="bar-chart-3"></i> VISION GLOBALE</h2>
+        
+        <!-- Indicateurs fiscaux - Grille 4 colonnes -->
+        <div class="grid grid--4 gap-lg mb-lg">
+            <!-- URSSAF : 2025 + 2026 -->
+            <div class="card card--spacious dashboard-container-urssaf">
+                <h3 class="section-title mb-md"><i data-lucide="briefcase"></i> URSSAF</h3>
+                
+                <div class="grid grid--2 gap-sm">
+                    <!-- 2025 -->
+                    <div class="indicator indicator--cyan">
+                        <div class="indicator__label">2025</div>
+                        <div id="dashboard-urssaf-2025" class="indicator__value">-</div>
+                    </div>
+                    <!-- 2026 -->
+                    <div class="indicator indicator--cyan">
+                        <div class="indicator__label">2026</div>
+                        <div id="dashboard-urssaf-2026" class="indicator__value">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IR : 2025 + 2026 -->
+            <div id="dashboard-ir-container" class="card card--spacious dashboard-container-ir">
+                <h3 class="section-title mb-md"><i data-lucide="receipt"></i> IMPÔT SUR LE REVENU</h3>
+                
+                <div class="grid grid--2 gap-sm">
+                    <!-- 2025 -->
+                    <div class="indicator indicator--cyan">
+                        <div class="indicator__label">2025</div>
+                        <div id="dashboard-ir-2025" class="indicator__value">-</div>
+                    </div>
+                    <!-- 2026 -->
+                    <div class="indicator indicator--cyan">
+                        <div class="indicator__label">2026</div>
+                        <div id="dashboard-ir-2026" class="indicator__value">-</div>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Chiffre d'Affaires -->
+            <div class="card card--spacious dashboard-container-ca">
+                <h3 class="section-title mb-md"><i data-lucide="dollar-sign"></i> Chiffre d’Affaires</h3>
+                
+                <div class="grid grid--2 gap-sm">
+                    <!-- CA Mois -->
+                    <div class="indicator indicator--cyan">
+                        <div class="indicator__label">Mois en cours</div>
+                        <div id="dashboard-ca-mois" class="indicator__value">-</div>
+                    </div>
+                    
+                    <!-- CA Année -->
+                    <div class="indicator indicator--cyan">
+                        <div class="indicator__label">Année <span id="annee-ca">2026</span></div>
+                        <div id="dashboard-ca-annee" class="indicator__value">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bénéfices & Trésorerie -->
+            <div class="card card--spacious dashboard-container-benefice">
+                <h3 class="section-title mb-md"><i data-lucide="trending-up"></i> Bénéfices & Trésorerie</h3>
+                
+                <div class="grid grid--2 gap-sm">
+                    <!-- Bénéfice -->
+                    <div class="indicator indicator--cyan">
+                        <div class="indicator__label">Bénéfice <span id="annee-benefice">2026</span></div>
+                        <div id="dashboard-benefice-moyen" class="indicator__value">-</div>
+                    </div>
+                    
+                    <!-- Trésorerie -->
+                    <div class="indicator indicator--cyan">
+                        <div class="indicator__label">Trésorerie Actuelle</div>
+                        <div id="dashboard-tresorerie" class="indicator__value">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Performance - 6 indicateurs violets -->
+        <div class="grid grid--6 gap-lg mb-lg mt-lg">
+            <!-- Taux d'occupation -->
+            <div class="card card--compact dashboard-kpi-occupation">
+                <h3 class="section-title-small mb-xs"><i data-lucide="percent"></i> Taux occupation</h3>
+                <div class="indicator indicator--violet">
+                    <div id="dashboard-taux-occupation" class="indicator__value-large">-</div>
+                </div>
+            </div>
+
+            <!-- Revenu moyen par nuit -->
+            <div class="card card--compact dashboard-kpi-revenu-nuit">
+                <h3 class="section-title-small mb-xs"><i data-lucide="moon"></i> Revenu/nuit</h3>
+                <div class="indicator indicator--violet">
+                    <div id="dashboard-revenu-nuit" class="indicator__value-large">-</div>
+                </div>
+            </div>
+
+            <!-- Durée moyenne séjour -->
+            <div class="card card--compact dashboard-kpi-duree-sejour">
+                <h3 class="section-title-small mb-xs"><i data-lucide="calendar-days"></i> Durée moy.</h3>
+                <div class="indicator indicator--violet">
+                    <div id="dashboard-duree-sejour" class="indicator__value-large">-</div>
+                </div>
+            </div>
+
+            <!-- Charges totales -->
+            <div class="card card--compact dashboard-kpi-charges">
+                <h3 class="section-title-small mb-xs"><i data-lucide="minus-circle"></i> Charges</h3>
+                <div class="indicator indicator--violet">
+                    <div id="dashboard-charges-totales" class="indicator__value-large">-</div>
+                </div>
+            </div>
+
+            <!-- Marge nette -->
+            <div class="card card--compact dashboard-kpi-marge">
+                <h3 class="section-title-small mb-xs"><i data-lucide="trending-up"></i> Marge nette</h3>
+                <div class="indicator indicator--violet">
+                    <div id="dashboard-marge-nette" class="indicator__value-large">-</div>
+                </div>
+            </div>
+
+            <!-- Reste à percevoir -->
+            <div class="card card--compact dashboard-kpi-reste">
+                <h3 class="section-title-small mb-xs"><i data-lucide="clock"></i> À percevoir</h3>
+                <div class="indicator indicator--violet">
+                    <div id="dashboard-reste-percevoir" class="indicator__value-large">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid--auto-lg gap-lg mt-lg">
+            <!-- Bénéfices mensuels des gîtes -->
+            <div class="card card--spacious dashboard-graph-container-ca">
+                <header class="section-header">
+                    <h3 class="section-title">
+                        <i data-lucide="dollar-sign"></i>
+                        Bénéfices Mensuels des Gîtes
+                    </h3>
+                </header>
+                <div class="dashboard-graph-canvas">
+                    <canvas id="graphique-benefices-gites" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Trésorerie -->
+            <div class="card card--spacious dashboard-graph-container-benefice">
+                <header class="section-header">
+                    <h3 class="section-title">
+                        <i data-lucide="trending-up"></i>
+                        Évolution Trésorerie
+                    </h3>
+                </header>
+                <div class="dashboard-graph-canvas">
+                    <canvas id="graphique-tresorerie-dashboard" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Nombre de réservations -->
+            <div class="card card--spacious dashboard-graph-container-reservations">
+                <header class="section-header">
+                    <h3 class="section-title">
+                        <i data-lucide="calendar-check"></i>
+                        Nombre de Réservations Mensuelles
+                    </h3>
+                </header>
+                <div class="dashboard-graph-canvas">
+                    <canvas id="graphique-reservations-mensuelles" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparaison CA année en cours vs année précédente - Pleine largeur -->
+        <div class="card card--spacious dashboard-graph-container-ca-comparaison mt-lg">
+            <header class="section-header">
+                <h3 class="section-title">
+                    <i data-lucide="bar-chart-2"></i>
+                    Comparaison CA 2025 vs 2026
+                </h3>
+            </header>
+            <div class="dashboard-graph-canvas">
+                <canvas id="graphique-ca-comparaison" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+            </div>
+        </div>
+    </section>
+
+</div></div>
 
 <!-- Modal Ajout Tâche -->
 <div id="addTodoModal" class="modal">
