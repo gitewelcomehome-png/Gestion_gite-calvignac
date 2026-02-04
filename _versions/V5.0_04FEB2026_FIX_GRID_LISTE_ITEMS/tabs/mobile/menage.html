@@ -1,0 +1,415 @@
+<div class="tab-container">
+    <!-- Header Mobile -->
+    <div class="card" style="margin-bottom: 15px; padding: 15px;">
+        <h2 style="margin: 0 0 10px 0; font-size: 1.2rem;">🧹 Planning Ménage</h2>
+        <button id="btnRefreshMenage" class="btn-neo" style="width: 100%; padding: 12px;">
+            🔄 Actualiser
+        </button>
+    </div>
+
+    <!-- Filtres -->
+    <div class="mobile-collapse-section">
+        <div class="mobile-collapse-header" onclick="toggleMobileSection('filtres-menage')">
+            <span>🔍 Filtres</span>
+            <span class="mobile-collapse-icon" id="icon-filtres-menage">▼</span>
+        </div>
+        <div class="mobile-collapse-content hidden" id="content-filtres-menage">
+            <div style="padding: 12px;">
+                <select id="filterGiteMenage" style="width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: 2px solid #2D3436;">
+                    <option value="">Tous les gîtes</option>
+                </select>
+                <select id="filterStatutMenage" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #2D3436;">
+                    <option value="">Tous les statuts</option>
+                    <option value="pending">À faire</option>
+                    <option value="pending_validation">En attente validation</option>
+                    <option value="validated">Validé</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Planning -->
+    <div id="menagePlanningWeeks">
+        <div id="planning-menage-container">
+            <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
+                <div style="font-size: 48px; margin-bottom: 15px;">🧹</div>
+                <p>Chargement des ménages...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.menage-card {
+    background: var(--card);
+    border: 2px solid #2D3436;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 3px 3px 0 #2D3436;
+}
+
+.menage-card.validated {
+    border-left: 4px solid #2ecc71;
+    background: #f0fff4;
+}
+
+.menage-card.pending_validation {
+    border-left: 4px solid #3498db;
+    background: #f0f8ff;
+}
+
+.menage-card.pending {
+    border-left: 4px solid #f39c12;
+    background: #fffbf0;
+}
+
+.menage-card.expanded {
+    padding-bottom: 15px;
+}
+
+.menage-edit-form {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px dashed #ddd;
+}
+
+.week-block {
+    margin-bottom: 15px;
+}
+
+.week-header-unique {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    padding: 12px;
+    color: white;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+</style>
+
+<script>
+let allMenages = [];
+let allReservations = [];
+let gitesMap = {};
+let currentFilters = {
+    gite: '',
+    statut: ''
+};
+let expandedMenages = new Set();
+
+async function loadMenages() {
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) return;
+
+        // Charger les gîtes
+        const gites = await window.gitesManager.getAll();
+        gites.forEach(g => {
+            gitesMap[g.id] = g;
+        });
+
+        // Charger les réservations
+        if (typeof getAllReservations === 'function') {
+            allReservations = await getAllReservations(true);
+        }
+
+        // Charger les cleaning_schedule
+        const { data, error } = await window.supabaseClient
+            .from('cleaning_schedule')
+            .select('*')
+            .eq('owner_user_id', user.id)
+            .order('scheduled_date', { ascending: true });
+
+        if (error) throw error;
+
+        // Enrichir avec les données de réservation et gîte
+        allMenages = (data || []).map(cs => {
+            const reservation = allReservations.find(r => r.id === cs.reservation_id);
+            const gite = reservation ? gitesMap[reservation.gite_id] : null;
+            
+            return {
+                ...cs,
+                gite_name: gite?.name || 'Gîte inconnu',
+                gite_id: reservation?.gite_id,
+                reservation: reservation
+            };
+        });
+
+        renderMenages();
+        populateGiteFilter();
+    } catch (error) {
+        showToast('Erreur chargement ménages', 'error');
+    }
+}
+
+function populateGiteFilter() {
+    const selector = document.getElementById('filterGiteMenage');
+    if (!selector) return;
+
+    const gites = [...new Set(allMenages.map(m => m.gite_name).filter(Boolean))];
+    
+    let html = '<option value="">Tous les gîtes</option>';
+    gites.forEach(name => {
+        html += `<option value="${name}">${name}</option>`;
+    });
+    
+    selector.innerHTML = html;
+}
+
+function filterMenages() {
+    const giteFilter = document.getElementById('filterGiteMenage')?.value || '';
+    const statutFilter = document.getElementById('filterStatutMenage')?.value || '';
+    
+    currentFilters.gite = giteFilter;
+    currentFilters.statut = statutFilter;
+    
+    renderMenages();
+}
+
+function toggleEditMenage(menageId) {
+    // Convertir en number car getAttribute() retourne une string
+    const id = parseInt(menageId, 10);
+    if (expandedMenages.has(id)) {
+        expandedMenages.delete(id);
+    } else {
+        expandedMenages.add(id);
+    }
+    renderMenages();
+}
+
+async function saveMenageChanges(menageId) {
+    // Convertir en number car getAttribute() retourne une string
+    const id = parseInt(menageId, 10);
+    const menage = allMenages.find(m => m.id === id);
+    if (!menage) return;
+    
+    const dateInput = document.getElementById(`date-${menageId}`);
+    const timeSelect = document.getElementById(`time-${menageId}`);
+    
+    if (!dateInput || !timeSelect) return;
+    
+    const newDate = dateInput.value;
+    const newTime = timeSelect.value;
+    
+    if (!newDate) {
+        showToast('Veuillez sélectionner une date', 'error');
+        return;
+    }
+    
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        
+        const { error } = await window.supabaseClient
+            .from('cleaning_schedule')
+            .update({
+                scheduled_date: newDate,
+                time_of_day: newTime,
+                status: 'pending_validation',
+                proposed_by: 'owner',
+                validated_by_company: false
+            })
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        showToast('✅ Modification enregistrée', 'success');
+        expandedMenages.delete(id);
+        await loadMenages();
+    } catch (error) {
+        showToast('Erreur modification', 'error');
+    }
+}
+
+function renderMenages() {
+    const container = document.getElementById('planning-menage-container');
+    if (!container) return;
+
+    let filtered = allMenages;
+
+    if (currentFilters.gite) {
+        filtered = filtered.filter(m => m.gite_name === currentFilters.gite);
+    }
+
+    if (currentFilters.statut) {
+        filtered = filtered.filter(m => m.status === currentFilters.statut);
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
+                <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+                <p>Aucun ménage trouvé</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Grouper par semaine
+    const groupedByWeek = {};
+    filtered.forEach(menage => {
+        const date = new Date(menage.scheduled_date);
+        const weekKey = getWeekKey(date);
+        
+        if (!groupedByWeek[weekKey]) {
+            groupedByWeek[weekKey] = {
+                label: getWeekLabel(date),
+                menages: []
+            };
+        }
+        
+        groupedByWeek[weekKey].menages.push(menage);
+    });
+
+    let html = '';
+    Object.keys(groupedByWeek).sort().forEach(weekKey => {
+        const week = groupedByWeek[weekKey];
+        html += `
+            <div class="week-block">
+                <div class="week-header-unique">${week.label}</div>
+        `;
+        
+        week.menages.forEach(menage => {
+            const isExpanded = expandedMenages.has(menage.id);
+            
+            let statusClass = 'pending';
+            let statusEmoji = '⏳';
+            let statusText = 'À faire';
+            
+            if (menage.status === 'validated') {
+                statusClass = 'validated';
+                statusEmoji = '✅';
+                statusText = 'Validé';
+            } else if (menage.status === 'pending_validation') {
+                statusClass = 'pending_validation';
+                statusEmoji = '🔔';
+                statusText = 'En attente';
+            }
+            
+            const date = new Date(menage.scheduled_date);
+            const dateStr = date.toLocaleDateString('fr-FR', { 
+                weekday: 'short', 
+                day: 'numeric', 
+                month: 'short' 
+            });
+            
+            const timeOfDay = menage.time_of_day || 'afternoon';
+            const timeEmoji = timeOfDay === 'morning' ? '🌅' : '🌆';
+            const timeText = timeOfDay === 'morning' ? 'Matin' : 'Après-midi';
+            
+            html += `
+                <div class="menage-card ${statusClass} ${isExpanded ? 'expanded' : ''}" data-menage-id="${menage.id}">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text); margin-bottom: 4px;">
+                                🏠 ${menage.gite_name}
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                                📅 ${dateStr} · ${timeEmoji} ${timeText}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.2rem;">${statusEmoji}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">${statusText}</div>
+                        </div>
+                    </div>
+                    
+                    ${isExpanded && menage.status !== 'validated' ? `
+                        <div class="menage-edit-form" data-form>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 4px;">📅 Date :</label>
+                                <input type="date" id="date-${menage.id}" value="${menage.scheduled_date}" 
+                                    style="width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #2D3436; font-size: 0.9rem;">
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 4px;">⏰ Horaire :</label>
+                                <select id="time-${menage.id}" 
+                                    style="width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #2D3436; font-size: 0.9rem;">
+                                    <option value="morning" ${timeOfDay === 'morning' ? 'selected' : ''}>🌅 Matin (avant 12h)</option>
+                                    <option value="afternoon" ${timeOfDay === 'afternoon' ? 'selected' : ''}>🌆 Après-midi (après 12h)</option>
+                                </select>
+                            </div>
+                            <button data-save-btn="${menage.id}"
+                                style="width: 100%; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 6px; font-weight: 700; font-size: 0.9rem;">
+                                💾 Enregistrer
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+    });
+
+    container.innerHTML = html;
+    
+    // Attacher les événements après le render
+    setTimeout(() => {
+        // Clic sur les cartes pour déplier/replier
+        document.querySelectorAll('.menage-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Ne pas déclencher si on clique sur le formulaire
+                if (e.target.closest('[data-form]') || e.target.closest('[data-save-btn]')) {
+                    return;
+                }
+                const menageId = this.getAttribute('data-menage-id');
+                toggleEditMenage(menageId);
+            });
+        });
+        
+        // Boutons de sauvegarde
+        document.querySelectorAll('[data-save-btn]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const menageId = this.getAttribute('data-save-btn');
+                saveMenageChanges(menageId);
+            });
+        });
+    }, 100);
+}
+
+function getWeekKey(date) {
+    const firstDay = new Date(date);
+    firstDay.setDate(date.getDate() - date.getDay() + 1);
+    return firstDay.toISOString().split('T')[0];
+}
+
+function getWeekLabel(date) {
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    
+    const options = { day: 'numeric', month: 'short' };
+    return `Semaine du ${monday.toLocaleDateString('fr-FR', options)} au ${sunday.toLocaleDateString('fr-FR', options)}`;
+}
+
+window.toggleEditMenage = toggleEditMenage;
+window.saveMenageChanges = saveMenageChanges;
+
+// Event listeners
+setTimeout(() => {
+    loadMenages();
+    
+    const btnRefresh = document.getElementById('btnRefreshMenage');
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', loadMenages);
+    }
+    
+    const giteFilter = document.getElementById('filterGiteMenage');
+    if (giteFilter) {
+        giteFilter.addEventListener('change', filterMenages);
+    }
+    
+    const statutFilter = document.getElementById('filterStatutMenage');
+    if (statutFilter) {
+        statutFilter.addEventListener('change', filterMenages);
+    }
+}, 500);
+
+// Exposer pour permettre un refresh externe
+window.refreshMenages = loadMenages;
+</script>

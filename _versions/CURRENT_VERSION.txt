@@ -1,1 +1,1 @@
-V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO - Fix colonnes ID manquantes avec génération UUID automatique (PRODUCTION READY)
+V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS - Fix positionnement boutons dans listes items (PRODUCTION READY)

@@ -1,0 +1,36 @@
+<div class="tab-container">
+    <!-- Header Neo-Brutalism -->
+    <div class="card" padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 class="section-title-main"><i data-lucide="archive" style="width: 26px; height: 26px; display: inline-block; vertical-align: middle; margin-right: 10px;"></i>Archives</h2>
+                <p class="section-description">Réservations et tâches terminées</p>
+            </div>
+        </div>
+    </div>
+
+            <!-- Réservations archivées -->
+            <div class="card" style="margin-bottom: 30px;">
+                <div class="card-header">
+                    <span class="card-icon"><i data-lucide="archive" style="width: 22px; height: 22px;"></i></span>
+                    <h2 class="card-title">Réservations Archivées</h2>
+                </div>
+                <div id="archivesSection">
+                    <p style="text-align: center; color: var(--text-secondary); padding: 40px;">Aucune archive</p>
+                </div>
+            </div>
+
+            <!-- Tâches archivées -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon"><i data-lucide="check" style="width: 20px; height: 20px;"></i></span>
+                    <h2 class="card-title">Tâches Terminées</h2>
+                    <button onclick="clearArchivedTodos()" 
+                            style="background: rgba(231, 76, 60, 0.1); border: 1px solid #E74C3C; color: #E74C3C; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">
+                        🗑️ Vider l'archive
+                    </button>
+                </div>
+                <div id="archivedTodosSection" style="padding: 20px;">
+                    <p style="text-align: center; color: var(--text-secondary); padding: 40px;">Aucune tâche archivée</p>
+                </div>
+            </div>

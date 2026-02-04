@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <!-- Icons Modern Minimal - 24x24, stroke=2 -->
+  <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 10.5l9-7 9 7"/>
+    <path d="M5 10v10h14V10"/>
+    <path d="M10 20v-6h4v6"/>
+  </symbol>
+  <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="5" width="18" height="16" rx="2"/>
+    <path d="M8 3v4M16 3v4M3 11h18"/>
+  </symbol>
+  <symbol id="icon-broom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 20l5-2 6-6"/>
+    <path d="M14 9l7-6"/>
+    <path d="M4 18l2 3"/>
+  </symbol>
+  <symbol id="icon-linen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="5" width="16" height="4" rx="1"/>
+    <rect x="4" y="11" width="16" height="4" rx="1"/>
+    <rect x="4" y="17" width="16" height="2" rx="1"/>
+  </symbol>
+  <symbol id="icon-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="8" height="8" rx="2"/>
+    <rect x="13" y="3" width="8" height="5" rx="2"/>
+    <rect x="13" y="10" width="8" height="11" rx="2"/>
+    <rect x="3" y="13" width="8" height="8" rx="2"/>
+  </symbol>
+  <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 9v5"/>
+    <path d="M12 17h.01"/>
+    <path d="M10.3 3.5l-8.5 14.7A2 2 0 003.6 21h16.8a2 2 0 001.8-2.8L13.8 3.5a2 2 0 00-3.5 0z"/>
+  </symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 008 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.66 0 1.24.42 1.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+  </symbol>
+  <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="7" r="4"/>
+    <path d="M5.5 21a6.5 6.5 0 0113 0"/>
+  </symbol>
+  <symbol id="icon-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 8a15 15 0 0118 0"/>
+    <path d="M6 11a10 10 0 0112 0"/>
+    <path d="M9 14a5 5 0 016 0"/>
+    <path d="M12 18h.01"/>
+  </symbol>
+  <symbol id="icon-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="7" cy="15" r="3"/>
+    <path d="M9.8 13.2L21 2v4l-3 3v3l-3 3"/>
+  </symbol>
+  <symbol id="icon-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <path d="M9 17V7h5a3 3 0 010 6H9"/>
+  </symbol>
+  <symbol id="icon-bed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 11h18"/>
+    <path d="M4 7h6a3 3 0 013 3v1H4z"/>
+    <path d="M4 20v-9M20 20v-9"/>
+  </symbol>
+  <symbol id="icon-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/>
+    <circle cx="15" cy="10" r="2"/>
+  </symbol>
+  <symbol id="icon-euro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 7a5 5 0 00-9 2H6m2 6a5 5 0 009 2M6 12h10"/>
+  </symbol>
+  <symbol id="icon-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 3h7l5 5v13a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+    <path d="M14 3v6h6"/>
+  </symbol>
+  <symbol id="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="18" cy="5" r="3"/>
+    <circle cx="6" cy="12" r="3"/>
+    <circle cx="18" cy="19" r="3"/>
+    <path d="M8.6 13.8l6.8 3.4M15.4 6.8L8.6 10.2"/>
+  </symbol>
+</svg>

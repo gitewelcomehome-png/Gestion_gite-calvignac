@@ -1,0 +1,400 @@
+// ==========================================
+// 📊 CONFIGURATION DES TAUX FISCAUX
+// ==========================================
+// Système paramétrable pour gérer les taux URSSAF et fiscaux
+// Source: URSSAF Indépendants + impots.gouv.fr
+// Dernière mise à jour: 19 janvier 2026
+
+/**
+ * IMPORTANT: Ces taux sont indicatifs et doivent être vérifiés annuellement
+ * auprès de l'URSSAF et de votre expert-comptable.
+ * 
+ * Pour mettre à jour: modifier uniquement les valeurs dans TAUX_ANNEES
+ */
+
+const TAUX_FISCAUX = {
+    // ==========================================
+    // TAUX PAR ANNÉE
+    // ==========================================
+    TAUX_ANNEES: {
+        2024: {
+            // PASS (Plafond Annuel Sécurité Sociale)
+            PASS: 46368,
+            
+            // COTISATIONS URSSAF (LMP/TNS au réel)
+            URSSAF: {
+                // Maladie-Maternité (exonération totale si revenu < 110% PASS)
+                maladie: {
+                    taux: 0, // 0% si < 46368 × 1.1 = 51004.80€
+                    seuil_exoneration: 46368 * 1.1,
+                    description: "Maladie-Maternité (exonéré si < 110% PASS)"
+                },
+                
+                // Indemnités journalières
+                indemnites_journalieres: {
+                    taux: 0.0085, // 0.85%
+                    base: 'revenu',
+                    description: "Indemnités journalières"
+                },
+                
+                // Retraite de base (plafonné à 1 PASS)
+                retraite_base: {
+                    taux: 0.1775, // 17.75%
+                    plafond: 46368,
+                    base: 'revenu',
+                    description: "Retraite de base"
+                },
+                
+                // Retraite complémentaire
+                retraite_complementaire: {
+                    taux: 0.07, // 7%
+                    base: 'revenu',
+                    description: "Retraite complémentaire"
+                },
+                
+                // Invalidité-Décès
+                invalidite_deces: {
+                    taux: 0.013, // 1.30%
+                    base: 'revenu',
+                    description: "Invalidité-Décès"
+                },
+                
+                // CSG-CRDS
+                csg_crds: {
+                    taux: 0.097, // 9.70%
+                    base: 'revenu',
+                    description: "CSG-CRDS"
+                },
+                
+                // Allocations familiales (progressif selon revenu)
+                allocations_familiales: {
+                    seuil_debut: 46368 * 1.1,    // 110% PASS = 51004.80€
+                    seuil_fin: 46368 * 1.4,       // 140% PASS = 64915.20€
+                    taux_max: 0.031,              // 3.1%
+                    description: "Allocations familiales (progressif 0% à 3.1%)"
+                },
+                
+                // Formation professionnelle
+                formation_pro: {
+                    taux: 0.0025, // 0.25%
+                    base: 'ca',
+                    description: "Formation professionnelle"
+                }
+            },
+            
+            // COTISATIONS MINIMALES (si activité)
+            COTISATIONS_MINIMALES: {
+                applicable: false, // Pas de minimum pour LMP au réel
+                montant: 0,
+                description: "Pas de cotisations minimales pour LMP au réel (uniquement micro-entrepreneurs)"
+            },
+            
+            // TRIMESTRES RETRAITE
+            RETRAITE: {
+                smic_horaire: 11.65, // SMIC horaire 2024
+                heures_par_trimestre: 600,
+                trimestre_1: 11.65 * 600,      // 6 990 €
+                trimestre_2: 11.65 * 600 * 2,  // 13 980 €
+                trimestre_3: 11.65 * 600 * 3,  // 20 970 €
+                trimestre_4: 11.65 * 600 * 4   // 27 960 €
+            },
+            
+            // BARÈME IMPÔT SUR LE REVENU
+            BAREME_IR: [
+                { max: 11294, taux: 0 },
+                { max: 28797, taux: 0.11 },
+                { max: 82341, taux: 0.30 },
+                { max: 177106, taux: 0.41 },
+                { max: Infinity, taux: 0.45 }
+            ],
+            
+            // ABATTEMENT SALAIRES
+            ABATTEMENT_SALAIRE: {
+                taux: 0.10, // 10%
+                minimum: 472,
+                maximum: 13522
+            },
+            
+            // BARÈME KILOMÉTRIQUE (selon puissance fiscale)
+            BAREME_KM: {
+                3: [
+                    { max: 5000, formule: (d) => d * 0.529 },
+                    { max: 20000, formule: (d) => d * 0.316 + 1065 },
+                    { max: Infinity, formule: (d) => d * 0.370 }
+                ],
+                4: [
+                    { max: 5000, formule: (d) => d * 0.606 },
+                    { max: 20000, formule: (d) => d * 0.340 + 1330 },
+                    { max: Infinity, formule: (d) => d * 0.407 }
+                ],
+                5: [
+                    { max: 5000, formule: (d) => d * 0.636 },
+                    { max: 20000, formule: (d) => d * 0.357 + 1395 },
+                    { max: Infinity, formule: (d) => d * 0.427 }
+                ],
+                6: [
+                    { max: 5000, formule: (d) => d * 0.665 },
+                    { max: 20000, formule: (d) => d * 0.374 + 1457 },
+                    { max: Infinity, formule: (d) => d * 0.447 }
+                ],
+                7: [
+                    { max: 5000, formule: (d) => d * 0.697 },
+                    { max: 20000, formule: (d) => d * 0.394 + 1515 },
+                    { max: Infinity, formule: (d) => d * 0.470 }
+                ]
+            }
+        },
+        
+        2025: {
+            // PASS 2025 (identique 2024)
+            PASS: 46368,
+            
+            // COTISATIONS URSSAF 2025 (identiques 2024 - vérifier février 2025)
+            URSSAF: {
+                maladie: {
+                    taux: 0,
+                    seuil_exoneration: 46368 * 1.1,
+                    description: "Maladie-Maternité (exonéré si < 110% PASS)"
+                },
+                indemnites_journalieres: {
+                    taux: 0.0085,
+                    base: 'revenu',
+                    description: "Indemnités journalières"
+                },
+                retraite_base: {
+                    taux: 0.1775,
+                    plafond: 46368,
+                    base: 'revenu',
+                    description: "Retraite de base"
+                },
+                retraite_complementaire: {
+                    taux: 0.07,
+                    base: 'revenu',
+                    description: "Retraite complémentaire"
+                },
+                invalidite_deces: {
+                    taux: 0.013,
+                    base: 'revenu',
+                    description: "Invalidité-Décès"
+                },
+                csg_crds: {
+                    taux: 0.097,
+                    base: 'revenu',
+                    description: "CSG-CRDS"
+                },
+                allocations_familiales: {
+                    seuil_debut: 46368 * 1.1,
+                    seuil_fin: 46368 * 1.4,
+                    taux_max: 0.031,
+                    description: "Allocations familiales (progressif 0% à 3.1%)"
+                },
+                formation_pro: {
+                    taux: 0.0025,
+                    base: 'ca',
+                    description: "Formation professionnelle"
+                }
+            },
+            
+            COTISATIONS_MINIMALES: {
+                applicable: false,
+                montant: 0,
+                description: "Pas de cotisations minimales pour LMP au réel"
+            },
+            
+            // TRIMESTRES RETRAITE 2025
+            RETRAITE: {
+                smic_horaire: 11.88, // SMIC 2025 (estimé - à vérifier)
+                heures_par_trimestre: 600,
+                trimestre_1: 11.88 * 600,      // 7 128 €
+                trimestre_2: 11.88 * 600 * 2,  // 14 256 €
+                trimestre_3: 11.88 * 600 * 3,  // 21 384 €
+                trimestre_4: 11.88 * 600 * 4   // 28 512 €
+            },
+            
+            // BARÈME IR 2025 (identique 2024)
+            BAREME_IR: [
+                { max: 11294, taux: 0 },
+                { max: 28797, taux: 0.11 },
+                { max: 82341, taux: 0.30 },
+                { max: 177106, taux: 0.41 },
+                { max: Infinity, taux: 0.45 }
+            ],
+            
+            ABATTEMENT_SALAIRE: {
+                taux: 0.10,
+                minimum: 472,
+                maximum: 13522
+            },
+            
+            // BARÈME KM 2025 (à vérifier février 2025)
+            BAREME_KM: {
+                3: [
+                    { max: 5000, formule: (d) => d * 0.545 },
+                    { max: 20000, formule: (d) => d * 0.326 + 1095 },
+                    { max: Infinity, formule: (d) => d * 0.381 }
+                ],
+                4: [
+                    { max: 5000, formule: (d) => d * 0.624 },
+                    { max: 20000, formule: (d) => d * 0.351 + 1365 },
+                    { max: Infinity, formule: (d) => d * 0.419 }
+                ],
+                5: [
+                    { max: 5000, formule: (d) => d * 0.655 },
+                    { max: 20000, formule: (d) => d * 0.368 + 1435 },
+                    { max: Infinity, formule: (d) => d * 0.440 }
+                ],
+                6: [
+                    { max: 5000, formule: (d) => d * 0.685 },
+                    { max: 20000, formule: (d) => d * 0.385 + 1500 },
+                    { max: Infinity, formule: (d) => d * 0.460 }
+                ],
+                7: [
+                    { max: 5000, formule: (d) => d * 0.718 },
+                    { max: 20000, formule: (d) => d * 0.406 + 1560 },
+                    { max: Infinity, formule: (d) => d * 0.484 }
+                ]
+            }
+        }
+    },
+    
+    // ==========================================
+    // FONCTIONS UTILITAIRES
+    // ==========================================
+    
+    /**
+     * Récupérer la configuration pour une année donnée
+     */
+    getConfig: function(annee) {
+        return this.TAUX_ANNEES[annee] || this.TAUX_ANNEES[2024];
+    },
+    
+    /**
+     * Calculer les cotisations URSSAF pour une année
+     */
+    calculerURSSAF: function(annee, benefice, ca) {
+        const config = this.getConfig(annee);
+        const urssaf = config.URSSAF;
+        
+        let total = 0;
+        const details = {};
+        
+        // Maladie-Maternité (exonération si < seuil)
+        if (benefice > urssaf.maladie.seuil_exoneration) {
+            details.maladie = benefice * urssaf.maladie.taux;
+            total += details.maladie;
+        } else {
+            details.maladie = 0;
+        }
+        
+        // Indemnités journalières
+        details.indemnites_journalieres = benefice * urssaf.indemnites_journalieres.taux;
+        total += details.indemnites_journalieres;
+        
+        // Retraite de base (plafonné)
+        const revenuPlafonne = Math.min(benefice, urssaf.retraite_base.plafond);
+        details.retraite_base = revenuPlafonne * urssaf.retraite_base.taux;
+        total += details.retraite_base;
+        
+        // Retraite complémentaire
+        details.retraite_complementaire = benefice * urssaf.retraite_complementaire.taux;
+        total += details.retraite_complementaire;
+        
+        // Invalidité-Décès
+        details.invalidite_deces = benefice * urssaf.invalidite_deces.taux;
+        total += details.invalidite_deces;
+        
+        // CSG-CRDS
+        details.csg_crds = benefice * urssaf.csg_crds.taux;
+        total += details.csg_crds;
+        
+        // Allocations familiales (progressif)
+        const af = urssaf.allocations_familiales;
+        if (benefice > af.seuil_debut) {
+            const baseAF = Math.min(benefice - af.seuil_debut, af.seuil_fin - af.seuil_debut);
+            const tauxAF = (baseAF / (af.seuil_fin - af.seuil_debut)) * af.taux_max;
+            details.allocations_familiales = benefice * tauxAF;
+            total += details.allocations_familiales;
+        } else {
+            details.allocations_familiales = 0;
+        }
+        
+        // Formation professionnelle (sur CA)
+        details.formation_pro = ca * urssaf.formation_pro.taux;
+        total += details.formation_pro;
+        
+        // Appliquer minimum si applicable
+        if (config.COTISATIONS_MINIMALES.applicable && total < config.COTISATIONS_MINIMALES.montant) {
+            total = config.COTISATIONS_MINIMALES.montant;
+            details._minimum_applique = true;
+        }
+        
+        return { total, details };
+    },
+    
+    /**
+     * Calculer les trimestres de retraite validés
+     */
+    calculerTrimestres: function(annee, benefice) {
+        const config = this.getConfig(annee);
+        const retraite = config.RETRAITE;
+        
+        if (benefice >= retraite.trimestre_4) return 4;
+        if (benefice >= retraite.trimestre_3) return 3;
+        if (benefice >= retraite.trimestre_2) return 2;
+        if (benefice >= retraite.trimestre_1) return 1;
+        return 0;
+    },
+    
+    /**
+     * Calculer l'impôt sur le revenu
+     */
+    calculerIR: function(annee, revenuImposable, nbParts) {
+        const config = this.getConfig(annee);
+        const bareme = config.BAREME_IR;
+        const quotient = revenuImposable / nbParts;
+        
+        let impotQuotient = 0;
+        let tranchePrecedente = 0;
+        
+        for (const tranche of bareme) {
+            if (quotient <= tranchePrecedente) break;
+            
+            const baseImposable = Math.min(quotient, tranche.max) - tranchePrecedente;
+            impotQuotient += baseImposable * tranche.taux;
+            
+            tranchePrecedente = tranche.max;
+            if (quotient <= tranche.max) break;
+        }
+        
+        return impotQuotient * nbParts;
+    },
+    
+    /**
+     * Calculer les frais kilométriques
+     */
+    calculerBaremeKM: function(annee, puissance, kilometres) {
+        const config = this.getConfig(annee);
+        const bareme = config.BAREME_KM[puissance] || config.BAREME_KM[5];
+        
+        const tranche = bareme.find(t => kilometres <= t.max);
+        return tranche ? tranche.formule(kilometres) : 0;
+    },
+    
+    /**
+     * Appliquer l'abattement sur les salaires
+     */
+    appliquerAbattementSalaire: function(annee, salaireBrut) {
+        const config = this.getConfig(annee);
+        const abat = config.ABATTEMENT_SALAIRE;
+        
+        const abattement = Math.max(
+            abat.minimum,
+            Math.min(salaireBrut * abat.taux, abat.maximum)
+        );
+        
+        return salaireBrut - abattement;
+    }
+};
+
+// Export global
+window.TAUX_FISCAUX = TAUX_FISCAUX;

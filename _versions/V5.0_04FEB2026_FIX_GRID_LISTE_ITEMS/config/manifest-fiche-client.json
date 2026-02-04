@@ -1,0 +1,15 @@
+{
+  "name": "Guide Gîtes Trévoux & Couzon",
+  "short_name": "Gîtes Guide",
+  "description": "Votre guide interactif pour votre séjour dans nos gîtes",
+  "start_url": "/fiche-client.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [],
+  "categories": ["travel", "accommodation"],
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "screenshots": []
+}

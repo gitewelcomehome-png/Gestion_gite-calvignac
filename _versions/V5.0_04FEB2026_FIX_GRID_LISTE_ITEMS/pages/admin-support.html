@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Support & Tickets - Channel Manager</title>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Config Supabase -->
+    <script src="../js/shared-config.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    <link rel="stylesheet" href="../css/admin-support.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-left">
+            <h1>
+                <i data-lucide="headphones"></i>
+                Support & Tickets
+            </h1>
+        </div>
+        <div class="header-right">
+            <span class="user-email" id="userEmail">stephanecalvignac@hotmail.fr</span>
+            <button class="btn-icon" id="btnLogout" title="Déconnexion">
+                <i data-lucide="log-out"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <section class="tabs-navigation">
+        <div class="tabs-sidebar">
+            <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
+            <button class="tab-btn" onclick="window.location.href='admin-channel-manager.html'">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-clients.html'">
+                <i data-lucide="users"></i>
+                <span>Clients</span>
+            </button>
+            <button class="tab-btn active">
+                <i data-lucide="headphones"></i>
+                <span>Support</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-promotions.html'">
+                <i data-lucide="tag"></i>
+                <span>Promotions</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-finance.html'">
+                <i data-lucide="bar-chart-2"></i>
+                <span>Finance & BI</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-content.html'">
+                <i data-lucide="pen-tool"></i>
+                <span>Content IA</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-monitoring.html'">
+                <i data-lucide="activity"></i>
+                <span>Monitoring</span>
+            </button>
+            <button class="tab-btn">
+                <i data-lucide="globe"></i>
+                <span>Site Web</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main class="support-container">
+        
+        <!-- Stats Rapides -->
+        <section class="support-stats">
+            <div class="stat-card">
+                <div class="stat-icon open">
+                    <i data-lucide="inbox"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="statOpen">-</div>
+                    <div class="stat-label">Tickets Ouverts</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon pending">
+                    <i data-lucide="clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="statPending">-</div>
+                    <div class="stat-label">En Attente</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon response-time">
+                    <i data-lucide="timer"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="statResponseTime">-</div>
+                    <div class="stat-label">Temps Moyen Réponse</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon csat">
+                    <i data-lucide="smile"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="statCSAT">-</div>
+                    <div class="stat-label">CSAT Score</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filtres et Recherche -->
+        <section class="filters-bar">
+            <div class="search-box">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchTickets" placeholder="Rechercher un ticket, client, ou problème...">
+            </div>
+            <div class="filters-group">
+                <select id="filterStatus" class="filter-select">
+                    <option value="">Tous les statuts</option>
+                    <option value="ouvert">Ouvert</option>
+                    <option value="en_cours">En cours</option>
+                    <option value="en_attente_client">En attente client</option>
+                    <option value="resolu">Résolu</option>
+                    <option value="ferme">Fermé</option>
+                </select>
+                <select id="filterPriority" class="filter-select">
+                    <option value="">Toutes priorités</option>
+                    <option value="critique">Critique</option>
+                    <option value="haute">Haute</option>
+                    <option value="normale">Normale</option>
+                    <option value="basse">Basse</option>
+                </select>
+                <select id="filterCategory" class="filter-select">
+                    <option value="">Toutes catégories</option>
+                    <option value="technique">Technique</option>
+                    <option value="facturation">Facturation</option>
+                    <option value="fonctionnalite">Fonctionnalité</option>
+                    <option value="bug">Bug</option>
+                    <option value="autre">Autre</option>
+                </select>
+                <button class="btn-filter-clear" id="btnClearFilters">
+                    <i data-lucide="x"></i>
+                    Effacer filtres
+                </button>
+            </div>
+        </section>
+
+        <!-- Vue Double Panel -->
+        <section class="support-panels">
+            
+            <!-- Liste Tickets -->
+            <div class="tickets-list-panel">
+                <div class="panel-header">
+                    <h3>
+                        <i data-lucide="list"></i>
+                        Liste des Tickets
+                        <span class="ticket-count" id="ticketCount">(0)</span>
+                    </h3>
+                    <div class="sort-controls">
+                        <select id="sortBy" class="sort-select">
+                            <option value="created_at_desc">Plus récent</option>
+                            <option value="created_at_asc">Plus ancien</option>
+                            <option value="priority_desc">Priorité haute</option>
+                            <option value="updated_at_desc">Dernière mise à jour</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="tickets-list" id="ticketsList">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Chargement des tickets...</p>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <button class="btn-page" id="btnPrevPage" disabled>
+                        <i data-lucide="chevron-left"></i>
+                        Précédent
+                    </button>
+                    <span class="page-info" id="pageInfo">Page 1 sur 1</span>
+                    <button class="btn-page" id="btnNextPage" disabled>
+                        Suivant
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Détail Ticket -->
+            <div class="ticket-detail-panel" id="ticketDetailPanel">
+                <div class="empty-state">
+                    <i data-lucide="inbox" style="width: 64px; height: 64px; color: #ccc;"></i>
+                    <p>Sélectionnez un ticket pour voir les détails</p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Analytics Section -->
+        <section class="analytics-section">
+            <h2>
+                <i data-lucide="bar-chart-4"></i>
+                Analytics Support
+            </h2>
+            
+            <div class="analytics-grid">
+                
+                <!-- Temps de Résolution -->
+                <div class="analytics-card">
+                    <h3>
+                        <i data-lucide="clock"></i>
+                        Temps de Résolution
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="resolutionTimeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- CSAT Trend -->
+                <div class="analytics-card">
+                    <h3>
+                        <i data-lucide="trending-up"></i>
+                        Évolution CSAT
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="csatTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Problèmes -->
+                <div class="analytics-card">
+                    <h3>
+                        <i data-lucide="alert-circle"></i>
+                        Top 5 Problèmes
+                    </h3>
+                    <div class="top-problems-list" id="topProblemsList">
+                        <div class="loading-state">Chargement...</div>
+                    </div>
+                </div>
+
+                <!-- Heatmap Tickets -->
+                <div class="analytics-card full-width">
+                    <h3>
+                        <i data-lucide="calendar-clock"></i>
+                        Heatmap Tickets (30 derniers jours)
+                    </h3>
+                    <div class="heatmap-container" id="heatmapContainer">
+                        <div class="loading-state">Génération de la heatmap...</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Base de Connaissance -->
+        <section class="knowledge-base">
+            <h2>
+                <i data-lucide="book-open"></i>
+                Base de Connaissance
+                <button class="btn-primary" id="btnAddArticle">
+                    <i data-lucide="plus"></i>
+                    Nouvel Article
+                </button>
+            </h2>
+            <div class="kb-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchKB" placeholder="Rechercher dans la base de connaissance...">
+            </div>
+            <div class="kb-categories">
+                <button class="kb-category active" data-category="all">
+                    Tout
+                    <span class="kb-count" id="kbCountAll">0</span>
+                </button>
+                <button class="kb-category" data-category="technique">
+                    Technique
+                    <span class="kb-count" id="kbCountTechnique">0</span>
+                </button>
+                <button class="kb-category" data-category="facturation">
+                    Facturation
+                    <span class="kb-count" id="kbCountFacturation">0</span>
+                </button>
+                <button class="kb-category" data-category="fonctionnalite">
+                    Fonctionnalité
+                    <span class="kb-count" id="kbCountFonctionnalite">0</span>
+                </button>
+                <button class="kb-category" data-category="bug">
+                    Bug Connu
+                    <span class="kb-count" id="kbCountBug">0</span>
+                </button>
+            </div>
+            <div class="kb-articles" id="kbArticles">
+                <div class="loading-state">Chargement des articles...</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Détail Ticket (pour mobile) -->
+    <div class="modal" id="ticketModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">
+                <i data-lucide="x"></i>
+            </button>
+            <div id="modalTicketContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal Nouvel Article KB -->
+    <div class="modal" id="articleModal">
+        <div class="modal-content">
+            <button class="modal-close" id="articleModalClose">
+                <i data-lucide="x"></i>
+            </button>
+            <h2>
+                <i data-lucide="book-open"></i>
+                Nouvel Article
+            </h2>
+            <form id="articleForm">
+                <div class="form-group">
+                    <label for="articleTitle">Titre</label>
+                    <input type="text" id="articleTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="articleCategory">Catégorie</label>
+                    <select id="articleCategory" required>
+                        <option value="technique">Technique</option>
+                        <option value="facturation">Facturation</option>
+                        <option value="fonctionnalite">Fonctionnalité</option>
+                        <option value="bug">Bug Connu</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="articleContent">Contenu</label>
+                    <textarea id="articleContent" rows="10" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="articleTags">Tags (séparés par des virgules)</label>
+                    <input type="text" id="articleTags" placeholder="Ex: synchronisation, calendrier, booking">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="btnCancelArticle">Annuler</button>
+                    <button type="submit" class="btn-primary">
+                        <i data-lucide="save"></i>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/admin-support.js"></script>
+    <script>
+        // Initialiser les icônes Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>

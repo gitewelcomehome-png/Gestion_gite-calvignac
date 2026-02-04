@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Promotions - Channel Manager</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="background: #F9FAFB;">
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-left">
+            <h1>
+                <i data-lucide="tag"></i>
+                Gestion des Promotions
+            </h1>
+        </div>
+        <div class="header-right">
+            <button class="btn-primary" id="btnNewPromo">
+                <i data-lucide="plus"></i>
+                Nouvelle Promotion
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <section class="tabs-navigation">
+        <div class="tabs-sidebar">
+            <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
+            <button class="tab-btn" onclick="window.location.href='admin-channel-manager.html'">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-clients.html'">
+                <i data-lucide="users"></i>
+                <span>Clients</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-support.html'">
+                <i data-lucide="headphones"></i>
+                <span>Support</span>
+            </button>
+            <button class="tab-btn active">
+                <i data-lucide="tag"></i>
+                <span>Promotions</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-finance.html'">
+                <i data-lucide="bar-chart-2"></i>
+                <span>Finance & BI</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-content.html'">
+                <i data-lucide="pen-tool"></i>
+                <span>Content IA</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-monitoring.html'">
+                <i data-lucide="activity"></i>
+                <span>Monitoring</span>
+            </button>
+            <button class="tab-btn">
+                <i data-lucide="globe"></i>
+                <span>Site Web</span>
+            </button>
+        </div>
+    </section>
+
+    <div class="admin-wrapper">
+        <!-- Main Container -->
+        <main class="admin-container">
+            
+            <!-- Stats Promotions -->
+            <section class="kpis-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: #e8f5e9;">
+                        <i data-lucide="tag" style="color: #4caf50;"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Promotions Actives</div>
+                        <div class="kpi-value" id="kpiPromosActives">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: #e3f2fd;">
+                        <i data-lucide="users" style="color: #2196f3;"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Utilisations (30j)</div>
+                        <div class="kpi-value" id="kpiUtilisations">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: #fff3e0;">
+                        <i data-lucide="trending-down" style="color: #ff9800;"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Coût Total (30j)</div>
+                        <div class="kpi-value" id="kpiCoutTotal">0 €</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: #f3e5f5;">
+                        <i data-lucide="trending-up" style="color: #9c27b0;"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">CA Généré (30j)</div>
+                        <div class="kpi-value" id="kpiCAGenere">0 €</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: #e1f5fe;">
+                        <i data-lucide="percent" style="color: #00bcd4;"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">ROI Moyen</div>
+                        <div class="kpi-value" id="kpiROI">0%</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Liste Promotions -->
+            <section class="data-table-section">
+                <div class="section-header">
+                    <h2>
+                        <i data-lucide="list"></i>
+                        Liste des Promotions
+                    </h2>
+                    <div class="filters">
+                        <select id="filterStatut" class="form-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="actif">Actives</option>
+                            <option value="inactif">Inactives</option>
+                            <option value="expiré">Expirées</option>
+                        </select>
+                        <select id="filterType" class="form-select">
+                            <option value="">Tous les types</option>
+                            <option value="pourcentage">Pourcentage</option>
+                            <option value="montant_fixe">Montant fixe</option>
+                            <option value="mois_gratuits">Mois gratuits</option>
+                            <option value="upgrade">Upgrade gratuit</option>
+                        </select>
+                        <input type="search" id="searchPromo" class="form-input" placeholder="Rechercher...">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="tablePromotions">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Nom</th>
+                                <th>Type</th>
+                                <th>Valeur</th>
+                                <th>Cible</th>
+                                <th>Période</th>
+                                <th>Utilisations</th>
+                                <th>ROI</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyPromotions">
+                            <tr>
+                                <td colspan="10" class="loading-row">
+                                    <div class="loading">Chargement...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal Nouvelle/Modifier Promotion -->
+    <div id="modalPromo" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="modalPromoTitle">
+                    <i data-lucide="tag"></i>
+                    Nouvelle Promotion
+                </h3>
+                <button class="modal-close" id="btnCloseModalPromo">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formPromo">
+                    <input type="hidden" id="promoId">
+                    
+                    <div class="form-grid">
+                        <!-- Code promo -->
+                        <div class="form-group">
+                            <label for="promoCode">Code Promo *</label>
+                            <input type="text" id="promoCode" class="form-input" required 
+                                   placeholder="Ex: WELCOME2026" style="text-transform: uppercase;">
+                            <small>Code unique en majuscules</small>
+                        </div>
+
+                        <!-- Nom -->
+                        <div class="form-group">
+                            <label for="promoNom">Nom de la Promotion *</label>
+                            <input type="text" id="promoNom" class="form-input" required 
+                                   placeholder="Ex: Bienvenue nouveaux clients">
+                        </div>
+
+                        <!-- Type -->
+                        <div class="form-group">
+                            <label for="promoType">Type de Promotion *</label>
+                            <select id="promoType" class="form-select" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="pourcentage">Pourcentage de réduction</option>
+                                <option value="montant_fixe">Montant fixe</option>
+                                <option value="mois_gratuits">Mois gratuits</option>
+                                <option value="upgrade">Upgrade gratuit</option>
+                            </select>
+                        </div>
+
+                        <!-- Valeur -->
+                        <div class="form-group">
+                            <label for="promoValeur">Valeur *</label>
+                            <input type="number" id="promoValeur" class="form-input" required 
+                                   step="0.01" min="0" placeholder="Ex: 20">
+                            <small id="promoValeurHint">Ex: 20 pour 20%</small>
+                        </div>
+
+                        <!-- Cible -->
+                        <div class="form-group">
+                            <label for="promoCible">Segment Cible</label>
+                            <select id="promoCible" class="form-select">
+                                <option value="tous">Tous les clients</option>
+                                <option value="nouveaux">Nouveaux clients uniquement</option>
+                                <option value="existants">Clients existants</option>
+                                <option value="churn_risk">Clients à risque de churn</option>
+                                <option value="vip">Clients VIP</option>
+                            </select>
+                        </div>
+
+                        <!-- Abonnements concernés -->
+                        <div class="form-group">
+                            <label>Abonnements concernés</label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="segmentBasic" value="basic" checked>
+                                    Basic
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="segmentPro" value="pro" checked>
+                                    Pro
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="segmentPremium" value="premium" checked>
+                                    Premium
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Date début -->
+                        <div class="form-group">
+                            <label for="promoDateDebut">Date de début *</label>
+                            <input type="datetime-local" id="promoDateDebut" class="form-input" required>
+                        </div>
+
+                        <!-- Date fin -->
+                        <div class="form-group">
+                            <label for="promoDateFin">Date de fin</label>
+                            <input type="datetime-local" id="promoDateFin" class="form-input">
+                            <small>Laisser vide pour durée illimitée</small>
+                        </div>
+
+                        <!-- Max utilisations -->
+                        <div class="form-group">
+                            <label for="promoMaxUtilisations">Nombre d'utilisations max</label>
+                            <input type="number" id="promoMaxUtilisations" class="form-input" 
+                                   min="0" placeholder="Illimité si vide">
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group full-width">
+                            <label for="promoDescription">Description</label>
+                            <textarea id="promoDescription" class="form-textarea" rows="3" 
+                                      placeholder="Description interne de la promotion"></textarea>
+                        </div>
+
+                        <!-- Actif -->
+                        <div class="form-group full-width">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="promoActif" checked>
+                                Activer immédiatement cette promotion
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" id="btnCancelPromo">Annuler</button>
+                        <button type="submit" class="btn-primary">
+                            <i data-lucide="save"></i>
+                            Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Statistiques Promotion -->
+    <div id="modalStats" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="modalStatsTitle">
+                    <i data-lucide="bar-chart"></i>
+                    Statistiques de la Promotion
+                </h3>
+                <button class="modal-close" id="btnCloseModalStats">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Nombre d'utilisations</div>
+                        <div class="stat-value" id="statUtilisations">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Coût total réductions</div>
+                        <div class="stat-value" id="statCout">0 €</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">CA généré</div>
+                        <div class="stat-value" id="statCA">0 €</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">ROI</div>
+                        <div class="stat-value" id="statROI">0%</div>
+                    </div>
+                </div>
+
+                <div class="table-container" style="margin-top: 20px;">
+                    <h4>Historique des utilisations</h4>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Client</th>
+                                <th>Abonnement</th>
+                                <th>Réduction</th>
+                                <th>CA Généré</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyStatsUsage">
+                            <tr>
+                                <td colspan="5" class="loading-row">
+                                    <div class="loading">Chargement...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/shared-config.js"></script>
+    <script src="../js/admin-promotions.js"></script>
+    <script>
+        // Initialiser Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

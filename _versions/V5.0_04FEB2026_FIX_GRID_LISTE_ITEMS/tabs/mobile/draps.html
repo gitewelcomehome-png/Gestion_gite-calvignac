@@ -1,0 +1,313 @@
+<div class="tab-container">
+    <!-- Header -->
+    <div class="card" style="margin-bottom: 15px; padding: 15px;">
+        <h2 style="margin: 0 0 15px 0; font-size: 1.2rem;">🛏️ Gestion Draps</h2>
+        
+        <!-- Sélection du gîte -->
+        <label for="giteSelector" style="font-weight: 700; color: var(--text); font-size: 0.9rem; display: block; margin-bottom: 6px;">🏠 Sélectionner un gîte :</label>
+        <select id="giteSelector" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #2D3436; font-size: 0.9rem; font-weight: 600; background: var(--card); cursor: pointer; margin-bottom: 15px;">
+            <option value="">Chargement...</option>
+        </select>
+    </div>
+
+    <!-- Stock du gîte sélectionné -->
+    <div class="card" style="padding: 15px; margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: var(--text);">📦 Stocks</h3>
+            <button id="btnAddType" style="background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">+ Type</button>
+        </div>
+        <div id="stock-draps-container">
+            <p style="text-align: center; color: var(--text-secondary); padding: 20px;">Sélectionnez un gîte</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.drap-stock-item {
+    background: var(--card);
+    border: 2px solid #2D3436;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 12px;
+    box-shadow: 2px 2px 0 #2D3436;
+    position: relative;
+}
+
+.drap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.drap-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.drap-delete {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.drap-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.drap-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 2px solid #2D3436;
+    background: var(--card);
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.drap-btn.minus {
+    color: #e74c3c;
+    border-color: #e74c3c;
+}
+
+.drap-btn.plus {
+    color: #27ae60;
+    border-color: #27ae60;
+}
+
+.drap-quantity {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #667eea;
+    min-width: 50px;
+    text-align: center;
+}
+</style>
+
+<script>
+let currentGiteId = null;
+let linenNeeds = [];
+let stocks = {};
+
+async function loadGites() {
+    try {
+        const gites = await window.gitesManager.getAll();
+        const selector = document.getElementById('giteSelector');
+        
+        let html = '<option value="">-- Sélectionner --</option>';
+        gites.forEach(g => {
+            html += `<option value="${g.id}">${g.name}</option>`;
+        });
+        
+        selector.innerHTML = html;
+    } catch (error) {
+        showToast('Erreur chargement gîtes', 'error');
+    }
+}
+
+async function loadLinenNeeds(giteId) {
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) return [];
+        
+        const { data, error } = await window.supabaseClient
+            .from('linen_needs')
+            .select('*')
+            .eq('gite_id', giteId)
+            .eq('owner_user_id', user.id)
+            .order('item_label');
+        
+        if (error) throw error;
+        
+        linenNeeds = data || [];
+        return linenNeeds;
+    } catch (error) {
+        showToast('Erreur chargement types', 'error');
+        return [];
+    }
+}
+
+async function loadStocks(giteId) {
+    if (!giteId) {
+        document.getElementById('stock-draps-container').innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">Sélectionnez un gîte</p>';
+        return;
+    }
+    
+    currentGiteId = giteId;
+    
+    try {
+        await loadLinenNeeds(giteId);
+
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) return;
+        
+        const { data, error } = await window.supabaseClient
+            .from('linen_stock_items')
+            .select('item_key, quantity')
+            .eq('gite_id', giteId)
+            .eq('owner_user_id', user.id);
+        
+        if (error) throw error;
+        
+        // Charger les stocks existants
+        stocks = {};
+        (data || []).forEach(item => {
+            stocks[item.item_key] = item.quantity || 0;
+        });
+        
+        renderStocks();
+    } catch (error) {
+        showToast('Erreur chargement stocks', 'error');
+    }
+}
+
+function renderStocks() {
+    const container = document.getElementById('stock-draps-container');
+    
+    if (linenNeeds.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">Aucun type de linge configuré.<br>Cliquez sur "+ Type"</p>';
+        return;
+    }
+    
+    let html = '';
+    linenNeeds.forEach(need => {
+        const quantity = stocks[need.item_key] || 0;
+        html += `
+            <div class="drap-stock-item">
+                <div class="drap-header">
+                    <div class="drap-label">${need.item_label}</div>
+                    <button class="drap-delete" onclick="deleteType('${need.id}')">🗑️</button>
+                </div>
+                <div class="drap-controls">
+                    <button class="drap-btn minus" onclick="updateStock('${need.item_key}', -1)">−</button>
+                    <div class="drap-quantity">${quantity}</div>
+                    <button class="drap-btn plus" onclick="updateStock('${need.item_key}', 1)">+</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+async function updateStock(itemKey, delta) {
+    if (!currentGiteId) return;
+    
+    const currentValue = stocks[itemKey] || 0;
+    const newValue = Math.max(0, currentValue + delta);
+    
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+
+        const { error } = await window.supabaseClient
+            .from('linen_stock_items')
+            .upsert({
+                owner_user_id: user.id,
+                gite_id: currentGiteId,
+                item_key: itemKey,
+                quantity: newValue,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'gite_id,item_key' });
+        
+        if (error) throw error;
+        
+        stocks[itemKey] = newValue;
+        renderStocks();
+    } catch (error) {
+        showToast('Erreur mise à jour', 'error');
+    }
+}
+
+async function addType() {
+    if (!currentGiteId) {
+        showToast('Sélectionnez un gîte', 'error');
+        return;
+    }
+    
+    const label = prompt('Nom du type de linge (ex: Draps 1 personne) :');
+    if (!label || label.trim() === '') return;
+    
+    const key = label.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_|_$/g, '');
+    
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        
+        const { error } = await window.supabaseClient
+            .from('linen_needs')
+            .insert({
+                gite_id: currentGiteId,
+                owner_user_id: user.id,
+                item_key: key,
+                item_label: label.trim(),
+                quantity: 1,
+                is_custom: true
+            });
+        
+        if (error) throw error;
+        
+        await loadStocks(currentGiteId);
+        showToast('Type ajouté', 'success');
+    } catch (error) {
+        showToast('Erreur ajout type', 'error');
+    }
+}
+
+async function deleteType(needId) {
+    if (!confirm('Supprimer ce type de linge ?')) return;
+    
+    try {
+        const need = linenNeeds.find(n => n.id === needId);
+        const itemKey = need?.item_key;
+
+        const { error } = await window.supabaseClient
+            .from('linen_needs')
+            .delete()
+            .eq('id', needId);
+        
+        if (error) throw error;
+        
+        if (itemKey) {
+            await window.supabaseClient
+                .from('linen_stock_items')
+                .delete()
+                .eq('gite_id', currentGiteId)
+                .eq('item_key', itemKey);
+        }
+
+        await loadStocks(currentGiteId);
+        showToast('Type supprimé', 'success');
+    } catch (error) {
+        showToast('Erreur suppression', 'error');
+    }
+}
+
+window.updateStock = updateStock;
+window.deleteType = deleteType;
+
+setTimeout(() => {
+    loadGites();
+    
+    const selector = document.getElementById('giteSelector');
+    if (selector) {
+        selector.addEventListener('change', function(e) {
+            loadStocks(e.target.value);
+        });
+    }
+    
+    const btnAddType = document.getElementById('btnAddType');
+    if (btnAddType) {
+        btnAddType.addEventListener('click', addType);
+    }
+}, 500);
+</script>
