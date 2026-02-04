@@ -333,8 +333,9 @@ const PLATEFORME_COLORS = {
     'Booking': '#003580',
     'Booking.com': '#003580',
     'Gîtes de France': '#2ECC71',
+    'Gîtes de France (centrale)': '#2ECC71',
     'Direct': '#9B59B6',
-    'Abritel': '#F39C12',
+    'Abritel': '#0078D7',
     'Autre': '#95A5A6'
 };
 
@@ -406,6 +407,7 @@ function _renderCalendrierTarifsImmediate() {
     }
     
     container.innerHTML = '';
+    container.style.position = 'relative';
     
     // En-têtes des jours
     const jours = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -431,15 +433,63 @@ function _renderCalendrierTarifsImmediate() {
     // Jours du mois
     const lastDay = new Date(currentYearTarifs, currentMonthTarifs + 1, 0).getDate();
     
+    // Identifier toutes les réservations qui touchent ce mois et créer les barres continues
+    const reservationBars = [];
+    reservationsCache.forEach(resa => {
+        const checkIn = new Date(resa.date_arrivee || resa.check_in);
+        const checkOut = new Date(resa.date_depart || resa.check_out);
+        const firstDayOfMonth = new Date(currentYearTarifs, currentMonthTarifs, 1);
+        const lastDayOfMonth = new Date(currentYearTarifs, currentMonthTarifs + 1, 0);
+        
+        // Vérifier si la réservation chevauche ce mois
+        if (checkIn <= lastDayOfMonth && checkOut > firstDayOfMonth) {
+            // Calculer les jours de début et fin dans le mois
+            const startDay = checkIn < firstDayOfMonth ? 1 : checkIn.getDate();
+            const endDay = checkOut > lastDayOfMonth ? lastDay : checkOut.getDate() - 1; // -1 car checkout n'est pas compté
+            
+            reservationBars.push({
+                startDay,
+                endDay,
+                plateforme: resa.origine_reservation || resa.plateforme || 'Direct',
+                client: resa.nom_client,
+                id: resa.id
+            });
+        }
+    });
+    
     for (let day = 1; day <= lastDay; day++) {
         const dateObj = new Date(currentYearTarifs, currentMonthTarifs, day);
         const dateStr = dateObj.toISOString().split('T')[0];
         
         const tarif = tarifsCache.find(t => t.date === dateStr);
         
+        // Vérifier si cette date fait partie d'une réservation
+        const reservationBar = reservationBars.find(bar => day >= bar.startDay && day <= bar.endDay);
+        const isReserved = !!reservationBar;
+        
+        // Déterminer si c'est le début d'une barre (premier jour OU premier lundi d'une réservation qui continue)
+        let isBarStart = false;
+        let barLength = 0;
+        if (reservationBar) {
+            const dayOfWeek = dateObj.getDay(); // 0 = dimanche, 1 = lundi, ..., 6 = samedi
+            const mondayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convertir pour lundi = 0
+            
+            // C'est un début de barre si :
+            // 1. C'est le premier jour de la réservation
+            // 2. OU c'est un lundi et la réservation était déjà commencée avant
+            isBarStart = (day === reservationBar.startDay) || (mondayIndex === 0 && day > reservationBar.startDay);
+            
+            if (isBarStart) {
+                // Calculer combien de jours jusqu'à la fin de la semaine OU la fin de la réservation
+                const daysUntilSunday = mondayIndex === 0 ? 6 : 6 - mondayIndex; // Jours restants dans la semaine
+                const daysUntilEndOfReservation = reservationBar.endDay - day;
+                barLength = Math.min(daysUntilSunday, daysUntilEndOfReservation) + 1;
+            }
+        }
+        
         // Calculer le prix avec promotions si un tarif existe
         let prixDisplay = '';
-        if (tarif) {
+        if (tarif && !isReserved) {
             const prixBase = parseFloat(tarif.prix_nuit);
             const { prixFinal, promoAppliquee } = calculatePrixWithPromos(dateStr, prixBase);
             
@@ -454,37 +504,66 @@ function _renderCalendrierTarifsImmediate() {
                 // Prix normal
                 prixDisplay = `<div class="day-price" style="font-size: 13px; font-weight: 600; color: var(--text); margin-top: 4px;">${prixBase.toFixed(0)}€</div>`;
             }
-        } else {
+        } else if (!isReserved) {
             prixDisplay = '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">—</div>';
-        }
-        
-        // Vérifier si la date est dans une réservation et récupérer les infos
-        let reservationInfo = null;
-        const currentReservation = reservationsCache.find(resa => {
-            const checkIn = new Date(resa.date_arrivee || resa.check_in);
-            const checkOut = new Date(resa.date_depart || resa.check_out);
-            const currentDate = new Date(dateStr);
-            return currentDate >= checkIn && currentDate < checkOut;
-        });
-        
-        const isReserved = !!currentReservation;
-        if (isReserved) {
-            reservationInfo = {
-                plateforme: currentReservation.origine_reservation || currentReservation.plateforme || 'Direct',
-                client: currentReservation.nom_client
-            };
         }
         
         const dayCard = document.createElement('div');
         dayCard.className = 'day-card';
         dayCard.dataset.date = dateStr;
+        dayCard.style.minHeight = '140px'; // Forcer hauteur uniforme
+        dayCard.style.display = 'flex';
+        dayCard.style.flexDirection = 'column';
+        dayCard.style.justifyContent = 'space-between';
         
         if (isReserved) {
             dayCard.classList.add('reserved');
-            dayCard.style.background = '#e0e0e0';
-            dayCard.style.opacity = '0.6';
             dayCard.style.cursor = 'not-allowed';
-            dayCard.title = `Réservé - ${reservationInfo.plateforme}`;
+            
+            // Si c'est le début d'une barre (premier jour OU début de semaine), créer la barre continue
+            if (isBarStart) {
+                const plateformeColor = getPlateformeColor(reservationBar.plateforme);
+                
+                // Créer la barre qui s'étend sur plusieurs jours (jusqu'à la fin de la semaine)
+                dayCard.innerHTML = `
+                    <div class="day-number" style="position: relative; z-index: 12;">${day}</div>
+                    <div style="position: relative; flex: 1; display: flex; align-items: center;">
+                        <div class="reservation-bar" style="
+                            position: absolute;
+                            left: 4px;
+                            right: calc(-100% * ${barLength - 1} - ${(barLength - 1) * 4}px + 4px);
+                            height: 38px;
+                            background: ${plateformeColor};
+                            border: 2px solid #2D3436;
+                            border-radius: 6px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 11px;
+                            font-weight: 700;
+                            color: #fff;
+                            padding: 0 8px;
+                            z-index: 5;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                        ">
+                            ${reservationBar.plateforme}
+                        </div>
+                    </div>
+                    <div style="position: relative; z-index: 12; font-size: 11px; color: var(--text-secondary);">—</div>
+                `;
+            } else {
+                // Jours suivants de la réservation : afficher uniquement le numéro du jour
+                dayCard.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    <div style="flex: 1;"></div>
+                    <div style="font-size: 11px; color: var(--text-secondary);">—</div>
+                `;
+            }
+        } else {
+            dayCard.innerHTML = `
+                <div class="day-number">${day}</div>
+                ${prixDisplay}
+            `;
         }
         
         if (tarif && !isReserved) {
@@ -506,16 +585,6 @@ function _renderCalendrierTarifsImmediate() {
         if (selectedDates.includes(dateStr) && !isReserved) {
             dayCard.classList.add('selected');
         }
-        
-        const plateformeColor = isReserved ? getPlateformeColor(reservationInfo.plateforme) : '#ff5a5f';
-        
-        dayCard.innerHTML = `
-            <div class="day-number">${day}</div>
-            ${isReserved ? `
-                <div style="font-size: 10px; font-weight: 700; color: #fff; background: ${plateformeColor}; padding: 2px 4px; border-radius: 3px; margin-top: 4px; border: 2px solid #2D3436;">${reservationInfo.plateforme}</div>
-                <div style="font-size: 9px; color: var(--text-secondary); margin-top: 2px;">BOOKED</div>
-            ` : prixDisplay}
-        `;
         
         // Ne pas permettre la sélection des dates réservées
         if (!isReserved) {

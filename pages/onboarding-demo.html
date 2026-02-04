@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenue - Complétez votre profil</title>
+    <title>DÉMO - Formulaire Onboarding</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         * {
@@ -22,6 +22,20 @@
             padding: 20px;
         }
 
+        .demo-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #f59e0b;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
         .onboarding-container {
             background: white;
             border-radius: 20px;
@@ -29,6 +43,7 @@
             max-width: 800px;
             width: 100%;
             overflow: hidden;
+            margin-top: 50px;
         }
 
         .header {
@@ -181,12 +196,6 @@
             background: #e2e8f0;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
         .info-box {
             background: #f0f9ff;
             border: 2px solid #bae6fd;
@@ -229,17 +238,24 @@
                 grid-template-columns: 1fr;
             }
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
+    <div class="demo-banner">
+        🧪 MODE DÉMO - Aperçu du formulaire d'inscription (pas de sauvegarde)
+    </div>
+
     <div class="onboarding-container">
         <div class="header">
             <h1>🏠 Bienvenue !</h1>
             <p>Complétez votre profil pour commencer</p>
+            <p style="margin-top: 10px; font-size: 14px; opacity: 0.9;">
+                <a href="../index.html" style="color: white; text-decoration: underline;">← Retour au Dashboard</a>
+            </p>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressBar"></div>
             </div>
@@ -258,68 +274,24 @@
                         <label>
                             Email <span class="required">*</span>
                         </label>
-                        <input type="email" id="email" required placeholder="votre@email.com" autocomplete="email">
+                        <input type="email" id="email" required placeholder="votre@email.com" value="demo@example.com">
                     </div>
                     <div class="form-group">
                         <label>
                             Mot de passe <span class="required">*</span>
                         </label>
-                        <input type="password" id="password" required placeholder="Minimum 6 caractères" minlength="6" autocomplete="new-password">
+                        <input type="password" id="password" required placeholder="Minimum 6 caractères" value="Demo123456">
                     </div>
                     <div class="form-group">
                         <label>
                             Confirmer le mot de passe <span class="required">*</span>
                         </label>
-                        <input type="password" id="passwordConfirm" required placeholder="Retapez votre mot de passe" minlength="6" autocomplete="new-password">
+                        <input type="password" id="passwordConfirm" required placeholder="Retapez votre mot de passe" value="Demo123456">
                     </div>
                 </div>
 
                 <div class="buttons">
                     <button class="btn btn-primary" onclick="nextStep(1)">
-                        Suivant
-                        <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Étape 1: Informations personnelles -->
-            <div class="step" id="step1">
-                <h2>Informations personnelles</h2>
-                <p class="step-description">Maintenant, complétez vos informations</p>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>
-                            Prénom <span class="required">*</span>
-                        </label>
-                        <input type="text" id="prenom" required placeholder="Votre prénom">
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            Nom <span class="required">*</span>
-                        </label>
-                        <input type="text" id="nom" required placeholder="Votre nom">
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            Téléphone <span class="required">*</span>
-                        </label>
-                        <input type="tel" id="telephone" required placeholder="06 12 34 56 78">
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            Nom de l'entreprise
-                        </label>
-                        <input type="text" id="entreprise" placeholder="Optionnel">
-                    </div>
-                </div>
-
-                <div class="buttons">
-                    <button class="btn btn-secondary" onclick="prevStep(0)">
-                        <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
-                        Retour
-                    </button>
-                    <button class="btn btn-primary" onclick="nextStep(2)">
                         Suivant
                         <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
                     </button>
@@ -333,6 +305,50 @@
                 </div>
             </div>
 
+            <!-- Étape 1: Informations personnelles -->
+            <div class="step" id="step1">
+                <h2>Informations personnelles</h2>
+                <p class="step-description">Maintenant, complétez vos informations</p>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>
+                            Prénom <span class="required">*</span>
+                        </label>
+                        <input type="text" id="prenom" required placeholder="Votre prénom" value="Jean">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Nom <span class="required">*</span>
+                        </label>
+                        <input type="text" id="nom" required placeholder="Votre nom" value="Dupont">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Téléphone <span class="required">*</span>
+                        </label>
+                        <input type="tel" id="telephone" required placeholder="06 12 34 56 78" value="06 12 34 56 78">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Nom de l'entreprise
+                        </label>
+                        <input type="text" id="entreprise" placeholder="Optionnel" value="Gîtes Welcome Home">
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn btn-secondary" onclick="prevStep(0)">
+                        <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+                        Retour
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep(2)">
+                        Suivant
+                        <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+                    </button>
+                </div>
+            </div>
+
             <!-- Étape 2: Adresse -->
             <div class="step" id="step2">
                 <h2>Adresse</h2>
@@ -343,26 +359,26 @@
                         <label>
                             Adresse complète <span class="required">*</span>
                         </label>
-                        <input type="text" id="adresse" required placeholder="Numéro et nom de rue">
+                        <input type="text" id="adresse" required placeholder="Numéro et nom de rue" value="123 Rue de la Paix">
                     </div>
                     <div class="form-group">
                         <label>
                             Code postal <span class="required">*</span>
                         </label>
-                        <input type="text" id="codePostal" required placeholder="46160">
+                        <input type="text" id="codePostal" required placeholder="46160" value="46160">
                     </div>
                     <div class="form-group">
                         <label>
                             Ville <span class="required">*</span>
                         </label>
-                        <input type="text" id="ville" required placeholder="Calvignac">
+                        <input type="text" id="ville" required placeholder="Calvignac" value="Calvignac">
                     </div>
                     <div class="form-group full-width">
                         <label>
                             Pays <span class="required">*</span>
                         </label>
                         <select id="pays" required>
-                            <option value="France">France</option>
+                            <option value="France" selected>France</option>
                             <option value="Belgique">Belgique</option>
                             <option value="Suisse">Suisse</option>
                             <option value="Luxembourg">Luxembourg</option>
@@ -406,59 +422,26 @@
                         <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
                         Retour
                     </button>
-                    <button class="btn btn-primary" id="btnFinish" onclick="finishOnboarding()">
+                    <button class="btn btn-primary" id="btnFinish" onclick="demoFinish()">
                         <i data-lucide="check" style="width: 16px; height: 16px;"></i>
-                        Créer mon compte
+                        Créer mon compte (DÉMO)
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/shared-config.js"></script>
-    <script src="../js/error-tracker.js"></script>
     <script>
-        let currentStep = 0; // Commencer à l'étape 0 (création compte)
-        let currentUser = null;
+        let currentStep = 0;
 
         // Initialiser Lucide
         lucide.createIcons();
 
-        // Vérifier l'auth au chargement
-        window.addEventListener('DOMContentLoaded', async () => {
-            const { data: { user }, error } = await window.supabaseClient.auth.getUser();
-            
-            // Si déjà connecté, vérifier l'onboarding
-            if (user && !error) {
-                currentUser = user;
-                
-                // Vérifier si onboarding déjà fait
-                const { data: client } = await window.supabaseClient
-                    .from('cm_clients')
-                    .select('onboarding_completed')
-                    .eq('user_id', user.id)
-                    .single();
-                
-                if (client?.onboarding_completed) {
-                    // Rediriger vers l'app
-                    window.location.href = '../index.html';
-                }
-            }
-            // Sinon, rester sur la page pour créer le compte
-        });
-
         function nextStep(step) {
-            // Valider les champs de l'étape actuelle
-            if (!validateCurrentStep()) {
-                return;
-            }
-
             currentStep = step;
             updateSteps();
             updateProgress();
 
-            // Si étape 3, afficher le résumé
             if (step === 3) {
                 displaySummary();
             }
@@ -480,64 +463,8 @@
         }
 
         function updateProgress() {
-            const progress = (currentStep / 3) * 100; // 4 étapes (0 à 3)
+            const progress = (currentStep / 3) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
-        }
-
-        function validateCurrentStep() {
-            hideError();
-            
-            if (currentStep === 0) {
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                const passwordConfirm = document.getElementById('passwordConfirm').value;
-                
-                if (!email || !password || !passwordConfirm) {
-                    showError('Veuillez remplir tous les champs obligatoires');
-                    return false;
-                }
-                
-                if (password.length < 6) {
-                    showError('Le mot de passe doit contenir au moins 6 caractères');
-                    return false;
-                }
-                
-                if (password !== passwordConfirm) {
-                    showError('Les mots de passe ne correspondent pas');
-                    return false;
-                }
-                
-                // Valider format email
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    showError('Format d\'email invalide');
-                    return false;
-                }
-            }
-            
-            if (currentStep === 1) {
-                const prenom = document.getElementById('prenom').value.trim();
-                const nom = document.getElementById('nom').value.trim();
-                const telephone = document.getElementById('telephone').value.trim();
-                
-                if (!prenom || !nom || !telephone) {
-                    showError('Veuillez remplir tous les champs obligatoires');
-                    return false;
-                }
-            }
-            
-            if (currentStep === 2) {
-                const adresse = document.getElementById('adresse').value.trim();
-                const codePostal = document.getElementById('codePostal').value.trim();
-                const ville = document.getElementById('ville').value.trim();
-                
-                if (!adresse || !codePostal || !ville) {
-                    showError('Veuillez remplir tous les champs obligatoires');
-                    return false;
-                }
-            }
-            
-            return true;
         }
 
         function displaySummary() {
@@ -557,107 +484,12 @@
             document.getElementById('summaryContent').innerHTML = summary;
         }
 
-        async function finishOnboarding() {
-            const btn = document.getElementById('btnFinish');
-            btn.disabled = true;
-            btn.innerHTML = '<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Création du compte...';
-
-            try {
-                // ÉTAPE 1: Créer le compte Supabase
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                
-                const { data: signUpData, error: signUpError } = await window.supabaseClient.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        emailRedirectTo: window.location.origin + '/index.html'
-                    }
-                });
-
-                if (signUpError) {
-                    throw new Error('Erreur lors de la création du compte: ' + signUpError.message);
-                }
-
-                if (!signUpData.user) {
-                    throw new Error('Erreur lors de la création du compte');
-                }
-
-                currentUser = signUpData.user;
-                
-                btn.innerHTML = '<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Enregistrement du profil...';
-
-                // Attendre un peu que Supabase enregistre le compte
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                // ÉTAPE 2: Créer le profil client avec toutes les informations
-                const clientData = {
-                    user_id: currentUser.id,
-                    email_principal: email,
-                    prenom_contact: document.getElementById('prenom').value.trim(),
-                    nom_contact: document.getElementById('nom').value.trim(),
-                    telephone: document.getElementById('telephone').value.trim(),
-                    nom_entreprise: document.getElementById('entreprise').value.trim() || null,
-                    adresse: document.getElementById('adresse').value.trim(),
-                    code_postal: document.getElementById('codePostal').value.trim(),
-                    ville: document.getElementById('ville').value.trim(),
-                    pays: document.getElementById('pays').value,
-                    onboarding_completed: true,
-                    type_abonnement: 'basic',
-                    statut: 'trial',
-                    date_inscription: new Date().toISOString()
-                };
-
-                const { error: insertError } = await window.supabaseClient
-                    .from('cm_clients')
-                    .insert(clientData);
-                
-                if (insertError) {
-                    console.error('Erreur insertion client:', insertError);
-                    throw new Error('Erreur lors de l\'enregistrement du profil: ' + insertError.message);
-                }
-
-                // ÉTAPE 3: Connexion automatique
-                btn.innerHTML = '<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Connexion...';
-                
-                const { error: signInError } = await window.supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
-                if (signInError) {
-                    console.warn('⚠️ Connexion échouée:', signInError.message);
-                    showError('Compte créé ! Vérifiez votre email puis connectez-vous.');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i data-lucide="check"></i> Créer mon compte';
-                    lucide.createIcons();
-                    return;
-                }
-
-                // SUCCÈS: Redirection vers l'app
-                btn.innerHTML = '<i data-lucide="check"></i> Compte créé ! Redirection...';
-                setTimeout(() => {
-                    window.location.href = '../index.html';
-                }, 1000);
-
-            } catch (error) {
-                console.error('❌ Erreur onboarding:', error);
-                showError(error.message || 'Erreur lors de la création du compte');
-                btn.disabled = false;
-                btn.innerHTML = '<i data-lucide="check"></i> Créer mon compte';
-                lucide.createIcons();
-            }
+        function demoFinish() {
+            alert('🧪 MODE DÉMO\n\nCeci est une page de démonstration.\nAucune donnée n\'a été sauvegardée.\n\nEn production, cette page créerait:\n✅ Un compte Supabase Auth\n✅ Un profil complet dans cm_clients\n✅ Connexion automatique\n✅ Redirection vers le dashboard');
         }
 
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        function hideError() {
-            document.getElementById('errorMessage').style.display = 'none';
-        }
+        // Initialiser la barre de progression
+        updateProgress();
     </script>
 </body>
 </html>

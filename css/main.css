@@ -1452,7 +1452,7 @@ button.btn-action {
     margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -4450,7 +4450,7 @@ html.style-apple .dashboard-icalou .badge--info {
 /* En-têtes de sections graphiques */
 .dashboard-icalou .section-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
 }
@@ -4547,17 +4547,22 @@ html.style-apple .dashboard-icalou .badge--info {
 
 /* Badges de comptage - compact */
 .dashboard-icalou .badge--count {
-    min-width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0 6px;
-    background: var(--bg-secondary, rgba(0,0,0,0.1));
-    color: var(--text-primary);
+    display: inline-block !important;
+    width: auto !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    line-height: 12px !important;
+    padding: 3px 5px !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    border-radius: 6px !important;
+    background: linear-gradient(135deg, #00C2CB 0%, #00969E 100%) !important;
+    color: white !important;
+    box-shadow: 0 2px 6px rgba(0, 194, 203, 0.3) !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
 }
 
 /* Bouton + style sidebar */
@@ -5042,17 +5047,25 @@ html.style-sidebar .dashboard-todo-item:hover {
 }
 
 .dashboard-icalou .badge--count {
-    min-width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block !important;
+    width: auto !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    line-height: 12px !important;
+    padding: 3px 5px !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    border-radius: 6px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
 }
 
 .dashboard-icalou .section-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 16px;
 }
 
@@ -5189,9 +5202,10 @@ html.style-apple .btn--icon-sidebar:hover {
 
 /* Badge count Apple */
 html.style-apple .badge--count {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    font-weight: 700;
+    height: 18px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    font-weight: 700 !important;
 }
 
 /* Boutons de réservation Apple */
@@ -5362,8 +5376,8 @@ html.style-apple .dashboard-graph-container-benefice .section-header {
 }
 
 .indicator--cyan {
-    background: rgba(0, 194, 203, 0.3) !important;
-    border-color: #00C2CB !important;
+    background: rgba(0, 150, 158, 0.5) !important;
+    border-color: #00969E !important;
     border-width: 2px !important;
     box-sizing: border-box !important;
 }

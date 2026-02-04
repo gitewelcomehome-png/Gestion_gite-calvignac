@@ -322,7 +322,7 @@ html.theme-light.style-apple #tab-calendrier-tarifs .day-card {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-html.theme-light.style-apple #tab-calendrier-tarifs .day-card:hover {
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card:hover:not(.reserved) {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
@@ -334,7 +334,7 @@ html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-tarif {
     box-shadow: 0 3px 10px rgba(16, 185, 129, 0.15);
 }
 
-html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-tarif:hover {
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-tarif:hover:not(.reserved) {
     background: linear-gradient(145deg, rgba(16, 185, 129, 0.18), rgba(5, 150, 105, 0.22));
     box-shadow: 0 5px 15px rgba(16, 185, 129, 0.25);
 }
@@ -563,7 +563,7 @@ html.theme-dark.style-apple #tab-calendrier-tarifs .day-card {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-html.theme-dark.style-apple #tab-calendrier-tarifs .day-card:hover {
+html.theme-dark.style-apple #tab-calendrier-tarifs .day-card:hover:not(.reserved) {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
 }
