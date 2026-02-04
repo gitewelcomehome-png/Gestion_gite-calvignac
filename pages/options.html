@@ -592,7 +592,7 @@
                 <div class="action-description">
                     Personnalisez vos préférences de notifications et alertes
                 </div>
-                <button class="btn" onclick="if(window.opener && window.opener.notificationSystem) { window.opener.notificationSystem.openNotificationSettings(); window.close(); } else { alert('Ouvrez cette page depuis le dashboard principal'); }">
+                <button class="btn" onclick="openNotificationSettings()">
                     <span>🔔</span> Configurer
                 </button>
             </div>
@@ -680,35 +680,75 @@
             }
         }
         
-        function saveSettings() {
-            // Enregistrer tous les paramètres
-            localStorage.setItem('ficheClientTheme', selectedTheme);
-            localStorage.setItem('theme', selectedAppTheme);
-            localStorage.setItem('icalou-theme', selectedAppTheme);
-            localStorage.setItem('style', selectedAppStyle);
-            localStorage.setItem('icalou-style', selectedAppStyle);
-            
-            // Message de succès
-            const msg = document.getElementById('successMessage');
-            msg.classList.add('show');
-            
-            setTimeout(() => {
-                msg.classList.remove('show');
-            }, 3000);
-            
-            // Appliquer dans la page parent si ouverte depuis dashboard
-            if (window.opener && !window.opener.closed) {
-                window.opener.postMessage({
-                    type: 'settingsChange',
-                    ficheClientTheme: selectedTheme,
-                    theme: selectedAppTheme,
-                    style: selectedAppStyle
-                }, '*');
+        async function saveSettings() {
+            try {
+                // Enregistrer dans localStorage (toujours)
+                localStorage.setItem('ficheClientTheme', selectedTheme);
+                localStorage.setItem('theme', selectedAppTheme);
+                localStorage.setItem('icalou-theme', selectedAppTheme);
+                localStorage.setItem('style', selectedAppStyle);
+                localStorage.setItem('icalou-style', selectedAppStyle);
                 
-                // Recharger le parent après un délai
+                // Tenter d'enregistrer dans Supabase pour persistance cross-device
+                try {
+                    const { data: { user: currentUser } } = await window.supabaseClient.auth.getUser();
+                    
+                    if (currentUser) {
+                        const { data: existingClient } = await window.supabaseClient
+                            .from('cm_clients')
+                            .select('id')
+                            .eq('user_id', currentUser.id)
+                            .single();
+                        
+                        if (existingClient) {
+                            await window.supabaseClient
+                                .from('cm_clients')
+                                .update({
+                                    preferences: {
+                                        theme: selectedAppTheme,
+                                        ficheClientTheme: selectedTheme,
+                                        style: selectedAppStyle
+                                    },
+                                    updated_at: new Date().toISOString()
+                                })
+                                .eq('id', existingClient.id);
+                        }
+                    }
+                } catch (dbError) {
+                    console.log('⚠️ Sauvegarde Supabase ignorée (colonne preferences manquante?):', dbError);
+                    // On continue quand même, localStorage fonctionne
+                }
+                
+                // Message de succès
+                const msg = document.getElementById('successMessage');
+                msg.innerHTML = '<span style="font-size: 1.5rem;">✓</span><span>Paramètres enregistrés !</span>';
+                msg.classList.add('show');
+                
                 setTimeout(() => {
-                    window.opener.location.reload();
-                }, 1000);
+                    msg.classList.remove('show');
+                }, 3000);
+                
+                // Appliquer dans la page parent si ouverte depuis dashboard
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({
+                        type: 'settingsChange',
+                        ficheClientTheme: selectedTheme,
+                        theme: selectedAppTheme,
+                        style: selectedAppStyle
+                    }, '*');
+                    
+                    // Recharger le parent après un délai
+                    setTimeout(() => {
+                        window.opener.location.reload();
+                    }, 1000);
+                }
+                
+            } catch (error) {
+                console.error('Erreur sauvegarde paramètres:', error);
+                const msg = document.getElementById('successMessage');
+                msg.innerHTML = '<span style="font-size: 1.5rem;">⚠️</span><span>Erreur lors de la sauvegarde</span>';
+                msg.classList.add('show');
+                setTimeout(() => msg.classList.remove('show'), 3000);
             }
         }
         
@@ -718,6 +758,18 @@
                 selectAppTheme(event.data.theme);
             }
         });
+        
+        // Ouvrir les paramètres de notification
+        function openNotificationSettings() {
+            // Si ouvert depuis le dashboard, utiliser le système parent
+            if (window.opener && window.opener.notificationSystem) {
+                window.opener.notificationSystem.openNotificationSettings();
+                window.close();
+            } else {
+                // Sinon, rediriger vers le dashboard avec un paramètre pour ouvrir les notifications
+                window.location.href = '../index.html?openNotifications=true';
+            }
+        }
         
         // ================================================================
         // 👤 GESTION DU PROFIL UTILISATEUR
@@ -766,6 +818,35 @@
                 document.getElementById('profileVille').value = client.ville || '';
                 document.getElementById('profilePays').value = client.pays || 'France';
                 
+                // Charger les préférences de thème depuis la base de données (si disponibles)
+                try {
+                    if (client.preferences && typeof client.preferences === 'object') {
+                        const prefs = client.preferences;
+                        
+                        if (prefs.theme) {
+                            selectedAppTheme = prefs.theme;
+                            selectAppTheme(prefs.theme);
+                            localStorage.setItem('theme', prefs.theme);
+                            localStorage.setItem('icalou-theme', prefs.theme);
+                        }
+                        
+                        if (prefs.ficheClientTheme) {
+                            selectedTheme = prefs.ficheClientTheme;
+                            selectTheme(prefs.ficheClientTheme);
+                            localStorage.setItem('ficheClientTheme', prefs.ficheClientTheme);
+                        }
+                        
+                        if (prefs.style) {
+                            selectedAppStyle = prefs.style;
+                            selectAppStyle(prefs.style);
+                            localStorage.setItem('style', prefs.style);
+                            localStorage.setItem('icalou-style', prefs.style);
+                        }
+                    }
+                } catch (e) {
+                    console.log('⚠️ Préférences non chargées depuis la BDD, utilisation localStorage');
+                }
+                
                 profileLoading.style.display = 'none';
                 profileContent.style.display = 'block';
                 
@@ -811,20 +892,34 @@
                     throw new Error('Profil introuvable');
                 }
                 
+                // Préparer les données de mise à jour
+                const updateData = {
+                    prenom_contact: prenom,
+                    nom_contact: nom,
+                    telephone: telephone,
+                    nom_entreprise: document.getElementById('profileEntreprise').value.trim() || null,
+                    adresse: adresse,
+                    code_postal: codePostal,
+                    ville: ville,
+                    pays: pays,
+                    updated_at: new Date().toISOString()
+                };
+                
+                // Tenter d'ajouter les préférences (peut échouer si la colonne n'existe pas)
+                try {
+                    updateData.preferences = {
+                        theme: selectedAppTheme,
+                        ficheClientTheme: selectedTheme,
+                        style: selectedAppStyle
+                    };
+                } catch (e) {
+                    console.log('⚠️ Colonne preferences non disponible');
+                }
+                
                 // Mise à jour du profil
                 const { error: updateError } = await window.supabaseClient
                     .from('cm_clients')
-                    .update({
-                        prenom_contact: prenom,
-                        nom_contact: nom,
-                        telephone: telephone,
-                        nom_entreprise: document.getElementById('profileEntreprise').value.trim() || null,
-                        adresse: adresse,
-                        code_postal: codePostal,
-                        ville: ville,
-                        pays: pays,
-                        updated_at: new Date().toISOString()
-                    })
+                    .update(updateData)
                     .eq('id', existingClient.id);
                 
                 if (updateError) {

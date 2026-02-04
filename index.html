@@ -476,6 +476,16 @@
             if (dashboardTab) {
                 dashboardTab.classList.add('active');
             }
+            
+            // Vérifier si on doit ouvrir les paramètres de notifications
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('openNotifications') === 'true' && window.notificationSystem) {
+                setTimeout(() => {
+                    window.notificationSystem.openNotificationSettings();
+                    // Nettoyer l'URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }, 500);
+            }
         }, 100);
         
         // 🔧 Fonction toggle menu (inline pour éviter les problèmes de chargement)
