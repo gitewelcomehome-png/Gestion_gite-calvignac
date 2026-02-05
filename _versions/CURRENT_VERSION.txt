@@ -1,1 +1,1 @@
-V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS - Fix positionnement boutons dans listes items (PRODUCTION READY)
+V6.0_05FEB2026_STOCK_AUTO_DRAPS - Système décrémentation automatique stock draps + fixes calculs (PRODUCTION READY - SQL requis)

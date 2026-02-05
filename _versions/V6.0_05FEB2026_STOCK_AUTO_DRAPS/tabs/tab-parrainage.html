@@ -1,0 +1,1192 @@
+<div class="tab-container">
+    <!-- Header -->
+    <div class="card card-header-section">
+        <div class="header-content">
+            <div class="header-title-group">
+                <h2 class="page-title"><i data-lucide="users"></i> PROGRAMME DE PARRAINAGE</h2>
+                <p class="page-subtitle">Invitez vos collègues et profitez de récompenses exclusives</p>
+            </div>
+            <div class="header-actions">
+                <button onclick="refreshReferralData()" class="btn-neo btn-refresh" title="Actualiser">
+                    <i data-lucide="refresh-cw"></i> ACTUALISER
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message si désactivé -->
+    <div id="referral-disabled-message" class="card" style="display: none; text-align: center; padding: 3rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"><i data-lucide="lock"></i></div>
+        <h3 style="color: var(--text); margin-bottom: 1rem;">Programme de parrainage non disponible</h3>
+        <p style="color: var(--text-secondary);">Cette fonctionnalité n'est pas encore activée pour votre compte.</p>
+    </div>
+
+    <!-- Contenu du parrainage -->
+    <div id="referral-content" style="display: none;">
+        
+        <!-- Carte de statut principal -->
+        <div class="card referral-status-card">
+            <div class="discount-display">
+                <div class="discount-badge" id="currentRewardBadge">
+                    <span id="rewardValue">0</span>
+                    <span id="rewardUnit">%</span>
+                </div>
+                <div class="discount-details">
+                    <p class="discount-label" id="rewardLabel">Votre réduction actuelle</p>
+                    <div class="discount-price" id="priceDisplay">
+                        <span class="original-price">30€</span>
+                        <span class="new-price" id="currentPrice">30€</span>
+                        <span class="period">/mois</span>
+                    </div>
+                    <div id="pointsDisplay" style="display: none;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b; margin-top: 0.5rem;">
+                            <i data-lucide="gem"></i> <span id="currentPoints">0</span> points
+                        </div>
+                        <p style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.5rem;">
+                            Convertibles en crédits IA, templates, services...
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="progress-label">
+                    <span id="activeCount">0</span>/20 filleuls actifs
+                </div>
+            </div>
+            
+            <div class="next-milestone" id="nextMilestone">
+                ➡️ Plus que <strong>20</strong> filleuls pour la récompense maximale !
+            </div>
+        </div>
+
+        <!-- 💰 RÉCAPITULATIF ABONNEMENT (Standard uniquement) -->
+        <div class="card subscription-summary" id="subscriptionSummary" style="display: none;">
+            <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="calculator"></i> Récapitulatif de votre abonnement
+            </h3>
+            
+            <div class="price-breakdown">
+                <div class="price-line">
+                    <span class="price-label">Prix de base</span>
+                    <span class="price-value base-price-value">30,00 €</span>
+                </div>
+                
+                <div class="price-line discount-line" id="discountLineContainer" style="display: none;">
+                    <span class="price-label">
+                        Réduction parrainage
+                        <span id="discountDetailLabel" style="font-size: 0.85em; opacity: 0.8;"></span>
+                    </span>
+                    <span class="price-value discount-value" id="discountAmountValue">- 0,00 €</span>
+                </div>
+                
+                <div class="price-divider"></div>
+                
+                <div class="price-line final-price-line">
+                    <span class="price-label final-label">Prix final / mois</span>
+                    <span class="price-value final-price-value" id="finalPriceValue">30,00 €</span>
+                </div>
+            </div>
+            
+            <div class="referrals-detail" id="referralsDetailBox" style="display: none;">
+                <div class="detail-header">
+                    <i data-lucide="users"></i>
+                    <strong>Détail de vos filleuls actifs</strong>
+                </div>
+                <div id="referralsDetailContent" class="detail-content">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ⚠️ INFORMATION IMPORTANTE -->
+        <div class="card info-box-permanent" id="infoPermanentBox">
+            <div class="info-icon">
+                <i data-lucide="info"></i>
+            </div>
+            <div class="info-content">
+                <h4 class="info-title">📌 À savoir sur vos réductions</h4>
+                <p class="info-text">
+                    Vos avantages de parrainage sont <strong>actifs uniquement tant que vos filleuls restent abonnés</strong>. 
+                    Si un filleul se désabonne ou arrête son paiement, vous perdez automatiquement la réduction 
+                    qu'il vous apportait.
+                </p>
+                <p class="info-text-secondary">
+                    💡 Exemple : Si vous avez une réduction totale de 30%, et qu'un de vos filleuls arrête son abonnement, 
+                    votre réduction diminuera proportionnellement. Elle reviendra au niveau initial si votre filleul se réabonne.
+                </p>
+            </div>
+        </div>
+
+        <!-- 🎉 CAMPAGNES PROMO ACTIVES -->
+        <div id="activeCampaignsSection" class="card campaigns-section" style="display: none;">
+            <div class="section-header">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="zap"></i> Campagnes promotionnelles actives
+                </h3>
+                <span class="badge-promo">🔥 Promo en cours</span>
+            </div>
+            
+            <div id="campaignsList" class="campaigns-list">
+                <!-- Chargé dynamiquement -->
+            </div>
+        </div>
+
+        <!-- 🔔 NOTIFICATIONS -->
+        <div class="card notifications-section">
+            <div class="section-header">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="bell"></i> Notifications
+                    <span id="notifBadge" class="notif-badge" style="display: none;">0</span>
+                </h3>
+                <button onclick="markAllNotificationsRead()" class="btn-text" style="font-size: 0.875rem;">
+                    Tout marquer comme lu
+                </button>
+            </div>
+            
+            <div id="notificationsList" class="notifications-list">
+                <div class="no-notifications">
+                    <i data-lucide="inbox" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+                    <p>Aucune notification pour le moment</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Lien de Parrainage -->
+        <div class="card referral-link-section">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="link"></i> Votre lien de parrainage
+            </h3>
+            
+            <div class="link-container">
+                <input 
+                    type="text" 
+                    readonly 
+                    id="referralLinkInput" 
+                    class="referral-link-input"
+                    value="Chargement..."
+                >
+                <button onclick="copyReferralLink()" class="copy-btn" title="Copier">
+                    <i data-lucide="copy"></i>
+                </button>
+            </div>
+            
+            <div class="share-buttons">
+                <button onclick="shareViaEmail()" class="share-btn email-btn">
+                    <i data-lucide="mail"></i>
+                    Email
+                </button>
+                <button onclick="shareViaWhatsApp()" class="share-btn whatsapp-btn">
+                    <i data-lucide="message-circle"></i>
+                    WhatsApp
+                </button>
+                <button onclick="shareViaLinkedIn()" class="share-btn linkedin-btn">
+                    <i data-lucide="linkedin"></i>
+                    LinkedIn
+                </button>
+            </div>
+            
+            <div class="qr-code-container">
+                <p class="qr-label">QR Code pour partage physique</p>
+                <canvas id="qrCodeCanvas" width="200" height="200"></canvas>
+                <button onclick="downloadQRCode()" class="download-qr-btn">
+                    <i data-lucide="download"></i>
+                    Télécharger le QR Code
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="card referral-stats-section">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="bar-chart"></i> Vos statistiques
+            </h3>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i data-lucide="send"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="invitationsSent">0</span>
+                        <span class="stat-label">Invitations envoyées</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon"><i data-lucide="user-check"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="registrations">0</span>
+                        <span class="stat-label">Inscriptions</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card active">
+                    <div class="stat-icon"><i data-lucide="user-plus"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="activeReferrals">0</span>
+                        <span class="stat-label">Filleuls actifs</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" id="savingsIcon"><i data-lucide="piggy-bank"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="totalSaved">0€</span>
+                        <span class="stat-label" id="savingsLabel">Économies totales</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Convertisseur de Points (uniquement pour Gîtes de France) -->
+        <div class="card points-converter-section" id="pointsConverterSection" style="display: none;">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="gem"></i> Convertir mes points
+            </h3>
+            
+            <div class="conversion-options">
+                <div class="conversion-card" onclick="convertPoints('ai-credits', 100)">
+                    <div class="conversion-icon">✨</div>
+                    <h4>200 Générations IA</h4>
+                    <p class="conversion-cost">100 points</p>
+                    <button class="conversion-btn">Convertir</button>
+                </div>
+                
+                <div class="conversion-card" onclick="convertPoints('template', 300)">
+                    <div class="conversion-icon">📄</div>
+                    <h4>1 Template Premium</h4>
+                    <p class="conversion-cost">300 points</p>
+                    <button class="conversion-btn">Convertir</button>
+                </div>
+                
+                <div class="conversion-card" onclick="convertPoints('marketplace', 500)">
+                    <div class="conversion-icon">🛒</div>
+                    <h4>Bon Marketplace 50€</h4>
+                    <p class="conversion-cost">500 points</p>
+                    <button class="conversion-btn">Convertir</button>
+                </div>
+                
+                <div class="conversion-card" onclick="convertPoints('formation', 800)">
+                    <div class="conversion-icon">🎓</div>
+                    <h4>Formation Exclusive</h4>
+                    <p class="conversion-cost">800 points</p>
+                    <button class="conversion-btn">Convertir</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des Filleuls -->
+        <div class="card referrals-list-section">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="users"></i> Mes filleuls
+            </h3>
+            
+            <div id="referralsList" class="referrals-list">
+                <!-- Généré dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Conseils -->
+        <div class="card referral-tips-section">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="lightbulb"></i> Comment parrainer efficacement ?
+            </h3>
+            
+            <ul class="tips-list">
+                <li>
+                    <i data-lucide="check-circle"></i>
+                    Partagez votre expérience sur les groupes Facebook de propriétaires
+                </li>
+                <li>
+                    <i data-lucide="check-circle"></i>
+                    Montrez vos gains de temps concrets avec LiveOwnerUnit
+                </li>
+                <li>
+                    <i data-lucide="check-circle"></i>
+                    Invitez vos collègues lors de réunions Gîtes de France
+                </li>
+                <li>
+                    <i data-lucide="check-circle"></i>
+                    Publiez un avis détaillé sur les forums spécialisés
+                </li>
+                <li>
+                    <i data-lucide="check-circle"></i>
+                    Imprimez et affichez votre QR Code lors d'événements locaux
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<style>
+/* Carte de statut principal */
+.referral-status-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.discount-display {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.discount-badge {
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem 2rem;
+    border-radius: 20px;
+    min-width: 140px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+}
+
+#rewardUnit {
+    font-size: 1.5rem;
+    margin-top: 0.25rem;
+    opacity: 0.9;
+}
+
+.discount-details {
+    flex: 1;
+}
+
+.discount-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.discount-price {
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.original-price {
+    text-decoration: line-through;
+    opacity: 0.6;
+    margin-right: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.period {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.progress-container {
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #34d399);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.progress-label {
+    font-size: 0.875rem;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.next-milestone {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.938rem;
+}
+
+/* Section récapitulatif abonnement */
+.subscription-summary {
+    background: var(--card);
+}
+
+.price-breakdown {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+}
+
+.price-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    font-size: 1rem;
+}
+
+.price-label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.price-value {
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.base-price-value {
+    color: #64748b;
+}
+
+.discount-line {
+    color: #10b981;
+}
+
+.discount-line .price-label {
+    color: #10b981;
+}
+
+.discount-value {
+    color: #10b981;
+    font-size: 1.25rem;
+}
+
+.price-divider {
+    height: 2px;
+    background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+    margin: 0.5rem 0;
+}
+
+.final-price-line {
+    padding-top: 1rem;
+    border-top: 2px dashed #cbd5e1;
+}
+
+.final-label {
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.final-price-value {
+    color: #0ea5e9;
+    font-size: 1.75rem;
+    font-weight: 800;
+}
+
+.referrals-detail {
+    margin-top: 1.5rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+}
+
+.detail-row.campaign {
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* Info box permanente */
+.info-box-permanent {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 2px solid #3b82f6;
+    border-left: 6px solid #3b82f6;
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem;
+}
+
+.info-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.info-icon i {
+    width: 24px;
+    height: 24px;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-title {
+    margin: 0 0 0.75rem 0;
+    color: #1e40af;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.info-text {
+    margin: 0 0 0.75rem 0;
+    color: #1e40af;
+    font-size: 0.938rem;
+    line-height: 1.5;
+}
+
+.info-text strong {
+    color: #1e40af;
+    font-weight: 700;
+}
+
+.info-text-secondary {
+    margin: 0;
+    color: #3b82f6;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    padding-top: 0.5rem;
+    border-top: 1px dashed #93c5fd;
+}
+
+/* Section lien de parrainage */
+.referral-link-section {
+    background: var(--card);
+}
+
+.link-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.referral-link-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: var(--input-bg);
+    color: var(--text);
+}
+
+.copy-btn {
+    padding: 0.75rem 1rem;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-btn:hover {
+    background: #5568d3;
+}
+
+.share-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.share-btn {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.share-btn:hover {
+    border-color: #667eea;
+    background: var(--hover-bg);
+    transform: translateY(-2px);
+}
+
+.qr-code-container {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--hover-bg);
+    border-radius: 8px;
+}
+
+.qr-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+#qrCodeCanvas {
+    margin: 0 auto 1rem auto;
+    display: block;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.download-qr-btn {
+    padding: 0.5rem 1rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+}
+
+.download-qr-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* Grille de statistiques */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    background: var(--hover-bg);
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.stat-card.active {
+    background: #ecfdf5;
+    border-color: #10b981;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--card);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #667eea;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.813rem;
+    color: var(--text-secondary);
+}
+
+/* Convertisseur de points */
+.conversion-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.conversion-card {
+    background: var(--hover-bg);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.conversion-card:hover {
+    border-color: #f59e0b;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(245, 158, 11, 0.2);
+}
+
+.conversion-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.conversion-card h4 {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    color: var(--text);
+}
+
+.conversion-cost {
+    font-size: 0.875rem;
+    color: #f59e0b;
+    font-weight: 600;
+    margin: 0.5rem 0;
+}
+
+.conversion-btn {
+    padding: 0.5rem 1rem;
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+    margin-top: 0.5rem;
+}
+
+.conversion-btn:hover {
+    background: #d97706;
+}
+
+/* Liste des filleuls */
+.referrals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.referral-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--hover-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+
+.referral-item.active {
+    background: #ecfdf5;
+    border-color: #10b981;
+}
+
+.referral-item.inactive {
+    opacity: 0.6;
+}
+
+.referral-item-status {
+    font-size: 1.5rem;
+}
+
+.referral-item-content {
+    flex: 1;
+}
+
+.referral-item-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.referral-name {
+    font-size: 1rem;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.referral-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.badge-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.campaign-acquisition-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
+}
+
+.referral-item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.813rem;
+    color: var(--text-secondary);
+}
+
+.referral-item-reward {
+    text-align: center;
+}
+
+.reward-value {
+    display: inline-block;
+    font-size: 1.25rem;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.reward-value.active {
+    background: #10b981;
+    color: white;
+}
+
+/* Liste de conseils */
+.tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tips-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    font-size: 0.938rem;
+    color: var(--text);
+}
+
+.tips-list li svg {
+    color: #10b981;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+/* Campagnes promotionnelles */
+.campaigns-section {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #78350f;
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.badge-promo {
+    background: rgba(255, 255, 255, 0.9);
+    color: #f59e0b;
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.813rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.campaigns-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.campaign-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+.campaign-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
+.campaign-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.25rem 0;
+}
+
+.campaign-description {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.campaign-bonus {
+    background: #10b981;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.campaign-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.campaign-dates {
+    font-size: 0.813rem;
+    color: #64748b;
+}
+
+.btn-enroll {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-enroll:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+.btn-enroll:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Notifications */
+.notifications-section {
+    margin-bottom: 2rem;
+}
+
+.notif-badge {
+    background: #ef4444;
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.notifications-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.notification-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.notification-item:hover {
+    background: var(--hover-bg);
+    border-color: #667eea;
+}
+
+.notification-item.unread {
+    background: #eff6ff;
+    border-left: 3px solid #3b82f6;
+}
+
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.notification-icon.new_campaign {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.notification-icon.new_referral {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+.notification-icon.referral_active {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.notification-icon.milestone_reached {
+    background: #fce7f3;
+    color: #db2777;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 0.25rem 0;
+}
+
+.notification-message {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.375rem 0;
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.no-notifications {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+}
+
+.no-notifications p {
+    margin: 0.5rem 0 0 0;
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    color: #667eea;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-text:hover {
+    text-decoration: underline;
+}
+
+.tips-list li svg {
+    color: #10b981;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.no-referrals {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+}
+
+.no-referrals p {
+    margin: 0.5rem 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .discount-display {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .share-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .conversion-options {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

@@ -1,0 +1,35 @@
+<div class="tab-container">
+    <!-- Header Neo-Brutalism -->
+    <div class="card" padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 class="section-title-main"><i data-lucide="settings"></i> Gestion iCal</h2>
+                <p class="section-description">Configuration des URLs de synchronisation</p>
+            </div>
+        </div>
+    </div>
+
+            <div class="card">
+                
+                <div class="alert alert-info" style="text-align: center; padding: 60px 40px;">
+                    <h3 style="margin-bottom: 20px;"><i data-lucide="calendar"></i> Nouvelle interface de gestion</h3>
+                    <p style="font-size: 1.1rem; margin-bottom: 30px;">
+                        La gestion des URLs iCal se fait maintenant directement dans le gestionnaire de gîtes.
+                    </p>
+                    <button class="btn btn-primary" onclick="showGitesManager()" style="font-size: 1.2rem; padding: 15px 40px;">
+                        <i data-lucide="home"></i> Gérer mes gîtes
+                    </button>
+                    <p style="margin-top: 30px; color: var(--text-secondary); font-size: 0.9rem;">
+                        Vous pouvez ajouter plusieurs URLs iCal par gîte (Airbnb, Booking, Vrbo, etc.)
+                    </p>
+                </div>
+                
+                <button class="btn btn-sync" onclick="syncAllCalendars()" style="margin-top:10px">
+                    <span><i data-lucide="refresh-cw"></i></span> Synchroniser maintenant
+                </button>
+                
+                <div id="syncProgress" class="sync-progress" style="display:none;margin-top:20px">
+                    <strong>Synchronisation en cours...</strong>
+                    <div id="syncMessages"></div>
+                </div>
+            </div>

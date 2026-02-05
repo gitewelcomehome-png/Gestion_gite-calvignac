@@ -1,0 +1,95 @@
+<div class="tab-container">
+    <!-- Header Neo-Brutalism -->
+    <div class="checklist-header">
+        <div class="checklist-header-content">
+            <div>
+                <h2 class="checklist-header-title"><i data-lucide="clipboard"></i> Check-lists</h2>
+                <p class="checklist-header-subtitle">Suivi des tâches entrée/sortie</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 📊 RÉSERVATIONS EN COURS -->
+    <div class="checklist-card-reservations">
+        <h3 class="checklist-section-title"><i data-lucide="bar-chart-3"></i> Réservations en cours</h3>
+        <div id="checklist-reservations-container">
+            <p class="text-muted" style="font-style: italic;">Chargement des réservations...</p>
+        </div>
+    </div>
+    
+    <script>
+        // Charger automatiquement les checklists quand cet onglet est affiché
+        setTimeout(function() {
+            if (typeof window.loadChecklistsTab === 'function') {
+                try {
+                    window.loadChecklistsTab();
+                } catch (error) {
+                    console.error('Erreur chargement checklists:', error);
+                    const container = document.getElementById('checklist-reservations-container');
+                    if (container) {
+                        container.innerHTML = '<p style="color: #e74c3c;">Erreur de chargement. Rechargez la page.</p>';
+                    }
+                }
+            }
+        }, 500);
+    </script>
+    
+    <!-- ➕ CRÉER DES ITEMS DE CHECK-LIST -->
+    <div class="checklist-card-create">
+        <h3 class="checklist-section-title">➕ Créer des items de check-list</h3>
+        
+        <div class="checklist-form-grid">
+            <!-- Sélection gîte -->
+            <div>
+                <label class="checklist-form-label">Gîte</label>
+                <select id="checklist-gite-select" class="checklist-form-select">
+                    <option value="Trevoux">Trevoux</option>
+                    <option value="Couzon">Couzon</option>
+                </select>
+            </div>
+            
+            <!-- Sélection type -->
+            <div>
+                <label class="checklist-form-label">Type</label>
+                <select id="checklist-type-select" class="checklist-form-select">
+                    <option value="entree"><i data-lucide="door-open"></i> Entrée</option>
+                    <option value="sortie"><i data-lucide="luggage"></i> Sortie</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Liste des items existants -->
+        <div class="checklist-items-section">
+            <h4 class="checklist-items-title">Items existants</h4>
+            <div id="checklist-items-list" class="checklist-items-list">
+                <p class="text-muted" style="font-style: italic;">Chargement...</p>
+            </div>
+        </div>
+        
+        <!-- Formulaire d'ajout -->
+        <div class="checklist-form-box">
+            <h4 class="checklist-form-subtitle">Ajouter un nouvel item</h4>
+            
+            <div style="margin-bottom: 15px;">
+                <label class="checklist-form-label">Texte de l'item</label>
+                <input type="text" id="checklist-new-text" placeholder="Ex: Vérifier l'état du logement" 
+                       class="checklist-form-input">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label class="checklist-form-label">Description (optionnel)</label>
+                <textarea id="checklist-new-description" placeholder="Détails supplémentaires..." 
+                          class="checklist-form-textarea"></textarea>
+            </div>
+            
+            <div class="checklist-form-buttons">
+                <button id="btn-checklist-submit" onclick="addChecklistItem()" class="checklist-btn-submit">
+                    ➕ Ajouter l'item
+                </button>
+                <button onclick="clearChecklistForm()" class="checklist-btn-clear">
+                    <i data-lucide="trash-2"></i> Effacer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

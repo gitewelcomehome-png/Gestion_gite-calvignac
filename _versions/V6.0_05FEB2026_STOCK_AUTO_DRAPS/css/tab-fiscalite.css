@@ -1,0 +1,1660 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB FISCALITÉ - Styles propres avec modes Sidebar et Apple
+   ✅ Créé le 27 janvier 2026
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ STRUCTURE DE BASE (commune à tous les modes) ═══ */
+.tab-container {
+    max-width: 1550px;
+    margin: 0 auto;
+    padding: 32px 20px;
+}
+
+/* Blocs fiscaux collapsibles - BASE */
+.fiscal-bloc {
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.fiscal-bloc-title {
+    padding: 18px 24px;
+    margin: 0;
+    font-size: 1.1rem;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+}
+
+.toggle-icon {
+    transition: transform 0.3s;
+    font-size: 0.9rem;
+}
+
+.fiscal-bloc.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.bloc-content {
+    padding: 24px;
+    display: block;
+}
+
+.fiscal-bloc.collapsed .bloc-content {
+    display: none;
+}
+
+/* Grille de formulaire */
+.fiscal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE SIDEBAR - NEO-BRUTALISM
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.style-sidebar .fiscal-bloc {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 5px solid var(--upstay-cyan, #00C2CB);
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+html.style-sidebar .fiscal-bloc:hover {
+    border-left-color: #00C2CB;
+}
+
+html.style-sidebar .fiscal-bloc-title {
+    background: #2c3e50 !important;
+    font-weight: 700;
+    letter-spacing: normal;
+    color: #ffffff !important;
+    border-bottom: 2px solid var(--border-color);
+}
+
+html.style-sidebar .fiscal-bloc-title:hover {
+    background: #34495e !important;
+    color: #ffffff !important;
+}
+
+html.style-sidebar .form-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+html.style-sidebar .form-group input[type="number"],
+html.style-sidebar .form-group input[type="text"],
+html.style-sidebar .form-group select {
+    padding: 10px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-primary);
+    background: var(--bg);
+    box-shadow: none;
+    transition: all 0.2s;
+}
+
+html.style-sidebar .form-group input:focus,
+html.style-sidebar .form-group select:focus {
+    outline: none;
+    border-color: #00C2CB;
+}
+
+/* Sections d'exploitation - Sidebar */
+html.style-sidebar .exploitation-section.orange {
+    border: 2px solid var(--border-color);
+    border-left: 5px solid #ff7675;
+    border-radius: 8px;
+    box-shadow: none;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: var(--bg-secondary);
+}
+
+html.style-sidebar .exploitation-section.green {
+    border: 2px solid var(--border-color);
+    border-left: 5px solid #00b894;
+    border-radius: 8px;
+    box-shadow: none;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: var(--bg-secondary);
+}
+
+html.style-sidebar .exploitation-section.purple {
+    border: 2px solid var(--border-color);
+    border-left: 5px solid #a29bfe;
+    border-radius: 8px;
+    box-shadow: none;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: var(--bg-secondary);
+}
+
+html.style-sidebar .exploitation-section-title {
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+/* Info boxes - Sidebar */
+html.style-sidebar .info-box {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: none;
+}
+
+html.style-sidebar .info-box.green {
+    border-left: 5px solid #00b894;
+}
+
+html.style-sidebar .info-box-gradient.blue {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 5px solid #74b9ff;
+    border-radius: 8px;
+    box-shadow: none;
+    padding: 20px;
+}
+
+/* Boutons - Sidebar */
+html.style-sidebar .btn-neo,
+html.style-sidebar .btn-neo-secondary {
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 700;
+    box-shadow: none;
+    transition: all 0.2s;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+html.style-sidebar .btn-neo:hover,
+html.style-sidebar .btn-neo-secondary:hover {
+    border-color: #00C2CB;
+    background: var(--bg-primary);
+}
+
+html.style-sidebar .btn-toggle-period {
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+    box-shadow: none;
+    background: var(--bg);
+}
+
+html.style-sidebar .btn-toggle-period.active {
+    background: #00C2CB;
+    color: white;
+    border-color: #00C2CB;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE - JOUR (LIGHT)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.theme-light.style-apple .fiscal-bloc {
+    background: #ffffff;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+html.theme-light.style-apple .fiscal-bloc:hover {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+html.theme-light.style-apple .fiscal-bloc-title {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.04) 0%, #ffffff 100%);
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: #1d1d1f;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 20px 24px;
+}
+
+html.theme-light.style-apple .fiscal-bloc-title:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, #ffffff 100%);
+}
+
+html.theme-light.style-apple .form-group label {
+    font-weight: 500;
+    color: #1d1d1f;
+    letter-spacing: -0.2px;
+}
+
+html.theme-light.style-apple .form-group input[type="number"],
+html.theme-light.style-apple .form-group input[type="text"],
+html.theme-light.style-apple .form-group select {
+    padding: 12px 16px;
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #1d1d1f;
+    background: #ffffff;
+    transition: all 0.2s;
+}
+
+html.theme-light.style-apple .form-group input:focus,
+html.theme-light.style-apple .form-group select:focus {
+    outline: none;
+    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+/* Sections d'exploitation - Apple Light */
+html.theme-light.style-apple .exploitation-section.orange {
+    border: 2px solid rgba(255, 118, 117, 0.3);
+    border-radius: 18px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(255, 118, 117, 0.03) 0%, #ffffff 100%);
+    box-shadow: 0 2px 12px rgba(255, 118, 117, 0.1);
+    margin-bottom: 24px;
+}
+
+html.theme-light.style-apple .exploitation-section.green {
+    border: 2px solid rgba(0, 184, 148, 0.3);
+    border-radius: 18px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(0, 184, 148, 0.03) 0%, #ffffff 100%);
+    box-shadow: 0 2px 12px rgba(0, 184, 148, 0.1);
+    margin-bottom: 24px;
+}
+
+html.theme-light.style-apple .exploitation-section.purple {
+    border: 2px solid rgba(162, 155, 254, 0.3);
+    border-radius: 18px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.03) 0%, #ffffff 100%);
+    box-shadow: 0 2px 12px rgba(162, 155, 254, 0.1);
+    margin-bottom: 24px;
+}
+
+html.theme-light.style-apple .exploitation-section-title {
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+    color: #1d1d1f;
+}
+
+/* Info boxes - Apple Light */
+html.theme-light.style-apple .info-box {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.04) 0%, #ffffff 100%);
+    border: 1.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+html.theme-light.style-apple .info-box.green {
+    background: linear-gradient(135deg, rgba(0, 184, 148, 0.04) 0%, #ffffff 100%);
+    border: 1.5px solid rgba(0, 184, 148, 0.2);
+}
+
+html.theme-light.style-apple .info-box-gradient.blue {
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.08) 0%, rgba(162, 155, 254, 0.08) 100%);
+    border: 1.5px solid rgba(116, 185, 255, 0.3);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(116, 185, 255, 0.15);
+}
+
+/* Boutons - Apple Light */
+html.theme-light.style-apple .btn-neo,
+html.theme-light.style-apple .btn-neo-secondary {
+    border: 1.5px solid rgba(102, 126, 234, 0.3);
+    border-radius: 14px;
+    padding: 12px 24px;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, #ffffff 100%);
+    color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
+    transition: all 0.2s;
+}
+
+html.theme-light.style-apple .btn-neo:hover,
+html.theme-light.style-apple .btn-neo-secondary:hover {
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, #ffffff 100%);
+    transform: translateY(-2px);
+}
+
+html.theme-light.style-apple .btn-toggle-period {
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-weight: 500;
+    background: #ffffff;
+    color: #1d1d1f;
+    transition: all 0.2s;
+}
+
+html.theme-light.style-apple .btn-toggle-period.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE - NUIT (DARK)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.theme-dark.style-apple .fiscal-bloc {
+    background: rgba(30, 30, 30, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+html.theme-dark.style-apple .fiscal-bloc:hover {
+    box-shadow: 0 6px 32px rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-apple .fiscal-bloc-title {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(30, 30, 30, 0.8) 100%);
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: #f5f5f7;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 24px;
+}
+
+html.theme-dark.style-apple .fiscal-bloc-title:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.18) 0%, rgba(30, 30, 30, 0.9) 100%);
+}
+
+html.theme-dark.style-apple .form-group label {
+    font-weight: 500;
+    color: #f5f5f7;
+    letter-spacing: -0.2px;
+}
+
+html.theme-dark.style-apple .form-group input[type="number"],
+html.theme-dark.style-apple .form-group input[type="text"],
+html.theme-dark.style-apple .form-group select {
+    padding: 12px 16px;
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #f5f5f7;
+    background: rgba(20, 20, 20, 0.8);
+    transition: all 0.2s;
+}
+
+html.theme-dark.style-apple .form-group input:focus,
+html.theme-dark.style-apple .form-group select:focus {
+    outline: none;
+    border-color: rgba(102, 126, 234, 0.6);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+}
+
+/* Sections d'exploitation - Apple Dark */
+html.theme-dark.style-apple .exploitation-section.orange {
+    border: 2px solid rgba(255, 118, 117, 0.4);
+    border-radius: 18px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(255, 118, 117, 0.08) 0%, rgba(30, 30, 30, 0.9) 100%);
+    box-shadow: 0 4px 16px rgba(255, 118, 117, 0.15);
+    margin-bottom: 24px;
+}
+
+html.theme-dark.style-apple .exploitation-section.green {
+    border: 2px solid rgba(0, 184, 148, 0.4);
+    border-radius: 18px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(0, 184, 148, 0.08) 0%, rgba(30, 30, 30, 0.9) 100%);
+    box-shadow: 0 4px 16px rgba(0, 184, 148, 0.15);
+    margin-bottom: 24px;
+}
+
+html.theme-dark.style-apple .exploitation-section.purple {
+    border: 2px solid rgba(162, 155, 254, 0.4);
+    border-radius: 18px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.08) 0%, rgba(30, 30, 30, 0.9) 100%);
+    box-shadow: 0 4px 16px rgba(162, 155, 254, 0.15);
+    margin-bottom: 24px;
+}
+
+html.theme-dark.style-apple .exploitation-section-title {
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+    color: #f5f5f7;
+}
+
+/* Info boxes - Apple Dark */
+html.theme-dark.style-apple .info-box {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(30, 30, 30, 0.9) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+html.theme-dark.style-apple .info-box.green {
+    background: linear-gradient(135deg, rgba(0, 184, 148, 0.1) 0%, rgba(30, 30, 30, 0.9) 100%);
+    border: 1.5px solid rgba(0, 184, 148, 0.3);
+}
+
+html.theme-dark.style-apple .info-box-gradient.blue {
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.15) 0%, rgba(162, 155, 254, 0.15) 100%);
+    border: 1.5px solid rgba(116, 185, 255, 0.4);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(116, 185, 255, 0.2);
+}
+
+/* Boutons - Apple Dark */
+html.theme-dark.style-apple .btn-neo,
+html.theme-dark.style-apple .btn-neo-secondary {
+    border: 1.5px solid rgba(102, 126, 234, 0.4);
+    border-radius: 14px;
+    padding: 12px 24px;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(30, 30, 30, 0.8) 100%);
+    color: #a29bfe;
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2);
+    transition: all 0.2s;
+}
+
+html.theme-dark.style-apple .btn-neo:hover,
+html.theme-dark.style-apple .btn-neo-secondary:hover {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.18) 0%, rgba(30, 30, 30, 0.9) 100%);
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-apple .btn-toggle-period {
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-weight: 500;
+    background: rgba(30, 30, 30, 0.8);
+    color: #f5f5f7;
+    transition: all 0.2s;
+}
+
+html.theme-dark.style-apple .btn-toggle-period.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTRES ÉLÉMENTS SPÉCIFIQUES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Card générique */
+.card {
+    border-radius: 12px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+html.style-sidebar .card {
+    border: 2px solid var(--border-color);
+    border-left: 5px solid #00C2CB;
+    box-shadow: none;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+}
+
+html.style-sidebar .card:hover {
+    border-left-color: #00C2CB;
+}
+
+html.theme-light.style-apple .card {
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+    background: #ffffff;
+}
+
+html.theme-dark.style-apple .card {
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    background: rgba(30, 30, 30, 0.95);
+}
+
+/* Section titles */
+.section-title-main {
+    font-size: 1.8rem;
+    margin: 0 0 8px 0;
+}
+
+.section-description {
+    margin: 0;
+    opacity: 0.7;
+}
+
+html.style-sidebar .section-title-main {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+html.style-sidebar .section-description {
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+html.theme-light.style-apple .section-title-main {
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: #1d1d1f;
+}
+
+html.theme-light.style-apple .section-description {
+    font-weight: 400;
+    color: #6e6e73;
+}
+
+html.theme-dark.style-apple .section-title-main {
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: #f5f5f7;
+}
+
+html.theme-dark.style-apple .section-description {
+    font-weight: 400;
+    color: #a1a1a6;
+}
+
+/* Fiscal info (avertissements) */
+.fiscal-info {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+html.style-sidebar .fiscal-info {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 5px solid #f39c12;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+html.theme-light.style-apple .fiscal-info {
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.3) 0%, #ffffff 100%);
+    border: 1.5px solid rgba(243, 156, 18, 0.3);
+    font-weight: 500;
+    color: #1d1d1f;
+}
+
+html.theme-dark.style-apple .fiscal-info {
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.1) 0%, rgba(30, 30, 30, 0.9) 100%);
+    border: 1.5px solid rgba(243, 156, 18, 0.4);
+    font-weight: 500;
+    color: #f5f5f7;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CLASSES UTILITAIRES POUR REMPLACER STYLES INLINE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Header flex containers */
+.header-flex-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.header-actions-container {
+    display: flex;
+    gap: 10px;
+}
+
+.form-inline-flex {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Année fiscale bar */
+.annee-fiscale-bar {
+    padding: 20px 24px;
+}
+
+html.style-sidebar .annee-fiscale-bar {
+    background: var(--bg-secondary) !important;
+    border: 2px solid var(--border-color);
+    border-left: 5px solid #00C2CB;
+    box-shadow: none;
+}
+
+html.theme-light.style-apple .annee-fiscale-bar {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.04) 0%, #f8f9fa 100%) !important;
+}
+
+html.theme-dark.style-apple .annee-fiscale-bar {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(40, 40, 40, 0.95) 100%) !important;
+}
+
+/* CA Display block */
+.ca-display-block {
+    padding: 30px;
+    border-radius: 12px;
+}
+
+html.style-sidebar .ca-display-block {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: 2px solid var(--border-color);
+    box-shadow: none;
+    border-radius: 8px;
+}
+
+html.theme-light.style-apple .ca-display-block {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+    border-radius: 20px;
+}
+
+html.theme-dark.style-apple .ca-display-block {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+    color: white;
+    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.35);
+    border-radius: 20px;
+}
+
+.ca-display-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#ca-display {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+/* Period toggle container */
+.period-toggle-container {
+    margin-bottom: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+html.style-sidebar .period-toggle-container {
+    background: #2c3e50 !important;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+}
+
+html.style-sidebar .period-toggle-container label {
+    color: #ffffff !important;
+}
+
+html.theme-light.style-apple .period-toggle-container {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+html.theme-dark.style-apple .period-toggle-container {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.period-toggle-container label {
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Vehicle config boxes */
+.vehicle-config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.vehicle-box-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.vehicle-box-icon {
+    font-size: 2rem;
+    margin-right: 12px;
+}
+
+.vehicle-box-content {
+    flex: 1;
+}
+
+.vehicle-box-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+html.style-sidebar .vehicle-box-title {
+    font-weight: 700;
+}
+
+/* Automatisation box */
+.automatisation-box {
+    padding: 20px;
+    border-radius: 12px;
+}
+
+html.style-sidebar .automatisation-box {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 5px solid #f39c12;
+    box-shadow: none;
+    border-radius: 8px;
+}
+
+html.theme-light.style-apple .automatisation-box {
+    background: linear-gradient(135deg, rgba(255, 243, 205, 0.3) 0%, rgba(255, 224, 130, 0.3) 100%);
+    border: 1.5px solid rgba(255, 193, 7, 0.3);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);
+    border-radius: 18px;
+}
+
+html.theme-dark.style-apple .automatisation-box {
+    background: linear-gradient(135deg, rgba(255, 243, 205, 0.1) 0%, rgba(255, 224, 130, 0.1) 100%);
+    border: 1.5px solid rgba(255, 193, 7, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+    border-radius: 18px;
+}
+
+/* KM Resume box */
+.km-resume-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    text-align: center;
+}
+
+.km-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+html.style-sidebar .km-stat-value {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+html.theme-light.style-apple .km-stat-value {
+    color: #2e7d32;
+}
+
+html.theme-dark.style-apple .km-stat-value {
+    color: #66bb6a;
+}
+
+/* Liste containers */
+.liste-container {
+    display: grid;
+    gap: 10px;
+}
+
+.margin-bottom-15 {
+    margin-bottom: 15px;
+}
+
+/* Ratio display */
+#ratio-display {
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+html.style-sidebar #ratio-display {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+html.theme-light.style-apple #ratio-display {
+    color: #2e7d32;
+}
+
+html.theme-dark.style-apple #ratio-display {
+    color: #66bb6a;
+}
+
+/* Buttons with inline colors - Sidebar override */
+html.style-sidebar .btn.btn-secondary {
+    background: var(--bg-secondary) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: none !important;
+    color: var(--text-primary) !important;
+}
+
+html.style-sidebar .btn.btn-secondary:hover {
+    border-color: #00C2CB !important;
+}
+
+html.style-sidebar .btn-orange {
+    border-left: 5px solid #ff7675 !important;
+}
+
+html.style-sidebar .btn-green {
+    border-left: 5px solid #00b894 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOCS CHARGES PAR GÎTE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Container de bloc gîte - BASE */
+.gite-charges-block {
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+/* Header du bloc gîte */
+.gite-charges-header {
+    margin: 0 0 20px 0;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gite-charges-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+}
+
+/* Espacement entre blocs */
+.gite-spacing {
+    margin: 30px 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE SIDEBAR - BLOCS GÎTES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 3ème - Vert */
+html.style-sidebar .gite-charges-block[data-gite="3me"] {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 6px solid #36ab43 !important;
+    border-radius: 8px;
+}
+
+html.style-sidebar .gite-charges-block[data-gite="3me"] .gite-charges-header {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+html.style-sidebar .gite-charges-block[data-gite="3me"] .gite-charges-icon {
+    background: #36ab43;
+}
+
+/* 4ème - Bleu/Violet */
+html.style-sidebar .gite-charges-block[data-gite="4me"] {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 6px solid #667eea !important;
+    border-radius: 8px;
+}
+
+html.style-sidebar .gite-charges-block[data-gite="4me"] .gite-charges-header {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+html.style-sidebar .gite-charges-block[data-gite="4me"] .gite-charges-icon {
+    background: #667eea;
+}
+
+/* Couzon - Jaune */
+html.style-sidebar .gite-charges-block[data-gite="couzon"] {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 6px solid #e1e401 !important;
+    border-radius: 8px;
+}
+
+html.style-sidebar .gite-charges-block[data-gite="couzon"] .gite-charges-header {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+html.style-sidebar .gite-charges-block[data-gite="couzon"] .gite-charges-icon {
+    background: #e1e401;
+    color: #2D3436 !important;
+}
+
+/* Trévoux - Bleu */
+html.style-sidebar .gite-charges-block[data-gite="trvoux"] {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 6px solid #0530f0 !important;
+    border-radius: 8px;
+}
+
+html.style-sidebar .gite-charges-block[data-gite="trvoux"] .gite-charges-header {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+html.style-sidebar .gite-charges-block[data-gite="trvoux"] .gite-charges-icon {
+    background: #0530f0;
+}
+
+/* Hover effect Sidebar */
+html.style-sidebar .gite-charges-block:hover {
+    border-left-color: #00C2CB;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE JOUR - BLOCS GÎTES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 3ème - Vert */
+html.theme-light.style-apple .gite-charges-block[data-gite="3me"] {
+    border: 2px solid rgba(54, 171, 67, 0.3);
+    background: linear-gradient(135deg, rgba(54, 171, 67, 0.04) 0%, #ffffff 100%);
+    box-shadow: 0 2px 12px rgba(54, 171, 67, 0.15);
+    border-radius: 20px;
+}
+
+html.theme-light.style-apple .gite-charges-block[data-gite="3me"] .gite-charges-header {
+    color: #2e7d32;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+html.theme-light.style-apple .gite-charges-block[data-gite="3me"] .gite-charges-icon {
+    background: linear-gradient(135deg, #36ab43 0%, #2e7d32 100%);
+}
+
+/* 4ème - Bleu/Violet */
+html.theme-light.style-apple .gite-charges-block[data-gite="4me"] {
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.04) 0%, #ffffff 100%);
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.15);
+    border-radius: 20px;
+}
+
+html.theme-light.style-apple .gite-charges-block[data-gite="4me"] .gite-charges-header {
+    color: #5568d3;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+html.theme-light.style-apple .gite-charges-block[data-gite="4me"] .gite-charges-icon {
+    background: linear-gradient(135deg, #667eea 0%, #5568d3 100%);
+}
+
+/* Couzon - Jaune */
+html.theme-light.style-apple .gite-charges-block[data-gite="couzon"] {
+    border: 2px solid rgba(225, 228, 1, 0.4);
+    background: linear-gradient(135deg, rgba(225, 228, 1, 0.05) 0%, #ffffff 100%);
+    box-shadow: 0 2px 12px rgba(225, 228, 1, 0.2);
+    border-radius: 20px;
+}
+
+html.theme-light.style-apple .gite-charges-block[data-gite="couzon"] .gite-charges-header {
+    color: #c9c700;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+html.theme-light.style-apple .gite-charges-block[data-gite="couzon"] .gite-charges-icon {
+    background: linear-gradient(135deg, #e1e401 0%, #c9c700 100%);
+}
+
+/* Trévoux - Bleu */
+html.theme-light.style-apple .gite-charges-block[data-gite="trvoux"] {
+    border: 2px solid rgba(5, 48, 240, 0.3);
+    background: linear-gradient(135deg, rgba(5, 48, 240, 0.04) 0%, #ffffff 100%);
+    box-shadow: 0 2px 12px rgba(5, 48, 240, 0.15);
+    border-radius: 20px;
+}
+
+html.theme-light.style-apple .gite-charges-block[data-gite="trvoux"] .gite-charges-header {
+    color: #0530f0;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+html.theme-light.style-apple .gite-charges-block[data-gite="trvoux"] .gite-charges-icon {
+    background: linear-gradient(135deg, #0530f0 0%, #042ac4 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE NUIT - BLOCS GÎTES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 3ème - Vert */
+html.theme-dark.style-apple .gite-charges-block[data-gite="3me"] {
+    border: 2px solid rgba(54, 171, 67, 0.4);
+    background: linear-gradient(135deg, rgba(54, 171, 67, 0.08) 0%, rgba(30, 30, 30, 0.95) 100%);
+    box-shadow: 0 4px 16px rgba(54, 171, 67, 0.2);
+    border-radius: 20px;
+}
+
+html.theme-dark.style-apple .gite-charges-block[data-gite="3me"] .gite-charges-header {
+    color: #66bb6a;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+html.theme-dark.style-apple .gite-charges-block[data-gite="3me"] .gite-charges-icon {
+    background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+}
+
+/* 4ème - Bleu/Violet */
+html.theme-dark.style-apple .gite-charges-block[data-gite="4me"] {
+    border: 2px solid rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(30, 30, 30, 0.95) 100%);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+    border-radius: 20px;
+}
+
+html.theme-dark.style-apple .gite-charges-block[data-gite="4me"] .gite-charges-header {
+    color: #a29bfe;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+html.theme-dark.style-apple .gite-charges-block[data-gite="4me"] .gite-charges-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Couzon - Jaune */
+html.theme-dark.style-apple .gite-charges-block[data-gite="couzon"] {
+    border: 2px solid rgba(225, 228, 1, 0.5);
+    background: linear-gradient(135deg, rgba(225, 228, 1, 0.1) 0%, rgba(30, 30, 30, 0.95) 100%);
+    box-shadow: 0 4px 16px rgba(225, 228, 1, 0.25);
+    border-radius: 20px;
+}
+
+html.theme-dark.style-apple .gite-charges-block[data-gite="couzon"] .gite-charges-header {
+    color: #f4f467;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+html.theme-dark.style-apple .gite-charges-block[data-gite="couzon"] .gite-charges-icon {
+    background: linear-gradient(135deg, #e1e401 0%, #b8b601 100%);
+    color: #1d1d1f !important;
+}
+
+/* Trévoux - Bleu */
+html.theme-dark.style-apple .gite-charges-block[data-gite="trvoux"] {
+    border: 2px solid rgba(5, 48, 240, 0.4);
+    background: linear-gradient(135deg, rgba(5, 48, 240, 0.08) 0%, rgba(30, 30, 30, 0.95) 100%);
+    box-shadow: 0 4px 16px rgba(5, 48, 240, 0.2);
+    border-radius: 20px;
+}
+
+html.theme-dark.style-apple .gite-charges-block[data-gite="trvoux"] .gite-charges-header {
+    color: #5e8cff;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+html.theme-dark.style-apple .gite-charges-block[data-gite="trvoux"] .gite-charges-icon {
+    background: linear-gradient(135deg, #0530f0 0%, #3b5998 100%);
+}
+
+/* Hover effects pour tous les modes */
+html.style-sidebar .gite-charges-block:hover {
+    border-left-color: #00C2CB;
+}
+
+html.theme-light.style-apple .gite-charges-block:hover {
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-apple .gite-charges-block:hover {
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .fiscal-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tab-container {
+        padding: 20px 16px;
+    }
+    
+    .vehicle-config-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .km-resume-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .gite-charges-block {
+        padding: 16px;
+    }
+    
+    .gite-charges-header {
+        font-size: 1.1rem;
+    }
+}
+
+/* ============================================
+   CARTE CHIFFRE D'AFFAIRES
+   ============================================ */
+
+/* Base commune */
+.ca-card {
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.ca-card-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ca-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+.ca-amount {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+/* Mode Sidebar - Cyan avec liseré */
+html.style-sidebar .ca-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 6px solid #00C2CB;
+    box-shadow: none;
+}
+
+html.style-sidebar .ca-label {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+html.style-sidebar .ca-amount {
+    color: #00C2CB;
+}
+
+html.style-sidebar .ca-card:hover {
+    border-left-color: #00a8b5;
+}
+
+/* Mode Apple Jour - Gradient cyan clair */
+html.theme-light.style-apple .ca-card {
+    background: linear-gradient(135deg, #00C2CB 0%, #00a8b5 100%);
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 194, 203, 0.2);
+}
+
+html.theme-light.style-apple .ca-label {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+html.theme-light.style-apple .ca-amount {
+    color: #00C2CB;
+    font-weight: 700;
+}
+
+html.theme-light.style-apple .ca-card:hover {
+    box-shadow: 0 15px 40px rgba(0, 194, 203, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Mode Apple Nuit - Gradient cyan foncé */
+html.theme-dark.style-apple .ca-card {
+    background: linear-gradient(135deg, #008891 0%, #006670 100%);
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 194, 203, 0.15);
+}
+
+html.theme-dark.style-apple .ca-label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+html.theme-dark.style-apple .ca-amount {
+    color: #00C2CB;
+}
+
+html.theme-dark.style-apple .ca-card:hover {
+    box-shadow: 0 15px 40px rgba(0, 194, 203, 0.25);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   LISTES ITEMS (Travaux, Charges, etc.)
+   ============================================ */
+
+.liste-item {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1.5fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.liste-item .item-actions {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.liste-item .amortissement-info {
+    grid-column: 1 / -1;
+}
+
+/* Mode Sidebar */
+html.style-sidebar .liste-item {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 4px solid #00C2CB;
+}
+
+html.style-sidebar .liste-item input,
+html.style-sidebar .liste-item select {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 6px;
+}
+
+html.style-sidebar .liste-item:hover {
+    border-left-color: #00a8b5;
+}
+
+/* Mode Apple Jour */
+html.theme-light.style-apple .liste-item {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+html.theme-light.style-apple .liste-item input,
+html.theme-light.style-apple .liste-item select {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+/* Mode Apple Nuit */
+html.theme-dark.style-apple .liste-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+html.theme-dark.style-apple .liste-item input,
+html.theme-dark.style-apple .liste-item select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+/* ============================================
+   CARTE AUTOMATISATION
+   ============================================ */
+
+.auto-card {
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.auto-card-inner {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.auto-icon {
+    font-size: 2rem;
+    margin-right: 12px;
+}
+
+.auto-content {
+    flex: 1;
+}
+
+.auto-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.auto-subtitle {
+    margin: 6px 0 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.btn-auto {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+/* Mode Sidebar */
+html.style-sidebar .auto-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-left: 6px solid #00C2CB;
+}
+
+html.style-sidebar .auto-title {
+    color: #00C2CB;
+}
+
+html.style-sidebar .auto-subtitle {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .btn-auto {
+    background: var(--bg-primary);
+    color: #00C2CB;
+    border: 2px solid var(--border-color);
+}
+
+html.style-sidebar .btn-auto:hover {
+    background: #00C2CB;
+    color: white;
+}
+
+html.style-sidebar .auto-card:hover {
+    border-left-color: #00a8b5;
+}
+
+/* Mode Apple Jour */
+html.theme-light.style-apple .auto-card {
+    background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.15);
+}
+
+html.theme-light.style-apple .auto-title {
+    color: #00838f;
+}
+
+html.theme-light.style-apple .auto-subtitle {
+    color: #00695c;
+}
+
+html.theme-light.style-apple .btn-auto {
+    background: white;
+    color: #00838f;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+html.theme-light.style-apple .btn-auto:hover {
+    background: #00C2CB;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.3);
+}
+
+/* Mode Apple Nuit */
+html.theme-dark.style-apple .auto-card {
+    background: linear-gradient(135deg, #004d56 0%, #003840 100%);
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.1);
+}
+
+html.theme-dark.style-apple .auto-title {
+    color: #00C2CB;
+}
+
+html.theme-dark.style-apple .auto-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+html.theme-dark.style-apple .btn-auto {
+    background: rgba(0, 194, 203, 0.2);
+    color: #00C2CB;
+    border: 1px solid rgba(0, 194, 203, 0.3);
+}
+
+html.theme-dark.style-apple .btn-auto:hover {
+    background: #00C2CB;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.3);
+}
+
+/* ============================================
+   MODALES & INFO BOX
+   ============================================ */
+
+/* En-tête modale */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+/* Pied modale */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Section toggle dans modale */
+.modal-toggle-section {
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.toggle-checkbox {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.toggle-text {
+    font-weight: 600;
+}
+
+.toggle-description {
+    margin: 10px 0 0 39px;
+    font-size: 0.85rem;
+}
+
+/* Info box (remplace #fff3cd jaune) */
+.info-box {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.info-box p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Mode Sidebar */
+html.style-sidebar .modal-header {
+    border-bottom: 3px solid var(--border-color);
+}
+
+html.style-sidebar .modal-header h3 {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .btn-close-modal {
+    color: var(--text-secondary);
+}
+
+html.style-sidebar .btn-close-modal:hover {
+    color: var(--text-primary);
+}
+
+html.style-sidebar .modal-toggle-section {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+}
+
+html.style-sidebar .toggle-description {
+    color: var(--text-secondary);
+}
+
+html.style-sidebar .info-box {
+    background: rgba(0, 194, 203, 0.1);
+    border-left: 4px solid #00C2CB;
+}
+
+html.style-sidebar .info-box p {
+    color: var(--text-primary);
+}
+
+/* Mode Apple Jour */
+html.theme-light.style-apple .modal-header {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple .modal-header h3 {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .btn-close-modal {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+html.theme-light.style-apple .btn-close-modal:hover {
+    color: #1a1a1a;
+}
+
+html.theme-light.style-apple .modal-toggle-section {
+    background: rgba(0, 194, 203, 0.05);
+    border: 1px solid rgba(0, 194, 203, 0.2);
+}
+
+html.theme-light.style-apple .toggle-description {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+html.theme-light.style-apple .info-box {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.1) 0%, rgba(0, 194, 203, 0.05) 100%);
+    border-left: 4px solid #00C2CB;
+}
+
+html.theme-light.style-apple .info-box p {
+    color: #00838f;
+}
+
+/* Mode Apple Nuit */
+html.theme-dark.style-apple .modal-header {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+html.theme-dark.style-apple .modal-header h3 {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .btn-close-modal {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+html.theme-dark.style-apple .btn-close-modal:hover {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .modal-toggle-section {
+    background: rgba(0, 194, 203, 0.1);
+    border: 1px solid rgba(0, 194, 203, 0.3);
+}
+
+html.theme-dark.style-apple .toggle-description {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+html.theme-dark.style-apple .info-box {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.15) 0%, rgba(0, 194, 203, 0.08) 100%);
+    border-left: 4px solid #00C2CB;
+}
+
+html.theme-dark.style-apple .info-box p {
+    color: #00C2CB;
+}

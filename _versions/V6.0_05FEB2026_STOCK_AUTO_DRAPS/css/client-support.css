@@ -1,0 +1,1184 @@
+/* ================================================================
+   🎫 CSS SUPPORT CLIENT
+   ================================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+/* ================================================================
+   📱 HEADER
+   ================================================================ */
+.support-header {
+    background: white;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-left h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-left h1 i {
+    width: 28px;
+    height: 28px;
+    color: #3b82f6;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-email {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.btn-back {
+    padding: 8px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-back i {
+    width: 20px;
+    height: 20px;
+    color: #64748b;
+}
+
+.btn-back:hover {
+    border-color: #3b82f6;
+    transform: translateX(-2px);
+}
+
+.btn-back:hover i {
+    color: #3b82f6;
+}
+
+.btn-icon {
+    padding: 8px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-icon i {
+    width: 20px;
+    height: 20px;
+    color: #64748b;
+}
+
+.btn-icon:hover {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.btn-icon:hover i {
+    color: #ef4444;
+}
+
+/* ================================================================
+   📦 CONTAINER
+   ================================================================ */
+.support-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+/* ================================================================
+   📢 INFO BANNER
+   ================================================================ */
+.info-banner {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 2px solid #93c5fd;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 32px;
+    display: flex;
+    gap: 16px;
+    align-items: start;
+}
+
+.info-banner i {
+    width: 24px;
+    height: 24px;
+    color: #3b82f6;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.info-banner strong {
+    display: block;
+    font-size: 16px;
+    color: #1e40af;
+    margin-bottom: 4px;
+}
+
+.info-banner p {
+    font-size: 14px;
+    color: #475569;
+    margin: 0;
+}
+
+/* ================================================================
+   📝 SECTION HEADERS
+   ================================================================ */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.section-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header h2 i {
+    width: 24px;
+    height: 24px;
+    color: #3b82f6;
+}
+
+.ticket-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 10px;
+    background: #3b82f6;
+    color: white;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.filters {
+    display: flex;
+    gap: 12px;
+}
+
+.filter-select {
+    padding: 10px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #475569;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.filter-select:hover {
+    border-color: #cbd5e1;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+/* ================================================================
+   📝 FORMULAIRE CRÉATION TICKET
+   ================================================================ */
+.create-ticket-section {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.ticket-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-group label i {
+    width: 16px;
+    height: 16px;
+    color: #64748b;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #1e293b;
+    background: white;
+    transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.char-count {
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: right;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary i,
+.btn-secondary i {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+/* ================================================================
+   🎫 LISTE TICKETS
+   ================================================================ */
+.tickets-list-section {
+    margin-bottom: 32px;
+}
+
+.tickets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.ticket-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.ticket-card.has-notification {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+}
+
+.ticket-card.has-notification::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 16px;
+    height: 16px;
+    background: #ef4444;
+    border-radius: 50%;
+    border: 3px solid white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+.ticket-card:hover {
+    border-color: #3b82f6;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+}
+
+.ticket-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+}
+
+.ticket-id {
+    font-size: 13px;
+    font-weight: 700;
+    color: #3b82f6;
+    background: #eff6ff;
+    padding: 4px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.notification-dot {
+    font-size: 14px;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.ticket-badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.btn-delete-ticket {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+    margin-left: 6px;
+}
+
+.btn-delete-ticket:hover {
+    background: #fee2e2;
+    transform: scale(1.1);
+}
+
+.btn-delete-ticket i {
+    width: 16px;
+    height: 16px;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge.priority-critique {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.badge.priority-haute {
+    background: #fed7aa;
+    color: #ea580c;
+}
+
+.badge.priority-normale {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.badge.status-ouvert {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge.status-en_cours {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.badge.status-en_attente_client {
+    background: #fce7f3;
+    color: #be185d;
+}
+
+.badge.status-resolu {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge.status-ferme {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.ticket-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.ticket-description {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ticket-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.ticket-category {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.ticket-category i {
+    width: 14px;
+    height: 14px;
+}
+
+.ticket-date {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* ================================================================
+   ❓ FAQ
+   ================================================================ */
+.faq-section {
+    margin-bottom: 32px;
+}
+
+.faq-section h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.faq-section h2 i {
+    width: 24px;
+    height: 24px;
+    color: #3b82f6;
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.faq-item {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+}
+
+.faq-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.faq-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.faq-icon i {
+    width: 24px;
+    height: 24px;
+    color: #3b82f6;
+}
+
+.faq-item h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.faq-item p {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* ================================================================
+   🪟 MODAL
+   ================================================================ */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 32px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: #f1f5f9;
+    border: none;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: #e2e8f0;
+    transform: scale(1.1);
+}
+
+.modal-close i {
+    width: 20px;
+    height: 20px;
+    color: #64748b;
+}
+
+.ticket-detail-header {
+    margin-bottom: 24px;
+}
+
+.ticket-detail-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 16px;
+    line-height: 1.3;
+}
+
+.ticket-detail-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.meta-item i {
+    width: 16px;
+    height: 16px;
+}
+
+.meta-value {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.ticket-detail-description {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #475569;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    margin-bottom: 24px;
+}
+
+/* ================================================================
+   💬 CONVERSATION SECTION - Messages chat style
+   ================================================================ */
+.conversation-section {
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.conversation-message {
+    margin-bottom: 20px;
+    animation: slideIn 0.3s ease;
+}
+
+.conversation-message.client {
+    padding: 16px;
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    border-radius: 8px;
+}
+
+.conversation-message.client-reply {
+    padding: 16px;
+    background: #dbeafe;
+    border-left: 4px solid #2563eb;
+    border-radius: 8px;
+    margin-left: 40px;
+}
+
+.conversation-message.support {
+    padding: 16px;
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+    border-radius: 8px;
+    margin-right: 40px;
+}
+
+.conversation-message.support.ai {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+    margin-right: 40px;
+}
+
+.message-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.conversation-message.client .message-label,
+.conversation-message.client-reply .message-label {
+    color: #1e40af;
+}
+
+.conversation-message.support .message-label {
+    color: #065f46;
+}
+
+.conversation-message.support.ai .message-label {
+    color: #92400e;
+}
+
+.message-content {
+    font-size: 15px;
+    color: #1e293b;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    white-space: pre-wrap;
+}
+
+.message-time {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.no-response {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+}
+
+.no-response i {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    opacity: 0.3;
+}
+
+.no-response p {
+    font-size: 14px;
+    margin: 0;
+}
+
+.new-response-badge {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 20px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.response-section {
+    border-top: 2px solid #e2e8f0;
+    padding-top: 24px;
+}
+
+.response-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.response-section h3 i {
+    width: 20px;
+    height: 20px;
+    color: #3b82f6;
+}
+
+.response-form textarea {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 120px;
+    margin-bottom: 12px;
+}
+
+.response-form textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ================================================================
+   💬 SECTION RÉPONSE CLIENT
+   ================================================================ */
+.reply-section {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 24px;
+}
+
+.reply-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.reply-section textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.2s;
+}
+
+.reply-section textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.reply-section button {
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.reply-section button:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.reply-section button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.rating-section {
+    background: #fef9e7;
+    border: 2px solid #fde047;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.rating-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #713f12;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rating-section h4 i {
+    width: 18px;
+    height: 18px;
+    color: #ca8a04;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.star {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.star i {
+    width: 32px;
+    height: 32px;
+    color: #cbd5e1;
+}
+
+.star:hover i,
+.star.active i {
+    color: #fbbf24;
+}
+
+.star:hover {
+    transform: scale(1.2);
+}
+
+/* ================================================================
+   🍞 TOAST
+   ================================================================ */
+.toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    z-index: 10000;
+    border: 2px solid #10b981;
+}
+
+.toast.show {
+    display: flex;
+    animation: slideIn 0.3s ease-out;
+}
+
+.toast i {
+    width: 24px;
+    height: 24px;
+    color: #10b981;
+}
+
+.toast span {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ================================================================
+   ⏳ LOADING STATE
+   ================================================================ */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+}
+
+.empty-state i {
+    width: 64px;
+    height: 64px;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    font-size: 15px;
+}
+
+/* ================================================================
+   📱 RESPONSIVE
+   ================================================================ */
+@media (max-width: 768px) {
+    .support-header {
+        padding: 12px 16px;
+    }
+    
+    .header-left h1 {
+        font-size: 18px;
+    }
+    
+    .user-email {
+        display: none;
+    }
+    
+    .support-container {
+        padding: 20px 16px;
+    }
+    
+    .create-ticket-section {
+        padding: 20px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .tickets-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 24px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: start;
+        gap: 12px;
+    }
+    
+    .toast {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ticket-card {
+        padding: 16px;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}

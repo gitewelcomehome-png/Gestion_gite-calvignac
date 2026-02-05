@@ -1,0 +1,56 @@
+<div class="tab-container">
+    <!-- Header -->
+    <div class="card" style="margin-bottom: 15px; padding: 15px;">
+        <h2 style="margin: 0 0 10px 0; font-size: 1.2rem;">👥 Fiches Clients</h2>
+        <input type="text" id="searchClients" placeholder="🔍 Rechercher..." 
+               style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #2D3436; margin-bottom: 10px;" 
+               oninput="window.filterClients ? filterClients(this.value) : null">
+        <button onclick="window.openAddClientModal ? openAddClientModal() : alert('Fonction non disponible')" 
+                class="btn-neo" style="width: 100%; padding: 12px; background: #2ecc71; color: white;">
+            ➕ Nouveau Client
+        </button>
+    </div>
+
+    <!-- Liste des clients -->
+    <div id="clients-list-container">
+        <!-- Généré par JavaScript -->
+    </div>
+</div>
+
+<style>
+.client-card-mobile {
+    background: var(--card);
+    border: 2px solid #2D3436;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 3px 3px 0 #2D3436;
+}
+
+.client-card-mobile h3 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.client-info {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.client-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.client-actions button {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: 2px solid #2D3436;
+    background: var(--card);
+    font-size: 0.85rem;
+}
+</style>
