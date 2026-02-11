@@ -238,8 +238,9 @@ async function syncCalendar(giteId, platform, url) {
         let cancelled = 0;
         let skipped = 0;
 
-        // Map pour tracker les ical_uid présents dans le flux
+        // Sets pour tracker les UID et DATES présents dans le flux
         const presentUids = new Set();
+        const presentDates = new Set(); // ✅ NOUVELLE LOGIQUE : tracker les dates
         
         console.log(`  📥 Parsing flux iCal: ${vevents.length} événement(s) trouvé(s)`);
 
@@ -261,17 +262,22 @@ async function syncCalendar(giteId, platform, url) {
 
         console.log(`  💾 ${existingReservations?.length || 0} réservation(s) future(s) trouvée(s) en BDD`);
         
+        // Indexer par UID ET par dates (nouvelle logique)
         const existingByUid = {};
+        const existingByDates = {};
         if (existingReservations) {
             existingReservations.forEach(r => {
                 if (r.ical_uid) {
                     existingByUid[r.ical_uid] = r;
-                    console.log(`    🔑 BDD: UID ${r.ical_uid} → ${r.client_name} (${r.check_in})`);
+                    // Clé de date pour comparaison
+                    const dateKey = `${r.check_in}|${r.check_out}`;
+                    existingByDates[dateKey] = r;
+                    console.log(`    🔑 BDD: ${r.client_name} → ${r.check_in} au ${r.check_out}`);
                 }
             });
         }
         
-        console.log(`  🔍 ${Object.keys(existingByUid).length} réservation(s) future(s) avec ical_uid en BDD`);
+        console.log(`  🔍 ${Object.keys(existingByDates).length} réservation(s) future(s) avec dates en BDD`);
 
         // 2. TRAITER CHAQUE ÉVÉNEMENT DU FLUX iCal
         for (const vevent of vevents) {
@@ -297,9 +303,11 @@ async function syncCalendar(giteId, platform, url) {
             const dateDebut = formatDateForIcal(dtstart);
             const dateFin = formatDateForIcal(dtend);
 
-            // Marquer ce UID comme présent
+            // Marquer ce UID ET ces dates comme présents
             presentUids.add(uid);
-            console.log(`    ✅ iCal: UID ${uid} → ${summary} (${dateDebut})`);
+            const dateKey = `${dateDebut}|${dateFin}`;
+            presentDates.add(dateKey);
+            console.log(`    ✅ iCal: ${summary} → ${dateDebut} au ${dateFin}`);
 
             // Déterminer le site (nom affiché de la plateforme)
             let site;
@@ -355,26 +363,18 @@ async function syncCalendar(giteId, platform, url) {
                     }
                 }
             }
-        }
-
-        // 3. DÉTECTER LES ANNULATIONS (réservations absentes du flux)
-        console.log(`  🔎 DÉTECTION ANNULATIONS:`);
-        console.log(`    - ${Object.keys(existingByUid).length} UID(s) en BDD`);
-        console.log(`    - ${presentUids.size} UID(s) dans flux iCal`);
+        }dates absentes du flux iCal)
+        console.log(`  🔎 DÉTECTION ANNULATIONS (par dates):`);
+        console.log(`    - ${Object.keys(existingByDates).length} plage(s) de dates en BDD`);
+        console.log(`    - ${presentDates.size} plage(s) dans flux iCal`);
         
-        for (const [uid, existing] of Object.entries(existingByUid)) {
-            console.log(`    🔍 Vérification UID ${uid}:`, {
-                present_dans_ical: presentUids.has(uid),
-                manual_override: existing.manual_override,
-                client: existing.client_name,
-                dates: `${existing.check_in} → ${existing.check_out}`
-            });
+        for (const [dateKey, existing] of Object.entries(existingByDates)) {
+            console.log(`    🔍 Vérification ${existing.client_name}: ${dateKey.replace('|', ' → ')}`);
             
-            // ⚠️ DÉTECTION ANNULATION : manual_override ne bloque PAS (sinon aucune annulation détectée)
-            // manual_override protège uniquement contre les MISES À JOUR de données
-            if (!presentUids.has(uid)) {
-                // Réservation disparue du flux iCal → Stocker pour confirmation utilisateur
-                console.log(`🗑️ ANNULATION DÉTECTÉE: ${existing.client_name} (${existing.check_in}) - UID absent du flux`);
+            // NOUVELLE LOGIQUE : Comparer les DATES, pas les UID
+            // Si les dates ne sont plus dans le feed → annulation
+            if (!presentDates.has(dateKey)) {
+                console.log(`      🗑️ ANNULATION: dates absentes du flux iCal`);
                 
                 window.pendingCancellations.push({
                     id: existing.id,
@@ -383,6 +383,10 @@ async function syncCalendar(giteId, platform, url) {
                     check_out: existing.check_out,
                     platform: existing.synced_from || existing.platform,
                     gite_id: existing.gite_id
+                });
+                cancelled++;
+            } else {
+                console.log(`      ✅ Toujours présente`): existing.gite_id
                 });
                 cancelled++;
             }

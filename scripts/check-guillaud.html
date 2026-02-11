@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Check Guillaud</title>
+</head>
+<body>
+    <h1>Vérification réservation Guillaud</h1>
+    <pre id="output"></pre>
+
+    <script src="../config/supabase.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        
+        async function checkGuillaud() {
+            output.textContent = '🔍 Recherche de Marie-Pierre Guillaud...\n\n';
+            
+            // Rechercher toutes les réservations Guillaud
+            const { data: reservations, error } = await window.supabaseClient
+                .from('reservations')
+                .select(`
+                    id,
+                    client_name,
+                    check_in,
+                    check_out,
+                    status,
+                    ical_uid,
+                    synced_from,
+                    manual_override,
+                    last_seen_in_ical,
+                    gite_id,
+                    gites(name)
+                `)
+                .ilike('client_name', '%guillaud%')
+                .gte('check_out', new Date().toISOString().split('T')[0])
+                .order('check_in', { ascending: true });
+            
+            if (error) {
+                output.textContent += '❌ Erreur: ' + JSON.stringify(error) + '\n';
+                return;
+            }
+            
+            output.textContent += `📊 ${reservations.length} réservation(s) Guillaud trouvée(s):\n\n`;
+            
+            reservations.forEach((r, i) => {
+                output.textContent += `[${i+1}] ${r.client_name}\n`;
+                output.textContent += `    Gîte: ${r.gites?.name || 'N/A'}\n`;
+                output.textContent += `    Dates: ${r.check_in} → ${r.check_out}\n`;
+                output.textContent += `    Status: ${r.status}\n`;
+                output.textContent += `    Synced from: ${r.synced_from || 'N/A'}\n`;
+                output.textContent += `    Manual override: ${r.manual_override}\n`;
+                output.textContent += `    UID: ${r.ical_uid || 'N/A'}\n`;
+                output.textContent += `    Last seen: ${r.last_seen_in_ical || 'JAMAIS VU'}\n\n`;
+            });
+            
+            // Vérifier toutes les réservations futures avec leur statut sync
+            output.textContent += '\n📋 Toutes les réservations futures (avec ical_uid):\n\n';
+            
+            const { data: allReservations, error: error2 } = await window.supabaseClient
+                .from('reservations')
+                .select(`
+                    id,
+                    client_name,
+                    check_in,
+                    check_out,
+                    status,
+                    synced_from,
+                    last_seen_in_ical,
+                    gites(name)
+                `)
+                .not('ical_uid', 'is', null)
+                .gte('check_out', new Date().toISOString().split('T')[0])
+                .order('check_in', { ascending: true });
+            
+            if (error2) {
+                output.textContent += '❌ Erreur: ' + JSON.stringify(error2) + '\n';
+                return;
+            }
+            
+            allReservations.forEach(r => {
+                const now = new Date();
+                const lastSeen = r.last_seen_in_ical ? new Date(r.last_seen_in_ical) : null;
+                let syncStatus = '⚠️ JAMAIS VU';
+                
+                if (lastSeen) {
+                    const diffMs = now - lastSeen;
+                    const diffHours = diffMs / (1000 * 60 * 60);
+                    const diffDays = diffHours / 24;
+                    
+                    if (diffHours < 1) syncStatus = '✅ Récent (<1h)';
+                    else if (diffDays < 1) syncStatus = '🟡 < 1 jour';
+                    else if (diffDays < 7) syncStatus = '🟠 < 7 jours';
+                    else syncStatus = '🔴 > 7 jours (PROBABLEMENT ANNULÉE)';
+                }
+                
+                output.textContent += `${r.gites?.name || 'N/A'} | ${r.client_name} | ${r.check_in} → ${r.check_out} | ${r.status} | ${r.synced_from || 'N/A'} | ${syncStatus}\n`;
+            });
+        }
+        
+        window.addEventListener('load', checkGuillaud);
+    </script>
+</body>
+</html>
