@@ -32,22 +32,33 @@ class NotificationSystem {
      * Démarrer le système de notifications
      */
     async start() {
-        // Charger les préférences utilisateur
-        await this.loadUserPreferences();
-        
-        // Charger les dernières vérifications depuis localStorage
-        this.loadLastCheck();
-        
-        // Vérification initiale
-        await this.checkAll();
-        
-        // Vérifications périodiques
-        this.checkInterval = setInterval(() => {
-            this.checkAll();
-        }, this.CHECK_FREQUENCY);
-        
-        // Créer le badge de notification dans le header
-        this.createNotificationBadge();
+        try {
+            // Charger les préférences utilisateur
+            await this.loadUserPreferences();
+            
+            // Charger les dernières vérifications depuis localStorage
+            this.loadLastCheck();
+            
+            // Vérification initiale
+            await this.checkAll();
+            
+            // Vérifications périodiques
+            this.checkInterval = setInterval(() => {
+                this.checkAll();
+            }, this.CHECK_FREQUENCY);
+            
+            // Créer le badge de notification dans le header
+            this.createNotificationBadge();
+        } catch (error) {
+            console.error('⚠️ Erreur démarrage NotificationSystem (table notifications absente?):', error);
+            // Forcer le compteur à 0 et masquer le badge
+            this.updatePageTitle(0);
+            const badge = document.getElementById('notificationBadge');
+            if (badge) {
+                badge.style.display = 'none';
+                badge.textContent = '0';
+            }
+        }
     }
 
     /**
