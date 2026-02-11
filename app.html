@@ -112,8 +112,8 @@
     <!-- 📧 Email Sender (Resend API) -->
     <script src="js/email-sender.js"></script>
     
-    <!-- 🔔 Notification System -->
-    <script src="js/notification-system.js?v=2.1"></script>
+    <!-- 🔔 Notification System - DÉSACTIVÉ TEMPORAIREMENT -->
+    <!-- <script src="js/notification-system.js?v=2.1"></script> -->
     
     <!-- ✨ AI Assistant -->
     <script src="js/ai-assistant.js"></script>
@@ -177,6 +177,13 @@
     <link rel="stylesheet" href="css/gite-form-modern.css?v=6.1" />
 </head>
 <body>
+    <!-- 🧹 NETTOYAGE IMMÉDIAT DU TITRE -->
+    <script>
+        // Exécution IMMÉDIATE avant tout le reste
+        localStorage.removeItem('notif_lastCheck');
+        document.title = 'Gestion Gîtes';
+    </script>
+    
     <!-- 🎨 CONTRÔLES ADMIN -->
     <div class="theme-controls">
         <span id="userDisplayName" class="user-display-name" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.3s;">
@@ -4364,12 +4371,7 @@
             setTimeout(() => clearInterval(waitForSupabase), 5000);
             */
             
-            // ⚠️ NETTOYAGE : Supprimer le localStorage corrompu (retirer ce bloc si vous réactivez les notifications)
-            if (localStorage.getItem('notif_lastCheck')) {
-                localStorage.removeItem('notif_lastCheck');
-                document.title = 'Gestion Gîtes';
-            }
-            
+            // Masquer le badge (le nettoyage localStorage est fait au début du <body>)
             const badge = document.getElementById('notificationBadge');
             if (badge) badge.style.display = 'none';
         });
