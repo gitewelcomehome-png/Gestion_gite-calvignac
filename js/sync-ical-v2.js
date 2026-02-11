@@ -10,8 +10,8 @@
 
 let syncInProgress = false;
 
-// 🗑️ Liste des annulations récentes (pour affichage notification)
-window.recentCancellations = [];
+// 🗑️ Liste des annulations détectées en attente de confirmation
+window.pendingCancellations = [];
 
 /**
  * Synchroniser tous les calendriers iCal
@@ -102,10 +102,10 @@ async function syncAllCalendars() {
             updateLastSyncDisplay();
         }
 
-        // 🚨 Notifier des annulations détectées
-        if (totalCancelled > 0 && window.recentCancellations.length > 0) {
-            showCancellationNotification(window.recentCancellations);
-            window.recentCancellations = [];
+        // 🚨 Afficher le modal de confirmation des annulations si nécessaire
+        if (window.pendingCancellations.length > 0) {
+            console.log(`⚠️ ${window.pendingCancellations.length} annulation(s) détectée(s) - Affichage modal`);
+            showCancellationConfirmationModal();
         }
 
         return {
@@ -298,22 +298,18 @@ async function syncCalendar(giteId, platform, url) {
         // 3. DÉTECTER LES ANNULATIONS (réservations absentes du flux)
         for (const [uid, existing] of Object.entries(existingByUid)) {
             if (!presentUids.has(uid) && !existing.manual_override) {
-                // Réservation disparue du flux iCal → Annuler immédiatement
-                try {
-                    await cancelReservation(existing.id);
-                    
-                    // Stocker pour notification
-                    window.recentCancellations.push({
-                        client_name: existing.client_name || 'Client Airbnb',
-                        check_in: existing.check_in,
-                        check_out: existing.check_out,
-                        platform: existing.synced_from || existing.platform
-                    });
-                    
-                    cancelled++;
-                } catch (error) {
-                    console.error(`❌ Erreur annulation ${existing.client_name}:`, error);
-                }
+                // Réservation disparue du flux iCal → Stocker pour confirmation utilisateur
+                console.log(`🗑️ Annulation détectée: ${existing.client_name} (${existing.check_in})`);
+                
+                window.pendingCancellations.push({
+                    id: existing.id,
+                    client_name: existing.client_name || 'Client Airbnb',
+                    check_in: existing.check_in,
+                    check_out: existing.check_out,
+                    platform: existing.synced_from || existing.platform,
+                    gite_id: existing.gite_id
+                });
+                cancelled++;
             }
         }
 
@@ -484,89 +480,221 @@ function addMessage(message, type = 'info') {
 }
 
 /**
- * 🚨 Afficher notification des annulations détectées
+ * 🚨 Afficher le modal de confirmation des annulations détectées
  */
-function showCancellationNotification(cancellations) {
+function showCancellationConfirmationModal() {
+    const cancellations = window.pendingCancellations;
     if (!cancellations || cancellations.length === 0) return;
 
-    // Créer le toast de notification
-    const toast = document.createElement('div');
-    toast.style.cssText = `
+    console.log('📢 Affichage modal annulations:', cancellations);
+
+    // Créer le modal
+    const modal = document.createElement('div');
+    modal.id = 'cancellation-modal';
+    modal.style.cssText = `
         position: fixed;
-        top: 80px;
-        right: 20px;
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-        color: white;
-        padding: 16px 20px;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(238, 90, 111, 0.4);
-        z-index: 9999;
-        max-width: 400px;
-        animation: slideIn 0.3s ease-out;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999999;
+        animation: fadeIn 0.3s ease-out;
     `;
 
-    let message = `⚠️ <strong>${cancellations.length} annulation(s) détectée(s)</strong><br>`;
-    message += `<small style="opacity: 0.9; font-size: 0.9em;">`;
-    
-    if (cancellations.length <= 3) {
-        cancellations.forEach(c => {
-            const dateDebut = new Date(c.check_in).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-            message += `<br>• ${c.client_name} (${dateDebut})`;
-        });
-    } else {
-        message += `Les réservations disparues des flux iCal ont été marquées comme annulées.`;
-    }
-    
-    message += `</small>`;
-    toast.innerHTML = message;
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 650px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        animation: slideUp 0.3s ease-out;
+        position: relative;
+    `;
 
-    // Ajouter styles pour l'animation
-    if (!document.getElementById('toast-animation-styles')) {
+    // Ajouter styles d'animation
+    if (!document.getElementById('modal-animation-styles')) {
         const style = document.createElement('style');
-        style.id = 'toast-animation-styles';
+        style.id = 'modal-animation-styles';
         style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
             }
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
+            @keyframes slideUp {
+                from { transform: translateY(50px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
             }
         `;
         document.head.appendChild(style);
     }
 
-    document.body.appendChild(toast);
+    // Grouper par gîte
+    const gitesMap = {};
+    cancellations.forEach(c => {
+        if (!gitesMap[c.gite_id]) gitesMap[c.gite_id] = [];
+        gitesMap[c.gite_id].push(c);
+    });
 
-    // Supprimer après 8 secondes
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease-in';
-        setTimeout(() => {
-            if (toast.parentNode) {
-                document.body.removeChild(toast);
-            }
-        }, 300);
-    }, 8000);
+    // Construire le contenu HTML
+    let html = `
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+            <div style="
+                width: 56px;
+                height: 56px;
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+            ">⚠️</div>
+            <div>
+                <h2 style="margin: 0; color: #d32f2f; font-size: 24px;">Annulations détectées</h2>
+                <p style="margin: 4px 0 0 0; color: #666; font-size: 14px;">
+                    ${cancellations.length} réservation${cancellations.length > 1 ? 's ont' : ' a'} disparu des flux iCal
+                </p>
+            </div>
+        </div>
+        
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin-bottom: 24px; border-radius: 6px;">
+            <strong style="color: #856404;">📋 Que s'est-il passé ?</strong><br>
+            <span style="color: #856404; font-size: 14px;">
+                Ces réservations ne sont plus présentes dans vos calendriers iCal Airbnb/Abritel.
+                Cela signifie généralement qu'elles ont été annulées sur la plateforme.
+            </span>
+        </div>
+    `;
 
-    // Rafraîchir la liste si on est dans Réservations
-    setTimeout(() => {
-        if (typeof updateReservationsList === 'function') {
-            updateReservationsList(false);
+    // Afficher les annulations par gîte
+    html += `<div style="max-height: 300px; overflow-y: auto; margin-bottom: 24px;">`;
+    
+    for (const [giteId, resaList] of Object.entries(gitesMap)) {
+        html += `<div style="margin-bottom: 20px; border: 2px solid #fef2f2; border-radius: 10px; padding: 16px; background: #fef2f2;">`;
+        
+        // Récupérer le nom du gîte
+        let giteName = `Gîte ${giteId}`;
+        if (window.gitesManager) {
+            const gite = window.gitesManager.getAll().find(g => g.id === giteId);
+            if (gite) giteName = gite.name;
         }
-    }, 1000);
+        
+        html += `<strong style="display: block; margin-bottom: 12px; font-size: 16px; color: #333;">🏠 ${giteName}</strong>`;
+        
+        resaList.forEach(r => {
+            const dateDebut = new Date(r.check_in).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+            const dateFin = new Date(r.check_out).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+            html += `
+                <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #d32f2f;">
+                    <div style="font-weight: 600; color: #333; margin-bottom: 4px;">${r.client_name}</div>
+                    <div style="font-size: 13px; color: #666; display: flex; gap: 16px; flex-wrap: wrap;">
+                        <span>📅 ${dateDebut} → ${dateFin}</span>
+                        ${r.platform ? `<span style="background: #e3f2fd; padding: 2px 8px; border-radius: 4px; color: #1976d2;">🔗 ${r.platform}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+    }
+    
+    html += `</div>`;
+
+    html += `
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button id="btn-cancel-ignore" style="
+                padding: 12px 24px;
+                border: 2px solid #ddd;
+                background: white;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: 500;
+                color: #666;
+                transition: all 0.2s;
+            " onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                ❌ Ignorer pour l'instant
+            </button>
+            <button id="btn-cancel-confirm" style="
+                padding: 12px 24px;
+                border: none;
+                background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+                color: white;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+                transition: all 0.2s;
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(211, 47, 47, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(211, 47, 47, 0.3)'">
+                ✅ Confirmer les annulations
+            </button>
+        </div>
+    `;
+
+    modalContent.innerHTML = html;
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    console.log('✅ Modal ajoutée au DOM');
+
+    // Événements
+    document.getElementById('btn-cancel-ignore').addEventListener('click', () => {
+        console.log('🚫 Annulations ignorées par l\'utilisateur');
+        window.pendingCancellations = [];
+        document.body.removeChild(modal);
+    });
+
+    document.getElementById('btn-cancel-confirm').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-cancel-confirm');
+        btn.disabled = true;
+        btn.innerHTML = '<span style="display: inline-block; animation: spin 1s linear infinite;">⏳</span> Annulation en cours...';
+        
+        const style = document.createElement('style');
+        style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+
+        console.log(`🔄 Confirmation: annulation de ${cancellations.length} réservation(s)`);
+
+        let success = 0;
+        let errors = 0;
+
+        for (const cancellation of cancellations) {
+            try {
+                await cancelReservation(cancellation.id);
+                success++;
+            } catch (error) {
+                console.error('❌ Erreur annulation:', error);
+                errors++;
+            }
+        }
+
+        window.pendingCancellations = [];
+        window.invalidateCache('reservations');
+        
+        // Rafraîchir la liste si on est dans Réservations
+        if (typeof updateReservationsList === 'function') {
+            await updateReservationsList(false);
+        }
+
+        document.body.removeChild(modal);
+        
+        if (typeof showToast === 'function') {
+            if (errors === 0) {
+                showToast(`✅ ${success} réservation(s) annulée(s)`, 'success');
+            } else {
+                showToast(`⚠️ ${success} annulée(s), ${errors} erreur(s)`, 'warning');
+            }
+        }
+
+        console.log(`✅ Annulation terminée: ${success} succès, ${errors} erreurs`);
+    });
 }
 
 /**
