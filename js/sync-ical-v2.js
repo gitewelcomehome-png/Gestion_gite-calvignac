@@ -26,6 +26,9 @@ async function syncAllCalendars() {
 
     try {
         syncInProgress = true;
+        
+        // ✅ RÉINITIALISER la liste des annulations à chaque sync
+        window.pendingCancellations = [];
 
         const gites = await window.gitesManager.getAll();
         console.log(`📋 ${gites.length} gîte(s) à synchroniser`);
@@ -138,7 +141,20 @@ async function syncAllCalendars() {
 
         // 🚨 Afficher le modal de confirmation des annulations si nécessaire
         if (window.pendingCancellations.length > 0) {
-            console.log(`⚠️ ${window.pendingCancellations.length} annulation(s) détectée(s) - Affichage modal`);
+            // ✅ DÉDUPLIQUER par ID avant d'afficher le modal
+            const uniqueCancellations = [];
+            const seenIds = new Set();
+            
+            for (const cancel of window.pendingCancellations) {
+                if (!seenIds.has(cancel.id)) {
+                    seenIds.add(cancel.id);
+                    uniqueCancellations.push(cancel);
+                }
+            }
+            
+            window.pendingCancellations = uniqueCancellations;
+            
+            console.log(`⚠️ ${window.pendingCancellations.length} annulation(s) unique(s) détectée(s) - Affichage modal`);
             showCancellationConfirmationModal();
         } else {
             console.log('✅ Aucune annulation détectée');
@@ -354,61 +370,69 @@ async function syncCalendar(giteId, platform, url) {
                 icalUid: uid
             };
 
-            // Vérifier si la réservation existe déjà (par UID OU par dates)
+            // Vérifier si la réservation existe déjà (par dates d'abord, puis UID)
             const dateKey = `${dateDebut}|${dateFin}`;
-            const existingByUidMatch = existingByUid[uid];
-            const existingByDateMatch = existingByDates[dateKey]?.[0]; // Prendre la première du tableau
-            const existing = existingByUidMatch || existingByDateMatch;
-
-            if (!existing) {
-                // NOUVELLE RÉSERVATION → AJOUTER
-                try {
-                    await addReservationFromIcal(reservation);
-                    added++;
-                } catch (error) {
-                    console.error(`❌ Erreur insertion ${summary}:`, error);
-                }
-            } else {
-                // RÉSERVATION EXISTANTE
+            const existingByDateMatch = existingByDates[dateKey]; // Array ou undefined
+            
+            // Si ces dates sont déjà occupées → MISE À JOUR (pas ajout)
+            if (existingByDateMatch && existingByDateMatch.length > 0) {
+                const existing = existingByDateMatch[0]; // Prendre la première
+                
+                // MISE À JOUR seulement si pas manual_override
                 if (existing.manual_override) {
-                    // Si modifiée manuellement → NE PAS TOUCHER
                     skipped++;
+                    console.log(`      ⏭️ Ignorée (manual_override)`);
                 } else {
-                    // Sinon → METTRE À JOUR (dates, prix...)
                     try {
                         await updateReservationFromIcal(existing.id, reservation);
                         updated++;
+                        console.log(`      ✏️ Mise à jour`);
                     } catch (error) {
                         console.error(`❌ Erreur mise à jour ${summary}:`, error);
                     }
                 }
+            } else {
+                // DATES LIBRES → NOUVELLE RÉSERVATION
+                try {
+                    await addReservationFromIcal(reservation);
+                    added++;
+                    console.log(`      ➕ Ajoutée`);
+                } catch (error) {
+                    console.error(`❌ Erreur insertion ${summary}:`, error);
+                }
             }
         }
 
-        // 3. DÉTECTER LES ANNULATIONS (UID absents du flux iCal)
-        console.log(`  🔎 DÉTECTION ANNULATIONS (par UID):`);
+        // 3. DÉTECTER LES ANNULATIONS (dates absentes du flux iCal)
+        console.log(`  🔎 DÉTECTION ANNULATIONS (par dates):`);
         console.log(`    - ${totalReservations} réservation(s) en BDD à vérifier`);
-        console.log(`    - ${presentUids.size} UID(s) dans flux iCal`);
+        console.log(`    - ${presentDates.size} plage(s) dans flux iCal`);
         
-        // ✅ PARCOURIR TOUTES LES RÉSERVATIONS par UID
-        for (const [uid, existing] of Object.entries(existingByUid)) {
-            console.log(`    🔍 Vérification ${existing.client_name}: ${existing.check_in} → ${existing.check_out} (UID: ${uid.substring(0, 20)}...)`);
+        // ✅ PARCOURIR LES DATES UNIQUES (pas les UID)
+        for (const [dateKey, reservations] of Object.entries(existingByDates)) {
+            console.log(`    🔍 Vérification dates: ${dateKey.replace('|', ' → ')}`);
             
-            // Si l'UID n'est plus dans le feed → annulation
-            if (!presentUids.has(uid)) {
-                console.log(`      🗑️ ANNULATION: UID absent du flux iCal`);
+            // Si ces DATES ne sont plus dans le feed → annulation
+            if (!presentDates.has(dateKey)) {
+                console.log(`      🗑️ ANNULATION: dates absentes du flux iCal`);
+                
+                // ✅ Si doublons détectés sur ces dates, n'afficher qu'UNE FOIS dans le modal
+                // mais préparer la suppression de TOUS les doublons
+                const idsToDelete = reservations.map(r => r.id);
                 
                 window.pendingCancellations.push({
-                    id: existing.id,
-                    client_name: existing.client_name || 'Client Airbnb',
-                    check_in: existing.check_in,
-                    check_out: existing.check_out,
-                    platform: existing.synced_from || existing.platform,
-                    gite_id: existing.gite_id
+                    id: reservations[0].id, // ID principal pour le modal
+                    allIds: idsToDelete,    // Tous les IDs à supprimer (doublons inclus)
+                    client_name: reservations[0].client_name || 'Client Airbnb',
+                    check_in: reservations[0].check_in,
+                    check_out: reservations[0].check_out,
+                    platform: reservations[0].synced_from || reservations[0].platform,
+                    gite_id: reservations[0].gite_id,
+                    hasDoublons: reservations.length > 1
                 });
                 cancelled++;
             } else {
-                console.log(`      ✅ Toujours présente`);
+                console.log(`      ✅ Dates toujours présentes`);
             }
         }
         
@@ -692,9 +716,14 @@ async function showCancellationConfirmationModal() {
         resaList.forEach(r => {
             const dateDebut = new Date(r.check_in).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
             const dateFin = new Date(r.check_out).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+            
+            const doublonBadge = r.hasDoublons ? 
+                '<span style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">⚠️ DOUBLON</span>' 
+                : '';
+            
             html += `
                 <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #d32f2f;">
-                    <div style="font-weight: 600; color: #333; margin-bottom: 4px;">${r.client_name}</div>
+                    <div style="font-weight: 600; color: #333; margin-bottom: 4px;">${r.client_name} ${doublonBadge}</div>
                     <div style="font-size: 13px; color: #666; display: flex; gap: 16px; flex-wrap: wrap;">
                         <span>📅 ${dateDebut} → ${dateFin}</span>
                         ${r.platform ? `<span style="background: #e3f2fd; padding: 2px 8px; border-radius: 4px; color: #1976d2;">🔗 ${r.platform}</span>` : ''}
@@ -769,8 +798,13 @@ async function showCancellationConfirmationModal() {
 
         for (const cancellation of cancellations) {
             try {
-                await cancelReservation(cancellation.id);
-                success++;
+                // ✅ Supprimer TOUS les IDs (y compris doublons)
+                const idsToDelete = cancellation.allIds || [cancellation.id];
+                
+                for (const id of idsToDelete) {
+                    await cancelReservation(id);
+                    success++;
+                }
             } catch (error) {
                 console.error('❌ Erreur annulation:', error);
                 errors++;
