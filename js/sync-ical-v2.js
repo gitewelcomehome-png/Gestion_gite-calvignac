@@ -264,20 +264,26 @@ async function syncCalendar(giteId, platform, url) {
         
         // Indexer par UID ET par dates (nouvelle logique)
         const existingByUid = {};
-        const existingByDates = {};
+        const existingByDates = {}; // ✅ Garder TOUTES les réservations par date (array)
         if (existingReservations) {
             existingReservations.forEach(r => {
                 if (r.ical_uid) {
                     existingByUid[r.ical_uid] = r;
                     // Clé de date pour comparaison
                     const dateKey = `${r.check_in}|${r.check_out}`;
-                    existingByDates[dateKey] = r;
+                    // ✅ GARDER TOUTES les réservations avec ces dates (pas écraser)
+                    if (!existingByDates[dateKey]) {
+                        existingByDates[dateKey] = [];
+                    }
+                    existingByDates[dateKey].push(r);
                     console.log(`    🔑 BDD: ${r.client_name} → ${r.check_in} au ${r.check_out}`);
                 }
             });
         }
         
-        console.log(`  🔍 ${Object.keys(existingByDates).length} réservation(s) future(s) avec dates en BDD`);
+        const totalDatesUniques = Object.keys(existingByDates).length;
+        const totalReservations = Object.values(existingByDates).flat().length;
+        console.log(`  🔍 ${totalReservations} réservation(s) sur ${totalDatesUniques} plage(s) de dates unique(s)`);
 
         // 2. TRAITER CHAQUE ÉVÉNEMENT DU FLUX iCal
         for (const vevent of vevents) {
@@ -337,8 +343,11 @@ async function syncCalendar(giteId, platform, url) {
                 icalUid: uid
             };
 
-            // Vérifier si la réservation existe déjà
-            const existing = existingByUid[uid];
+            // Vérifier si la réservation existe déjà (par UID OU par dates)
+            const dateKey = `${dateDebut}|${dateFin}`;
+            const existingByUidMatch = existingByUid[uid];
+            const existingByDateMatch = existingByDates[dateKey]?.[0]; // Prendre la première du tableau
+            const existing = existingByUidMatch || existingByDateMatch;
 
             if (!existing) {
                 // NOUVELLE RÉSERVATION → AJOUTER
@@ -365,18 +374,18 @@ async function syncCalendar(giteId, platform, url) {
             }
         }
 
-        // 3. DÉTECTER LES ANNULATIONS (dates absentes du flux iCal)
-        console.log(`  🔎 DÉTECTION ANNULATIONS (par dates):`);
-        console.log(`    - ${Object.keys(existingByDates).length} plage(s) de dates en BDD`);
-        console.log(`    - ${presentDates.size} plage(s) dans flux iCal`);
+        // 3. DÉTECTER LES ANNULATIONS (UID absents du flux iCal)
+        console.log(`  🔎 DÉTECTION ANNULATIONS (par UID):`);
+        console.log(`    - ${totalReservations} réservation(s) en BDD à vérifier`);
+        console.log(`    - ${presentUids.size} UID(s) dans flux iCal`);
         
-        for (const [dateKey, existing] of Object.entries(existingByDates)) {
-            console.log(`    🔍 Vérification ${existing.client_name}: ${dateKey.replace('|', ' → ')}`);
+        // ✅ PARCOURIR TOUTES LES RÉSERVATIONS par UID
+        for (const [uid, existing] of Object.entries(existingByUid)) {
+            console.log(`    🔍 Vérification ${existing.client_name}: ${existing.check_in} → ${existing.check_out} (UID: ${uid.substring(0, 20)}...)`);
             
-            // NOUVELLE LOGIQUE : Comparer les DATES, pas les UID
-            // Si les dates ne sont plus dans le feed → annulation
-            if (!presentDates.has(dateKey)) {
-                console.log(`      🗑️ ANNULATION: dates absentes du flux iCal`);
+            // Si l'UID n'est plus dans le feed → annulation
+            if (!presentUids.has(uid)) {
+                console.log(`      🗑️ ANNULATION: UID absent du flux iCal`);
                 
                 window.pendingCancellations.push({
                     id: existing.id,
