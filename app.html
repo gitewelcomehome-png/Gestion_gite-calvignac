@@ -369,6 +369,13 @@
             }
         }
         
+        // ======================================================================
+        // ❌ FONCTION OBSOLÈTE - NE PLUS UTILISER
+        // Le badge de notifications est maintenant géré automatiquement par
+        // NotificationSystem (notification-system.js) qui se lance au démarrage
+        // ======================================================================
+        
+        /*
         // Mettre à jour le badge de notifications et afficher/masquer le bouton
         function updateNotificationBadge(count = 0) {
             const notificationBtn = document.getElementById('notificationBtn');
@@ -405,6 +412,7 @@
                 updateNotificationBadge(0);
             }
         }
+        */
         
         // Charger au démarrage de la page
         document.addEventListener('DOMContentLoaded', () => {
@@ -413,7 +421,8 @@
                 if (window.supabaseClient) {
                     clearInterval(waitForSupabase);
                     loadUserDisplayName();
-                    loadNotificationCount();
+                    // ✅ Le NotificationSystem gère automatiquement le badge (voir notification-system.js)
+                    // loadNotificationCount(); // ❌ NE PLUS APPELER - conflit avec NotificationSystem
                     
                     // 🔄 Synchronisation iCal automatique toutes les 3 minutes (180000 ms)
                     if (typeof window.syncAllCalendars === 'function') {
