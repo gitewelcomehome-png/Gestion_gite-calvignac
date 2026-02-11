@@ -15,6 +15,24 @@
     <link rel="stylesheet" href="../css/main.css?v=1.0" />
     
     <style>
+        /* FORCER MODE JOUR UNIQUEMENT */
+        :root, html, html.theme-dark {
+            --bg-primary: #f5f5f7 !important;
+            --bg-secondary: #ffffff !important;
+            --text-primary: #1d1d1f !important;
+            --text-secondary: #64748b !important;
+            --border-color: #e5e7eb !important;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+            --shadow-hover: 0 4px 12px rgba(0,0,0,0.12) !important;
+            --btn-neutral: #f8f9fa !important;
+            --btn-neutral-bg: #e9ecef !important;
+        }
+
+        html, body {
+            background: #f5f5f7 !important;
+            color: #1d1d1f !important;
+        }
+
         body {
             padding-top: 20px !important;
         }
@@ -377,6 +395,39 @@
             flex-wrap: wrap;
         }
 
+        .tab {
+            padding: 12px 24px;
+            border: 3px solid #2D3436;
+            background: white;
+            color: #2D3436;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0 #2D3436;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #74b9ff 0%, #a29bfe 100%);
+            color: #2D3436;
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #2D3436;
+        }
+
+        .tab:hover:not(.active) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #2D3436;
+            background: #f8f9fa;
+        }
+
+        .tab:active {
+            transform: translate(3px, 3px);
+            box-shadow: 1px 1px 0 #2D3436;
+        }
+
         .tab-button {
             padding: 12px 24px;
             border: 2px solid #2D3436;
@@ -550,6 +601,34 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 3px solid #2D3436;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 4px 4px 0 #2D3436;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s;
+            font-weight: 700;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -641,6 +720,13 @@
             <!-- Les grilles seront générées dynamiquement par JS -->
         </div>
 
+        <!-- SECTION: Mes Retours Envoyés -->
+        <div class="card">
+            <h2 class="card-title">📋 Mes Retours Envoyés</h2>
+            <p class="section-subtitle">Historique de vos retours après ménage</p>
+            <div id="retours-list"></div>
+        </div>
+
         <!-- SECTION: Faire un Retour après Ménage -->
         <div class="card">
             <h2 class="card-title">📝 Faire un Retour après Ménage</h2>
@@ -651,8 +737,6 @@
                     <label for="retour-gite">Gîte</label>
                     <select id="retour-gite" required>
                         <option value="">Sélectionner un gîte</option>
-                        <option value="Trevoux">Trevoux</option>
-                        <option value="Couzon">Couzon</option>
                     </select>
                 </div>
 
@@ -697,8 +781,18 @@
         </div>
     </div>
 
+    <div id="toast" class="toast">
+        <span id="toastIcon" style="font-size: 1.5rem;">✓</span>
+        <span id="toastMessage"></span>
+    </div>
+
     <!-- Configuration Supabase partagée -->
     <script src="../js/shared-config.js"></script>
+    <!-- Forcer mode jour uniquement -->
+    <script>
+        document.documentElement.classList.add('theme-light');
+        document.documentElement.classList.remove('theme-dark');
+    </script>
     <!-- Script de la page -->
     <script src="../js/femme-menage.js"></script>
 </body>

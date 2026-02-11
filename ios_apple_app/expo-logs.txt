@@ -1,0 +1,506 @@
+env: load .env
+env: export EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY
+Starting project at /workspaces/Gestion_gite-calvignac/ios_apple_app
+Starting Metro Bundler
+Tunnel connected.
+Tunnel ready.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 67ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 2, "gites_count": 4, "reservations_count": 31, "reservations_data": 0}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 2, "gites_count": 4, "reservations_count": 31, "reservations_data": 0}
+ ERROR  ❌ [DASHBOARD] Erreurs détaillées: [{"code": "42703", "details": null, "hint": null, "message": "column reservations.number_guests does not exist"}, {"code": "42703", "details": null, "hint": "Perhaps you meant to reference the column \"cleaning_schedule.scheduled_date\".", "message": "column cleaning_schedule.scheduled_time does not exist"}] 
+
+Code: index.tsx
+[0m [90m 106 |[39m
+ [90m 107 |[39m     [36mif[39m (errors[33m.[39mlength [33m>[39m [35m0[39m) {
+[31m[1m>[22m[39m[90m 108 |[39m       console[33m.[39merror([32m'❌ [DASHBOARD] Erreurs détaillées:'[39m[33m,[39m errors)[33m;[39m
+ [90m     |[39m                    [31m[1m^[22m[39m
+ [90m 109 |[39m       setErrorMessage([32m'Unable to load dashboard data.'[39m)[33m;[39m
+ [90m 110 |[39m     }
+ [90m 111 |[39m[0m
+Call Stack
+  loadData (app/(tabs)/index.tsx:108:20)
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ ERROR  ❌ [DASHBOARD] Erreurs détaillées: [{"code": "42703", "details": null, "hint": null, "message": "column reservations.number_guests does not exist"}, {"code": "42703", "details": null, "hint": "Perhaps you meant to reference the column \"cleaning_schedule.scheduled_date\".", "message": "column cleaning_schedule.scheduled_time does not exist"}] 
+
+Code: index.tsx
+[0m [90m 106 |[39m
+ [90m 107 |[39m     [36mif[39m (errors[33m.[39mlength [33m>[39m [35m0[39m) {
+[31m[1m>[22m[39m[90m 108 |[39m       console[33m.[39merror([32m'❌ [DASHBOARD] Erreurs détaillées:'[39m[33m,[39m errors)[33m;[39m
+ [90m     |[39m                    [31m[1m^[22m[39m
+ [90m 109 |[39m       setErrorMessage([32m'Unable to load dashboard data.'[39m)[33m;[39m
+ [90m 110 |[39m     }
+ [90m 111 |[39m[0m
+Call Stack
+  loadData (app/(tabs)/index.tsx:108:20)
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 60ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 2, "gites_count": 4, "reservations_count": 31, "reservations_data": 0}
+ ERROR  ❌ [DASHBOARD] Erreurs détaillées: [{"code": "42703", "details": null, "hint": null, "message": "column reservations.number_guests does not exist"}, {"code": "42703", "details": null, "hint": "Perhaps you meant to reference the column \"cleaning_schedule.scheduled_date\".", "message": "column cleaning_schedule.scheduled_time does not exist"}] 
+
+Code: index.tsx
+[0m [90m 106 |[39m
+ [90m 107 |[39m     [36mif[39m (errors[33m.[39mlength [33m>[39m [35m0[39m) {
+[31m[1m>[22m[39m[90m 108 |[39m       console[33m.[39merror([32m'❌ [DASHBOARD] Erreurs détaillées:'[39m[33m,[39m errors)[33m;[39m
+ [90m     |[39m                    [31m[1m^[22m[39m
+ [90m 109 |[39m       setErrorMessage([32m'Unable to load dashboard data.'[39m)[33m;[39m
+ [90m 110 |[39m     }
+ [90m 111 |[39m[0m
+Call Stack
+  loadData (app/(tabs)/index.tsx:108:20)
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 2, "gites_count": 4, "reservations_count": 31, "reservations_data": 0}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ ERROR  ❌ [DASHBOARD] Erreurs détaillées: [{"code": "42703", "details": null, "hint": null, "message": "column reservations.number_guests does not exist"}, {"code": "42703", "details": null, "hint": "Perhaps you meant to reference the column \"cleaning_schedule.scheduled_date\".", "message": "column cleaning_schedule.scheduled_time does not exist"}] 
+
+Code: index.tsx
+[0m [90m 106 |[39m
+ [90m 107 |[39m     [36mif[39m (errors[33m.[39mlength [33m>[39m [35m0[39m) {
+[31m[1m>[22m[39m[90m 108 |[39m       console[33m.[39merror([32m'❌ [DASHBOARD] Erreurs détaillées:'[39m[33m,[39m errors)[33m;[39m
+ [90m     |[39m                    [31m[1m^[22m[39m
+ [90m 109 |[39m       setErrorMessage([32m'Unable to load dashboard data.'[39m)[33m;[39m
+ [90m 110 |[39m     }
+ [90m 111 |[39m[0m
+Call Stack
+  loadData (app/(tabs)/index.tsx:108:20)
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  📞 [CARD] Tentative appel: {"has_phone": true, "phone": "0615386019"}
+ LOG  📞 [CARD] Tentative appel: {"has_phone": true, "phone": "0615386019"}
+ LOG  📞 [CARD] Tentative appel: {"has_phone": true, "phone": "0615386019"}
+ LOG  📞 [CARD] Tentative appel: {"has_phone": true, "phone": "0615386019"}
+env: load .env
+env: export EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY
+Starting project at /workspaces/Gestion_gite-calvignac/ios_apple_app
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+env: load .env
+env: export EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY
+Starting project at /workspaces/Gestion_gite-calvignac/ios_apple_app
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Tunnel connected.
+Tunnel ready.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS ./index.ts ▓▓░░░░░░░░░░░░░░ 15.6% ( 82/314)
+iOS ./index.ts ▓▓▓▓░░░░░░░░░░░░ 29.7% (296/543)
+iOS ./index.ts ▓▓▓▓▓▓░░░░░░░░░░ 41.2% (531/827)
+iOS ./index.ts ▓▓▓▓▓▓▓▓░░░░░░░░ 54.3% (654/888)
+iOS ./index.ts ▓▓▓▓▓▓▓▓▓░░░░░░░ 56.5% ( 722/1003)
+iOS ./index.ts ▓▓▓▓▓▓▓▓▓░░░░░░░ 62.1% ( 842/1069)
+iOS ./index.ts ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 76.0% (1034/1186)
+iOS ./index.ts ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 79.4% (1114/1252)
+iOS ./index.ts ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 85.1% (1178/1277)
+iOS ./index.ts ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 94.9% (1430/1468)
+iOS Bundled 37857ms index.ts (1478 modules)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [WHATSAPP] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [WHATSAPP] Vérification WhatsApp installé...
+ LOG  💬 [WHATSAPP] WhatsApp disponible: false
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [WHATSAPP] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [WHATSAPP] Vérification WhatsApp installé...
+ LOG  💬 [WHATSAPP] WhatsApp disponible: false
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [SHARE] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [SHARE] Ouverture menu partage...
+env: load .env
+env: export EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY
+Starting project at /workspaces/Gestion_gite-calvignac/ios_apple_app
+Starting Metro Bundler
+Tunnel connected.
+Tunnel ready.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 1871ms index.ts (1478 modules)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [SHARE] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [SHARE] Ouverture menu partage...
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 860ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [WHATSAPP] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [WHATSAPP] Numéro formaté: 33615386019
+ LOG  💬 [WHATSAPP] Ouverture WhatsApp avec wa.me...
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [WHATSAPP] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [WHATSAPP] Numéro formaté: 33615386019
+ LOG  💬 [WHATSAPP] Ouverture WhatsApp avec wa.me...
+ LOG  ✅ [WHATSAPP] WhatsApp ouvert avec succès
+ ERROR  ❌ [WHATSAPP] Erreur complète: [Error: Unable to open URL: https://wa.me/33615386019?text=Bonjour%20FFAC,%250A%250AVoici%20votre%20guide%20pour%20votre%20s%C3%A9jour%20:%250Ahttps://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50ade9bc38f9efe4e2bd206ae27c26cde152875020f87f6c49eace3b977%250A%250AVous%20y%20trouverez%20toutes%20les%20informations%20n%C3%A9cessaires%20(codes,%20horaires,%20activit%C3%A9s...).%250A%250A%C3%80%20tr%C3%A8s%20bient%C3%B4t%20!] Error: Unable to open URL: https://wa.me/33615386019?text=Bonjour%20FFAC,%250A%250AVoici%20votre%20guide%20pour%20votre%20s%C3%A9jour%20:%250Ahttps://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50ade9bc38f9efe4e2bd206ae27c26cde152875020f87f6c49eace3b977%250A%250AVous%20y%20trouverez%20toutes%20les%20informations%20n%C3%A9cessaires%20(codes,%20horaires,%20activit%C3%A9s...).%250A%250A%C3%80%20tr%C3%A8s%20bient%C3%B4t%20!
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 92ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [WHATSAPP] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [WHATSAPP] Numéro formaté: 33615386019
+ LOG  💬 [WHATSAPP] Ouverture WhatsApp avec wa.me...
+ LOG  ✅ [WHATSAPP] WhatsApp ouvert avec succès
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [WHATSAPP] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [WHATSAPP] Numéro formaté: 33615386019
+ LOG  💬 [WHATSAPP] Ouverture WhatsApp avec wa.me...
+ LOG  ✅ [WHATSAPP] WhatsApp ouvert avec succès
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 95ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_count": 1, "errors_count": 0, "gites_count": 4, "reservations_count": 31, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [WHATSAPP] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [WHATSAPP] Numéro formaté: 33615386019
+ LOG  💬 [WHATSAPP] Ouverture WhatsApp avec wa.me...
+ LOG  💬 [WHATSAPP] Début handleWhatsApp: {"has_phone": true, "phone": "0615386019", "reservation_id": "ca55fe96-e27a-446d-b561-6296aebbf74e"}
+ LOG  💬 [WHATSAPP] Recherche token existant...
+ LOG  ✅ [WHATSAPP] Token existant trouvé
+ LOG  💬 [WHATSAPP] URL fiche: https://gestion-gite-calvignac.vercel.app/pages/fiche-client.html?token=90d5d50a...
+ LOG  💬 [WHATSAPP] Numéro formaté: 33615386019
+ LOG  💬 [WHATSAPP] Ouverture WhatsApp avec wa.me...
+ LOG  ✅ [WHATSAPP] WhatsApp ouvert avec succès
+ ERROR  ❌ [WHATSAPP] Erreur complète: [Error: Unable to open URL: https://wa.me/33615386019?text=Bonjour%20FFAC%2C%0A%0AVoici%20le%20guide%20de%20votre%20s%C3%A9jour%20%C3%A0%20Tr%C3%A9voux%20%3A%0A%0Ahttps%3A%2F%2Fgestion-gite-calvignac.vercel.app%2Fpages%2Ffiche-client.html%3Ftoken%3D90d5d50ade9bc38f9efe4e2bd206ae27c26cde152875020f87f6c49eace3b977%0A%0AVous%20y%20trouverez%20toutes%20les%20informations%20pratiques.%0A%0A%C3%80%20bient%C3%B4t%20!] Error: Unable to open URL: https://wa.me/33615386019?text=Bonjour%20FFAC%2C%0A%0AVoici%20le%20guide%20de%20votre%20s%C3%A9jour%20%C3%A0%20Tr%C3%A9voux%20%3A%0A%0Ahttps%3A%2F%2Fgestion-gite-calvignac.vercel.app%2Fpages%2Ffiche-client.html%3Ftoken%3D90d5d50ade9bc38f9efe4e2bd206ae27c26cde152875020f87f6c49eace3b977%0A%0AVous%20y%20trouverez%20toutes%20les%20informations%20pratiques.%0A%0A%C3%80%20bient%C3%B4t%20!
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 81ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 1}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 1}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 1}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 1}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 1}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+› Detected a change in babel.config.js. Restart the server to see the new results. You may need to clear the bundler cache with the --clear flag for your changes to take effect.
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 1787ms index.ts (1 module)
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 158ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ ERROR  ❌ Erreur chargement listes: {"code": "PGRST205", "details": null, "hint": "Perhaps you meant the table 'public.cm_pricing_plans'", "message": "Could not find the table 'public.shopping_lists' in the schema cache"} 
+
+Code: shopping.tsx
+[0m [90m 45 |[39m
+ [90m 46 |[39m       [36mif[39m (error) {
+[31m[1m>[22m[39m[90m 47 |[39m         console[33m.[39merror([32m'❌ Erreur chargement listes:'[39m[33m,[39m error)[33m;[39m
+ [90m    |[39m                      [31m[1m^[22m[39m
+ [90m 48 |[39m         setErrorMessage([32m'Impossible de charger les listes.'[39m)[33m;[39m
+ [90m 49 |[39m       } [36melse[39m {
+ [90m 50 |[39m         setLists((data [36mas[39m [33mShoppingList[39m[]) [33m||[39m [])[33m;[39m[0m
+Call Stack
+  loadLists (app/shopping.tsx:47:22)
+ ERROR  ❌ Erreur création liste: {"code": "PGRST205", "details": null, "hint": "Perhaps you meant the table 'public.cm_pricing_plans'", "message": "Could not find the table 'public.shopping_lists' in the schema cache"} 
+
+Code: shopping.tsx
+[0m [90m 109 |[39m
+ [90m 110 |[39m       [36mif[39m (error) {
+[31m[1m>[22m[39m[90m 111 |[39m         console[33m.[39merror([32m'❌ Erreur création liste:'[39m[33m,[39m error)[33m;[39m
+ [90m     |[39m                      [31m[1m^[22m[39m
+ [90m 112 |[39m         [33mAlert[39m[33m.[39malert([32m'Erreur'[39m[33m,[39m [32m'Impossible de créer la liste.'[39m)[33m;[39m
+ [90m 113 |[39m       } [36melse[39m {
+ [90m 114 |[39m         setLists([data [36mas[39m [33mShoppingList[39m[33m,[39m [33m...[39mlists])[33m;[39m[0m
+Call Stack
+  createNewList (app/shopping.tsx:111:22)
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 144ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ WARN  Route "./shopping-new.tsx" is missing the required default export. Ensure a React component is exported as default.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+Unable to resolve "@react-native-picker/picker" from "app/shopping-new.tsx"
+[0m [90m 10 |[39m   [33mView[39m[33m,[39m
+ [90m 11 |[39m } [36mfrom[39m [32m'react-native'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 12 |[39m [36mimport[39m { [33mPicker[39m } [36mfrom[39m [32m'@react-native-picker/picker'[39m[33m;[39m
+ [90m    |[39m                         [31m[1m^[22m[39m
+ [90m 13 |[39m
+ [90m 14 |[39m [36mimport[39m { [33mErrorBanner[39m } [36mfrom[39m [32m'@/components/error-banner'[39m[33m;[39m
+ [90m 15 |[39m [36mimport[39m { [33mThemedText[39m } [36mfrom[39m [32m'@/components/themed-text'[39m[33m;[39m[0m
+
+Import stack:
+
+ app/shopping-new.tsx
+ | import "@react-native-picker/picker"
+
+ app (require.context)
+
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping-new", "shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping-old", "shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 72ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  📱 Shopping Screen: User = OK
+ LOG  📱 Shopping Screen: Supabase = OK
+ LOG  🔄 Chargement des listes...
+ LOG  🔄 Chargement des lieux favoris...
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG  ✅ 2 liste(s) chargée(s)
+ LOG  📋 Liste sélectionnée: liste 2
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 71ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  📱 Shopping Screen: User = OK
+ LOG  📱 Shopping Screen: Supabase = OK
+ LOG  🔄 Chargement des listes...
+ LOG  🔄 Chargement des lieux favoris...
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG  ✅ 2 liste(s) chargée(s)
+ LOG  📋 Liste sélectionnée: liste 2

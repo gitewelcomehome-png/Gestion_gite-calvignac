@@ -1,0 +1,123 @@
+<!-- ================================================ -->
+<!-- ONGLET GESTION DRAPS - STOCKS ET PRÉVISIONS CALOU -->
+<!-- ================================================ -->
+
+<div class="tab-container">
+    <!-- Header CALOU -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.75rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-calou-icon="package" class="calou-icon" style="width: 32px; height: 32px;"></i>
+                    GESTION DES DRAPS
+                </h2>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--calou-text-secondary);">Suivi des stocks et prévisions des besoins</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📋 CONFIGURATION DES BESOINS -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-calou-icon="settings" class="calou-icon" style="width: 24px; height: 24px;"></i>
+            CONFIGURATION DES BESOINS PAR RÉSERVATION
+        </h3>
+        <div id="besoins-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
+            <!-- Généré dynamiquement par JS -->
+        </div>
+    </div>
+
+    <!-- 📦 STOCKS EN RÉSERVE -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-calou-icon="box" class="calou-icon" style="width: 24px; height: 24px;"></i>
+                STOCKS EN RÉSERVE
+            </h3>
+            <button onclick="sauvegarderStocks()" class="calou-btn-primary">
+                <i data-calou-icon="save" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                Sauvegarder
+            </button>
+        </div>
+        
+        <div id="stocks-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
+            <!-- Généré dynamiquement par JS -->
+        </div>
+    </div>
+
+    <!-- 📊 ANALYSE & PRÉVISIONS -->
+    <div class="calou-grid" data-cols="2" style="margin-bottom: 2rem;">
+        <!-- Réservations couvertes -->
+        <div class="calou-card">
+            <h3 style="margin: 0 0 0.75rem 0; font-size: 1.1rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-calou-icon="check-circle" class="calou-icon" style="width: 20px; height: 20px;"></i>
+                RÉSERVATIONS COUVERTES
+            </h3>
+            <p style="color: var(--calou-text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">Nombre de réservations assurables avec vos stocks</p>
+            <div id="reservations-couvertes" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <!-- Rempli par JS -->
+            </div>
+        </div>
+        
+        <!-- À emmener dans les gîtes -->
+        <div class="calou-card">
+            <h3 style="margin: 0 0 0.75rem 0; font-size: 1.1rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-calou-icon="truck" class="calou-icon" style="width: 20px; height: 20px;"></i>
+                CE QU'IL FAUT EMMENER AU GÎTE
+            </h3>
+            <p style="color: var(--calou-text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">Calculez ce qui manque pour couvrir les réservations</p>
+            
+            <!-- Boutons Gîtes -->
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--calou-text-primary); margin-bottom: 0.5rem;">
+                    🏠 Sélectionnez un gîte
+                </label>
+                <div id="boutons-gites-emmener" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <!-- Rempli par JS -->
+                </div>
+            </div>
+            
+            <!-- Date limite -->
+            <div style="display: flex; gap: 1rem; align-items: end; margin-bottom: 1rem;">
+                <div style="flex: 1; max-width: 300px;">
+                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--calou-text-primary); margin-bottom: 0.5rem;">
+                        📅 Jusqu'au
+                    </label>
+                    <input type="date" id="date-limite-emmener" style="width: 100%; padding: 0.5rem; border: 2px solid var(--calou-border); border-radius: 8px; font-size: 0.875rem; background: var(--calou-bg); color: var(--calou-text-primary);">
+                </div>
+            </div>
+            
+            <!-- Résultat -->
+            <div id="a-emmener" style="margin-top: 1rem;">
+                <!-- Rempli par JS -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 🔮 SIMULATION DES BESOINS FUTURS -->
+    <div class="calou-card">
+        <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-calou-icon="trending-up" class="calou-icon" style="width: 24px; height: 24px;"></i>
+            SIMULATION DES BESOINS FUTURS
+        </h3>
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--calou-text-primary); font-size: 0.875rem;">Calculer les besoins jusqu'au :</label>
+            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                <input type="date" id="date-simulation" class="calou-input" style="max-width: 200px;">
+                <button onclick="simulerBesoins()" class="calou-btn-primary">
+                    <i data-calou-icon="search" class="calou-icon" style="width: 18px; height: 18px;"></i>
+                    Calculer
+                </button>
+            </div>
+        </div>
+        
+        <div id="resultats-simulation" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <div style="background: rgba(99, 102, 241, 0.05); border: 2px dashed var(--calou-border); border-radius: var(--calou-radius-lg); padding: 2.5rem; text-align: center; width: 100%;">
+                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.6;">
+                    <i data-calou-icon="bar-chart-2" class="calou-icon" style="width: 64px; height: 64px;"></i>
+                </div>
+                <p style="color: var(--calou-text-secondary); font-size: 1rem; margin: 0;">Sélectionnez une date et cliquez sur "Calculer" pour simuler vos besoins futurs</p>
+            </div>
+        </div>
+    </div>
+</div>

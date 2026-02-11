@@ -38,7 +38,7 @@ function verifyWebhookSignature(request, payload, secret) {
  * Traiter une nouvelle réservation
  */
 async function handleNewReservation(reservation) {
-  console.log('📥 Nouvelle réservation Abritel:', reservation.reservation_id);
+  // console.log('📥 Nouvelle réservation Abritel:', reservation.reservation_id);
   
   try {
     // 1. Trouver le gîte correspondant
@@ -61,7 +61,7 @@ async function handleNewReservation(reservation) {
       .maybeSingle();
     
     if (existing) {
-      console.log('ℹ️ Réservation déjà importée');
+      // console.log('ℹ️ Réservation déjà importée');
       return { success: true, message: 'Déjà existante' };
     }
     
@@ -92,7 +92,7 @@ async function handleNewReservation(reservation) {
       throw insertError;
     }
     
-    console.log('✅ Réservation importée:', newReservation.id);
+    // console.log('✅ Réservation importée:', newReservation.id);
     
     // 4. TODO: Calculer ménage automatiquement
     // await calculateCleaningSchedule(newReservation);
@@ -109,7 +109,7 @@ async function handleNewReservation(reservation) {
  * Traiter une modification de réservation
  */
 async function handleReservationUpdate(reservation) {
-  console.log('🔄 Mise à jour réservation Abritel:', reservation.reservation_id);
+  // console.log('🔄 Mise à jour réservation Abritel:', reservation.reservation_id);
   
   try {
     const { data, error } = await supabase
@@ -132,7 +132,7 @@ async function handleReservationUpdate(reservation) {
       return { success: false, error: error.message };
     }
     
-    console.log('✅ Réservation mise à jour:', data.id);
+    // console.log('✅ Réservation mise à jour:', data.id);
     return { success: true, reservation: data };
     
   } catch (error) {
@@ -145,7 +145,7 @@ async function handleReservationUpdate(reservation) {
  * Traiter une annulation
  */
 async function handleReservationCancellation(reservation) {
-  console.log('❌ Annulation réservation Abritel:', reservation.reservation_id);
+  // console.log('❌ Annulation réservation Abritel:', reservation.reservation_id);
   
   try {
     const { data, error } = await supabase
@@ -163,7 +163,7 @@ async function handleReservationCancellation(reservation) {
       return { success: false, error: error.message };
     }
     
-    console.log('✅ Réservation annulée:', data.id);
+    // console.log('✅ Réservation annulée:', data.id);
     
     // TODO: Libérer les dates sur autres plateformes
     
@@ -190,7 +190,7 @@ function calculateNights(checkIn, checkOut) {
  */
 export default async function handler(req, res) {
   // Log de la requête
-  console.log('📥 Webhook reçu:', {
+  // console.log('📥 Webhook reçu:', {
     method: req.method,
     headers: req.headers,
     query: req.query
@@ -212,7 +212,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Payload manquant' });
     }
     
-    console.log('📦 Payload reçu:', JSON.stringify(payload, null, 2));
+    // console.log('📦 Payload reçu:', JSON.stringify(payload, null, 2));
     
     // Vérifier la signature (sécurité)
     const webhookSecret = process.env.ABRITEL_WEBHOOK_SECRET;
@@ -242,7 +242,7 @@ export default async function handler(req, res) {
         
       case 'ping':
       case 'test':
-        console.log('🏓 Ping reçu - Webhook configuré correctement');
+        // console.log('🏓 Ping reçu - Webhook configuré correctement');
         return res.status(200).json({ 
           success: true, 
           message: 'Webhook actif' 

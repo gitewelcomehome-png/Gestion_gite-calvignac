@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Workflow - Channel Manager</title>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Config Supabase -->
+    <script src="../js/shared-config.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    
+    <style>
+        .workflow-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .actions-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        
+        .action-btn.primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .action-btn.primary:hover {
+            background: #2563eb;
+        }
+        
+        .action-btn.success {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .action-btn.success:hover {
+            background: #059669;
+        }
+        
+        .action-btn.danger {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .action-btn.danger:hover {
+            background: #dc2626;
+        }
+        
+        .timeline-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .comment-box {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+        
+        .comment-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .comment-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-left">
+            <button onclick="history.back()" style="background: none; border: none; cursor: pointer; padding: 8px; display: flex; align-items: center; color: #64748b;">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <h1>
+                <i data-lucide="ticket"></i>
+                Workflow Ticket
+            </h1>
+        </div>
+        <div class="header-right">
+            <span class="user-email" id="userEmail"></span>
+            <button class="btn-icon" id="btnLogout" title="Déconnexion">
+                <i data-lucide="log-out"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="workflow-container">
+        
+        <!-- Résumé du ticket -->
+        <div id="ticketSummary"></div>
+        
+        <!-- Grid principal -->
+        <div class="workflow-grid">
+            
+            <!-- Colonne gauche : Erreur + Timeline -->
+            <div>
+                <!-- Erreur associée -->
+                <div id="errorSection"></div>
+                
+                <!-- Timeline -->
+                <div class="timeline-section">
+                    <h3 style="margin: 0 0 20px 0; color: #1e293b; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="activity"></i>
+                        Historique du ticket
+                    </h3>
+                    <div id="timeline"></div>
+                </div>
+            </div>
+            
+            <!-- Colonne droite : Actions -->
+            <div>
+                <div class="actions-panel">
+                    <h3 style="margin: 0 0 15px 0; color: #1e293b; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="zap"></i>
+                        Actions rapides
+                    </h3>
+                    
+                    <!-- Changer statut -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #475569; font-size: 13px; font-weight: 600;">
+                            Changer le statut
+                        </label>
+                        <select id="statusSelect" class="action-btn" style="padding: 10px;">
+                            <option value="">-- Sélectionner --</option>
+                            <option value="ouvert">Ouvert</option>
+                            <option value="en_cours">En cours</option>
+                            <option value="en_attente_client">En attente client</option>
+                            <option value="resolu">Résolu</option>
+                            <option value="ferme">Fermé</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Actions principales -->
+                    <button class="action-btn primary" onclick="openInSupport()">
+                        <i data-lucide="external-link"></i>
+                        Ouvrir dans Support
+                    </button>
+                    
+                    <button class="action-btn" onclick="viewError()">
+                        <i data-lucide="alert-circle"></i>
+                        Voir l'erreur complète
+                    </button>
+                    
+                    <button class="action-btn" onclick="notifyClient()">
+                        <i data-lucide="mail"></i>
+                        Notifier le client
+                    </button>
+                    
+                    <div style="border-top: 1px solid #e2e8f0; margin: 15px 0;"></div>
+                    
+                    <button class="action-btn success" onclick="markResolved()">
+                        <i data-lucide="check-circle"></i>
+                        Marquer comme résolu
+                    </button>
+                    
+                    <button class="action-btn danger" onclick="closeTicket()">
+                        <i data-lucide="x-circle"></i>
+                        Fermer le ticket
+                    </button>
+                    
+                    <!-- Commentaire -->
+                    <div class="comment-box">
+                        <label style="display: block; margin-bottom: 8px; color: #475569; font-size: 13px; font-weight: 600;">
+                            Ajouter un commentaire
+                        </label>
+                        <textarea id="commentText" class="comment-textarea" placeholder="Votre commentaire..."></textarea>
+                        <button class="action-btn primary" style="margin-top: 10px;" onclick="addComment()">
+                            <i data-lucide="message-circle"></i>
+                            Ajouter
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/ticket-workflow.js"></script>
+    <script>
+        let workflow = null;
+        let ticketId = null;
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            
+            // Récupérer l'ID du ticket depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            ticketId = urlParams.get('ticket');
+            
+            if (!ticketId) {
+                alert('❌ ID du ticket manquant');
+                history.back();
+                return;
+            }
+            
+            // Charger le workflow
+            await loadWorkflow();
+            
+            // Event listeners
+            initEventListeners();
+            
+            lucide.createIcons();
+        });
+        
+        // Authentification
+        async function checkAuth() {
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
+            
+            if (!session) {
+                window.location.href = '../index.html';
+                return;
+            }
+            
+            document.getElementById('userEmail').textContent = session.user.email;
+        }
+        
+        // Charger le workflow
+        async function loadWorkflow() {
+            try {
+                workflow = new TicketWorkflow(ticketId);
+                await workflow.load();
+                
+                // Afficher les données
+                document.getElementById('ticketSummary').innerHTML = workflow.renderSummary();
+                document.getElementById('errorSection').innerHTML = workflow.renderErrorSection();
+                document.getElementById('timeline').innerHTML = workflow.renderTimeline();
+                
+                lucide.createIcons();
+                
+            } catch (err) {
+                console.error('❌ Erreur chargement workflow:', err);
+                alert('❌ Erreur lors du chargement du ticket: ' + err.message);
+            }
+        }
+        
+        // Event listeners
+        function initEventListeners() {
+            // Logout
+            document.getElementById('btnLogout').addEventListener('click', async () => {
+                await window.supabaseClient.auth.signOut();
+                window.location.href = '../index.html';
+            });
+            
+            // Changement de statut
+            document.getElementById('statusSelect').addEventListener('change', async (e) => {
+                const newStatus = e.target.value;
+                if (!newStatus) return;
+                
+                try {
+                    await workflow.changeStatus(newStatus);
+                    alert('✅ Statut mis à jour');
+                    await loadWorkflow();
+                } catch (err) {
+                    alert('❌ Erreur: ' + err.message);
+                }
+                
+                e.target.value = '';
+            });
+        }
+        
+        // Actions
+        function openInSupport() {
+            window.location.href = `admin-support.html?ticket=${ticketId}`;
+        }
+        
+        function viewError() {
+            if (!workflow.error) {
+                alert('Aucune erreur associée');
+                return;
+            }
+            window.location.href = `admin-monitoring.html#error-${workflow.error.id}`;
+        }
+        
+        async function notifyClient() {
+            const confirmed = confirm('Envoyer un email de notification au client ?');
+            if (!confirmed) return;
+            
+            try {
+                // TODO: Implémenter l'envoi d'email
+                await workflow.addHistory('email_sent', 'Email de notification envoyé au client');
+                alert('✅ Email envoyé');
+                await loadWorkflow();
+            } catch (err) {
+                alert('❌ Erreur: ' + err.message);
+            }
+        }
+        
+        async function markResolved() {
+            const confirmed = confirm('Marquer ce ticket comme résolu ?');
+            if (!confirmed) return;
+            
+            try {
+                await workflow.changeStatus('resolu', 'Ticket marqué comme résolu manuellement');
+                alert('✅ Ticket résolu');
+                await loadWorkflow();
+            } catch (err) {
+                alert('❌ Erreur: ' + err.message);
+            }
+        }
+        
+        async function closeTicket() {
+            const confirmed = confirm('Fermer définitivement ce ticket ?');
+            if (!confirmed) return;
+            
+            try {
+                await workflow.changeStatus('ferme', 'Ticket fermé manuellement');
+                alert('✅ Ticket fermé');
+                await loadWorkflow();
+            } catch (err) {
+                alert('❌ Erreur: ' + err.message);
+            }
+        }
+        
+        async function addComment() {
+            const comment = document.getElementById('commentText').value.trim();
+            if (!comment) {
+                alert('Veuillez entrer un commentaire');
+                return;
+            }
+            
+            try {
+                await workflow.addComment(comment);
+                alert('✅ Commentaire ajouté');
+                document.getElementById('commentText').value = '';
+                await loadWorkflow();
+            } catch (err) {
+                alert('❌ Erreur: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

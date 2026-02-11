@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - Welcome Home</title>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Config Supabase -->
+    <script src="../js/shared-config.js"></script>
+    
+    <!-- Support IA Module -->
+    <script src="../js/support-ai.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/client-support.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="support-header">
+        <div class="header-left">
+            <button class="btn-back" onclick="window.location.href='../index.html'">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <h1>
+                <i data-lucide="headphones"></i>
+                Support & Assistance
+            </h1>
+        </div>
+        <div class="header-right">
+            <span class="user-email" id="userEmail">Chargement...</span>
+            <button class="btn-icon" id="btnLogout" title="Déconnexion">
+                <i data-lucide="log-out"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="support-container">
+        
+        <!-- Bannière Info -->
+        <div class="info-banner">
+            <i data-lucide="info"></i>
+            <div>
+                <strong>Besoin d'aide ?</strong>
+                <p>Notre équipe est là pour vous aider. Créez un ticket et nous vous répondrons dans les plus brefs délais.</p>
+            </div>
+        </div>
+
+        <!-- Section Création Ticket -->
+        <section class="create-ticket-section">
+            <div class="section-header">
+                <h2>
+                    <i data-lucide="plus-circle"></i>
+                    Créer un nouveau ticket
+                </h2>
+            </div>
+            
+            <form id="createTicketForm" class="ticket-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ticketCategory">
+                            <i data-lucide="tag"></i>
+                            Catégorie *
+                        </label>
+                        <select id="ticketCategory" required>
+                            <option value="">Sélectionnez une catégorie</option>
+                            <option value="technique">🔧 Problème technique</option>
+                            <option value="facturation">💰 Question facturation</option>
+                            <option value="fonctionnalite">✨ Demande de fonctionnalité</option>
+                            <option value="bug">🐛 Signaler un bug</option>
+                            <option value="autre">❓ Autre</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ticketPriority">
+                            <i data-lucide="alert-circle"></i>
+                            Priorité *
+                        </label>
+                        <select id="ticketPriority" required>
+                            <option value="basse">Basse</option>
+                            <option value="normale" selected>Normale</option>
+                            <option value="haute">Haute</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ticketTitle">
+                        <i data-lucide="type"></i>
+                        Titre du problème *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="ticketTitle" 
+                        placeholder="Ex: Erreur lors de la synchronisation du calendrier"
+                        required
+                        maxlength="200"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="ticketDescription">
+                        <i data-lucide="file-text"></i>
+                        Description détaillée *
+                    </label>
+                    <textarea 
+                        id="ticketDescription" 
+                        rows="6" 
+                        placeholder="Décrivez votre problème en détail. Plus vous donnerez d'informations, plus nous pourrons vous aider rapidement."
+                        required
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/1000 caractères
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="btnResetForm">
+                        <i data-lucide="x"></i>
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i data-lucide="send"></i>
+                        Créer le ticket
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Section Mes Tickets -->
+        <section class="tickets-list-section">
+            <div class="section-header">
+                <h2>
+                    <i data-lucide="inbox"></i>
+                    Mes tickets
+                    <span class="ticket-badge" id="ticketCount">0</span>
+                </h2>
+                <div class="filters">
+                    <select id="filterStatus" class="filter-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="ouvert">Ouvert</option>
+                        <option value="en_cours">En cours</option>
+                        <option value="en_attente_client">En attente de ma réponse</option>
+                        <option value="resolu">Résolu</option>
+                        <option value="ferme">Fermé</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="tickets-grid" id="ticketsGrid">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Chargement de vos tickets...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section FAQ Rapide -->
+        <section class="faq-section">
+            <h2>
+                <i data-lucide="help-circle"></i>
+                Questions fréquentes
+            </h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-icon">
+                        <i data-lucide="calendar"></i>
+                    </div>
+                    <h3>Comment synchroniser mon calendrier ?</h3>
+                    <p>Rendez-vous dans Paramètres > Synchronisation et copiez l'URL iCal fournie.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-icon">
+                        <i data-lucide="credit-card"></i>
+                    </div>
+                    <h3>Comment modifier mon abonnement ?</h3>
+                    <p>Accédez à Mon Compte > Abonnement pour changer de plan.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-icon">
+                        <i data-lucide="bell"></i>
+                    </div>
+                    <h3>Configurer mes notifications</h3>
+                    <p>Dans Paramètres > Notifications, personnalisez vos alertes par email ou SMS.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-icon">
+                        <i data-lucide="shield"></i>
+                    </div>
+                    <h3>Sécurité de mes données</h3>
+                    <p>Vos données sont cryptées et sauvegardées quotidiennement sur des serveurs sécurisés.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Détail Ticket -->
+    <div class="modal" id="ticketModal">
+        <div class="modal-backdrop" onclick="closeTicketModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeTicketModal()">
+                <i data-lucide="x"></i>
+            </button>
+            <div id="ticketDetailContent">
+                <!-- Contenu dynamique -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i data-lucide="check-circle"></i>
+        <span id="toastMessage">Message</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/client-support.js"></script>
+    <script>
+        // Initialiser les icônes Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>

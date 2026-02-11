@@ -4,7 +4,7 @@
 // Extension admin-content.js pour stratégie hebdomadaire automatique
 // ================================================================
 
-console.log('🤖 Module Stratégie IA chargé');
+// console.log('🤖 Module Stratégie IA chargé');
 
 // ================================================================
 // NAVIGATION ONGLETS
@@ -121,7 +121,7 @@ async function generateRemainingWeeksInBackground(startWeek, year, planGlobal) {
             if (response.ok) {
                 const { week } = await response.json();
                 await saveSingleWeek(week, startWeek, year);
-                console.log(`✅ Semaine ${weekNum}/12 générée`);
+                // console.log(`✅ Semaine ${weekNum}/12 générée`);
             }
         } catch (err) {
             console.error(`❌ Erreur semaine ${weekNum}:`, err);
@@ -433,11 +433,11 @@ async function generateContentQueue(strategyId, strategy) {
     try {
         showToast('🤖 Génération de la queue de contenus...', 'info');
         
-        console.log('📋 Génération queue pour', strategy.contenus.length, 'contenus');
+        // console.log('📋 Génération queue pour', strategy.contenus.length, 'contenus');
         
         const contentPromises = strategy.contenus.map(async (idea, index) => {
             try {
-                console.log(`📝 Contenu ${index + 1}:`, idea.sujet);
+                // console.log(`📝 Contenu ${index + 1}:`, idea.sujet);
                 
                 // Récupérer l'historique pour cohérence
                 const { data: history } = await window.supabaseClient
@@ -466,7 +466,7 @@ async function generateContentQueue(strategyId, strategy) {
                 }
                 
                 const result = await response.json();
-                console.log('✅ Contenu généré:', result);
+                // console.log('✅ Contenu généré:', result);
                 
                 const content = result.content;
                 
@@ -506,7 +506,7 @@ async function generateContentQueue(strategyId, strategy) {
                     throw error;
                 }
                 
-                console.log('✅ Inséré dans queue:', data);
+                // console.log('✅ Inséré dans queue:', data);
                 return data;
                 
             } catch (itemError) {
@@ -519,7 +519,7 @@ async function generateContentQueue(strategyId, strategy) {
         const successes = results.filter(r => r.status === 'fulfilled').length;
         const failures = results.filter(r => r.status === 'rejected').length;
         
-        console.log(`📊 Résultats: ${successes} succès, ${failures} échecs`);
+        // console.log(`📊 Résultats: ${successes} succès, ${failures} échecs`);
         
         if (successes > 0) {
             showToast(`✅ ${successes} contenu(s) créé(s) !`, 'success');

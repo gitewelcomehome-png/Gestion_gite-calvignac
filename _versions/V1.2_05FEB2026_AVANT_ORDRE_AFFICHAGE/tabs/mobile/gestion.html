@@ -1,0 +1,54 @@
+<div class="tab-container">
+    <!-- Header -->
+    <div class="card" style="margin-bottom: 15px; padding: 15px;">
+        <h2 style="margin: 0 0 10px 0; font-size: 1.2rem;">🏠 Gestion Gîtes</h2>
+        <button onclick="window.openAddGiteModal ? openAddGiteModal() : alert('Fonction non disponible')" 
+                class="btn-neo" style="width: 100%; padding: 12px; background: #2ecc71; color: white;">
+            ➕ Nouveau Gîte
+        </button>
+    </div>
+
+    <!-- Liste des gîtes -->
+    <div id="gites-list-container">
+        <!-- Généré par JavaScript -->
+    </div>
+</div>
+
+<style>
+.gite-card-mobile {
+    background: var(--card);
+    border: 2px solid #2D3436;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 3px 3px 0 #2D3436;
+}
+
+.gite-card-mobile h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    color: var(--text);
+}
+
+.gite-info-row {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+}
+
+.gite-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.gite-actions button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid #2D3436;
+    background: var(--card);
+    cursor: pointer;
+}
+</style>

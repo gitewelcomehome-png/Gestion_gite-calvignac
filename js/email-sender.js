@@ -43,7 +43,7 @@ async function sendEmail({ to, subject, html, fromName }) {
             throw new Error(data.message || 'Erreur envoi email');
         }
 
-        console.log('✅ Email envoyé avec succès:', data);
+        // console.log('✅ Email envoyé avec succès:', data);
         return { success: true, data };
 
     } catch (error) {

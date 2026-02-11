@@ -43,9 +43,17 @@ let renderCalendarTimeout = null; // Debounce pour le re-render du calendrier
 // ==========================================
 
 // Gestionnaires globaux pour la sélection par glisser
-document.addEventListener('mouseup', () => {
+document.addEventListener('mouseup', (e) => {
+    // Ne pas interférer avec les clics sur les boutons
+    if (e.target.closest('button')) {
+        isSelecting = false;
+        selectionMode = null;
+        return;
+    }
+    
     if (isSelecting && selectedDates.length > 0) {
         // Ouvrir le modal avec les dates sélectionnées
+        // Ne PAS réinitialiser selectedDates ici, car saveTarifFromModal() en a besoin
         openTarifModal(selectedDates[0]);
     }
     isSelecting = false;
@@ -55,7 +63,7 @@ document.addEventListener('mouseup', () => {
 async function initCalendrierTarifs() {
     // 🚫 Bloquer en mode mobile (version mobile séparée)
     if (window.isMobile) {
-        console.log('📱 Mode mobile: initCalendrierTarifs() ignorée (version mobile séparée)');
+        // console.log('📱 Mode mobile: initCalendrierTarifs() ignorée (version mobile séparée)');
         return;
     }
     
@@ -522,6 +530,7 @@ function _renderCalendrierTarifsImmediate() {
             
             // Si c'est le début d'une barre (premier jour OU début de semaine), créer la barre continue
             if (isBarStart) {
+                dayCard.style.zIndex = '10'; // Z-index élevé pour passer au-dessus des autres cellules
                 const plateformeColor = getPlateformeColor(reservationBar.plateforme);
                 
                 // Créer la barre qui s'étend sur plusieurs jours (jusqu'à la fin de la semaine)
@@ -531,7 +540,7 @@ function _renderCalendrierTarifsImmediate() {
                         <div class="reservation-bar" style="
                             position: absolute;
                             left: 4px;
-                            right: calc(-100% * ${barLength - 1} - ${(barLength - 1) * 4}px + 4px);
+                            right: calc(-100% * ${barLength - 1} - ${(barLength - 1) * 15}px + 4px);
                             height: 38px;
                             background: ${plateformeColor};
                             border: 2px solid #2D3436;
@@ -553,6 +562,7 @@ function _renderCalendrierTarifsImmediate() {
                 `;
             } else {
                 // Jours suivants de la réservation : afficher uniquement le numéro du jour
+                dayCard.style.zIndex = '1'; // Z-index bas pour passer sous la barre
                 dayCard.innerHTML = `
                     <div class="day-number">${day}</div>
                     <div style="flex: 1;"></div>
@@ -658,9 +668,15 @@ function openTarifModal(dateStr) {
     const prixInput = document.getElementById('modal-tarif-prix');
     
     const date = new Date(dateStr + 'T00:00:00');
-    dateDisplay.textContent = `📅 ${date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`;
     
-    // Pré-remplir avec le tarif existant
+    // Afficher le nombre de jours sélectionnés
+    if (selectedDates.length > 1) {
+        dateDisplay.textContent = `📅 ${selectedDates.length} jours sélectionnés (du ${new Date(selectedDates[0] + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} au ${new Date(selectedDates[selectedDates.length - 1] + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })})`;
+    } else {
+        dateDisplay.textContent = `📅 ${date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`;
+    }
+    
+    // Pré-remplir avec le tarif existant (du premier jour)
     const tarif = tarifsCache.find(t => t.date === dateStr);
     prixInput.value = tarif ? tarif.prix_nuit : '';
     
@@ -1706,7 +1722,7 @@ function toggleAccordion(sectionId) {
 function renderCalendrierTarifsTab() {
     // 🚫 Bloquer en mode mobile (version mobile séparée)
     if (window.isMobile) {
-        console.log('📱 Mode mobile: renderCalendrierTarifsTab() ignorée (version mobile séparée)');
+        // console.log('📱 Mode mobile: renderCalendrierTarifsTab() ignorée (version mobile séparée)');
         return;
     }
     
@@ -1956,6 +1972,7 @@ function openRemplissageAutoModal() {
         window.openModalRemplissageAuto(currentGiteId);
     } else {
         console.error('❌ Module de remplissage automatique non chargé');
+        alert('⚠️ Module de remplissage automatique non disponible');
     }
 }
 

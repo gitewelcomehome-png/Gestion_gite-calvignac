@@ -244,6 +244,16 @@ function switchTab(tabName) {
             }, 200);
         }
         // MOBILE : Le script est déjà dans le tab chargé, rien à faire ici
+    } else if (tabName === 'gestion') {
+        // Appeler directement showGitesManager au lieu de charger tab-gestion.html
+        // console.log('🏠 Tab GESTION activé - Appel de showGitesManager()');
+        if (typeof window.showGitesManager === 'function') {
+            setTimeout(() => {
+                window.showGitesManager();
+            }, 100);
+        } else {
+            console.error('❌ showGitesManager non disponible');
+        }
     } else if (tabName === 'infos-gites') {
         if (typeof generateGitesButtons === 'function') {
             setTimeout(() => generateGitesButtons(), 100);
@@ -302,7 +312,7 @@ function switchTab(tabName) {
         // En mode mobile, ne pas appeler la fonction desktop
         const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
         if (isMobileDevice && document.documentElement.classList.contains('is-mobile')) {
-            console.log('📱 Mode mobile: skip renderCalendrierTarifsTab (version mobile chargée depuis HTML)');
+            // console.log('📱 Mode mobile: skip renderCalendrierTarifsTab (version mobile chargée depuis HTML)');
         } else if (typeof renderCalendrierTarifsTab === 'function') {
             renderCalendrierTarifsTab();
         }

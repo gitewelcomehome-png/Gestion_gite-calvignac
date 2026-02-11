@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Fiscal History</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test Fiscal History 2026</h1>
+    <pre id="result">Chargement...</pre>
+
+    <script type="module">
+        // Importer la config
+        const response = await fetch('./config/supabase-config.js');
+        const configText = await response.text();
+        
+        // Extraire les variables (hack simple pour demo)
+        const urlMatch = configText.match(/SUPABASE_URL\s*=\s*['"]([^'"]+)['"]/);
+        const keyMatch = configText.match(/SUPABASE_ANON_KEY\s*=\s*['"]([^'"]+)['"]/);
+        
+        const SUPABASE_URL = urlMatch[1];
+        const SUPABASE_ANON_KEY = keyMatch[1];
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true
+            }
+        });
+        
+        // Vérifier l'utilisateur
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        
+        if (!user) {
+            document.getElementById('result').textContent = '❌ NON CONNECTÉ';
+        } else {
+            // Chercher simulation 2026
+            const { data, error } = await supabaseClient
+                .from('fiscal_history')
+                .select('*')
+                .eq('year', 2026)
+                .order('created_at', { ascending: false })
+                .limit(1);
+            
+            const resultEl = document.getElementById('result');
+            
+            if (error) {
+                resultEl.textContent = `❌ ERREUR:\n${JSON.stringify(error, null, 2)}`;
+            } else if (!data || data.length === 0) {
+                resultEl.textContent = '⚠️ AUCUNE SIMULATION 2026 TROUVÉE\n\nC\'est le problème ! Le dashboard ne trouve rien.';
+            } else {
+                const sim = data[0];
+                const details = sim.donnees_detaillees || {};
+                resultEl.textContent = `✅ SIMULATION 2026 TROUVÉE\n\nCA: ${details.chiffre_affaires || 0}€\nCharges Total: ${details.charges_total || 0}€\nBénéfice: ${details.benefice_imposable || 0}€\n\nDernière modif: ${sim.updated_at}\n\n${JSON.stringify(sim, null, 2)}`;
+            }
+        }
+    </script>
+</body>
+</html>

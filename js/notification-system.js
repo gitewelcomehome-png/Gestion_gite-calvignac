@@ -57,7 +57,7 @@ class NotificationSystem {
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
             this.checkInterval = null;
-            console.log('🔕 Notification System arrêté');
+            // console.log('🔕 Notification System arrêté');
         }
     }
 
@@ -233,8 +233,8 @@ class NotificationSystem {
                 this.saveLastCheck();
             }
         } catch (error) {
-            // Catcher l'erreur silencieusement (site en production)
-            if (error.code !== '42703') { // Si ce n'est pas l'erreur de colonne connue
+            // Les erreurs réseau temporaires sont filtrées en amont par error-tracker
+            if (error.code && error.code !== '42703') {
                 console.error('Erreur checkNewReservations:', error);
             }
         }
@@ -314,7 +314,7 @@ class NotificationSystem {
                 window.showToast(notif.title, 'info');
             }
             
-            console.log('🔔 Nouvelle notification:', notif.title);
+            // console.log('🔔 Nouvelle notification:', notif.title);
             
             // Envoyer email si activé
             this.sendEmailNotification(notif);
@@ -369,7 +369,7 @@ class NotificationSystem {
                 });
 
                 if (result.success) {
-                    console.log('✅ Email de notification envoyé');
+                    // console.log('✅ Email de notification envoyé');
                 } else {
                     console.error('❌ Erreur envoi email:', result.error);
                 }
@@ -755,7 +755,7 @@ class NotificationSystem {
                 window.showToast('Préférence mise à jour', 'success');
             }
 
-            console.log('✅ Préférence sauvegardée:', key, value);
+            // console.log('✅ Préférence sauvegardée:', key, value);
         } catch (error) {
             console.error('❌ Erreur sauvegarde préférence:', error);
             if (window.showToast) {

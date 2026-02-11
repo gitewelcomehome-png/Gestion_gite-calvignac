@@ -19,6 +19,19 @@
         </div>
     </header>
 
+    <!-- ⚠️ DEMANDES HORAIRES CLIENTS -->
+    <section id="dashboard-demandes-clients" class="section-alert section-alert--warning mb-md" style="display: none;">
+        <header class="section-header">
+            <h2 class="section-title">
+                <i data-lucide="calendar-clock"></i> DEMANDES HORAIRES (ARRIVÉE/DÉPART)
+            </h2>
+            <span id="badge-demandes-count" class="badge badge--warning badge--count">0</span>
+        </header>
+        <div id="liste-demandes-clients" class="section-content section-content--compact">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande d'horaire en attente</p>
+        </div>
+    </section>
+
     <!-- 🎫 TICKETS SUPPORT EN ATTENTE -->
     <section id="dashboard-tickets-support" class="section-alert section-alert--warning mb-md" style="display: none;">
         <header class="section-header">
@@ -29,19 +42,6 @@
         </header>
         <div id="liste-tickets-support" class="section-content section-content--compact">
             <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun ticket en attente</p>
-        </div>
-    </section>
-
-    <!-- ⚠️ DEMANDES CLIENTS URGENTES -->
-    <section id="dashboard-demandes-clients" class="section-alert section-alert--warning mb-md" style="display: none;">
-        <header class="section-header">
-            <h2 class="section-title">
-                <i data-lucide="file-text"></i> FICHES CLIENTS À ENVOYER
-            </h2>
-            <span id="badge-demandes-count" class="badge badge--warning badge--count">0</span>
-        </header>
-        <div id="liste-demandes-clients" class="section-content section-content--compact">
-            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>
         </div>
     </section>
 
@@ -149,7 +149,10 @@
                         <i data-lucide="shopping-cart"></i>
                         Achats & Courses
                     </h3>
-                    <button onclick="addTodoItem('achats')" class="btn btn--icon-sidebar">+</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="openShoppingListManager()" class="btn btn--secondary" style="font-size: 13px; padding: 6px 12px;">📋 Liste</button>
+                        <button onclick="addTodoItem('achats')" class="btn btn--icon-sidebar">+</button>
+                    </div>
                 </header>
                 <div id="todo-achats">
                     <!-- Todos dynamiques -->
@@ -490,22 +493,22 @@ window.debugModalLabels = function() {
     setTimeout(() => {
         const modal = document.getElementById('addTodoModal');
         const htmlClasses = document.documentElement.className;
-        console.log('=== DEBUG MODAL LABELS ===');
-        console.log('🔍 Classes HTML:', htmlClasses);
-        console.log('🎨 Style détecté:', htmlClasses.includes('style-apple') ? 'APPLE' : 'SIDEBAR');
+        // console.log('=== DEBUG MODAL LABELS ===');
+        // console.log('🔍 Classes HTML:', htmlClasses);
+        // console.log('🎨 Style détecté:', htmlClasses.includes('style-apple') ? 'APPLE' : 'SIDEBAR');
         
         const labels = modal.querySelectorAll('.form-group label');
-        console.log('📋 Nombre de labels:', labels.length);
+        // console.log('📋 Nombre de labels:', labels.length);
         
         labels.forEach((label, i) => {
             const computed = window.getComputedStyle(label);
-            console.log(`Label ${i+1}: "${label.textContent.trim()}"`);
-            console.log(`  ├─ color: ${computed.color}`);
-            console.log(`  ├─ font-size: ${computed.fontSize}`);
-            console.log(`  ├─ font-weight: ${computed.fontWeight}`);
-            console.log(`  └─ text-transform: ${computed.textTransform}`);
+            // console.log(`Label ${i+1}: "${label.textContent.trim()}"`);
+            // console.log(`  ├─ color: ${computed.color}`);
+            // console.log(`  ├─ font-size: ${computed.fontSize}`);
+            // console.log(`  ├─ font-weight: ${computed.fontWeight}`);
+            // console.log(`  └─ text-transform: ${computed.textTransform}`);
         });
-        console.log('========================');
+        // console.log('========================');
     }, 150);
 };
 
@@ -531,26 +534,26 @@ window.debugEditModal = function() {
     const originalSetStyle = window.setStyle;
     if (originalSetStyle) {
         window.setStyle = function(style) {
-            console.log('🎨 SWITCH STYLE:', style);
-            console.log('🔍 Classes HTML avant:', document.documentElement.className);
+            // console.log('🎨 SWITCH STYLE:', style);
+            // console.log('🔍 Classes HTML avant:', document.documentElement.className);
             
             // Appel de la fonction originale
             originalSetStyle.call(this, style);
             
-            console.log('🔍 Classes HTML après:', document.documentElement.className);
+            // console.log('🔍 Classes HTML après:', document.documentElement.className);
             
             // Vérifier les styles appliqués aux labels
             setTimeout(() => {
                 const labels = document.querySelectorAll('.modal-content .form-group label');
-                console.log('📋 Nombre de labels trouvés:', labels.length);
+                // console.log('📋 Nombre de labels trouvés:', labels.length);
                 labels.forEach((label, i) => {
                     const computedStyle = window.getComputedStyle(label);
-                    console.log(`📌 Label ${i+1}:`, {
-                        text: label.textContent.trim(),
-                        color: computedStyle.color,
-                        fontSize: computedStyle.fontSize,
-                        fontWeight: computedStyle.fontWeight
-                    });
+                    // console.log(`📌 Label ${i+1}:`, {
+                    //     text: label.textContent.trim(),
+                    //     color: computedStyle.color,
+                    //     fontSize: computedStyle.fontSize,
+                    //     fontWeight: computedStyle.fontWeight
+                    // });
                 });
             }, 100);
             
@@ -582,7 +585,7 @@ window.debugEditModal = function() {
     // Initialiser au chargement de la page
     document.addEventListener('DOMContentLoaded', function() {
         const savedStyle = localStorage.getItem('icalou-style') || 'sidebar';
-        console.log('🚀 Initialisation style:', savedStyle);
+        // console.log('🚀 Initialisation style:', savedStyle);
         updateModalSwitchButtons(savedStyle);
     });
 
@@ -592,7 +595,7 @@ window.debugEditModal = function() {
         // Attendre DOMContentLoaded
     } else {
         const savedStyle = localStorage.getItem('icalou-style') || 'sidebar';
-        console.log('🚀 Initialisation immédiate style:', savedStyle);
+        // console.log('🚀 Initialisation immédiate style:', savedStyle);
         updateModalSwitchButtons(savedStyle);
     }
     

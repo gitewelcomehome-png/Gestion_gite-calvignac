@@ -232,6 +232,13 @@
 ### `/_archives/` - Fichiers obsolètes
 - Tout fichier inutile doit être archivé ici
 
+### `/LiveOwnerUnit/` - Application mobile (Expo)
+- Application mobile Expo Router pour iOS/Android
+- Point d'entree: `app/_layout.tsx` avec AuthProvider + redirections
+- Onglets: `app/(tabs)/index.tsx`, `calendar.tsx`, `cleaning.tsx`, `stats.tsx`, `settings.tsx`
+- Auth Supabase via variables `EXPO_PUBLIC_SUPABASE_URL` et `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+- Donnees chargees depuis `reservations`, `cleaning_schedule`, `gites` (RLS)
+
 ---
 
 ## 🔐 Système d'Authentification

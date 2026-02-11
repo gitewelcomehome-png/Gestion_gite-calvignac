@@ -370,8 +370,7 @@ async function getAllHistoricalData() {
     try {
         const { data, error } = await window.supabaseClient
             .from('historical_data')
-            .select('*')
-            .order('year', { ascending: false });
+            .select('*');
         
         if (error) throw error;
         return data || [];

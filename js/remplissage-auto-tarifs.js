@@ -421,8 +421,8 @@
         let countVacances = 0;
         let countReservees = 0;
 
-        // Compter aussi les dates réservées pour les stats
-        const allDatesIncludingReserved = [];
+        // Générer TOUTES les dates (y compris réservées) pour le preview
+        const allDatesToShow = [];
         let debut, fin;
         
         switch (modalState.periode.type) {
@@ -451,16 +451,16 @@
             const dateStr = current.toISOString().split('T')[0];
             const jourSemaine = getJourSemaine(dateStr);
             if (modalState.joursSelectionnes[jourSemaine]) {
-                if (isDateReservee(dateStr)) {
+                const estReservee = isDateReservee(dateStr);
+                allDatesToShow.push({ date: dateStr, reservee: estReservee });
+                if (estReservee) {
                     countReservees++;
-                } else {
-                    allDatesIncludingReserved.push(dateStr);
                 }
             }
             current.setDate(current.getDate() + 1);
         }
 
-        if (dates.length === 0 && countReservees === 0) {
+        if (allDatesToShow.length === 0) {
             container.innerHTML = '<p class="no-dates">Aucun jour sélectionné</p>';
             document.getElementById('count-total').textContent = '0';
             document.getElementById('count-feries').textContent = '0';
@@ -471,11 +471,11 @@
 
         // Grouper par mois
         const datesByMonth = {};
-        dates.forEach(dateStr => {
+        allDatesToShow.forEach(({ date: dateStr, reservee }) => {
             const date = new Date(dateStr + 'T12:00:00');
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             if (!datesByMonth[monthKey]) datesByMonth[monthKey] = [];
-            datesByMonth[monthKey].push(dateStr);
+            datesByMonth[monthKey].push({ date: dateStr, reservee });
         });
 
         // Afficher les mois
@@ -491,25 +491,30 @@
                 <h4>${monthName}</h4>
                 <div class="preview-days">`;
             
-            datesByMonth[monthKey].forEach(dateStr => {
+            datesByMonth[monthKey].forEach(({ date: dateStr, reservee }) => {
                 const date = new Date(dateStr + 'T12:00:00');
                 const day = date.getDate();
                 const jourFerie = isJourFerie(dateStr);
                 const vacances = isVacancesScolaires(dateStr);
                 
-                if (jourFerie) countFeries++;
-                if (vacances) countVacances++;
+                if (!reservee && jourFerie) countFeries++;
+                if (!reservee && vacances) countVacances++;
                 
                 let classes = ['preview-day'];
                 let title = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
                 
-                if (jourFerie) {
-                    classes.push('ferie');
-                    title += ` - ${jourFerie.nom}`;
-                }
-                if (vacances) {
-                    classes.push('vacances');
-                    title += ` - ${vacances.nom}`;
+                if (reservee) {
+                    classes.push('reservee');
+                    title += ' - RÉSERVÉ (ignoré)';
+                } else {
+                    if (jourFerie) {
+                        classes.push('ferie');
+                        title += ` - ${jourFerie.nom}`;
+                    }
+                    if (vacances) {
+                        classes.push('vacances');
+                        title += ` - ${vacances.nom}`;
+                    }
                 }
                 
                 html += `<div class="${classes.join(' ')}" title="${title}">${day}</div>`;
@@ -587,17 +592,15 @@
                 tarifsExistants[date] = modalState.tarif;
             });
 
-            // Convertir en tableau pour sauvegarde (format attendu en base)
-            const tarifsArray = Object.entries(tarifsExistants).map(([date, prix_nuit]) => ({
-                date,
-                prix_nuit: parseFloat(prix_nuit)
-            }));
+            // ✅ NOUVEAU : Sauvegarder en format OBJECT (pas array)
+            // Format attendu : {"2026-02-16": 170, "2026-02-17": 180}
+            // (Compatible avec le code mobile et les promos)
 
             // Sauvegarder dans la base
             const { error: updateError } = await window.supabaseClient
                 .from('gites')
                 .update({ 
-                    tarifs_calendrier: tarifsArray,
+                    tarifs_calendrier: tarifsExistants,  // ✅ Object direct, pas array
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', modalState.currentGiteId);

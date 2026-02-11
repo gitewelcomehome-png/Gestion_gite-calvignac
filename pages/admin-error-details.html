@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails Erreur & Corrections</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    <style>
+        .error-details-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .error-header {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .error-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #06b6d4;
+        }
+
+        .correction-item {
+            background: #f8fafc;
+            border-left: 4px solid #06b6d4;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+
+        .code-diff {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .code-old {
+            background: #fee;
+            border-left: 3px solid #f44;
+        }
+
+        .code-new {
+            background: #efe;
+            border-left: 3px solid #4f4;
+        }
+
+        .ticket-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .status-open {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-closed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.4rem;
+            top: 0.3rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #06b6d4;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #e2e8f0;
+        }
+
+        .btn-back {
+            background: white;
+            color: #06b6d4;
+            border: 2px solid #06b6d4;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: #06b6d4;
+            color: white;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metadata-item {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .metadata-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+        }
+
+        .metadata-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .test-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .test-passed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .test-failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .test-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-details-container">
+        <!-- Header -->
+        <div class="error-header">
+            <button class="btn-back" onclick="window.history.back()">
+                <i data-lucide="arrow-left"></i>
+                Retour au monitoring
+            </button>
+            <h1 style="margin: 1rem 0 0.5rem 0;">
+                <i data-lucide="bug"></i>
+                Détails de l'erreur
+            </h1>
+            <div id="error-title"></div>
+        </div>
+
+        <!-- Informations erreur -->
+        <div class="error-card">
+            <div class="section-title">
+                <i data-lucide="info"></i>
+                Informations de l'erreur
+            </div>
+            <div id="error-info"></div>
+        </div>
+
+        <!-- Ticket associé -->
+        <div class="error-card" id="ticket-section" style="display: none;">
+            <div class="section-title">
+                <i data-lucide="ticket"></i>
+                Ticket support associé
+            </div>
+            <div id="ticket-info"></div>
+        </div>
+
+        <!-- Corrections apportées -->
+        <div class="error-card">
+            <div class="section-title">
+                <i data-lucide="wrench"></i>
+                Corrections apportées
+            </div>
+            <div id="corrections-list">
+                <p style="color: #64748b;">Aucune correction encore appliquée</p>
+            </div>
+        </div>
+
+        <!-- Historique -->
+        <div class="error-card">
+            <div class="section-title">
+                <i data-lucide="clock"></i>
+                Historique
+            </div>
+            <div class="timeline" id="timeline"></div>
+        </div>
+    </div>
+
+    <script src="../js/supabase-init.js"></script>
+    <script>
+        lucide.createIcons();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorId = urlParams.get('error');
+
+        async function loadErrorDetails() {
+            if (!errorId) {
+                alert('ID erreur manquant');
+                window.history.back();
+                return;
+            }
+
+            try {
+                // Charger l'erreur
+                const { data: error, error: errorFetch } = await window.supabaseClient
+                    .from('cm_error_logs')
+                    .select('*')
+                    .eq('id', errorId)
+                    .single();
+
+                if (errorFetch) throw errorFetch;
+
+                // Afficher les infos
+                displayErrorInfo(error);
+
+                // Charger ticket associé
+                await loadTicket(error);
+
+                // Charger corrections
+                await loadCorrections(errorId);
+
+                // Charger historique
+                await loadTimeline(errorId);
+
+            } catch (err) {
+                console.error('Erreur chargement:', err);
+                alert('Impossible de charger les détails');
+            }
+        }
+
+        function displayErrorInfo(error) {
+            document.getElementById('error-title').innerHTML = `
+                <code style="font-size: 0.9rem; opacity: 0.9;">${error.message}</code>
+            `;
+
+            const statusBadge = error.resolved 
+                ? '<span style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem;">✅ Résolu</span>'
+                : '<span style="background: #fee2e2; color: #991b1b; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem;">❌ Non résolu</span>';
+
+            document.getElementById('error-info').innerHTML = `
+                <div class="metadata-grid">
+                    <div class="metadata-item">
+                        <div class="metadata-label">Statut</div>
+                        <div class="metadata-value">${statusBadge}</div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="metadata-label">Fichier</div>
+                        <div class="metadata-value">${error.source || 'N/A'}</div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="metadata-label">Ligne</div>
+                        <div class="metadata-value">${error.metadata?.lineno || 'N/A'}</div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="metadata-label">Première détection</div>
+                        <div class="metadata-value">${new Date(error.timestamp).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+
+                ${error.stack_trace ? `
+                    <div style="margin-top: 1rem;">
+                        <strong>Stack trace:</strong>
+                        <div class="code-block">${error.stack_trace}</div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        async function loadTicket(error) {
+            const { data: ticket } = await window.supabaseClient
+                .from('cm_support_tickets')
+                .select('*')
+                .eq('error_id', errorId)
+                .single();
+
+            if (ticket) {
+                document.getElementById('ticket-section').style.display = 'block';
+                
+                const statusClass = ticket.status === 'closed' ? 'status-closed' : 'status-open';
+                const statusIcon = ticket.status === 'closed' ? 'check-circle' : 'clock';
+                
+                document.getElementById('ticket-info').innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3>Ticket #${ticket.id}</h3>
+                            <p>${ticket.subject}</p>
+                        </div>
+                        <span class="ticket-status ${statusClass}">
+                            <i data-lucide="${statusIcon}"></i>
+                            ${ticket.status}
+                        </span>
+                    </div>
+                    <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                        ${ticket.message}
+                    </div>
+                    ${ticket.metadata?.auto_closed ? `
+                        <div style="margin-top: 1rem; padding: 1rem; background: #d1fae5; border-radius: 8px; color: #065f46;">
+                            ✅ Ticket clôturé automatiquement après 24h sans réapparition
+                        </div>
+                    ` : ''}
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        async function loadCorrections(errorId) {
+            const { data: corrections } = await window.supabaseClient
+                .from('cm_error_corrections')
+                .select('*')
+                .eq('error_id', errorId)
+                .order('applied_at', { ascending: false });
+
+            if (corrections && corrections.length > 0) {
+                const html = corrections.map(corr => {
+                    const testBadge = corr.test_status
+                        ? `<span class="test-badge test-${corr.test_status}"><i data-lucide="${corr.test_status === 'passed' ? 'check' : corr.test_status === 'failed' ? 'x' : 'clock'}"></i> Test ${corr.test_status}</span>`
+                        : '';
+
+                    return `
+                        <div class="correction-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div>
+                                    <strong>${corr.file_path}</strong>
+                                    <div style="font-size: 0.85rem; color: #64748b;">
+                                        ${new Date(corr.applied_at).toLocaleString('fr-FR')} par ${corr.applied_by}
+                                    </div>
+                                </div>
+                                ${testBadge}
+                            </div>
+                            
+                            ${corr.description ? `<p style="margin-bottom: 1rem;">${corr.description}</p>` : ''}
+                            
+                            ${corr.old_code && corr.new_code ? `
+                                <div class="code-diff">
+                                    <div>
+                                        <strong style="color: #dc2626;">- Ancien code</strong>
+                                        <div class="code-block code-old">${escapeHtml(corr.old_code)}</div>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #16a34a;">+ Nouveau code</strong>
+                                        <div class="code-block code-new">${escapeHtml(corr.new_code)}</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('corrections-list').innerHTML = html;
+                lucide.createIcons();
+            }
+        }
+
+        async function loadTimeline(errorId) {
+            // Combiner historique ticket + corrections
+            const { data: history } = await window.supabaseClient
+                .from('cm_support_ticket_history')
+                .select('*')
+                .eq('ticket_id', errorId)
+                .order('created_at', { ascending: true });
+
+            const { data: corrections } = await window.supabaseClient
+                .from('cm_error_corrections')
+                .select('*')
+                .eq('error_id', errorId)
+                .order('applied_at', { ascending: true });
+
+            const events = [
+                ...(history || []).map(h => ({
+                    type: 'history',
+                    action: h.action,
+                    description: h.description,
+                    date: h.created_at
+                })),
+                ...(corrections || []).map(c => ({
+                    type: 'correction',
+                    action: 'correction_applied',
+                    description: `Correction appliquée: ${c.file_path}`,
+                    date: c.applied_at
+                }))
+            ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (events.length > 0) {
+                const html = events.map(event => `
+                    <div class="timeline-item">
+                        <strong>${formatAction(event.action)}</strong>
+                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">
+                            ${new Date(event.date).toLocaleString('fr-FR')}
+                        </div>
+                        ${event.description ? `<div style="margin-top: 0.5rem;">${event.description}</div>` : ''}
+                    </div>
+                `).join('');
+
+                document.getElementById('timeline').innerHTML = html;
+            } else {
+                document.getElementById('timeline').innerHTML = '<p style="color: #64748b;">Aucun historique</p>';
+            }
+        }
+
+        function formatAction(action) {
+            const actions = {
+                'created': '🎫 Ticket créé',
+                'email_sent': '📧 Email envoyé',
+                'status_changed': '🔄 Statut modifié',
+                'auto_closed': '✅ Clôturé automatiquement',
+                'correction_applied': '🔧 Correction appliquée'
+            };
+            return actions[action] || action;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Charger au démarrage
+        loadErrorDetails();
+    </script>
+</body>
+</html>

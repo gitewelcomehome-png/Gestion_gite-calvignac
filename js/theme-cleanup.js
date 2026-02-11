@@ -7,7 +7,7 @@
     'use strict';
     
     function cleanInlineStyles() {
-        console.log('🧹 Nettoyage des styles inline...');
+        // console.log('🧹 Nettoyage des styles inline...');
         
         // Liste des propriétés à nettoyer
         const propertiesToClean = [
@@ -58,7 +58,7 @@
             }
         });
         
-        console.log(`✅ ${cleanedCount} éléments nettoyés`);
+        // console.log(`✅ ${cleanedCount} éléments nettoyés`);
     }
     
     // Exécuter au chargement

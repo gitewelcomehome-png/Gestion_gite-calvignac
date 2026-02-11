@@ -4,7 +4,7 @@
 // Analytics avancés, métriques SaaS, cohort analysis, prédictions IA
 // ================================================================
 
-console.log('🚀 Script admin-finance.js chargé');
+// console.log('🚀 Script admin-finance.js chargé');
 
 // ================================================================
 // ÉTAT GLOBAL
@@ -19,7 +19,7 @@ let currentPeriod = 90;
 // ================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📊 Initialisation Finance & BI');
+    // console.log('📊 Initialisation Finance & BI');
     
     // Créer icônes immédiatement
     lucide.createIcons();
@@ -50,7 +50,7 @@ async function loadAllData() {
             loadPredictions()
         ]);
         
-        console.log('✅ Toutes les données Finance chargées');
+        // console.log('✅ Toutes les données Finance chargées');
     } catch (error) {
         console.error('❌ Erreur chargement données finance:', error);
     }
@@ -112,7 +112,7 @@ async function loadKPIsFinanciers() {
         updateChangeIndicator('kpiRevenuChange', changePct);
         updateChangeIndicator('kpiMRRChange', changePct * 0.5); // Estimation
         
-        console.log('✅ KPIs financiers chargés:', { revenuTotal, mrr, croissance, marge });
+        // console.log('✅ KPIs financiers chargés:', { revenuTotal, mrr, croissance, marge });
         
     } catch (error) {
         console.error('❌ Erreur KPIs financiers:', error);
@@ -166,7 +166,7 @@ async function loadMetriquesSaaS() {
         document.getElementById('kpiPayback').textContent = paybackPeriod.toFixed(1) + ' mois';
         document.getElementById('kpiChurnRate').textContent = tauxChurn.toFixed(1) + '%';
         
-        console.log('✅ Métriques SaaS chargées:', { ltv, cac, paybackPeriod, tauxChurn });
+        // console.log('✅ Métriques SaaS chargées:', { ltv, cac, paybackPeriod, tauxChurn });
         
     } catch (error) {
         console.error('❌ Erreur métriques SaaS:', error);
@@ -282,7 +282,7 @@ async function loadGraphiques() {
             }
         });
         
-        console.log('✅ Graphiques créés');
+        // console.log('✅ Graphiques créés');
         
     } catch (error) {
         console.error('❌ Erreur graphiques:', error);
@@ -361,7 +361,7 @@ async function loadCohortAnalysis() {
             `;
         }).join('');
         
-        console.log('✅ Cohort analysis chargée');
+        // console.log('✅ Cohort analysis chargée');
         
     } catch (error) {
         console.error('❌ Erreur cohort analysis:', error);
@@ -413,7 +413,7 @@ async function loadTransactions() {
         }).join('');
         
         lucide.createIcons();
-        console.log('✅ Transactions chargées');
+        // console.log('✅ Transactions chargées');
         
     } catch (error) {
         console.error('❌ Erreur transactions:', error);
@@ -472,7 +472,7 @@ async function loadPredictions() {
         document.getElementById('predChurn').textContent = predChurn;
         document.getElementById('predChurnConf').textContent = confChurn + '%';
         
-        console.log('✅ Prédictions IA calculées');
+        // console.log('✅ Prédictions IA calculées');
         
     } catch (error) {
         console.error('❌ Erreur prédictions:', error);

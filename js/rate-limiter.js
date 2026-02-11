@@ -376,10 +376,10 @@ async function deleteReservation(id) {
 
 // ===== EXEMPLE 5: Vérifier statut =====
 const status = window.loginLimiter.getStatus('user@example.com');
-console.log(`Tentatives: ${status.attempts}, Restantes: ${status.remaining}`);
+// console.log(`Tentatives: ${status.attempts}, Restantes: ${status.remaining}`);
 
 if (status.blocked) {
-    console.log(`Bloqué pendant ${status.retryAfter} secondes`);
+    // console.log(`Bloqué pendant ${status.retryAfter} secondes`);
 }
 
 // ===== EXEMPLE 6: Réinitialiser manuellement =====

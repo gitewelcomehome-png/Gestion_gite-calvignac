@@ -31,7 +31,7 @@
             
             if (cached && cacheTimestamp && (Date.now() - parseInt(cacheTimestamp)) < ICONS_CONFIG.cacheExpiry) {
                 svgContent = cached;
-                console.log('🎨 [CALOU Icons] Chargé depuis le cache');
+                // console.log('🎨 [CALOU Icons] Chargé depuis le cache');
             } else {
                 // Fetch depuis le serveur
                 const response = await fetch(ICONS_CONFIG.spritePath);
@@ -43,7 +43,7 @@
                 // Mettre en cache
                 localStorage.setItem(ICONS_CONFIG.cacheKey, svgContent);
                 localStorage.setItem(ICONS_CONFIG.cacheKey + '-timestamp', Date.now().toString());
-                console.log('🎨 [CALOU Icons] Chargé et mis en cache');
+                // console.log('🎨 [CALOU Icons] Chargé et mis en cache');
             }
 
             // Injecter dans le DOM
@@ -102,7 +102,7 @@
         });
 
         if (placeholders.length > 0) {
-            console.log(`🎨 [CALOU Icons] ${placeholders.length} icônes remplacées`);
+            // console.log(`🎨 [CALOU Icons] ${placeholders.length} icônes remplacées`);
         }
     }
 
@@ -158,7 +158,7 @@
         clearCache: () => {
             localStorage.removeItem(ICONS_CONFIG.cacheKey);
             localStorage.removeItem(ICONS_CONFIG.cacheKey + '-timestamp');
-            console.log('🗑️ [CALOU Icons] Cache vidé');
+            // console.log('🗑️ [CALOU Icons] Cache vidé');
         }
     };
 

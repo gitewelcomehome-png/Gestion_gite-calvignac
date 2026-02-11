@@ -567,7 +567,6 @@ async function decrementerStockReservationsTerminees() {
         }
         
         if (!reservationsTerminees || reservationsTerminees.length === 0) {
-            console.log('✅ Aucune réservation terminée à traiter');
             return;
         }
         
@@ -589,11 +588,11 @@ async function decrementerStockReservationsTerminees() {
         const aTraiter = reservationsTerminees.filter(r => !idsTraites.has(r.id));
         
         if (aTraiter.length === 0) {
-            console.log('✅ Toutes les réservations terminées ont déjà été traitées');
+            // console.log('✅ Toutes les réservations terminées ont déjà été traitées');
             return;
         }
         
-        console.log(`📉 ${aTraiter.length} réservation(s) à traiter pour décrémentation du stock`);
+        // console.log(`📉 ${aTraiter.length} réservation(s) à traiter pour décrémentation du stock`);
         
         // Préparer les données pour la modal
         const modifications = [];
@@ -616,32 +615,38 @@ async function decrementerStockReservationsTerminees() {
                 const quantite = besoins[key] || 0;
                 if (quantite <= 0) continue;
                 
-                // Récupérer le stock actuel
-                const { data: stockActuel } = await window.supabaseClient
-                    .from('linen_stock_items')
-                    .select('quantity')
-                    .eq('owner_user_id', user.id)
-                    .eq('gite_id', giteId)
-                    .eq('item_key', key)
-                    .single();
-                
-                const quantiteActuelle = stockActuel?.quantity || 0;
-                stockAvant[key] = quantiteActuelle;
-                
-                const nouvelleQuantite = Math.max(0, quantiteActuelle - quantite);
-                stockApres[key] = nouvelleQuantite;
-                
-                // Mettre à jour le stock (upsert)
-                await window.supabaseClient
-                    .from('linen_stock_items')
-                    .upsert({
-                        owner_user_id: user.id,
-                        gite_id: giteId,
-                        item_key: key,
-                        quantity: nouvelleQuantite
-                    }, {
-                        onConflict: 'owner_user_id,gite_id,item_key'
-                    });
+                try {
+                    // Récupérer le stock actuel
+                    const { data: stockActuel } = await window.supabaseClient
+                        .from('linen_stock_items')
+                        .select('quantity')
+                        .eq('owner_user_id', user.id)
+                        .eq('gite_id', giteId)
+                        .eq('item_key', key)
+                        .maybeSingle();
+                    
+                    const quantiteActuelle = stockActuel?.quantity || 0;
+                    stockAvant[key] = quantiteActuelle;
+                    
+                    const nouvelleQuantite = Math.max(0, quantiteActuelle - quantite);
+                    stockApres[key] = nouvelleQuantite;
+                    
+                    // Mettre à jour le stock (upsert avec syntaxe correcte)
+                    const { error: upsertError } = await window.supabaseClient
+                        .from('linen_stock_items')
+                        .upsert({
+                            owner_user_id: user.id,
+                            gite_id: giteId,
+                            item_key: key,
+                            quantity: nouvelleQuantite
+                        });
+                    
+                    if (upsertError) {
+                        console.error(`Erreur upsert stock pour ${key}:`, upsertError);
+                    }
+                } catch (itemError) {
+                    console.error(`Erreur traitement item ${key}:`, itemError);
+                }
             }
             
             // Ajouter aux modifications
@@ -664,7 +669,7 @@ async function decrementerStockReservationsTerminees() {
                     gite_id: giteId
                 });
             
-            console.log(`✅ Stock décrémenté pour réservation ${reservation.id}`);
+            // console.log(`✅ Stock décrémenté pour réservation ${reservation.id}`);
         }
         
         // Afficher la modal récapitulative si des modifications ont été faites
@@ -672,7 +677,7 @@ async function decrementerStockReservationsTerminees() {
             afficherModalDecrementationStock(modifications);
         }
         
-        console.log('✅ Décrémentation du stock terminée');
+        // console.log('✅ Décrémentation du stock terminée');
         
     } catch (error) {
         console.error('Erreur décrémentation stock:', error);
@@ -1427,9 +1432,9 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture) {
 // ================================================================
 
 async function simulerBesoins() {
-    console.log('🔮 simulerBesoins() appelée');
+    // console.log('🔮 simulerBesoins() appelée');
     const dateLimit = document.getElementById('date-simulation').value;
-    console.log('📅 Date limite:', dateLimit);
+    // console.log('📅 Date limite:', dateLimit);
     
     if (!dateLimit) {
         alert('⚠️ Veuillez sélectionner une date');
@@ -1442,7 +1447,7 @@ async function simulerBesoins() {
         if (!user) throw new Error('Utilisateur non connecté');
 
         const today = new Date().toISOString().split('T')[0];
-        console.log('📊 Requête Supabase de', today, 'à', dateLimit);
+        // console.log('📊 Requête Supabase de', today, 'à', dateLimit);
         
         // Compter les réservations qui SE TERMINENT (check_out) dans la période
         // Car c'est au check-out qu'on doit changer les draps
@@ -1459,7 +1464,7 @@ async function simulerBesoins() {
             throw new Error(`Erreur simulation: ${error.message}`);
         }
         
-        console.log('✅ Réservations récupérées:', reservations?.length);
+        // console.log('✅ Réservations récupérées:', reservations?.length);
 
         // Grouper par gîte (UUID)
         const resaParGite = {};

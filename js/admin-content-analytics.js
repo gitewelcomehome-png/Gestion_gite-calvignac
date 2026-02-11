@@ -2,7 +2,7 @@
 // 📊 ANALYTICS BI - Dashboard de Performance
 // ================================================================
 
-console.log('📊 Module Analytics BI chargé');
+// console.log('📊 Module Analytics BI chargé');
 
 let platformChart, timelineChart;
 

@@ -95,10 +95,10 @@ function openEditModal(id) {
         // Attacher submit
         document.getElementById('editFormMobile').addEventListener('submit', async (event) => {
             event.preventDefault();
-            console.log('📝 Submit formulaire mobile');
+            // console.log('📝 Submit formulaire mobile');
             
             const id = modal.querySelector('#editId').value;
-            console.log('🆔 ID récupéré:', id, 'Type:', typeof id);
+            // console.log('🆔 ID récupéré:', id, 'Type:', typeof id);
             
             const nom = modal.querySelector('#editNom').value.trim();
             const telephone = modal.querySelector('#editTelephone').value.trim();
@@ -108,7 +108,7 @@ function openEditModal(id) {
             const acompte = parseFloat(modal.querySelector('#editAcompte').value) || 0;
             const paiement = modal.querySelector('#editPaiement').value;
             
-            console.log('📦 Données:', { id, nom, telephone, montant, acompte });
+            // console.log('📦 Données:', { id, nom, telephone, montant, acompte });
             
             if (!nom) {
                 showToast('Le nom est obligatoire', 'error');

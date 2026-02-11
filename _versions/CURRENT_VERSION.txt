@@ -1,1 +1,1 @@
-V6.0_05FEB2026_STOCK_AUTO_DRAPS - Système décrémentation automatique stock draps + fixes calculs (PRODUCTION READY - SQL requis)
+V6.2_06FEB2026_SIMPLIFICATION_FISCALITE - Simplification code fiscalité + correction bugs config hardcodés + helpers utilitaires

@@ -18,12 +18,12 @@ let syncInProgress = false;
 async function syncAllCalendars() {
     // ⚠️ PROTECTION : Empêcher les synchronisations simultanées (doublons)
     if (syncInProgress) {
-        console.log('⏳ Synchronisation déjà en cours, ignorée');
+        // console.log('⏳ Synchronisation déjà en cours, ignorée');
         return { total: 0, added: 0, skipped: 0, deleted: 0 };
     }
     
     syncInProgress = true;
-    console.log('🔒 Verrou de synchronisation activé');
+    // console.log('🔒 Verrou de synchronisation activé');
     
     // Recharger les configs depuis localStorage
     window.ICAL_CONFIGS = getIcalConfigs();
@@ -198,7 +198,7 @@ async function syncAllCalendars() {
     } finally {
         // ⚠️ TOUJOURS LIBÉRER LE VERROU, même en cas d'erreur
         syncInProgress = false;
-        console.log('🔓 Verrou de synchronisation libéré');
+        // console.log('🔓 Verrou de synchronisation libéré');
     }
 }
 
@@ -292,10 +292,10 @@ async function syncCalendar(giteId, platform, url) {
             return false;
         });
         
-        console.log(`📋 Réservations existantes pour ${giteName} / ${platform}: ${platformReservations.length}`);
-        console.log(`🔍 DEBUG - Total réservations ${giteName}: ${existingReservations.filter(r => r.gite_id === giteId).length}`);
+        // console.log(`📋 Réservations existantes pour ${giteName} / ${platform}: ${platformReservations.length}`);
+        // console.log(`🔍 DEBUG - Total réservations ${giteName}: ${existingReservations.filter(r => r.gite_id === giteId).length}`);
         platformReservations.forEach(r => {
-            console.log(`   • ${r.dateDebut} → ${r.dateFin} | ${r.nomClient || r.nom} | Plateforme: "${r.plateforme}" | SyncedFrom: "${r.syncedFrom || 'NON DÉFINI'}"`);
+            // console.log(`   • ${r.dateDebut} → ${r.dateFin} | ${r.nomClient || r.nom} | Plateforme: "${r.plateforme}" | SyncedFrom: "${r.syncedFrom || 'NON DÉFINI'}"`);
         });
         
         // Créer un Set des IDs de réservations trouvées dans le flux iCal
@@ -470,10 +470,10 @@ async function syncCalendar(giteId, platform, url) {
                 syncedFrom: platform
             };
             
-            console.log(`🔍 TENTATIVE INSERTION: ${nom} - ${dateDebut} → ${dateFin} (${site})`);
+            // console.log(`🔍 TENTATIVE INSERTION: ${nom} - ${dateDebut} → ${dateFin} (${site})`);
             try {
                 await addReservation(reservation);
-                console.log(`✅ INSERTION RÉUSSIE: ${nom}`);
+                // console.log(`✅ INSERTION RÉUSSIE: ${nom}`);
                 added++;
             } catch (insertError) {
                 console.error(`❌ ERREUR INSERTION: ${nom}`, insertError);
@@ -505,7 +505,7 @@ async function syncCalendar(giteId, platform, url) {
                 }
                 
                 if (!belongsToThisPlatform) {
-                    console.log(`🛡️ PROTECTION: Réservation d'une autre plateforme (${resaPlatform}) - NON supprimée: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                    // console.log(`🛡️ PROTECTION: Réservation d'une autre plateforme (${resaPlatform}) - NON supprimée: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
                     continue;
                 }
                 
@@ -515,24 +515,24 @@ async function syncCalendar(giteId, platform, url) {
                     !oldResa.nom.includes('BOOKED') && 
                     !oldResa.nom.includes('Reserved');
                 
-                console.log(`🔍 ANALYSE PROTECTION: ${oldResa.nom}`);
-                console.log(`   - Nom personnalisé: ${hasCustomName}`);
-                console.log(`   => PROTÉGÉE: ${hasCustomName}`);
+                // console.log(`🔍 ANALYSE PROTECTION: ${oldResa.nom}`);
+                // console.log(`   - Nom personnalisé: ${hasCustomName}`);
+                // console.log(`   => PROTÉGÉE: ${hasCustomName}`);
                 
                 if (hasCustomName) {
-                    console.log(`🔒 Conservation réservation avec nom personnalisé: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                    // console.log(`🔒 Conservation réservation avec nom personnalisé: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
                     continue;
                 }
                 
                 // ⚠️ Cette réservation a été annulée (plus dans le flux iCal)
-                console.log(`⚠️ Réservation annulée détectée: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                // console.log(`⚠️ Réservation annulée détectée: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
                 canceledReservations.push(oldResa);
             }
         }
         
         // 🚨 Si des annulations détectées, demander confirmation avant suppression
         if (canceledReservations.length > 0) {
-            console.log(`\n🚨 ${canceledReservations.length} réservation(s) annulée(s) détectée(s) pour ${giteName} / ${platform}`);
+            // console.log(`\n🚨 ${canceledReservations.length} réservation(s) annulée(s) détectée(s) pour ${giteName} / ${platform}`);
             
             const confirmMsg = canceledReservations.map(r => 
                 `• ${r.dateDebut} → ${r.dateFin} : ${r.nom}`
@@ -553,11 +553,11 @@ async function syncCalendar(giteId, platform, url) {
                         .delete()
                         .eq('id', oldResa.id);
                     
-                    console.log(`✅ Supprimée: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
+                    // console.log(`✅ Supprimée: ${giteName} du ${oldResa.dateDebut} au ${oldResa.dateFin} - ${oldResa.nom}`);
                     deleted++;
                 }
             } else {
-                console.log(`❌ Suppression annulée par l'utilisateur - ${canceledReservations.length} réservation(s) conservée(s)`);
+                // console.log(`❌ Suppression annulée par l'utilisateur - ${canceledReservations.length} réservation(s) conservée(s)`);
             }
         }
 
@@ -600,7 +600,7 @@ async function checkDateOverlap(giteId, dateDebut, dateFin, excludeId = null, ex
         // - Le début de la nouvelle résa est strictement avant la fin de l'existante
         // - ET la fin de la nouvelle résa est strictement après le début de l'existante
         if ((debut < rFin && fin > rDebut)) {
-            console.log(`🔍 Chevauchement détecté: Nouvelle [${dateDebut} → ${dateFin}] vs Existante [${r.dateDebut} → ${r.dateFin}]`);
+            // console.log(`🔍 Chevauchement détecté: Nouvelle [${dateDebut} → ${dateFin}] vs Existante [${r.dateDebut} → ${r.dateFin}]`);
             return true;
         }
     }
@@ -666,11 +666,11 @@ async function cleanupBlockedReservations() {
         }
         
         if (toDelete.length === 0) {
-            console.log('✅ Aucun blocage à nettoyer');
+            // console.log('✅ Aucun blocage à nettoyer');
             return { deleted: 0 };
         }
         
-        console.log(`🧹 Nettoyage de ${toDelete.length} blocage(s)...`);
+        // console.log(`🧹 Nettoyage de ${toDelete.length} blocage(s)...`);
         
         for (const r of toDelete) {
             await window.supabase
@@ -678,7 +678,7 @@ async function cleanupBlockedReservations() {
                 .delete()
                 .eq('id', r.id);
             
-            console.log(`   ✓ Supprimé: ${r.gite || r.giteId} ${r.dateDebut} → ${r.dateFin} (${r.nom})`);
+            // console.log(`   ✓ Supprimé: ${r.gite || r.giteId} ${r.dateDebut} → ${r.dateFin} (${r.nom})`);
         }
         
         return { deleted: toDelete.length };

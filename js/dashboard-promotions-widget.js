@@ -4,14 +4,10 @@
 // Affiche les stats des promotions sur le dashboard admin
 // ================================================================
 
-console.log('🚀 DEBUG: Fichier dashboard-promotions-widget.js chargé');
-
 async function loadPromotionsStats() {
-    console.log('🔍 DEBUG: Chargement stats promotions...');
     
     try {
         if (!window.supabaseClient) {
-            console.error('❌ DEBUG: window.supabaseClient non disponible');
             return;
         }
         
@@ -24,7 +20,7 @@ async function loadPromotionsStats() {
             .select('*');
         
         if (errorPromos) {
-            console.error('❌ DEBUG: Erreur Supabase promotions:', errorPromos);
+            console.error('Erreur chargement promotions:', errorPromos);
             throw errorPromos;
         }
         
@@ -35,12 +31,9 @@ async function loadPromotionsStats() {
             .gte('created_at', dateDebut30j.toISOString());
         
         if (errorUsages) {
-            console.error('❌ DEBUG: Erreur Supabase usages:', errorUsages);
+            console.error('Erreur chargement usages:', errorUsages);
             throw errorUsages;
         }
-        
-        console.log('📊 DEBUG: Promotions reçues:', promotions ? promotions.length : 0);
-        console.log('📊 DEBUG: Usages reçus:', usages ? usages.length : 0);
         
         // Calculer stats
         const now = new Date();
@@ -81,10 +74,8 @@ async function loadPromotionsStats() {
             }
         }
         
-        console.log('✅ DEBUG: Stats promotions affichées', { promosActives, utilisations, roi });
-        
     } catch (error) {
-        console.error('❌ DEBUG: Erreur chargement stats promotions:', error);
+        console.error('Erreur chargement stats promotions:', error);
     }
 }
 

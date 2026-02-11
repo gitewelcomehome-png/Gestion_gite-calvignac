@@ -82,6 +82,30 @@ async function initChecklistsTab() {
         });
     }
     
+    // 🎯 Appliquer le filtre depuis le dashboard si présent
+    const checklistFilterData = localStorage.getItem('checklistFilter');
+    if (checklistFilterData) {
+        try {
+            const filter = JSON.parse(checklistFilterData);
+            // Appliquer le gîte si présent
+            if (filter.giteId && giteSelect) {
+                currentGiteFilter = filter.giteId;
+                giteSelect.value = filter.giteId;
+            }
+            // Appliquer le type (entree/sortie)
+            if (filter.type && typeSelect) {
+                currentTypeFilter = filter.type;
+                typeSelect.value = filter.type;
+            }
+            // Nettoyer le localStorage après usage
+            localStorage.removeItem('checklistFilter');
+            // console.log('🎯 Filtre check-list appliqué:', filter);
+        } catch (error) {
+            console.error('❌ Erreur parsing filtre check-list:', error);
+            localStorage.removeItem('checklistFilter');
+        }
+    }
+    
     // Chargement initial
     await loadChecklistItems();
     // NE PAS charger loadReservationsProgress() - géré par dashboard.js / loadChecklistsTab()
@@ -374,13 +398,13 @@ async function updateChecklistItem(itemId) {
         const description = descriptionInput.value.trim() || null;
         
         // 🌍 TRADUCTION AUTOMATIQUE
-        console.log('🌍 Traduction automatique en cours...');
+        // console.log('🌍 Traduction automatique en cours...');
         const [texteEn, descriptionEn] = await Promise.all([
             translateToEnglish(texte),
             description ? translateToEnglish(description) : Promise.resolve(null)
         ]);
         
-        console.log('✅ Traduction terminée:', { texteEn, descriptionEn });
+        // console.log('✅ Traduction terminée:', { texteEn, descriptionEn });
         
         // Mise à jour
         const { error } = await supabaseClient

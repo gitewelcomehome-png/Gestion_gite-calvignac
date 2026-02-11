@@ -158,7 +158,7 @@ function toggleMobileSection(sectionId) {
     const content = document.getElementById('content-' + sectionId);
     const icon = document.getElementById('icon-' + sectionId);
     
-    console.log('🔄 Toggle section:', sectionId, 'Element:', content);
+    // console.log('🔄 Toggle section:', sectionId, 'Element:', content);
     
     if (!content) {
         console.warn('⚠️ Section non trouvée:', sectionId);
@@ -166,18 +166,18 @@ function toggleMobileSection(sectionId) {
     }
     
     const isHidden = content.classList.contains('hidden');
-    console.log('État actuel:', isHidden ? 'plié' : 'ouvert');
+    // console.log('État actuel:', isHidden ? 'plié' : 'ouvert');
     
     if (isHidden) {
         // Déplier
         content.classList.remove('hidden');
         if (icon) icon.textContent = '▲'; // Flèche vers le haut
-        console.log('✅ Section dépliée');
+        // console.log('✅ Section dépliée');
     } else {
         // Plier
         content.classList.add('hidden');
         if (icon) icon.textContent = '▼'; // Flèche vers le bas
-        console.log('✅ Section pliée');
+        // console.log('✅ Section pliée');
     }
 }
 
@@ -186,7 +186,7 @@ window.toggleMobileSection = toggleMobileSection;
 
 // Fonction pour afficher les détails d'une réservation (mobile)
 function showReservationDetails(reservationId) {
-    console.log('📋 Affichage détails réservation:', reservationId);
+    // console.log('📋 Affichage détails réservation:', reservationId);
     // Rediriger vers l'onglet réservations avec la réservation sélectionnée
     if (typeof window.switchTab === 'function') {
         window.switchTab('reservations');
@@ -279,7 +279,7 @@ function initMobileUserMenu() {
 
 // Fonction d'initialisation
 function initMobile() {
-    console.log('📱 Initialisation mobile...');
+    // console.log('📱 Initialisation mobile...');
     
     // Vérifier si le DOM est prêt
     if (document.readyState === 'loading') {
@@ -289,13 +289,13 @@ function initMobile() {
     
     // Le DOM est prêt, on initialise
     setTimeout(() => {
-        console.log('🚀 Démarrage des fonctions mobiles');
+        // console.log('🚀 Démarrage des fonctions mobiles');
         initMobileMenu();
         initMobileSections();
         initMobileUserMenu();
         hideMobileUnwantedElements();
         observeDOMChanges();
-        console.log('✅ Mobile initialisé');
+        // console.log('✅ Mobile initialisé');
     }, 300);
 }
 
@@ -304,7 +304,7 @@ function tryInitTodoModal() {
     const modal = document.getElementById('addTodoModal');
     if (modal && typeof initializeTodoModal === 'function') {
         initializeTodoModal();
-        console.log('✅ Modal TODO initialisé pour mobile');
+        // console.log('✅ Modal TODO initialisé pour mobile');
         return true;
     }
     return false;

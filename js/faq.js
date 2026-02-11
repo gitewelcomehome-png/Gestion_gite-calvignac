@@ -393,7 +393,7 @@ window.sauvegarderQuestionFAQ = async function() {
 
     try {
         // 🌍 TRADUCTION AUTOMATIQUE FR → EN
-        console.log('🌍 Traduction automatique de la FAQ en anglais...');
+        // console.log('🌍 Traduction automatique de la FAQ en anglais...');
         const [questionEn, answerEn] = await Promise.all([
             translateToEnglish(data.question),
             translateToEnglish(data.answer)
@@ -403,7 +403,7 @@ window.sauvegarderQuestionFAQ = async function() {
         data.question_en = questionEn;
         data.answer_en = answerEn;
         
-        console.log('✅ Traduction FAQ terminée:', { questionEn, answerEn });
+        // console.log('✅ Traduction FAQ terminée:', { questionEn, answerEn });
 
         if (id) {
             // Mise à jour
@@ -413,7 +413,7 @@ window.sauvegarderQuestionFAQ = async function() {
                 .eq('id', id);
 
             if (error) throw error;
-            console.log('✅ FAQ mise à jour avec traduction EN');
+            // console.log('✅ FAQ mise à jour avec traduction EN');
         } else {
             // Création
             const { error } = await window.supabaseClient
@@ -421,7 +421,7 @@ window.sauvegarderQuestionFAQ = async function() {
                 .insert([data]);
 
             if (error) throw error;
-            console.log('✅ FAQ créée avec traduction EN');
+            // console.log('✅ FAQ créée avec traduction EN');
         }
 
         fermerModalQuestion();

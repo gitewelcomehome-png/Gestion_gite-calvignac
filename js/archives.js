@@ -4,11 +4,11 @@
 // Affichage des réservations passées
 
 async function updateArchivesDisplay() {
-    console.log('🔄 updateArchivesDisplay() - Début');
+    // console.log('🔄 updateArchivesDisplay() - Début');
     
     try {
         const reservations = await getAllReservations();
-        console.log('📦 Réservations chargées:', reservations.length);
+        // console.log('📦 Réservations chargées:', reservations.length);
         
         const section = document.getElementById('archivesSection');
         if (!section) {
@@ -22,7 +22,7 @@ async function updateArchivesDisplay() {
         const archives = reservations.filter(r => parseLocalDate(r.dateFin) < today);
         archives.sort((a, b) => parseLocalDate(b.dateFin) - parseLocalDate(a.dateFin));
         
-        console.log('📁 Archives trouvées:', archives.length);
+        // console.log('📁 Archives trouvées:', archives.length);
         
         if (archives.length === 0) {
             section.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">Aucune archive</p>';
@@ -32,7 +32,7 @@ async function updateArchivesDisplay() {
         let html = '<div class="gite-section">';
         
         archives.forEach((r, index) => {
-            console.log(`📄 Archive ${index + 1}:`, r.nom, r.id);
+            // console.log(`📄 Archive ${index + 1}:`, r.nom, r.id);
             const badgeClass = getPlatformBadgeClass(r.site);
             html += `
                 <div class="reservation-item ${r.gite.toLowerCase()}">
@@ -55,18 +55,18 @@ async function updateArchivesDisplay() {
         
         html += '</div>';
         
-        console.log('✅ HTML généré, longueur:', html.length);
-        console.log('🔍 Vérification présence "Modifier" dans HTML:', html.includes('Modifier'));
+        // console.log('✅ HTML généré, longueur:', html.length);
+        // console.log('🔍 Vérification présence "Modifier" dans HTML:', html.includes('Modifier'));
         
         // ⚠️ IMPORTANT : Utiliser innerHTML direct au lieu de SecurityUtils.setInnerHTML
         // SecurityUtils supprime les attributs onclick, ce qui empêche les boutons de fonctionner
         section.innerHTML = html;
         
-        console.log('✅ HTML injecté dans le DOM');
+        // console.log('✅ HTML injecté dans le DOM');
         
         // Vérifier que les boutons sont bien dans le DOM
         const buttons = section.querySelectorAll('button');
-        console.log('🔘 Nombre de boutons trouvés dans le DOM:', buttons.length);
+        // console.log('🔘 Nombre de boutons trouvés dans le DOM:', buttons.length);
         
     } catch (error) {
         console.error('❌ Erreur dans updateArchivesDisplay:', error);

@@ -3,7 +3,7 @@
 // ==========================================
 
 async function aperçuFicheClient(reservationId) {
-    console.log('🎯 START aperçuFicheClient - ID:', reservationId);
+    // console.log('🎯 START aperçuFicheClient - ID:', reservationId);
     
     try {
         // 1. Attendre Supabase
@@ -31,7 +31,7 @@ async function aperçuFicheClient(reservationId) {
         const clientPhone = reservation.client_phone || reservation.telephone || '';
         const checkOut = reservation.check_out || reservation.dateFin || reservation.date_fin;
 
-        console.log('✅ Réservation trouvée:', clientName);
+        // console.log('✅ Réservation trouvée:', clientName);
         
         // 3. Chercher token existant
         const { data: existingTokens } = await window.supabaseClient
@@ -47,12 +47,12 @@ async function aperçuFicheClient(reservationId) {
         
         if (existingTokens && existingTokens.length > 0) {
             token = existingTokens[0].token;
-            console.log('♻️ Token existant trouvé:', token.substring(0, 10) + '...');
-            console.log('♻️ Token expirations:', existingTokens[0].expires_at, 'is_active:', existingTokens[0].is_active);
+            // console.log('♻️ Token existant trouvé:', token.substring(0, 10) + '...');
+            // console.log('♻️ Token expirations:', existingTokens[0].expires_at, 'is_active:', existingTokens[0].is_active);
         } else {
             // Générer nouveau token
             token = generateSecureToken();
-            console.log('✨ Nouveau token généré:', token.substring(0, 10) + '...');
+            // console.log('✨ Nouveau token généré:', token.substring(0, 10) + '...');
             
             // Calculer expiration (date fin + 7 jours)
             if (!checkOut) {
@@ -66,7 +66,7 @@ async function aperçuFicheClient(reservationId) {
 
             expiresAt.setDate(expiresAt.getDate() + 7);
             
-            console.log('📅 Expiration:', expiresAt.toLocaleDateString('fr-FR'));
+            // console.log('📅 Expiration:', expiresAt.toLocaleDateString('fr-FR'));
             
             // Sauvegarder (avec catch RLS)
             const { data: { user } } = await window.supabaseClient.auth.getUser();
@@ -97,7 +97,7 @@ async function aperçuFicheClient(reservationId) {
         
         // 4. Créer URL fiche
         const ficheUrl = `${window.location.origin}/pages/fiche-client.html?token=${token}`;
-        console.log('🔗 URL générée:', ficheUrl);
+        // console.log('🔗 URL générée:', ficheUrl);
         
         // 5. Afficher modal
         showSimpleModal(reservation, ficheUrl, token, clientName, clientPhone);
@@ -110,7 +110,7 @@ async function aperçuFicheClient(reservationId) {
 
 // Modal simple avec 3 options
 function showSimpleModal(reservation, ficheUrl, token, clientName, clientPhone) {
-    console.log('📱 Affichage modal pour:', clientName);
+    // console.log('📱 Affichage modal pour:', clientName);
     
     // Supprimer anciens modals
     document.querySelectorAll('.modal-fiche-options').forEach(m => m.remove());
@@ -172,7 +172,7 @@ function showSimpleModal(reservation, ficheUrl, token, clientName, clientPhone) 
     
     // Événements
     document.getElementById('btn-open-fiche').onclick = () => {
-        console.log('🌐 Ouverture fiche:', ficheUrl);
+        // console.log('🌐 Ouverture fiche:', ficheUrl);
         window.open(ficheUrl, '_blank');
         modal.remove();
     };
@@ -182,7 +182,7 @@ function showSimpleModal(reservation, ficheUrl, token, clientName, clientPhone) 
             const phone = reservation.telephone.replace(/\D/g, '').replace(/^0/, '33');
             const message = `Bonjour ${reservation.nom} ! 👋\n\nVoici votre fiche d'accueil pour votre séjour au gîte ${reservation.gite} :\n\n${ficheUrl}\n\nBon séjour ! 🏡`;
             const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-            console.log('💬 Ouverture WhatsApp:', whatsappUrl.substring(0, 50) + '...');
+            // console.log('💬 Ouverture WhatsApp:', whatsappUrl.substring(0, 50) + '...');
             window.open(whatsappUrl, '_blank');
             modal.remove();
         };

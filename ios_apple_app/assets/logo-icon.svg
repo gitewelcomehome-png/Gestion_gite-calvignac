@@ -1,0 +1,25 @@
+<svg width="1024" height="1024" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fond dégradé cyan -->
+    <rect width="120" height="120" fill="url(#bg_gradient)"/>
+    
+    <!-- Cercle extérieur -->
+    <circle cx="60" cy="60" r="55" stroke="white" stroke-width="3" opacity="0.3"/>
+    <circle cx="60" cy="60" r="48" fill="white"/>
+    
+    <!-- Maison minimaliste -->
+    <path d="M60 35L40 52V75H55V60H65V75H80V52L60 35Z" fill="url(#house_gradient)"/>
+    
+    <!-- Notification dot (live) -->
+    <circle cx="78" cy="42" r="6" fill="#00E676"/>
+    
+    <defs>
+        <linearGradient id="bg_gradient" x1="0" y1="0" x2="120" y2="120">
+            <stop offset="0%" stop-color="#00D4FF"/>
+            <stop offset="100%" stop-color="#0093E9"/>
+        </linearGradient>
+        <linearGradient id="house_gradient" x1="60" y1="35" x2="60" y2="75">
+            <stop offset="0%" stop-color="#00D4FF"/>
+            <stop offset="100%" stop-color="#0093E9"/>
+        </linearGradient>
+    </defs>
+</svg>

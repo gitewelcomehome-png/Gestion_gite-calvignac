@@ -72,21 +72,21 @@ class EmailConfirmationGuard {
 
             // Si email non confirmé et > 1 heure → déconnexion
             if (timeSinceCreation > this.MAX_UNCONFIRMED_TIME) {
-                console.log('⏰ Délai de confirmation dépassé (1h). Déconnexion...');
+                // console.log('⏰ Délai de confirmation dépassé (1h). Déconnexion...');
                 await this.forceLogout();
                 return;
             }
 
             // Si email non confirmé et < 1 heure → accès restreint
             if (!this.isRestricted) {
-                console.log('⚠️ Email non confirmé. Activation mode restreint.');
+                // console.log('⚠️ Email non confirmé. Activation mode restreint.');
                 this.applyRestrictions();
             }
 
             // Afficher le temps restant
             const timeRemaining = this.MAX_UNCONFIRMED_TIME - timeSinceCreation;
             const minutesRemaining = Math.floor(timeRemaining / 60000);
-            console.log(`⏳ Temps restant pour confirmer: ${minutesRemaining} minutes`);
+            // console.log(`⏳ Temps restant pour confirmer: ${minutesRemaining} minutes`);
             
             this.showWarningBanner(minutesRemaining);
 
@@ -130,7 +130,7 @@ class EmailConfirmationGuard {
         // 4. Bloquer les appels API externes
         this.blockExternalAPICalls();
 
-        console.log('🔒 Restrictions appliquées : accès uniquement à la gestion des gîtes');
+        // console.log('🔒 Restrictions appliquées : accès uniquement à la gestion des gîtes');
     }
 
     /**
@@ -159,7 +159,7 @@ class EmailConfirmationGuard {
             banner.remove();
         }
 
-        console.log('🔓 Restrictions levées : accès complet');
+        // console.log('🔓 Restrictions levées : accès complet');
     }
 
     /**
@@ -189,7 +189,7 @@ class EmailConfirmationGuard {
             return originalFetch.apply(this, args);
         };
 
-        console.log('🚫 Appels API externes bloqués');
+        // console.log('🚫 Appels API externes bloqués');
     }
 
     /**

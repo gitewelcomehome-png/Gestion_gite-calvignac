@@ -13,7 +13,7 @@ function captureReferralCode() {
         const referralCode = urlParams.get('ref');
         
         if (referralCode) {
-            console.log('🎯 Code de parrainage détecté:', referralCode);
+            // console.log('🎯 Code de parrainage détecté:', referralCode);
             
             // Stocker en sessionStorage pour utiliser après l'inscription
             sessionStorage.setItem('referral_code', referralCode);
@@ -80,11 +80,11 @@ async function registerReferral(newUserEmail, newUserId) {
         const referralCode = sessionStorage.getItem('referral_code');
         
         if (!referralCode) {
-            console.log('ℹ️ Pas de code de parrainage pour cette inscription');
+            // console.log('ℹ️ Pas de code de parrainage pour cette inscription');
             return { success: true, referral: false };
         }
         
-        console.log('📝 Enregistrement du parrainage:', { referralCode, newUserEmail, newUserId });
+        // console.log('📝 Enregistrement du parrainage:', { referralCode, newUserEmail, newUserId });
         
         // Appeler la fonction SQL pour enregistrer le parrainage
         const { data, error } = await supabase.rpc('process_referral_signup', {
@@ -99,7 +99,7 @@ async function registerReferral(newUserEmail, newUserId) {
             return { success: true, referral: false, error: error.message };
         }
         
-        console.log('✅ Parrainage enregistré avec succès:', data);
+        // console.log('✅ Parrainage enregistré avec succès:', data);
         
         // Nettoyer le sessionStorage
         sessionStorage.removeItem('referral_code');
@@ -123,7 +123,7 @@ async function registerReferral(newUserEmail, newUserId) {
  * Afficher un message de confirmation du parrainage
  */
 function showReferralSuccess() {
-    console.log('🎉 Parrainage confirmé !');
+    // console.log('🎉 Parrainage confirmé !');
     
     // Optionnel : Afficher une notification
     if (typeof showToast === 'function') {
@@ -139,7 +139,7 @@ function showReferralSuccess() {
  */
 async function activateReferralAfterPayment(userId) {
     try {
-        console.log('💳 Activation du parrainage après paiement pour:', userId);
+        // console.log('💳 Activation du parrainage après paiement pour:', userId);
         
         // Appeler la fonction SQL pour activer le parrainage
         const { error } = await supabase.rpc('activate_referral', {
@@ -151,7 +151,7 @@ async function activateReferralAfterPayment(userId) {
             return { success: false, error: error.message };
         }
         
-        console.log('✅ Parrainage activé avec succès');
+        // console.log('✅ Parrainage activé avec succès');
         
         // Optionnel : Envoyer une notification au parrain
         await notifyReferrerOfActivation(userId);
@@ -178,7 +178,7 @@ async function notifyReferrerOfActivation(referredUserId) {
         
         if (!referral) return;
         
-        console.log('📧 Notification parrain:', referral.referrer_id);
+        // console.log('📧 Notification parrain:', referral.referrer_id);
         
         // TODO: Envoyer email ou notification au parrain
         // if (typeof sendNotification === 'function') {
@@ -228,7 +228,7 @@ async function exampleSignupProcess() {
             authData.user.id
         );
         
-        console.log('Résultat parrainage:', referralResult);
+        // console.log('Résultat parrainage:', referralResult);
         
         // Continuer le processus normal d'inscription
         // ...
@@ -247,7 +247,7 @@ async function exampleAfterPaymentProcess(userId) {
         const activationResult = await activateReferralAfterPayment(userId);
         
         if (activationResult.success) {
-            console.log('✅ Parrainage activé après paiement');
+            // console.log('✅ Parrainage activé après paiement');
         }
         
     } catch (error) {

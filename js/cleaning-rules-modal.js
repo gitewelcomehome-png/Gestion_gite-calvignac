@@ -7,7 +7,7 @@ function showCleaningRulesModal() {
     modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;';
     
     modal.innerHTML = `
-        <div style="background: var(--bg-secondary); border: 3px solid #2D3436; border-radius: 16px; box-shadow: 8px 8px 0 #2D3436; max-width: 900px; width: 100%; max-height: 85vh; overflow-y: auto; margin: auto;">`
+        <div style="background: var(--bg-secondary); border: 3px solid #2D3436; border-radius: 16px; box-shadow: 8px 8px 0 #2D3436; max-width: 900px; width: 100%; max-height: 85vh; overflow-y: auto; margin: auto;">
             <div style="position: sticky; top: 0; background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); padding: 25px; border-bottom: 3px solid #2D3436; border-radius: 13px 13px 0 0; z-index: 10;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
@@ -58,7 +58,7 @@ function closeCleaningRulesModal() {
     
     // Rafraîchir le planning des ménages si la fonction existe
     if (typeof afficherPlanningParSemaine === 'function') {
-        console.log('🔄 Rafraîchissement du planning ménage après modification des règles...');
+        // console.log('🔄 Rafraîchissement du planning ménage après modification des règles...');
         afficherPlanningParSemaine();
     }
 }

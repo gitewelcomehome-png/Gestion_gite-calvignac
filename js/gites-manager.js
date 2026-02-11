@@ -26,11 +26,13 @@ class GitesManager {
             try {
             // Charger uniquement les gîtes de l'utilisateur connecté
             // Le filtre owner_user_id est géré automatiquement par RLS
+            // Trier par ordre_affichage (ordre personnalisé) puis par nom si NULL
             let query = window.supabaseClient
                 .from('gites')
                 .select('*')
                 .eq('is_active', true)
-                .order('name');
+                .order('ordre_affichage', { ascending: true, nullsFirst: false })
+                .order('name', { ascending: true });
 
             const { data, error } = await query;
 
@@ -41,8 +43,8 @@ class GitesManager {
 
             this.gites = data || [];
             
-            // Appliquer l'ordre personnalisé depuis localStorage
-            this.applySavedOrder();
+            // Si certains gîtes n'ont pas d'ordre_affichage, les initialiser
+            await this.initializeOrderIfNeeded();
             
             // Indexer par ID et slug pour accès rapide
             this.gitesById = new Map(this.gites.map(g => [g.id, g]));
@@ -160,7 +162,7 @@ class GitesManager {
                     : []
             };
             
-            console.log('📤 Données INSERT gites:', insertData);
+            // console.log('📤 Données INSERT gites:', insertData);
             
             // Créer avec owner_user_id explicite pour passer la RLS policy
             const { data, error } = await window.supabaseClient
@@ -437,44 +439,77 @@ class GitesManager {
     }
 
     /**
-     * Appliquer l'ordre personnalisé depuis localStorage
+     * Initialiser ordre_affichage pour les gîtes qui n'en ont pas
      */
-    applySavedOrder() {
+    async initializeOrderIfNeeded() {
         try {
-            const savedOrder = localStorage.getItem('gites_custom_order');
-            if (!savedOrder) {
-                // Pas d'ordre sauvegardé, trier alphabétiquement
-                this.gites.sort((a, b) => a.name.localeCompare(b.name));
-                return;
+            const gitesWithoutOrder = this.gites.filter(g => g.ordre_affichage === null || g.ordre_affichage === undefined);
+            
+            if (gitesWithoutOrder.length === 0) {
+                return; // Tous les gîtes ont déjà un ordre
             }
 
-            const orderMap = JSON.parse(savedOrder);
-            this.gites.sort((a, b) => {
-                const indexA = orderMap[a.id] ?? 999;
-                const indexB = orderMap[b.id] ?? 999;
-                if (indexA !== indexB) {
-                    return indexA - indexB;
+            // Trouver le prochain index disponible
+            const maxOrder = Math.max(...this.gites.map(g => g.ordre_affichage || 0), 0);
+            
+            // Assigner un ordre à chaque gîte sans ordre
+            const updates = gitesWithoutOrder.map((gite, index) => ({
+                id: gite.id,
+                ordre_affichage: maxOrder + index + 1
+            }));
+
+            // Mettre à jour dans Supabase
+            for (const update of updates) {
+                const { error } = await window.supabaseClient
+                    .from('gites')
+                    .update({ ordre_affichage: update.ordre_affichage })
+                    .eq('id', update.id);
+                
+                if (error) {
+                    console.error('❌ Erreur initialisation ordre:', error);
+                } else {
+                    // Mettre à jour localement
+                    const gite = this.gitesById.get(update.id);
+                    if (gite) {
+                        gite.ordre_affichage = update.ordre_affichage;
+                    }
                 }
-                return a.name.localeCompare(b.name);
-            });
+            }
         } catch (error) {
-            console.error('Erreur lors de l\'application de l\'ordre:', error);
-            // En cas d'erreur, trier alphabétiquement
-            this.gites.sort((a, b) => a.name.localeCompare(b.name));
+            console.error('❌ Erreur initializeOrderIfNeeded:', error);
         }
     }
 
     /**
-     * Sauvegarder l'ordre actuel dans localStorage
+     * Sauvegarder l'ordre actuel dans Supabase
      */
-    saveCurrentOrder() {
+    async saveCurrentOrder() {
         try {
-            const orderMap = {};
-            this.gites.forEach((gite, index) => {
-                orderMap[gite.id] = index;
-            });
-            localStorage.setItem('gites_custom_order', JSON.stringify(orderMap));
-            // Ordre sauvé
+            // Mettre à jour l'ordre_affichage de chaque gîte dans Supabase
+            const updates = this.gites.map((gite, index) => ({
+                id: gite.id,
+                ordre_affichage: index + 1 // Commencer à 1 au lieu de 0
+            }));
+
+            // Mettre à jour en batch
+            for (const update of updates) {
+                const { error } = await window.supabaseClient
+                    .from('gites')
+                    .update({ ordre_affichage: update.ordre_affichage })
+                    .eq('id', update.id);
+                
+                if (error) {
+                    console.error('❌ Erreur sauvegarde ordre gîte:', error);
+                } else {
+                    // Mettre à jour localement
+                    const gite = this.gitesById.get(update.id);
+                    if (gite) {
+                        gite.ordre_affichage = update.ordre_affichage;
+                    }
+                }
+            }
+            
+            // console.log('✅ Ordre des gîtes sauvegardé dans Supabase');
         } catch (error) {
             console.error('❌ Erreur lors de la sauvegarde de l\'ordre:', error);
         }
@@ -483,7 +518,7 @@ class GitesManager {
     /**
      * Déplacer un gîte dans l'ordre
      */
-    moveGite(giteId, direction) {
+    async moveGite(giteId, direction) {
         const currentIndex = this.gites.findIndex(g => g.id === giteId);
         if (currentIndex === -1) return false;
 
@@ -493,8 +528,8 @@ class GitesManager {
         // Échanger les positions
         [this.gites[currentIndex], this.gites[newIndex]] = [this.gites[newIndex], this.gites[currentIndex]];
 
-        // Sauvegarder le nouvel ordre
-        this.saveCurrentOrder();
+        // Sauvegarder le nouvel ordre dans Supabase
+        await this.saveCurrentOrder();
 
         return true;
     }

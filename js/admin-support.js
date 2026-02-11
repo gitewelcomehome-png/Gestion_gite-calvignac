@@ -19,7 +19,7 @@ let currentUser = null; // Utilisateur authentifié
 // 🔐 INITIALISATION
 // ================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🎫 Initialisation Module Support');
+    // console.log('🎫 Initialisation Module Support');
     
     // Vérifier auth
     await checkAuth();
@@ -561,7 +561,7 @@ window.sendReply = async function(ticketId) {
         
         if (commentError) throw commentError;
         
-        console.log('✅ Commentaire enregistré:', comment.id);
+        // console.log('✅ Commentaire enregistré:', comment.id);
         
         // 2. Mettre à jour statut ticket
         const { error: ticketError } = await window.supabaseClient
@@ -608,7 +608,7 @@ window.changeTicketStatus = async function(ticketId, newStatus) {
         if (error) throw error;
         
         alert(`✅ Statut changé : ${newStatus}`);
-        console.log('🧠 Statut changé vers:', newStatus);
+        // console.log('🧠 Statut changé vers:', newStatus);
         
         // Recharger
         await loadTickets();
@@ -1066,7 +1066,7 @@ function setupRealtime() {
         .on('postgres_changes', 
             { event: '*', schema: 'public', table: 'cm_support_tickets' },
             (payload) => {
-                console.log('🔔 Changement ticket:', payload);
+                // console.log('🔔 Changement ticket:', payload);
                 loadTickets();
                 loadStats();
             }
@@ -1111,4 +1111,4 @@ function debounce(func, wait) {
     };
 }
 
-console.log('✅ Module Support chargé');
+// console.log('✅ Module Support chargé');

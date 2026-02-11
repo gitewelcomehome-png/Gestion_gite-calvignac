@@ -1,0 +1,370 @@
+<div class="tab-container">
+    <!-- Version: 2026-01-05-v4 -->
+    <!-- En-tête avec semaine actuelle -->
+    <div class="card" style="background: var(--card); border: 3px solid #2D3436; padding: 10px; margin-bottom: 12px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="margin: 0; font-size: 1rem; color: var(--text); font-weight: 700; text-transform: uppercase;">📊 Tableau de Bord</h2>
+                <p id="dashboard-week-info" style="margin: 8px 0 0 0; font-size: 0.75rem; color: var(--text-secondary);">Semaine en cours</p>
+            </div>
+            <div style="text-align: right;">
+                <div id="dashboard-date" style="font-size: 0.7rem; font-weight: 600; color: #2c3e50;">Chargement...</div>
+                <div id="dashboard-week-number" style="font-size: 0.65rem; opacity: 1; margin-top: 2px; color: #2c3e50;">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚠️ DEMANDES CLIENTS URGENTES - EN HAUT -->
+    <div id="dashboard-demandes-clients" class="card" style="margin-bottom: 12px; background: var(--card); border: 3px solid #ffeaa7; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; padding: 10px; display: none;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h2 style="margin: 0; font-size: 0.85rem; color: var(--text); font-weight: 700; text-transform: uppercase;">
+                📄 FICHES CLIENTS À ENVOYER
+            </h2>
+            <span id="badge-demandes-count" style="background: #ffeaa7; color: var(--text); padding: 6px 16px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">0</span>
+        </div>
+        <div id="liste-demandes-clients" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Les demandes seront chargées ici par JS -->
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>
+        </div>
+    </div>
+
+    <!-- ⚠️ PROBLÈMES URGENTS UNIQUEMENT -->
+    <div id="dashboard-problemes-urgents" class="card" style="margin-bottom: 12px; background: var(--card); border: 3px solid #ff7675; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; padding: 10px; display: none;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h2 style="margin: 0; font-size: 0.85rem; color: var(--text); font-weight: 700; text-transform: uppercase;">
+                ⚠️ PROBLÈMES URGENTS
+            </h2>
+            <span id="badge-problemes-urgents-count" style="background: #ff7675; color: white; padding: 6px 16px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">0</span>
+        </div>
+        <div id="liste-problemes-urgents" style="display: flex; flex-direction: column; gap: 12px;">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucun problème urgent</p>
+        </div>
+    </div>
+
+    <!-- 💬 DEMANDES & RETOURS CLIENTS -->
+    <div id="dashboard-demandes-retours" class="card" style="margin-bottom: 12px; background: var(--card); border: 3px solid #74b9ff; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px; padding: 10px; display: none;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h2 style="margin: 0; font-size: 0.85rem; color: var(--text); font-weight: 700; text-transform: uppercase;">
+                💬 DEMANDES & RETOURS
+            </h2>
+            <span id="badge-demandes-retours-count" style="background: #74b9ff; color: white; padding: 6px 16px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; border: 2px solid #2D3436; box-shadow: 2px 2px 0 #2D3436;">0</span>
+        </div>
+        <div id="liste-demandes-retours" style="display: flex; flex-direction: column; gap: 12px;">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+
+    <!-- Alertes / Notifications importantes -->
+    <div id="dashboard-alerts" style="margin-bottom: 20px;"></div>
+
+    <!-- ========================================
+         📊 VISION GLOBALE - SECTION ENGLOBANTE
+         ======================================== -->
+    <div class="card" style="background: var(--card); border: 3px solid #2D3436; padding: 15px; border-radius: 16px; box-shadow: 4px 4px 0 #2D3436; margin-bottom: 15px;">
+        <h2 style="margin: 0 0 12px 0; font-size: 0.75rem; color: var(--text); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px solid #2D3436; padding-bottom: 8px;">📊 VISION GLOBALE</h2>
+        
+        <!-- Indicateurs fiscaux - Ligne 1 : URSSAF et IR -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px;">
+            <!-- URSSAF : 2025 + 2026 -->
+            <div style="background: rgba(102, 126, 234, 0.08); border: 2px solid #667eea; padding: 10px; border-radius: 12px;">
+                <div style="font-size: 0.7rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #667eea; text-transform: uppercase;">💼 URSSAF</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <!-- 2025 -->
+                    <div class="indicator-box" style="background: var(--card); padding: 8px; border-radius: 10px; text-align: center; border: 2px solid #667eea; box-shadow: 2px 2px 0 #667eea;">
+                        <div style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">2025</div>
+                        <div id="dashboard-urssaf-2025" style="font-size: 0.75rem; font-weight: 700; color: #667eea;">-</div>
+                        <div class="indicator-label" data-mobile="Préc." style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 3px;">Année précédente</div>
+                    </div>
+                    <!-- 2026 -->
+                    <div class="indicator-box" style="background: var(--card); padding: 8px; border-radius: 10px; text-align: center; border: 2px solid #667eea; box-shadow: 3px 3px 0 #667eea;">
+                        <div style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">2026</div>
+                        <div id="dashboard-urssaf-2026" style="font-size: 0.75rem; font-weight: 700; color: #667eea;">-</div>
+                        <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 3px;">En cours</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IR : 2025 + 2026 -->
+            <div id="dashboard-ir-container" style="background: rgba(231, 76, 60, 0.08); border: 2px solid #E74C3C; padding: 10px; border-radius: 12px;">
+                <div class="box-title" data-mobile="🧾 IMPÔT REV." style="font-size: 0.7rem; margin-bottom: 8px; font-weight: 600; text-align: center; color: #E74C3C; text-transform: uppercase;">🧾 IMPÔT SUR LE REVENU</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <!-- 2025 -->
+                    <div class="indicator-box" style="background: var(--card); padding: 8px; border-radius: 10px; text-align: center; border: 2px solid #E74C3C; box-shadow: 2px 2px 0 #E74C3C;">
+                        <div style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">2025</div>
+                        <div id="dashboard-ir-2025" style="font-size: 0.75rem; font-weight: 700; color: #E74C3C;">-</div>
+                        <div class="indicator-label" data-mobile="Préc." style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 3px;">Année précédente</div>
+                    </div>
+                    <!-- 2026 -->
+                    <div class="indicator-box" style="background: var(--card); padding: 8px; border-radius: 10px; text-align: center; border: 2px solid #E74C3C; box-shadow: 3px 3px 0 #E74C3C;">
+                        <div style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">2026</div>
+                        <div id="dashboard-ir-2026" style="font-size: 0.75rem; font-weight: 700; color: #E74C3C;">-</div>
+                        <div style="font-size: 0.5rem; color: var(--text-secondary); margin-top: 3px;">Estimation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Indicateurs financiers - Ligne 2 : CA et Bénéfices -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+            <!-- Chiffre d'Affaires -->
+            <div style="background: rgba(102, 126, 234, 0.08); border: 2px solid #667eea; padding: 10px; border-radius: 12px;">
+                <div class="box-title" data-mobile="💰 CA" style="font-size: 0.7rem; margin-bottom: 8px; font-weight: 600; color: #667eea; text-align: center; text-transform: uppercase;">💰 Chiffre d'Affaires</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <!-- CA Mois -->
+                    <div class="indicator-box" style="text-align: center; background: var(--card); padding: 8px; border-radius: 12px; border: 2px solid #667eea; box-shadow: 2px 2px 0 #667eea;">
+                        <div class="indicator-label" data-mobile="Mois" style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">Mois en cours</div>
+                        <div id="dashboard-ca-mois" style="font-size: 1rem; font-weight: 700; color: #667eea;">-</div>
+                    </div>
+                    
+                    <!-- CA Année -->
+                    <div class="indicator-box" style="text-align: center; background: var(--card); padding: 8px; border-radius: 12px; border: 2px solid #667eea; box-shadow: 2px 2px 0 #667eea;">
+                        <div class="indicator-label" data-mobile="Année" style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">Année <span id="annee-ca">2026</span></div>
+                        <div id="dashboard-ca-annee" style="font-size: 1rem; font-weight: 700; color: #667eea;">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bénéfices & Trésorerie -->
+            <div style="background: rgba(39, 174, 96, 0.08); border: 2px solid #27AE60; padding: 10px; border-radius: 12px;">
+                <div class="box-title" data-mobile="📈 BÉNÉF. & TRÉSO" style="font-size: 0.7rem; margin-bottom: 8px; font-weight: 600; color: #27AE60; text-align: center; text-transform: uppercase;">📈 Bénéfices & Trésorerie</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <!-- Bénéfice -->
+                    <div class="indicator-box" style="text-align: center; background: var(--card); padding: 8px; border-radius: 12px; border: 2px solid #27AE60; box-shadow: 2px 2px 0 #27AE60;">
+                        <div class="indicator-label" data-mobile="Bénéf." style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">Bénéfice <span id="annee-benefice">2026</span></div>
+                        <div id="dashboard-benefice-moyen" style="font-size: 1rem; font-weight: 700; color: #27AE60;">-</div>
+                    </div>
+                    
+                    <!-- Trésorerie -->
+                    <div class="indicator-box" style="text-align: center; background: var(--card); padding: 8px; border-radius: 12px; border: 2px solid #27AE60; box-shadow: 2px 2px 0 #27AE60;">
+                        <div class="indicator-label" data-mobile="Tréso" style="font-size: 0.55rem; color: #555; margin-bottom: 3px;">Trésorerie Actuelle</div>
+                        <div id="dashboard-tresorerie" style="font-size: 1rem; font-weight: 700; color: #27AE60;">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Graphiques financiers -->
+        <div id="graphiques-dashboard" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 10px; margin-top: 25px;">
+            <!-- Bénéfices mensuels des gîtes -->
+            <div style="background: var(--card); border: 2px solid #667eea; padding: 10px; border-radius: 12px; box-shadow: 2px 2px 0 #667eea;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea;">
+                    <span style="font-size: 1rem;">💰</span>
+                    <h3 style="margin: 0; font-size: 0.7rem; color: #667eea; font-weight: 700; text-transform: uppercase;">Bénéfices Mensuels des Gîtes</h3>
+                </div>
+                <div style="padding: 10px 0;">
+                    <canvas id="graphique-benefices-gites" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Trésorerie -->
+            <div style="background: var(--card); border: 2px solid #27AE60; padding: 10px; border-radius: 12px; box-shadow: 2px 2px 0 #27AE60;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #27AE60;">
+                    <span style="font-size: 1rem;">📈</span>
+                    <h3 style="margin: 0; font-size: 0.7rem; color: #27AE60; font-weight: 700; text-transform: uppercase;">Évolution Trésorerie</h3>
+                </div>
+                <div style="padding: 10px 0;">
+                    <canvas id="graphique-tresorerie-dashboard" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         🎯 VISION ACTIONS - MODERNE
+         ======================================== -->
+    <div class="card" style="background: var(--card); border: 3px solid #2D3436; padding: 10px; border-radius: 16px; box-shadow: 4px 4px 0 #2D3436; margin-bottom: 10px;">
+        <h2 style="margin: 0 0 10px 0; font-size: 0.75rem; color: var(--text); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px solid #2D3436; padding-bottom: 6px;">🎯 ACTIONS</h2>
+        
+        <!-- Réservations -->
+        <div style="background: #f8f9fa; border: 2px solid #667eea; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                <span style="font-size: 0.85rem;">📅</span>
+                <h3 style="margin: 0; font-size: 0.65rem; color: var(--text); font-weight: 700; text-transform: uppercase;">Réservations semaine</h3>
+            </div>
+            <div id="dashboard-reservations" style="display: flex; flex-direction: column;">
+                <p style="text-align: center; color: var(--text-secondary); padding: 15px; font-size: 0.7rem;">Chargement...</p>
+            </div>
+        </div>
+
+        <!-- Ménages -->
+        <div style="background: #fffbf0; border: 2px solid #ffeaa7; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.85rem;">🧹</span>
+                    <h3 style="margin: 0; font-size: 0.65rem; color: var(--text); font-weight: 700; text-transform: uppercase;">Ménages prévus</h3>
+                </div>
+                <span id="dashboard-cleanings" style="background: #ffeaa7; color: var(--text); padding: 3px 8px; border: 1px solid #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0</span>
+            </div>
+            <div id="dashboard-menages" style="max-height: 150px; overflow-y: auto; font-size: 0.7rem;">
+                <p style="text-align: center; color: var(--text-secondary); padding: 15px;">Chargement...</p>
+            </div>
+        </div>
+
+        <!-- Actions Réservations -->
+        <div style="background: #f0f2ff; border: 2px solid #667eea; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.85rem;">✅</span>
+                    <h3 style="margin: 0; font-size: 0.65rem; color: var(--text); font-weight: 700; text-transform: uppercase;">Actions Résa</h3>
+                </div>
+                <span id="todo-count-reservations" style="background: #667eea; color: white; padding: 3px 8px; border: 1px solid #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0</span>
+            </div>
+            <button data-todo-category="reservations" style="width: 100%; background: #667eea; color: white; border: 1px solid #2D3436; padding: 4px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 600; margin-bottom: 4px;">+ Tâche</button>
+            <div id="todo-reservations" style="max-height: 150px; overflow-y: auto; font-size: 0.7rem;"></div>
+        </div>
+
+        <!-- Travaux & Maintenance -->
+        <div style="background: #fff8f0; border: 2px solid #F39C12; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.85rem;">🔧</span>
+                    <h3 style="margin: 0; font-size: 0.65rem; color: var(--text); font-weight: 700; text-transform: uppercase;">Travaux</h3>
+                </div>
+                <span id="todo-count-travaux" style="background: #F39C12; color: white; padding: 3px 8px; border: 1px solid #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0</span>
+            </div>
+            <button data-todo-category="travaux" style="width: 100%; background: #F39C12; color: white; border: 1px solid #2D3436; padding: 4px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 600; margin-bottom: 4px;">+ Tâche</button>
+            <div id="todo-travaux" style="max-height: 150px; overflow-y: auto; font-size: 0.7rem;"></div>
+        </div>
+
+        <!-- Achats & Courses -->
+        <div style="background: #f0fff5; border: 2px solid #27AE60; border-radius: 12px; padding: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.85rem;">🛒</span>
+                    <h3 style="margin: 0; font-size: 0.65rem; color: var(--text); font-weight: 700; text-transform: uppercase;">Achats</h3>
+                </div>
+                <span id="todo-count-achats" style="background: #27AE60; color: white; padding: 3px 8px; border: 1px solid #2D3436; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0</span>
+            </div>
+            <button data-todo-category="achats" style="width: 100%; background: #27AE60; color: white; border: 1px solid #2D3436; padding: 4px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 600; margin-bottom: 4px;">+ Tâche</button>
+            <div id="todo-achats" style="max-height: 150px; overflow-y: auto; font-size: 0.7rem;"></div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Tâche -->
+<div id="addTodoModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="card-header">
+            <span class="card-icon">📝</span>
+            <h2 class="card-title">Nouvelle Tâche</h2>
+        </div>
+        
+        <form id="addTodoForm">
+            <input type="hidden" id="todoCategory">
+            
+            <div class="form-group">
+                <label>Titre <span class="required">*</span></label>
+                <input type="text" id="todoTitle" placeholder="Ex: Réparer robinet" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="todoDescription" rows="3" placeholder="Détails supplémentaires..."></textarea>
+            </div>
+            
+            <div id="giteSelectGroup" class="form-group" style="display: none;">
+                <label>Gîte concerné</label>
+                <select id="todoGite">
+                    <option value="">Non spécifié</option>
+                    <option value="Trevoux">Trevoux</option>
+                    <option value="Couzon">Couzon</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="todoRecurrent" style="width: 18px; height: 18px;">
+                    <span>🔁 Tâche récurrente</span>
+                </label>
+            </div>
+            
+            <div id="recurrentOptions" style="display: none; margin-left: 26px; margin-top: 10px;">
+                <div class="form-group">
+                    <label>Fréquence</label>
+                    <select id="todoFrequency">
+                        <option value="weekly">Hebdomadaire</option>
+                        <option value="biweekly">Bimensuelle (2 semaines)</option>
+                        <option value="monthly">Mensuelle</option>
+                    </select>
+                </div>
+                
+                <div id="weeklyOptions" class="form-group">
+                    <label>Jour de la semaine</label>
+                    <select id="todoWeekday">
+                        <option value="1">Lundi</option>
+                        <option value="2">Mardi</option>
+                        <option value="3">Mercredi</option>
+                        <option value="4">Jeudi</option>
+                        <option value="5">Vendredi</option>
+                        <option value="6">Samedi</option>
+                        <option value="0">Dimanche</option>
+                    </select>
+                </div>
+                
+                <div id="monthlyOptions" class="form-group" style="display: none;">
+                    <label>Jour du mois</label>
+                    <input type="number" id="todoDayOfMonth" min="1" max="31" value="1">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary">
+                    <span>✓</span> Créer
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddTodoModal()">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Réponse WhatsApp -->
+<div id="reponseWhatsappModal" class="modal-overlay" style="display: none; align-items: flex-start; padding-top: 50px;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #2c3e50;">💬 Répondre au client</h2>
+            <button onclick="closeReponseWhatsappModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: #7f8c8d;">×</button>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #25D366;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 0.75rem;">📍</span>
+                <strong style="color: #2c3e50; font-size: 1.05rem;" id="reponseClientNom">Client</strong>
+                <span style="background: #25D366; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.55rem; font-weight: 600;" id="reponseClientGite">Gîte</span>
+            </div>
+            <div style="color: #555; font-size: 0.75rem; margin-left: 30px;" id="reponseClientSujet">Sujet de la demande</div>
+        </div>
+        
+        <form id="formReponseWhatsapp">
+            <input type="hidden" id="reponseProblemeId">
+            <input type="hidden" id="reponseTelephone">
+            
+            <div class="form-group">
+                <label style="font-weight: 600; color: #2c3e50; margin-bottom: 8px; display: block;">Votre message</label>
+                <textarea id="reponseMessage" rows="8" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.7rem; resize: vertical; font-family: inherit;" placeholder="Écrivez votre réponse ici..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" style="flex: 1; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span style="font-size: 0.85rem;">💬</span> Envoyer via WhatsApp
+                </button>
+                <button type="button" onclick="closeReponseWhatsappModal()" style="background: #95a5a6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

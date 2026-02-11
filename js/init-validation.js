@@ -47,12 +47,12 @@ window.initValidationInfosPratiques = function() {
         return;
     }
     
-    console.log('🛡️ Initialisation filtrage + standardisation téléphone infos pratiques...');
+    // console.log('🛡️ Initialisation filtrage + standardisation téléphone infos pratiques...');
     
     // STANDARDISATION TÉLÉPHONE FRANÇAIS
     const infos_telephone = document.getElementById('infos_telephone');
     if (infos_telephone) {
-        console.log('✅ Standardisation téléphone FR activée');
+        // console.log('✅ Standardisation téléphone FR activée');
         
         // Filtrage temps réel pendant la saisie
         infos_telephone.addEventListener('input', function(e) {
@@ -94,7 +94,7 @@ window.initValidationInfosPratiques = function() {
                 } else {
                     this.value = cleaned.startsWith('+') ? cleaned : '+' + cleaned;
                 }
-                console.log('📞 Téléphone EN standardisé:', this.value);
+                // console.log('📞 Téléphone EN standardisé:', this.value);
             }
         });
     }

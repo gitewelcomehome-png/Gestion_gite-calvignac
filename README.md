@@ -2,7 +2,21 @@
 
 Application web de gestion de gîtes et locations saisonnières.
 
-## 🚀 Quick Start
+## � Application Mobile iOS
+
+**Application iOS native disponible !**
+
+```bash
+cd ios_apple_app
+npm install --legacy-peer-deps
+npx expo start --tunnel
+```
+
+📖 **Documentation** : [ios_apple_app/GUIDE_RAPIDE.md](ios_apple_app/GUIDE_RAPIDE.md)
+
+---
+
+## 🚀 Quick Start (Web)
 
 ### Développement local
 ```bash
@@ -17,8 +31,7 @@ python3 -m http.server 8080
 ## �� Documentation
 
 ### Documents Essentiels
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Architecture technique complète
-- **[DESCRIPTION_COMPLETE_SITE.md](DESCRIPTION_COMPLETE_SITE.md)** - Documentation master
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Architecture technique complète- **[GUIDE_MONITORING_TICKETS.md](GUIDE_MONITORING_TICKETS.md)** - Monitoring & Gestion Tickets ⭐ NOUVEAU- **[DESCRIPTION_COMPLETE_SITE.md](DESCRIPTION_COMPLETE_SITE.md)** - Documentation master
 - **[ERREURS_CRITIQUES.md](ERREURS_CRITIQUES.md)** - Historique bugs et solutions
 - **[STRUCTURE_PROJET.md](STRUCTURE_PROJET.md)** - Structure du projet
 - **[MODULES_JAVASCRIPT.md](MODULES_JAVASCRIPT.md)** - Documentation JavaScript

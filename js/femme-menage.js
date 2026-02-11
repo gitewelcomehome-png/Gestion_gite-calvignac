@@ -7,6 +7,29 @@
 // (pas besoin de redéclarer)
 
 // ================================================================
+// FONCTION TOAST (NOTIFICATIONS)
+// ================================================================
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const icon = document.getElementById('toastIcon');
+    const messageEl = document.getElementById('toastMessage');
+
+    if (!toast || !icon || !messageEl) {
+        console.warn('Toast elements not found');
+        return;
+    }
+
+    icon.textContent = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+    messageEl.textContent = message;
+    
+    toast.style.display = 'flex';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// ================================================================
 // CHARGEMENT INITIAL
 // ================================================================
 
@@ -67,6 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     await chargerInterventions();
     await chargerStocksDraps(); // Activer le chargement des stocks
+    await chargerRetoursMenuge(); // Charger les retours ménage envoyés
     
     // Validation temps réel
     if (window.ValidationUtils) {
@@ -587,6 +611,112 @@ window.switchStockTab = function(giteId) {
 // RETOUR APRÈS MÉNAGE
 // ================================================================
 
+/**
+ * Charge et affiche les retours ménage envoyés
+ */
+async function chargerRetoursMenuge() {
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) throw new Error('Non connecté');
+
+        // Charger les retours des 30 derniers jours
+        const dateDebut = new Date();
+        dateDebut.setDate(dateDebut.getDate() - 30);
+
+        const { data: retours, error } = await window.supabaseClient
+            .from('retours_menage')
+            .select(`
+                *,
+                gites:gite_id(name)
+            `)
+            .eq('owner_user_id', user.id)
+            .gte('date_menage', dateDebut.toISOString().split('T')[0])
+            .order('date_menage', { ascending: false });
+
+        if (error) {
+            console.error('Erreur chargement retours:', error);
+            throw error;
+        }
+
+        const container = document.getElementById('retours-list');
+        
+        if (!retours || retours.length === 0) {
+            if (window.SecurityUtils) {
+                window.SecurityUtils.setInnerHTML(container, `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Aucun retour envoyé ces 30 derniers jours</p>
+                    </div>
+                `, { trusted: true });
+            } else {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Aucun retour envoyé ces 30 derniers jours</p>
+                    </div>
+                `;
+            }
+            return;
+        }
+
+        // Construire l'affichage des retours
+        let html = '<div style="display: flex; flex-direction: column; gap: 15px;">';
+        
+        retours.forEach(retour => {
+            const giteName = retour.gites?.name || 'Gîte inconnu';
+            const dateFormatted = new Date(retour.date_menage).toLocaleDateString('fr-FR', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short'
+            });
+            const statusClass = retour.validated ? 'status-validated' : 'status-pending';
+            const statusText = retour.validated ? '✅ Validé' : '⏳ En attente';
+            
+            html += `
+                <div style="border: 2px solid #2D3436; border-radius: 12px; padding: 20px; background: white; box-shadow: 2px 2px 0 #2D3436;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div>
+                            <div class="intervention-gite" style="font-weight: 800; color: #2D3436; font-size: 1.1rem; margin-bottom: 5px;">
+                                🏠 ${window.SecurityUtils ? window.SecurityUtils.sanitizeText(giteName) : giteName}
+                            </div>
+                            <div class="intervention-date" style="color: #636e72; font-weight: 600;">
+                                📅 ${dateFormatted}
+                            </div>
+                        </div>
+                        <span class="intervention-status ${statusClass}">${statusText}</span>
+                    </div>
+                    ${retour.commentaires ? `
+                        <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border-radius: 8px; border-left: 3px solid #667eea;">
+                            <div style="font-size: 0.85rem; font-weight: 600; color: #636e72; margin-bottom: 5px;">📝 Commentaires :</div>
+                            <div style="white-space: pre-wrap; font-size: 0.95rem; color: #2D3436;">${window.SecurityUtils ? window.SecurityUtils.sanitizeText(retour.commentaires) : retour.commentaires}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        
+        if (window.SecurityUtils) {
+            window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+        } else {
+            container.innerHTML = html;
+        }
+
+    } catch (error) {
+        console.error('Erreur chargement retours ménage:', error);
+        const container = document.getElementById('retours-list');
+        if (container) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚠️</div>
+                    <p>Erreur lors du chargement des retours</p>
+                </div>
+            `;
+        }
+    }
+}
+
 async function envoyerRetourMenage(e) {
     e.preventDefault();
     
@@ -618,10 +748,6 @@ async function envoyerRetourMenage(e) {
     if (detailsDeroulement) commentaires += `Détails déroulement: ${detailsDeroulement}`;
     
     try {
-        // ❌ Table retours_menage supprimée - 23/01/2026
-        showToast('❌ Feature retours ménage supprimée', 'info');
-        return;
-        
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) throw new Error('Non connecté');
         
@@ -629,7 +755,7 @@ async function envoyerRetourMenage(e) {
             .from('retours_menage')
             .insert({
                 owner_user_id: user.id,
-                reported_by: user.id, // La personne qui fait le retour
+                reported_by: user.id,
                 gite_id: giteId,
                 date_menage: date,
                 commentaires: commentaires.trim() || null,
@@ -638,11 +764,14 @@ async function envoyerRetourMenage(e) {
 
         if (error) throw error;
 
-        alert('✅ Retour envoyé avec succès ! Le propriétaire sera notifié.');
+        showToast('✅ Retour envoyé avec succès ! Le propriétaire sera notifié.', 'success');
         document.getElementById('form-retour-menage').reset();
         document.getElementById('retour-date').valueAsDate = new Date();
+        
+        // Recharger la liste des retours
+        await chargerRetoursMenuge();
     } catch (error) {
         console.error('Erreur envoi retour:', error);
-        alert('❌ Erreur lors de l\'envoi du retour');
+        showToast('❌ Erreur lors de l\'envoi du retour', 'error');
     }
 }

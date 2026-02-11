@@ -165,9 +165,9 @@
 </div>
 
 <script>
-console.log('🎯 ========================================');
-console.log('🎯 FICHIER MOBILE CALENDRIER-TARIFS.HTML CHARGÉ');
-console.log('🎯 ========================================');
+// console.log('🎯 ========================================');
+// console.log('🎯 FICHIER MOBILE CALENDRIER-TARIFS.HTML CHARGÉ');
+// console.log('🎯 ========================================');
 
 let currentGiteIdMobile = null;
 let currentMonthMobile = new Date().getMonth();
@@ -191,7 +191,7 @@ function getPlateformeColorMobile(plateforme) {
 }
 
 async function loadGitesSelectorMobile() {
-    console.log('📅 Chargement sélecteur gîtes mobile...');
+    // console.log('📅 Chargement sélecteur gîtes mobile...');
     try {
         if (!window.gitesManager) {
             console.error('❌ gitesManager non disponible');
@@ -200,7 +200,7 @@ async function loadGitesSelectorMobile() {
         }
         
         const gites = await window.gitesManager.getAll();
-        console.log('✅ Gîtes chargés:', gites.length);
+        // console.log('✅ Gîtes chargés:', gites.length);
         
         const selector = document.getElementById('giteSelectTarifs');
         if (!selector) {
@@ -222,7 +222,7 @@ async function loadGitesSelectorMobile() {
         if (gites.length > 0) {
             selector.value = gites[0].id;
             currentGiteIdMobile = gites[0].id;
-            console.log('✅ Gîte sélectionné:', gites[0].name);
+            // console.log('✅ Gîte sélectionné:', gites[0].name);
             await loadTarifsMobile();
         }
     } catch (error) {
@@ -232,7 +232,7 @@ async function loadGitesSelectorMobile() {
 }
 
 async function loadTarifsMobile() {
-    console.log('📅 Chargement tarifs pour gîte:', currentGiteIdMobile);
+    // console.log('📅 Chargement tarifs pour gîte:', currentGiteIdMobile);
     if (!currentGiteIdMobile) {
         console.warn('⚠️ Pas de gîte sélectionné');
         return;
@@ -245,7 +245,7 @@ async function loadTarifsMobile() {
             return;
         }
         
-        console.log('✅ Utilisateur connecté, chargement des données...');
+        // console.log('✅ Utilisateur connecté, chargement des données...');
         
         // Charger les tarifs depuis le champ JSON tarifs_calendrier de la table gites
         const { data: giteData, error: errorTarifs } = await window.supabaseClient
@@ -260,7 +260,7 @@ async function loadTarifsMobile() {
         const tarifData = giteData?.tarifs_calendrier;
         if (Array.isArray(tarifData)) {
             tarifsCacheMobile = tarifData;
-        console.log('✅ Tarifs chargés:', tarifsCacheMobile.length);
+        // console.log('✅ Tarifs chargés:', tarifsCacheMobile.length);
         
         } else if (tarifData && typeof tarifData === 'object') {
             tarifsCacheMobile = Object.entries(tarifData).map(([date, prix]) => ({
@@ -274,12 +274,12 @@ async function loadTarifsMobile() {
         // Charger les réservations
         if (typeof getAllReservations === 'function') {
             reservationsCacheMobile = await getAllReservations(true);
-            console.log('📋 Réservations totales chargées:', reservationsCacheMobile.length);
+            // console.log('📋 Réservations totales chargées:', reservationsCacheMobile.length);
             // ✅ Comparer directement les UUID strings (pas de parseInt!)
             reservationsCacheMobile = reservationsCacheMobile.filter(r => r.gite_id === currentGiteIdMobile);
-            console.log('📋 Réservations pour gite_id', currentGiteIdMobile, ':', reservationsCacheMobile.length);
+            // console.log('📋 Réservations pour gite_id', currentGiteIdMobile, ':', reservationsCacheMobile.length);
             if (reservationsCacheMobile.length > 0) {
-                console.log('📋 Première réservation:', reservationsCacheMobile[0]);
+                // console.log('📋 Première réservation:', reservationsCacheMobile[0]);
             }
         } else {
             console.warn('⚠️ getAllReservations non disponible');
@@ -291,7 +291,7 @@ async function loadTarifsMobile() {
             loadReglesIntoFormMobile();
         }
         
-        console.log('✅ Render du calendrier...');
+        // console.log('✅ Render du calendrier...');
         renderCalendrierMobile();
     } catch (error) {
         console.error('Erreur chargement tarifs:', error);
@@ -327,14 +327,14 @@ function loadReglesIntoFormMobile() {
 }
 
 function renderCalendrierMobile() {
-    console.log('🎨 renderCalendrierMobile() appelée');
+    // console.log('🎨 renderCalendrierMobile() appelée');
     const container = document.getElementById('calendrierTarifsMobile');
     if (!container) {
         console.error('❌ Container #calendrierTarifsMobile non trouvé !');
         return;
     }
     
-    console.log('✅ Container trouvé, génération du calendrier...');
+    // console.log('✅ Container trouvé, génération du calendrier...');
     
     // Afficher le mois actuel
     const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
@@ -420,7 +420,7 @@ function renderCalendrierMobile() {
         container.appendChild(dayCard);
     }
     
-    console.log(`✅ Calendrier généré: ${lastDay} jours créés`);
+    // console.log(`✅ Calendrier généré: ${lastDay} jours créés`);
 }
 
 function openTarifModalMobile(dateStr) {

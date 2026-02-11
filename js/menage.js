@@ -518,12 +518,12 @@ async function afficherPlanningParSemaine() {
         
         // Debug log pour vérifier les données
         if (validation && validation.status === 'pending_validation') {
-            console.log('🔍 menageInfo créé avec proposition:', {
-                reservationId: r.id,
-                status: validation.status,
-                proposedBy: validation.proposed_by,
-                hasValidation: !!validation
-            });
+            // console.log('🔍 menageInfo créé avec proposition:', {
+            //     reservationId: r.id,
+            //     status: validation.status,
+            //     proposedBy: validation.proposed_by,
+            //     hasValidation: !!validation
+            // });
         }
         
         // Chercher la réservation suivante pour ce gîte
@@ -866,15 +866,171 @@ function ouvrirPageFemmeMenage() {
     window.open('pages/femme-menage.html', '_blank');
 }
 
+/**
+ * Charge et affiche les retours ménage envoyés par la femme de ménage
+ */
+async function loadRetoursMenuge() {
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) throw new Error('Non connecté');
+
+        // Charger les retours des 30 derniers jours
+        const dateDebut = new Date();
+        dateDebut.setDate(dateDebut.getDate() - 30);
+
+        const { data: retours, error } = await window.supabaseClient
+            .from('retours_menage')
+            .select(`
+                *,
+                gites:gite_id(name)
+            `)
+            .eq('owner_user_id', user.id)
+            .gte('date_menage', dateDebut.toISOString().split('T')[0])
+            .order('date_menage', { ascending: false })
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Erreur chargement retours ménage:', error);
+            throw error;
+        }
+
+        const container = document.getElementById('retoursMenugeList');
+        if (!container) return; // Container pas encore chargé
+        
+        if (!retours || retours.length === 0) {
+            const html = `
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
+                    <p>Aucun retour envoyé ces 30 derniers jours</p>
+                </div>
+            `;
+            window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+            return;
+        }
+
+        // Construire l'affichage des retours
+        let html = '<div style="display: flex; flex-direction: column; gap: 20px;">';
+        
+        retours.forEach(retour => {
+            const giteName = retour.gites?.name || 'Gîte inconnu';
+            const dateFormatted = new Date(retour.date_menage).toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            const createdAt = new Date(retour.created_at).toLocaleDateString('fr-FR', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            html += `
+                <div style="border: 2px solid var(--border-color); border-radius: 12px; padding: 25px; background: var(--bg-secondary); box-shadow: var(--shadow);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <div style="flex: 1; min-width: 250px;">
+                            <div style="font-weight: 800; color: var(--text-primary); font-size: 1.2rem; margin-bottom: 5px;">
+                                🏠 ${window.SecurityUtils ? window.SecurityUtils.sanitizeText(giteName) : giteName}
+                            </div>
+                            <div style="color: var(--text-secondary); font-weight: 600; margin-bottom: 3px;">
+                                📅 ${dateFormatted}
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.85rem;">
+                                🕒 Envoyé le ${createdAt}
+                            </div>
+                        </div>
+                        <span class="menage-status-badge menage-status-badge-${retour.validated ? 'validated' : 'pending'}">
+                            ${retour.validated ? '✅ Validé' : '⏳ En attente'}
+                        </span>
+                    </div>
+                    ${retour.commentaires ? `
+                        <div style="margin-top: 15px; padding: 15px; background: var(--bg-primary); border-radius: 8px; border-left: 3px solid var(--accent-color);">
+                            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                📝 Observations :
+                            </div>
+                            <div style="white-space: pre-wrap; font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;">${window.SecurityUtils ? window.SecurityUtils.sanitizeText(retour.commentaires) : retour.commentaires}</div>
+                        </div>
+                    ` : ''}
+                    ${!retour.validated ? `
+                        <div style="margin-top: 15px;">
+                            <button onclick="validerRetourMenage('${retour.id}')" class="btn-neo btn-validation" style="padding: 10px 20px; font-size: 0.9rem;">
+                                <i data-lucide="check"></i> Marquer comme validé
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        
+        window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+        
+        // Réinitialiser les icônes Lucide après l'injection HTML
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+    } catch (error) {
+        console.error('Erreur chargement retours ménage:', error);
+        const container = document.getElementById('retoursMenugeList');
+        if (container) {
+            const html = `
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">⚠️</div>
+                    <p>Erreur lors du chargement des retours</p>
+                </div>
+            `;
+            window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+        }
+    }
+}
+
+/**
+ * Valide un retour ménage
+ */
+async function validerRetourMenage(retourId) {
+    try {
+        const { error } = await window.supabaseClient
+            .from('retours_menage')
+            .update({ validated: true })
+            .eq('id', retourId);
+
+        if (error) throw error;
+
+        showToast('✅ Retour validé avec succès', 'success');
+        
+        // Recharger la liste
+        await loadRetoursMenuge();
+    } catch (error) {
+        console.error('Erreur validation retour:', error);
+        showToast('❌ Erreur lors de la validation', 'error');
+    }
+}
+
+// Hook pour charger les retours après le planning
+const originalAfficherPlanning = afficherPlanningParSemaine;
+if (originalAfficherPlanning) {
+    async function afficherPlanningParSemaineAvecRetours() {
+        await originalAfficherPlanning();
+        // Charger les retours après un court délai pour s'assurer que le DOM est prêt
+        setTimeout(() => loadRetoursMenuge(), 500);
+    }
+    window.afficherPlanningParSemaine = afficherPlanningParSemaineAvecRetours;
+}
+
 // Exporter les fonctions dans le scope global
 window.calculerDateMenage = calculerDateMenage;
 window.isJourFerie = isJourFerie;
 window.formatDateShort = formatDateShort;
 window.genererPlanningMenage = genererPlanningMenage;
-window.afficherPlanningParSemaine = afficherPlanningParSemaine;
+// window.afficherPlanningParSemaine est déjà défini dans le hook ci-dessus
 window.generateCleaningItemHTML = generateCleaningItemHTML;
 window.telechargerPlanningMenage = telechargerPlanningMenage;
 window.ouvrirPageFemmeMenage = ouvrirPageFemmeMenage;
 window.acceptCompanyProposal = acceptCompanyProposal;
 window.refuseCompanyProposal = refuseCompanyProposal;
 window.modifierDateMenage = modifierDateMenage;
+window.loadRetoursMenuge = loadRetoursMenuge;
+window.validerRetourMenage = validerRetourMenage;

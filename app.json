@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "10a705b9-7d40-4598-bd11-2ef185ab9bab"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.liveownerunit.gestiongitecalvignac",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

@@ -107,7 +107,7 @@ async function autoTranslateGiteInfoIfNeeded() {
         
         // Si FR rempli mais EN vide → Traduire
         if (valueFR && valueFR.trim() !== '' && (!valueEN || valueEN.trim() === '')) {
-            console.log(`🌍 Traduction ${field}: "${valueFR.substring(0, 50)}..."`);
+            // console.log(`🌍 Traduction ${field}: "${valueFR.substring(0, 50)}..."`);
             
             // Traduire avec délai pour éviter rate limit (100ms entre chaque)
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -121,7 +121,7 @@ async function autoTranslateGiteInfoIfNeeded() {
     
     // Sauvegarder les traductions dans la base
     if (translated && Object.keys(updates).length > 0) {
-        console.log(`💾 Sauvegarde de ${Object.keys(updates).length} traductions automatiques...`);
+        // console.log(`💾 Sauvegarde de ${Object.keys(updates).length} traductions automatiques...`);
         
         try {
             const { error } = await supabase
@@ -132,7 +132,7 @@ async function autoTranslateGiteInfoIfNeeded() {
             if (error) {
                 console.error('❌ Erreur sauvegarde traductions:', error);
             } else {
-                console.log('✅ Traductions sauvegardées en base de données');
+                // console.log('✅ Traductions sauvegardées en base de données');
             }
         } catch (err) {
             console.error('❌ Erreur update base:', err);
@@ -575,11 +575,11 @@ async function loadGiteInfo() {
         horairesValidees.forEach(h => {
             if (h.type === 'arrivee') {
                 giteInfo.heure_arrivee_validee = h.heure_demandee;
-                console.log('✅ Heure arrivée validée chargée:', h.heure_demandee);
+                // console.log('✅ Heure arrivée validée chargée:', h.heure_demandee);
             }
             if (h.type === 'depart') {
                 giteInfo.heure_depart_validee = h.heure_demandee;
-                console.log('✅ Heure départ validée chargée:', h.heure_demandee);
+                // console.log('✅ Heure départ validée chargée:', h.heure_demandee);
             }
         });
     }

@@ -2,17 +2,17 @@
 // 📱 RÉSERVATIONS MOBILE - Grille 2 colonnes
 // ==========================================
 
-console.log('📱 reservations.js MOBILE chargé');
+// console.log('📱 reservations.js MOBILE chargé');
 
 // Fonction principale réservations mobile
 async function updateReservationsList() {
-    console.log('🔄 updateReservationsList MOBILE');
+    // console.log('🔄 updateReservationsList MOBILE');
     
     const reservations = await getAllReservations(true);
-    console.log('📊 Réservations chargées:', reservations?.length || 0);
+    // console.log('📊 Réservations chargées:', reservations?.length || 0);
     
     const gites = await window.gitesManager.getAll();
-    console.log('🏠 Gîtes chargés:', gites?.length || 0);
+    // console.log('🏠 Gîtes chargés:', gites?.length || 0);
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -70,7 +70,7 @@ async function updateReservationsList() {
 // Fonction de recherche mobile
 function filterReservations(term) {
     // TODO: implémenter recherche si nécessaire
-    console.log('🔍 Recherche:', term);
+    // console.log('🔍 Recherche:', term);
 }
 
 // Actualisation

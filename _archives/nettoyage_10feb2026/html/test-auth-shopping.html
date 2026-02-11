@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Auth Shopping</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>🔍 Test Authentification Shopping</h1>
+    <div id="results"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://rcjqbywlkhxopahgjgnl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjanFieXdsa2h4b3BhaGdqZ25sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAwNDY2NzcsImV4cCI6MjA0NTYyMjY3N30.H0N7pQ3j0Duz7fqI5_mR3WTkq3D5YaTN0vx1qmJmZEI';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function runTests() {
+            const results = document.getElementById('results');
+            
+            // 1. Vérifier authentification
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            
+            if (authError || !user) {
+                results.innerHTML = `
+                    <h2 style="color: red;">❌ PAS AUTHENTIFIÉ</h2>
+                    <p>Ouvrez d'abord votre dashboard principal et connectez-vous.</p>
+                `;
+                return;
+            }
+
+            results.innerHTML = `<h2 style="color: green;">✅ AUTHENTIFIÉ</h2>`;
+            results.innerHTML += `<p><strong>User ID:</strong> ${user.id}</p>`;
+            results.innerHTML += `<p><strong>Email:</strong> ${user.email}</p>`;
+            results.innerHTML += `<hr>`;
+
+            // 2. Tester accès aux listes
+            const { data: lists, error: listsError } = await supabase
+                .from('shopping_lists')
+                .select('*')
+                .eq('status', 'en_cours');
+
+            results.innerHTML += `<h3>📝 Listes de courses (status=en_cours)</h3>`;
+            if (listsError) {
+                results.innerHTML += `<p style="color: red;">❌ Erreur: ${listsError.message}</p>`;
+            } else {
+                results.innerHTML += `<p style="color: green;">✅ ${lists.length} liste(s) accessible(s)</p>`;
+                lists.forEach(list => {
+                    results.innerHTML += `<p> - ${list.name} (owner: ${list.owner_user_id})</p>`;
+                });
+            }
+            results.innerHTML += `<hr>`;
+
+            // 3. Tester accès aux lieux
+            const { data: lieux, error: lieuxError } = await supabase
+                .from('km_lieux_favoris')
+                .select('*');
+
+            results.innerHTML += `<h3>📍 Lieux favoris</h3>`;
+            if (lieuxError) {
+                results.innerHTML += `<p style="color: red;">❌ Erreur: ${lieuxError.message}</p>`;
+            } else {
+                results.innerHTML += `<p style="color: green;">✅ ${lieux.length} lieu(x) accessible(s)</p>`;
+                lieux.forEach(lieu => {
+                    results.innerHTML += `<p> - ${lieu.nom} - ${lieu.distance_km} km (owner: ${lieu.owner_user_id})</p>`;
+                });
+            }
+            results.innerHTML += `<hr>`;
+
+            // 4. Comparer les owner_user_id
+            if (lists && lists.length > 0) {
+                const firstList = lists[0];
+                const match = firstList.owner_user_id === user.id;
+                
+                results.innerHTML += `<h3>🔍 Comparaison des IDs</h3>`;
+                results.innerHTML += `<p><strong>Mon user_id:</strong> ${user.id}</p>`;
+                results.innerHTML += `<p><strong>Owner des listes:</strong> ${firstList.owner_user_id}</p>`;
+                results.innerHTML += `<p style="font-size: 24px;">${match ? '✅ MATCH - Tout est OK !' : '❌ DIFFÉRENT - Problème d\'authentification'}</p>`;
+                
+                if (!match) {
+                    results.innerHTML += `
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                            <h4>🛠️ Solution</h4>
+                            <p>Les listes appartiennent à un autre compte.</p>
+                            <p><strong>2 options:</strong></p>
+                            <ol>
+                                <li>Se connecter sur le mobile avec le compte: <strong>${user.email}</strong></li>
+                                <li>OU transférer les listes vers le compte mobile</li>
+                            </ol>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Lancer les tests au chargement
+        runTests();
+    </script>
+</body>
+</html>

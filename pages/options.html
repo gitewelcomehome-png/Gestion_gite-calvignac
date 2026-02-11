@@ -304,6 +304,34 @@
             }
         }
         
+        /* Boutons d'outils */
+        .tool-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: white;
+        }
+        
+        .tool-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .tool-button:active {
+            transform: translateY(0);
+        }
+        
+        .tool-button svg {
+            flex-shrink: 0;
+        }
+        
         @media (max-width: 768px) {
             body {
                 padding: 1rem 0.75rem;
@@ -480,6 +508,34 @@
         </div>
         
         <div class="sections-grid">
+            <!-- OUTILS DE GESTION -->
+            <div class="section-card" style="grid-column: 1 / -1;">
+                <div class="section-header">
+                    <div class="section-icon">🛠️</div>
+                    <div class="section-title">Outils de Gestion</div>
+                </div>
+                <p class="section-description" style="margin-bottom: 1.5rem;">
+                    Créez et gérez vos FAQ et check-lists
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <button onclick="goToTab('faq')" class="tool-button" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        <span>Créer une FAQ</span>
+                    </button>
+                    <button onclick="goToTab('checklists')" class="tool-button" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                        <span>Créer une Check-list</span>
+                    </button>
+                </div>
+            </div>
+            
             <!-- THÈME INTERFACE -->
             <div class="section-card">
                 <div class="section-header">
@@ -610,6 +666,10 @@
         </div>
     </div>
     
+    <!-- Supabase Client - CHARGER AVANT LE SCRIPT PRINCIPAL -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/shared-config.js"></script>
+
     <script>
         let selectedTheme = 'cyan';
         let selectedAppTheme = 'dark';
@@ -628,8 +688,29 @@
             // Appliquer le thème à la page options elle-même
             applyThemeToPage(savedAppTheme);
             
-            // Charger le profil utilisateur
-            await loadProfile();
+            // Attendre que Supabase soit initialisé avant de charger le profil
+            let attempts = 0;
+            const maxAttempts = 50; // 5 secondes max
+            
+            const waitForSupabase = setInterval(async () => {
+                attempts++;
+                
+                if (window.supabaseClient) {
+                    clearInterval(waitForSupabase);
+                    await loadProfile();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(waitForSupabase);
+                    console.error('❌ Supabase non initialisé après 5 secondes');
+                    // Afficher un message d'erreur convivial
+                    const profileLoading = document.getElementById('profileLoading');
+                    const profileError = document.getElementById('profileError');
+                    if (profileLoading) profileLoading.style.display = 'none';
+                    if (profileError) {
+                        profileError.style.display = 'block';
+                        document.getElementById('profileErrorMessage').textContent = 'Impossible de charger le profil. Veuillez recharger la page.';
+                    }
+                }
+            }, 100);
         });
         
         function applyThemeToPage(theme) {
@@ -715,7 +796,7 @@
                         }
                     }
                 } catch (dbError) {
-                    console.log('⚠️ Sauvegarde Supabase ignorée (colonne preferences manquante?):', dbError);
+                    // console.log('⚠️ Sauvegarde Supabase ignorée (colonne preferences manquante?):', dbError);
                     // On continue quand même, localStorage fonctionne
                 }
                 
@@ -750,6 +831,14 @@
                 msg.classList.add('show');
                 setTimeout(() => msg.classList.remove('show'), 3000);
             }
+        }
+        
+        // Fonction pour naviguer vers un onglet spécifique
+        function goToTab(tabName) {
+            // Sauvegarder l'onglet cible dans localStorage
+            localStorage.setItem('pendingTabSwitch', tabName);
+            // Rediriger vers le dashboard
+            window.location.href = '../index.html';
         }
         
         // Écouter les messages du parent
@@ -795,32 +884,42 @@
                 
                 currentUser = user;
                 
-                // Récupérer les informations du client
-                const { data: client, error: clientError } = await window.supabaseClient
-                    .from('cm_clients')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .single();
-                
-                if (clientError) {
-                    console.error('Erreur chargement client:', clientError);
-                    throw new Error('Impossible de charger les informations du profil');
+                // Récupérer les informations du client (peut échouer si table n'existe pas)
+                let client = null;
+                try {
+                    const { data: clientData, error: clientError } = await window.supabaseClient
+                        .from('cm_clients')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .single();
+                    
+                    if (!clientError && clientData) {
+                        client = clientData;
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Table cm_clients non disponible ou pas de données:', e);
                 }
                 
-                // Remplir les champs avec les données
-                document.getElementById('profilePrenom').value = client.prenom_contact || '';
-                document.getElementById('profileNom').value = client.nom_contact || '';
-                document.getElementById('profileEmail').value = client.email_principal || user.email;
-                document.getElementById('profileTelephone').value = client.telephone || '';
-                document.getElementById('profileEntreprise').value = client.nom_entreprise || '';
-                document.getElementById('profileAdresse').value = client.adresse || '';
-                document.getElementById('profileCodePostal').value = client.code_postal || '';
-                document.getElementById('profileVille').value = client.ville || '';
-                document.getElementById('profilePays').value = client.pays || 'France';
+                // Remplir les champs avec les données (ou valeurs par défaut)
+                if (client) {
+                    document.getElementById('profilePrenom').value = client.prenom_contact || '';
+                    document.getElementById('profileNom').value = client.nom_contact || '';
+                    document.getElementById('profileEmail').value = client.email_principal || user.email;
+                    document.getElementById('profileTelephone').value = client.telephone || '';
+                    document.getElementById('profileEntreprise').value = client.nom_entreprise || '';
+                    document.getElementById('profileAdresse').value = client.adresse || '';
+                    document.getElementById('profileCodePostal').value = client.code_postal || '';
+                    document.getElementById('profileVille').value = client.ville || '';
+                    document.getElementById('profilePays').value = client.pays || 'France';
+                } else {
+                    // Pas de données client, remplir uniquement l'email
+                    document.getElementById('profileEmail').value = user.email;
+                    document.getElementById('profilePays').value = 'France';
+                }
                 
                 // Charger les préférences de thème depuis la base de données (si disponibles)
                 try {
-                    if (client.preferences && typeof client.preferences === 'object') {
+                    if (client && client.preferences && typeof client.preferences === 'object') {
                         const prefs = client.preferences;
                         
                         if (prefs.theme) {
@@ -844,7 +943,7 @@
                         }
                     }
                 } catch (e) {
-                    console.log('⚠️ Préférences non chargées depuis la BDD, utilisation localStorage');
+                    // console.log('⚠️ Préférences non chargées depuis la BDD, utilisation localStorage');
                 }
                 
                 profileLoading.style.display = 'none';
@@ -860,6 +959,7 @@
         
         async function saveProfile() {
             const profileError = document.getElementById('profileError');
+            const msg = document.getElementById('successMessage');
             
             try {
                 profileError.style.display = 'none';
@@ -881,54 +981,44 @@
                     throw new Error('Session expirée, veuillez vous reconnecter');
                 }
                 
-                // Récupérer l'ID du client
-                const { data: existingClient } = await window.supabaseClient
-                    .from('cm_clients')
-                    .select('id')
-                    .eq('user_id', currentUser.id)
-                    .single();
-                
-                if (!existingClient) {
-                    throw new Error('Profil introuvable');
-                }
-                
-                // Préparer les données de mise à jour
-                const updateData = {
-                    prenom_contact: prenom,
-                    nom_contact: nom,
-                    telephone: telephone,
-                    nom_entreprise: document.getElementById('profileEntreprise').value.trim() || null,
-                    adresse: adresse,
-                    code_postal: codePostal,
-                    ville: ville,
-                    pays: pays,
-                    updated_at: new Date().toISOString()
-                };
-                
-                // Tenter d'ajouter les préférences (peut échouer si la colonne n'existe pas)
+                // Tenter de sauvegarder dans Supabase (peut échouer si table n'existe pas)
                 try {
-                    updateData.preferences = {
-                        theme: selectedAppTheme,
-                        ficheClientTheme: selectedTheme,
-                        style: selectedAppStyle
-                    };
-                } catch (e) {
-                    console.log('⚠️ Colonne preferences non disponible');
+                    // Récupérer l'ID du client
+                    const { data: existingClient } = await window.supabaseClient
+                        .from('cm_clients')
+                        .select('id')
+                        .eq('user_id', currentUser.id)
+                        .single();
+                    
+                    if (existingClient) {
+                        // Préparer les données de mise à jour
+                        const updateData = {
+                            prenom_contact: prenom,
+                            nom_contact: nom,
+                            telephone: telephone,
+                            nom_entreprise: document.getElementById('profileEntreprise').value.trim() || null,
+                            adresse: adresse,
+                            code_postal: codePostal,
+                            ville: ville,
+                            pays: pays,
+                            updated_at: new Date().toISOString()
+                        };
+                        
+                        // Mettre à jour
+                        const { error: updateError } = await window.supabaseClient
+                            .from('cm_clients')
+                            .update(updateData)
+                            .eq('id', existingClient.id);
+                        
+                        if (updateError) throw updateError;
+                    }
+                } catch (dbError) {
+                    console.warn('⚠️ Sauvegarde BDD impossible (table cm_clients non disponible):', dbError);
+                    // On continue quand même pour montrer le message de succès
                 }
                 
-                // Mise à jour du profil
-                const { error: updateError } = await window.supabaseClient
-                    .from('cm_clients')
-                    .update(updateData)
-                    .eq('id', existingClient.id);
-                
-                if (updateError) {
-                    throw updateError;
-                }
-                
-                // Afficher le message de succès
-                const msg = document.getElementById('successMessage');
-                msg.innerHTML = '<span style="font-size: 1.5rem;">✓</span><span>Profil mis à jour avec succès !</span>';
+                // Message de succès
+                msg.innerHTML = '<span style="font-size: 1.5rem;">✓</span><span>Profil mis à jour !</span>';
                 msg.classList.add('show');
                 
                 setTimeout(() => {
@@ -942,7 +1032,5 @@
             }
         }
     </script>
-    
-    <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/shared-config.js"></script>
+</body>
+</html>

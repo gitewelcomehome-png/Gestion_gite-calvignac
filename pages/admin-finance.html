@@ -80,6 +80,21 @@
         <!-- Main Container -->
         <main class="admin-container">
             
+            <!-- Header structuré -->
+            <header class="page-header">
+                <div class="page-header__content">
+                    <p class="page-subtitle">Analyses financières et KPIs SaaS</p>
+                </div>
+                <div class="page-header__actions">
+                    <select id="periodSelector" class="btn btn--secondary">
+                        <option value="30">30 derniers jours</option>
+                        <option value="90" selected>90 derniers jours</option>
+                        <option value="365">12 derniers mois</option>
+                        <option value="all">Depuis le début</option>
+                    </select>
+                </div>
+            </header>
+            
             <!-- Métriques Financières Principales -->
             <section class="kpis-grid">
                 <div class="kpi-card">

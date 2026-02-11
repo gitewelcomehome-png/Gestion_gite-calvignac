@@ -161,15 +161,16 @@ class ErrorLogger {
             info: 'color: #3498DB; font-weight: bold;'
         };
         
-        console.log(
-            `%c[${logEntry.level.toUpperCase()}] ${logEntry.message}`,
-            style[logEntry.level] || '',
-            {
-                error: logEntry.error,
-                context: logEntry.context,
-                timestamp: logEntry.timestamp
-            }
-        );
+        // Désactivé pour éviter pollution console
+        // console.log(
+        //     `%c[${logEntry.level.toUpperCase()}] ${logEntry.message}`,
+        //     style[logEntry.level] || '',
+        //     {
+        //         error: logEntry.error,
+        //         context: logEntry.context,
+        //         timestamp: logEntry.timestamp
+        //     }
+        // );
     }
     
     /**

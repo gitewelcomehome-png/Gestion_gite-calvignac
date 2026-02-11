@@ -1,0 +1,824 @@
+<div class="card">
+    <div class="card-header">
+        <span class="card-icon">💰</span>
+        <h2 class="card-title">Calculateur Fiscal LMP</h2>
+        <p style="color: #7f8c8d; font-size: 0.9rem; margin: 8px 0 0 0;">Optimisez votre déclaration et calculez vos charges déductibles</p>
+    </div>
+
+    <!-- Boutons de gestion -->
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+        <button onclick="chargerDerniereSimulation()" class="btn btn-secondary">
+            📂 Charger dernière simulation
+        </button>
+        <button onclick="nouvelleSimulation()" class="btn btn-secondary">
+            🔄 Nouvelle simulation
+        </button>
+        <button onclick="sauvegarderSimulation()" class="btn btn-primary">
+            💾 Sauvegarder
+        </button>
+    </div>
+
+    <form id="calculateur-lmp" onsubmit="calculerFiscalite(event)">
+        
+        <!-- BLOC 1 : Chiffre d'affaires -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
+                <span class="toggle-icon">▼</span> 📊 Chiffre d'affaires
+            </h3>
+            <div class="bloc-content">
+                <div class="form-group">
+                    <label>Chiffre d'affaires annuel (€) <span class="required">*</span></label>
+                    <input type="number" id="ca" step="0.01" required placeholder="Ex: 25000">
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 2A : Charges COUZON -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)">
+                <span class="toggle-icon">▼</span> 🏠 Charges COUZON (100% déductibles)
+            </h3>
+            <div class="bloc-content">
+            <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Internet</label>
+                    <div class="input-with-select">
+                        <select id="internet_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="internet_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Eau</label>
+                    <div class="input-with-select">
+                        <select id="eau_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="eau_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Électricité</label>
+                    <div class="input-with-select">
+                        <select id="electricite_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="electricite_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance habitation</label>
+                    <div class="input-with-select">
+                        <select id="assurance_hab_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_hab_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance emprunteur</label>
+                    <div class="input-with-select">
+                        <select id="assurance_emprunt_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_emprunt_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Intérêts emprunt</label>
+                    <div class="input-with-select">
+                        <select id="interets_emprunt_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="interets_emprunt_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ménage/Entretien</label>
+                    <div class="input-with-select">
+                        <select id="menage_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="menage_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Linge (draps, serviettes)</label>
+                    <div class="input-with-select">
+                        <select id="linge_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="linge_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Logiciel de gestion</label>
+                    <div class="input-with-select">
+                        <select id="logiciel_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="logiciel_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Charges de copropriété</label>
+                    <div class="input-with-select">
+                        <select id="copropriete_couzon_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="copropriete_couzon" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Taxe foncière (annuel)</label>
+                    <input type="number" id="taxe_fonciere_couzon" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>CFE (annuel)</label>
+                    <input type="number" id="cfe_couzon" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Commissions plateformes (annuel)</label>
+                    <input type="number" id="commissions_couzon" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Amortissement du bien (annuel)</label>
+                    <input type="number" id="amortissement_couzon" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 2B : Charges TRÉVOUX -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🏠 Charges TRÉVOUX (100% déductibles)</h3>
+            <div class="bloc-content">
+<div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Internet</label>
+                    <div class="input-with-select">
+                        <select id="internet_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="internet_trevoux" step="0.01" placeholder="0.00">
+            </div>
+        </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Eau</label>
+                    <div class="input-with-select">
+                        <select id="eau_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="eau_trevoux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Électricité</label>
+                    <div class="input-with-select">
+                        <select id="electricite_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="electricite_trevoux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance habitation</label>
+                    <div class="input-with-select">
+                        <select id="assurance_hab_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_hab_trevoux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance emprunteur</label>
+                    <div class="input-with-select">
+                        <select id="assurance_emprunt_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_emprunt_trevoux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Intérêts emprunt</label>
+                    <div class="input-with-select">
+                        <select id="interets_emprunt_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="interets_emprunt_trevoux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ménage/Entretien</label>
+                    <div class="input-with-select">
+                        <select id="menage_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="menage_trevoux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Linge (draps, serviettes)</label>
+                    <div class="input-with-select">
+                        <select id="linge_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="linge_trevoux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Logiciel de gestion</label>
+                    <div class="input-with-select">
+                        <select id="logiciel_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="logiciel_trevoux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Charges de copropriété</label>
+                    <div class="input-with-select">
+                        <select id="copropriete_trevoux_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="copropriete_trevoux" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Taxe foncière (annuel)</label>
+                    <input type="number" id="taxe_fonciere_trevoux" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>CFE (annuel)</label>
+                    <input type="number" id="cfe_trevoux" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Commissions plateformes (annuel)</label>
+                    <input type="number" id="commissions_trevoux" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Amortissement du bien (annuel)</label>
+                    <input type="number" id="amortissement_trevoux" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 2C : Travaux (Liste dynamique) -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🔧 Travaux/Réparations</h3>
+            <div class="bloc-content">
+<div style="margin-bottom: 15px;">
+                <button type="button" onclick="ajouterTravaux()" class="btn btn-secondary">➕ Ajouter un travail</button>
+            </div>
+            <div id="travaux-liste" style="display: grid; gap: 10px;">
+            </div>
+        </div>
+        </div>
+
+        <!-- BLOC 2D : Frais divers (Liste dynamique) -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 📝 Frais divers</h3>
+            <div class="bloc-content">
+<div style="margin-bottom: 15px;">
+                <button type="button" onclick="ajouterFraisDivers()" class="btn btn-secondary">➕ Ajouter un frais</button>
+            </div>
+            <div id="frais-divers-liste" style="display: grid; gap: 10px;">
+            </div>
+        </div>
+        </div>
+
+        <!-- BLOC 2E : Produits d'accueil (Liste dynamique) -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🧴 Produits d'accueil</h3>
+            <div class="bloc-content">
+<div style="margin-bottom: 15px;">
+                <button type="button" onclick="ajouterProduitAccueil()" class="btn btn-secondary">➕ Ajouter un produit</button>
+            </div>
+            <div id="produits-accueil-liste" style="display: grid; gap: 10px;">
+            </div>
+        </div>
+        </div>
+
+        <!-- BLOC 3 : Résidence principale (Bureau) -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🏡 Charges résidence principale (Bureau)</h3>
+            <div class="bloc-content">
+<p class="fiscal-info">⚠️ Déductibles au prorata de la surface professionnelle</p>
+            
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 10px;">
+                    <div class="form-group">
+                        <label>Surface bureau (m²)</label>
+                        <input type="number" id="surface_bureau" step="0.01" placeholder="15" onchange="calculerRatio()">
+                    </div>
+                    <div class="form-group">
+                        <label>Surface totale logement (m²)</label>
+                        <input type="number" id="surface_totale" step="0.01" placeholder="100" onchange="calculerRatio()">
+            </div>
+        </div>
+                </div>
+                <div id="ratio-display" style="font-size: 1.2rem; font-weight: 600; color: #27ae60; text-align: center;">
+                    Ratio : 0%
+                </div>
+            </div>
+            
+            <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Intérêts emprunt résidence</label>
+                    <div class="input-with-select">
+                        <select id="interets_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="interets_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance emprunteur résidence</label>
+                    <div class="input-with-select">
+                        <select id="assurance_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Électricité résidence</label>
+                    <div class="input-with-select">
+                        <select id="electricite_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="electricite_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Internet résidence</label>
+                    <div class="input-with-select">
+                        <select id="internet_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="internet_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Eau résidence</label>
+                    <div class="input-with-select">
+                        <select id="eau_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="eau_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance habitation résidence</label>
+                    <div class="input-with-select">
+                        <select id="assurance_hab_residence_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_hab_residence" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Taxe foncière résidence (annuel)</label>
+                    <input type="number" id="taxe_fonciere_residence" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 4 : Frais professionnels -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 💼 Frais professionnels (100% déductibles)</h3>
+            <div class="bloc-content">
+<div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Comptable (annuel)</label>
+                    <input type="number" id="comptable" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Frais bancaires (annuel)</label>
+                    <input type="number" id="frais_bancaires" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Téléphone</label>
+                    <div class="input-with-select">
+                        <select id="telephone_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="telephone" step="0.01" placeholder="0.00">
+            </div>
+        </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Matériel informatique (annuel)</label>
+                    <input type="number" id="materiel_info" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>RC Professionnelle (annuel)</label>
+                    <input type="number" id="rc_pro" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Formation (annuel)</label>
+                    <input type="number" id="formation" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Fournitures</label>
+                    <div class="input-with-select">
+                        <select id="fournitures_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="fournitures" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 5 : Véhicule -->
+        <div class="fiscal-bloc collapsible">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🚗 Frais de véhicule</h3>
+            <div class="bloc-content">
+<div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <input type="radio" name="vehicule_option" value="bareme" checked onchange="toggleVehiculeOption()"> 
+                    Barème kilométrique 2024
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="vehicule_option" value="reel" onchange="toggleVehiculeOption()"> 
+                    Frais réels
+                </label>
+            </div>
+
+            <div id="vehicule-bareme" class="fiscal-grid">
+                <div class="form-group">
+                    <label>Puissance fiscale (CV)</label>
+                    <select id="puissance_fiscale">
+                        <option value="3">3 CV</option>
+                        <option value="4">4 CV</option>
+                        <option value="5" selected>5 CV</option>
+                        <option value="6">6 CV</option>
+                        <option value="7">7 CV et +</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Kilomètres professionnels</label>
+                    <input type="number" id="km_professionnels" step="1" placeholder="5000">
+            </div>
+        </div>
+            </div>
+
+            <div id="vehicule-reel" class="fiscal-grid" style="display: none;">
+                <div class="form-group">
+                    <label>Carburant</label>
+                    <div class="input-with-select">
+                        <select id="carburant_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="carburant" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance auto</label>
+                    <div class="input-with-select">
+                        <select id="assurance_auto_type" class="type-select">
+                            <option value="mensuel">Mensuel</option>
+                            <option value="annuel">Annuel</option>
+                        </select>
+                        <input type="number" id="assurance_auto" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Entretien/réparations (annuel)</label>
+                    <input type="number" id="entretien_auto" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Amortissement véhicule (annuel)</label>
+                    <input type="number" id="amortissement_auto" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Usage professionnel (%)</label>
+                    <input type="number" id="usage_pro_pourcent" step="1" min="0" max="100" placeholder="50">
+                </div>
+            </div>
+        </div>
+
+        <!-- Estimation URSSAF en temps réel -->
+        <div id="estimation-urssaf" style="display: none; margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border-radius: 15px; text-align: center;">
+            <h3 style="margin-bottom: 15px;">💰 ESTIMATION EN TEMPS RÉEL</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Bénéfice imposable</div>
+                    <div id="preview-benefice" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Cotisations URSSAF</div>
+                    <div id="preview-urssaf" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Reste avant IR</div>
+                    <div id="preview-reste" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                </div>
+            </div>
+            <div id="alerte-retraite" style="display: none; background: #e74c3c; padding: 12px; border-radius: 8px; font-weight: 600;">
+                ⚠️ ATTENTION : Bénéfice en dessous de 7 046 € - Trimestres de retraite non validés !
+            </div>
+        </div>
+
+        <!-- Calcul Impôt sur le Revenu -->
+        <div class="fiscal-bloc" style="margin-top: 30px;">
+            <h3 class="fiscal-bloc-title" onclick="toggleBloc(this)"><span class="toggle-icon">▼</span> 🧾 Calcul Impôt sur le Revenu (IR)</h3>
+            <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Salaire annuel Madame (€)</label>
+                    <input type="number" id="salaire_madame" step="0.01" placeholder="0.00" oninput="calculerIR()">
+                </div>
+                
+                <div class="form-group">
+                    <label>Salaire annuel Monsieur (€)</label>
+                    <input type="number" id="salaire_monsieur" step="0.01" placeholder="0.00" oninput="calculerIR()">
+                </div>
+                
+                <div class="form-group">
+                    <label>Revenu LMP (calculé automatiquement)</label>
+                    <input type="number" id="revenu_lmp" step="0.01" readonly style="background: #e8f5e9; font-weight: 600;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Nombre d'enfants</label>
+                    <select id="nombre_enfants" onchange="calculerIR()">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5+</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="resultat-ir" style="display: none; margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 10px;">
+                <div style="display: grid; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                        <span>Revenu imposable total :</span>
+                        <strong id="ir-revenu-total">0 €</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                        <span>Nombre de parts fiscales :</span>
+                        <strong id="ir-parts">0</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                        <span>Quotient familial :</span>
+                        <strong id="ir-quotient">0 €</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 15px 0; font-size: 1.3rem; border-top: 2px solid white; margin-top: 10px;">
+                        <span>💵 IMPÔT SUR LE REVENU :</span>
+                        <strong id="ir-montant">0 €</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 1.4rem;">
+                        <span>✅ RESTE APRÈS IR :</span>
+                        <strong id="ir-reste-final">0 €</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton Calculer -->
+        <div style="text-align: center; margin-top: 30px;">
+            <button type="submit" class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 40px;">
+                🔢 CALCULER
+            </button>
+        </div>
+    </form>
+
+    <!-- Résultats -->
+    <div id="resultats-fiscalite" style="display: none; margin-top: 30px;"></div>
+</div>
+
+<style>
+.fiscal-bloc {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.fiscal-bloc-title {
+    font-size: 1.4rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fiscal-info {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    color: #856404;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.fiscal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.input-with-select {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.type-select {
+    min-width: 85px;
+    max-width: 85px;
+    padding: 8px 4px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.input-with-select input {
+    flex: 1;
+    min-width: 0;
+}
+
+.liste-item {
+    display: grid;
+    grid-template-columns: 1fr 120px 150px 40px;
+    gap: 10px;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+}
+
+.liste-item input,
+.liste-item select {
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+}
+
+.liste-item button {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.liste-item button:hover {
+    background: #c0392b;
+}
+
+#resultats-content {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.resultat-ligne {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.resultat-ligne.total {
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-top: 2px solid white;
+    border-bottom: 2px solid white;
+    margin: 10px 0;
+}
+
+.resultat-section {
+    margin: 20px 0;
+}
+
+.resultat-section h4 {
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+/* Blocs collapsibles */
+.fiscal-bloc.collapsible .fiscal-bloc-title {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.fiscal-bloc.collapsible .fiscal-bloc-title:hover {
+    opacity: 0.8;
+}
+
+.toggle-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    margin-right: 5px;
+}
+
+.fiscal-bloc.collapsible.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.fiscal-bloc.collapsible.collapsed .bloc-content {
+    display: none;
+}
+
+.bloc-content {
+    margin-top: 20px;
+}
+</style>
+
+<script>
+function toggleBloc(titleElement) {
+    const bloc = titleElement.closest('.fiscal-bloc');
+    bloc.classList.toggle('collapsed');
+}
+</script>

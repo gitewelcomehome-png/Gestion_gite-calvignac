@@ -29,7 +29,7 @@ let ADMIN_FILTER_MODE = 'current'; // 'all' ou 'current'
 function handleAdminFilterChange(mode) {
     ADMIN_FILTER_MODE = mode;
     
-    console.log(`🔄 Filtre admin changé: ${mode}`);
+    // console.log(`🔄 Filtre admin changé: ${mode}`);
     
     // Recharger les données
     if (typeof loadDashboard === 'function') {
@@ -59,7 +59,7 @@ function selectAdminFilter(mode) {
         select.value = mode;
     }
     
-    console.log(`🔄 Filtre admin changé: ${mode}`);
+    // console.log(`🔄 Filtre admin changé: ${mode}`);
     
     // Recharger les données
     if (typeof loadDashboard === 'function') {
@@ -101,6 +101,33 @@ function showAdminFilterMessage(mode) {
         setTimeout(() => notification.remove(), 300);
     }, 2000);
 }
+
+// ==========================================
+// 📋 NAVIGATION VERS DÉTAIL CHECK-LIST
+// ==========================================
+
+/**
+ * Ouvre le détail d'une check-list spécifique
+ * @param {number} reservationId - ID de la réservation
+ * @param {number} giteId - ID du gîte
+ * @param {string} type - Type de check-list ('entree' ou 'sortie')
+ */
+window.openChecklistDetail = function(reservationId, giteId, type) {
+    // Sauvegarder les infos dans localStorage pour filtrage
+    localStorage.setItem('checklistFilter', JSON.stringify({
+        reservationId: reservationId,
+        giteId: giteId,
+        type: type,
+        timestamp: Date.now()
+    }));
+    
+    // Rediriger vers l'onglet checklists
+    if (typeof switchTab === 'function') {
+        switchTab('checklists');
+    } else {
+        console.error('❌ Fonction switchTab non disponible');
+    }
+};
 
 // ==========================================
 // FONCTIONS UTILITAIRES (fallback si shared-utils ne charge pas)
@@ -515,7 +542,7 @@ async function updateDashboardReservations() {
             if (checklistProgress.entree.total > 0) {
                 const colorEntree = getProgressColorDashboard(checklistProgress.entree.percent);
                 checklistHtml += `
-                    <span style="display: flex; align-items: center; gap: 4px;">
+                    <span onclick="openChecklistDetail(${r.id}, ${r.gite_id}, 'entree')" style="display: flex; align-items: center; gap: 4px; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="Cliquez pour voir le détail">
                         <span style="width: 10px; height: 10px; border-radius: 50%; background: ${colorEntree};"></span>
                         <svg style="width:16px;height:16px;flex-shrink:0;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Entrée: ${checklistProgress.entree.completed}/${checklistProgress.entree.total}
                     </span>
@@ -525,7 +552,7 @@ async function updateDashboardReservations() {
             if (checklistProgress.sortie.total > 0) {
                 const colorSortie = getProgressColorDashboard(checklistProgress.sortie.percent);
                 checklistHtml += `
-                    <span style="display: flex; align-items: center; gap: 4px;">
+                    <span onclick="openChecklistDetail(${r.id}, ${r.gite_id}, 'sortie')" style="display: flex; align-items: center; gap: 4px; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="Cliquez pour voir le détail">
                         <span style="width: 10px; height: 10px; border-radius: 50%; background: ${colorSortie};"></span>
                         <svg style="width:16px;height:16px;flex-shrink:0;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sortie: ${checklistProgress.sortie.completed}/${checklistProgress.sortie.total}
                     </span>
@@ -799,7 +826,7 @@ async function updateTodoList(category) {
 }
 
 async function addTodoItem(category) {
-    console.log('🎯 addTodoItem appelé pour:', category);
+    // console.log('🎯 addTodoItem appelé pour:', category);
     
     // Supprimer ancien modal s'il existe
     document.querySelectorAll('.modal-todo-dynamic').forEach(m => m.remove());
@@ -909,7 +936,7 @@ async function addTodoItem(category) {
     `);
     
     document.body.appendChild(modal);
-    console.log('✅ Modal TODO créé et ajouté au body');
+    // console.log('✅ Modal TODO créé et ajouté au body');
     
     // Gestion de la checkbox récurrente
     const recurrentCheckbox = document.getElementById('todoRecurrentDynamic');
@@ -938,7 +965,7 @@ async function addTodoItem(category) {
     
     // Bouton annuler
     document.getElementById('btn-cancel-todo').onclick = () => {
-        console.log('🚪 Annulation');
+        // console.log('🚪 Annulation');
         modal.remove();
     };
     
@@ -997,7 +1024,7 @@ async function addTodoItem(category) {
         //     todoData.next_occurrence = calculateNextOccurrence(frequency, todoData.frequency_detail);
         // }
         
-        console.log('💾 Création TODO:', todoData);
+        // console.log('💾 Création TODO:', todoData);
         
         // Insérer dans Supabase
         const { data, error } = await window.supabaseClient
@@ -1012,7 +1039,7 @@ async function addTodoItem(category) {
             return;
         }
         
-        console.log('✅ TODO créé:', data);
+        // console.log('✅ TODO créé:', data);
         modal.remove();
         
         // Rafraîchir la liste
@@ -1022,7 +1049,7 @@ async function addTodoItem(category) {
 
 function closeAddTodoModal() {
     const modal = document.getElementById('addTodoModal');
-    console.log('🚪 Fermeture modal');
+    // console.log('🚪 Fermeture modal');
     modal.style.cssText = 'display: none !important;';
     modal.classList.remove('show');
     document.getElementById('addTodoForm').reset();
@@ -1049,7 +1076,7 @@ function initAddTodoModal() {
     }
     
     todoModalInitialized = true;
-    console.log('✅ Modal addTodoModal initialisé');
+    // console.log('✅ Modal addTodoModal initialisé');
 }
 
 // Supprimé - le modal est maintenant créé dynamiquement dans addTodoItem()
@@ -1311,10 +1338,6 @@ async function editTodo(id) {
 }
 
 // Helper pour ouvrir l'édition d'une réservation
-function openEditReservation(id) {
-    window.openEditModal(id);
-}
-
 // Helper pour ouvrir la fiche client - VERSION SIMPLE
 function openFicheClient(reservationId) {
     // Appeler directement aperçuFicheClient qui marche déjà
@@ -1371,98 +1394,91 @@ async function updateFinancialIndicators() {
     // Récupérer le Total Charges depuis la simulation fiscale de l'année en cours
     let simFiscale = null;
     try {
-        const { data } = await window.supabaseClient
-            .from('simulations_fiscales')
+        const { data, error } = await window.supabaseClient
+            .from('fiscal_history')
             .select('*')
-            .eq('annee', anneeActuelle)
+            .eq('year', anneeActuelle)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
+        
+        if (error) {
+            console.error('❌ Erreur requête simulation:', error);
+        }
+        
         simFiscale = data;
+        
+        // Diagnostic : lister toutes les simulations disponibles
+        if (!simFiscale) {
+            const { data: allSims } = await window.supabaseClient
+                .from('fiscal_history')
+                .select('id, year, created_at')
+                .order('created_at', { ascending: false })
+                .limit(5);
+            if (allSims && allSims.length > 0) {
+                // console.log('📋 Simulations disponibles dans la BDD:', allSims);
+            }
+        }
     } catch (error) {
-        // Table non créée ou erreur - continuer sans simulation
+        console.error('❌ Exception récupération simulation:', error);
     }
     
     let totalChargesAnnee = 0;
     
-    if (simFiscale) {
-        // Calculer le total selon la même formule que fiscalité-v2.js
-        // Couzon (sans amortissement)
-        const chargesCouzon = (
-            simFiscale.internet_couzon || 0) * (simFiscale.internet_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.eau_couzon || 0) * (simFiscale.eau_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.electricite_couzon || 0) * (simFiscale.electricite_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.assurance_hab_couzon || 0) * (simFiscale.assurance_hab_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.assurance_emprunt_couzon || 0) * (simFiscale.assurance_emprunt_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.interets_emprunt_couzon || 0) * (simFiscale.interets_emprunt_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.menage_couzon || 0) * (simFiscale.menage_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.linge_couzon || 0) * (simFiscale.linge_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.logiciel_couzon || 0) * (simFiscale.logiciel_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.copropriete_couzon || 0) * (simFiscale.copropriete_couzon_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.taxe_fonciere_couzon || 0) +
-            (simFiscale.cfe_couzon || 0) +
-            (simFiscale.commissions_couzon || 0);
-        
-        // Trevoux (sans amortissement)
-        const chargesTrevoux = (
-            simFiscale.internet_trevoux || 0) * (simFiscale.internet_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.eau_trevoux || 0) * (simFiscale.eau_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.electricite_trevoux || 0) * (simFiscale.electricite_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.assurance_hab_trevoux || 0) * (simFiscale.assurance_hab_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.assurance_emprunt_trevoux || 0) * (simFiscale.assurance_emprunt_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.interets_emprunt_trevoux || 0) * (simFiscale.interets_emprunt_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.menage_trevoux || 0) * (simFiscale.menage_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.linge_trevoux || 0) * (simFiscale.linge_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.logiciel_trevoux || 0) * (simFiscale.logiciel_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.copropriete_trevoux || 0) * (simFiscale.copropriete_trevoux_type === 'mensuel' ? 12 : 1) +
-            (simFiscale.taxe_fonciere_trevoux || 0) +
-            (simFiscale.cfe_trevoux || 0) +
-            (simFiscale.commissions_trevoux || 0);
-        
-        // Frais professionnels
-        const fraisPro = 
-            (simFiscale.comptable || 0) +
-            (simFiscale.frais_bancaires || 0) +
-            ((simFiscale.telephone || 0) * (simFiscale.telephone_type === 'mensuel' ? 12 : 1)) +
-            (simFiscale.materiel_info || 0) +
-            (simFiscale.rc_pro || 0) +
-            (simFiscale.formation || 0) +
-            ((simFiscale.fournitures || 0) * (simFiscale.fournitures_type === 'mensuel' ? 12 : 1));
-        
-        // Listes
-        const travaux = (simFiscale.travaux_liste || []).reduce((sum, item) => sum + item.montant, 0);
-        const fraisDivers = (simFiscale.frais_divers_liste || []).reduce((sum, item) => sum + item.montant, 0);
-        const produitsAccueil = (simFiscale.produits_accueil_liste || []).reduce((sum, item) => sum + item.montant, 0);
-        
-        // Crédits (tous gîtes)
-        const credits = (simFiscale.credits_liste || [])
-            .reduce((sum, c) => sum + (c.mensualite * 12), 0);
-        
-        totalChargesAnnee = chargesCouzon + chargesTrevoux + fraisPro + travaux + fraisDivers + produitsAccueil + credits;
+    if (simFiscale && typeof window.calculerChargesParGiteSansAmortissement === 'function') {
+        // ✅ UTILISER LA NOUVELLE FONCTION GLOBALE (calcul dynamique multi-gîtes)
+        try {
+            // Récupérer les gîtes
+            const gites = await window.gitesManager.getAll();
+            const charges = await window.calculerChargesParGiteSansAmortissement(simFiscale, gites);
+            totalChargesAnnee = charges.total;
+        } catch (error) {
+            console.error('❌ Erreur calcul charges:', error);
+        }
+    } else if (!simFiscale) {
+        // Pas de simulation fiscale pour l'année en cours - utiliser 0
+        totalChargesAnnee = 0;
+    } else {
+        // Fonction manquante - charger fiscalite-v2.js d'abord
+        console.error('❌ La fonction calculerChargesParGiteSansAmortissement n\'est pas disponible');
+        totalChargesAnnee = 0;
     }
+    
+    // console.log('💰 CA Année:', caAnnee.toFixed(2), '€');
+    // console.log('💰 Charges Année:', totalChargesAnnee.toFixed(2), '€');
     
     // Bénéfice = CA - Total Charges (depuis fiscalité)
     const beneficeAnnee = caAnnee - totalChargesAnnee;
     
-    // 2. Calculer l'URSSAF pour l'année en cours (22% + 9.7% CSG-CRDS + allocations familiales progressives)
-    const cotisationsSociales = beneficeAnnee * 0.22; // 22%
-    const csgCrds = beneficeAnnee * 0.097; // 9.7%
-    const formationPro = caAnnee * 0.0025; // 0.25% du CA
+    // console.log('💰 BÉNÉFICE Année (CA - Charges):', beneficeAnnee.toFixed(2), '€');
+    
+    // 2. Calculer l'URSSAF pour l'année en cours (somme des cotisations sociales)
+    const config = window.TAUX_FISCAUX.getConfig(anneeActuelle);
+    
+    const tauxCotisationsSociales = config.URSSAF.indemnites_journalieres.taux + 
+                                     config.URSSAF.retraite_base.taux + 
+                                     config.URSSAF.retraite_complementaire.taux + 
+                                     config.URSSAF.invalidite_deces.taux;
+    
+    const cotisationsSociales = beneficeAnnee * tauxCotisationsSociales;
+    const csgCrds = beneficeAnnee * config.URSSAF.csg_crds.taux;
+    const formationPro = caAnnee * config.URSSAF.formation_pro.taux;
     
     // Allocations familiales (progressif entre 110% et 140% du PASS)
     let allocations = 0;
-    const pass2024 = 46368;
-    if (beneficeAnnee > pass2024 * 1.1) {
-        const baseAlloc = Math.min(beneficeAnnee - (pass2024 * 1.1), pass2024 * 0.3);
-        const tauxAlloc = (baseAlloc / (pass2024 * 0.3)) * 0.031;
+    const pass2024 = config.PASS;
+    const af = config.URSSAF.allocations_familiales;
+    if (beneficeAnnee > af.seuil_debut) {
+        const baseAlloc = Math.min(beneficeAnnee - af.seuil_debut, af.seuil_fin - af.seuil_debut);
+        const tauxAlloc = (baseAlloc / (af.seuil_fin - af.seuil_debut)) * af.taux_max;
         allocations = beneficeAnnee * tauxAlloc;
     }
     
     let urssafTotal = cotisationsSociales + csgCrds + formationPro + allocations;
     
-    // ⚠️ Appliquer le minimum URSSAF de 1200€
-    if (urssafTotal < 1200) {
-        urssafTotal = 1200;
+    // ⚠️ Appliquer le minimum URSSAF (cotisations minimales légales)
+    if (urssafTotal < config.COTISATIONS_MINIMALES.montant) {
+        urssafTotal = config.COTISATIONS_MINIMALES.montant;
     }
     
     
@@ -1470,9 +1486,9 @@ async function updateFinancialIndicators() {
     let simulationPrecedente = null;
     try {
         const { data } = await window.supabaseClient
-            .from('simulations_fiscales')
+            .from('fiscal_history')
             .select('*')
-            .eq('annee', anneePrecedente)
+            .eq('year', anneePrecedente)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -1485,26 +1501,17 @@ async function updateFinancialIndicators() {
     let urssafPrecedent = 0;
     
     if (simulationPrecedente) {
-        if (simulationPrecedente.impot_revenu) {
-            impotRevenuPrecedent = parseFloat(simulationPrecedente.impot_revenu);
-        } else {
-            // console.warn(`⚠️ Champ impot_revenu null ou undefined pour ${anneePrecedente}`);
-        }
-        
-        if (simulationPrecedente.cotisations_urssaf) {
-            urssafPrecedent = parseFloat(simulationPrecedente.cotisations_urssaf);
-        } else {
-            // console.warn(`⚠️ Champ cotisations_urssaf null ou undefined pour ${anneePrecedente}`);
-        }
-    } else {
-        // console.warn(`⚠️ Aucune simulation trouvée pour ${anneePrecedente}`);
+        // Lire depuis donnees_detaillees JSONB
+        const details = simulationPrecedente.donnees_detaillees || {};
+        impotRevenuPrecedent = parseFloat(details.impot_revenu || 0);
+        urssafPrecedent = parseFloat(details.cotisations_urssaf || 0);
     }
     
     // 4. Calculer l'IR de l'ANNÉE EN COURS (temps réel)
     const { data: simulationCourante } = await window.supabaseClient
-        .from('simulations_fiscales')
+        .from('fiscal_history')
         .select('*')
-        .eq('annee', anneeActuelle)
+        .eq('year', anneeActuelle)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -1512,9 +1519,10 @@ async function updateFinancialIndicators() {
     let impotRevenuCourant = 0;
     
     if (simulationCourante) {
-        const salaireMadame = parseFloat(simulationCourante.salaire_madame || 0);
-        const salaireMonsieur = parseFloat(simulationCourante.salaire_monsieur || 0);
-        const nbEnfants = parseInt(simulationCourante.nombre_enfants || 0);
+        const details = simulationCourante.donnees_detaillees || {};
+        const salaireMadame = parseFloat(details.salaire_madame || 0);
+        const salaireMonsieur = parseFloat(details.salaire_monsieur || 0);
+        const nbEnfants = parseInt(details.nombre_enfants || 0);
         
         // Revenu imposable = bénéfice - URSSAF + salaires
         const resteApresURSSAF = beneficeAnnee - urssafTotal;
@@ -1599,8 +1607,12 @@ async function updateFinancialIndicators() {
         }
     }
     
-    // Afficher bénéfice
-    if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeAnnee);
+    // Afficher bénéfice APRÈS URSSAF uniquement (l'IR concerne les salaires, pas l'activité gîtes)
+    const beneficeFinal = beneficeAnnee - urssafTotal;
+    if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeFinal);
+    
+    // console.log('💰 URSSAF Total:', urssafTotal.toFixed(2), '€');
+    // console.log('💰 BÉNÉFICE FINAL (après URSSAF):', beneficeFinal.toFixed(2), '€');
     
     // ============================================================
     // ❌ FEATURE SUPPRIMÉE - 23 JAN 2026
@@ -1618,8 +1630,8 @@ async function updateFinancialIndicators() {
         tresorerieEl.textContent = '-';
     }
     
-    // 7. Afficher les graphiques
-    const benefices = await calculerBeneficesMensuels(totalChargesAnnee);
+    // 7. Afficher les graphiques (avec bénéfice final après URSSAF uniquement)
+    const benefices = await calculerBeneficesMensuels(totalChargesAnnee, urssafTotal / 12);
     await afficherGraphiqueBenefices(benefices);
     await afficherGraphiqueTresorerieDashboard();
 }
@@ -1627,66 +1639,26 @@ async function updateFinancialIndicators() {
 // ==========================================
 // ==========================================
 
-// Fonction utilitaire : calculer charges totales SANS amortissement
-function calculerChargesSansAmortissement(simFiscale) {
-    if (!simFiscale) return 0;
+// ==========================================
+// 💰 CALCUL DES CHARGES (Wrapper pour compatibilité)
+// ==========================================
+
+/**
+ * Fonction utilitaire : calculer charges totales SANS amortissement
+ * @deprecated Utiliser window.calculerChargesParGiteSansAmortissement() à la place
+ */
+async function calculerChargesSansAmortissement(simFiscale) {
+    if (typeof window.calculerChargesParGiteSansAmortissement === 'function') {
+        const charges = await window.calculerChargesParGiteSansAmortissement(simFiscale);
+        return charges.total;
+    }
     
-    let totalCharges = 0;
-    
-    // Charges Couzon (SANS amortissement_couzon)
-    totalCharges += (simFiscale.eau_couzon || 0) * (simFiscale.eau_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.edf_couzon || 0) * (simFiscale.edf_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.fibre_couzon || 0) * (simFiscale.fibre_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.assurance_couzon || 0) * (simFiscale.assurance_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.taxe_fonciere_couzon || 0) * (simFiscale.taxe_fonciere_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.taxe_ordures_couzon || 0) * (simFiscale.taxe_ordures_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.taxe_habitation_couzon || 0) * (simFiscale.taxe_habitation_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.cfe_couzon || 0) * (simFiscale.cfe_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.comptable_couzon || 0) * (simFiscale.comptable_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.adl_couzon || 0) * (simFiscale.adl_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.assurance_pno_couzon || 0) * (simFiscale.assurance_pno_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.mutuelle_couzon || 0) * (simFiscale.mutuelle_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.prevoyance_couzon || 0) * (simFiscale.prevoyance_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.entretien_couzon || 0) * (simFiscale.entretien_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.menage_couzon || 0) * (simFiscale.menage_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.linge_couzon || 0) * (simFiscale.linge_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.charges_copro_couzon || 0) * (simFiscale.charges_copro_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.gestion_locative_couzon || 0) * (simFiscale.gestion_locative_couzon_type === 'mensuel' ? 12 : 1);
-    
-    // Charges Trevoux (SANS amortissement_trevoux)
-    totalCharges += (simFiscale.eau_trevoux || 0) * (simFiscale.eau_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.edf_trevoux || 0) * (simFiscale.edf_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.fibre_trevoux || 0) * (simFiscale.fibre_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.assurance_trevoux || 0) * (simFiscale.assurance_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.taxe_fonciere_trevoux || 0) * (simFiscale.taxe_fonciere_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.taxe_ordures_trevoux || 0) * (simFiscale.taxe_ordures_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.taxe_habitation_trevoux || 0) * (simFiscale.taxe_habitation_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.cfe_trevoux || 0) * (simFiscale.cfe_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.comptable_trevoux || 0) * (simFiscale.comptable_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.adl_trevoux || 0) * (simFiscale.adl_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.assurance_pno_trevoux || 0) * (simFiscale.assurance_pno_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.mutuelle_trevoux || 0) * (simFiscale.mutuelle_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.prevoyance_trevoux || 0) * (simFiscale.prevoyance_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.entretien_trevoux || 0) * (simFiscale.entretien_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.menage_trevoux || 0) * (simFiscale.menage_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.linge_trevoux || 0) * (simFiscale.linge_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.charges_copro_trevoux || 0) * (simFiscale.charges_copro_trevoux_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.gestion_locative_trevoux || 0) * (simFiscale.gestion_locative_trevoux_type === 'mensuel' ? 12 : 1);
-    
-    // Autres charges résidence
-    totalCharges += (simFiscale.frais_pro || 0) * (simFiscale.frais_pro_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.travaux_residence || 0) * (simFiscale.travaux_residence_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.frais_divers || 0) * (simFiscale.frais_divers_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.produits_entretien || 0) * (simFiscale.produits_entretien_type === 'mensuel' ? 12 : 1);
-    
-    // Crédits immobiliers
-    totalCharges += (simFiscale.credit_couzon || 0) * (simFiscale.credit_couzon_type === 'mensuel' ? 12 : 1);
-    totalCharges += (simFiscale.credit_trevoux || 0) * (simFiscale.credit_trevoux_type === 'mensuel' ? 12 : 1);
-    
-    return totalCharges;
+    // Fallback si la fonction globale n'est pas disponible
+    console.warn('⚠️ Fonction calculerChargesParGiteSansAmortissement non disponible, utilisation fallback');
+    return 0;
 }
 
-async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
+async function calculerBeneficesMensuels(totalChargesAnnee = 0, urssafMensuel = 0) {
     try {
         // Récupérer toutes les réservations
         const reservations = await getAllReservations();
@@ -1694,28 +1666,40 @@ async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
         const anneeActuelle = new Date().getFullYear();
         const benefices = [];
         
-        // Récupérer la simulation fiscale pour avoir les détails des charges
+        // Récupérer la simulation fiscale pour calculer les charges SANS AMORTISSEMENT
         let simFiscale = null;
         let chargesMensuellesSansAmort = 0;
+        let chargesParGite = {};
         
         try {
-            const { data } = await window.supabaseClient
-                .from('simulations_fiscales')
+            // console.log('🔍 [Mensuel] Recherche simulation pour année:', anneeActuelle);
+            const { data, error } = await window.supabaseClient
+                .from('fiscal_history')
                 .select('*')
-                .eq('annee', anneeActuelle)
+                .eq('year', anneeActuelle)
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .maybeSingle();
+            
+            if (error) {
+                console.error('❌ [Mensuel] Erreur requête:', error);
+            }
+            
             simFiscale = data;
             
-            if (simFiscale) {
-                // Utiliser la fonction utilitaire pour calculer les charges SANS amortissement
-                const chargesAnnuellesSansAmort = calculerChargesSansAmortissement(simFiscale);
-                chargesMensuellesSansAmort = chargesAnnuellesSansAmort / 12;
+            if (simFiscale && typeof window.calculerChargesParGiteSansAmortissement === 'function') {
+                // Récupérer les gîtes
+                const gites = await window.gitesManager.getAll();
+                // Utiliser la nouvelle fonction globale pour calculer les charges par gîte
+                const charges = await window.calculerChargesParGiteSansAmortissement(simFiscale, gites);
+                chargesParGite = charges.parGite; // charges par gite_id
+                chargesMensuellesSansAmort = charges.total / 12; // total annuel / 12
             } else {
+                // Fallback : utiliser totalChargesAnnee passé en paramètre
                 chargesMensuellesSansAmort = totalChargesAnnee / 12;
             }
         } catch (error) {
+            console.error('❌ Erreur récupération charges:', error);
             chargesMensuellesSansAmort = totalChargesAnnee / 12;
         }
         
@@ -1723,7 +1707,7 @@ async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
         for (let mois = 0; mois < 12; mois++) {
             const nomMois = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'][mois];
             
-            // 1. Calculer le CA du mois (toutes les réservations Trevoux + Couzon)
+            // 1. Calculer le CA du mois (toutes les réservations de tous les gîtes)
             const reservationsDuMois = reservations.filter(r => {
                 const dateDebut = parseLocalDate(r.dateDebut);
                 return dateDebut.getFullYear() === anneeActuelle && dateDebut.getMonth() === mois;
@@ -1731,8 +1715,8 @@ async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
             
             const caMois = reservationsDuMois.reduce((sum, r) => sum + (parseFloat(r.montant) || 0), 0);
             
-            // 2. Calcul du bénéfice : CA - Charges mensuelles (sans amortissement)
-            const beneficeMois = caMois - chargesMensuellesSansAmort;
+            // 2. Calcul du bénéfice : CA - Charges mensuelles - URSSAF mensuel
+            const beneficeMois = caMois - chargesMensuellesSansAmort - urssafMensuel;
             
             benefices.push({
                 mois: mois + 1,
@@ -1740,7 +1724,8 @@ async function calculerBeneficesMensuels(totalChargesAnnee = 0) {
                 total: beneficeMois,
                 details: {
                     ca: caMois,
-                    charges: chargesMensuellesSansAmort
+                    charges: chargesMensuellesSansAmort,
+                    urssaf: urssafMensuel
                 }
             });
         }
@@ -2110,7 +2095,6 @@ async function afficherGraphiqueCAComparaison() {
                 const value = histTotal.months[m] || 0;
                 dataByYear[year].total[idx] = value;
             });
-            console.log(`✅ Année ${year} - Données historiques chargées:`, dataByYear[year].total);
         } else {
             reservations.filter(r => {
                 if (!r.check_in) return false;
@@ -2119,7 +2103,6 @@ async function afficherGraphiqueCAComparaison() {
                 const month = new Date(r.check_in).getMonth();
                 dataByYear[year].total[month] += parseFloat(r.total_price || r.montant || 0);
             });
-            console.log(`✅ Année ${year} - Données réservations chargées:`, dataByYear[year].total);
         }
     });
     
@@ -2200,10 +2183,7 @@ async function refreshDashboard() {
     await updateDashboardMenages();
     await updateTodoLists();
     await updateFinancialIndicators();
-    await updateKPIPerformance();
     await afficherGraphiqueTresorerieDashboard();
-    await afficherGraphiqueReservationsMensuelles();
-    await afficherGraphiqueCAComparaison();
     // initializeTodoModal(); // Supprimé - modal créé dynamiquement
     initializeReponseWhatsappModal();
     
@@ -2251,6 +2231,264 @@ function initializeReponseWhatsappModal() {
                 closeReponseWhatsappModal();
             }
         });
+    }
+}
+
+// ==========================================
+// ❌ FEATURE SUPPRIMÉE - 23 JAN 2026
+// ⏰ DEMANDES D'HORAIRES CLIENTS
+// ==========================================
+// WIDGET : PROPOSITIONS CHANGEMENT DATE MÉNAGE
+// ==========================================
+
+async function updatePropositionsMenage() {
+    try {
+        // Charger les ménages avec status = 'pending_validation'
+        const { data: propositions, error } = await supabaseClient
+            .from('cleaning_schedule')
+            .select(`
+                *,
+                reservations (
+                    id,
+                    client_name,
+                    gite_id,
+                    check_in,
+                    check_out
+                )
+            `)
+            .eq('status', 'pending_validation')
+            .order('scheduled_date', { ascending: true });
+        
+        if (error) {
+            console.error('❌ Erreur chargement propositions ménage:', error);
+            throw error;
+        }
+        
+        const container = document.getElementById('liste-demandes-clients');
+        const badge = document.getElementById('badge-demandes-count');
+        const card = document.getElementById('dashboard-demandes-clients');
+        
+        if (!container || !badge || !card) return;
+        
+        if (!propositions || propositions.length === 0) {
+            window.SecurityUtils.setInnerHTML(container, '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune proposition de changement en attente</p>');
+            badge.textContent = '0';
+            card.style.display = 'none';
+            return;
+        }
+        
+        badge.textContent = propositions.length;
+        card.style.display = 'block';
+        
+        // Charger les gîtes pour avoir les noms
+        let gites = [];
+        if (window.gitesManager) {
+            gites = await window.gitesManager.getAll();
+        }
+        
+        let html = '';
+        propositions.forEach(p => {
+            if (!p.id) {
+                console.warn('⚠️ Proposition sans ID ignorée:', p);
+                return;
+            }
+            
+            // Vérifier que scheduled_date existe
+            if (!p.scheduled_date) {
+                console.error('❌ Proposition sans date programmée:', p);
+                return;
+            }
+            
+            const resa = p.reservations;
+            const clientNom = resa?.client_name || 'Client';
+            
+            // Date d'origine = lendemain de la fin de réservation (reservation_end + 1 jour)
+            let dateOrigine = 'N/A';
+            if (p.reservation_end) {
+                const dateOrigineObj = new Date(p.reservation_end);
+                dateOrigineObj.setDate(dateOrigineObj.getDate() + 1);
+                dateOrigine = formatDateFromObj(dateOrigineObj);
+            }
+            
+            // Date proposée = scheduled_date
+            const dateProposee = formatDateFromObj(new Date(p.scheduled_date));
+            
+            // Récupérer le gîte
+            let giteNom = 'Gîte';
+            let giteColor = '#667eea';
+            if (resa?.gite_id) {
+                const gite = gites.find(g => g.id === resa.gite_id);
+                if (gite) {
+                    giteNom = gite.name;
+                    giteColor = gite.color || '#667eea';
+                }
+            }
+            
+            html += `
+                <div style="background: var(--card); border-left: 4px solid ${giteColor}; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                            <span style="background: #f39c12; color: white; padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">🧹 Changement date</span>
+                            <strong style="font-size: 1rem;">${giteNom}</strong>
+                            ${clientNom ? `<span style="color: var(--text-secondary); font-size: 0.85rem;">• ${clientNom}</span>` : ''}
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                            📅 Initialement : <strong>${dateOrigine}</strong> → Proposé : <strong style="color: #f39c12;">${dateProposee}</strong>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button data-action="valider-proposition-menage" 
+                                data-proposition-id="${p.id}" 
+                                data-date-proposee="${p.scheduled_date}"
+                                style="background: #27AE60; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;"
+                                onmouseover="this.style.opacity='0.8'"
+                                onmouseout="this.style.opacity='1'">
+                            ✓ Accepter
+                        </button>
+                        <button data-action="refuser-proposition-menage" 
+                                data-proposition-id="${p.id}"
+                                style="background: #E74C3C; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;"
+                                onmouseover="this.style.opacity='0.8'"
+                                onmouseout="this.style.opacity='1'">
+                            ✗ Refuser
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        window.SecurityUtils.setInnerHTML(container, html);
+        
+        // Event delegation
+        attachPropositionsMenageEventListeners();
+    } catch (err) {
+        console.error('❌ [DEBUG] Erreur dans updatePropositionsMenage:', err);
+        
+        const container = document.getElementById('liste-demandes-clients');
+        const card = document.getElementById('dashboard-demandes-clients');
+        const badge = document.getElementById('badge-demandes-count');
+        
+        if (container && card && badge) {
+            card.style.display = 'block';
+            badge.textContent = '!';
+            window.SecurityUtils.setInnerHTML(container, `
+                <p style="color: #e74c3c; font-style: italic; margin: 0;">
+                    ⚠️ Erreur de chargement: ${err.message}
+                </p>
+            `);
+        }
+    }
+}
+
+// Event delegation pour les propositions de changement de date ménage
+function attachPropositionsMenageEventListeners() {
+    const container = document.getElementById('liste-demandes-clients');
+    if (!container) return;
+    
+    container.removeEventListener('click', handlePropositionsMenageClick);
+    container.addEventListener('click', handlePropositionsMenageClick);
+}
+
+async function handlePropositionsMenageClick(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    
+    const action = btn.dataset.action;
+    const propositionId = btn.dataset.propositionId;
+    
+    if (action === 'valider-proposition-menage') {
+        await accepterPropositionMenage(propositionId, btn.dataset.dateProposee);
+    } else if (action === 'refuser-proposition-menage') {
+        await refuserPropositionMenage(propositionId);
+    }
+}
+
+async function accepterPropositionMenage(propositionId, dateProposee) {
+    if (!confirm('Accepter cette nouvelle date de ménage ?')) return;
+    
+    // Si pas de date proposée passée en paramètre, la récupérer depuis la BDD
+    if (!dateProposee || dateProposee === 'undefined') {
+        const { data, error } = await supabaseClient
+            .from('cleaning_schedule')
+            .select('scheduled_date')
+            .eq('id', propositionId)
+            .single();
+        
+        if (error || !data?.scheduled_date) {
+            console.error('❌ Impossible de récupérer la date proposée:', error);
+            alert('❌ Erreur : date proposée manquante');
+            return;
+        }
+        
+        dateProposee = data.scheduled_date;
+    }
+    
+    try {
+        // Mettre à jour le cleaning_schedule
+        // La date est déjà dans scheduled_date, il suffit de valider
+        const { error } = await supabaseClient
+            .from('cleaning_schedule')
+            .update({
+                status: 'confirmed',
+                validated_by_company: true,
+                validated_at: new Date().toISOString()
+            })
+            .eq('id', propositionId);
+        
+        if (error) throw error;
+        
+        alert('✅ Date de ménage acceptée et mise à jour');
+        await updatePropositionsMenage();
+        
+        // Recharger le calendrier de ménage si ouvert
+        if (window.afficherCalendrierMenage) {
+            await window.afficherCalendrierMenage();
+        }
+    } catch (error) {
+        console.error('Erreur validation proposition:', error);
+        alert('❌ Erreur lors de la validation');
+    }
+}
+
+async function refuserPropositionMenage(propositionId) {
+    if (!confirm('Refuser cette proposition ? Le ménage sera programmé selon les règles automatiques.')) return;
+    
+    try {
+        // Récupérer la date d'origine (reservation_end + 1 jour)
+        const { data, error: fetchError } = await supabaseClient
+            .from('cleaning_schedule')
+            .select('reservation_end')
+            .eq('id', propositionId)
+            .single();
+        
+        if (fetchError || !data?.reservation_end) {
+            console.error('❌ Impossible de récupérer la date de fin de réservation:', fetchError);
+            alert('❌ Erreur lors du refus');
+            return;
+        }
+        
+        // Calculer la date originale (lendemain de la fin de réservation)
+        const dateOrigine = new Date(data.reservation_end);
+        dateOrigine.setDate(dateOrigine.getDate() + 1);
+        const dateOriginaleFormatee = dateOrigine.toISOString().split('T')[0];
+        
+        // Remettre la date d'origine et status à 'pending'
+        const { error } = await supabaseClient
+            .from('cleaning_schedule')
+            .update({
+                scheduled_date: dateOriginaleFormatee,
+                status: 'pending',
+                proposed_by: null
+            })
+            .eq('id', propositionId);
+        
+        if (error) throw error;
+        
+        alert('✅ Proposition refusée - date d\'origine conservée');
+        await updatePropositionsMenage();
+    } catch (error) {
+        console.error('Erreur refus proposition:', error);
+        alert('❌ Erreur lors du refus');
     }
 }
 
@@ -3165,7 +3403,7 @@ async function loadChecklistsTab() {
         for (const r of activeReservations) {
             const gite = await window.gitesManager.getById(r.gite_id);
             if (!gite) {
-                console.warn(`⚠️ Gîte non trouvé pour gite_id: ${r.gite_id}`);
+                // Gîte non trouvé - probablement supprimé ou données incohérentes - ignorer silencieusement
                 continue;
             }
             
@@ -3327,5 +3565,336 @@ function toggleChecklistDetails(reservationId) {
 }
 
 window.toggleChecklistDetails = toggleChecklistDetails;
+
+// ═══════════════════════════════════════════════════════════════════════// GESTION DES LISTES DE COURSES
+// ═══════════════════════════════════════════════════════════════════════
+
+// Fonction pour échapper le HTML et prévenir les XSS
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+let currentShoppingList = null;
+let shoppingListItems = [];
+let allShoppingLists = [];
+
+async function openShoppingListManager() {
+    // Récupérer l'utilisateur connecté
+    const { data: { user } } = await window.supabaseClient.auth.getUser();
+    
+    if (!user || !user.id) {
+        console.error('❌ Utilisateur non connecté');
+        alert('Vous devez être connecté pour accéder aux listes de courses');
+        return;
+    }
+    
+    // Supprimer ancien modal s'il existe
+    document.querySelectorAll('.modal-shopping-list').forEach(m => m.remove());
+    
+    // Charger les listes existantes (en_cours uniquement)
+    const { data: lists, error } = await window.supabase
+        .from('shopping_lists')
+        .select('*')
+        .eq('owner_user_id', user.id)
+        .eq('status', 'en_cours')
+        .order('created_date', { ascending: false });
+    
+    if (error) {
+        console.error('Erreur chargement listes:', error);
+        alert('Impossible de charger les listes de courses');
+        return;
+    }
+    
+    allShoppingLists = lists || [];
+    currentShoppingList = null;
+    
+    // Créer le modal
+    const modal = document.createElement('div');
+    modal.className = 'modal-shopping-list';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 20px;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 16px; max-width: 700px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="padding: 24px; border-bottom: 1px solid #e0e0e0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; font-size: 24px; color: #333;">📋 Gestion des Listes</h2>
+                    <button onclick="closeShoppingListManager()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #999; line-height: 1;">×</button>
+                </div>
+            </div>
+            
+            <div style="flex: 1; overflow-y: auto; display: flex;">
+                <!-- Colonne des listes -->
+                <div id="lists-sidebar" style="width: 280px; border-right: 1px solid #e0e0e0; padding: 20px; background: #f8f9fa;">
+                    <button onclick="showNewListForm()" style="width: 100%; padding: 12px; background: #7c3aed; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; margin-bottom: 16px;">
+                        + Nouvelle liste
+                    </button>
+                    <div id="new-list-form" style="display: none; margin-bottom: 16px; padding: 12px; background: white; border-radius: 8px; border: 2px solid #7c3aed;">
+                        <input type="text" id="new-list-name" placeholder="Nom de la liste" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 8px; font-size: 14px;">
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="cancelNewList()" style="flex: 1; padding: 8px; background: #e0e0e0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">Annuler</button>
+                            <button onclick="createNewList()" style="flex: 1; padding: 8px; background: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">Créer</button>
+                        </div>
+                    </div>
+                    <div id="shopping-lists-container">
+                        <div style="text-align: center; color: #999; padding: 20px; font-size: 13px;">Chargement...</div>
+                    </div>
+                </div>
+                
+                <!-- Colonne des articles -->
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <div id="list-editor-container" style="flex: 1; display: flex; flex-direction: column;">
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; color: #999;">
+                            <div style="text-align: center;">
+                                <p style="font-size: 18px; margin-bottom: 8px;">Sélectionnez une liste</p>
+                                <p style="font-size: 14px;">ou créez-en une nouvelle</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    renderShoppingLists();
+}
+
+async function loadShoppingItems() {
+    if (!currentShoppingList) return;
+    
+    const { data, error } = await window.supabase
+        .from('shopping_list_items')
+        .select('*')
+        .eq('list_id', currentShoppingList.id)
+        .order('created_at', { ascending: true });
+    
+    if (error) {
+        console.error('Erreur chargement items:', error);
+        return;
+    }
+    
+    shoppingListItems = data || [];
+    renderShoppingItems();
+}
+
+function renderShoppingLists() {
+    const container = document.getElementById('shopping-lists-container');
+    if (!container) return;
+    
+    if (allShoppingLists.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #999; padding: 20px; font-size: 13px;">Aucune liste</div>';
+        return;
+    }
+    
+    const listsHtml = allShoppingLists.map(list => `
+        <div onclick="selectShoppingList('${list.id}')" style="padding: 12px; background: ${currentShoppingList?.id === list.id ? '#ede9fe' : 'white'}; border: 2px solid ${currentShoppingList?.id === list.id ? '#7c3aed' : '#e0e0e0'}; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;">
+            <div style="font-weight: 600; color: #333; font-size: 14px; margin-bottom: 4px;">${escapeHtml(list.name)}</div>
+            <div style="font-size: 12px; color: #999;">${new Date(list.created_date).toLocaleDateString('fr-FR')}</div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = listsHtml;
+}
+
+function renderShoppingItems() {
+    const editorContainer = document.getElementById('list-editor-container');
+    if (!editorContainer || !currentShoppingList) return;
+    
+    const itemsCount = shoppingListItems.length;
+    
+    const itemsHtml = shoppingListItems.length === 0 
+        ? '<div style="text-align: center; color: #999; padding: 40px;">Aucun article dans cette liste</div>'
+        : shoppingListItems.map(item => `
+            <div style="padding: 14px; background: white; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+                <span style="flex: 1; font-size: 15px; color: #333;">
+                    ${escapeHtml(item.item_name)}
+                </span>
+                <button onclick="deleteShoppingItem('${item.id}')" style="padding: 6px 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">🗑️</button>
+            </div>
+        `).join('');
+    
+    editorContainer.innerHTML = `
+        <div style="padding: 20px; border-bottom: 1px solid #e0e0e0; background: #fafafa;">
+            <div style="font-weight: 600; color: #7c3aed; font-size: 16px; margin-bottom: 4px;">${escapeHtml(currentShoppingList.name)}</div>
+            <div style="font-size: 13px; color: #999;">${itemsCount} article${itemsCount > 1 ? 's' : ''}</div>
+        </div>
+        <div style="padding: 20px; border-bottom: 1px solid #e0e0e0;">
+            <div style="display: flex; gap: 10px;">
+                <input 
+                    type="text" 
+                    id="shopping-input" 
+                    placeholder="Ajouter un article..." 
+                    style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px;"
+                    onkeypress="if(event.key === 'Enter') addShoppingItem()">
+                <button onclick="addShoppingItem()" style="padding: 12px 24px; background: #7c3aed; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 16px;">+</button>
+            </div>
+        </div>
+        <div id="shopping-items-container" style="flex: 1; overflow-y: auto; padding: 20px;">
+            ${itemsHtml}
+        </div>
+        <div style="padding: 20px; border-top: 1px solid #e0e0e0;">
+            <button onclick="validateShoppingList()" style="width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px;">
+                ✓ Valider liste
+            </button>
+        </div>
+    `;
+    
+    // Focus sur l'input après le rendu
+    setTimeout(() => document.getElementById('shopping-input')?.focus(), 100);
+}
+
+async function selectShoppingList(listId) {
+    const list = allShoppingLists.find(l => l.id === listId);
+    if (!list) return;
+    
+    currentShoppingList = list;
+    renderShoppingLists();
+    await loadShoppingItems();
+}
+
+async function deleteShoppingItem(itemId) {
+    if (!confirm('Supprimer cet article ?')) return;
+    
+    const { error } = await window.supabase
+        .from('shopping_list_items')
+        .delete()
+        .eq('id', itemId);
+    
+    if (error) {
+        console.error('Erreur suppression item:', error);
+        alert('Impossible de supprimer l\'article');
+        return;
+    }
+    
+    shoppingListItems = shoppingListItems.filter(i => i.id !== itemId);
+    renderShoppingItems();
+}
+
+async function addShoppingItem() {
+    const input = document.getElementById('shopping-input');
+    const itemName = input?.value.trim();
+    
+    if (!itemName || !currentShoppingList) return;
+    
+    const { data, error } = await window.supabase
+        .from('shopping_list_items')
+        .insert({
+            list_id: currentShoppingList.id,
+            item_name: itemName,
+            is_checked: false,
+            added_by: 'proprietaire'
+        })
+        .select()
+        .single();
+    
+    if (error) {
+        console.error('Erreur ajout item:', error);
+        alert('Impossible d\'ajouter l\'article');
+        return;
+    }
+    
+    shoppingListItems.push(data);
+    renderShoppingItems();
+    input.value = '';
+    input.focus();
+}
+
+function showNewListForm() {
+    const form = document.getElementById('new-list-form');
+    if (form) {
+        form.style.display = 'block';
+        document.getElementById('new-list-name')?.focus();
+    }
+}
+
+function cancelNewList() {
+    const form = document.getElementById('new-list-form');
+    if (form) {
+        form.style.display = 'none';
+        document.getElementById('new-list-name').value = '';
+    }
+}
+
+async function createNewList() {
+    const input = document.getElementById('new-list-name');
+    const name = input?.value.trim();
+    
+    if (!name) {
+        alert('Veuillez saisir un nom pour la liste');
+        return;
+    }
+    
+    // Récupérer l'utilisateur connecté
+    const { data: { user } } = await window.supabaseClient.auth.getUser();
+    
+    if (!user || !user.id) {
+        console.error('❌ Utilisateur non connecté');
+        alert('Vous devez être connecté pour créer une liste');
+        return;
+    }
+    
+    const { data, error } = await window.supabase
+        .from('shopping_lists')
+        .insert({
+            owner_user_id: user.id,
+            name: name,
+            status: 'en_cours'
+        })
+        .select()
+        .single();
+    
+    if (error) {
+        console.error('Erreur création liste:', error);
+        alert('Impossible de créer la liste');
+        return;
+    }
+    
+    allShoppingLists.unshift(data);
+    currentShoppingList = data;
+    shoppingListItems = [];
+    
+    // Mettre à jour l'affichage
+    cancelNewList();
+    renderShoppingLists();
+    renderShoppingItems();
+}
+
+async function validateShoppingList() {
+    if (!currentShoppingList) return;
+    
+    if (shoppingListItems.length === 0) {
+        alert('⚠️ La liste est vide.\n\nAjoutez des articles avant de valider.');
+        return;
+    }
+    
+    alert('✅ Liste validée !\n\n"' + currentShoppingList.name + '" est prête.\nVous la retrouverez sur votre mobile pour faire les courses.\n\nVous pouvez continuer à la modifier ici si besoin.');
+}
+
+function closeShoppingListManager() {
+    document.querySelectorAll('.modal-shopping-list').forEach(m => m.remove());
+}
+
+// Exposer les fonctions globalement
+window.openShoppingListManager = openShoppingListManager;
+window.closeShoppingListManager = closeShoppingListManager;
+window.addShoppingItem = addShoppingItem;
+window.selectShoppingList = selectShoppingList;
+window.deleteShoppingItem = deleteShoppingItem;
+window.validateShoppingList = validateShoppingList;
+window.showNewListForm = showNewListForm;
+window.cancelNewList = cancelNewList;
+window.createNewList = createNewList;
 
 // ═══════════════════════════════════════════════════════════════════════

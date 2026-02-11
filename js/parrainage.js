@@ -13,7 +13,7 @@ let referralEnabled = false;
  * Initialisation du système de parrainage
  */
 async function initReferralSystem() {
-    console.log('🎯 Initialisation du système de parrainage');
+    // console.log('🎯 Initialisation du système de parrainage');
     
     try {
         // Vérifier si le parrainage est activé
@@ -105,8 +105,8 @@ async function loadReferralData() {
         // 8. Charger les campagnes actives
         await loadActiveCampaigns(user.id);
         
-        // 9. Charger les notifications
-        await loadNotifications(user.id);
+        // 9. Charger les notifications (DÉSACTIVÉ - table non encore déployée en production)
+        // await loadNotifications(user.id);
         
         // Initialiser les icônes Lucide
         if (typeof lucide !== 'undefined') {
@@ -562,17 +562,23 @@ function adaptInterfaceForSubscriptionType() {
 async function generateQRCode(link) {
     try {
         const canvas = document.getElementById('qrCodeCanvas');
+        if (!canvas) return;
         
-        // Utiliser QRCode.js (à charger via CDN)
+        // Vider le canvas existant
+        canvas.innerHTML = '';
+        
+        // Utiliser QRCode.js (qrcodejs library)
         if (typeof QRCode !== 'undefined') {
-            QRCode.toCanvas(canvas, link, {
+            new QRCode(canvas, {
+                text: link,
                 width: 200,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#FFFFFF',
+                correctLevel: QRCode.CorrectLevel.M
             });
+        } else {
+            console.warn('⚠️ Bibliothèque QRCode non chargée');
         }
     } catch (error) {
         console.error('❌ Erreur génération QR Code:', error);
@@ -674,7 +680,15 @@ function shareViaLinkedIn() {
  * Télécharger le QR Code
  */
 function downloadQRCode() {
-    const canvas = document.getElementById('qrCodeCanvas');
+    const container = document.getElementById('qrCodeCanvas');
+    // qrcodejs crée un canvas à l'intérieur du div
+    const canvas = container.querySelector('canvas');
+    
+    if (!canvas) {
+        showToast('QR Code non généré', 'error');
+        return;
+    }
+    
     const link = document.createElement('a');
     link.download = 'qr-code-parrainage-liveownerunit.png';
     link.href = canvas.toDataURL('image/png');
@@ -954,6 +968,11 @@ async function loadNotifications(userId) {
         }).join('');
         
     } catch (error) {
+        // Table referral_notifications pas encore créée en production - ignorer silencieusement
+        if (error.code === 'PGRST205' || error.code === 'PGRST116' || error.message?.includes('does not exist') || error.message?.includes('in the schema cache')) {
+            // Table inexistante - c'est normal, fonctionnalité non encore déployée
+            return;
+        }
         console.error('❌ Erreur chargement notifications:', error);
     }
 }
@@ -1001,6 +1020,8 @@ async function markNotificationAsRead(notificationId) {
         }
         
     } catch (error) {
+        // Table referral_notifications pas encore créée en production - ignorer silencieusement
+        if (error.code === 'PGRST205' || error.code === 'PGRST116' || error.message?.includes('does not exist') || error.message?.includes('in the schema cache')) return;
         console.error('❌ Erreur mise à jour notification:', error);
     }
 }
@@ -1027,6 +1048,8 @@ async function markAllNotificationsRead() {
         await loadNotifications(user.id);
         
     } catch (error) {
+        // Table referral_notifications pas encore créée en production - ignorer silencieusement
+        if (error.code === 'PGRST205' || error.code === 'PGRST116' || error.message?.includes('does not exist') || error.message?.includes('in the schema cache')) return;
         console.error('❌ Erreur marquage notifications:', error);
         showToast('Erreur lors du marquage', 'error');
     }

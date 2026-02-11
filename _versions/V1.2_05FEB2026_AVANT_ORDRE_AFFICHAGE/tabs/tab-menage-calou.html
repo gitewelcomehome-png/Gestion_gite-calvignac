@@ -1,0 +1,136 @@
+<div class="tab-container">
+    <!-- Header CALOU -->
+    <div class="calou-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.75rem; color: var(--calou-text-primary); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-calou-icon="broom" class="calou-icon" style="width: 32px; height: 32px;"></i>
+                    PLANNING MÉNAGE
+                </h2>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--calou-text-secondary);">Organisation et suivi des ménages par semaine</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu du planning -->
+    <div id="menagePlanningWeeks" style="margin-bottom: 2rem;">
+        <!-- Les semaines de ménage seront générées ici par JavaScript -->
+        <div style="text-align: center; padding: 3rem; color: var(--calou-text-secondary);">
+            <i data-calou-icon="loader" class="calou-icon" style="width: 48px; height: 48px; opacity: 0.5;"></i>
+            <p style="margin-top: 1rem;">Chargement du planning...</p>
+        </div>
+    </div>
+    
+    <!-- Container alternatif pour compatibilité -->
+    <div id="menage-container">
+        <!-- Alias pour compatibilité avec certaines fonctions JS -->
+    </div>
+</div>
+
+<style>
+/* ========================================
+   PLANNING MÉNAGE - CALOU THEME
+   ======================================== */
+
+:root.calou-theme .week-block {
+    background: var(--calou-glass-bg);
+    backdrop-filter: blur(10px);
+    border-radius: var(--calou-radius-lg);
+    border: 2px solid var(--calou-border);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: all 0.3s;
+}
+
+:root.calou-theme .week-block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+}
+
+:root.calou-theme .week-header-unique {
+    background: linear-gradient(135deg, var(--calou-primary) 0%, var(--calou-secondary) 100%);
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    color: white;
+}
+
+:root.calou-theme .week-number-big {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+:root.calou-theme .week-dates-small {
+    font-size: 0.85rem;
+    opacity: 0.95;
+}
+
+:root.calou-theme .menage-card {
+    background: rgba(99, 102, 241, 0.05);
+    border-left: 4px solid var(--calou-border);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-radius: var(--calou-radius-md);
+    transition: all 0.3s;
+}
+
+:root.calou-theme .menage-card:hover {
+    background: rgba(99, 102, 241, 0.1);
+    transform: translateX(4px);
+    border-left-color: var(--calou-primary);
+}
+
+:root.calou-theme .menage-card.validated {
+    border-left-color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+:root.calou-theme .menage-card.pending-validation {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+:root.calou-theme .menage-date-main {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--calou-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+:root.calou-theme .menage-info-row {
+    display: flex;
+    gap: 1rem;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--calou-text-secondary);
+}
+
+:root.calou-theme .menage-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: var(--calou-glass-bg);
+    color: var(--calou-text-primary);
+}
+
+:root.calou-theme .btn-validate-menage {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--calou-radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+:root.calou-theme .btn-validate-menage:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+</style>

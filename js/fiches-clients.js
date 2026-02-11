@@ -10,7 +10,7 @@ let currentGiteEdit = null;
 
 // ==================== INITIALISATION ====================
 async function initFichesClients() {
-    console.log('Initialisation du module Fiches Clients');
+    // console.log('Initialisation du module Fiches Clients');
     
     // Validation temps réel pour formulaire édition gîte
     if (window.ValidationUtils) {
@@ -21,39 +21,39 @@ async function initFichesClients() {
     
     // Attendre que supabaseClient soit disponible
     if (typeof window.supabaseClient === 'undefined') {
-        console.log('⏳ Attente du chargement de Supabase...');
+        // console.log('⏳ Attente du chargement de Supabase...');
         await new Promise(resolve => {
             const checkSupabase = setInterval(() => {
                 if (typeof window.supabaseClient !== 'undefined') {
                     clearInterval(checkSupabase);
-                    console.log('✅ Supabase chargé');
+                    // console.log('✅ Supabase chargé');
                     resolve();
                 }
             }, 50);
         });
     }
     
-    console.log('📊 Chargement des statistiques...');
+    // console.log('📊 Chargement des statistiques...');
     // Charger les statistiques
     await loadFichesStats();
     
-    console.log('📋 Chargement de la liste des réservations...');
+    // console.log('📋 Chargement de la liste des réservations...');
     // Charger la liste des réservations
     await loadFichesClientList();
     
-    console.log('⏰ Chargement des demandes horaires...');
+    // console.log('⏰ Chargement des demandes horaires...');
     // Charger les demandes en attente
     await loadDemandesHoraires();
     
-    console.log('💬 Chargement des retours clients...');
+    // console.log('💬 Chargement des retours clients...');
     // Charger les retours clients
     await loadRetoursClients();
     
-    console.log('🎯 Initialisation des sub-tabs...');
+    // console.log('🎯 Initialisation des sub-tabs...');
     // Initialiser les sub-tabs
     initSubTabs();
     
-    console.log('✅ Module Fiches Clients initialisé');
+    // console.log('✅ Module Fiches Clients initialisé');
 }
 
 function initSubTabs() {

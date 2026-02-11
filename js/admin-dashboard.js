@@ -14,7 +14,7 @@ let currentUser = null;
 // ================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Initialisation Dashboard Channel Manager...');
+    // console.log('🚀 Initialisation Dashboard Channel Manager...');
     
     // Vérifier l'authentification
     await checkAuth();
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         lucide.createIcons();
     }
     
-    console.log('✅ Dashboard initialisé');
+    // console.log('✅ Dashboard initialisé');
 });
 
 // ================================================================
@@ -58,7 +58,7 @@ async function checkAuth() {
         }
         
         currentUser = session.user;
-        console.log('✅ Utilisateur connecté:', currentUser.email);
+        // console.log('✅ Utilisateur connecté:', currentUser.email);
         
         // Vérifier si c'est l'admin
         if (currentUser.email !== 'stephanecalvignac@hotmail.fr') {
@@ -844,7 +844,7 @@ function setupRealtime() {
         .on('postgres_changes', 
             { event: '*', schema: 'public', table: 'cm_clients' },
             () => {
-                console.log('🔄 Mise à jour clients détectée');
+                // console.log('🔄 Mise à jour clients détectée');
                 loadKPIs();
                 loadAlerts();
                 loadOpportunities();

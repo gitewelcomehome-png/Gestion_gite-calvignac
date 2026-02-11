@@ -137,14 +137,14 @@ const KmManager = (function() {
      */
     async function ajouterTrajet(trajetData) {
         try {
-            console.log('🚗 [KM-MANAGER] Début ajout trajet...');
+            // console.log('🚗 [KM-MANAGER] Début ajout trajet...');
             
             const { data: user } = await supabaseClient.auth.getUser();
             if (!user?.user?.id) {
                 throw new Error('Non authentifié');
             }
             
-            console.log('🚗 [KM-MANAGER] User OK:', user.user.id);
+            // console.log('🚗 [KM-MANAGER] User OK:', user.user.id);
 
             // Calculer distance totale
             const distanceTotale = trajetData.aller_retour 
@@ -168,7 +168,7 @@ const KmManager = (function() {
                 notes: trajetData.notes || null
             };
             
-            console.log('🚗 [KM-MANAGER] Trajet à insérer:', trajet);
+            // console.log('🚗 [KM-MANAGER] Trajet à insérer:', trajet);
 
             const { data, error } = await supabaseClient
                 .from('km_trajets')
@@ -181,7 +181,7 @@ const KmManager = (function() {
                 throw error;
             }
             
-            console.log('✅ [KM-MANAGER] Trajet inséré:', data);
+            // console.log('✅ [KM-MANAGER] Trajet inséré:', data);
 
             return data;
         } catch (error) {
@@ -407,7 +407,7 @@ const KmManager = (function() {
             if (resaError) throw resaError;
 
             if (!reservations || reservations.length === 0) {
-                console.log(`Aucune réservation pour ${annee}`);
+                // console.log(`Aucune réservation pour ${annee}`);
                 return { 
                     deleted: 0, 
                     created: 0, 
@@ -444,7 +444,7 @@ const KmManager = (function() {
                 }
             }
 
-            console.log(`✅ Régénération ${annee}: ${reservations.length} réservations, ${totalCreated} trajets créés`);
+            // console.log(`✅ Régénération ${annee}: ${reservations.length} réservations, ${totalCreated} trajets créés`);
             if (gitesSkipped.size > 0) {
                 console.warn('⚠️ Gîtes ignorés (distance non configurée):', Array.from(gitesSkipped));
             }

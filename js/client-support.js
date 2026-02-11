@@ -11,7 +11,7 @@ let currentFilter = '';
 // 🔐 INITIALISATION
 // ================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🎫 Initialisation Support Client');
+    // console.log('🎫 Initialisation Support Client');
     
     // Vérifier auth
     await checkAuth();
@@ -50,9 +50,9 @@ async function checkAuth() {
         
         // Si le client n'existe pas, le créer automatiquement
         if (clientError || !client) {
-            console.log('📝 Création automatique du client...');
-            console.log('User ID:', user.id);
-            console.log('User Email:', user.email);
+            // console.log('📝 Création automatique du client...');
+            // console.log('User ID:', user.id);
+            // console.log('User Email:', user.email);
             
             // Extraire nom/prénom de l'email si possible
             const emailParts = user.email.split('@')[0].split('.');
@@ -84,11 +84,11 @@ async function checkAuth() {
             }
             
             client = newClient;
-            console.log('✅ Client créé:', client.email_principal);
+            // console.log('✅ Client créé:', client.email_principal);
         }
         
         currentClient = client;
-        console.log('✅ Client authentifié:', client.email_principal);
+        // console.log('✅ Client authentifié:', client.email_principal);
         
     } catch (err) {
         console.error('❌ Erreur auth:', err);
@@ -254,7 +254,7 @@ async function createTicket(e) {
         
         if (error) throw error;
         
-        console.log('✅ Ticket créé, ID:', ticket.id);
+        // console.log('✅ Ticket créé, ID:', ticket.id);
         
         // 🤖 L'ANALYSE IA SE FAIT AUTOMATIQUEMENT VIA LE TRIGGER SQL
         // Le trigger auto_respond_to_ticket() analyse et répond instantanément
@@ -790,4 +790,4 @@ async function deleteTicket(ticketId) {
 
 window.deleteTicket = deleteTicket;
 
-console.log('✅ Module Support Client chargé');
+// console.log('✅ Module Support Client chargé');

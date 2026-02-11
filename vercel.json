@@ -61,16 +61,12 @@
   ],
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/commercial.html"
-    },
-    {
       "source": "/app",
-      "destination": "/index.html"
+      "destination": "/app.html"
     },
     {
       "source": "/login",
-      "destination": "/index.html"
+      "destination": "/app.html"
     }
   ]
 }

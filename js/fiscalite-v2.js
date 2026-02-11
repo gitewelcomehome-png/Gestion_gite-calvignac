@@ -12,6 +12,72 @@ let configKm = null;
 let trajetsKm = [];
 let lieuxFavoris = [];
 
+// ==========================================
+// 🔧 HELPERS UTILITAIRES
+// ==========================================
+
+/**
+ * Récupère la valeur numérique d'un champ de formulaire
+ * @param {string} id - ID de l'élément
+ * @param {number} defaultValue - Valeur par défaut si vide
+ * @returns {number}
+ */
+function getFieldValue(id, defaultValue = 0) {
+    return parseFloat(document.getElementById(id)?.value || defaultValue);
+}
+
+/**
+ * Formate un montant en euros
+ * @param {number} montant - Montant à formater
+ * @returns {string}
+ */
+function formatCurrency(montant) {
+    return montant.toFixed(2) + ' €';
+}
+
+/**
+ * Parse un montant affiché (qui contient € et espaces)
+ * @param {string} elementId - ID de l'élément contenant le montant
+ * @returns {number}
+ */
+function parseDisplayedAmount(elementId) {
+    return parseFloat(document.getElementById(elementId)?.textContent?.replace(/[€\s]/g, '') || 0);
+}
+
+/**
+ * Récupère la config fiscale pour l'année (avec cache)
+ * @returns {object}
+ */
+let _cachedConfig = null;
+let _cachedYear = null;
+
+function getConfig() {
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
+    if (_cachedYear !== annee || !_cachedConfig) {
+        _cachedConfig = window.TAUX_FISCAUX.getConfig(annee);
+        _cachedYear = annee;
+    }
+    return _cachedConfig;
+}
+
+/**
+ * Affiche plusieurs montants dans des éléments (helper générique)
+ * @param {object} elementsMap - Map {elementId: valeur}
+ */
+function afficherDetailsFinanciers(elementsMap) {
+    Object.entries(elementsMap).forEach(([elementId, valeur]) => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = formatCurrency(valeur);
+        }
+    });
+}
+
+// ==========================================
+// FONCTIONS EXISTANTES
+// ==========================================
+
+
 /**
  * Mettre à jour l'affichage du CA dans le bloc visuel
  */
@@ -342,75 +408,68 @@ function calculerAmortissementsAnneeCourante() {
  * Calcule et affiche le tableau comparatif des 4 options fiscales
  */
 function calculerTableauComparatif() {
-    const ca = parseFloat(document.getElementById('ca')?.value || 0);
+    const ca = getFieldValue('ca');
     if (ca === 0) {
         return;
     }
     
-    // LOI 2025/2026 - Nouveaux plafonds et abattements
-    const PLAFOND_MICRO_NON_CLASSE = 15000; // Meublé tourisme NON classé : 15 000€
-    const PLAFOND_MICRO_CLASSE = 77700; // Meublé tourisme CLASSÉ ⭐ : 77 700€
-    const ABATTEMENT_NON_CLASSE = 0.30; // 30% pour non classé
-    const ABATTEMENT_CLASSE = 0.50; // 50% pour classé
-    const TAUX_COTIS_MICRO_NON_CLASSE = 0.212; // 21,2% pour non classé
-    const TAUX_COTIS_MICRO_CLASSE = 0.06; // 6% pour classé ⭐
-    const COTISATIONS_MINIMALES_LMP = 1200;
-    const SEUIL_RFR_PAR_PART = 29315; // Seuil RFR 2024 pour versement libératoire
-    const TAUX_VL_CLASSE = 0.01; // 1% pour classé
-    const TAUX_VL_NON_CLASSE = 0.017; // 1,7% pour non classé
+    // LOI 2025/2026 - Utiliser la config centralisée
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
+    const config = window.TAUX_FISCAUX.getConfig(annee);
+    const PLAFOND_MICRO_NON_CLASSE = config.MICRO_BIC.plafond_non_classe;
+    const PLAFOND_MICRO_CLASSE = config.MICRO_BIC.plafond_classe;
+    const ABATTEMENT_NON_CLASSE = config.MICRO_BIC.abattement_non_classe;
+    const ABATTEMENT_CLASSE = config.MICRO_BIC.abattement_classe;
+    const TAUX_COTIS_MICRO_NON_CLASSE = config.MICRO_BIC.taux_cotis_non_classe;
+    const TAUX_COTIS_MICRO_CLASSE = config.MICRO_BIC.taux_cotis_classe;
+    const COTISATIONS_MINIMALES_LMP = config.COTISATIONS_MINIMALES.montant;
+    const TAUX_VL_CLASSE = config.MICRO_BIC.taux_vl_classe;
+    const TAUX_VL_NON_CLASSE = config.MICRO_BIC.taux_vl_non_classe;
     
     // Détecter le classement sélectionné
     const classement = document.getElementById('classement_meuble')?.value || 'non_classe';
     const estClasse = classement === 'classe';
     
-    // Vérifier l'option versement libératoire
-    const optionVL = document.getElementById('option_versement_liberatoire')?.checked || false;
-    const rfr2024 = parseFloat(document.getElementById('rfr_2024')?.value || 0);
+    // Versement libératoire : disponible UNIQUEMENT pour Micro-BIC
+    const PLAFOND_MICRO = estClasse ? PLAFOND_MICRO_CLASSE : PLAFOND_MICRO_NON_CLASSE;
+    const estEligibleMicroBIC = ca > 0 && ca <= PLAFOND_MICRO;
+    const statutActuelSelect = document.getElementById('statut_fiscal')?.value || 'lmnp';
+    const estStatutMicro = statutActuelSelect === 'micro';
+    
+    const blocVL = document.getElementById('bloc-versement-liberatoire');
+    const checkboxVL = document.getElementById('option_versement_liberatoire');
+    const messageVL = document.getElementById('vl-eligibilite-message');
+    
+    // Afficher le bloc UNIQUEMENT si statut Micro-BIC ET CA dans les plafonds
+    if (blocVL) {
+        if (estStatutMicro && estEligibleMicroBIC) {
+            blocVL.style.display = 'block';
+            if (messageVL) {
+                messageVL.innerHTML = '💡 <strong>Option micro-entrepreneurs</strong> : Taux forfaitaire sur le CA (1% ou 1,7%) au lieu de l\'IR progressif';
+                messageVL.style.color = '#2ecc71';
+            }
+        } else {
+            blocVL.style.display = 'none';
+        }
+    }
+    
+    if (checkboxVL) {
+        checkboxVL.disabled = !(estStatutMicro && estEligibleMicroBIC);
+        if (!(estStatutMicro && estEligibleMicroBIC)) {
+            checkboxVL.checked = false;
+        }
+    }
+    
+    const optionVL = checkboxVL?.checked || false;
+    const utiliserVL = optionVL && estStatutMicro && estEligibleMicroBIC;
     
     // Données communes
-    const salaireMadame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
-    const salaireMonsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
+    const salaireMadame = getFieldValue('salaire_madame');
+    const salaireMonsieur = getFieldValue('salaire_monsieur');
     const nombreEnfants = parseInt(document.getElementById('nombre_enfants')?.value || 0);
     const nombreParts = 2 + (nombreEnfants * 0.5);
     const revenusSalaries = salaireMadame + salaireMonsieur;
     
-    // Vérifier l'éligibilité au versement libératoire
-    const seuilRFR = SEUIL_RFR_PAR_PART * nombreParts;
-    const eligibleVL = rfr2024 > 0 && rfr2024 <= seuilRFR;
-    const utiliserVL = optionVL && eligibleVL;
-    
-    // Mettre à jour le message d'éligibilité
-    const messageVL = document.getElementById('vl-eligibilite-message');
-    const checkboxVL = document.getElementById('option_versement_liberatoire');
-    
-    // ✅ Checkbox toujours activable, mais message adapté
-    if (checkboxVL) {
-        checkboxVL.disabled = false;
-    }
-    
-    if (messageVL) {
-        if (optionVL && (!rfr2024 || rfr2024 === 0)) {
-            // Checkbox cochée mais pas de RFR
-            messageVL.innerHTML = '⚠️ <strong>RFR 2024 manquant !</strong> Renseignez-le ci-dessous pour bénéficier du versement libératoire';
-            messageVL.style.color = '#e67e22';
-        } else if (optionVL && !eligibleVL) {
-            // Checkbox cochée mais non éligible
-            messageVL.innerHTML = `❌ <strong>Non éligible.</strong> Votre RFR (${rfr2024.toLocaleString('fr-FR')} €) > ${seuilRFR.toLocaleString('fr-FR')} € (seuil pour ${nombreParts} part${nombreParts > 1 ? 's' : ''}) - IR classique appliqué`;
-            messageVL.style.color = '#e74c3c';
-        } else if (!rfr2024 || rfr2024 === 0) {
-            messageVL.innerHTML = '💡 Renseignez votre RFR 2024 ci-dessous pour vérifier l\'éligibilité';
-            messageVL.style.color = '#666';
-        } else if (eligibleVL) {
-            messageVL.innerHTML = `✅ <strong>Éligible !</strong> Votre RFR (${rfr2024.toLocaleString('fr-FR')} €) ≤ ${seuilRFR.toLocaleString('fr-FR')} € (seuil pour ${nombreParts} part${nombreParts > 1 ? 's' : ''})`;
-            messageVL.style.color = '#2ecc71';
-        } else {
-            messageVL.innerHTML = `❌ <strong>Non éligible.</strong> Votre RFR (${rfr2024.toLocaleString('fr-FR')} €) > ${seuilRFR.toLocaleString('fr-FR')} € (seuil pour ${nombreParts} part${nombreParts > 1 ? 's' : ''})`;
-            messageVL.style.color = '#e74c3c';
-        }
-    }
-    
-    const annee = new Date().getFullYear();
-    const config = window.TAUX_FISCAUX.getConfig(annee);
     const bareme = config.BAREME_IR;
     
     // Fonction helper pour calculer l'IR
@@ -435,13 +494,12 @@ function calculerTableauComparatif() {
     }
     
     // Vérifier critères LMP
-    const urssafReel = parseFloat(document.getElementById('preview-urssaf')?.textContent?.replace(/[€\s]/g, '') || 0);
-    const beneficeReel = parseFloat(document.getElementById('preview-benefice')?.textContent?.replace(/[€\s]/g, '') || 0);
-    const resteAvantIRReel = parseFloat(document.getElementById('preview-reste')?.textContent?.replace(/[€\s]/g, '') || 0);
+    const urssafReel = parseDisplayedAmount('preview-urssaf');
+    const beneficeReel = parseDisplayedAmount('preview-benefice');
+    const resteAvantIRReel = parseDisplayedAmount('preview-reste');
     
-    // Si le statut actuel est LMP, autoriser l'option LMP (passage automatique ou manuel)
-    const statutActuel = document.getElementById('statut_fiscal')?.value || 'lmnp';
-    const forceLMP = statutActuel === 'lmp';
+    // Vérifier le statut actuel pour forcer LMP si nécessaire
+    const forceLMP = statutActuelSelect === 'lmp';
     
     // Sinon, vérifier les critères
     const revenusGlobauxReel = revenusSalaries + resteAvantIRReel;
@@ -852,13 +910,25 @@ function changerStatutFiscal() {
     const statut = document.getElementById('statut_fiscal').value;
     const statutUpperCase = statut.toUpperCase();
     
+    // Gérer l'affichage du bloc classement (UNIQUEMENT pour Micro-BIC)
+    const blocClassement = document.getElementById('bloc-classement');
+    if (blocClassement) {
+        blocClassement.style.display = statut === 'micro' ? 'flex' : 'none';
+    }
+    
     // Mettre à jour l'interface
     document.getElementById('statut-fiscal-title').textContent = statutUpperCase;
     document.getElementById('statut-fiscal-badge').textContent = statutUpperCase;
     
     // Adapter la couleur du badge
     const badge = document.getElementById('statut-fiscal-badge');
-    badge.style.background = statut === 'lmp' ? '#e67e22' : '#2ecc71';
+    if (statut === 'lmp') {
+        badge.style.background = '#e67e22';
+    } else if (statut === 'micro') {
+        badge.style.background = '#3498db';
+    } else {
+        badge.style.background = '#2ecc71';
+    }
     
     // Adapter la note explicative
     const noteLabel = document.getElementById('statut-fiscal-note-label');
@@ -866,7 +936,12 @@ function changerStatutFiscal() {
     
     if (statut === 'lmp') {
         noteLabel.textContent = 'Régime LMP au réel';
-        noteText.textContent = 'Les cotisations sont calculées sur le bénéfice imposable avec cotisations minimales SSI (~1200-1500€/an même si bénéfice nul).';
+        const anneeSimulation = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
+        const config = window.TAUX_FISCAUX.getConfig(anneeSimulation);
+        noteText.textContent = `Les cotisations sont calculées sur le bénéfice imposable avec cotisations minimales SSI (~${config.COTISATIONS_MINIMALES.montant}€/an même si bénéfice nul).`;
+    } else if (statut === 'micro') {
+        noteLabel.textContent = 'Régime Micro-BIC';
+        noteText.textContent = 'Abattement forfaitaire de 30% (non classé) ou 50% (classé ⭐). Pas de cotisations si CA < 23k€. Option versement libératoire disponible.';
     } else {
         noteLabel.textContent = 'Régime LMNP au réel';
         noteText.textContent = 'Les cotisations sont calculées uniquement sur le bénéfice imposable. Pas de cotisations minimales en LMNP.';
@@ -874,6 +949,7 @@ function changerStatutFiscal() {
     
     // Recalculer avec le nouveau statut
     calculerTempsReel();
+    calculerTableauComparatif();
     verifierSeuilsStatut();
 }
 
@@ -922,17 +998,18 @@ function ajusterStatutFiscalAutomatique(ca, benefice, urssafActuel) {
         
         let urssafNew = 0;
         if (benefice > 0) {
-            const indemnites = benefice * config.URSSAF.indemnites;
-            const retraiteBase = benefice * config.URSSAF.retraite_base;
-            const retraiteCompl = benefice * config.URSSAF.retraite_compl;
-            const invalidite = benefice * config.URSSAF.invalidite;
-            const csgCrds = benefice * config.URSSAF.csg_crds;
-            const formationPro = benefice * config.URSSAF.formation_pro;
-            const allocations = benefice * config.URSSAF.allocations;
+            const indemnites = benefice * config.URSSAF.indemnites_journalieres.taux;
+            const retraiteBase = benefice * config.URSSAF.retraite_base.taux;
+            const retraiteCompl = benefice * config.URSSAF.retraite_complementaire.taux;
+            const invalidite = benefice * config.URSSAF.invalidite_deces.taux;
+            const csgCrds = benefice * config.URSSAF.csg_crds.taux;
+            const formationPro = benefice * config.URSSAF.formation_pro.taux;
+            const allocations = 0; // Calculé séparément avec allocations_familiales
+            
             urssafNew = indemnites + retraiteBase + retraiteCompl + invalidite + csgCrds + formationPro + allocations;
         }
         
-        const COTISATIONS_MINIMALES_LMP = 1200;
+        const COTISATIONS_MINIMALES_LMP = config.COTISATIONS_MINIMALES.montant;
         if (urssafNew < COTISATIONS_MINIMALES_LMP) {
             urssafNew = COTISATIONS_MINIMALES_LMP;
         }
@@ -954,8 +1031,9 @@ function ajusterStatutFiscalAutomatique(ca, benefice, urssafActuel) {
 }
 
 /**
- * Vérifie si les seuils LMNP sont dépassés et alerte l'utilisateur
- * Calcul automatique : CA > 23k€ ET recettes location > 50% revenus d'activité = LMP obligatoire
+ * Vérifie si les seuils LMNP sont dépassés et adapte le select statut
+ * Utilise EXACTEMENT la même logique que le tableau comparatif
+ * Ne touche PAS au statut Micro-BIC (choix manuel)
  */
 function verifierSeuilsStatut() {
     const ca = parseFloat(document.getElementById('ca')?.value || 0);
@@ -963,33 +1041,72 @@ function verifierSeuilsStatut() {
     const alerteDiv = document.getElementById('alerte-seuil-statut');
     const alerteMessage = document.getElementById('alerte-seuil-message');
     
-    const SEUIL_CA_LMNP = 23000; // 23k€ CA annuel
+    const selectStatut = document.getElementById('statut_fiscal');
+    const optionLMNP = selectStatut?.querySelector('option[value="lmnp"]');
+    const optionMicro = selectStatut?.querySelector('option[value="micro"]');
+    const optionLMP = selectStatut?.querySelector('option[value="lmp"]');
     
-    // Récupérer les revenus d'activité du foyer fiscal
-    const salaireMadame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
-    const salaireMonsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
-    const recettesLocation = ca; // CA de la location meublée
-    
-    const revenusSalaries = salaireMadame + salaireMonsieur;
-    const revenusActiviteGlobaux = revenusSalaries + recettesLocation;
-    const partRecettesLocation = revenusActiviteGlobaux > 0 ? (recettesLocation / revenusActiviteGlobaux) * 100 : 0;
-    
-    // Si CA = 0, ne rien afficher
+    // Si CA = 0, réinitialiser
     if (ca === 0) {
         alerteDiv.style.display = 'none';
+        if (optionLMNP) {
+            optionLMNP.disabled = false;
+            optionLMNP.textContent = 'LMNP';
+        }
+        if (optionMicro) {
+            optionMicro.disabled = false;
+            optionMicro.textContent = 'Micro-BIC';
+        }
+        if (optionLMP) {
+            optionLMP.disabled = true;
+            optionLMP.textContent = 'LMP (critères non remplis)';
+        }
         return;
     }
     
-    // CRITÈRES LMP : CA > 23k€ ET recettes location > 50% revenus d'activité
-    const critereCA = ca > SEUIL_CA_LMNP;
-    const criterePart = partRecettesLocation > 50;
-    const doitEtreLMP = critereCA && criterePart;
+    // Récupérer les données (MÊME LOGIQUE que calculerTableauComparatif)
+    const salaireMadame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
+    const salaireMonsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
+    const revenusSalaries = salaireMadame + salaireMonsieur;
     
-    // Désactiver l'option LMNP si LMP obligatoire
-    const selectStatut = document.getElementById('statut_fiscal');
-    const optionLMNP = selectStatut?.querySelector('option[value="lmnp"]');
+    const beneficeReel = parseFloat(document.getElementById('preview-benefice')?.textContent?.replace(/[€\s]/g, '') || 0);
+    const urssafReel = parseFloat(document.getElementById('preview-urssaf')?.textContent?.replace(/[€\s]/g, '') || 0);
+    const resteAvantIRReel = parseFloat(document.getElementById('preview-reste')?.textContent?.replace(/[€\s]/g, '') || 0);
+    
+    // CRITÈRES IDENTIQUES AU TABLEAU COMPARATIF
+    const revenusActiviteGlobaux = revenusSalaries + ca;
+    const partRecettesLocation = revenusActiviteGlobaux > 0 ? (ca / revenusActiviteGlobaux) * 100 : 0;
+    
+    // LMP OBLIGATOIRE (grise LMNP dans le tableau)
+    const lmpObligatoire = ca > 23000 && partRecettesLocation > 50;
+    
+    // PEUT ÊTRE LMP (active LMP dans le tableau)
+    const revenusGlobauxReel = revenusSalaries + resteAvantIRReel;
+    const partLocative = revenusGlobauxReel > 0 ? (resteAvantIRReel / revenusGlobauxReel) * 100 : 0;
+    const critereCA_LMP = ca > 23000;
+    const criterePart_LMP = partLocative > 50;
+    const forceLMP = statut === 'lmp';
+    const peutEtreLMP = forceLMP || (critereCA_LMP && criterePart_LMP);
+    
+    // ADAPTER LE SELECT SELON LES MÊMES RÈGLES QUE LE TABLEAU
+    // Micro-BIC : désactivé si CA > seuils (comme dans le tableau)
+    const estClasse = document.getElementById('classement_meuble')?.value === 'classe';
+    const seuilMicro = estClasse ? 77700 : 15000;
+    const microDepasseSeuil = ca > seuilMicro;
+    
+    if (optionMicro) {
+        if (microDepasseSeuil) {
+            optionMicro.disabled = true;
+            optionMicro.textContent = `Micro-BIC (⛔ CA > ${seuilMicro.toLocaleString('fr-FR')} €)`;
+        } else {
+            optionMicro.disabled = false;
+            optionMicro.textContent = 'Micro-BIC';
+        }
+    }
+    
+    // LMNP : désactivé si LMP obligatoire (CA > 23k ET recettes > 50%)
     if (optionLMNP) {
-        if (doitEtreLMP) {
+        if (lmpObligatoire) {
             optionLMNP.disabled = true;
             optionLMNP.textContent = 'LMNP (⛔ LMP obligatoire)';
         } else {
@@ -998,47 +1115,57 @@ function verifierSeuilsStatut() {
         }
     }
     
-    if (statut === 'lmnp') {
-        if (!critereCA) {
-            // CA < 23k€ : LMNP OK
-            alerteDiv.style.display = 'block';
-            alerteDiv.style.background = '#d4edda';
-            alerteDiv.style.borderLeft = '4px solid #28a745';
-            alerteMessage.innerHTML = `✅ <strong>Statut LMNP valide</strong> : Votre CA (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) est inférieur au seuil de 23 000 €.`;
-        } else if (doitEtreLMP) {
-            // CA > 23k€ ET > 50% : LMP obligatoire (déjà basculé automatiquement)
-            alerteDiv.style.display = 'block';
-            alerteDiv.style.background = '#f8d7da';
-            alerteDiv.style.borderLeft = '4px solid #dc3545';
-            alerteMessage.innerHTML = `⚠️ <strong>Passage automatique en statut LMP effectué !</strong><br>
-                • CA (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) > 23 000 €<br>
-                • Recettes de location (${partRecettesLocation.toFixed(1)}%) > 50% des revenus d'activité (${revenusActiviteGlobaux.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €)<br>
-                → <strong>Inscription obligatoire au RCS</strong>`;
+    // LMP : TOUJOURS disponible (choix anticipé possible)
+    if (optionLMP) {
+        optionLMP.disabled = false;
+        optionLMP.textContent = 'LMP';
+    }
+    
+    // FORÇAGE AUTOMATIQUE DU STATUT
+    // Si Micro-BIC sélectionné mais CA > seuils → basculer automatiquement
+    if (statut === 'micro' && microDepasseSeuil) {
+        if (lmpObligatoire) {
+            selectStatut.value = 'lmp';
         } else {
-            // CA > 23k€ mais < 50% : LMNP OK
-            alerteDiv.style.display = 'block';
-            alerteDiv.style.background = '#d4edda';
-            alerteDiv.style.borderLeft = '4px solid #28a745';
-            alerteMessage.innerHTML = `✅ <strong>Statut LMNP maintenu</strong> : Même si votre CA (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) dépasse 23 000 €, vos recettes de location (${partRecettesLocation.toFixed(1)}%) restent inférieures à 50% de vos revenus d'activité (${revenusActiviteGlobaux.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €).`;
+            selectStatut.value = 'lmnp';
         }
-    } else if (statut === 'lmp') {
-        if (!doitEtreLMP) {
-            // Ne remplit plus les critères LMP
-            alerteDiv.style.display = 'block';
-            alerteDiv.style.background = '#fff3cd';
-            alerteDiv.style.borderLeft = '4px solid #ffc107';
-            if (!critereCA) {
-                alerteMessage.innerHTML = `⚠️ <strong>Attention</strong> : Votre CA (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) est inférieur au seuil LMP de 23 000 €. Vous pourriez <strong>revenir en statut LMNP</strong> l'année prochaine.`;
-            } else {
-                alerteMessage.innerHTML = `⚠️ <strong>Attention</strong> : Vos recettes de location (${partRecettesLocation.toFixed(1)}%) sont inférieures à 50% de vos revenus d'activité. Vous pourriez <strong>revenir en statut LMNP</strong> l'année prochaine.`;
-            }
-        } else {
-            // LMP OK
-            alerteDiv.style.display = 'block';
-            alerteDiv.style.background = '#d4edda';
-            alerteDiv.style.borderLeft = '4px solid #28a745';
-            alerteMessage.innerHTML = `✅ <strong>Statut LMP valide</strong> : CA (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) > 23 000 € et recettes de location (${partRecettesLocation.toFixed(1)}%) > 50% des revenus d'activité (${revenusActiviteGlobaux.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €).`;
-        }
+        changerStatutFiscal();
+    }
+    
+    // Si LMNP sélectionné mais LMP obligatoire → basculer automatiquement
+    if (statut === 'lmnp' && lmpObligatoire) {
+        selectStatut.value = 'lmp';
+        changerStatutFiscal();
+    }
+    
+    // Afficher les alertes (ne pas afficher pour Micro)
+    if (statut === 'micro') {
+        alerteDiv.style.display = 'none';
+    } else if (lmpObligatoire) {
+        alerteDiv.style.display = 'block';
+        alerteDiv.style.background = '#f8d7da';
+        alerteDiv.style.borderLeft = '4px solid #dc3545';
+        alerteMessage.innerHTML = `⚠️ <strong>Passage automatique en statut LMP</strong><br>
+            • CA (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) > 23 000 €<br>
+            • Recettes de location (${partRecettesLocation.toFixed(1)}%) > 50% des revenus d'activité<br>
+            → <strong>Inscription obligatoire au RCS</strong>`;
+    } else if (statut === 'lmnp' && ca < 23000) {
+        alerteDiv.style.display = 'block';
+        alerteDiv.style.background = '#d4edda';
+        alerteDiv.style.borderLeft = '4px solid #28a745';
+        alerteMessage.innerHTML = `✅ <strong>Statut LMNP valide</strong> : CA < 23 000 € → Pas de cotisations sociales`;
+    } else if (statut === 'lmnp' && ca >= 23000) {
+        alerteDiv.style.display = 'block';
+        alerteDiv.style.background = '#d4edda';
+        alerteDiv.style.borderLeft = '4px solid #28a745';
+        alerteMessage.innerHTML = `✅ <strong>Statut LMNP maintenu</strong> : Recettes (${partRecettesLocation.toFixed(1)}%) < 50% des revenus d'activité`;
+    } else if (statut === 'lmp' && peutEtreLMP) {
+        alerteDiv.style.display = 'block';
+        alerteDiv.style.background = '#d4edda';
+        alerteDiv.style.borderLeft = '4px solid #28a745';
+        alerteMessage.innerHTML = `✅ <strong>Statut LMP valide</strong> : CA > 23 000 € et recettes > 50% des revenus d'activité`;
+    } else {
+        alerteDiv.style.display = 'none';
     }
 }
 
@@ -1172,7 +1299,7 @@ function calculerTempsReel() {
         
         // ⚠️ RÈGLES COTISATIONS selon le statut
         const statutFiscal = document.getElementById('statut_fiscal')?.value || 'lmnp';
-        const COTISATIONS_MINIMALES_LMP = 1200; // Cotisations SSI minimales pour LMP
+        const COTISATIONS_MINIMALES_LMP = config.COTISATIONS_MINIMALES.montant; // Cotisations SSI minimales pour LMP
         const SEUIL_EXONERATION_LMNP = 23000; // Seuil d'exonération URSSAF en LMNP
         
         if (statutFiscal === 'lmnp' && ca < SEUIL_EXONERATION_LMNP) {
@@ -1277,6 +1404,7 @@ function calculerTempsReel() {
 }
 
 function calculerChargesBien(type) {
+    // console.log(`  🔧 calculerChargesBien('${type}') appelée`);
     const internet = getAnnualValue(`internet_${type}`, `internet_${type}_type`);
     const eau = getAnnualValue(`eau_${type}`, `eau_${type}_type`);
     const electricite = getAnnualValue(`electricite_${type}`, `electricite_${type}_type`);
@@ -1294,6 +1422,12 @@ function calculerChargesBien(type) {
     
     const total = internet + eau + electricite + assuranceHab + assuranceEmprunt + interetsEmprunt + 
            menage + linge + logiciel + copropriete + taxeFonciere + cfe + commissions + amortissementImmobilier;
+    
+    // console.log(`    Détail ${type}:`, {
+    //     internet, eau, electricite, assuranceHab, assuranceEmprunt, interetsEmprunt,
+    //     menage, linge, logiciel, copropriete, taxeFonciere, cfe, commissions, 
+    //     amortissementImmobilier, total
+    // });
     
     return total;
         // ⚠️ CORRECTION : Ne pas inclure amortissement_${type} car déjà calculé via calculerAmortissementsAnneeCourante()
@@ -1318,6 +1452,91 @@ function calculerFraisProfessionnels() {
         parseFloat(document.getElementById('formation')?.value || 0) +
         getAnnualValue('fournitures', 'fournitures_type');
 }
+
+// ========================================
+// 💰 CALCUL GLOBAL DES CHARGES PAR GÎTE
+// Fonction exportée pour dashboard.js et statistiques.js
+// ========================================
+
+/**
+ * Calcule les charges totales SANS AMORTISSEMENT par gîte et globales
+ * MÉTHODE SIMPLE : Total charges - Amortissements immobiliers
+ * @param {Object} simFiscale - Simulation fiscale (ou null pour utiliser les champs actuels)
+ * @param {Array} gitesData - Liste des gîtes (ou null pour utiliser window.GITES_DATA)
+ * @returns {Object} { parGite: {giteId: montant}, gitesTotales: montant, globales: montant, total: montant }
+ */
+window.calculerChargesParGiteSansAmortissement = async function(simFiscale = null, gitesData = null) {
+    // console.log('🔧 calculerChargesParGiteSansAmortissement appelée (MÉTHODE DOM)');
+    // console.log('🔧 simFiscale:', simFiscale ? 'Présente' : 'Absente');
+    
+    const gites = gitesData || window.GITES_DATA || await window.gitesManager.getAll();
+    // console.log('🔧 Nombre de gîtes:', gites.length);
+    
+    // ✅ ÉTAPE 1 : Récupérer le TOTAL CHARGES depuis le DOM (élément affiché)
+    const totalChargesElement = document.getElementById('total-charges-annuelles');
+    let totalChargesAvecAmort = 0;
+    
+    if (totalChargesElement && totalChargesElement.textContent) {
+        // Parser le texte "88496.21 €" -> 88496.21
+        const textValue = totalChargesElement.textContent.replace(/[€\s]/g, '').replace(',', '.');
+        totalChargesAvecAmort = parseFloat(textValue) || 0;
+        // console.log('📥 Total charges (depuis DOM #total-charges-annuelles):', totalChargesAvecAmort.toFixed(2), '€');
+    } else if (simFiscale) {
+        // Fallback : lire depuis la BDD
+        const isFiscalHistory = simFiscale && simFiscale.donnees_detaillees;
+        const details = isFiscalHistory ? simFiscale.donnees_detaillees : simFiscale;
+        totalChargesAvecAmort = parseFloat(details.charges_total || 0);
+        // console.log('📥 Total charges (depuis BDD):', totalChargesAvecAmort.toFixed(2), '€');
+    }
+    
+    // ✅ ÉTAPE 2 : Calculer le total des AMORTISSEMENTS IMMOBILIERS uniquement
+    let totalAmortissements = 0;
+    
+    for (const gite of gites) {
+        // ⚠️ TOUJOURS recalculer le slug depuis le nom pour cohérence avec les IDs HTML
+        const giteSlug = gite.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        let amortGite = 0;
+        
+        // Lire depuis le DOM en priorité
+        const inputAmort = document.getElementById(`amortissement_${giteSlug}`);
+        if (inputAmort && inputAmort.value) {
+            amortGite = parseFloat(inputAmort.value || 0);
+            // console.log(`  🔍 DOM trouvé pour ${gite.name} (${giteSlug}): ${amortGite}€`);
+        } else {
+            // console.log(`  ⚠️ DOM introuvable: #amortissement_${giteSlug}`);
+            // Fallback : lire depuis la BDD
+            const isFiscalHistory = simFiscale && simFiscale.donnees_detaillees;
+            const details = isFiscalHistory ? simFiscale.donnees_detaillees : simFiscale;
+            
+            if (isFiscalHistory && details.charges_gites && details.charges_gites[giteSlug]) {
+                amortGite = parseFloat(details.charges_gites[giteSlug].amortissement || 0);
+                // console.log(`  📥 BDD charges_gites[${giteSlug}]: ${amortGite}€`);
+            } else {
+                amortGite = parseFloat(simFiscale[`amortissement_${giteSlug}`] || 0);
+                // console.log(`  📥 BDD simFiscale[amortissement_${giteSlug}]: ${amortGite}€`);
+            }
+        }
+        
+        totalAmortissements += amortGite;
+        // console.log(`  🏠 ${gite.name}: amortissement = ${amortGite.toFixed(2)}€`);
+    }
+    
+    // console.log('🏗️ Total amortissements immobiliers:', totalAmortissements.toFixed(2), '€');
+    
+    // ✅ ÉTAPE 3 : CHARGES SANS AMORTISSEMENT = Total - Amortissements
+    const chargesSansAmort = totalChargesAvecAmort - totalAmortissements;
+    
+    // console.log('💰 TOTAL CHARGES AVEC amortissements:', totalChargesAvecAmort.toFixed(2), '€');
+    // console.log('💰 TOTAL CHARGES SANS amortissements:', chargesSansAmort.toFixed(2), '€');
+    
+    // Retour simplifié (pour compatibilité avec l'existant)
+    return {
+        parGite: {}, // Non utilisé dans cette version simplifiée
+        gitesTotales: chargesSansAmort,
+        globales: 0, // Déjà inclus dans le total
+        total: chargesSansAmort
+    };
+};
 
 // ===========================
 // FONCTION DÉTAIL DES CHARGES
@@ -2023,6 +2242,10 @@ function calculerFiscalite(event) {
         return;
     }
     
+    // Année et config
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
+    const config = window.TAUX_FISCAUX.getConfig(annee);
+    
     // CHARGES PAR GÎTE (dynamique)
     const gites = window.GITES_DATA || [];
     let chargesBiens = 0;
@@ -2090,12 +2313,12 @@ function calculerFiscalite(event) {
     
     // COTISATIONS URSSAF
     const cotisations = {
-        indemnites: benefice * 0.0085,
-        retraiteBase: benefice * 0.1775,
-        retraiteCompl: benefice * 0.07,
-        invalidite: benefice * 0.013,
-        csgCrds: benefice * 0.097,
-        formationPro: ca * 0.0025
+        indemnites: benefice * config.URSSAF.indemnites_journalieres.taux,
+        retraiteBase: benefice * config.URSSAF.retraite_base.taux,
+        retraiteCompl: benefice * config.URSSAF.retraite_complementaire.taux,
+        invalidite: benefice * config.URSSAF.invalidite_deces.taux,
+        csgCrds: benefice * config.URSSAF.csg_crds.taux,
+        formationPro: ca * config.URSSAF.formation_pro.taux
     };
     
     let totalCotisations = 0;
@@ -2105,10 +2328,10 @@ function calculerFiscalite(event) {
         totalCotisations = Object.values(cotisations).reduce((sum, val) => sum + val, 0);
     }
     
-    // ⚠️ MINIMUM URSSAF : 1200€ par an (cotisations minimales légales obligatoires)
-    // Même si bénéfice négatif ou nul, minimum de 1200€ à payer
-    if (totalCotisations < 1200) {
-        totalCotisations = 1200;
+    // ⚠️ MINIMUM URSSAF : cotisations minimales légales obligatoires
+    // Même si bénéfice négatif ou nul, minimum à payer
+    if (totalCotisations < config.COTISATIONS_MINIMALES.montant) {
+        totalCotisations = config.COTISATIONS_MINIMALES.montant;
     }
     
     const resteAvantIR = benefice - totalCotisations;
@@ -2316,9 +2539,9 @@ async function chargerListeAnnees() {
 
 // Charger les données d'une année spécifique
 async function chargerAnnee(annee) {
+    const anneeActuelle = new Date().getFullYear();
+    
     try {
-        const anneeActuelle = new Date().getFullYear();
-        
         // Stocker l'année sélectionnée globalement
         window.anneeSelectionnee = parseInt(annee);
         
@@ -2772,16 +2995,6 @@ async function calculerCAAutomatique(anneeParam = null) {
     }
 }
 
-// Helper formatCurrency
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: 'EUR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(amount);
-}
-
 // Créer une nouvelle année en copiant les frais fixes de l'année précédente
 async function creerNouvelleAnnee() {
     const anneeActuelle = parseInt(document.getElementById('annee_simulation').value);
@@ -2949,13 +3162,44 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
         donnees_detaillees: {} // JSONB - VRAIE colonne
     };
     
+    // ✅ CALCULER LE TOTAL DES CHARGES (pour le dashboard)
+    let totalChargesCalcul = 0;
+    
+    // 1. Charges de tous les gîtes
+    if (window.GITES_DATA && window.GITES_DATA.length > 0) {
+        window.GITES_DATA.forEach(gite => {
+            // ⚠️ TOUJOURS recalculer le slug pour cohérence avec les IDs HTML
+            const giteSlug = gite.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            totalChargesCalcul += calculerChargesBien(giteSlug);
+        });
+    }
+    
+    // 2. Charges immédiates
+    const chargesImmediates = [
+        ...getTravauxListe().filter(item => !item.type_amortissement || item.type_amortissement === ''),
+        ...getFraisDiversListe().filter(item => !item.type_amortissement || item.type_amortissement === ''),
+        ...getProduitsAccueilListe().filter(item => !item.type_amortissement || item.type_amortissement === '')
+    ].reduce((sum, item) => sum + item.montant, 0);
+    
+    // 3. Amortissements année en cours
+    const amortissements = calculerAmortissementsAnneeCourante();
+    totalChargesCalcul += chargesImmediates + amortissements.montantAnnuel;
+    
+    // 4. Charges résidence, frais pro, frais véhicule
+    const ratio = calculerRatio();
+    totalChargesCalcul += calculerChargesResidence() * ratio;
+    totalChargesCalcul += calculerFraisProfessionnels();
+    totalChargesCalcul += calculerFraisVehicule();
+    
+    // console.log('💾 Total charges calculé pour sauvegarde:', totalChargesCalcul.toFixed(2), '€');
+    
     // 🏢 MULTI-TENANT: Collecter toutes les données dans "donnees_detaillees" JSONB
     const detailsData = {
         regime: 'reel',
         gite: 'multi', // Info stockée dans JSONB
         chiffre_affaires: parseFloat(document.getElementById('ca')?.value || 0),
         revenus_total: parseFloat(document.getElementById('ca')?.value || 0),
-        charges_total: 0, // Sera calculé
+        charges_total: totalChargesCalcul, // ✅ CALCULÉ DYNAMIQUEMENT
         resultat_imposable: parseFloat(document.getElementById('preview-benefice')?.textContent?.replace(/[€\s]/g, '') || 0),
         impot_estime: parseFloat(document.getElementById('ir-montant')?.textContent?.replace(/[€\s]/g, '') || 0)
     };
@@ -2964,6 +3208,7 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
     const chargesGites = {};
     if (window.GITES_DATA && window.GITES_DATA.length > 0) {
         window.GITES_DATA.forEach(gite => {
+            // ⚠️ TOUJOURS recalculer le slug pour cohérence
             const slug = gite.name.toLowerCase().replace(/[^a-z0-9]/g, '');
             chargesGites[slug] = {};
             
@@ -3106,13 +3351,13 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
 }
 
 async function chargerDerniereSimulation() {
-    console.log('🔄 [LOAD-START] Début chargement données fiscales...');
+    // console.log('🔄 [LOAD-START] Début chargement données fiscales...');
     
     try {
         // Récupérer l'année sélectionnée ou l'année en cours
         const anneeSelectionnee = document.getElementById('annee_simulation')?.value || new Date().getFullYear();
         
-        console.log(`📅 [LOAD] Chargement pour année: ${anneeSelectionnee}`);
+        // console.log(`📅 [LOAD] Chargement pour année: ${anneeSelectionnee}`);
         
         const { data, error } = await window.supabaseClient
             .from('fiscal_history')
@@ -3129,15 +3374,15 @@ async function chargerDerniereSimulation() {
         }
         
         if (!data) {
-            console.log(`ℹ️ [LOAD-EMPTY] Aucune donnée fiscale pour ${anneeSelectionnee}`);
+            // console.log(`ℹ️ [LOAD-EMPTY] Aucune donnée fiscale pour ${anneeSelectionnee}`);
             return;
         }
         
-        console.log(`✅ Données fiscales ${anneeSelectionnee} chargées:`, {
-            ca: data.revenus,
-            nb_travaux: data.donnees_detaillees?.travaux_liste?.length || 0,
-            derniere_modif: data.updated_at
-        });
+        // console.log(`✅ Données fiscales ${anneeSelectionnee} chargées:`, {
+        //     ca: data.revenus,
+        //     nb_travaux: data.donnees_detaillees?.travaux_liste?.length || 0,
+        //     derniere_modif: data.updated_at
+        // });
         
         // Remplir le formulaire avec les données depuis JSONB "donnees_detaillees"
         const details = data.donnees_detaillees || {};
@@ -3293,7 +3538,7 @@ async function chargerDerniereSimulation() {
         // Restaurer les travaux
         if (details.travaux_liste) {
             const travaux = Array.isArray(details.travaux_liste) ? details.travaux_liste : [];
-            console.log(`🔄 Restauration de ${travaux.length} travaux:`, travaux);
+            // console.log(`🔄 Restauration de ${travaux.length} travaux:`, travaux);
             travaux.forEach((item, index) => {
                 ajouterTravaux();
                 const id = travauxCounter;
@@ -3314,19 +3559,19 @@ async function chargerDerniereSimulation() {
                 giteEl.value = item.gite || 'commun';
                 montantEl.value = item.montant || 0;
                 
-                console.log(`✅ Travail ${index + 1} restauré:`, {
-                    id,
-                    description: item.description,
-                    type: item.type_amortissement,
-                    gite: item.gite,
-                    montant: item.montant
-                });
+                // console.log(`✅ Travail ${index + 1} restauré:`, {
+                //     id,
+                //     description: item.description,
+                //     type: item.type_amortissement,
+                //     gite: item.gite,
+                //     montant: item.montant
+                // });
                 
                 // Mettre en readonly après restauration
                 toggleEdit(`travaux-${id}`);
             });
         } else {
-            console.log('ℹ️ Aucun travail à restaurer');
+            // console.log('ℹ️ Aucun travail à restaurer');
         }
         
         // Restaurer les frais divers
@@ -3692,7 +3937,7 @@ function ajouterCredit() {
         <input type="number" step="0.01" placeholder="Capital restant €" id="credit-capital-${id}" readonly>
         <div class="item-actions">
             <button type="button" class="btn-edit" onclick="toggleEdit('credit-${id}')" title="Modifier">✏️</button>
-            <button type="button" class="btn-delete" onclick="supprimerCredit('credit-${id}')">×</button>
+            <button type="button" class="btn-delete" onclick="supprimerCreditDOM('credit-${id}')">×</button>
         </div>
     `);
     container.appendChild(item);
@@ -3704,7 +3949,7 @@ function ajouterCredit() {
     });
 }
 
-function supprimerCredit(itemId) {
+function supprimerCreditDOM(itemId) {
     const item = document.getElementById(itemId);
     if (item) {
         item.remove();
@@ -4218,7 +4463,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tbody.addEventListener('input', debounce(async (e) => {
                         if (e.target.classList.contains('solde-bancaire-input') || 
                             e.target.classList.contains('notes-bancaire-input')) {
-                            console.log('💾 Sauvegarde auto des soldes...');
+                            // console.log('💾 Sauvegarde auto des soldes...');
                             await sauvegarderSoldesBancairesAuto();
                         }
                     }, 1500)); // Attendre 1.5s après la dernière saisie
@@ -4280,7 +4525,7 @@ async function sauvegarderSoldesBancairesAuto() {
         
         if (error) throw error;
         
-        console.log(`✅ ${soldesData.length} mois sauvegardés automatiquement`);
+        // console.log(`✅ ${soldesData.length} mois sauvegardés automatiquement`);
         
         // Actualiser le graphique
         afficherGraphiqueSoldes();
@@ -4298,7 +4543,7 @@ async function sauvegarderSoldesBancairesAuto() {
 let isTogglingPeriod = false;
 
 function togglePeriodSection(section, period) {
-    console.log(`🔄 Toggle période section ${section}: ${period}`);
+    // console.log(`🔄 Toggle période section ${section}: ${period}`);
     
     // Activer le flag pour éviter les sauvegardes automatiques pendant la conversion
     isTogglingPeriod = true;
@@ -4554,7 +4799,7 @@ async function creerLignesAmortissementFutures(type, data, amortissement) {
             
             if (error) throw error;
             
-            console.log(`✅ [AMORTISSEMENT] ${lignesFutures.length} lignes créées pour années futures`);
+            // console.log(`✅ [AMORTISSEMENT] ${lignesFutures.length} lignes créées pour années futures`);
             showToast(`✅ Amortissement créé : ${lignesFutures.length} lignes sur les années ${anneeActuelle + 1}-${amortissement.anneeFin}`, 'success');
         } catch (error) {
             console.error('❌ [AMORTISSEMENT] Erreur création lignes futures:', error);
@@ -4576,7 +4821,7 @@ async function chargerAmortissementsAnnee(annee) {
         if (error) throw error;
         
         if (data && data.length > 0) {
-            console.log(`📋 [AMORTISSEMENT] ${data.length} lignes d'amortissement chargées pour ${annee}`);
+            // console.log(`📋 [AMORTISSEMENT] ${data.length} lignes d'amortissement chargées pour ${annee}`);
             
             // Ajouter les lignes d'amortissement dans les listes correspondantes
             data.forEach(ligne => {
@@ -5183,7 +5428,7 @@ async function remplirOptionsDestination() {
         let optgroupLieux = selectDestination.querySelector('#optgroup-lieux-trajet');
         
         if (!optgroupGites || !optgroupLieux) {
-            console.log('🔧 Recréation des optgroup manquants...');
+            // console.log('🔧 Recréation des optgroup manquants...');
             
             // Récupérer l'option "autre" si elle existe
             const optionAutre = selectDestination.querySelector('option[value="autre"]');
@@ -5305,7 +5550,7 @@ function calculerDistanceTotaleTrajet() {
  */
 async function soumettreTrajet(event) {
     event.preventDefault();
-    console.log('🚗 [TRAJET] Début soumission...');
+    // console.log('🚗 [TRAJET] Début soumission...');
     
     try {
         // Vérifier que KmManager existe
@@ -5316,7 +5561,7 @@ async function soumettreTrajet(event) {
         const form = event.target;
         const destination = document.getElementById('trajet-destination').value;
         
-        console.log('🚗 [TRAJET] Destination:', destination);
+        // console.log('🚗 [TRAJET] Destination:', destination);
         
         let giteId = null;
         let lieuArrivee = '';
@@ -5344,10 +5589,10 @@ async function soumettreTrajet(event) {
             notes: document.getElementById('trajet-notes').value || null
         };
         
-        console.log('🚗 [TRAJET] Données:', trajetData);
+        // console.log('🚗 [TRAJET] Données:', trajetData);
         
         const result = await window.KmManager.ajouterTrajet(trajetData);
-        console.log('✅ [TRAJET] Trajet ajouté:', result);
+        // console.log('✅ [TRAJET] Trajet ajouté:', result);
         
         fermerModalTrajet();
         await rafraichirKilometres(window.anneeSelectionnee || new Date().getFullYear());
@@ -6203,7 +6448,7 @@ window.exporterSoldesCSV = exporterSoldesCSV;
 // ==========================================
 
 function debugResidence() {
-    console.log('🐛 ========== DEBUG RÉSIDENCE ==========');
+    // console.log('🐛 ========== DEBUG RÉSIDENCE ==========');
     
     // 1. Vérifier les inputs HTML
     const fields = [
@@ -6216,31 +6461,31 @@ function debugResidence() {
         'taxe_fonciere_residence'
     ];
     
-    console.log('📋 Valeurs actuelles des champs:');
+    // console.log('📋 Valeurs actuelles des champs:');
     fields.forEach(fieldId => {
         const el = document.getElementById(fieldId);
         if (el) {
             const value = el.value;
             const type = el.getAttribute('data-period-type');
-            console.log(`  ${fieldId}:`, {value, type});
+            // console.log(`  ${fieldId}:`, {value, type});
         } else {
-            console.log(`  ${fieldId}: ❌ ELEMENT NON TROUVÉ`);
+            // console.log(`  ${fieldId}: ❌ ELEMENT NON TROUVÉ`);
         }
     });
     
     // 2. Tester la fonction getAnnualValue
-    console.log('\n💰 Test getAnnualValue:');
+    // console.log('\n💰 Test getAnnualValue:');
     fields.forEach(fieldId => {
         try {
             const annual = getAnnualValue(fieldId, fieldId + '_type');
-            console.log(`  ${fieldId} annualisé:`, annual);
+            // console.log(`  ${fieldId} annualisé:`, annual);
         } catch (error) {
-            console.log(`  ${fieldId}: ❌ ERREUR`, error.message);
+            // console.log(`  ${fieldId}: ❌ ERREUR`, error.message);
         }
     });
     
     // 3. Simuler une sauvegarde
-    console.log('\n💾 Test collecte données:');
+    // console.log('\n💾 Test collecte données:');
     try {
         const testData = {};
         fields.forEach(fieldId => {
@@ -6250,13 +6495,13 @@ function debugResidence() {
                 testData[fieldId + '_type'] = el.getAttribute('data-period-type') || 'mensuel';
             }
         });
-        console.log('Données qui seraient sauvegardées:', testData);
+        // console.log('Données qui seraient sauvegardées:', testData);
     } catch (error) {
         console.error('❌ Erreur collecte:', error);
     }
     
     // 4. Vérifier la dernière simulation sauvegardée
-    console.log('\n📂 Dernière simulation en base:');
+    // console.log('\n📂 Dernière simulation en base:');
     supabaseClient
         .from('fiscal_history')
         .select('donnees_detaillees')
@@ -6268,16 +6513,16 @@ function debugResidence() {
                 console.error('❌ Erreur lecture:', error);
             } else if (data && data[0]) {
                 const details = data[0].donnees_detaillees;
-                console.log('Résidence dans la base:');
+                // console.log('Résidence dans la base:');
                 fields.forEach(fieldId => {
-                    console.log(`  ${fieldId}:`, details[fieldId], `(type: ${details[fieldId + '_type']})`);
+                    // console.log(`  ${fieldId}:`, details[fieldId], `(type: ${details[fieldId + '_type']})`);
                 });
             } else {
-                console.log('❌ Aucune simulation trouvée');
+                // console.log('❌ Aucune simulation trouvée');
             }
         });
     
-    console.log('🐛 ========== FIN DEBUG ==========');
+    // console.log('🐛 ========== FIN DEBUG ==========');
     alert('🐛 Debug terminé - Voir la console (F12)');
 }
 
@@ -6615,7 +6860,7 @@ function appliquerTestCA() {
             
             btnRestaurer.remove();
             input.value = '';
-            console.log('✅ CA réel restauré');
+            // console.log('✅ CA réel restauré');
         };
         
         input.parentElement.appendChild(btnRestaurer);

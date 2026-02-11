@@ -9,7 +9,7 @@ const OPENAI_API_KEY = 'sk-proj-YOUR_KEY'; // À configurer
 // ================================================================
 async function analyzeTicketAndMatch(ticketId, sujet, description, categorie) {
     try {
-        console.log('🤖 Analyse IA du ticket...', ticketId);
+        // console.log('🤖 Analyse IA du ticket...', ticketId);
         
         // 1. Récupérer toutes les solutions de la base
         const { data: solutions, error: solutionsError } = await window.supabaseClient
@@ -21,7 +21,7 @@ async function analyzeTicketAndMatch(ticketId, sujet, description, categorie) {
         if (solutionsError) throw solutionsError;
         
         if (!solutions || solutions.length === 0) {
-            console.log('📭 Aucune solution connue pour cette catégorie');
+            // console.log('📭 Aucune solution connue pour cette catégorie');
             return await startGuidedDiagnostic(ticketId, sujet, description, categorie);
         }
         
@@ -45,7 +45,7 @@ async function analyzeTicketAndMatch(ticketId, sujet, description, categorie) {
         // 4. Décider action selon confiance
         if (matchResult.confidence >= 0.8) {
             // Auto-résolution : Confiance élevée
-            console.log('✅ Solution trouvée (confiance ' + Math.round(matchResult.confidence * 100) + '%)');
+            // console.log('✅ Solution trouvée (confiance ' + Math.round(matchResult.confidence * 100) + '%)');
             await applyAutoSolution(ticketId, matchResult.solution, diagnostic.id);
             return {
                 type: 'auto-resolved',
@@ -55,7 +55,7 @@ async function analyzeTicketAndMatch(ticketId, sujet, description, categorie) {
             
         } else if (matchResult.confidence >= 0.5) {
             // Proposer solutions candidates
-            console.log('💡 Solutions possibles trouvées');
+            // console.log('💡 Solutions possibles trouvées');
             return {
                 type: 'suggestions',
                 solutions: matchResult.candidates,
@@ -64,7 +64,7 @@ async function analyzeTicketAndMatch(ticketId, sujet, description, categorie) {
             
         } else {
             // Lancer diagnostic guidé
-            console.log('🔍 Lancement diagnostic guidé');
+            // console.log('🔍 Lancement diagnostic guidé');
             return await startGuidedDiagnostic(ticketId, sujet, description, categorie);
         }
         
@@ -130,7 +130,7 @@ Réponds UNIQUEMENT en JSON avec cette structure:
         const data = await response.json();
         const result = JSON.parse(data.choices[0].message.content);
         
-        console.log('🎯 Matching result:', result);
+        // console.log('🎯 Matching result:', result);
         
         return {
             solution: result.best_match_index !== null ? solutions[result.best_match_index] : null,
@@ -241,7 +241,7 @@ L'équipe Support`;
         
         if (solutionError) throw solutionError;
         
-        console.log('✅ Auto-solution appliquée');
+        // console.log('✅ Auto-solution appliquée');
         
     } catch (error) {
         console.error('❌ Erreur application auto-solution:', error);
@@ -268,7 +268,7 @@ async function startGuidedDiagnostic(ticketId, sujet, description, categorie) {
         
         if (error) throw error;
         
-        console.log('🔍 Diagnostic guidé démarré');
+        // console.log('🔍 Diagnostic guidé démarré');
         
         return {
             type: 'guided-diagnostic',
@@ -397,4 +397,4 @@ window.SupportAI = {
     collectTechnicalContext
 };
 
-console.log('✅ Module Support IA chargé');
+// console.log('✅ Module Support IA chargé');

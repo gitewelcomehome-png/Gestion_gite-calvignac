@@ -5,7 +5,7 @@
 // ================================================================
 
 window.initAIPropositionsWidget = function() {
-    console.log('🤖 Initialisation Widget Propositions IA');
+    // console.log('🤖 Initialisation Widget Propositions IA');
 
     // Créer le HTML du widget
     const widgetHTML = `
@@ -147,7 +147,7 @@ window.refreshAIPropositions = async function() {
         }
 
         const posts = stratComplete.actions_reseaux || [];
-        console.log(`📥 ${posts.length} posts trouvés pour semaine ${strategy.semaine}`);
+        // console.log(`📥 ${posts.length} posts trouvés pour semaine ${strategy.semaine}`);
         
         if (posts.length === 0) {
             container.innerHTML = `
@@ -308,12 +308,12 @@ window.openPostDetails = function(index) {
 };
 
 window.acceptProposition = async function(propositionId, type) {
-    console.log('✓ Acceptation proposition:', propositionId);
+    // console.log('✓ Acceptation proposition:', propositionId);
     showToast(`Proposition acceptée !`, 'success');
 };
 
 window.rejectProposition = async function(propositionId) {
-    console.log('✕ Rejet proposition:', propositionId);
+    // console.log('✕ Rejet proposition:', propositionId);
     showToast('Proposition rejetée', 'success');
 };
 
@@ -344,11 +344,11 @@ function showToast(message, type = 'success') {
 // AUTO-INIT AU CHARGEMENT
 // ================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🤖 Widget IA Propositions chargé');
+    // console.log('🤖 Widget IA Propositions chargé');
     
     // Auto-refresh toutes les heures
     setInterval(() => {
-        console.log('🔄 Auto-refresh propositions IA');
+        // console.log('🔄 Auto-refresh propositions IA');
         window.refreshAIPropositions();
     }, 3600000); // 1h
 });

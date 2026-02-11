@@ -126,4 +126,4 @@ async function saveRegles() {
     showToast('✅ Règles enregistrées', 'success');
 }
 
-console.log('✅ Module calendrier-tarifs-simple chargé');
+// console.log('✅ Module calendrier-tarifs-simple chargé');

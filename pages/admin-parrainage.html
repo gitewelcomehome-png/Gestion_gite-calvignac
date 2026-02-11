@@ -112,7 +112,7 @@
         }
         
         .btn-create {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
             color: white;
             border: none;
             padding: 12px 24px;
@@ -228,7 +228,7 @@
         
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #06b6d4;
         }
         
         .form-textarea {
@@ -243,7 +243,7 @@
         }
         
         .btn-submit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
             color: white;
             border: none;
             padding: 12px 32px;
@@ -276,7 +276,7 @@
         
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #06b6d4 0%, #0891b2 100%);
             transition: width 0.3s;
         }
         
@@ -297,9 +297,6 @@
     <!-- Header -->
     <header class="admin-header">
         <div class="header-left">
-            <button onclick="window.location.href='admin-channel-manager.html'" style="background: transparent; border: none; cursor: pointer; padding: 8px;">
-                <i data-lucide="arrow-left" style="width: 20px; height: 20px; color: #64748b;"></i>
-            </button>
             <h1>
                 <i data-lucide="gift"></i>
                 Gestion Parrainage
@@ -314,6 +311,19 @@
     </header>
 
     <main class="admin-container">
+        <!-- Header structuré -->
+        <header class="page-header">
+            <div class="page-header__content">
+                <p class="page-subtitle">Campagnes de parrainage et statistiques</p>
+            </div>
+            <div class="page-header__actions">
+                <button class="btn btn--primary" onclick="alert('Fonctionnalité à venir')">
+                    <i data-lucide="plus"></i>
+                    Nouvelle Campagne
+                </button>
+            </div>
+        </header>
+        
         <!-- Tabs Navigation -->
         <section class="tabs-navigation">
             <div class="tabs-sidebar">
@@ -531,7 +541,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
             display: flex;
             align-items: center;
             justify-content: center;

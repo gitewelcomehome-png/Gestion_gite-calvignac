@@ -290,7 +290,7 @@ function attachRealtimeValidation(fieldId, ruleType, options = {}) {
                 this.value = this.value.substring(0, 100);
             }
             if (before !== this.value) {
-                console.log('🚫 Caractères invalides bloqués dans horaires');
+                // console.log('🚫 Caractères invalides bloqués dans horaires');
             }
         });
         field.addEventListener('keypress', function(e) {

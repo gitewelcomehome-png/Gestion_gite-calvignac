@@ -8,3 +8,5 @@ package-lock.json
 # 🔒 PHASE 2 SÉCURITÉ: Fichiers de configuration locale (contiennent les clés API)
 config.local.js
 .env.local
+.vercel
+.env*.local

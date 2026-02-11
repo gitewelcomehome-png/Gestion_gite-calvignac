@@ -4,7 +4,7 @@
 // Génération de posts sociaux, emails, blogs avec IA
 // ================================================================
 
-console.log('🚀 Script admin-content.js chargé');
+// console.log('🚀 Script admin-content.js chargé');
 
 // ================================================================
 // ÉTAT GLOBAL
@@ -51,7 +51,7 @@ const TEMPLATES = {
 // ================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📝 Initialisation Content IA');
+    // console.log('📝 Initialisation Content IA');
     
     lucide.createIcons();
     
@@ -284,7 +284,7 @@ async function generateContent() {
             
         } else {
             // ========== MODE LOCAL : SIMULATION ==========
-            console.log('⚠️ Mode simulation - Déployez sur Vercel pour utiliser les vraies APIs IA');
+            // console.log('⚠️ Mode simulation - Déployez sur Vercel pour utiliser les vraies APIs IA');
             content = simulateAIGeneration(type, subject, tone, keyPoints, cta, length);
         }
         
@@ -594,7 +594,7 @@ async function generateImage() {
         
         if (!isVercelDeployed) {
             // Mode simulation - afficher une image placeholder
-            console.log('⚠️ Mode simulation - Image placeholder affichée');
+            // console.log('⚠️ Mode simulation - Image placeholder affichée');
             currentGeneratedImage = 'https://via.placeholder.com/1024x1024/667eea/ffffff?text=Image+Simulee';
             document.getElementById('generatedImage').src = currentGeneratedImage;
             document.getElementById('imageResult').style.display = 'block';

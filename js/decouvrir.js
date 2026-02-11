@@ -724,7 +724,7 @@ async function afficherActivitesSurCarte(activites) {
 function genererGuidePDF() {
     showToast('📄 Génération du PDF en cours...', 'info');
     // TODO: Implémenter la génération PDF
-    console.log('Génération PDF pour', activitesCache.length, 'activités');
+    // console.log('Génération PDF pour', activitesCache.length, 'activités');
 }
 
 // ==================== HELPERS ====================
@@ -756,7 +756,7 @@ function showToast(message, type = 'info') {
             toast.style.display = 'none';
         }, 3000);
     } else {
-        console.log(`[${type.toUpperCase()}] ${message}`);
+        // console.log(`[${type.toUpperCase()}] ${message}`);
     }
 }
 

@@ -90,7 +90,39 @@ tar -xzf _backups/backup_complete_CURRENT.tar.gz -C .
 # Vider cache navigateur : Ctrl+Shift+R
 ```
 
+## � Backups Application Mobile iOS
+
+### Backup iOS fonctionnel
+- **Dossier** : `ios_app_backup_20260209_111050_WORKING/`
+- **Date** : 9 février 2026 - 11:10:50
+- **Status** : ✅ Testé et validé fonctionnel
+- **Documentation** : README_RESTAURATION.md + INVENTAIRE.md
+- **Script auto** : restore.sh
+
+### Restauration iOS
+```bash
+# Automatique
+bash _backups/ios_app_backup_20260209_111050_WORKING/restore.sh
+
+# Manuelle
+cd /workspaces/Gestion_gite-calvignac
+rm -rf ios_apple_app
+cp -r _backups/ios_app_backup_20260209_111050_WORKING ios_apple_app
+cd ios_apple_app
+npm install --legacy-peer-deps
+npx expo start --tunnel
+```
+
+### Pourquoi ce backup ?
+- ✅ État stable et fonctionnel après résolution de multiples erreurs
+- ✅ Toutes les dépendances aux bonnes versions
+- ✅ Configuration testée et validée
+- ✅ Permet rollback rapide en cas de régression
+
+---
+
 ## 📝 Historique
+- **9 février 2026** : Ajout backup application iOS fonctionnelle
 - **27 janvier 2026** : Mise en place backup centralisé
 - **Nettopage effectué** : Suppression 20+ fichiers CSS et dossiers obsolètes
 - **Migration archivée** : Lots 01-09 + tests déplacés vers `_archives/migrations/`

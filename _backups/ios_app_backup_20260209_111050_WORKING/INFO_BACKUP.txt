@@ -1,0 +1,65 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                  BACKUP APPLICATION iOS                          ║
+║             ÉTAT FONCTIONNEL VALIDÉ                              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📅 Date : 9 février 2026 - 11:10:50
+💾 Taille : 373 MB (avec node_modules)
+✅ Status : Testé et validé fonctionnel
+📱 Version : 1.0.0
+
+─────────────────────────────────────────────────────────────────
+
+📋 FICHIERS DE DOCUMENTATION :
+
+• README_RESTAURATION.md     → Guide complet de restauration
+• RESTAURATION_RAPIDE.md      → Commande rapide rollback
+• INVENTAIRE.md               → Liste complète du contenu
+• restore.sh                  → Script automatique de restauration
+
+─────────────────────────────────────────────────────────────────
+
+🚀 RESTAURATION EN UNE COMMANDE :
+
+bash restore.sh
+
+─────────────────────────────────────────────────────────────────
+
+✅ CE BACKUP CONTIENT :
+
+• État stable après corrections multiples erreurs
+• react-native-worklets v0.5.1 (version critique)
+• Fichier .env avec identifiants Supabase
+• Configuration Babel et TypeScript avec alias @
+• Tous les node_modules (pas besoin de réinstaller)
+• Application compilée et testée sur iPhone
+
+─────────────────────────────────────────────────────────────────
+
+⚠️ IMPORTANT :
+
+• Conservez ce backup précieusement
+• Ne pas modifier les fichiers dans ce dossier
+• Pour restaurer : utiliser restore.sh
+• En cas de doute : consulter README_RESTAURATION.md
+
+─────────────────────────────────────────────────────────────────
+
+🎯 TESTS VALIDÉS AVANT BACKUP :
+
+✅ npx expo start --tunnel → Démarre sans erreur
+✅ Tunnel ngrok → Connecté
+✅ QR Code → Généré et scannable
+✅ Compilation → 1471 modules OK
+✅ Expo Go iPhone → App chargée
+✅ Écran login → Affiché correctement
+✅ Authentification → Supabase connecté
+✅ Dashboard → Données chargées
+
+─────────────────────────────────────────────────────────────────
+
+Backup créé automatiquement par GitHub Copilot
+Projet : Gestion Gîte Calvignac
+Repository : gitewelcomehome-png/Gestion_gite-calvignac
+
+╚══════════════════════════════════════════════════════════════════╝

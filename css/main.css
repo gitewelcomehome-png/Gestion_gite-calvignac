@@ -191,11 +191,192 @@ html.theme-light {
     display: block;
 }
 
+/* Nom d'utilisateur */
+.user-display-name {
+    margin-right: 6px;
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: none !important;
+    color: white !important;
+}
+
+.user-display-name svg {
+    opacity: 0.85;
+    stroke: white !important;
+}
+
+/* Bouton notification - Caché par défaut */
+.notification-btn {
+    display: none !important;
+    opacity: 1 !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    padding: 8px 10px !important;
+    position: relative;
+}
+
+.notification-btn.has-notifications {
+    display: flex !important;
+}
+
+.notification-btn:hover {
+    background: rgba(239, 68, 68, 0.3) !important;
+}
+
+.notification-btn svg {
+    display: block;
+}
+
+.notification-badge {
+    animation: badge-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badge-pop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
+
 .ctrl-separator {
     width: 1px;
     height: 16px;
     background: rgba(255,255,255,0.2);
     margin: 0 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MENU ADMIN DROPDOWN MODERNE - LISTE CONTINUE
+   ═══════════════════════════════════════════════════════════════════════ */
+.admin-dropdown-modern {
+    display: none;
+    position: fixed;
+    top: 65px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 220px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+html.theme-dark .admin-dropdown-modern {
+    background: #1e293b;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-item-modern {
+    width: 100%;
+    padding: 14px 18px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    transition: all 0.15s ease;
+    position: relative;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.dropdown-item-modern:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item-modern:hover {
+    background: #f8fafc;
+}
+
+.dropdown-item-modern i {
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+
+.dropdown-item-modern:hover i {
+    opacity: 1;
+}
+
+/* Item header sans gradient, juste premier item */
+.dropdown-item-header {
+    background: #f8fafc;
+    color: #0891b2 !important;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dropdown-item-header:hover {
+    background: #f1f5f9;
+}
+
+.dropdown-item-header i {
+    opacity: 0.8 !important;
+    color: #0891b2;
+}
+
+/* Item danger (déconnexion) */
+.dropdown-item-danger {
+    color: #dc2626;
+}
+
+.dropdown-item-danger:hover {
+    background: #fef2f2;
+}
+
+.dropdown-item-danger i {
+    color: #dc2626;
+    opacity: 0.8;
+}
+
+/* Divider - presque invisible */
+.dropdown-divider-modern {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.04);
+    margin: 0;
+}
+
+/* Theme dark overrides */
+html.theme-dark .dropdown-item-modern {
+    color: #e2e8f0;
+    border-bottom-color: rgba(255, 255, 255, 0.04);
+}
+
+html.theme-dark .dropdown-item-modern:hover {
+    background: #334155;
+}
+
+html.theme-dark .dropdown-item-header {
+    background: #334155;
+    color: #22d3ee !important;
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html.theme-dark .dropdown-item-header:hover {
+    background: #475569;
+}
+
+html.theme-dark .dropdown-item-header i {
+    color: #22d3ee;
+}
+
+html.theme-dark .dropdown-item-danger {
+    color: #fca5a5;
+}
+
+html.theme-dark .dropdown-item-danger:hover {
+    background: #450a0a;
+}
+
+html.theme-dark .dropdown-item-danger i {
+    color: #fca5a5;
+}
+
+html.theme-dark .dropdown-divider-modern {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -311,17 +492,18 @@ html.theme-light {
 .icalou-icon {
     width: 56px;
     height: 56px;
-    background: #ffffff;
+    background: transparent;
     border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 10px 20px rgba(0, 82, 136, 0.3);
+    overflow: hidden;
 }
 
 .liveownerunit-logo {
-    width: 65%;
-    height: 65%;
+    width: 100%;
+    height: 100%;
 }
 
 .brand-identity {
@@ -5471,4 +5653,42 @@ html.style-apple .dashboard-graph-container-benefice .section-header {
     justify-content: center;
     width: 100%;
     margin-top: 20px;
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   INFO TOOLTIP - Icône d'information avec survol
+   ═══════════════════════════════════════════════════════════════════════ */
+.info-tooltip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3498db;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: help;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.info-tooltip:hover {
+    background: #2980b9;
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SELECT STATUT FISCAL - Options désactivées
+   ═══════════════════════════════════════════════════════════════════════ */
+#statut_fiscal option:disabled {
+    color: #999;
+    font-style: italic;
+    background: #f5f5f5;
+}
+
+select option:disabled {
+    color: #999 !important;
+    opacity: 0.6;
 }

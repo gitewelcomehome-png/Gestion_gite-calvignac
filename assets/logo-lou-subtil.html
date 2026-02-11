@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LiveOwnerUnit - Logos LOU Subtils</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #2d3561 0%, #c05c7e 100%);
+            padding: 60px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            margin-bottom: 50px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+        .logo-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .logo-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        }
+        .logo-preview {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .logo-preview svg {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            z-index: 1;
+        }
+        .logo-info h2 {
+            font-size: 1.5rem;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            background: linear-gradient(135deg, #2d3561 0%, #c05c7e 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .hint {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #856404;
+            margin-top: 10px;
+            border-left: 4px solid #ffc107;
+        }
+        .logo-info p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+        .logo-info strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>� LiveOwnerUnit - LOU Fusion</h1>
+        <p class="subtitle">L et U intégrés dans la maison centrale (O) - Design cyan moderne</p>
+        <div class="grid">
+
+            <!-- OPTION 1 - MAISON L-U -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #00D4FF 0%, #00A8CC 100%);">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Maison centrale (O) avec mur gauche épais (L) et base arrondie (U) -->
+                        <circle cx="50" cy="50" r="35" fill="white" opacity="0.2"/>
+                        <!-- Toit -->
+                        <path d="M50 20L25 42H75L50 20Z" fill="white"/>
+                        <!-- Mur gauche épais = L -->
+                        <rect x="22" y="42" width="8" height="38" fill="white"/>
+                        <!-- Murs droits -->
+                        <rect x="70" y="42" width="5" height="38" fill="white"/>
+                        <!-- Base en U (fondation arrondie) -->
+                        <path d="M30 78V82C30 85 38 88 50 88C62 88 70 85 70 82V78" fill="white"/>
+                        <rect x="30" y="42" width="40" height="36" fill="white" opacity="0.9"/>
+                        <!-- Porte -->
+                        <rect x="42" y="62" width="16" height="18" rx="2" fill="#00D4FF"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        🏠 Maison L-U
+                        <span class="badge">ARCHITECTURAL</span>
+                    </h2>
+                    <p><strong>Intégration :</strong> Mur gauche épais (L) + Base arrondie (U)</p>
+                    <p><strong>Effet :</strong> Structure visible, maison au centre</p>
+                    <div class="hint">💡 Le L forme le pilier gauche, le U la fondation</div>
+                </div>
+            </div>
+
+            <!-- OPTION 2 - PORTE L-U -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #00C2CB 0%, #005288 100%);">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Cercle O -->
+                        <circle cx="50" cy="52" r="33" fill="white"/>
+                        <!-- Maison -->
+                        <path d="M50 22L28 42V78H72V42L50 22Z" fill="url(#grad2)"/>
+                        <!-- Porte en forme de L inversé + U combinés -->
+                        <path d="M38 78V52H42V74H48V78H38Z" fill="white"/>
+                        <path d="M52 78V66C52 63 54 62 56 62C58 62 60 63 60 66V78" fill="white"/>
+                        <!-- Fenêtre -->
+                        <circle cx="50" cy="46" r="5" fill="white" opacity="0.7"/>
+                        <defs>
+                            <linearGradient id="grad2" x1="50" y1="22" x2="50" y2="78">
+                                <stop offset="0%" stop-color="#00D4FF"/>
+                                <stop offset="100%" stop-color="#00A8CC"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        🚪 Porte L-U
+                        <span class="badge">CRÉATIF</span>
+                    </h2>
+                    <p><strong>Intégration :</strong> Porte double formant L + U</p>
+                    <p><strong>Effet :</strong> Maison cyan avec ouvertures architecturées</p>
+                    <div class="hint">💡 Les 2 portes dessinent les lettres L et U</div>
+                </div>
+            </div>
+
+            <!-- OPTION 3 - FENÊTRES L-U -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #00D4FF 0%, #0099CC 100%);">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Maison cercle (O) -->
+                        <circle cx="50" cy="50" r="35" fill="white"/>
+                        <!-- Maison cyan -->
+                        <path d="M50 18L25 40V80H75V40L50 18Z" fill="#00D4FF"/>
+                        <!-- Fenêtre gauche en L -->
+                        <rect x="32" y="48" width="3" height="16" fill="white"/>
+                        <rect x="32" y="61" width="10" height="3" fill="white"/>
+                        <!-- Fenêtre droite en U -->
+                        <path d="M60 48V60C60 62 62 63 64 63C66 63 68 62 68 60V48" stroke="white" stroke-width="3" fill="none"/>
+                        <!-- Porte centrale -->
+                        <rect x="45" y="64" width="10" height="16" rx="1" fill="white"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        🪟 Fenêtres L-U
+                        <span class="badge">SUBTIL</span>
+                    </h2>
+                    <p><strong>Intégration :</strong> Fenêtres en forme de L et U</p>
+                    <p><strong>Effet :</strong> Maison cyan avec détails architecturaux</p>
+                    <div class="hint">💡 Les fenêtres dessinent discrètement L et U</div>
+                </div>
+            </div>
+
+            <!-- OPTION 4 - COLONNES L-U -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: white;">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Cercle O en outline -->
+                        <circle cx="50" cy="50" r="34" stroke="#00D4FF" stroke-width="2" fill="none"/>
+                        <!-- Toit -->
+                        <path d="M50 20L27 40H73L50 20Z" fill="#00D4FF"/>
+                        <!-- Colonne gauche (L) -->
+                        <rect x="30" y="40" width="6" height="35" fill="#00D4FF"/>
+                        <rect x="30" y="72" width="15" height="6" fill="#00D4FF"/>
+                        <!-- Corps maison -->
+                        <rect x="36" y="40" width="28" height="38" fill="#00D4FF" opacity="0.3"/>
+                        <!-- Arc U (entrée) -->
+                        <path d="M56 78V66C56 62 58 60 61 60C64 60 66 62 66 66V78" fill="#00D4FF"/>
+                        <!-- Fenêtre -->
+                        <circle cx="50" cy="52" r="6" fill="white"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        🏛️ Colonnes L-U
+                        <span class="badge">ÉLÉGANT</span>
+                    </h2>
+                    <p><strong>Intégration :</strong> Colonne gauche (L) + Arc d'entrée (U)</p>
+                    <p><strong>Effet :</strong> Architecture classique cyan modernisée</p>
+                    <div class="hint">💡 Style architectural avec pilier L et arcade U</div>
+                </div>
+            </div>
+
+            <!-- OPTION 5 - TOIT L-U -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #001F3F 0%, #003D5C 100%);">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Cercle O -->
+                        <circle cx="50" cy="50" r="35" fill="#00D4FF" opacity="0.15"/>
+                        <!-- Maison principale -->
+                        <path d="M50 20L28 42V78H72V78V42L50 20Z" fill="#00D4FF"/>
+                        <!-- Toit gauche plus long (L) -->
+                        <path d="M28 42L22 46V78" fill="#00D4FF" opacity="0.8"/>
+                        <!-- Toit arrondi/courbe à droite (U) -->
+                        <path d="M72 42Q78 50 78 62V78" fill="#00D4FF" opacity="0.8"/>
+                        <!-- Détails -->
+                        <rect x="44" y="60" width="12" height="18" rx="2" fill="white" opacity="0.9"/>
+                        <circle cx="50" cy="48" r="4" fill="white" opacity="0.8"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        🏔️ Toit L-U
+                        <span class="badge">MODERNE</span>
+                    </h2>
+                    <p><strong>Intégration :</strong> Extension gauche (L) + Courbe droite (U)</p>
+                    <p><strong>Effet :</strong> Architecture contemporaine asymétrique</p>
+                    <div class="hint">💡 Le toit intègre les formes L et U naturellement</div>
+                </div>
+            </div>
+
+            <!-- OPTION 6 - OUTLINE L-U -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #00D4FF 0%, #00BFFF 100%);">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Maison en outline blanc (O) -->
+                        <circle cx="50" cy="50" r="35" stroke="white" stroke-width="3" fill="none"/>
+                        <path d="M50 20L27 40V78H73V40L50 20Z" stroke="white" stroke-width="4" fill="none"/>
+                        <!-- L intégré (mur gauche renforcé) -->
+                        <path d="M27 40V78H35" stroke="white" stroke-width="8" stroke-linecap="round"/>
+                        <!-- U intégré (base arrondie) -->
+                        <path d="M40 78H60" stroke="white" stroke-width="10" stroke-linecap="round"/>
+                        <path d="M42 72V76C42 77 45 78 50 78C55 78 58 77 58 76V72" stroke="white" stroke-width="4"/>
+                        <!-- Porte -->
+                        <rect x="45" y="62" width="10" height="16" rx="1" stroke="white" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        ✏️ Outline L-U
+                        <span class="badge">ÉPURÉ</span>
+                    </h2>
+                    <p><strong>Intégration :</strong> Traits épais sur L (gauche) et U (base)</p>
+                    <p><strong>Effet :</strong> Style line-art blanc sur cyan</p>
+                    <div class="hint">💡 Les traits renforcés forment naturellement L et U</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

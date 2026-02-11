@@ -790,7 +790,7 @@ async function loadInfosGiteFromSupabase(giteName) {
         
         // Pas de données trouvées = OK
         if (!data) {
-            console.log(`ℹ️ Aucune donnée pour ${giteName} - Création à la première sauvegarde`);
+            // console.log(`ℹ️ Aucune donnée pour ${giteName} - Création à la première sauvegarde`);
             return null;
         }
         
@@ -1026,24 +1026,24 @@ async function generateGitesButtons() {
         // Nettoyer tous les styles inline des cards pour laisser le CSS gérer
         setTimeout(() => {
             const formCards = document.querySelectorAll('#gite-content-wrapper .infos-card');
-            console.log(`🧹 Nettoyage de ${formCards.length} infos-cards`);
+            // console.log(`🧹 Nettoyage de ${formCards.length} infos-cards`);
             formCards.forEach((card, idx) => {
                 const oldStyle = card.getAttribute('style');
                 if (oldStyle) {
-                    console.log(`  Card ${idx}: avait style="${oldStyle}"`);
+                    // console.log(`  Card ${idx}: avait style="${oldStyle}"`);
                 }
                 card.removeAttribute('style');
             });
             const cardHeaders = document.querySelectorAll('#gite-content-wrapper .infos-card-header');
-            console.log(`🧹 Nettoyage de ${cardHeaders.length} headers`);
+            // console.log(`🧹 Nettoyage de ${cardHeaders.length} headers`);
             cardHeaders.forEach((header, idx) => {
                 const oldStyle = header.getAttribute('style');
                 if (oldStyle) {
-                    console.log(`  Header ${idx}: avait style="${oldStyle}"`);
+                    // console.log(`  Header ${idx}: avait style="${oldStyle}"`);
                 }
                 header.removeAttribute('style');
             });
-            console.log('✅ Nettoyage terminé - CSS prend le contrôle');
+            // console.log('✅ Nettoyage terminé - CSS prend le contrôle');
         }, 100);
         
         // Charger les données du premier gîte
@@ -1116,24 +1116,24 @@ window.selectGiteFromDropdown = async function(giteName) {
     // Nettoyer tous les styles inline des cards pour laisser le CSS gérer
     setTimeout(() => {
         const formCards = document.querySelectorAll('#gite-content-wrapper .infos-card');
-        console.log(`🧹 Nettoyage de ${formCards.length} infos-cards`);
+        // console.log(`🧹 Nettoyage de ${formCards.length} infos-cards`);
         formCards.forEach((card, idx) => {
             const oldStyle = card.getAttribute('style');
             if (oldStyle) {
-                console.log(`  Card ${idx}: avait style="${oldStyle}"`);
+                // console.log(`  Card ${idx}: avait style="${oldStyle}"`);
             }
             card.removeAttribute('style');
         });
         const cardHeaders = document.querySelectorAll('#gite-content-wrapper .infos-card-header');
-        console.log(`🧹 Nettoyage de ${cardHeaders.length} headers`);
+        // console.log(`🧹 Nettoyage de ${cardHeaders.length} headers`);
         cardHeaders.forEach((header, idx) => {
             const oldStyle = header.getAttribute('style');
             if (oldStyle) {
-                console.log(`  Header ${idx}: avait style="${oldStyle}"`);
+                // console.log(`  Header ${idx}: avait style="${oldStyle}"`);
             }
             header.removeAttribute('style');
         });
-        console.log('✅ Nettoyage terminé - CSS prend le contrôle');
+        // console.log('✅ Nettoyage terminé - CSS prend le contrôle');
     }, 100);
     
     // Charger les données du nouveau gîte (préserve la langue active)
@@ -1334,13 +1334,13 @@ async function sauvegarderDonneesInfos() {
     const champsFR = Object.keys(formData).filter(k => !k.includes('_en') && formData[k] && formData[k].trim() !== '');
     const champsEN = Object.keys(formData).filter(k => k.includes('_en') && formData[k] && formData[k].trim() !== '');
     
-    console.log(`💾 Sauvegarde ${currentGiteInfos}:`, {
-        champsFR: champsFR.length,
-        champsEN: champsEN.length,
-        total: Object.keys(formData).length,
-        exemplesFR: champsFR.slice(0, 3),
-        exemplesEN: champsEN.slice(0, 3)
-    });
+    // console.log(`💾 Sauvegarde ${currentGiteInfos}:`, {
+    //     champsFR: champsFR.length,
+    //     champsEN: champsEN.length,
+    //     total: Object.keys(formData).length,
+    //     exemplesFR: champsFR.slice(0, 3),
+    //     exemplesEN: champsEN.slice(0, 3)
+    // });
     
     // Détecter si l'adresse a changé
     const addressChanged = formData.adresse && formData.adresse.trim() !== initialAddress.trim();
@@ -1349,9 +1349,9 @@ async function sauvegarderDonneesInfos() {
     // 1. L'adresse est renseignée ET pas de GPS
     // 2. OU si l'adresse a changé
     if (formData.adresse && (!formData.gpsLat || !formData.gpsLon || addressChanged)) {
-        console.log('📍 Géocodage automatique de l\'adresse...');
+        // console.log('📍 Géocodage automatique de l\'adresse...');
         if (addressChanged) {
-            console.log('🔄 Adresse modifiée détectée');
+            // console.log('🔄 Adresse modifiée détectée');
         }
         const coords = await geocodeAddressAuto(formData.adresse);
         if (coords) {
@@ -1408,7 +1408,13 @@ async function chargerDonneesInfos() {
     let champsRemplis = 0;
     let champsNonTrouves = [];
     
+    // Champs système à ignorer (pas d'affichage dans le formulaire)
+    const champsSystemeIgnores = ['dateModification', 'created_at', 'updated_at', 'id', 'user_id'];
+    
     Object.keys(data).forEach(key => {
+        // Ignorer les champs système
+        if (champsSystemeIgnores.includes(key)) return;
+        
         // Essayer avec préfixe "infos_"
         let element = document.getElementById('infos_' + key);
         // Si pas trouvé, essayer sans préfixe pour les champs _en
@@ -1426,8 +1432,8 @@ async function chargerDonneesInfos() {
         }
     });
     
-    console.log(`✅ ${champsRemplis} champs remplis (avec valeur)`);
-    console.log(`📊 Total clés dans data: ${Object.keys(data).length}`);
+    // console.log(`✅ ${champsRemplis} champs remplis (avec valeur)`);
+    // console.log(`📊 Total clés dans data: ${Object.keys(data).length}`);
     
     if (champsNonTrouves.length > 0) {
         console.warn(`⚠️ ${champsNonTrouves.length} champs NON TROUVÉS dans le HTML:`, champsNonTrouves);
@@ -1435,7 +1441,7 @@ async function chargerDonneesInfos() {
     
     // Debug : afficher quelques exemples de champs EN chargés
     const exemplesEN = Object.keys(data).filter(k => k.includes('_en')).slice(0, 5);
-    console.log(`🔍 Exemples champs EN chargés:`, exemplesEN.map(k => `${k}="${data[k]?.substring(0, 30)}..."`));
+    // console.log(`🔍 Exemples champs EN chargés:`, exemplesEN.map(k => `${k}="${data[k]?.substring(0, 30)}..."`));
     
     // Charger les coordonnées depuis la table gites si non présentes
     if (!data.gpsLat || !data.gpsLon) {
@@ -1539,7 +1545,7 @@ function attachChangeListeners() {
                 // Débounce pour éviter trop de sauvegardes
                 clearTimeout(saveTimeout);
                 saveTimeout = setTimeout(async () => {
-                    console.log('💾 Sauvegarde automatique...');
+                    // console.log('💾 Sauvegarde automatique...');
                     await sauvegarderDonneesInfos();
                     window.isDirty = false;
                     captureFormState();
@@ -1892,7 +1898,7 @@ async function geocodeAddressAuto(address) {
     
     if (!address || !address.trim()) return;
     
-    console.log(`🔍 Recherche GPS pour: "${address}"`);
+    // console.log(`🔍 Recherche GPS pour: "${address}"`);
     
     // Ajouter un délai pour respecter la limite Nominatim (1 req/sec)
     await new Promise(resolve => setTimeout(resolve, 1100));
@@ -1918,7 +1924,7 @@ async function geocodeAddressAuto(address) {
             const encodedAddress = encodeURIComponent(variant);
             const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=3&addressdetails=1`;
             
-            console.log(`📡 Tentative: "${variant}"`);
+            // console.log(`📡 Tentative: "${variant}"`);
             
             const response = await fetch(url, {
                 headers: {
@@ -1933,13 +1939,13 @@ async function geocodeAddressAuto(address) {
             
             const data = await response.json();
             
-            console.log(`📊 Résultats: ${data.length}`, data);
+            // console.log(`📊 Résultats: ${data.length}`, data);
             
             if (data && data.length > 0) {
                 const lat = parseFloat(data[0].lat).toFixed(8);
                 const lon = parseFloat(data[0].lon).toFixed(8);
                 
-                console.log(`✅ Coordonnées: ${lat}, ${lon} (${data[0].display_name})`);
+                // console.log(`✅ Coordonnées: ${lat}, ${lon} (${data[0].display_name})`);
                 
                 if (latField) latField.value = lat;
                 if (lonField) lonField.value = lon;
@@ -1987,7 +1993,7 @@ window.toggleLanguageInfos = async function() {
     if (currentLangInfos === 'en') {
         const needsTranslation = checkIfNeedsTranslation();
         if (needsTranslation) {
-            console.log('🌍 Champs EN vides détectés → Traduction automatique...');
+            // console.log('🌍 Champs EN vides détectés → Traduction automatique...');
             if (typeof showNotification === 'function') {
                 showNotification('🌍 Traduction automatique en cours...', 'info', 2000);
             }
@@ -2041,13 +2047,13 @@ function applyLanguageDisplay() {
     const firstCard = allCards[0]; // Card avec les boutons de gîtes
     const frenchCards = allCards.filter(c => c !== firstCard && c !== englishCard);
     
-    console.log('🔍 DEBUG applyLanguageDisplay:', {
-        langue: currentLangInfos,
-        totalCards: allCards.length,
-        frenchCards: frenchCards.length,
-        englishCard: englishCard ? 'trouvée' : 'MANQUANTE',
-        englishCardVisible: englishCard ? window.getComputedStyle(englishCard).display : 'N/A'
-    });
+    // console.log('🔍 DEBUG applyLanguageDisplay:', {
+    //     langue: currentLangInfos,
+    //     totalCards: allCards.length,
+    //     frenchCards: frenchCards.length,
+    //     englishCard: englishCard ? 'trouvée' : 'MANQUANTE',
+    //     englishCardVisible: englishCard ? window.getComputedStyle(englishCard).display : 'N/A'
+    // });
     
     if (currentLangInfos === 'en') {
         // Mode ANGLAIS : afficher la card EN, cacher les cards FR
@@ -2067,7 +2073,7 @@ function applyLanguageDisplay() {
             cachees++;
         });
         
-        console.log(`🇬🇧 Mode EN activé : ${cachees} cards FR cachées, 1 card EN affichée`);
+        // console.log(`🇬🇧 Mode EN activé : ${cachees} cards FR cachées, 1 card EN affichée`);
         
     } else {
         // Mode FRANÇAIS : cacher la card EN, afficher toutes les cards FR
@@ -2087,7 +2093,7 @@ function applyLanguageDisplay() {
             affichees++;
         });
         
-        console.log(`🇫🇷 Mode FR activé : ${affichees} cards FR affichées, 1 card EN cachée`);
+        // console.log(`🇫🇷 Mode FR activé : ${affichees} cards FR affichées, 1 card EN cachée`);
     }
 }
 
@@ -2170,7 +2176,7 @@ function attachAutoTranslation() {
         }
     });
     
-    console.log(`✅ Traduction automatique FR → EN activée sur ${champsAvecTraduction} champs`);
+    // console.log(`✅ Traduction automatique FR → EN activée sur ${champsAvecTraduction} champs`);
     if (champsSansCorrespondanceEN.length > 0) {
         console.warn(`⚠️ ${champsSansCorrespondanceEN.length} champs FR sans champ EN:`, champsSansCorrespondanceEN);
     }
@@ -2234,7 +2240,7 @@ window.translateAllFields = async function() {
         }
         
         // 🔥 SAUVEGARDE AUTOMATIQUE après traduction
-        console.log('💾 Sauvegarde automatique après traduction...');
+        // console.log('💾 Sauvegarde automatique après traduction...');
         await sauvegarderDonneesInfos();
         
         if (typeof showNotification === 'function') {

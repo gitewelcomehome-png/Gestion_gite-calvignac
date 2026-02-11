@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     const { action, type, subject, tone, keyPoints, cta, length, model } = req.body;
 
     // DEBUG: Log des variables d'environnement
-    console.log('🔍 DEBUG ENV:', {
+    // console.log('🔍 DEBUG ENV:', {
       hasSupabaseUrl: !!process.env.SUPABASE_URL,
       hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
       hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
@@ -82,7 +82,7 @@ export default async function handler(req, res) {
     // PROPOSITIONS QUOTIDIENNES IA
     // ================================================================
     if (action === 'generate-daily-propositions') {
-      console.log('🚀 Génération propositions quotidiennes...');
+      // console.log('🚀 Génération propositions quotidiennes...');
       
       const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
       
@@ -93,8 +93,8 @@ export default async function handler(req, res) {
         });
       }
 
-      console.log('✅ Anthropic API key présente');
-      console.log('🔑 API Key format:', {
+      // console.log('✅ Anthropic API key présente');
+      // console.log('🔑 API Key format:', {
         length: ANTHROPIC_API_KEY.length,
         starts: ANTHROPIC_API_KEY.substring(0, 7),
         valid_format: ANTHROPIC_API_KEY.startsWith('sk-ant-')
@@ -117,7 +117,7 @@ export default async function handler(req, res) {
         });
       }
 
-      console.log('✅ Variables Supabase présentes');
+      // console.log('✅ Variables Supabase présentes');
 
       const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -203,7 +203,7 @@ Réponds UNIQUEMENT avec :
         });
       }
 
-      console.log('✅ Réponse Claude reçue');
+      // console.log('✅ Réponse Claude reçue');
 
       const result = await response.json();
       const content = result.content[0].text;
@@ -420,7 +420,7 @@ Image description: ${prompt}`;
             }
           } catch (e) {
             // Si traduction échoue, utiliser le prompt original
-            console.log('Translation failed, using original prompt:', e.message);
+            // console.log('Translation failed, using original prompt:', e.message);
           }
         }
 
@@ -766,7 +766,7 @@ Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
       let response, data, content;
 
       if (useOpenAI) {
-        console.log('🤖 Utilisation OpenAI GPT-4o');
+        // console.log('🤖 Utilisation OpenAI GPT-4o');
         response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -796,7 +796,7 @@ Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
         content = data.choices[0].message.content;
 
       } else {
-        console.log('🤖 Utilisation Claude Sonnet 4.5');
+        // console.log('🤖 Utilisation Claude Sonnet 4.5');
         response = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
@@ -825,7 +825,7 @@ Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
       }
       
       // LOG BRUT pour debug
-      console.log('🔍 RÉPONSE BRUTE CLAUDE:', content.substring(0, 500));
+      // console.log('🔍 RÉPONSE BRUTE CLAUDE:', content.substring(0, 500));
       
       let cleanJSON = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       
@@ -1010,7 +1010,7 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
 
             if (req.body.useOpenAI) {
                 // OpenAI avec timeout
-                console.log('🤖 Appel OpenAI GPT-4o...');
+                // console.log('🤖 Appel OpenAI GPT-4o...');
                 
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
@@ -1047,7 +1047,7 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
                         throw new Error('OpenAI: Réponse vide');
                     }
                     
-                    console.log('✅ Réponse OpenAI reçue, parsing JSON...');
+                    // console.log('✅ Réponse OpenAI reçue, parsing JSON...');
                     plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
                     
                 } catch (fetchError) {
@@ -1060,7 +1060,7 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
 
             } else {
                 // Claude
-                console.log('🤖 Appel Claude Sonnet...');
+                // console.log('🤖 Appel Claude Sonnet...');
                 const response = await fetch('https://api.anthropic.com/v1/messages', {
                     method: 'POST',
                     headers: {
@@ -1089,7 +1089,7 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
                     throw new Error('Claude: Réponse vide');
                 }
                 
-                console.log('✅ Réponse Claude reçue, parsing JSON...');
+                // console.log('✅ Réponse Claude reçue, parsing JSON...');
                 plan = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
             }
 
@@ -1097,7 +1097,7 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
                 throw new Error('Format de plan invalide: etapes manquant');
             }
 
-            console.log(`✅ Plan généré avec ${plan.etapes.length} étapes`);
+            // console.log(`✅ Plan généré avec ${plan.etapes.length} étapes`);
             return res.json({ success: true, plan });
             
         } catch (error) {
@@ -1127,9 +1127,9 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
       try {
         const configPath = path.join(process.cwd(), 'config', 'PROMPT_CLAUDE_BASE.md');
         promptConfig = fs.readFileSync(configPath, 'utf-8');
-        console.log('✅ Configuration prompt chargée depuis config/PROMPT_CLAUDE_BASE.md');
+        // console.log('✅ Configuration prompt chargée depuis config/PROMPT_CLAUDE_BASE.md');
       } catch (err) {
-        console.log('⚠️ Fichier config prompt non trouvé, utilisation prompt par défaut');
+        // console.log('⚠️ Fichier config prompt non trouvé, utilisation prompt par défaut');
       }
 
       // Récupérer règles éthiques depuis DB
@@ -1147,7 +1147,7 @@ Fournis **uniquement le JSON**, sans texte avant/après.`;
           ).join('\n\n')}`;
         }
       } catch (err) {
-        console.log('⚠️ Règles éthiques non chargées (table peut-être pas créée)');
+        // console.log('⚠️ Règles éthiques non chargées (table peut-être pas créée)');
       }
 
       // Récupérer l'historique des actions archivées avec métriques
@@ -1186,7 +1186,7 @@ ${topPerformers.map(a => {
 ⚠️ ADAPTE la nouvelle stratégie en fonction de ces performances réelles !`;
         }
       } catch (err) {
-        console.log('⚠️ Pas d\'historique disponible (normal si première utilisation):', err.message);
+        // console.log('⚠️ Pas d\'historique disponible (normal si première utilisation):', err.message);
       }
 
       // Récupérer feedback précédents pour apprentissage
@@ -1207,7 +1207,7 @@ ${topPerformers.map(a => {
           }
         }
       } catch (err) {
-        console.log('⚠️ Feedback non chargé');
+        // console.log('⚠️ Feedback non chargé');
       }
 
       const planPrompt = `🎯 RÔLE : Directeur Marketing Growth de LiveOwnerUnit - SaaS Gestion Locative Premium

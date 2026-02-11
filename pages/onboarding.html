@@ -628,7 +628,7 @@
                     try {
                         const referralResult = await registerReferral(email, currentUser.id);
                         if (referralResult?.referral) {
-                            console.log('🎉 Parrainage enregistré avec succès !');
+                            // console.log('🎉 Parrainage enregistré avec succès !');
                         }
                     } catch (referralError) {
                         console.error('⚠️ Erreur parrainage (non bloquante):', referralError);

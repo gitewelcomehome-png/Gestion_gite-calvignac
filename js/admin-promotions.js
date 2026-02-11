@@ -4,7 +4,7 @@
 // Gestion CRUD des promotions avec tracking ROI
 // ================================================================
 
-console.log('🚀 Script admin-promotions.js chargé');
+// console.log('🚀 Script admin-promotions.js chargé');
 
 // ================================================================
 // ÉTAT GLOBAL
@@ -18,7 +18,7 @@ let currentPromoId = null;
 // ================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📋 Initialisation page promotions');
+    // console.log('📋 Initialisation page promotions');
     
     await loadPromotions();
     await loadStats();
@@ -43,7 +43,7 @@ async function loadPromotions() {
         allPromotions = promotions || [];
         renderPromotions(allPromotions);
         
-        console.log('✅ Promotions chargées:', allPromotions.length);
+        // console.log('✅ Promotions chargées:', allPromotions.length);
     } catch (error) {
         console.error('❌ Erreur chargement promotions:', error);
         showToast('Erreur de chargement', 'error');
@@ -94,7 +94,7 @@ async function loadStats() {
             kpiROIEl.style.color = '#f44336';
         }
         
-        console.log('✅ Stats chargées:', { promosActives, utilisations, coutTotal, caGenere, roi });
+        // console.log('✅ Stats chargées:', { promosActives, utilisations, coutTotal, caGenere, roi });
     } catch (error) {
         console.error('❌ Erreur chargement stats:', error);
     }

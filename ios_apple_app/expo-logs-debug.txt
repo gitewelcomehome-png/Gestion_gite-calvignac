@@ -1,0 +1,612 @@
+env: load .env
+env: export EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY
+Starting project at /workspaces/Gestion_gite-calvignac/ios_apple_app
+Starting Metro Bundler
+Tunnel connected.
+Tunnel ready.
+The following packages should be updated for best compatibility with the installed expo version:
+  @react-native-picker/picker@2.11.4 - expected version: 2.11.1
+Your project may not work correctly until you install the expected versions of the packages.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 1956ms index.ts (1478 modules)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...), test liste (a4001e4d...)
+ LOG  📋 Liste sélectionnée: liste 2
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...), test liste (a4001e4d...)
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  ✅ 2 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...), test liste (a4001e4d...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  ✅ 2 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...), test liste (a4001e4d...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 58ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  ✅ 2 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...), test liste (a4001e4d...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...), test liste (a4001e4d...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ ERROR  [ReferenceError: Property 'Picker' doesn't exist] 
+
+Code: shopping.tsx
+[0m [90m 347 |[39m               [33m<[39m[33mThemedText[39m style[33m=[39m{styles[33m.[39mlabel}[33m>[39m📋 [33mListe[39m de courses ({lists[33m.[39mlength} disponible(s))[33m<[39m[33m/[39m[33mThemedText[39m[33m>[39m
+ [90m 348 |[39m               [33m<[39m[33mView[39m style[33m=[39m{styles[33m.[39mpickerContainer}[33m>[39m
+[31m[1m>[22m[39m[90m 349 |[39m                 [33m<[39m[33mPicker[39m
+ [90m     |[39m                  [31m[1m^[22m[39m
+ [90m 350 |[39m                   selectedValue[33m=[39m{currentListId}
+ [90m 351 |[39m                   onValueChange[33m=[39m{(itemValue) [33m=>[39m {
+ [90m 352 |[39m                     console[33m.[39mlog([32m'📋 Sélection liste:'[39m[33m,[39m itemValue)[33m;[39m[0m
+Call Stack
+  ShoppingScreen (app/shopping.tsx:349:18) 
+
+Code: _layout.tsx
+[0m [90m 50 |[39m       [33m<[39m[33mAuthProvider[39m[33m>[39m
+ [90m 51 |[39m         [33m<[39m[33mAuthGate[39m[33m>[39m
+[31m[1m>[22m[39m[90m 52 |[39m           [33m<[39m[33mStack[39m screenOptions[33m=[39m{{ headerShown[33m:[39m [36mfalse[39m }}[33m>[39m
+ [90m    |[39m           [31m[1m^[22m[39m
+ [90m 53 |[39m             [33m<[39m[33mStack[39m[33m.[39m[33mScreen[39m name[33m=[39m[32m"(auth)"[39m [33m/[39m[33m>[39m
+ [90m 54 |[39m             [33m<[39m[33mStack[39m[33m.[39m[33mScreen[39m name[33m=[39m[32m"(tabs)"[39m [33m/[39m[33m>[39m
+ [90m 55 |[39m           [33m<[39m[33m/[39m[33mStack[39m[33m>[39m[0m
+Call Stack
+  RootLayout (app/_layout.tsx:52:11)
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 82ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...), test liste (a4001e4d...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  📋 Sélection liste: test liste
+ LOG  📍 Sélection lieu: brico dépot
+ WARN  ⚠️ Trajet non enregistré (table manquante?): {"code": "PGRST204", "details": null, "hint": null, "message": "Could not find the 'annee' column of 'km_trajets' in the schema cache"}
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  ✅ 1 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ ERROR  SyntaxError: /workspaces/Gestion_gite-calvignac/ios_apple_app/app/shopping.tsx: Missing catch or finally clause. (259:12)
+
+  257 |           text: 'Valider',
+  258 |           onPress: async () => {
+> 259 |             try {
+      |             ^
+  260 |               console.log('📝 Étape 1: Archivage de la liste...');
+  261 |               
+  262 |               // 1. Archiver la liste
+    at toParseError (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parse-error.ts:95:45)
+    at TypeScriptParserMixin.raise (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/tokenizer/index.ts:1504:19)
+    at TypeScriptParserMixin.parseTryStatement (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/statement.ts:1236:12)
+    at TypeScriptParserMixin.parseStatementContent (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/statement.ts:549:21)
+    at TypeScriptParserMixin.parseStatementContent (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/plugins/typescript/index.ts:3220:20)
+    at TypeScriptParserMixin.parseStatementLike (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/statement.ts:482:17)
+    at TypeScriptParserMixin.parseStatementListItem (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/statement.ts:431:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+    at TypeScriptParserMixin.parseBlockBody (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+    at TypeScriptParserMixin.parseBlock (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+    at TypeScriptParserMixin.parseFunctionBody (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:2618:24)
+    at TypeScriptParserMixin.parseArrowExpression (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:2559:10)
+    at TypeScriptParserMixin.parseAsyncArrowFromCallExpression (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:1067:10)
+    at TypeScriptParserMixin.parseAsyncArrowFromCallExpression (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/plugins/typescript/index.ts:3724:20)
+    at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:942:27)
+    at TypeScriptParserMixin.parseSubscript (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:804:19)
+    at TypeScriptParserMixin.parseSubscript (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/plugins/typescript/index.ts:2809:20)
+    at TypeScriptParserMixin.parseSubscripts (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:763:19)
+    at TypeScriptParserMixin.parseExprSubscripts (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:748:17)
+    at TypeScriptParserMixin.parseUpdate (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:721:21)
+    at TypeScriptParserMixin.parseMaybeUnary (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:683:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/plugins/typescript/index.ts:3893:20)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:417:14)
+    at TypeScriptParserMixin.parseExprOps (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:429:23)
+    at TypeScriptParserMixin.parseMaybeConditional (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:384:23)
+    at TypeScriptParserMixin.parseMaybeAssign (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+    at TypeScriptParserMixin.parseMaybeAssign (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/plugins/typescript/index.ts:3764:22)
+    at callback (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:257:12)
+    at TypeScriptParserMixin.allowInAnd (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:3194:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:256:17)
+    at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:3308:17)
+    at TypeScriptParserMixin.parseObjectProperty (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:2325:16)
+    at TypeScriptParserMixin.parseObjPropValue (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:2388:12)
+    at TypeScriptParserMixin.parseObjPropValue (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/plugins/typescript/index.ts:3675:20)
+    at TypeScriptParserMixin.parsePropertyDefinition (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:2228:17)
+    at TypeScriptParserMixin.parseObjectLike (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:2095:21)
+    at TypeScriptParserMixin.parseExprAtom (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:1181:21)
+    at TypeScriptParserMixin.parseExprAtom (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)
+    at TypeScriptParserMixin.parseExprSubscripts (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:742:23)
+    at TypeScriptParserMixin.parseUpdate (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:721:21)
+    at TypeScriptParserMixin.parseMaybeUnary (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:683:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/plugins/typescript/index.ts:3893:20)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:417:14)
+    at TypeScriptParserMixin.parseExprOps (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:429:23)
+    at TypeScriptParserMixin.parseMaybeConditional (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:384:23)
+    at TypeScriptParserMixin.parseMaybeAssign (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+    at TypeScriptParserMixin.parseMaybeAssign (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/plugins/typescript/index.ts:3764:22)
+    at callback (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:257:12)
+    at TypeScriptParserMixin.allowInAnd (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:3194:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (/workspaces/Gestion_gite-calvignac/ios_apple_app/node_modules/@babel/parser/src/parser/expression.ts:256:17)
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  ✅ 1 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 76ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  ✅ 1 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  ✅ 1 liste(s) chargée(s)
+ LOG    → Listes trouvées: liste 2 (90a9b1fb...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  📋 Sélection liste: liste 2
+ LOG  📍 Sélection lieu: brico dépot
+ LOG  🚀 DÉBUT VALIDATION
+ LOG    → Liste: liste 2
+ LOG    → Lieu: brico dépot
+ LOG    → Distance A/R: 48 km
+ LOG  📝 Étape 1: Archivage de la liste...
+ LOG  ✅ Liste archivée
+ LOG  📝 Étape 2: Ajout du trajet kilométrique...
+ LOG  📊 Données trajet: {
+  "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814",
+  "annee": 2026,
+  "date_trajet": "2026-02-09",
+  "type_trajet": "courses",
+  "motif": "Courses - liste 2",
+  "lieu_depart": "Domicile",
+  "lieu_arrivee": "brico dépot",
+  "gite_id": null,
+  "distance_aller": 24,
+  "aller_retour": true,
+  "distance_totale": 48,
+  "reservation_id": null,
+  "auto_genere": false,
+  "notes": "Liste: liste 2"
+}
+ ERROR  ❌ Erreur insertion trajet: {"code": "PGRST204", "details": null, "hint": null, "message": "Could not find the 'annee' column of 'km_trajets' in the schema cache"} 
+
+Code: shopping.tsx
+[0m [90m 306 |[39m                   console[33m.[39mwarn([32m'⚠️ Table km_trajets non créée'[39m)[33m;[39m
+ [90m 307 |[39m                 } [36melse[39m {
+[31m[1m>[22m[39m[90m 308 |[39m                   console[33m.[39merror([32m'❌ Erreur insertion trajet:'[39m[33m,[39m trajetError)[33m;[39m
+ [90m     |[39m                                [31m[1m^[22m[39m
+ [90m 309 |[39m                   [36mthrow[39m trajetError[33m;[39m
+ [90m 310 |[39m                 }
+ [90m 311 |[39m               } [36melse[39m {[0m
+Call Stack
+  onPress (app/shopping.tsx:308:32)
+ ERROR  ❌ ERREUR VALIDATION COMPLÈTE: {"code": "PGRST204", "details": null, "hint": null, "message": "Could not find the 'annee' column of 'km_trajets' in the schema cache"} 
+
+Code: shopping.tsx
+[0m [90m 326 |[39m               )[33m;[39m
+ [90m 327 |[39m             } [36mcatch[39m (err) {
+[31m[1m>[22m[39m[90m 328 |[39m               console[33m.[39merror([32m'❌ ERREUR VALIDATION COMPLÈTE:'[39m[33m,[39m err)[33m;[39m
+ [90m     |[39m                            [31m[1m^[22m[39m
+ [90m 329 |[39m               [33mAlert[39m[33m.[39malert([32m'Erreur'[39m[33m,[39m [32m'Impossible de valider la liste.'[39m)[33m;[39m
+ [90m 330 |[39m             }
+ [90m 331 |[39m           }[33m,[39m[0m
+Call Stack
+  onPress (app/shopping.tsx:328:28)
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  ✅ 0 liste(s) chargée(s)
+ WARN  ⚠️ Aucune liste trouvée pour user_id: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 0 liste(s) chargée(s)
+ WARN  ⚠️ Aucune liste trouvée pour user_id: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 128ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Début chargement dashboard
+ LOG  🏠 [DASHBOARD] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🏠 [DASHBOARD] Résultats requêtes: {"cleanings_data": 2, "errors_count": 0, "reservations_data": 3}
+ LOG  ✅ [DASHBOARD] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  🏠 [DASHBOARD] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  
+=== 🔍 SHOPPING SCREEN DEBUG ===
+ LOG  User connecté: OUI
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  Supabase initialisé: OUI
+ LOG  ================================
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  
+🔄 CHARGEMENT LIEUX FAVORIS...
+ LOG    → User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  ✅ 2 lieu(x) chargé(s)
+ LOG    → Lieux: brico dépot (24km), intermarché (7km)
+ LOG  ✅ 0 liste(s) chargée(s)
+ WARN  ⚠️ Aucune liste trouvée pour user_id: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  ✅ 0 liste(s) chargée(s)
+ WARN  ⚠️ Aucune liste trouvée pour user_id: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  ✅ 1 liste(s) chargée(s)
+ LOG    → Listes trouvées: nouvelle liste (2926f802...)
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  📋 Sélection liste: nouvelle liste
+ LOG  📍 Sélection lieu: brico dépot
+ LOG  🚀 DÉBUT VALIDATION
+ LOG    → Liste: nouvelle liste
+ LOG    → Lieu: brico dépot
+ LOG    → Distance A/R: 48 km
+ LOG  📝 Étape 1: Archivage de la liste...
+ LOG  ✅ Liste archivée
+ LOG  📝 Étape 2: Ajout du trajet kilométrique...
+ LOG  📊 Données trajet: {
+  "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814",
+  "annee_fiscale": 2026,
+  "date_trajet": "2026-02-09",
+  "type_trajet": "courses",
+  "motif": "Courses - nouvelle liste",
+  "lieu_depart": "Domicile",
+  "lieu_arrivee": "brico dépot",
+  "gite_id": null,
+  "distance_aller": 24,
+  "aller_retour": true,
+  "distance_totale": 48,
+  "reservation_id": null,
+  "auto_genere": false,
+  "notes": "Liste: nouvelle liste"
+}
+ LOG  ✅ Trajet kilométrique ajouté: [{"aller_retour": true, "annee_fiscale": 2026, "auto_genere": false, "created_at": "2026-02-09T15:03:46.322253+00:00", "date_trajet": "2026-02-09", "distance_aller": 24, "distance_totale": 48, "gite_id": null, "id": "aac9b78d-927b-4374-ae5f-94ebe0c105a3", "lieu_arrivee": "brico dépot", "lieu_depart": "Domicile", "motif": "Courses - nouvelle liste", "notes": "Liste: nouvelle liste", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "reservation_id": null, "type_trajet": "courses", "updated_at": "2026-02-09T15:03:46.322253+00:00"}]
+ LOG  📝 Étape 3: Rafraîchissement des données...
+ LOG  
+🔄 CHARGEMENT LISTES...
+ LOG    → User ID pour la requête: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG    → User Email: stephanecalvignac@hotmail.fr
+ LOG  ✅ 0 liste(s) chargée(s)
+ WARN  ⚠️ Aucune liste trouvée pour user_id: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  📋 Listes chargées et prêtes pour le Picker
+ LOG  ✅ VALIDATION TERMINÉE
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 176ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  📅 [CALENDAR] Début chargement réservations
+ LOG  📅 [CALENDAR] Date aujourd'hui: 2026-02-08T23:00:00.000Z
+ LOG  📅 [CALENDAR] User ID: 12296d3d-696b-4c5d-95b7-e0b3a1dd1814
+ LOG  📅 [CALENDAR] Résultat requête: {"data_count": 20, "error": null, "has_data": true}
+ LOG  ✅ [CALENDAR] Première réservation: {"check_in": "2026-02-09", "check_out": "2026-02-13", "client_email": null, "client_name": "FFAC", "client_phone": "0615386019", "gite": "Trévoux", "gite_id": "2ee6c0bb-1a6a-4490-85e6-af75a1ff3f03", "guest_count": 6, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "owner_user_id": "12296d3d-696b-4c5d-95b7-e0b3a1dd1814", "platform": "Gîtes de France (centrale)", "status": "confirmed", "total_price": 1000}
+ LOG  📅 [CALENDAR] Chargement terminé
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Samuel Beyeler", "gite": "Couzon", "has_phone": false, "id": "fbf54c0d-7328-44a7-97c4-2288bfbf68bc", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Vincent Forest", "gite": "Trévoux", "has_phone": false, "id": "90b425cf-cb02-4d09-9a38-ad3b89d740b1", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Jules Villedieu", "gite": "Couzon", "has_phone": false, "id": "0b2e3989-ce6c-4e1b-8410-75bc70b45a73", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lauren Magnin", "gite": "Trévoux", "has_phone": false, "id": "d4c74772-e257-4468-a373-23cac49b9ded", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "J-Bat Clerm", "gite": "Couzon", "has_phone": false, "id": "68714254-61c7-41b5-95aa-8d9f963ece6a", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Nathalie MARGNAT", "gite": "Trévoux", "has_phone": false, "id": "f07487c3-9738-4cce-bcd9-f6ffcb2983ff", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": false, "id": "339d619e-c83b-418f-a740-3fa97289e93d", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Carole Fauvey", "gite": "Couzon", "has_phone": true, "id": "3d2cc4f9-2648-4a7f-8fbf-9862fd6b446d", "phone": "0660466129"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Anne-Laure Prin", "gite": "Trévoux", "has_phone": false, "id": "b2580c46-a7f1-42fe-8716-88ffcdc371b8", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Xavier LoubetA", "gite": "Trévoux", "has_phone": false, "id": "925c41f3-adfe-4573-82f0-fc80f9a5d2d0", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Ruth Macfarlane", "gite": "Couzon", "has_phone": false, "id": "c061820e-998c-4308-9726-85bc4788222f", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Delphine GUESNON", "gite": "Trévoux", "has_phone": false, "id": "0ade01bc-9459-429a-b0f4-f5c2bd5eab17", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": false, "id": "177374a0-9dde-432e-a8e9-bb8d2f9ad108", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Sylviane Henriot", "gite": "Trévoux", "has_phone": false, "id": "cdc13861-4d9c-4f1f-8897-f00e68004b06", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Nicolas Motel", "gite": "Trévoux", "has_phone": false, "id": "9a112845-5060-4301-9797-fc50e475aefd", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Anne Lise Tocquet", "gite": "Trévoux", "has_phone": false, "id": "c06b056f-41d4-4b2f-8bf6-20685b80b7b1", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Jean-Pierre ROBIN", "gite": "Trévoux", "has_phone": false, "id": "56696355-9cb6-4a95-bc45-6022ff118277", "phone": ""}
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 67ms index.ts (1 module)
+ WARN  [Reanimated] Reduced motion setting is enabled on this device. This warning is visible only in the development mode. Some animations will be disabled by default. You can override the behavior for individual animations, see https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device.
+ WARN  [Layout children]: No route named "(auth)" exists in nested children: ["shopping", "(auth)/login", "(tabs)", "reservation/[id]"]
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "FFAC", "gite": "Trévoux", "has_phone": true, "id": "ca55fe96-e27a-446d-b561-6296aebbf74e", "phone": "0615386019"}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Asdfspv Duflot", "gite": "Trévoux", "has_phone": false, "id": "0e6d6434-5b05-4ef3-9616-f46cbfe7bba5", "phone": ""}
+ LOG  🎫 [CARD] Rendu carte réservation: {"client": "Lilo Pailhes", "gite": "Couzon", "has_phone": false, "id": "804f85f4-a0e1-4f01-99ac-6785ce755c0f", "phone": ""}
+Killed

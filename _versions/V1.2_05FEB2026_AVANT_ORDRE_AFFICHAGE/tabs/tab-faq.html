@@ -1,0 +1,370 @@
+<!-- ================================================ -->
+<!-- ONGLET FAQ - QUESTIONS FRÉQUENTES CLIENTS      -->
+<!-- ================================================ -->
+<!-- Remplace l'ancien onglet Messagerie            -->
+<!-- ================================================ -->
+
+<div class="tab-container">
+    <!-- Header Neo-Brutalism -->
+    <div class="card" padding: 20px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 class="section-title-main"><i data-lucide="help-circle" style="width: 26px; height: 26px; display: inline-block; vertical-align: middle; margin-right: 10px;"></i>FAQ</h2>
+                <p class="section-description">Réponses aux questions courantes des clients</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-neo" data-action="ajouter-question" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    <i data-lucide="plus" style="width: 16px; height: 16px; margin-right: 6px;"></i>Ajouter une Question
+                </button>
+                <button class="btn-neo" data-action="exporter-html" style="background: #55efc4; color: var(--text); padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    <i data-lucide="download"></i> Exporter en HTML
+                </button>
+            </div>
+        </div>
+    </div>
+
+<div class="page-header" style="margin-bottom: 40px;">
+
+<!-- Barre de recherche -->
+<div class="search-section" style="margin-bottom: 30px; margin-top: 30px;">
+    <div class="search-box" style="max-width: 600px; margin: 0 auto;">
+        <input type="text" 
+               id="faq-search" 
+               placeholder="Rechercher une question..."
+               style="width: 100%; padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 50px; font-size: 16px; transition: all 0.3s;">
+    </div>
+</div>
+
+<!-- Filtres par catégorie -->
+<div class="filters-section" style="margin-bottom: 20px;">
+    <div class="filter-chips">
+        <button class="chip active" data-category="all" data-action="filtrer-faq">
+            Toutes
+        </button>
+        <button class="chip" data-category="arrivee" data-action="filtrer-faq">
+            <i data-lucide="key"></i> Arrivée
+        </button>
+        <button class="chip" data-category="depart" data-action="filtrer-faq">
+            <i data-lucide="door-open"></i> Départ
+        </button>
+        <button class="chip" data-category="equipements" data-action="filtrer-faq">
+            <i data-lucide="home"></i> Équipements
+        </button>
+        <button class="chip" data-category="localisation" data-action="filtrer-faq">
+            <i data-lucide="map-pin"></i> Localisation
+        </button>
+        <button class="chip" data-category="tarifs" data-action="filtrer-faq">
+            <i data-lucide="dollar-sign"></i> Tarifs
+        </button>
+        <button class="chip" data-category="reglement" data-action="filtrer-faq">
+            <i data-lucide="clipboard"></i> Règlement
+        </button>
+        <button class="chip" data-category="autre" data-action="filtrer-faq">
+            ℹ️ Autre
+        </button>
+    </div>
+</div>
+
+<!-- Liste des questions -->
+<div id="faq-list" class="faq-container">
+    <!-- Les questions seront chargées ici -->
+</div>
+
+<!-- Modal Ajouter/Modifier Question -->
+<div id="modal-question-faq" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h2 id="modal-question-title">Ajouter une Question FAQ</h2>
+            <button class="btn-close" onclick="fermerModalQuestion()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="form-question-faq">
+                <input type="hidden" id="question-id">
+
+                <div class="form-group">
+                    <label for="question-categorie">Catégorie *</label>
+                    <select id="question-categorie" required>
+                        <option value="arrivee"><i data-lucide="key"></i> Arrivée</option>
+                        <option value="depart"><i data-lucide="door-open"></i> Départ</option>
+                        <option value="equipements"><i data-lucide="home"></i> Équipements</option>
+                        <option value="localisation"><i data-lucide="map-pin"></i> Localisation</option>
+                        <option value="tarifs"><i data-lucide="dollar-sign"></i> Tarifs</option>
+                        <option value="reglement"><i data-lucide="clipboard"></i> Règlement</option>
+                        <option value="autre"><i data-lucide="info"></i> Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="question-gite">Gîte concerné</label>
+                    <select id="question-gite">
+                        <option value="tous"><i data-lucide="map-pin"></i> Tous les gîtes</option>
+                        <!-- Options dynamiques chargées via JS -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="question-titre">Question *</label>
+                    <input type="text" 
+                           id="question-titre" 
+                           placeholder="Ex: Quelle est l'heure d'arrivée ?"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="question-reponse">Réponse *</label>
+                    <textarea id="question-reponse" 
+                              rows="6"
+                              placeholder="Réponse détaillée à la question..."
+                              required></textarea>
+                    <small>Vous pouvez utiliser des balises HTML (gras, listes, liens...)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="question-ordre">Ordre d'affichage</label>
+                    <input type="number" 
+                           id="question-ordre" 
+                           value="0"
+                           min="0"
+                           placeholder="0">
+                    <small>Plus le nombre est petit, plus la question apparaît en haut</small>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" data-action="fermer-modal">Annuler</button>
+            <button class="btn-primary" data-action="sauvegarder-question">Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Event delegation pour les boutons FAQ
+document.addEventListener('click', function(e) {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    
+    const actionType = action.getAttribute('data-action');
+    const questionId = action.getAttribute('data-question-id');
+    
+    switch(actionType) {
+        case 'ajouter-question':
+            if (typeof window.ajouterQuestionFAQ === 'function') {
+                window.ajouterQuestionFAQ();
+            }
+            break;
+        case 'exporter-html':
+            if (typeof window.exporterFAQHTML === 'function') {
+                window.exporterFAQHTML();
+            }
+            break;
+        case 'fermer-modal':
+            if (typeof window.fermerModalQuestion === 'function') {
+                window.fermerModalQuestion();
+            }
+            break;
+        case 'sauvegarder-question':
+            if (typeof window.sauvegarderQuestionFAQ === 'function') {
+                window.sauvegarderQuestionFAQ();
+            }
+            break;
+        case 'filtrer-faq':
+            const category = action.getAttribute('data-category');
+            if (typeof window.filtrerFAQ === 'function') {
+                window.filtrerFAQ(category);
+            }
+            // Gérer les classes active
+            document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+            action.classList.add('active');
+            break;
+        case 'toggle-faq':
+            e.stopPropagation();
+            if (typeof window.toggleFAQ === 'function' && questionId) {
+                window.toggleFAQ(parseInt(questionId));
+            }
+            break;
+        case 'modifier-question':
+            e.stopPropagation();
+            if (typeof window.modifierQuestion === 'function' && questionId) {
+                window.modifierQuestion(parseInt(questionId));
+            }
+            break;
+        case 'supprimer-question':
+            e.stopPropagation();
+            if (typeof window.supprimerQuestion === 'function' && questionId) {
+                window.supprimerQuestion(parseInt(questionId));
+            }
+            break;
+    }
+});
+
+// Event delegation pour la recherche
+const searchInput = document.getElementById('faq-search');
+if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+        if (typeof window.rechercherFAQ === 'function') {
+            window.rechercherFAQ(e.target.value);
+        }
+    });
+}
+</script>
+
+<style>
+/* Boutons */
+.btn-primary, .btn-secondary {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: var(--card);
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+    background: #f8f9ff;
+    transform: translateY(-2px);
+}
+
+.faq-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.faq-item {
+    background: var(--card);
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.faq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    cursor: pointer;
+    background: #f8f9fa;
+}
+
+.faq-header:hover {
+    background: #e9ecef;
+}
+
+.faq-question {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.faq-question h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.faq-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.faq-badge.arrivee { background: #e3f2fd; color: #1976d2; }
+.faq-badge.depart { background: #fff3e0; color: #f57c00; }
+.faq-badge.equipements { background: #f3e5f5; color: #7b1fa2; }
+.faq-badge.localisation { background: #e8f5e9; color: #388e3c; }
+.faq-badge.tarifs { background: #fff9c4; color: #f9a825; }
+.faq-badge.reglement { background: #fce4ec; color: #c2185b; }
+.faq-badge.autre { background: #eceff1; color: #546e7a; }
+
+.faq-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.faq-body {
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-item.open .faq-body {
+    max-height: 500px;
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.faq-answer {
+    color: #555;
+    line-height: 1.6;
+}
+
+.faq-meta {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 13px;
+    color: #777;
+}
+
+.filter-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: var(--card);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.chip:hover {
+    background: #f5f5f5;
+}
+
+.chip.active {
+    background: #2196f3;
+    color: white;
+    border-color: #2196f3;
+}
+
+.faq-item.hidden {
+    display: none;
+}
+</style>

@@ -4,7 +4,7 @@
 // Génération semaine par semaine pour contourner limite Vercel 60s
 // ================================================================
 
-console.log('🤖 Module Stratégie IA chargé');
+// console.log('🤖 Module Stratégie IA chargé');
 
 // ================================================================
 // ARCHIVAGE AUTOMATIQUE DES SEMAINES PASSÉES
@@ -26,7 +26,7 @@ async function archiveOldWeeks() {
         
         if (error) throw error;
         
-        console.log('✅ Semaines passées archivées automatiquement');
+        // console.log('✅ Semaines passées archivées automatiquement');
     } catch (error) {
         console.error('❌ Erreur archivage auto:', error);
     }
@@ -232,7 +232,7 @@ async function saveSingleWeek(semaine, year) {
         if (error) {
             console.error('❌ Erreur sauvegarde semaine', semaine.numero, ':', error);
         } else if (semaine.numero === 1) {
-            console.log('✅ Semaine 1 ACTIVÉE automatiquement');
+            // console.log('✅ Semaine 1 ACTIVÉE automatiquement');
         }
     } catch (err) {
         console.error('❌ Erreur saveSingleWeek:', err);
@@ -280,7 +280,7 @@ async function generateRemainingWeeksBackground(startWeek, year, planGlobal, use
             if (response.ok) {
                 const { week } = await response.json();
                 await saveSingleWeek(week, year);
-                console.log(`✅ Semaine ${weekNum}/12 générée`);
+                // console.log(`✅ Semaine ${weekNum}/12 générée`);
             }
         } catch (err) {
             console.error(`❌ Erreur semaine ${weekNum}:`, err);
@@ -314,11 +314,11 @@ async function loadLongtermPlanFromDB() {
         }
         
         if (!data || data.length === 0) {
-            console.log('ℹ️ Aucun plan sauvegardé en DB');
+            // console.log('ℹ️ Aucun plan sauvegardé en DB');
             return;
         }
         
-        console.log(`✅ ${data.length} semaines trouvées en DB`);
+        // console.log(`✅ ${data.length} semaines trouvées en DB`);
         
         // Reconstituer le plan complet
         const semaines = data.map(row => {
@@ -331,7 +331,7 @@ async function loadLongtermPlanFromDB() {
         }).filter(s => s !== null);
         
         if (semaines.length === 0) {
-            console.log('⚠️ Aucune semaine valide après parsing');
+            // console.log('⚠️ Aucune semaine valide après parsing');
             return;
         }
         
@@ -348,7 +348,7 @@ async function loadLongtermPlanFromDB() {
         };
         
         displayLongtermPlan(plan);
-        console.log(`✅ Plan 12 semaines rechargé : ${semaines.length} semaines affichées`);
+        // console.log(`✅ Plan 12 semaines rechargé : ${semaines.length} semaines affichées`);
         
     } catch (error) {
         console.error('❌ Erreur rechargement plan:', error);
@@ -528,7 +528,7 @@ JSON uniquement:
                 .update({ strategie_complete: JSON.stringify(strategy) })
                 .eq('id', sem.id);
             
-            console.log(`✅ Semaine ${strategy.numero} enrichie`);
+            // console.log(`✅ Semaine ${strategy.numero} enrichie`);
         }
         
         showToast('✅ Plan enrichi !', 'success');
@@ -545,7 +545,7 @@ window.generateFullContent = async function(weekNum, actionIdx) {
     showToast('🤖 Génération contenu...', 'info');
     
     try {
-        console.log('🔍 Recherche semaine:', weekNum, 'année:', new Date().getFullYear());
+        // console.log('🔍 Recherche semaine:', weekNum, 'année:', new Date().getFullYear());
         
         const { data, error } = await window.supabaseClient
             .from('cm_ai_strategies')
@@ -554,7 +554,7 @@ window.generateFullContent = async function(weekNum, actionIdx) {
             .eq('annee', new Date().getFullYear())
             .in('statut', ['actif', 'planifié']); // IMPORTANT: filtrer sur statuts
         
-        console.log('📊 Résultat query:', data, 'erreur:', error);
+        // console.log('📊 Résultat query:', data, 'erreur:', error);
         
         if (error) {
             console.error('❌ Erreur DB:', error);
@@ -566,14 +566,14 @@ window.generateFullContent = async function(weekNum, actionIdx) {
         }
         
         const strategy = JSON.parse(data[0].strategie_complete);
-        console.log('📋 Stratégie chargée:', strategy);
+        // console.log('📋 Stratégie chargée:', strategy);
         
         if (!strategy.actions || !strategy.actions[actionIdx]) {
             throw new Error(`Action ${actionIdx} non trouvée (total: ${strategy.actions?.length || 0})`);
         }
         
         const action = strategy.actions[actionIdx];
-        console.log('🎯 Action:', action);
+        // console.log('🎯 Action:', action);
         
         const prompt = `Génère contenu PRÊT À PUBLIER:
 
@@ -1107,7 +1107,7 @@ async function loadContentQueue() {
             return;
         }
         
-        console.log('✅ Publications programmées trouvées:', data.length);
+        // console.log('✅ Publications programmées trouvées:', data.length);
         
         const html = data.map(item => `
             <div onclick="openActionDetails('${item.id}')" style="padding: 15px; background: white; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)'">
@@ -1259,7 +1259,7 @@ function getWeekNumber(d) {
 }
 
 function showToast(message, type) {
-    console.log(`[${type}] ${message}`);
+    // console.log(`[${type}] ${message}`);
 }
 
 // Init au chargement

@@ -386,7 +386,7 @@
         (async () => {
             // Éviter les vérifications multiples
             if (window._loginCheckDone) {
-                console.log('⚠️ Vérification login déjà faite');
+                // console.log('⚠️ Vérification login déjà faite');
                 return;
             }
             window._loginCheckDone = true;
@@ -394,7 +394,7 @@
             try {
                 const { data: { session } } = await window.supabaseClient.auth.getSession();
                 if (session && session.user) {
-                    console.log('✅ Déjà authentifié, redirection...');
+                    // console.log('✅ Déjà authentifié, redirection...');
                     // Petit délai pour éviter les conflits
                     setTimeout(() => {
                         window.location.href = '/index.html';
@@ -422,7 +422,7 @@
             setLoading(true);
             
             try {
-                console.log('🔐 Tentative de connexion:', email);
+                // console.log('🔐 Tentative de connexion:', email);
                 
                 const { data, error } = await window.supabaseClient.auth.signInWithPassword({
                     email,
@@ -447,7 +447,7 @@
                     return;
                 }
                 
-                console.log('✅ Connexion réussie!');
+                // console.log('✅ Connexion réussie!');
                 showAlert('Connexion réussie ! Redirection...', 'success');
                 
                 // Redirection après 1 seconde
@@ -469,8 +469,8 @@
             }
         });
 
-        console.log('✅ Page de login chargée');
-        console.log('📝 Supabase configuré:', !!window.supabaseClient);
+        // console.log('✅ Page de login chargée');
+        // console.log('📝 Supabase configuré:', !!window.supabaseClient);
     </script>
 </body>
 </html>

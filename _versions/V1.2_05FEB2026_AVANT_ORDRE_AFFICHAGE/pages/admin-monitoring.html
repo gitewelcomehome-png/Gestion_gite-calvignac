@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring - Channel Manager</title>
+    
+    <!-- Filtre erreurs extensions Chrome -->
+    <script>
+        window.onerror = function(msg, source, lineno, colno, error) {
+            const msgStr = String(msg || '');
+            const srcStr = String(source || '');
+            if (msgStr.includes('webpage_content_reporter') || 
+                srcStr.includes('webpage_content_reporter') ||
+                msgStr.includes('Unexpected token') ||
+                msgStr.includes('export') ||
+                msgStr.includes('import') ||
+                srcStr.includes('chrome-extension')) {
+                return true;
+            }
+        };
+        
+        window.addEventListener('error', function(event) {
+            const msg = event.message || '';
+            const src = event.filename || '';
+            if (src.includes('webpage_content_reporter') || 
+                msg.includes('webpage_content_reporter') ||
+                msg.includes('Unexpected token') || 
+                msg.includes('export') ||
+                msg.includes('import') ||
+                src.includes('chrome-extension')) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return true;
+            }
+        }, true);
+    </script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Config Supabase -->
+    <script src="../js/shared-config.js"></script>
+    
+    <!-- CSS Admin -->
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    
+    <style>
+        .monitoring-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .monitoring-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .monitoring-card h3 {
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            color: #1e293b;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-dot.up { background: #10b981; }
+        .status-dot.down { background: #ef4444; }
+        .status-dot.degraded { background: #f59e0b; }
+        
+        .error-row {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .error-row.warning {
+            border-left-color: #f59e0b;
+        }
+        
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .logs-table th {
+            background: #f8fafc;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .logs-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .logs-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-bar select,
+        .filter-bar input {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-left">
+            <h1>
+                <i data-lucide="activity"></i>
+                Monitoring & System Health
+            </h1>
+        </div>
+        <div class="header-right">
+            <span class="user-email" id="userEmail">stephanecalvignac@hotmail.fr</span>
+            <button class="btn-icon" id="btnLogout" title="Déconnexion">
+                <i data-lucide="log-out"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <section class="tabs-navigation">
+        <div class="tabs-sidebar">
+            <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
+            <button class="tab-btn" onclick="window.location.href='admin-channel-manager.html'">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-clients.html'">
+                <i data-lucide="users"></i>
+                <span>Clients</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-support.html'">
+                <i data-lucide="headphones"></i>
+                <span>Support</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-promotions.html'">
+                <i data-lucide="tag"></i>
+                <span>Promotions</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-parrainage.html'">
+                <i data-lucide="gift"></i>
+                <span>Parrainage</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-finance.html'">
+                <i data-lucide="bar-chart-2"></i>
+                <span>Finance & BI</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-content.html'">
+                <i data-lucide="pen-tool"></i>
+                <span>Content IA</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admin-communications.html'">
+                <i data-lucide="megaphone"></i>
+                <span>Communications</span>
+            </button>
+            <button class="tab-btn active">
+                <i data-lucide="activity"></i>
+                <span>Monitoring</span>
+            </button>
+            <button class="tab-btn">
+                <i data-lucide="globe"></i>
+                <span>Site Web</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main class="admin-container">
+        
+        <!-- System Health -->
+        <section style="margin-bottom: 30px;">
+            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <i data-lucide="heart-pulse"></i>
+                Santé du Système
+            </h2>
+            <div class="monitoring-grid">
+                <div class="monitoring-card">
+                    <h3><i data-lucide="server"></i> Services</h3>
+                    <div id="servicesStatus">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Supabase Database</span>
+                            <span class="status-dot up"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>API Functions</span>
+                            <span class="status-dot up"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Vercel Hosting</span>
+                            <span class="status-dot up"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="monitoring-card">
+                    <h3><i data-lucide="zap"></i> Performance</h3>
+                    <div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 14px; color: #64748b;">Latence moyenne</span>
+                                <strong id="avgLatency">~</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 14px; color: #64748b;">Requêtes/min</span>
+                                <strong id="requestsPerMin">~</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 14px; color: #64748b;">Taux d'erreur</span>
+                                <strong id="errorRate" style="color: #10b981;">~</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="monitoring-card">
+                    <h3><i data-lucide="clock"></i> Uptime</h3>
+                    <div style="text-align: center;">
+                        <div style="font-size: 48px; font-weight: bold; color: #10b981;">99.9%</div>
+                        <div style="color: #64748b; margin-top: 10px;">Derniers 30 jours</div>
+                        <div style="margin-top: 15px; font-size: 14px; color: #64748b;">
+                            Dernier incident: <strong>Aucun</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error Tracking -->
+        <section style="margin-bottom: 30px;">
+            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; justify-content: space-between;">
+                <span><i data-lucide="alert-octagon"></i> Erreurs Non Résolues</span>
+                <button class="btn btn-success" onclick="refreshErrors()">
+                    <i data-lucide="refresh-cw"></i>
+                    Actualiser
+                </button>
+            </h2>
+            <div id="errorsContainer">
+                <div style="text-align: center; padding: 40px; color: #64748b;">
+                    Chargement des erreurs...
+                </div>
+            </div>
+        </section>
+
+        <!-- Logs Explorer -->
+        <section style="margin-bottom: 30px;">
+            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <i data-lucide="search"></i>
+                Logs Explorer
+            </h2>
+            
+            <div class="filter-bar">
+                <select id="filterType">
+                    <option value="">Tous les types</option>
+                    <option value="critical">Critiques</option>
+                    <option value="warning">Warnings</option>
+                    <option value="info">Info</option>
+                </select>
+                
+                <input type="text" id="filterSource" placeholder="Filtrer par source..." style="flex: 1; min-width: 200px;">
+                
+                <input type="date" id="filterDateFrom" title="Date de début">
+                <input type="date" id="filterDateTo" title="Date de fin">
+                
+                <button class="btn btn-primary" onclick="searchLogs()">
+                    <i data-lucide="search"></i>
+                    Rechercher
+                </button>
+                
+                <button class="btn btn-danger" onclick="clearFilters()">
+                    <i data-lucide="x"></i>
+                    Réinitialiser
+                </button>
+            </div>
+
+            <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto;">
+                <table class="logs-table" id="logsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Source</th>
+                            <th>Message</th>
+                            <th>User</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                                Utilisez les filtres pour rechercher des logs
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Top 10 Erreurs -->
+        <section>
+            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <i data-lucide="trending-up"></i>
+                Top 10 Erreurs (30 derniers jours)
+            </h2>
+            <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <canvas id="errorsChart" height="300"></canvas>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="../js/error-tracker.js"></script>
+    <script src="../js/admin-monitoring.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

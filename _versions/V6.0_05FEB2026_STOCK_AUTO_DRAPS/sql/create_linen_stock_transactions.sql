@@ -21,6 +21,10 @@ CREATE INDEX IF NOT EXISTS idx_linen_stock_transactions_reservation
 -- RLS (Row Level Security)
 ALTER TABLE linen_stock_transactions ENABLE ROW LEVEL SECURITY;
 
+-- Suppression des anciennes policies si elles existent
+DROP POLICY IF EXISTS "Users can view own transactions" ON linen_stock_transactions;
+DROP POLICY IF EXISTS "Users can insert own transactions" ON linen_stock_transactions;
+
 -- Politique : les utilisateurs peuvent voir leurs propres transactions
 CREATE POLICY "Users can view own transactions" 
     ON linen_stock_transactions

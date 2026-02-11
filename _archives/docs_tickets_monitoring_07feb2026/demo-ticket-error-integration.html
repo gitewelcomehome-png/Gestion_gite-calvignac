@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemple - Intégration Erreurs dans Tickets Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .demo-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+
+        .widget {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .widget-header h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+
+        .widget-stats {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .stat {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .stat-critical {
+            border-left: 4px solid #dc3545;
+        }
+
+        .stat-warning {
+            border-left: 4px solid #ffc107;
+        }
+
+        .widget-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .widget-notice {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #856404;
+            font-style: italic;
+        }
+
+        .error-preview {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .error-preview h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+
+        .error-item {
+            background: white;
+            border-left: 4px solid #6c757d;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .error-item.critical {
+            border-left-color: #dc3545;
+        }
+
+        .error-item.warning {
+            border-left-color: #ffc107;
+        }
+
+        .error-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-critical {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .error-message {
+            font-size: 14px;
+            color: #333;
+            margin: 5px 0;
+        }
+
+        .error-meta {
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            gap: 15px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+
+        .result {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .result.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎫 Démo : Intégration Erreurs → Tickets Support</h1>
+            <p>Exemple d'utilisation du système de déduplication et d'intégration automatique</p>
+        </div>
+
+        <!-- Section 1 : Simulation d'erreurs -->
+        <div class="demo-section">
+            <h2>1️⃣ Simulation : Générer des erreurs</h2>
+            <p>Simulez des erreurs pour tester le système de déduplication</p>
+            
+            <div class="form-group">
+                <label>UUID Client (simulé)</label>
+                <input type="text" id="simUserId" value="a1b2c3d4-e5f6-7890-1234-567890abcdef" readonly>
+            </div>
+
+            <div class="form-group">
+                <button class="btn btn-primary" onclick="simulateError('critical')">
+                    🔴 Générer Erreur Critique
+                </button>
+                <button class="btn btn-primary" onclick="simulateError('warning')">
+                    ⚠️ Générer Warning
+                </button>
+            </div>
+
+            <div id="errorSimResult" class="result"></div>
+        </div>
+
+        <!-- Section 2 : Widget erreurs -->
+        <div class="demo-section">
+            <h2>2️⃣ Widget : Erreurs détectées</h2>
+            <p>Widget affiché dans le formulaire de création de ticket</p>
+            
+            <div id="error-widget-demo"></div>
+        </div>
+
+        <!-- Section 3 : Formulaire ticket -->
+        <div class="demo-section">
+            <h2>3️⃣ Création de Ticket avec Erreurs</h2>
+            
+            <div class="form-group">
+                <label>Sujet du ticket</label>
+                <input type="text" id="ticketSubject" value="Problème d'affichage du dashboard" placeholder="Ex: Problème de connexion">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="ticketMessage" placeholder="Décrivez le problème...">Je n'arrive plus à accéder à mon tableau de bord. La page se charge mais reste blanche.</textarea>
+            </div>
+
+            <div class="form-group">
+                <button class="btn btn-success" onclick="createTicketWithErrors()">
+                    ✉️ Créer Ticket (avec erreurs automatiques)
+                </button>
+            </div>
+
+            <div id="ticketResult" class="result"></div>
+        </div>
+
+        <!-- Section 4 : Prévisualisation -->
+        <div class="demo-section">
+            <h2>4️⃣ Aperçu : Message inséré dans la conversation</h2>
+            <p>Voici comment les erreurs apparaissent dans le ticket</p>
+            
+            <div class="error-preview">
+                <h4>🤖 Rapport d'erreurs automatique</h4>
+                <p><strong>⚠️ 3 erreur(s) active(s) détectée(s):</strong></p>
+                
+                <div class="error-item critical">
+                    <div class="error-header">
+                        <span class="badge badge-critical">CRITICAL</span>
+                        <span>🔄 15x</span>
+                        <span>👥 3 clients</span>
+                    </div>
+                    <div class="error-message">Cannot read properties of null (reading 'addEventListener')</div>
+                    <div class="error-meta">
+                        <small>📁 dashboard.js</small>
+                        <small>🕐 06/02/2026 14:30</small>
+                    </div>
+                </div>
+
+                <div class="error-item warning">
+                    <div class="error-header">
+                        <span class="badge badge-warning">WARNING</span>
+                        <span>🔄 8x</span>
+                        <span>👥 1 client</span>
+                    </div>
+                    <div class="error-message">⚠️ Aucune simulation fiscale trouvée</div>
+                    <div class="error-meta">
+                        <small>📁 fiscalite.js</small>
+                        <small>🕐 06/02/2026 12:15</small>
+                    </div>
+                </div>
+
+                <div class="error-item critical">
+                    <div class="error-header">
+                        <span class="badge badge-critical">CRITICAL</span>
+                        <span>🔄 3x</span>
+                        <span>👥 2 clients</span>
+                    </div>
+                    <div class="error-message">HTTP 400 - historical_data does not exist</div>
+                    <div class="error-meta">
+                        <small>📁 fetch</small>
+                        <small>🕐 06/02/2026 11:00</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5 : Code d'intégration -->
+        <div class="demo-section">
+            <h2>5️⃣ Code d'Intégration</h2>
+            
+            <h3>JavaScript - Création ticket avec erreurs</h3>
+            <div class="code-block">
+                <pre>
+// Créer un ticket avec intégration automatique des erreurs
+const ticket = await window.ticketErrorIntegration.createTicketWithErrors({
+    user_id: clientUuid,
+    subject: 'Problème de connexion',
+    message: 'Je n\'arrive pas à accéder au dashboard',
+    priority: 'normal',
+    category: 'technique'
+});
+
+// Le système va automatiquement :
+// ✅ Récupérer les erreurs du client (7 derniers jours)
+// ✅ Ajuster la priorité si erreurs critiques
+// ✅ Insérer les erreurs dans la conversation
+// ✅ Ajouter tags appropriés
+
+console.log('Ticket créé:', ticket.id);
+                </pre>
+            </div>
+
+            <h3>JavaScript - Widget dans formulaire</h3>
+            <div class="code-block">
+                <pre>
+// Afficher le widget dans le formulaire
+await window.ticketErrorIntegration.renderErrorWidget(
+    clientUuid,
+    'error-widget-container'
+);
+
+// Le widget affiche :
+// - Nombre total d'erreurs
+// - Répartition critiques/warnings
+// - Boutons pour voir détails et copier rapport
+                </pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SIMULATION - Dans la vraie application, ces fonctions utilisent Supabase
+
+        function simulateError(type) {
+            const result = document.getElementById('errorSimResult');
+            
+            const errors = {
+                critical: [
+                    'Cannot read properties of null',
+                    'TypeError: undefined is not a function',
+                    'HTTP 500 - Internal Server Error'
+                ],
+                warning: [
+                    '⚠️ Aucune simulation fiscale trouvée',
+                    'Calcul charges impossible - données incomplètes',
+                    'Table historical_data introuvable'
+                ]
+            };
+
+            const message = errors[type][Math.floor(Math.random() * errors[type].length)];
+            
+            result.className = 'result show alert alert-success';
+            result.innerHTML = `
+                <strong>✅ Erreur simulée !</strong><br>
+                Type: <strong>${type.toUpperCase()}</strong><br>
+                Message: ${message}<br><br>
+                <em>Dans l'application réelle, cette erreur serait :</em>
+                <ul>
+                    <li>✅ Envoyée à PostgreSQL via <code>upsert_error_log()</code></li>
+                    <li>✅ Dédupliquée si elle existe déjà</li>
+                    <li>✅ UUID client ajouté à affected_users</li>
+                    <li>✅ Compteur occurrence_count incrémenté</li>
+                </ul>
+            `;
+
+            // Mettre à jour le widget
+            updateErrorWidget(type);
+        }
+
+        function updateErrorWidget(newErrorType) {
+            const widget = document.getElementById('error-widget-demo');
+            
+            // Simuler augmentation du compteur
+            const currentCritical = parseInt(widget.querySelector('.stat-critical .stat-value')?.textContent || 2);
+            const currentWarning = parseInt(widget.querySelector('.stat-warning .stat-value')?.textContent || 3);
+            
+            const critical = newErrorType === 'critical' ? currentCritical + 1 : currentCritical;
+            const warning = newErrorType === 'warning' ? currentWarning + 1 : currentWarning;
+            const total = critical + warning;
+
+            widget.innerHTML = `
+                <div class="widget widget-errors">
+                    <div class="widget-header">
+                        <h4>⚠️ Erreurs détectées</h4>
+                    </div>
+                    <div class="widget-body">
+                        <div class="widget-stats">
+                            <div class="stat">
+                                <span class="stat-value">${total}</span>
+                                <span class="stat-label">Total</span>
+                            </div>
+                            <div class="stat stat-critical">
+                                <span class="stat-value">${critical}</span>
+                                <span class="stat-label">Critiques</span>
+                            </div>
+                            <div class="stat stat-warning">
+                                <span class="stat-value">${warning}</span>
+                                <span class="stat-label">Warnings</span>
+                            </div>
+                        </div>
+                        <div class="widget-actions">
+                            <button class="btn btn-primary" onclick="alert('Dans l\'app réelle : modal avec détails des erreurs')">
+                                📋 Voir les détails
+                            </button>
+                            <button class="btn btn-success" onclick="alert('Rapport copié dans le presse-papier !')">
+                                📄 Copier le rapport
+                            </button>
+                        </div>
+                        <p class="widget-notice">
+                            💡 Ces erreurs seront automatiquement ajoutées au ticket
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createTicketWithErrors() {
+            const subject = document.getElementById('ticketSubject').value;
+            const message = document.getElementById('ticketMessage').value;
+            const result = document.getElementById('ticketResult');
+
+            result.className = 'result show alert alert-success';
+            result.innerHTML = `
+                <strong>✅ Ticket créé avec succès !</strong><br><br>
+                
+                <strong>📋 Informations du ticket :</strong>
+                <ul>
+                    <li><strong>Sujet :</strong> ${subject}</li>
+                    <li><strong>Message :</strong> ${message}</li>
+                    <li><strong>Priorité :</strong> HIGH (ajustée automatiquement car erreurs critiques détectées)</li>
+                    <li><strong>Tags :</strong> erreurs-critiques</li>
+                </ul>
+
+                <strong>🤖 Erreurs insérées dans la conversation :</strong>
+                <ul>
+                    <li>✅ 3 erreur(s) formatée(s) et ajoutées</li>
+                    <li>✅ 2 erreur(s) critique(s) → Priorité haute automatique</li>
+                    <li>✅ Rapport technique attaché pour l'équipe support</li>
+                </ul>
+
+                <div class="code-block" style="margin-top: 15px;">
+                    <strong>Message système inséré :</strong>
+                    <pre>
+🤖 RAPPORT D'ERREURS AUTOMATIQUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ 3 erreur(s) active(s) détectée(s):
+
+1. [CRITICAL] Cannot read properties of null
+   📁 Source: dashboard.js
+   🔄 Occurrences: 15
+   👥 Clients affectés: 3
+   🕐 Dernière occurrence: 06/02/2026 14:30
+
+2. [WARNING] ⚠️ Aucune simulation fiscale trouvée
+   📁 Source: fiscalite.js
+   🔄 Occurrences: 8
+   👥 Clients affectés: 1
+   🕐 Dernière occurrence: 06/02/2026 12:15
+
+3. [CRITICAL] HTTP 400 - does not exist
+   📁 Source: fetch
+   🔄 Occurrences: 3
+   👥 Clients affectés: 2
+   🕐 Dernière occurrence: 06/02/2026 11:00
+                    </pre>
+                </div>
+            `;
+        }
+
+        // Initialiser le widget au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            updateErrorWidget();
+        });
+    </script>
+</body>
+</html>

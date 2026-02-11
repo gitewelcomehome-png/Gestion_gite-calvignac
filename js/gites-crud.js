@@ -3,24 +3,73 @@
 // ================================================================
 
 /**
- * Obtenir l'icône SVG d'un type de propriété
+ * Obtenir l'icône SVG moderne d'un type de propriété
+ * Style Apple/Sidebar - Outline simple
  */
 window.getPropertyIcon = function(emojiType) {
     const icons = {
-        'house-simple': `<svg viewBox="0 0 64 64" style="width:48px;height:48px"><rect x="14" y="28" width="36" height="28" fill="white" stroke="#2D3436" stroke-width="2.5"/><path d="M8 28 L32 8 L56 28" fill="#ff7675" stroke="#2D3436" stroke-width="2.5"/><rect x="42" y="10" width="6" height="10" fill="#ff7675"/><rect x="26" y="40" width="12" height="16" fill="#0984e3"/><rect x="18" y="34" width="6" height="6" fill="#74b9ff"/></svg>`,
-        'apartment': `<svg viewBox="0 0 64 64" style="width:48px;height:48px"><rect x="18" y="8" width="28" height="48" rx="2" fill="#74b9ff" stroke="#2D3436" stroke-width="2.5"/><rect x="26" y="42" width="12" height="14" fill="#0984e3"/><rect x="22" y="16" width="8" height="8" fill="white"/><rect x="34" y="16" width="8" height="8" fill="white"/><rect x="22" y="28" width="8" height="8" fill="white"/><rect x="34" y="28" width="8" height="8" fill="white"/></svg>`,
-        'studio': `<svg viewBox="0 0 64 64" style="width:48px;height:48px"><rect x="8" y="20" width="32" height="36" fill="white" stroke="#2D3436" stroke-width="2.5"/><rect x="32" y="12" width="24" height="24" fill="#ffeaa7" stroke="#2D3436" stroke-width="2.5"/><rect x="14" y="32" width="20" height="16" fill="#74b9ff" fill-opacity="0.5"/><line x1="44" y1="36" x2="44" y2="56" stroke="#2D3436" stroke-width="2.5"/></svg>`,
-        'chalet': `<svg viewBox="0 0 64 64" style="width:48px;height:48px"><path d="M32 6 L6 56 H58 Z" fill="#fdcb6e" stroke="#2D3436" stroke-width="2.5"/><path d="M32 6 L10 48" stroke="#ff7675" stroke-width="4"/><path d="M32 6 L54 48" stroke="#ff7675" stroke-width="4"/><circle cx="32" cy="26" r="6" fill="white" stroke="#2D3436" stroke-width="2.5"/><path d="M26 56 v-14 h12 v14" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/></svg>`,
-        'castle': `<svg viewBox="0 0 64 64" style="width:48px;height:48px"><rect x="8" y="22" width="12" height="34" fill="white" stroke="#2D3436" stroke-width="2.5"/><rect x="44" y="22" width="12" height="34" fill="white" stroke="#2D3436" stroke-width="2.5"/><rect x="20" y="28" width="24" height="28" fill="white" stroke="#2D3436" stroke-width="2.5"/><path d="M8 22 L14 10 L20 22" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/><path d="M44 22 L50 10 L56 22" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/><rect x="20" y="22" width="24" height="6" fill="#0984e3"/><path d="M28 56 v-10 a4 4 0 0 1 8 0 v10" fill="#fdcb6e" stroke="#2D3436" stroke-width="2.5"/></svg>`,
-        'camper': `<svg viewBox="0 0 64 64" style="width:48px;height:48px"><circle cx="20" cy="52" r="5" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/><circle cx="44" cy="52" r="5" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/><rect x="10" y="24" width="44" height="24" fill="#ffeaa7" stroke="#2D3436" stroke-width="2.5"/><path d="M8 24 L6 16 L58 16 L56 24 Z" fill="#ff7675" stroke="#2D3436" stroke-width="2.5"/><rect x="38" y="30" width="10" height="18" fill="white"/><rect x="16" y="32" width="12" height="10" fill="#74b9ff"/></svg>`,
-        'church': `<svg viewBox="0 0 64 64" style="width:48px;height:48px"><rect x="6" y="24" width="52" height="32" fill="#ff7675" stroke="#2D3436" stroke-width="2.5"/><path d="M4 24 L32 10 L60 24" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/><rect x="24" y="32" width="16" height="24" fill="#ffeaa7" stroke="#2D3436" stroke-width="2.5"/><line x1="32" y1="32" x2="32" y2="56" stroke="#2D3436" stroke-width="2.5"/><circle cx="32" cy="20" r="4" fill="white" stroke="#2D3436" stroke-width="2.5"/></svg>`,
-        'house': `<svg viewBox="0 0 64 64" style="width:48px;height:48px"><rect x="10" y="48" width="44" height="8" rx="2" fill="#fdcb6e" stroke="#2D3436" stroke-width="2.5"/><path d="M14 50 A 20 20 0 0 1 50 50" stroke="#2D3436" stroke-width="3" fill="#74b9ff" fill-opacity="0.4"/><line x1="32" y1="18" x2="32" y2="50" stroke="#2D3436" stroke-width="2"/></svg>`
+        'house-simple': `<svg viewBox="0 0 64 64" style="width:48px;height:48px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 28 L32 12 L52 28 L52 52 L12 52 Z"/>
+            <rect x="26" y="38" width="12" height="14"/>
+            <rect x="18" y="32" width="8" height="8"/>
+            <rect x="38" y="32" width="8" height="8"/>
+        </svg>`,
+        'apartment': `<svg viewBox="0 0 64 64" style="width:48px;height:48px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="18" y="8" width="28" height="48" rx="2"/>
+            <rect x="26" y="42" width="12" height="14"/>
+            <line x1="24" y1="16" x2="28" y2="16"/><line x1="36" y1="16" x2="40" y2="16"/>
+            <line x1="24" y1="22" x2="28" y2="22"/><line x1="36" y1="22" x2="40" y2="22"/>
+            <line x1="24" y1="28" x2="28" y2="28"/><line x1="36" y1="28" x2="40" y2="28"/>
+            <line x1="24" y1="34" x2="28" y2="34"/><line x1="36" y1="34" x2="40" y2="34"/>
+        </svg>`,
+        'studio': `<svg viewBox="0 0 64 64" style="width:48px;height:48px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="14" y="20" width="36" height="32"/>
+            <path d="M14 28 L50 28"/>
+            <circle cx="32" cy="38" r="6"/>
+            <rect x="22" y="46" width="8" height="6"/>
+            <rect x="34" y="46" width="8" height="6"/>
+        </svg>`,
+        'chalet': `<svg viewBox="0 0 64 64" style="width:48px;height:48px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 28 L32 8 L56 28 L56 54 L8 54 Z"/>
+            <path d="M18 28 L32 16 L46 28"/>
+            <rect x="28" y="40" width="8" height="14"/>
+            <circle cx="22" cy="35" r="2"/>
+            <circle cx="42" cy="35" r="2"/>
+        </svg>`,
+        'castle': `<svg viewBox="0 0 64 64" style="width:48px;height:48px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 24 L8 54 L20 54 L20 28 L44 28 L44 54 L56 54 L56 24"/>
+            <rect x="14" y="10" width="4" height="14"/><rect x="46" y="10" width="4" height="14"/>
+            <path d="M20 28 L20 54 L44 54 L44 28"/>
+            <path d="M28 54 L28 42 A4 4 0 0 1 36 42 L36 54"/>
+        </svg>`,
+        'camper': `<svg viewBox="0 0 64 64" style="width:48px;height:48px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="12" y="24" width="40" height="20" rx="2"/>
+            <circle cx="20" cy="50" r="4"/>
+            <circle cx="44" cy="50" r="4"/>
+            <line x1="20" y1="46" x2="20" y2="44"/>
+            <line x1="44" y1="46" x2="44" y2="44"/>
+            <rect x="38" y="28" width="8" height="8"/>
+            <rect x="18" y="30" width="12" height="6"/>
+        </svg>`,
+        'church': `<svg viewBox="0 0 64 64" style="width:48px;height:48px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 28 L32 12 L54 28 L54 54 L10 54 Z"/>
+            <rect x="26" y="38" width="12" height="16"/>
+            <line x1="32" y1="38" x2="32" y2="54"/>
+            <circle cx="32" cy="24" r="3"/>
+            <line x1="32" y1="12" x2="32" y2="21"/>
+        </svg>`,
+        'house': `<svg viewBox="0 0 64 64" style="width:48px;height:48px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 30 L32 10 L54 30 L54 54 L10 54 Z"/>
+            <rect x="26" y="38" width="12" height="16"/>
+            <rect x="18" y="32" width="8" height="8"/>
+            <rect x="38" y="32" width="8" height="8"/>
+        </svg>`
     };
     return icons[emojiType] || icons['house'];
 };
 
 window.showGitesManager = async function() {
-    console.log('🏠 showGitesManager() appelée');
+    // console.log('🏠 showGitesManager() appelée');
     
     // Fermer la modal existante si elle existe
     const existingModal = document.querySelector('.gites-manager-modal');
@@ -30,86 +79,71 @@ window.showGitesManager = async function() {
     
     // Charger les gîtes depuis le gestionnaire
     const gites = await window.gitesManager.getAll();
-    console.log('📋 Gîtes chargés:', gites.length);
+    // console.log('📋 LISTE GÎTES MODERNE V2.0 - Gîtes chargés:', gites.length);
     
-    // Créer la modal de gestion avec le style Flat Outline du site
+    // Créer la modal MODERNE
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
-        <div class="modal-content gites-manager-modal">
-            <div class="modal-header">
+        <div class="modal-content-modern" style="max-width: 1200px;">
+            <div class="modal-header-modern">
                 <h2>
-                    <svg class="icon-inline" width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <rect x="8" y="14" width="32" height="26" rx="2"/>
-                        <path d="M8 20 L24 8 L40 20"/>
-                    </svg>
+                    <i data-lucide="home"></i>
                     Gérer mes gîtes
                 </h2>
-                <button class="btn-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+                <button class="btn-close-modern" onclick="this.closest('.modal-overlay').remove()">
+                    <i data-lucide="x"></i>
+                </button>
             </div>
-            <div class="modal-body">
-                <div class="gites-list-header" style="margin-bottom: 20px;">
-                    <button class="btn-neo save" onclick="window.showAddGiteForm()">
-                        <svg width="20" height="20" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
-                            <circle cx="24" cy="24" r="18"/>
-                            <path d="M24 12 L24 36"/>
-                            <path d="M12 24 L36 24"/>
-                        </svg>
+            <div class="modal-body-modern">
+                <div class="gites-list-header-modern">
+                    <button class="btn-add-modern" onclick="window.showAddGiteForm()">
+                        <i data-lucide="plus"></i>
                         Ajouter un gîte
                     </button>
                 </div>
-                <div class="gites-grid">
+                <div class="gites-grid-modern">
                     ${gites.map((gite, index) => `
-                        <div class="gite-card" data-gite-id="${gite.id}">
-                            <div class="gite-order-number">${index + 1}</div>
-                            <div class="gite-card-header" style="background: ${gite.color || '#74b9ff'}">
-                                <div class="gite-icon">${window.getPropertyIcon(gite.icon || 'house')}</div>
+                        <div class="gite-card-modern" data-gite-id="${gite.id}">
+                            <div class="gite-order-number-modern">${index + 1}</div>
+                            <div class="gite-card-header-modern" style="background: ${gite.color || '#667eea'}">
+                                <div class="gite-icon-modern">${window.getPropertyIcon(gite.icon || 'house')}</div>
                                 <h3>${gite.name}</h3>
                             </div>
-                            <div class="gite-card-body">
-                                <div class="gite-info">
-                                    <strong>📍</strong> ${gite.address || 'Non renseigné'}
+                            <div class="gite-card-body-modern">
+                                <div class="gite-info-modern">
+                                    <strong>📍</strong>
+                                    <span>${gite.address || 'Non renseigné'}</span>
                                 </div>
-                                <div class="gite-info">
-                                    <strong>👥</strong> ${gite.capacity || '-'} personnes
+                                <div class="gite-info-modern">
+                                    <strong>👥</strong>
+                                    <span>${gite.capacity || '-'} personnes</span>
                                 </div>
-                                <div class="gite-info">
-                                    <strong>🔗</strong> ${gite.ical_sources?.length || 0} URL(s) iCal
+                                <div class="gite-info-modern">
+                                    <strong>🔗</strong>
+                                    <span>${(() => {
+                                        const sources = gite.ical_sources;
+                                        if (!sources) return '0 URL iCal';
+                                        const count = Array.isArray(sources) ? sources.length : Object.keys(sources).length;
+                                        return count === 0 ? '0 URL iCal' : count === 1 ? '1 URL iCal' : count + ' URLs iCal';
+                                    })()}</span>
                                 </div>
                             </div>
-                            <div class="gite-card-actions">
-                                <button class="btn-neo" onclick="window.showIcalConfig('${gite.id}')" title="Configurer URLs iCal" style="padding: 8px 12px;">
-                                    <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <rect x="8" y="12" width="32" height="28" rx="2"/>
-                                        <path d="M8 20 L40 20"/>
-                                        <circle cx="16" cy="28" r="2" fill="currentColor"/>
-                                        <circle cx="24" cy="28" r="2" fill="currentColor"/>
-                                        <circle cx="32" cy="28" r="2" fill="currentColor"/>
-                                    </svg>
-                                    iCal
+                            <div class="gite-card-actions-modern">
+                                <button class="btn-icon-modern primary" onclick="window.showIcalConfig('${gite.id}')" title="Configurer URLs iCal">
+                                    <i data-lucide="calendar"></i>
                                 </button>
-                                <button class="btn-neo" onclick="window.editGite('${gite.id}')" title="Modifier" style="padding: 8px 12px;">
-                                    <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <path d="M8 40 L8 32 L28 12 L36 20 L16 40 L8 40 Z"/>
-                                        <path d="M28 12 L36 20"/>
-                                    </svg>
+                                <button class="btn-icon-modern" onclick="window.editGite('${gite.id}')" title="Modifier">
+                                    <i data-lucide="pencil"></i>
                                 </button>
-                                <button class="btn-neo" onclick="window.moveGiteOrder('${gite.id}', 'up')" title="Monter" ${index === 0 ? 'disabled' : ''} style="padding: 8px 12px;">
-                                    <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <path d="M12 28 L24 16 L36 28"/>
-                                    </svg>
+                                <button class="btn-icon-modern" onclick="window.moveGiteOrder('${gite.id}', 'up')" title="Monter" ${index === 0 ? 'disabled' : ''}>
+                                    <i data-lucide="chevron-up"></i>
                                 </button>
-                                <button class="btn-neo" onclick="window.moveGiteOrder('${gite.id}', 'down')" title="Descendre" ${index === gites.length - 1 ? 'disabled' : ''} style="padding: 8px 12px;">
-                                    <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <path d="M12 20 L24 32 L36 20"/>
-                                    </svg>
+                                <button class="btn-icon-modern" onclick="window.moveGiteOrder('${gite.id}', 'down')" title="Descendre" ${index === gites.length - 1 ? 'disabled' : ''}>
+                                    <i data-lucide="chevron-down"></i>
                                 </button>
-                                <button class="btn-neo delete" onclick="window.deleteGite('${gite.id}')" title="Supprimer" style="padding: 8px 12px;">
-                                    <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <path d="M12 16 L36 16"/>
-                                        <path d="M16 16 L16 40 L32 40 L32 16"/>
-                                        <path d="M20 8 L28 8"/>
-                                    </svg>
+                                <button class="btn-icon-modern delete" onclick="window.deleteGite('${gite.id}')" title="Supprimer">
+                                    <i data-lucide="trash-2"></i>
                                 </button>
                             </div>
                         </div>
@@ -120,6 +154,11 @@ window.showGitesManager = async function() {
     `;
     
     document.body.appendChild(modal);
+    
+    // Initialiser les icônes Lucide
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
 };
 
 /**
@@ -127,16 +166,16 @@ window.showGitesManager = async function() {
  */
 window.showAddGiteForm = function(giteToEdit = null) {
     const isEdit = !!giteToEdit;
-    console.log(isEdit ? '✏️ Édition gîte:' : '➕ Ajout nouveau gîte', giteToEdit);
+    // console.log('🎨 FORMULAIRE MODERNE V2.0 - showAddGiteForm() appelée');
+    // console.log(isEdit ? '✏️ Édition gîte:' : '➕ Ajout nouveau gîte', giteToEdit);
     
     // Générer les champs iCal
     let icalFieldsHtml = "";
     if (isEdit && Array.isArray(giteToEdit.ical_sources) && giteToEdit.ical_sources.length > 0) {
         icalFieldsHtml = giteToEdit.ical_sources.map(ical => `
-            <div class="ical-url-item">
-                <div class="platform-icon-preview"></div>
-                <select class="ical-platform" onchange="window.updatePlatformIcon(this)">
-                    <option value="">Autre plateforme</option>
+            <div class="ical-url-row">
+                <select class="form-select-modern ical-platform" onchange="window.updatePlatformIcon(this)">
+                    <option value="">Plateforme</option>
                     <option value="airbnb" ${ical.platform==='airbnb'?'selected':''}>Airbnb</option>
                     <option value="booking" ${ical.platform==='booking'?'selected':''}>Booking.com</option>
                     <option value="vrbo" ${ical.platform==='vrbo'?'selected':''}>Vrbo</option>
@@ -145,21 +184,17 @@ window.showAddGiteForm = function(giteToEdit = null) {
                     <option value="tripadvisor" ${ical.platform==='tripadvisor'?'selected':''}>TripAdvisor</option>
                     <option value="gites-de-france" ${ical.platform==='gites-de-france'?'selected':''}>Gîtes de France</option>
                 </select>
-                <input type="url" class="ical-url-input" placeholder="https://..." value="${ical.url || ''}">
-                <button type="button" class="btn-neo delete" title="Supprimer" style="padding: 8px; width: auto;">
-                    <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="24" cy="24" r="16"/>
-                        <path d="M16 24 L32 24"/>
-                    </svg>
+                <input type="url" class="form-input-modern ical-url-input" placeholder="https://..." value="${ical.url || ''}">
+                <button type="button" class="btn-icon-modern btn-remove-ical" title="Supprimer">
+                    <i data-lucide="trash-2"></i>
                 </button>
             </div>
         `).join('');
     } else {
         icalFieldsHtml = `
-            <div class="ical-url-item">
-                <div class="platform-icon-preview"></div>
-                <select class="ical-platform" onchange="window.updatePlatformIcon(this)">
-                    <option value="">Autre plateforme</option>
+            <div class="ical-url-row">
+                <select class="form-select-modern ical-platform" onchange="window.updatePlatformIcon(this)">
+                    <option value="">Plateforme</option>
                     <option value="airbnb">Airbnb</option>
                     <option value="booking">Booking.com</option>
                     <option value="vrbo">Vrbo</option>
@@ -168,12 +203,9 @@ window.showAddGiteForm = function(giteToEdit = null) {
                     <option value="tripadvisor">TripAdvisor</option>
                     <option value="gites-de-france">Gîtes de France</option>
                 </select>
-                <input type="url" class="ical-url-input" placeholder="https://...">
-                <button type="button" class="btn-neo delete" title="Supprimer" style="padding: 8px; width: auto;">
-                    <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="24" cy="24" r="16"/>
-                        <path d="M16 24 L32 24"/>
-                    </svg>
+                <input type="url" class="form-input-modern ical-url-input" placeholder="https://...">
+                <button type="button" class="btn-icon-modern btn-remove-ical" title="Supprimer">
+                    <i data-lucide="trash-2"></i>
                 </button>
             </div>
         `;
@@ -185,219 +217,188 @@ window.showAddGiteForm = function(giteToEdit = null) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
-        <div class="modal-content gite-form-modal">
-            <div class="modal-header">
+        <div class="modal-content-modern">
+            <div class="modal-header-modern">
                 <h2>
-                    <svg class="icon-inline" width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M24 8 L24 40"/>
-                        <path d="M8 24 L40 24"/>
-                    </svg>
+                    <i data-lucide="${isEdit ? 'pencil' : 'plus-circle'}"></i>
                     ${isEdit ? 'Modifier le gîte' : 'Nouveau gîte'}
                 </h2>
-                <button class="btn-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+                <button class="btn-close-modern" onclick="this.closest('.modal-overlay').remove()">
+                    <i data-lucide="x"></i>
+                </button>
             </div>
         
-            <form class="modal-body gite-form" onsubmit="handleSaveGite(event, ${isEdit ? `'${giteToEdit.id}'` : 'null'}); return false;">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>
-                            <svg class="icon-label" width="20" height="20" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <rect x="8" y="14" width="32" height="26" rx="2"/>
-                                <path d="M8 20 L24 8 L40 20"/>
-                            </svg>
-                            Nom du gîte *
-                        </label>
-                        <input type="text" name="name" required placeholder="Ex: Gîte des Vignes" value="${isEdit ? (giteToEdit.name || '') : ''}">
+            <form class="modal-body-modern" onsubmit="handleSaveGite(event, ${isEdit ? `'${giteToEdit.id}'` : 'null'}); return false;">
+                <!-- Informations générales -->
+                <div class="form-section-modern">
+                    <div class="form-section-title">
+                        <i data-lucide="info"></i>
+                        Informations générales
                     </div>
-                
-                    <div class="form-group">
-                        <label>
-                            <svg class="icon-label" width="20" height="20" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <circle cx="24" cy="20" r="4"/>
-                                <path d="M24 40 L24 28 C24 28 12 32 12 40"/>
-                                <path d="M24 28 C24 28 36 32 36 40 L36 40 L24 40"/>
-                            </svg>
-                            Capacité
-                        </label>
-                        <input type="number" name="capacity" min="1" max="20" placeholder="Nombre de personnes" value="${isEdit && giteToEdit.capacity ? giteToEdit.capacity : ''}">
+                    
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Nom du gîte *</label>
+                        <input type="text" name="name" class="form-input-modern" required placeholder="Ex: Gîte des Vignes" value="${isEdit ? (giteToEdit.name || '') : ''}">
                     </div>
-                    <div class="form-group">
-                        <label>
-                            <svg class="icon-label" width="20" height="20" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <circle cx="24" cy="24" r="4"/>
-                                <path d="M24 8 L24 16"/>
-                                <path d="M24 32 L24 40"/>
-                                <path d="M8 24 L16 24"/>
-                                <path d="M32 24 L40 24"/>
-                            </svg>
-                            Localisation
-                        </label>
-                        <input type="text" name="location" placeholder="Ex: Trévoux, Ain" value="${isEdit ? (giteToEdit.address || '') : ''}">
-                    </div>
-                
-                    <div class="form-group">
-                        <label>
-                            <svg class="icon-label" width="20" height="20" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <circle cx="24" cy="24" r="16"/>
-                                <circle cx="24" cy="24" r="4"/>
-                            </svg>
-                            Couleur
-                        </label>
-                        <input type="color" name="color" value="${isEdit ? (giteToEdit.color || '#667eea') : '#667eea'}">
-                    </div>
-                
-                    <div class="form-group full-width">
-                        <label>Type de propriété</label>
-                        <div class="property-type-grid">
-                            <button type="button" class="property-type-btn${iconValue==='house-simple'?' active':''}" data-icon="house-simple" title="Maison simple">
-                                <svg viewBox="0 0 64 64">
-                                    <rect x="14" y="28" width="36" height="28" fill="white" stroke="#2D3436" stroke-width="2.5"/>
-                                    <path d="M8 28 L32 8 L56 28" fill="#ff7675" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="42" y="10" width="6" height="10" fill="#ff7675"/>
-                                    <rect x="26" y="40" width="12" height="16" fill="#0984e3"/>
-                                    <rect x="18" y="34" width="6" height="6" fill="#74b9ff"/>
-                                </svg>
-                                <span>Maison</span>
-                            </button>
-                            <button type="button" class="property-type-btn${iconValue==='apartment'?' active':''}" data-icon="apartment" title="Appartement">
-                                <svg viewBox="0 0 64 64">
-                                    <rect x="18" y="8" width="28" height="48" rx="2" fill="#74b9ff" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="26" y="42" width="12" height="14" fill="#0984e3"/>
-                                    <rect x="22" y="16" width="8" height="8" fill="white"/>
-                                    <rect x="34" y="16" width="8" height="8" fill="white"/>
-                                    <rect x="22" y="28" width="8" height="8" fill="white"/>
-                                    <rect x="34" y="28" width="8" height="8" fill="white"/>
-                                </svg>
-                                <span>Appartement</span>
-                            </button>
-                            <button type="button" class="property-type-btn${iconValue==='studio'?' active':''}" data-icon="studio" title="Studio">
-                                <svg viewBox="0 0 64 64">
-                                    <rect x="8" y="20" width="32" height="36" fill="white" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="32" y="12" width="24" height="24" fill="#ffeaa7" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="14" y="32" width="20" height="16" fill="#74b9ff" fill-opacity="0.5"/>
-                                    <line x1="44" y1="36" x2="44" y2="56" stroke="#2D3436" stroke-width="2.5"/>
-                                </svg>
-                                <span>Studio</span>
-                            </button>
-                            <button type="button" class="property-type-btn${iconValue==='chalet'?' active':''}" data-icon="chalet" title="Chalet">
-                                <svg viewBox="0 0 64 64">
-                                    <path d="M32 6 L6 56 H58 Z" fill="#fdcb6e" stroke="#2D3436" stroke-width="2.5"/>
-                                    <path d="M32 6 L10 48" stroke="#ff7675" stroke-width="4"/>
-                                    <path d="M32 6 L54 48" stroke="#ff7675" stroke-width="4"/>
-                                    <circle cx="32" cy="26" r="6" fill="white" stroke="#2D3436" stroke-width="2.5"/>
-                                    <path d="M26 56 v-14 h12 v14" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/>
-                                </svg>
-                                <span>Chalet</span>
-                            </button>
-                            <button type="button" class="property-type-btn${iconValue==='castle'?' active':''}" data-icon="castle" title="Château">
-                                <svg viewBox="0 0 64 64">
-                                    <rect x="8" y="22" width="12" height="34" fill="white" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="44" y="22" width="12" height="34" fill="white" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="20" y="28" width="24" height="28" fill="white" stroke="#2D3436" stroke-width="2.5"/>
-                                    <path d="M8 22 L14 10 L20 22" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/>
-                                    <path d="M44 22 L50 10 L56 22" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="20" y="22" width="24" height="6" fill="#0984e3"/>
-                                    <path d="M28 56 v-10 a4 4 0 0 1 8 0 v10" fill="#fdcb6e" stroke="#2D3436" stroke-width="2.5"/>
-                                </svg>
-                                <span>Château</span>
-                            </button>
-                            <button type="button" class="property-type-btn${iconValue==='camper'?' active':''}" data-icon="camper" title="Camping-car">
-                                <svg viewBox="0 0 64 64">
-                                    <circle cx="20" cy="52" r="5" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/>
-                                    <circle cx="44" cy="52" r="5" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="10" y="24" width="44" height="24" fill="#ffeaa7" stroke="#2D3436" stroke-width="2.5"/>
-                                    <path d="M8 24 L6 16 L58 16 L56 24 Z" fill="#ff7675" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="38" y="30" width="10" height="18" fill="white"/>
-                                    <rect x="16" y="32" width="12" height="10" fill="#74b9ff"/>
-                                </svg>
-                                <span>Camping-car</span>
-                            </button>
-                            <button type="button" class="property-type-btn${iconValue==='church'?' active':''}" data-icon="church" title="Lieu atypique">
-                                <svg viewBox="0 0 64 64">
-                                    <rect x="6" y="24" width="52" height="32" fill="#ff7675" stroke="#2D3436" stroke-width="2.5"/>
-                                    <path d="M4 24 L32 10 L60 24" fill="#0984e3" stroke="#2D3436" stroke-width="2.5"/>
-                                    <rect x="24" y="32" width="16" height="24" fill="#ffeaa7" stroke="#2D3436" stroke-width="2.5"/>
-                                    <line x1="32" y1="32" x2="32" y2="56" stroke="#2D3436" stroke-width="2.5"/> 
-                                    <circle cx="32" cy="20" r="4" fill="white" stroke="#2D3436" stroke-width="2.5"/>
-                                </svg>
-                                <span>Atypique</span>
-                            </button>
-                            <button type="button" class="property-type-btn${iconValue==='house'?' active':''}" data-icon="house" title="Maison traditionnelle">
-                                <svg viewBox="0 0 64 64">
-                                    <rect x="10" y="48" width="44" height="8" rx="2" fill="#fdcb6e" stroke="#2D3436" stroke-width="2.5"/>
-                                    <path d="M14 50 A 20 20 0 0 1 50 50" stroke="#2D3436" stroke-width="3" fill="#74b9ff" fill-opacity="0.4"/>
-                                    <line x1="32" y1="18" x2="32" y2="50" stroke="#2D3436" stroke-width="2"/>
-                                </svg>
-                                <span>Tente</span>
-                            </button>
+                    
+                    <div class="form-grid-2">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Capacité</label>
+                            <input type="number" name="capacity" class="form-input-modern" min="1" max="20" placeholder="Personnes" value="${isEdit && giteToEdit.capacity ? giteToEdit.capacity : ''}">
                         </div>
-                        <input type="hidden" name="icon" id="icon-value" value="${iconValue}">
-                    </div>
-                
-                    <div class="form-group full-width">
-                        <label>
-                            <svg class="icon-label" width="20" height="20" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path d="M8 12 L40 12 L40 36 L8 36 Z"/>
-                                <path d="M12 20 L36 20"/>
-                                <path d="M12 28 L24 28"/>
-                            </svg>
-                            URLs de synchronisation iCal
-                        </label>
-                        <small style="display: block; margin-bottom: 12px; color: #636e72;">
-                            💡 L'icône de la plateforme s'affiche automatiquement à gauche quand vous sélectionnez dans la liste
-                        </small>
-                        <div id="ical-urls-container">
-                            ${icalFieldsHtml}
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Localisation</label>
+                            <input type="text" name="location" class="form-input-modern" placeholder="Ex: Trévoux, Ain" value="${isEdit ? (giteToEdit.address || '') : ''}">
                         </div>
-                        <button type="button" class="btn-neo save" onclick="window.addIcalUrlField()">
-                            <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <circle cx="24" cy="24" r="16"/>
-                                <path d="M24 16 L24 32"/>
-                                <path d="M16 24 L32 24"/>
-                            </svg>
-                            Ajouter une URL iCal
-                        </button>
-                        <small>Synchronisez avec Airbnb, Booking.com, etc.</small>
+                    </div>
+                    
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Couleur d'affichage</label>
+                        <input type="color" name="color" class="form-input-modern" value="${isEdit ? (giteToEdit.color || '#667eea') : '#667eea'}">
                     </div>
                 </div>
-            
-                <div class="form-actions">
-                    <button type="button" class="btn-neo" onclick="this.closest('.modal-overlay').remove()">
-                        Annuler
-                    </button>
-                    <button type="submit" class="btn-neo save">
-                        <svg width="20" height="20" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
-                            <path d="M8 24 L20 36 L40 12"/>
-                        </svg>
-                        ${isEdit ? 'Modifier' : 'Créer le gîte'}
+                
+                <!-- Type de propriété -->
+                <div class="form-section-modern">
+                    <div class="form-section-title">
+                        <i data-lucide="home"></i>
+                        Type de propriété
+                    </div>
+                    
+                    <div class="icon-type-grid">
+                        <button type="button" class="icon-type-btn${iconValue==='house-simple'?' active':''}" data-icon="house-simple" title="Maison simple">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 28 L32 12 L52 28 L52 52 L12 52 Z"/>
+                                <rect x="26" y="38" width="12" height="14"/>
+                                <rect x="18" y="32" width="8" height="8"/>
+                                <rect x="38" y="32" width="8" height="8"/>
+                            </svg>
+                            <span>Maison</span>
+                        </button>
+                        <button type="button" class="icon-type-btn${iconValue==='apartment'?' active':''}" data-icon="apartment" title="Appartement">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="18" y="8" width="28" height="48" rx="2"/>
+                                <rect x="26" y="42" width="12" height="14"/>
+                                <line x1="24" y1="16" x2="28" y2="16"/><line x1="36" y1="16" x2="40" y2="16"/>
+                                <line x1="24" y1="22" x2="28" y2="22"/><line x1="36" y1="22" x2="40" y2="22"/>
+                                <line x1="24" y1="28" x2="28" y2="28"/><line x1="36" y1="28" x2="40" y2="28"/>
+                                <line x1="24" y1="34" x2="28" y2="34"/><line x1="36" y1="34" x2="40" y2="34"/>
+                            </svg>
+                            <span>Appartement</span>
+                        </button>
+                        <button type="button" class="icon-type-btn${iconValue==='studio'?' active':''}" data-icon="studio" title="Studio">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="14" y="20" width="36" height="32"/>
+                                <path d="M14 28 L50 28"/>
+                                <circle cx="32" cy="38" r="6"/>
+                                <rect x="22" y="46" width="8" height="6"/>
+                                <rect x="34" y="46" width="8" height="6"/>
+                            </svg>
+                            <span>Studio</span>
+                        </button>
+                        <button type="button" class="icon-type-btn${iconValue==='chalet'?' active':''}" data-icon="chalet" title="Chalet">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 28 L32 8 L56 28 L56 54 L8 54 Z"/>
+                                <path d="M18 28 L32 16 L46 28"/>
+                                <rect x="28" y="40" width="8" height="14"/>
+                                <circle cx="22" cy="35" r="2"/>
+                                <circle cx="42" cy="35" r="2"/>
+                            </svg>
+                            <span>Chalet</span>
+                        </button>
+                        <button type="button" class="icon-type-btn${iconValue==='castle'?' active':''}" data-icon="castle" title="Château">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 24 L8 54 L20 54 L20 28 L44 28 L44 54 L56 54 L56 24"/>
+                                <rect x="14" y="10" width="4" height="14"/><rect x="46" y="10" width="4" height="14"/>
+                                <path d="M20 28 L20 54 L44 54 L44 28"/>
+                                <path d="M28 54 L28 42 A4 4 0 0 1 36 42 L36 54"/>
+                            </svg>
+                            <span>Château</span>
+                        </button>
+                        <button type="button" class="icon-type-btn${iconValue==='camper'?' active':''}" data-icon="camper" title="Camping-car">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="12" y="24" width="40" height="20" rx="2"/>
+                                <circle cx="20" cy="50" r="4"/>
+                                <circle cx="44" cy="50" r="4"/>
+                                <line x1="20" y1="46" x2="20" y2="44"/>
+                                <line x1="44" y1="46" x2="44" y2="44"/>
+                                <rect x="38" y="28" width="8" height="8"/>
+                                <rect x="18" y="30" width="12" height="6"/>
+                            </svg>
+                            <span>Camping-car</span>
+                        </button>
+                        <button type="button" class="icon-type-btn${iconValue==='church'?' active':''}" data-icon="church" title="Lieu atypique">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 28 L32 12 L54 28 L54 54 L10 54 Z"/>
+                                <rect x="26" y="38" width="12" height="16"/>
+                                <line x1="32" y1="38" x2="32" y2="54"/>
+                                <circle cx="32" cy="24" r="3"/>
+                                <line x1="32" y1="12" x2="32" y2="21"/>
+                            </svg>
+                            <span>Atypique</span>
+                        </button>
+                        <button type="button" class="icon-type-btn${iconValue==='house'?' active':''}" data-icon="house" title="Tente">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 30 L32 10 L54 30 L54 54 L10 54 Z"/>
+                                <rect x="26" y="38" width="12" height="16"/>
+                                <rect x="18" y="32" width="8" height="8"/>
+                                <rect x="38" y="32" width="8" height="8"/>
+                            </svg>
+                            <span>Tente</span>
+                        </button>
+                    </div>
+                    <input type="hidden" name="icon" id="icon-value" value="${iconValue}">
+                </div>
+                
+                <!-- Synchronisation iCal -->
+                <div class="form-section-modern">
+                    <div class="form-section-title">
+                        <i data-lucide="calendar"></i>
+                        Synchronisation iCal
+                    </div>
+                    
+                    <div class="ical-urls-container" id="ical-urls-container">
+                        ${icalFieldsHtml}
+                    </div>
+                    
+                    <button type="button" class="btn-add-url-modern" onclick="window.addIcalUrlField()">
+                        <i data-lucide="plus"></i>
+                        Ajouter une plateforme
                     </button>
                 </div>
             </form>
+            
+            <div class="form-actions-modern">
+                <button type="button" class="btn-modern btn-modern-cancel" onclick="this.closest('.modal-overlay').remove()">
+                    <i data-lucide="x"></i>
+                    Annuler
+                </button>
+                <button type="submit" form="gite-form-modern" class="btn-modern btn-modern-save" onclick="this.closest('form').dispatchEvent(new Event('submit'))">
+                    <i data-lucide="check"></i>
+                    ${isEdit ? 'Enregistrer' : 'Créer'}
+                </button>
+            </div>
         </div>
     `;
     
     document.body.appendChild(modal);
     
+    // Initialiser Lucide icons
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+    
     // Initialiser l'icône par défaut pour le premier champ
     setTimeout(() => {
-        const firstSelect = document.querySelector('.ical-platform');
-        if (firstSelect) {
-            window.updatePlatformIcon(firstSelect);
-        }
-        
         // Gérer la sélection du type de propriété
-        const propertyButtons = document.querySelectorAll('.property-type-btn');
+        const propertyButtons = document.querySelectorAll('.icon-type-btn');
         const iconInput = document.getElementById('icon-value');
         
         propertyButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                // Retirer la classe active de tous les boutons
                 propertyButtons.forEach(b => b.classList.remove('active'));
-                
-                // Ajouter la classe active au bouton cliqué
                 btn.classList.add('active');
-                
-                // Mettre à jour la valeur cachée
                 iconInput.value = btn.dataset.icon;
             });
         });
@@ -406,9 +407,20 @@ window.showAddGiteForm = function(giteToEdit = null) {
         const removeButtons = document.querySelectorAll('.btn-remove-ical');
         removeButtons.forEach(btn => {
             btn.addEventListener('click', function() {
-                this.closest('.ical-url-item').remove();
+                this.closest('.ical-url-row').remove();
             });
         });
+        
+        // Fix submit button
+        const submitBtn = modal.querySelector('.btn-modern-save');
+        const form = modal.querySelector('form');
+        if (submitBtn && form) {
+            form.id = 'gite-form-modern';
+            submitBtn.onclick = (e) => {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit'));
+            };
+        }
     }, 100);
 };
 
@@ -418,11 +430,10 @@ window.showAddGiteForm = function(giteToEdit = null) {
 window.addIcalUrlField = function() {
     const container = document.getElementById('ical-urls-container');
     const newField = document.createElement('div');
-    newField.className = 'ical-url-item';
+    newField.className = 'ical-url-row';
     newField.innerHTML = `
-        <div class="platform-icon-preview"></div>
-        <select class="ical-platform" onchange="window.updatePlatformIcon(this)">
-            <option value="">Autre plateforme</option>
+        <select class="form-select-modern ical-platform" onchange="window.updatePlatformIcon(this)">
+            <option value="">Plateforme</option>
             <option value="airbnb">Airbnb</option>
             <option value="booking">Booking.com</option>
             <option value="vrbo">Vrbo</option>
@@ -431,20 +442,16 @@ window.addIcalUrlField = function() {
             <option value="tripadvisor">TripAdvisor</option>
             <option value="gites-de-france">Gîtes de France</option>
         </select>
-        <input type="url" class="ical-url-input" placeholder="https://...">
-        <button type="button" class="btn-neo delete" title="Supprimer" style="padding: 8px; width: auto;">
-            <svg width="18" height="18" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="24" cy="24" r="16"/>
-                <path d="M16 24 L32 24"/>
-            </svg>
+        <input type="url" class="form-input-modern ical-url-input" placeholder="https://...">
+        <button type="button" class="btn-icon-modern btn-remove-ical" title="Supprimer">
+            <i data-lucide="trash-2"></i>
         </button>
     `;
     container.appendChild(newField);
     
-    // Initialiser l'icône par défaut
-    const select = newField.querySelector('.ical-platform');
-    if (select) {
-        window.updatePlatformIcon(select);
+    // Réinitialiser Lucide icons
+    if (window.lucide) {
+        lucide.createIcons();
     }
     
     // Ajouter l'event listener pour le bouton supprimer
@@ -458,27 +465,12 @@ window.addIcalUrlField = function() {
 
 /**
  * Mettre à jour l'icône affichée selon la plateforme sélectionnée
+ * (Version moderne - fonction simplifiée)
  */
 window.updatePlatformIcon = function(selectElement) {
-    const platform = selectElement.value;
-    const iconPreview = selectElement.closest('.ical-url-item').querySelector('.platform-icon-preview');
-    
-    if (window.PlatformIcons) {
-        iconPreview.innerHTML = window.PlatformIcons.get(platform);
-        
-        // Ajouter le nom de la plateforme pour le tooltip
-        const platformNames = {
-            'airbnb': 'Airbnb',
-            'booking': 'Booking.com',
-            'vrbo': 'Vrbo',
-            'abritel': 'Abritel',
-            'homeaway': 'HomeAway',
-            'tripadvisor': 'TripAdvisor',
-            'gites-de-france': 'Gîtes de France',
-            '': 'Autre plateforme'
-        };
-        iconPreview.setAttribute('data-platform', platformNames[platform] || 'Plateforme');
-    }
+    // Dans le design moderne, nous n'avons plus d'icônes de plateforme séparées
+    // Cette fonction est conservée uniquement pour la compatibilité
+    return;
 }
 
 window.handleSaveGite = async function(event, giteId = null) {
@@ -489,7 +481,7 @@ window.handleSaveGite = async function(event, giteId = null) {
     
     // Collecter toutes les URLs iCal
     const icalUrls = [];
-    const icalItems = document.querySelectorAll('.ical-url-item');
+    const icalItems = document.querySelectorAll('.ical-url-row');
     icalItems.forEach(item => {
         const platform = item.querySelector('.ical-platform').value;
         const url = item.querySelector('.ical-url-input').value.trim();
@@ -507,17 +499,17 @@ window.handleSaveGite = async function(event, giteId = null) {
         ical_sources: icalUrls.length > 0 ? icalUrls : []
     };
     
-    console.log('📤 Données gîte à sauvegarder:', giteData);
+    // console.log('📤 Données gîte à sauvegarder:', giteData);
     
     try {
         let result;
         if (isEdit) {
             result = await window.gitesManager.update(giteId, giteData);
-            console.log('✅ Gîte modifié:', result);
+            // console.log('✅ Gîte modifié:', result);
             showToast(`Gîte "${giteData.name}" modifié avec succès !`, 'success');
         } else {
             result = await window.gitesManager.create(giteData);
-            console.log('✅ Gîte créé:', result);
+            // console.log('✅ Gîte créé:', result);
             showToast(`Gîte "${giteData.name}" créé avec succès !`, 'success');
         }
         
@@ -1137,12 +1129,12 @@ document.head.appendChild(gitesStyles);
 // GESTION DE L'ORDRE D'AFFICHAGE
 // ================================================================
 
-window.moveGiteOrder = function(giteId, direction) {
+window.moveGiteOrder = async function(giteId, direction) {
     try {
-        console.log(`🔄 Déplacement du gîte ${giteId} vers ${direction}`);
+        // console.log(`🔄 Déplacement du gîte ${giteId} vers ${direction}`);
         
         // Trouver la carte du gîte dans le DOM
-        const currentCard = document.querySelector(`.gite-card[data-gite-id="${giteId}"]`);
+        const currentCard = document.querySelector(`.gite-card-modern[data-gite-id="${giteId}"]`);
         if (!currentCard) {
             console.error('Carte du gîte non trouvée');
             return;
@@ -1150,15 +1142,15 @@ window.moveGiteOrder = function(giteId, direction) {
         
         // Trouver la carte à échanger
         const targetCard = direction === 'up' ? currentCard.previousElementSibling : currentCard.nextElementSibling;
-        if (!targetCard || !targetCard.classList.contains('gite-card')) {
+        if (!targetCard || !targetCard.classList.contains('gite-card-modern')) {
             if (typeof showToast === 'function') {
                 showToast('Impossible de déplacer le gîte', 'warning');
             }
             return;
         }
         
-        // Déplacer dans le gestionnaire
-        const success = window.gitesManager.moveGite(giteId, direction);
+        // Déplacer dans le gestionnaire (maintenant async)
+        const success = await window.gitesManager.moveGite(giteId, direction);
         if (!success) return;
         
         // Échanger visuellement les cartes dans le DOM
@@ -1169,9 +1161,9 @@ window.moveGiteOrder = function(giteId, direction) {
         }
         
         // Mettre à jour les numéros d'ordre
-        const allCards = document.querySelectorAll('.gite-card');
+        const allCards = document.querySelectorAll('.gite-card-modern');
         allCards.forEach((card, index) => {
-            const orderNumber = card.querySelector('.gite-order-number');
+            const orderNumber = card.querySelector('.gite-order-number-modern');
             if (orderNumber) {
                 orderNumber.textContent = index + 1;
             }

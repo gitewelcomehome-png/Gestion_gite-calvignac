@@ -35,7 +35,7 @@ class AIAssistant {
      * Méthode conservée pour compatibilité mais non utilisée
      */
     setApiKey(key) {
-        console.log('ℹ️ L\'API est maintenant gérée côté serveur');
+        // console.log('ℹ️ L\'API est maintenant gérée côté serveur');
     }
 
     /**
@@ -581,7 +581,7 @@ Réponds UNIQUEMENT en JSON avec ce format exact :
         progressText.textContent = 'Application des modifications...';
         progressBar.style.width = '90%';
 
-        console.log('🤖 RETOUR IA:', response);
+        // console.log('🤖 RETOUR IA:', response);
 
         // Parser la réponse JSON
         let improvedFields;

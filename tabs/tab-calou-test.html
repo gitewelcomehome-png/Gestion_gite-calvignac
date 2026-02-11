@@ -330,7 +330,7 @@ function toggleCalouTheme() {
         document.querySelectorAll('link[href*="calou"]').forEach(link => {
             link.disabled = true;
         });
-        console.log('❌ CALOU désactivé - Retour à flat-outline.css');
+        // console.log('❌ CALOU désactivé - Retour à flat-outline.css');
     } else {
         html.classList.add('calou-theme');
         button.textContent = 'Désactiver CALOU';
@@ -358,7 +358,7 @@ function toggleCalouTheme() {
             });
         }
         
-        console.log('✅ CALOU activé - Design System appliqué');
+        // console.log('✅ CALOU activé - Design System appliqué');
     }
     
     // Sauvegarder la préférence
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function listIcons() {
     if (window.CALOUIcons) {
         const icons = window.CALOUIcons.list();
-        console.log('🎨 Icônes disponibles:', icons);
+        // console.log('🎨 Icônes disponibles:', icons);
         alert(`${icons.length} icônes disponibles (voir console)`);
     } else {
         alert('Système d\'icônes non chargé');
