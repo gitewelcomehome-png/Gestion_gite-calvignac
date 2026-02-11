@@ -4,8 +4,8 @@
 // Logique de synchronisation intelligente :
 // - Détection des nouvelles réservations (ajout)
 // - Détection des modifications (mise à jour SI manual_override = false)
-// - Détection des annulations (disparition du flux iCal)
-// - Protection des réservations modifiées manuellement
+// - Détection des annulations (UID absent du flux iCal même si manual_override = true)
+// - Protection contre écrasement des données modifiées manuellement (manual_override)
 // ================================================================
 
 let syncInProgress = false;
@@ -367,9 +367,11 @@ async function syncCalendar(giteId, platform, url) {
                 dates: `${existing.check_in} → ${existing.check_out}`
             });
             
-            if (!presentUids.has(uid) && !existing.manual_override) {
+            // ⚠️ DÉTECTION ANNULATION : manual_override ne bloque PAS (sinon aucune annulation détectée)
+            // manual_override protège uniquement contre les MISES À JOUR de données
+            if (!presentUids.has(uid)) {
                 // Réservation disparue du flux iCal → Stocker pour confirmation utilisateur
-                console.log(`🗑️ ANNULATION DÉTECTÉE: ${existing.client_name} (${existing.check_in})`);
+                console.log(`🗑️ ANNULATION DÉTECTÉE: ${existing.client_name} (${existing.check_in}) - UID absent du flux`);
                 
                 window.pendingCancellations.push({
                     id: existing.id,
