@@ -2185,6 +2185,8 @@ async function refreshDashboard() {
     await updateFinancialIndicators();
     await updateKPIPerformance();
     await afficherGraphiqueTresorerieDashboard();
+    await afficherGraphiqueReservationsMensuelles();
+    await afficherGraphiqueCAComparaison();
     // initializeTodoModal(); // Supprimé - modal créé dynamiquement
     initializeReponseWhatsappModal();
     
