@@ -124,7 +124,10 @@ async function syncCalendar(giteId, platform, url) {
     }
 
     // Essayer plusieurs proxies CORS
+    // 1. Notre proxy Vercel serverless (priorité)
+    // 2. Proxies publics (fallback)
     const proxies = [
+        `/api/cors-proxy?url=${encodeURIComponent(url)}`,
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
         `https://api.codetabs.com/v1/proxy/?quest=${url}`
