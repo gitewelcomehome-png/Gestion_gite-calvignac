@@ -62,6 +62,11 @@
         'cm_clients',           // Table clients (problème permissions)
         'admin-monitoring',     // Page monitoring elle-même
         'loadTestCorrections',  // Fonction monitoring corrections
+        // Erreurs envoi emails (ne pas polluer console)
+        'Erreur envoi email',
+        'sendEmail',
+        'sendImmediateEmail',
+        'api.resend.com',
         // Ne PAS ignorer les autres erreurs
     ];
 
@@ -214,7 +219,7 @@
     console.error = function(...args) {
         const message = args.join(' ');
         
-        // Ne pas tracker si erreur d'extension
+        // Ne pas tracker ni afficher si erreur ignorée
         if (!shouldIgnoreError(message, '')) {
             // Envoyer au tracker
             const errorData = {
@@ -230,10 +235,10 @@
             };
 
             logError(errorData);
+            
+            // Appeler console.error original uniquement si pas ignoré
+            console.__originalError.apply(console, args);
         }
-
-        // Appeler console.error original
-        console.__originalError.apply(console, args);
     };
 
     console.warn = function(...args) {

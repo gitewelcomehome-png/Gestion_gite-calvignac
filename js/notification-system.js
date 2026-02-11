@@ -368,14 +368,12 @@ class NotificationSystem {
                     html: html
                 });
 
-                if (result.success) {
-                    // console.log('✅ Email de notification envoyé');
-                } else {
-                    console.error('❌ Erreur envoi email:', result.error);
+                if (!result.success) {
+                    // Erreur email catchée silencieusement (ne pas polluer console)
                 }
             }
         } catch (error) {
-            console.error('❌ Erreur sendImmediateEmail:', error);
+            // Erreur email catchée silencieusement
         }
     }
     

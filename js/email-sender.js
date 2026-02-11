@@ -47,7 +47,7 @@ async function sendEmail({ to, subject, html, fromName }) {
         return { success: true, data };
 
     } catch (error) {
-        console.error('❌ Erreur envoi email:', error);
+        // Erreur API email catchée silencieusement (ne pas polluer console)
         return { success: false, error: error.message };
     }
 }
