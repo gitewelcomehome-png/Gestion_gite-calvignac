@@ -4336,6 +4336,7 @@
             // console.log('📦 Versions: main.css v15.5 | gites-crud.js v5.2 | gite-form-modern.css v6.1 | ical-config-modern.js v1.0');
             
             // Attendre que Supabase soit initialisé
+            /* SYSTÈME NOTIFICATIONS DÉSACTIVÉ TEMPORAIREMENT
             const waitForSupabase = setInterval(() => {
                 if (window.supabaseClient) {
                     clearInterval(waitForSupabase);
@@ -4348,6 +4349,13 @@
             
             // Timeout après 5 secondes
             setTimeout(() => clearInterval(waitForSupabase), 5000);
+            */
+            
+            // Nettoyer le localStorage et forcer titre clean
+            localStorage.removeItem('notif_lastCheck');
+            document.title = 'Gestion Gîtes';
+            const badge = document.getElementById('notificationBadge');
+            if (badge) badge.style.display = 'none';
         });
     </script>
     
