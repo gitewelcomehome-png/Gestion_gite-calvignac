@@ -465,6 +465,8 @@ html.style-sidebar .week-column-body {
     justify-content: flex-end;
     gap: 8px;
     margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .btn-reservation {
@@ -477,11 +479,17 @@ html.style-sidebar .week-column-body {
     box-shadow: 2px 2px 0;
     transition: all 0.2s;
     min-width: 36px;
+    width: 36px;
     height: 36px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     border: 2px solid;
+    flex-shrink: 0;
+}
+
+.btn-reservation svg {
+    flex-shrink: 0;
 }
 
 .btn-reservation-edit {
