@@ -1338,6 +1338,11 @@ html.theme-dark a {
     gap: 20px;
     box-shadow: var(--shadow);
     height: 70px;
+    pointer-events: none; /* Laisse passer les clics vers les éléments en dessous */
+}
+
+.sticky-header > * {
+    pointer-events: auto; /* Réactive les clics sur les enfants directs */
 }
 
 .site-title {

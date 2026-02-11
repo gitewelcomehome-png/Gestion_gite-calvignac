@@ -17,10 +17,10 @@ window.pendingCancellations = [];
  * Synchroniser tous les calendriers iCal
  */
 async function syncAllCalendars() {
-    console.log('🔄 DÉBUT SYNCHRONISATION iCal');
+    // console.log('🔄 DÉBUT SYNCHRONISATION iCal');
     
     if (syncInProgress) {
-        console.log('⏸️ Sync déjà en cours, annulation');
+        // console.log('⏸️ Sync déjà en cours, annulation');
         return;
     }
 
@@ -31,7 +31,7 @@ async function syncAllCalendars() {
         window.pendingCancellations = [];
 
         const gites = await window.gitesManager.getAll();
-        console.log(`📋 ${gites.length} gîte(s) à synchroniser`);
+        // console.log(`📋 ${gites.length} gîte(s) à synchroniser`);
         
         let totalAdded = 0;
         let totalUpdated = 0;
@@ -40,16 +40,16 @@ async function syncAllCalendars() {
         let totalErrors = 0;
 
         for (const gite of gites) {
-            console.log(`🏠 Synchronisation gîte: ${gite.name} (ID: ${gite.id})`);
+            // console.log(`🏠 Synchronisation gîte: ${gite.name} (ID: ${gite.id})`);
             addMessage(`Synchronisation ${gite.name}...`, 'info');
             
             // Récupérer les sources iCal (format unifié objet)
             let icalSources = gite.ical_sources || {};
-            console.log(`  📦 ical_sources pour ${gite.name}:`, typeof icalSources, icalSources);
+            // console.log(`  📦 ical_sources pour ${gite.name}:`, typeof icalSources, icalSources);
             
             // NORMALISER : Si array, convertir en objet
             if (Array.isArray(icalSources)) {
-                console.log(`  🔧 Conversion array → objet pour ${gite.name}`);
+                // console.log(`  🔧 Conversion array → objet pour ${gite.name}`);
                 const normalized = {};
                 icalSources.forEach((item, index) => {
                     if (typeof item === 'object' && item.platform && item.url) {
@@ -66,7 +66,7 @@ async function syncAllCalendars() {
                     }
                 });
                 icalSources = normalized;
-                console.log(`  ✅ Normalisé en:`, icalSources);
+                // console.log(`  ✅ Normalisé en:`, icalSources);
             }
             
             // Vérifier que c'est bien un objet après normalisation
@@ -77,16 +77,16 @@ async function syncAllCalendars() {
             }
 
             const platforms = Object.entries(icalSources).filter(([platform, url]) => url && typeof url === 'string');
-            console.log(`  🔍 Entrées trouvées:`, Object.entries(icalSources));
-            console.log(`  ✅ Entrées valides (url string):`, platforms);
+            // console.log(`  🔍 Entrées trouvées:`, Object.entries(icalSources));
+            // console.log(`  ✅ Entrées valides (url string):`, platforms);
 
             if (platforms.length === 0) {
-                console.log(`  ℹ️ Aucune source iCal configurée pour ${gite.name}`);
+                // console.log(`  ℹ️ Aucune source iCal configurée pour ${gite.name}`);
                 addMessage(`  ℹ️ Aucune source iCal configurée`, 'info');
                 continue;
             }
             
-            console.log(`  📡 ${platforms.length} plateforme(s) configurée(s):`, platforms.map(p => p[0]));
+            // console.log(`  📡 ${platforms.length} plateforme(s) configurée(s):`, platforms.map(p => p[0]));
 
             for (const [platform, url] of platforms) {
                 try {
@@ -154,19 +154,19 @@ async function syncAllCalendars() {
             
             window.pendingCancellations = uniqueCancellations;
             
-            console.log(`⚠️ ${window.pendingCancellations.length} annulation(s) unique(s) détectée(s) - Affichage modal`);
+            // console.log(`⚠️ ${window.pendingCancellations.length} annulation(s) unique(s) détectée(s) - Affichage modal`);
             showCancellationConfirmationModal();
         } else {
-            console.log('✅ Aucune annulation détectée');
+            // console.log('✅ Aucune annulation détectée');
         }
 
-        console.log(`✅ FIN SYNCHRONISATION - Résumé:`, {
-            ajoutées: totalAdded,
-            mises_à_jour: totalUpdated,
-            annulées: totalCancelled,
-            ignorées: totalSkipped,
-            erreurs: totalErrors
-        });
+        // console.log(`✅ FIN SYNCHRONISATION - Résumé:`, {
+        //     ajoutées: totalAdded,
+        //     mises_à_jour: totalUpdated,
+        //     annulées: totalCancelled,
+        //     ignorées: totalSkipped,
+        //     erreurs: totalErrors
+        // });
 
         return {
             added: totalAdded,
@@ -182,7 +182,7 @@ async function syncAllCalendars() {
         throw error;
     } finally {
         syncInProgress = false;
-        console.log('🔓 Sync terminée, verrou libéré');
+        // console.log('🔓 Sync terminée, verrou libéré');
     }
 }
 
@@ -254,13 +254,13 @@ async function syncCalendar(giteId, platform, url) {
         let cancelled = 0;
         let skipped = 0;
 
-        console.log(`  📥 Parsing flux iCal: ${vevents.length} événement(s) trouvé(s)`);
+        // console.log(`  📥 Parsing flux iCal: ${vevents.length} événement(s) trouvé(s)`);
 
         // ==========================================
         // ÉTAPE 1 : CHARGER LES RÉSERVATIONS BDD
         // ==========================================
         const today = new Date().toISOString().split('T')[0];
-        console.log(`  📊 Chargement BDD (gîte: ${giteName}, plateforme: ${platform}, date: ${today})`);
+        // console.log(`  📊 Chargement BDD (gîte: ${giteName}, plateforme: ${platform}, date: ${today})`);
         
         const { data: existingReservations, error: dbError } = await window.supabaseClient
             .from('reservations')
@@ -274,7 +274,7 @@ async function syncCalendar(giteId, platform, url) {
             return { added: 0, updated: 0, cancelled: 0, skipped: 0 };
         }
 
-        console.log(`  💾 ${existingReservations?.length || 0} réservation(s) trouvée(s) en BDD`);
+        // console.log(`  💾 ${existingReservations?.length || 0} réservation(s) trouvée(s) en BDD`);
         
         // Indexer par DATES uniquement (logique simplifiée)
         const bddByDates = {}; // { "2026-03-06|2026-03-08": [...réservations...] }
@@ -285,8 +285,8 @@ async function syncCalendar(giteId, platform, url) {
                     bddByDates[dateKey] = [];
                 }
                 bddByDates[dateKey].push(r);
-                const statusEmoji = r.status === 'cancelled' ? '❌' : '✅';
-                console.log(`    ${statusEmoji} BDD: ${r.client_name} → ${r.check_in} au ${r.check_out} (${r.status})`);
+                // const statusEmoji = r.status === 'cancelled' ? '❌' : '✅';
+                // console.log(`    ${statusEmoji} BDD: ${r.client_name} → ${r.check_in} au ${r.check_out} (${r.status})`);
             });
         }
         
@@ -326,7 +326,7 @@ async function syncCalendar(giteId, platform, url) {
             // Marquer ces dates comme présentes dans iCal
             icalDates.add(dateKey);
             
-            console.log(`    📅 iCal: ${summary} → ${dateDebut} au ${dateFin}`);
+            // console.log(`    📅 iCal: ${summary} → ${dateDebut} au ${dateFin}`);
 
             // Déterminer le site (nom affiché de la plateforme)
             let site;
@@ -368,17 +368,17 @@ async function syncCalendar(giteId, platform, url) {
                 if (existing.manual_override) {
                     // Protection : ne jamais toucher aux réservations manuelles
                     skipped++;
-                    console.log(`      ⏭️ Ignorée (manual_override)`);
+                    // console.log(`      ⏭️ Ignorée (manual_override)`);
                 } else if (existing.status === 'cancelled') {
                     // Réservation annulée mais réapparue dans iCal → RÉACTIVER
                     skipped++;
-                    console.log(`      ⚠️ Ignorée (déjà cancelled, ne pas réactiver)`);
+                    // console.log(`      ⚠️ Ignorée (déjà cancelled, ne pas réactiver)`);
                 } else {
                     // Mise à jour normale
                     try {
                         await updateReservationFromIcal(existing.id, reservation);
                         updated++;
-                        console.log(`      ✏️ Mise à jour`);
+                        // console.log(`      ✏️ Mise à jour`);
                     } catch (error) {
                         console.error(`❌ Erreur mise à jour ${summary}:`, error);
                     }
@@ -388,7 +388,7 @@ async function syncCalendar(giteId, platform, url) {
                 try {
                     await addReservationFromIcal(reservation);
                     added++;
-                    console.log(`      ➕ Ajoutée`);
+                    // console.log(`      ➕ Ajoutée`);
                 } catch (error) {
                     console.error(`❌ Erreur insertion ${summary}:`, error);
                 }
@@ -398,9 +398,9 @@ async function syncCalendar(giteId, platform, url) {
         // ==========================================
         // ÉTAPE 3 : DÉTECTER LES ANNULATIONS
         // ==========================================
-        console.log(`  🔎 Détection annulations:`);
-        console.log(`    - ${Object.keys(bddByDates).length} plage(s) de dates en BDD`);
-        console.log(`    - ${icalDates.size} plage(s) de dates dans iCal`);
+        // console.log(`  🔎 Détection annulations:`);
+        // console.log(`    - ${Object.keys(bddByDates).length} plage(s) de dates en BDD`);
+        // console.log(`    - ${icalDates.size} plage(s) de dates dans iCal`);
         
         for (const [dateKey, reservations] of Object.entries(bddByDates)) {
             const [checkIn, checkOut] = dateKey.split('|');
@@ -414,7 +414,7 @@ async function syncCalendar(giteId, platform, url) {
                 );
                 
                 if (reservationsActives.length > 0) {
-                    console.log(`    🗑️ ANNULATION: ${checkIn} → ${checkOut} (${reservationsActives.length} réservation(s))`);
+                    // console.log(`    🗑️ ANNULATION: ${checkIn} → ${checkOut} (${reservationsActives.length} réservation(s))`);
                     
                     // Ajouter au modal d'annulation
                     const idsToDelete = reservationsActives.map(r => r.id);
@@ -430,12 +430,12 @@ async function syncCalendar(giteId, platform, url) {
                     });
                     cancelled++;
                 } else {
-                    console.log(`    ⏭️ Ignorée: ${checkIn} → ${checkOut} (déjà cancelled ou manual_override)`);
+                    // console.log(`    ⏭️ Ignorée: ${checkIn} → ${checkOut} (déjà cancelled ou manual_override)`);
                 }
             }
         }
         
-        console.log(`  📊 Résultat: ${added} ajoutées, ${updated} mises à jour, ${cancelled} annulées, ${skipped} ignorées`);
+        // console.log(`  📊 Résultat: ${added} ajoutées, ${updated} mises à jour, ${cancelled} annulées, ${skipped} ignorées`);
 
         return { added, updated, cancelled, skipped };
 
@@ -610,7 +610,7 @@ async function showCancellationConfirmationModal() {
     const cancellations = window.pendingCancellations;
     if (!cancellations || cancellations.length === 0) return;
 
-    console.log('📢 Affichage modal annulations:', cancellations);
+    // console.log('📢 Affichage modal annulations:', cancellations);
 
     // Créer le modal
     const modal = document.createElement('div');
@@ -772,11 +772,11 @@ async function showCancellationConfirmationModal() {
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
 
-    console.log('✅ Modal ajoutée au DOM');
+    // console.log('✅ Modal ajoutée au DOM');
 
     // Événements
     document.getElementById('btn-cancel-ignore').addEventListener('click', () => {
-        console.log('🚫 Annulations ignorées par l\'utilisateur');
+        // console.log('🚫 Annulations ignorées par l\'utilisateur');
         window.pendingCancellations = [];
         document.body.removeChild(modal);
     });
@@ -790,7 +790,7 @@ async function showCancellationConfirmationModal() {
         style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
         document.head.appendChild(style);
 
-        console.log(`🔄 Confirmation: annulation de ${cancellations.length} réservation(s)`);
+        // console.log(`🔄 Confirmation: annulation de ${cancellations.length} réservation(s)`);
 
         let success = 0;
         let errors = 0;
@@ -828,7 +828,7 @@ async function showCancellationConfirmationModal() {
             }
         }
 
-        console.log(`✅ Annulation terminée: ${success} succès, ${errors} erreurs`);
+        // console.log(`✅ Annulation terminée: ${success} succès, ${errors} erreurs`);
     });
 }
 
