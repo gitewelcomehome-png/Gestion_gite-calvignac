@@ -41,13 +41,35 @@ async function syncAllCalendars() {
             addMessage(`Synchronisation ${gite.name}...`, 'info');
             
             // Récupérer les sources iCal (format unifié objet)
-            const icalSources = gite.ical_sources || {};
+            let icalSources = gite.ical_sources || {};
             console.log(`  📦 ical_sources pour ${gite.name}:`, typeof icalSources, icalSources);
             
-            // Vérifier que c'est bien un objet
+            // NORMALISER : Si array, convertir en objet
+            if (Array.isArray(icalSources)) {
+                console.log(`  🔧 Conversion array → objet pour ${gite.name}`);
+                const normalized = {};
+                icalSources.forEach((item, index) => {
+                    if (typeof item === 'object' && item.platform && item.url) {
+                        // Format: [{platform: 'airbnb', url: '...'}, ...]
+                        normalized[item.platform] = item.url;
+                    } else if (typeof item === 'string' && item.startsWith('http')) {
+                        // Format: ['https://...', 'http://...'] → deviner plateforme
+                        const platform = item.includes('airbnb') ? 'airbnb' 
+                                      : item.includes('abritel') ? 'abritel' 
+                                      : item.includes('vrbo') ? 'vrbo'
+                                      : item.includes('itea') ? 'gites-de-france'
+                                      : `plateforme_${index + 1}`;
+                        normalized[platform] = item;
+                    }
+                });
+                icalSources = normalized;
+                console.log(`  ✅ Normalisé en:`, icalSources);
+            }
+            
+            // Vérifier que c'est bien un objet après normalisation
             if (typeof icalSources !== 'object' || Array.isArray(icalSources)) {
-                console.error(`  ❌ Format ical_sources invalide:`, typeof icalSources, Array.isArray(icalSources));
-                addMessage(`  ❌ Format ical_sources invalide (utilisez l'interface pour corriger)`, 'error');
+                console.error(`  ❌ Format ical_sources invalide après normalisation`);
+                addMessage(`  ❌ Format ical_sources invalide`, 'error');
                 continue;
             }
 
@@ -140,8 +162,10 @@ async function syncAllCalendars() {
             oldReservations.forEach(r => {
                 const lastSeen = r.last_seen_in_ical ? new Date(r.last_seen_in_ical) : null;
                 
-                if (!lastSeen || lastSeen < sevenDaysAgo) {
-                    console.log(`  🔴 ANCIENNE: ${r.client_name} (${r.check_in}) - Dernière sync: ${lastSeen ? lastSeen.toLocaleDateString('fr-FR') : 'JAMAIS'}`);
+                // ⚠️ IMPORTANT : Ne détecter QUE les réservations qui ONT ÉTÉ vues puis ont disparu
+                // Ignorer les NULL (jamais synchronisées) pour éviter les faux positifs
+                if (lastSeen && lastSeen < sevenDaysAgo) {
+                    console.log(`  🔴 ANCIENNE: ${r.client_name} (${r.check_in}) - Dernière sync: ${lastSeen.toLocaleDateString('fr-FR')}`);
                     
                     // Ajouter aux annulations si pas déjà présente
                     const alreadyAdded = window.pendingCancellations.some(c => c.id === r.id);
@@ -161,7 +185,7 @@ async function syncAllCalendars() {
             
             if (window.pendingCancellations.length > 0) {
                 console.log(`  ⚠️ ${window.pendingCancellations.length} réservation(s) ancienne(s) ajoutée(s) pour confirmation`);
-                showCancellationConfirmationModal();
+                await showCancellationConfirmationModal();
             }
         }
 
@@ -575,7 +599,7 @@ function addMessage(message, type = 'info') {
 /**
  * 🚨 Afficher le modal de confirmation des annulations détectées
  */
-function showCancellationConfirmationModal() {
+async function showCancellationConfirmationModal() {
     const cancellations = window.pendingCancellations;
     if (!cancellations || cancellations.length === 0) return;
 
@@ -674,7 +698,8 @@ function showCancellationConfirmationModal() {
         // Récupérer le nom du gîte
         let giteName = `Gîte ${giteId}`;
         if (window.gitesManager) {
-            const gite = window.gitesManager.getAll().find(g => g.id === giteId);
+            const gites = await window.gitesManager.getAll();
+            const gite = gites.find(g => g.id === giteId);
             if (gite) giteName = gite.name;
         }
         
