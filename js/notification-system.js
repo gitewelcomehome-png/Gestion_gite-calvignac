@@ -772,8 +772,12 @@ class NotificationSystem {
         const isVisible = panel.style.display === 'block';
         
         if (isVisible) {
+            // ✅ FERMETURE : Marquer toutes comme lues et effacer le titre
             panel.style.display = 'none';
+            this.markAllAsRead();
+            this.updatePageTitle(0); // Enlever le compteur du titre
         } else {
+            // OUVERTURE : Afficher le panel
             this.renderNotifications();
             panel.style.display = 'block';
         }
