@@ -598,9 +598,6 @@ class NotificationSystem {
      * Mettre à jour le titre de la page avec le compteur
      */
     updatePageTitle(count) {
-        // ⚠️ DÉSACTIVÉ - Ne plus modifier le titre
-        return;
-        
         const baseTitle = 'Gestion Gîtes';
         
         if (count > 0) {
