@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌓 Système de Thèmes - iCalou</title>
+    <style>
+        /* ========================================
+           SYSTÈME DE THÈMES & VARIABLES CSS
+           ======================================== */
+        
+        :root[data-theme="light"] {
+            /* Couleurs de base */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            
+            /* Texte */
+            --text-primary: #2D3436;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            
+            /* Bordures & Ombres */
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+            
+            /* Boutons - Couleurs principales */
+            --btn-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --btn-success-hover: linear-gradient(135deg, #059669 0%, #047857 100%);
+            --btn-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --btn-danger-hover: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            --btn-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --btn-primary-hover: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            --btn-secondary: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --btn-secondary-hover: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            --btn-neutral: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            --btn-neutral-hover: linear-gradient(135deg, #475569 0%, #334155 100%);
+            --btn-info: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            --btn-info-hover: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+            --btn-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --btn-warning-hover: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            --btn-special: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --btn-special-hover: linear-gradient(135deg, #5568d3 0%, #6a3f91 100%);
+        }
+
+        :root[data-theme="dark"] {
+            /* Couleurs de base */
+            --bg-primary: #1e293b;
+            --bg-secondary: #0f172a;
+            --bg-gradient: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+            
+            /* Texte */
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            
+            /* Bordures & Ombres */
+            --border-color: #334155;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+            
+            /* Boutons - Couleurs principales (légèrement ajustées pour dark) */
+            --btn-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --btn-success-hover: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            --btn-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --btn-danger-hover: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            --btn-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --btn-primary-hover: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            --btn-secondary: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --btn-secondary-hover: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            --btn-neutral: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            --btn-neutral-hover: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+            --btn-info: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            --btn-info-hover: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+            --btn-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --btn-warning-hover: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            --btn-special: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --btn-special-hover: linear-gradient(135deg, #818cf8 0%, #9333ea 100%);
+        }
+
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Styles de la page */
+        body {
+            font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            padding: 40px 20px;
+            min-height: 100vh;
+            transition: background 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+        }
+
+        /* ========================================
+           CONTRÔLES DE THÈME
+           ======================================== */
+        
+        .theme-controls {
+            position: sticky;
+            top: 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            z-index: 100;
+        }
+
+        .theme-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .theme-switch {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            background: var(--border-color);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-switch.active {
+            background: var(--btn-special);
+        }
+
+        .theme-switch-toggle {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-switch.active .theme-switch-toggle {
+            transform: translateX(28px);
+        }
+
+        .theme-switch-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+        }
+
+        .theme-switch-icon.sun {
+            left: 6px;
+            color: #f59e0b;
+        }
+
+        .theme-switch-icon.moon {
+            right: 6px;
+            color: #cbd5e1;
+        }
+
+        .style-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .style-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .style-btn:hover {
+            border-color: #667eea;
+            background: var(--bg-secondary);
+        }
+
+        .style-btn.active {
+            background: var(--btn-special);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* ========================================
+           TITRES ET SECTIONS
+           ======================================== */
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 800;
+            transition: color 0.3s ease;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            transition: color 0.3s ease;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .demo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .code-block {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            overflow-x: auto;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .alert-info {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        /* ========================================
+           SYSTÈME DE BOUTONS
+           ======================================== */
+
+        .btn-action {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            font-family: 'Work Sans', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-action::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-action:hover::before {
+            opacity: 1;
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Boutons avec variables CSS */
+        .btn-ajouter, .btn-add { background: var(--btn-success); color: white; }
+        .btn-ajouter:hover, .btn-add:hover { background: var(--btn-success-hover); }
+
+        .btn-supprimer, .btn-remove { background: var(--btn-danger); color: white; }
+        .btn-supprimer:hover, .btn-remove:hover { background: var(--btn-danger-hover); }
+
+        .btn-modifier, .btn-editer { background: var(--btn-primary); color: white; }
+        .btn-modifier:hover, .btn-editer:hover { background: var(--btn-primary-hover); }
+
+        .btn-enregistrer, .btn-sauvegarder { background: var(--btn-secondary); color: white; }
+        .btn-enregistrer:hover, .btn-sauvegarder:hover { background: var(--btn-secondary-hover); }
+
+        .btn-annuler { background: var(--btn-neutral); color: white; }
+        .btn-annuler:hover { background: var(--btn-neutral-hover); }
+
+        .btn-valider, .btn-confirmer { background: var(--btn-success); color: white; }
+        .btn-valider:hover, .btn-confirmer:hover { background: var(--btn-success-hover); }
+
+        .btn-fiche-client { background: var(--btn-special); color: white; }
+        .btn-fiche-client:hover { background: var(--btn-special-hover); }
+
+        .btn-info, .btn-details { background: var(--btn-info); color: white; }
+        .btn-info:hover, .btn-details:hover { background: var(--btn-info-hover); }
+
+        .btn-telecharger, .btn-export { background: var(--btn-secondary); color: white; }
+        .btn-telecharger:hover, .btn-export:hover { background: var(--btn-secondary-hover); }
+
+        .btn-actualiser, .btn-refresh {
+            background: var(--bg-primary);
+            color: #667eea;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+        .btn-actualiser:hover, .btn-refresh:hover {
+            background: var(--bg-secondary);
+        }
+
+        .btn-imprimer { background: var(--btn-primary); color: white; }
+        .btn-imprimer:hover { background: var(--btn-primary-hover); }
+
+        .btn-rechercher { background: var(--btn-info); color: white; }
+        .btn-rechercher:hover { background: var(--btn-info-hover); }
+
+        .btn-plus {
+            background: var(--btn-success);
+            color: white;
+            padding: 10px 18px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            justify-content: center;
+        }
+        .btn-plus:hover { background: var(--btn-success-hover); }
+
+        .btn-moins {
+            background: var(--btn-warning);
+            color: white;
+            padding: 10px 18px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            justify-content: center;
+        }
+        .btn-moins:hover { background: var(--btn-warning-hover); }
+
+        /* Variantes de tailles */
+        .btn-action.btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+
+        .btn-action.btn-lg {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            border-radius: 14px;
+        }
+
+        .btn-action.btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-group .btn-action {
+            flex: 1;
+            min-width: fit-content;
+        }
+
+        /* Boutons icônes */
+        .btn-icon {
+            padding: 12px;
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+            font-size: 1.2rem;
+        }
+
+        .btn-icon:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-icon.edit { color: #3b82f6; }
+        .btn-icon.delete { color: #ef4444; }
+        .btn-icon.add { color: #10b981; }
+        .btn-icon.info { color: #06b6d4; }
+
+        /* ========================================
+           STYLES SPÉCIFIQUES PAR THÈME
+           ======================================== */
+
+        /* 🎨 STYLE MODERNE (par défaut) */
+        .style-modern .btn-action {
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .style-modern .btn-action:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ⚡ STYLE NEO-BRUTAL */
+        .style-neo-brutal .btn-action {
+            border: 3px solid #2D3436;
+            border-radius: 8px;
+            box-shadow: 5px 5px 0 #2D3436;
+            background: #10b981 !important;
+        }
+
+        .style-neo-brutal .btn-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 7px 7px 0 #2D3436;
+        }
+
+        .style-neo-brutal .btn-action:active {
+            transform: translateY(0);
+            box-shadow: 3px 3px 0 #2D3436;
+        }
+
+        .style-neo-brutal .btn-ajouter, 
+        .style-neo-brutal .btn-add,
+        .style-neo-brutal .btn-valider,
+        .style-neo-brutal .btn-confirmer {
+            background: #10b981 !important;
+        }
+
+        .style-neo-brutal .btn-supprimer,
+        .style-neo-brutal .btn-remove {
+            background: #ef4444 !important;
+        }
+
+        .style-neo-brutal .btn-modifier,
+        .style-neo-brutal .btn-editer {
+            background: #3b82f6 !important;
+        }
+
+        .style-neo-brutal .btn-enregistrer,
+        .style-neo-brutal .btn-sauvegarder,
+        .style-neo-brutal .btn-telecharger,
+        .style-neo-brutal .btn-export {
+            background: #8b5cf6 !important;
+        }
+
+        .style-neo-brutal .btn-annuler {
+            background: #64748b !important;
+        }
+
+        .style-neo-brutal .btn-fiche-client {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        .style-neo-brutal .btn-info,
+        .style-neo-brutal .btn-details,
+        .style-neo-brutal .btn-rechercher {
+            background: #06b6d4 !important;
+        }
+
+        .style-neo-brutal .btn-imprimer {
+            background: #6366f1 !important;
+        }
+
+        .style-neo-brutal .btn-plus {
+            background: #10b981 !important;
+            border-radius: 8px;
+        }
+
+        .style-neo-brutal .btn-moins {
+            background: #f59e0b !important;
+            border-radius: 8px;
+        }
+
+        .style-neo-brutal .btn-actualiser,
+        .style-neo-brutal .btn-refresh {
+            background: white !important;
+            color: #667eea !important;
+            border: 3px solid #667eea;
+        }
+
+        .style-neo-brutal .btn-icon {
+            border: 3px solid currentColor;
+            border-radius: 8px;
+            box-shadow: 3px 3px 0 currentColor;
+        }
+
+        .style-neo-brutal .btn-icon:hover {
+            box-shadow: 5px 5px 0 currentColor;
+        }
+
+        .style-neo-brutal .container {
+            border: 4px solid #2D3436;
+            box-shadow: 15px 15px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .style-neo-brutal .theme-controls {
+            border: 3px solid var(--border-color);
+            box-shadow: 5px 5px 0 var(--border-color);
+        }
+
+        /* ✨ STYLE MINIMAL */
+        .style-minimal .btn-action {
+            border-radius: 6px;
+            box-shadow: none;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .style-minimal .btn-action:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            transform: none;
+        }
+
+        .style-minimal .btn-action::before {
+            display: none;
+        }
+
+        .style-minimal .btn-ajouter,
+        .style-minimal .btn-add,
+        .style-minimal .btn-valider,
+        .style-minimal .btn-confirmer {
+            background: #10b981 !important;
+        }
+
+        .style-minimal .btn-supprimer,
+        .style-minimal .btn-remove {
+            background: #ef4444 !important;
+        }
+
+        .style-minimal .btn-modifier,
+        .style-minimal .btn-editer {
+            background: #3b82f6 !important;
+        }
+
+        .style-minimal .btn-enregistrer,
+        .style-minimal .btn-sauvegarder {
+            background: #8b5cf6 !important;
+        }
+
+        .style-minimal .btn-annuler {
+            background: #94a3b8 !important;
+        }
+
+        .style-minimal .btn-fiche-client {
+            background: #667eea !important;
+        }
+
+        .style-minimal .btn-info,
+        .style-minimal .btn-details,
+        .style-minimal .btn-rechercher {
+            background: #06b6d4 !important;
+        }
+
+        .style-minimal .btn-telecharger,
+        .style-minimal .btn-export {
+            background: #8b5cf6 !important;
+        }
+
+        .style-minimal .btn-imprimer {
+            background: #6366f1 !important;
+        }
+
+        .style-minimal .btn-plus {
+            background: #10b981 !important;
+        }
+
+        .style-minimal .btn-moins {
+            background: #f59e0b !important;
+        }
+
+        .style-minimal .btn-actualiser,
+        .style-minimal .btn-refresh {
+            background: white !important;
+            border: 1px solid #667eea;
+        }
+
+        .style-minimal .btn-icon {
+            box-shadow: none;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .style-minimal .btn-icon:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            transform: none;
+        }
+
+        .style-minimal .container {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 💎 STYLE GLASS */
+        .style-glass .btn-action {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.15) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .style-glass .btn-action:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .style-glass .btn-ajouter,
+        .style-glass .btn-add,
+        .style-glass .btn-valider,
+        .style-glass .btn-confirmer {
+            background: rgba(16, 185, 129, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-supprimer,
+        .style-glass .btn-remove {
+            background: rgba(239, 68, 68, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-modifier,
+        .style-glass .btn-editer {
+            background: rgba(59, 130, 246, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-enregistrer,
+        .style-glass .btn-sauvegarder {
+            background: rgba(139, 92, 246, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-annuler {
+            background: rgba(100, 116, 139, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-fiche-client {
+            background: rgba(102, 126, 234, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-info,
+        .style-glass .btn-details,
+        .style-glass .btn-rechercher {
+            background: rgba(6, 182, 212, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-telecharger,
+        .style-glass .btn-export {
+            background: rgba(139, 92, 246, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-imprimer {
+            background: rgba(99, 102, 241, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-plus {
+            background: rgba(16, 185, 129, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-moins {
+            background: rgba(245, 158, 11, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-actualiser,
+        .style-glass .btn-refresh {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: #667eea !important;
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            text-shadow: none;
+        }
+
+        .style-glass .btn-icon {
+            background: rgba(255, 255, 255, 0.15) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .style-glass .container {
+            background: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .style-glass .theme-controls {
+            background: rgba(248, 250, 252, 0.6) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Glass mode dark */
+        :root[data-theme="dark"] .style-glass .container {
+            background: rgba(30, 41, 59, 0.7) !important;
+        }
+
+        :root[data-theme="dark"] .style-glass .theme-controls {
+            background: rgba(15, 23, 42, 0.6) !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .theme-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .theme-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .style-buttons {
+                width: 100%;
+            }
+
+            .style-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌓 Système de Thèmes iCalou</h1>
+
+        <!-- Contrôles de Thème -->
+        <div class="theme-controls">
+            <div class="theme-section">
+                <span class="theme-label">Mode :</span>
+                <div class="theme-switch" id="themeSwitch">
+                    <span class="theme-switch-icon sun">☀️</span>
+                    <div class="theme-switch-toggle"></div>
+                    <span class="theme-switch-icon moon">🌙</span>
+                </div>
+            </div>
+
+            <div class="theme-section">
+                <span class="theme-label">Style :</span>
+                <div class="style-buttons">
+                    <button class="style-btn active" data-style="modern">🎨 Moderne</button>
+                    <button class="style-btn" data-style="neo-brutal">⚡ Neo-Brutal</button>
+                    <button class="style-btn" data-style="minimal">✨ Minimal</button>
+                    <button class="style-btn" data-style="glass">💎 Glass</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert-info">
+            <strong>🎯 Testez le système de thèmes :</strong> Utilisez les contrôles ci-dessus pour basculer entre le mode jour/nuit et changer de style. Les préférences sont sauvegardées automatiquement.
+        </div>
+
+        <!-- Section 1 : Boutons Principaux -->
+        <div class="section">
+            <h2 class="section-title">🎯 Boutons d'Action Principaux</h2>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">➕ Ajouter</button>
+                    <span class="demo-label">Ajouter / Créer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">✏️ Modifier</button>
+                    <span class="demo-label">Modifier / Éditer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-supprimer">🗑️ Supprimer</button>
+                    <span class="demo-label">Supprimer / Effacer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-enregistrer">💾 Enregistrer</button>
+                    <span class="demo-label">Enregistrer / Sauvegarder</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-annuler">✖️ Annuler</button>
+                    <span class="demo-label">Annuler</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-valider">✅ Valider</button>
+                    <span class="demo-label">Valider / Confirmer</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2 : Boutons Spéciaux -->
+        <div class="section">
+            <h2 class="section-title">⭐ Boutons Spéciaux</h2>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-fiche-client">📋 Fiche Client</button>
+                    <span class="demo-label">Fiche Client</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-actualiser">🔄 Actualiser</button>
+                    <span class="demo-label">Actualiser</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-telecharger">📥 Télécharger</button>
+                    <span class="demo-label">Télécharger</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-imprimer">🖨️ Imprimer</button>
+                    <span class="demo-label">Imprimer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-rechercher">🔍 Rechercher</button>
+                    <span class="demo-label">Rechercher</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">ℹ️ Détails</button>
+                    <span class="demo-label">Info / Détails</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3 : Boutons +/- -->
+        <div class="section">
+            <h2 class="section-title">➕➖ Boutons Plus / Moins</h2>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-plus">+</button>
+                    <span class="demo-label">Plus (+)</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-moins">-</button>
+                    <span class="demo-label">Moins (-)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4 : Variantes de Tailles -->
+        <div class="section">
+            <h2 class="section-title">📏 Variantes de Tailles</h2>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter btn-sm">➕ Petit</button>
+                    <span class="demo-label">Petit (Small)</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">➕ Normal</button>
+                    <span class="demo-label">Normal</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter btn-lg">➕ Grand</button>
+                    <span class="demo-label">Grand (Large)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5 : Boutons Icônes -->
+        <div class="section">
+            <h2 class="section-title">🎨 Boutons Icônes</h2>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-icon edit">✏️</button>
+                    <span class="demo-label">Modifier</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon delete">🗑️</button>
+                    <span class="demo-label">Supprimer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon add">➕</button>
+                    <span class="demo-label">Ajouter</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon info">ℹ️</button>
+                    <span class="demo-label">Info</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6 : Groupe de Boutons -->
+        <div class="section">
+            <h2 class="section-title">👥 Groupe de Boutons</h2>
+            <div class="btn-group">
+                <button class="btn-action btn-modifier">✏️ Modifier</button>
+                <button class="btn-action btn-supprimer">🗑️ Supprimer</button>
+                <button class="btn-action btn-info">ℹ️ Détails</button>
+            </div>
+        </div>
+
+        <!-- Section 7 : Exemple Pleine Largeur -->
+        <div class="section">
+            <h2 class="section-title">↔️ Bouton Pleine Largeur</h2>
+            <button class="btn-action btn-fiche-client btn-full">📋 Générer Fiche Client</button>
+        </div>
+
+        <!-- Section 8 : Exemples d'Utilisation -->
+        <div class="section">
+            <h2 class="section-title">💡 Exemples d'Utilisation</h2>
+            
+            <h3 style="margin: 20px 0 10px; color: var(--text-secondary); transition: color 0.3s;">Formulaire modal</h3>
+            <div class="btn-group">
+                <button class="btn-action btn-annuler">✖️ Annuler</button>
+                <button class="btn-action btn-enregistrer">💾 Enregistrer</button>
+            </div>
+
+            <h3 style="margin: 30px 0 10px; color: var(--text-secondary); transition: color 0.3s;">Actions sur une ligne</h3>
+            <div class="btn-group">
+                <button class="btn-action btn-modifier btn-sm">✏️ Modifier</button>
+                <button class="btn-action btn-supprimer btn-sm">🗑️ Supprimer</button>
+                <button class="btn-action btn-info btn-sm">ℹ️ Détails</button>
+            </div>
+        </div>
+
+        <!-- Section 9 : BIBLIOTHÈQUE DE PICTOGRAMMES -->
+        <div class="section">
+            <h2 class="section-title">🎨 Bibliothèque Complète de Pictogrammes</h2>
+            
+            <div class="alert-info">
+                <strong>📖 Guide des pictogrammes :</strong> Liste exhaustive de tous les pictogrammes utilisés dans iCalou. Copiez-collez simplement l'emoji de votre choix.
+            </div>
+
+            <!-- Actions Principales -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">📋 Actions Principales</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">➕</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Ajouter / Créer</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">✏️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Modifier / Éditer</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🗑️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Supprimer</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💾</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Enregistrer</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">✅</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Valider</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">❌</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Annuler</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">✖️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Fermer</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">↩️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Retour</span>
+                </div>
+            </div>
+
+            <!-- Navigation & Onglets -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">🧭 Navigation & Onglets Application</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📋</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Fiche Client</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📅</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Calendrier</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🏠</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Réservations</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💰</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Fiscalité</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🧹</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Ménage</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🛏️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Draps</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🎯</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Découvrir</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⚙️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Gestion</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📊</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Statistiques</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🏡</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Gîtes</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🏘️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Résidences</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🏗️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Propriétés</span>
+                </div>
+            </div>
+
+            <!-- Fichiers & Documents -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">📁 Fichiers & Documents</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📥</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Télécharger</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📤</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Exporter</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🖨️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Imprimer</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📄</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Document / PDF</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📊</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Excel / Tableur</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📝</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Note / Texte</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📎</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Pièce jointe</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📂</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Dossier</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📁</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Fichier</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🗂️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Archive</span>
+                </div>
+            </div>
+
+            <!-- Statuts & Alertes -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">⚡ Statuts & Alertes</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">✅</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Succès</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">❌</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Erreur</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⚠️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Attention / Warning</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">ℹ️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Information</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔔</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Notification</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⏸️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">En attente</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🟢</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Actif / En ligne</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔴</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Inactif / Hors ligne</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🟡</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">En cours</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🟠</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Occupé</span>
+                </div>
+            </div>
+
+            <!-- Gestion & Paramètres -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">⚙️ Gestion & Paramètres</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔄</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Actualiser</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⚙️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Paramètres</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔍</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Rechercher</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔗</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Synchroniser / Lien</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">👤</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Utilisateur</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">👥</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Groupe / Équipe</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔒</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Verrouiller</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔓</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Déverrouiller</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🚪</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Déconnexion</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔑</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Mot de passe / Clé</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🛡️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Sécurité</span>
+                </div>
+            </div>
+
+            <!-- Finances & Paiements -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">💳 Finances & Paiements</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💰</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Argent / Paiement</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💳</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Carte bancaire</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💵</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Espèces</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🏦</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Banque / Virement</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🧾</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Facture / Reçu</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📈</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Revenus / Gains</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📉</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Dépenses / Pertes</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💹</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Comptabilité</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💸</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Transfert d'argent</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💲</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Prix / Tarif</span>
+                </div>
+            </div>
+
+            <!-- Communication -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">💬 Communication</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📧</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Email</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📱</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">SMS / Mobile</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📞</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Téléphone / Appel</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💬</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Message / Chat</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔔</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Notification</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📢</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Annonce</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💭</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Commentaire</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">✉️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Courrier</span>
+                </div>
+            </div>
+
+            <!-- Dates & Temps -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">📅 Dates & Temps</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📅</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Calendrier</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📆</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Date</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🕐</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Heure</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⏰</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Alarme / Rappel</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⏱️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Chronomètre</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⏳</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Compte à rebours</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🗓️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Planning / Agenda</span>
+                </div>
+            </div>
+
+            <!-- Localisation -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">🗺️ Localisation & Géographie</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🗺️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Carte</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📍</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Position / Lieu</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🧭</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Navigation</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🏠</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Adresse / Maison</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🌍</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Monde / Global</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📌</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Épingle / Marquer</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🏙️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Ville</span>
+                </div>
+            </div>
+
+            <!-- Médias -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">🎬 Médias & Contenu</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🖼️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Image</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📷</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Photo</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🎥</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Vidéo</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🎵</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Audio / Musique</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">📹</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Caméra</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🎨</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Galerie / Art</span>
+                </div>
+            </div>
+
+            <!-- Symboles Utiles -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">🔤 Symboles & Divers</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⭐</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Favori / Important</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">💡</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Idée / Astuce</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🔥</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Populaire / Tendance</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⚡</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Rapide / Flash</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🎁</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Cadeau / Bonus</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🏆</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Trophée / Réussite</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">❤️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Coeur / J'aime</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">👍</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Pouce levé / OK</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🎯</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Objectif / Cible</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">🚀</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Lancement / Fusée</span>
+                </div>
+            </div>
+
+            <!-- Contrôles -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">🎮 Contrôles & Navigation</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">▶️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Lecture / Play</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⏸️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Pause</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⏹️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Stop</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⏪</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Retour rapide</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⏩</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Avance rapide</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⬆️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Haut / Upload</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⬇️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Bas / Download</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⬅️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Gauche / Retour</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">➡️</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">Droite / Suivant</span>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="section">
+            <h2 class="section-title">🎨 Bibliothèque Complète de Pictogrammes</h2>
+            
+            <!-- Actions Principales -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">📋 Actions Principales</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">➕ Ajouter</button>
+                    <span class="demo-label">Ajouter</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">✏️ Modifier</button>
+                    <span class="demo-label">Modifier</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-supprimer">🗑️ Supprimer</button>
+                    <span class="demo-label">Supprimer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-enregistrer">💾 Enregistrer</button>
+                    <span class="demo-label">Enregistrer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-valider">✅ Valider</button>
+                    <span class="demo-label">Valider</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-annuler">❌ Annuler</button>
+                    <span class="demo-label">Annuler</span>
+                </div>
+            </div>
+
+            <!-- Navigation & Onglets -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">🧭 Navigation & Onglets</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-fiche-client">📋 Fiche Client</button>
+                    <span class="demo-label">Fiche Client</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">📅 Calendrier</button>
+                    <span class="demo-label">Calendrier</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">🏠 Réservations</button>
+                    <span class="demo-label">Réservations</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">💰 Fiscalité</button>
+                    <span class="demo-label">Fiscalité</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">🧹 Ménage</button>
+                    <span class="demo-label">Ménage</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">🛏️ Draps</button>
+                    <span class="demo-label">Draps</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">🎯 Découvrir</button>
+                    <span class="demo-label">Découvrir</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">⚙️ Gestion</button>
+                    <span class="demo-label">Gestion</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">📊 Statistiques</button>
+                    <span class="demo-label">Statistiques</span>
+                </div>
+            </div>
+
+            <!-- Fichiers & Documents -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">📁 Fichiers & Documents</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-telecharger">📥 Télécharger</button>
+                    <span class="demo-label">Télécharger</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-enregistrer">📤 Exporter</button>
+                    <span class="demo-label">Exporter</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-imprimer">🖨️ Imprimer</button>
+                    <span class="demo-label">Imprimer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-supprimer">📄 PDF</button>
+                    <span class="demo-label">Générer PDF</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">📊 Excel</button>
+                    <span class="demo-label">Exporter Excel</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">📧 Email</button>
+                    <span class="demo-label">Envoyer Email</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">📎 Joindre</button>
+                    <span class="demo-label">Joindre Fichier</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">📂 Dossier</button>
+                    <span class="demo-label">Ouvrir Dossier</span>
+                </div>
+            </div>
+
+            <!-- Statuts & Alertes -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">⚡ Statuts & Alertes</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-valider">✅ Succès</button>
+                    <span class="demo-label">Succès</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-supprimer">❌ Erreur</button>
+                    <span class="demo-label">Erreur</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-moins">⚠️ Attention</button>
+                    <span class="demo-label">Attention</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">ℹ️ Information</button>
+                    <span class="demo-label">Information</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">🔔 Notification</button>
+                    <span class="demo-label">Notification</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-annuler">⏸️ En attente</button>
+                    <span class="demo-label">En attente</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">🟢 Actif</button>
+                    <span class="demo-label">Actif</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-supprimer">🔴 Inactif</button>
+                    <span class="demo-label">Inactif</span>
+                </div>
+            </div>
+
+            <!-- Gestion & Paramètres -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">⚙️ Gestion & Paramètres</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-actualiser">🔄 Actualiser</button>
+                    <span class="demo-label">Actualiser</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">⚙️ Paramètres</button>
+                    <span class="demo-label">Paramètres</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-rechercher">🔍 Rechercher</button>
+                    <span class="demo-label">Rechercher</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">🔗 Synchroniser</button>
+                    <span class="demo-label">Synchroniser</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">👤 Utilisateur</button>
+                    <span class="demo-label">Utilisateur</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-enregistrer">👥 Groupe</button>
+                    <span class="demo-label">Groupe</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-annuler">🔒 Verrouiller</button>
+                    <span class="demo-label">Verrouiller</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">🔓 Déverrouiller</button>
+                    <span class="demo-label">Déverrouiller</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-supprimer">🚪 Déconnexion</button>
+                    <span class="demo-label">Déconnexion</span>
+                </div>
+            </div>
+
+            <!-- Finances & Paiements -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">💳 Finances & Paiements</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">💰 Paiement</button>
+                    <span class="demo-label">Paiement</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">💳 Carte Bancaire</button>
+                    <span class="demo-label">Carte Bancaire</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-enregistrer">💵 Espèces</button>
+                    <span class="demo-label">Espèces</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">🏦 Virement</button>
+                    <span class="demo-label">Virement</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">🧾 Facture</button>
+                    <span class="demo-label">Facture</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">📈 Revenus</button>
+                    <span class="demo-label">Revenus</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-supprimer">📉 Dépenses</button>
+                    <span class="demo-label">Dépenses</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">💹 Comptabilité</button>
+                    <span class="demo-label">Comptabilité</span>
+                </div>
+            </div>
+
+            <!-- Communication -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">💬 Communication</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-info">📧 Email</button>
+                    <span class="demo-label">Email</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">📱 SMS</button>
+                    <span class="demo-label">SMS</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">📞 Téléphone</button>
+                    <span class="demo-label">Téléphone</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">💬 Message</button>
+                    <span class="demo-label">Message</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">🔔 Notification</button>
+                    <span class="demo-label">Notification</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-enregistrer">📢 Annonce</button>
+                    <span class="demo-label">Annonce</span>
+                </div>
+            </div>
+
+            <!-- Dates & Temps -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">📅 Dates & Temps</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-info">📅 Calendrier</button>
+                    <span class="demo-label">Calendrier</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">📆 Date</button>
+                    <span class="demo-label">Date</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">🕐 Heure</button>
+                    <span class="demo-label">Heure</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">⏰ Alarme</button>
+                    <span class="demo-label">Alarme</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">⏱️ Chronomètre</button>
+                    <span class="demo-label">Chronomètre</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-enregistrer">📊 Planning</button>
+                    <span class="demo-label">Planning</span>
+                </div>
+            </div>
+
+            <!-- Localisation -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">🗺️ Localisation</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-info">🗺️ Carte</button>
+                    <span class="demo-label">Carte</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">📍 Position</button>
+                    <span class="demo-label">Position</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">🧭 Navigation</button>
+                    <span class="demo-label">Navigation</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">🏠 Adresse</button>
+                    <span class="demo-label">Adresse</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">🌍 Monde</button>
+                    <span class="demo-label">Global</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-enregistrer">📌 Épingler</button>
+                    <span class="demo-label">Épingler</span>
+                </div>
+            </div>
+
+            <!-- Médias -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">🎬 Médias</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <button class="btn-action btn-info">🖼️ Image</button>
+                    <span class="demo-label">Image</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-primary">📷 Photo</button>
+                    <span class="demo-label">Photo</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-modifier">🎥 Vidéo</button>
+                    <span class="demo-label">Vidéo</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-ajouter">🎵 Audio</button>
+                    <span class="demo-label">Audio</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-info">📹 Caméra</button>
+                    <span class="demo-label">Caméra</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-action btn-enregistrer">🎨 Galerie</button>
+                    <span class="demo-label">Galerie</span>
+                </div>
+            </div>
+
+            <!-- Boutons Icônes Seulement -->
+            <h3 style="margin: 30px 0 15px; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s;">🎯 Icônes Compactes</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                <div class="demo-item">
+                    <button class="btn-icon edit" title="Modifier">✏️</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Modifier</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon delete" title="Supprimer">🗑️</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Supprimer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon add" title="Ajouter">➕</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Ajouter</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon info" title="Info">ℹ️</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Info</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon edit" title="Valider">✅</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Valider</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon delete" title="Annuler">❌</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Annuler</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon info" title="Rechercher">🔍</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Rechercher</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon add" title="Télécharger">📥</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Télécharger</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon edit" title="Imprimer">🖨️</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Imprimer</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon info" title="Calendrier">📅</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Calendrier</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon add" title="Paramètres">⚙️</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Paramètres</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon edit" title="Utilisateur">👤</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Utilisateur</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon info" title="Email">📧</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Email</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon delete" title="Déconnexion">🚪</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Déconnexion</span>
+                </div>
+                <div class="demo-item">
+                    <button class="btn-icon add" title="Notifications">🔔</button>
+                    <span class="demo-label" style="font-size: 0.75rem;">Notifications</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // SYSTÈME DE GESTION DES THÈMES
+        // ========================================
+
+        class ThemeManager {
+            constructor() {
+                this.html = document.documentElement;
+                this.themeSwitch = document.getElementById('themeSwitch');
+                this.styleButtons = document.querySelectorAll('.style-btn');
+                
+                // Charger les préférences sauvegardées
+                this.currentTheme = localStorage.getItem('icalou-theme') || 'light';
+                this.currentStyle = localStorage.getItem('icalou-style') || 'modern';
+                
+                this.init();
+            }
+
+            init() {
+                // Appliquer le thème et style sauvegardés
+                this.applyTheme(this.currentTheme);
+                this.applyStyle(this.currentStyle);
+                
+                // Event listeners
+                this.themeSwitch.addEventListener('click', () => this.toggleTheme());
+                
+                this.styleButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const style = e.target.dataset.style;
+                        this.changeStyle(style);
+                    });
+                });
+            }
+
+            toggleTheme() {
+                this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                this.applyTheme(this.currentTheme);
+                localStorage.setItem('icalou-theme', this.currentTheme);
+            }
+
+            applyTheme(theme) {
+                this.html.setAttribute('data-theme', theme);
+                
+                if (theme === 'dark') {
+                    this.themeSwitch.classList.add('active');
+                } else {
+                    this.themeSwitch.classList.remove('active');
+                }
+            }
+
+            changeStyle(style) {
+                this.currentStyle = style;
+                this.applyStyle(style);
+                localStorage.setItem('icalou-style', style);
+                
+                // Mettre à jour les boutons actifs
+                this.styleButtons.forEach(btn => {
+                    if (btn.dataset.style === style) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            applyStyle(style) {
+                // Retirer tous les styles précédents
+                this.html.classList.remove('style-modern', 'style-neo-brutal', 'style-minimal', 'style-glass');
+                
+                // Appliquer le nouveau style
+                this.html.classList.add(`style-${style}`);
+                
+                // TODO: Ici on pourrait ajouter des ajustements CSS spécifiques pour chaque style
+                // Par exemple, modifier les border-radius, shadows, etc.
+                switch(style) {
+                    case 'modern':
+                        // console.log('✅ Style Moderne appliqué');
+                        break;
+                    case 'neo-brutal':
+                        // console.log('⚡ Style Neo-Brutal appliqué');
+                        // On pourrait ajouter des bordures épaisses, shadows brutales
+                        break;
+                    case 'minimal':
+                        // console.log('✨ Style Minimal appliqué');
+                        // Simplifier les ombres, moins de gradients
+                        break;
+                    case 'glass':
+                        // console.log('💎 Style Glass appliqué');
+                        // Effet glassmorphism
+                        break;
+                }
+            }
+        }
+
+        // Initialiser le gestionnaire de thèmes
+        document.addEventListener('DOMContentLoaded', () => {
+            window.themeManager = new ThemeManager();
+            // console.log('🎨 Système de thèmes initialisé');
+        });
+    </script>
+</body>
+</html>

@@ -10,6 +10,9 @@
 
 let syncInProgress = false;
 
+// 🗑️ Liste des annulations détectées en attente de confirmation
+window.pendingCancellations = [];
+
 /**
  * Synchroniser tous les calendriers iCal
  */
@@ -89,6 +92,19 @@ async function syncAllCalendars() {
             addMessage('', 'info');
             addMessage(`⚠️ RAPPEL: Les iCal publics ne contiennent PAS les noms des clients (RGPD)`, 'info');
             addMessage(`💡 Allez dans "Réservations" → "⚠️ Compléter" pour ajouter les noms`, 'info');
+        }
+
+        // 📅 Stocker la date de dernière synchronisation
+        localStorage.setItem('lastIcalSync', new Date().toISOString());
+
+        // Mettre à jour l'affichage
+        if (typeof updateLastSyncDisplay === 'function') {
+            updateLastSyncDisplay();
+        }
+
+        // 🚨 Afficher le modal de confirmation des annulations si nécessaire
+        if (window.pendingCancellations.length > 0) {
+            showCancellationConfirmationModal();
         }
 
         return {
@@ -281,13 +297,16 @@ async function syncCalendar(giteId, platform, url) {
         // 3. DÉTECTER LES ANNULATIONS (réservations absentes du flux)
         for (const [uid, existing] of Object.entries(existingByUid)) {
             if (!presentUids.has(uid) && !existing.manual_override) {
-                // Réservation disparue du flux iCal → ANNULÉE
-                try {
-                    await cancelReservation(existing.id);
-                    cancelled++;
-                } catch (error) {
-                    console.error(`❌ Erreur annulation ${existing.client_name}:`, error);
-                }
+                // Réservation disparue du flux iCal → Stocker pour confirmation
+                window.pendingCancellations.push({
+                    id: existing.id,
+                    client_name: existing.client_name || 'Client Airbnb',
+                    check_in: existing.check_in,
+                    check_out: existing.check_out,
+                    platform: existing.synced_from || existing.platform,
+                    gite_id: existing.gite_id
+                });
+                cancelled++;
             }
         }
 
@@ -457,5 +476,188 @@ function addMessage(message, type = 'info') {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
+/**
+ * 🚨 Afficher le modal de confirmation des annulations détectées
+ */
+function showCancellationConfirmationModal() {
+    const cancellations = window.pendingCancellations;
+    if (!cancellations || cancellations.length === 0) return;
+
+    // Créer le modal
+    const modal = document.createElement('div');
+    modal.id = 'cancellation-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    `;
+
+    // Grouper par gîte
+    const gitesMap = {};
+    cancellations.forEach(c => {
+        if (!gitesMap[c.gite_id]) gitesMap[c.gite_id] = [];
+        gitesMap[c.gite_id].push(c);
+    });
+
+    // Construire le contenu HTML
+    let html = `
+        <h2 style="margin: 0 0 16px 0; color: #d32f2f;">⚠️ Annulations détectées</h2>
+        <p style="margin: 0 0 20px 0; color: #555;">
+            ${cancellations.length} réservation(s) ont disparu des flux iCal. 
+            Cela signifie généralement qu'elles ont été annulées sur la plateforme.
+        </p>
+    `;
+
+    // Afficher les annulations par gîte
+    for (const [giteId, resaList] of Object.entries(gitesMap)) {
+        html += `<div style="margin-bottom: 16px; border-left: 3px solid #d32f2f; padding-left: 12px;">`;
+        
+        // Récupérer le nom du gîte
+        const giteName = window.gitesManager ? 
+            (window.gitesManager.getById(giteId)?.name || `Gîte ${giteId}`) : 
+            `Gîte ${giteId}`;
+        
+        html += `<strong style="display: block; margin-bottom: 8px;">${giteName}</strong>`;
+        
+        resaList.forEach(r => {
+            const dateDebut = new Date(r.check_in).toLocaleDateString('fr-FR');
+            const dateFin = new Date(r.check_out).toLocaleDateString('fr-FR');
+            html += `
+                <div style="background: #fef2f2; padding: 8px; border-radius: 6px; margin-bottom: 6px;">
+                    <div style="font-weight: 500;">${r.client_name}</div>
+                    <div style="font-size: 0.9em; color: #666;">
+                        📅 ${dateDebut} → ${dateFin}
+                        ${r.platform ? `<span style="margin-left: 8px;">🔗 ${r.platform}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+    }
+
+    html += `
+        <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
+            <button id="btn-cancel-ignore" style="
+                padding: 10px 20px;
+                border: 1px solid #ddd;
+                background: white;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+            ">Ignorer</button>
+            <button id="btn-cancel-confirm" style="
+                padding: 10px 20px;
+                border: none;
+                background: #d32f2f;
+                color: white;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+            ">Confirmer les annulations</button>
+        </div>
+    `;
+
+    modalContent.innerHTML = html;
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    // Événements
+    document.getElementById('btn-cancel-ignore').addEventListener('click', () => {
+        window.pendingCancellations = [];
+        document.body.removeChild(modal);
+    });
+
+    document.getElementById('btn-cancel-confirm').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-cancel-confirm');
+        btn.disabled = true;
+        btn.textContent = 'Annulation en cours...';
+
+        for (const cancellation of cancellations) {
+            try {
+                await cancelReservation(cancellation.id);
+            } catch (error) {
+                console.error('Erreur annulation:', error);
+            }
+        }
+
+        window.pendingCancellations = [];
+        window.invalidateCache('reservations');
+        
+        // Rafraîchir la liste si on est dans Réservations
+        if (typeof updateReservationsList === 'function') {
+            await updateReservationsList(false);
+        }
+
+        document.body.removeChild(modal);
+        
+        if (typeof showToast === 'function') {
+            showToast(`${cancellations.length} réservation(s) annulée(s)`, 'success');
+        }
+    });
+}
+
+/**
+ * 📅 Afficher la dernière synchronisation iCal
+ */
+function updateLastSyncDisplay() {
+    const lastSync = localStorage.getItem('lastIcalSync');
+    if (!lastSync) return;
+
+    const date = new Date(lastSync);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+
+    let timeText;
+    if (diffMins < 1) {
+        timeText = "À l'instant";
+    } else if (diffMins === 1) {
+        timeText = "Il y a 1 min";
+    } else if (diffMins < 60) {
+        timeText = `Il y a ${diffMins} min`;
+    } else {
+        const hours = Math.floor(diffMins / 60);
+        if (hours === 1) {
+            timeText = "Il y a 1h";
+        } else if (hours < 24) {
+            timeText = `Il y a ${hours}h`;
+        } else {
+            timeText = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+    }
+
+    // Mettre à jour les deux endroits
+    const dashboardEl = document.getElementById('last-sync-dashboard');
+    const reservationsEl = document.getElementById('last-sync-reservations');
+
+    if (dashboardEl) {
+        dashboardEl.textContent = `🔄 Dernière sync: ${timeText}`;
+    }
+    if (reservationsEl) {
+        reservationsEl.textContent = `🔄 Dernière sync: ${timeText}`;
+    }
+}
+
 // Rendre la fonction globale
 window.syncAllCalendars = syncAllCalendars;
+window.updateLastSyncDisplay = updateLastSyncDisplay;

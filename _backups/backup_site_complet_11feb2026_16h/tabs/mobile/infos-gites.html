@@ -1,0 +1,74 @@
+<div class="tab-container">
+    <!-- Header -->
+    <div class="card" style="margin-bottom: 15px; padding: 15px;">
+        <h2 style="margin: 0 0 10px 0; font-size: 1.2rem;">💰 Calendrier & Tarifs</h2>
+        <button onclick="window.refreshTarifs ? refreshTarifs() : location.reload()" class="btn-neo" 
+                style="width: 100%; padding: 12px;">
+            🔄 Actualiser
+        </button>
+    </div>
+
+    <!-- Sélection gîte -->
+    <div class="card" style="margin-bottom: 15px; padding: 15px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Gîte</label>
+        <select id="selectGiteTarif" onchange="window.loadTarifsForGite ? loadTarifsForGite(this.value) : null" 
+                style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #2D3436;">
+            <option value="">Sélectionner un gîte</option>
+        </select>
+    </div>
+
+    <!-- Actions -->
+    <div class="card" style="margin-bottom: 15px; padding: 15px;">
+        <button onclick="window.openAddTarifModal ? openAddTarifModal() : alert('Fonction non disponible')" 
+                class="btn-neo" style="width: 100%; padding: 12px; margin-bottom: 8px; background: #2ecc71; color: white;">
+            ➕ Nouveau Tarif
+        </button>
+        <button onclick="window.openModelesTarifsModal ? openModelesTarifsModal() : alert('Fonction non disponible')" 
+                class="btn-neo" style="width: 100%; padding: 12px; background: #667eea; color: white;">
+            📋 Modèles de Tarifs
+        </button>
+    </div>
+
+    <!-- Calendrier -->
+    <div id="calendrier-tarifs-container">
+        <!-- Généré par JavaScript -->
+    </div>
+</div>
+
+<style>
+.tarif-day-mobile {
+    border: 2px solid #2D3436;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: var(--card);
+    box-shadow: 2px 2px 0 #2D3436;
+}
+
+.tarif-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.tarif-date {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+.tarif-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.tarif-actions button {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: 2px solid #2D3436;
+    background: var(--card);
+    font-size: 0.85rem;
+}
+</style>

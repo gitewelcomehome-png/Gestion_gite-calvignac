@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics BI - LiveOwnerUnit</title>
+    <link rel="stylesheet" href="/css/main-admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body style="background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+    
+    <!-- HEADER -->
+    <header style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="/pages/admin-dashboard.html" style="color: #64748b; text-decoration: none;">← Retour Dashboard</a>
+                <h1 style="margin: 0; font-size: 1.5rem; font-weight: 600;">📊 Analytics BI</h1>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <select id="timeRange" onchange="loadAnalytics()" style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white;">
+                    <option value="7">7 derniers jours</option>
+                    <option value="30" selected>30 derniers jours</option>
+                    <option value="90">90 derniers jours</option>
+                    <option value="365">Année complète</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main style="padding: 2rem; max-width: 1400px; margin: 0 auto;">
+
+        <!-- KPIs GLOBAUX -->
+        <section id="kpiCards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Rempli par JS -->
+        </section>
+
+        <!-- GRAPHIQUES -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Performance par plateforme -->
+            <section style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="bar-chart-3" style="width: 20px; height: 20px;"></i>
+                    Performance par Plateforme
+                </h2>
+                <canvas id="platformChart"></canvas>
+            </section>
+
+            <!-- Évolution dans le temps -->
+            <section style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="trending-up" style="width: 20px; height: 20px;"></i>
+                    Évolution Leads & Vues
+                </h2>
+                <canvas id="timelineChart"></canvas>
+            </section>
+        </div>
+
+        <!-- Tableau des top actions -->
+        <section style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+            <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="trophy" style="width: 20px; height: 20px;"></i>
+                Top 10 Actions Performantes
+            </h2>
+            <div id="topActionsTable" style="overflow-x: auto;"></div>
+        </section>
+
+        <!-- Insights & Recommandations IA -->
+        <section style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); border-radius: 12px; padding: 1.5rem; color: white; box-shadow: 0 4px 16px rgba(6,182,212,0.3);">
+            <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="brain" style="width: 20px; height: 20px;"></i>
+                Insights & Recommandations IA
+            </h2>
+            <div id="aiInsights"></div>
+        </section>
+
+    </main>
+
+    <script type="module" src="/js/supabase.js"></script>
+    <script type="module" src="/js/admin-content-analytics.js"></script>
+    <script>
+        // Init Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

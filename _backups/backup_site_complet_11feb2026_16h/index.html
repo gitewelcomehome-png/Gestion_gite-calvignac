@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiveOwnerUnit - Channel Manager Nouvelle Génération pour Locations Saisonnières</title>
+    
+    <meta name="google-site-verification" content="-m6Nci10wmh_v9XwryDnHDTElF7OfG2H9f9Lm-sS75I" />
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Channel Manager nouvelle génération pour gérer vos locations saisonnières. Synchronisation Airbnb, Booking, Abritel en temps réel. Planning ménage automatique et fiscalité LMNP/LMP simplifiée. Essai gratuit 14 jours.">
+    <meta name="keywords" content="channel manager, location saisonnière, LMNP, gestion gîte, Airbnb, Booking, Abritel, calendrier synchronisé, fiscalité LMNP, planning ménage, meublé de tourisme">
+    <meta name="author" content="LiveOwnerUnit">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.liveownerunit.fr/">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.liveownerunit.fr/">
+    <meta property="og:title" content="LiveOwnerUnit - Channel Manager pour Locations Saisonnières">
+    <meta property="og:description" content="Synchronisez Airbnb, Booking, Abritel en temps réel. Planning ménage automatique et fiscalité LMNP. Gagnez 10h/semaine.">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="LiveOwnerUnit">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Archivo+Black&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyan: #00FFD1;
+            --cyan-dark: #00BFA0;
+            --electric: #6366F1;
+            --coral: #FF6B6B;
+            --navy: #0A0E27;
+            --navy-light: #161B3D;
+            --white: #FFFFFF;
+            --gray-light: #F5F7FA;
+            --gray-mid: #8892A6;
+            --shadow-sm: 0 2px 8px rgba(10, 14, 39, 0.08);
+            --shadow-md: 0 8px 24px rgba(10, 14, 39, 0.12);
+            --shadow-lg: 0 20px 60px rgba(10, 14, 39, 0.2);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--navy);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background: var(--white);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(10, 14, 39, 0.08);
+        }
+
+        .nav-wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.5rem;
+            color: var(--navy);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .logo-mark {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-mark img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.95); }
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: var(--navy);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-menu a:hover {
+            color: var(--electric);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--electric) 100%);
+            color: var(--navy);
+            padding: 0.85rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 16px rgba(0, 255, 209, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 255, 209, 0.5);
+        }
+
+        .btn-login {
+            background: transparent;
+            color: var(--navy);
+            border: 2px solid var(--navy);
+            padding: 0.7rem 1.5rem;
+            box-shadow: none;
+        }
+
+        .btn-login:hover {
+            background: var(--navy);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--electric);
+            border: 2px solid var(--electric);
+        }
+
+        .btn-outline:hover {
+            background: var(--electric);
+            color: white;
+        }
+
+        /* Hero */
+        .hero {
+            margin-top: 80px;
+            padding: 8rem 2rem 6rem;
+            background: 
+                radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.06), transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(0, 255, 209, 0.06), transparent 50%),
+                var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: float-slow 20s ease-in-out infinite;
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-50px, 50px); }
+        }
+
+        .hero-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 6rem;
+            align-items: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(0, 255, 209, 0.1));
+            border: 1px solid var(--electric);
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--electric);
+            margin-bottom: 2rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .hero-badge .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: pulse-live 2s infinite;
+        }
+
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 209, 0.7); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0, 255, 209, 0); }
+        }
+
+        .hero h1 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 4.5rem;
+            line-height: 1.05;
+            margin-bottom: 1.8rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--electric) 0%, var(--cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.35rem;
+            color: var(--gray-mid);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .feature-chip .icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--cyan), var(--electric));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .hero-cta .btn {
+            font-size: 1.1rem;
+            padding: 1.1rem 2.5rem;
+        }
+
+        .hero-trust {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            font-size: 0.9rem;
+            color: var(--gray-mid);
+        }
+
+        .trust-dot {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .trust-dot::before {
+            content: '✓';
+            color: var(--cyan);
+            font-weight: 700;
+        }
+
+        /* Dashboard Visual */
+        .hero-visual {
+            position: relative;
+            z-index: 1;
+        }
+
+        .dashboard-mock {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(10, 14, 39, 0.08);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .dashboard-mock::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--electric), var(--cyan), var(--electric));
+            background-size: 200% 100%;
+            animation: gradient-flow 3s linear infinite;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .dash-header {
+            display: flex;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(10, 14, 39, 0.08);
+        }
+
+        .dash-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .dash-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--gray-light);
+            padding: 1.2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-mid);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--electric);
+        }
+
+        .dash-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .cal-day {
+            aspect-ratio: 1;
+            background: var(--gray-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .cal-day.active {
+            background: linear-gradient(135deg, var(--electric), var(--cyan));
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .cal-day:hover {
+            transform: scale(1.05);
+        }
+
+        /* Floating Cards */
+        .float-card {
+            position: absolute;
+            background: white;
+            padding: 1.2rem 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(10, 14, 39, 0.08);
+            animation: float-card 4s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        @keyframes float-card {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .float-card-1 {
+            top: -30px;
+            left: -40px;
+            animation-delay: 0s;
+        }
+
+        .float-card-2 {
+            bottom: 20px;
+            right: -40px;
+            animation-delay: 1.5s;
+        }
+
+        .float-label {
+            font-size: 0.75rem;
+            color: var(--gray-mid);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .float-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--electric), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: var(--navy);
+            padding: 3rem 2rem;
+            color: white;
+        }
+
+        .stats-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 3.5rem;
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+        }
+
+        /* Section Common */
+        .section {
+            padding: 7rem 2rem;
+        }
+
+        .section-alt {
+            background: var(--gray-light);
+        }
+
+        .section-dark {
+            background: var(--navy);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-head {
+            text-align: center;
+            margin-bottom: 5rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--electric);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .section-title {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 3.5rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: 1.25rem;
+            color: var(--gray-mid);
+            line-height: 1.6;
+        }
+
+        .section-dark .section-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Problem Cards */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .problem-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--coral);
+            transform: scaleX(0);
+            transition: transform 0.4s;
+        }
+
+        .problem-card:hover {
+            border-color: var(--coral);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-8px);
+        }
+
+        .problem-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .problem-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .problem-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--navy);
+        }
+
+        .problem-text {
+            font-size: 1.05rem;
+            color: var(--gray-mid);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .problem-impact {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--coral);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Solution Visual */
+        .solution-flow {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 4rem;
+        }
+
+        .platforms {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .platform {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .platform:hover {
+            border-color: var(--electric);
+            transform: translateY(-4px);
+        }
+
+        .platform-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .platform-status {
+            font-size: 0.8rem;
+            color: var(--gray-mid);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--cyan);
+            border-radius: 50%;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--electric);
+            margin: 1.5rem 0;
+        }
+
+        .hub-box {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+            padding: 3rem;
+            border-radius: 16px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hub-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 209, 0.1) 0%, transparent 70%);
+            animation: rotate-slow 15s linear infinite;
+        }
+
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hub-box-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hub-title {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--cyan);
+        }
+
+        .hub-desc {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Benefits */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .benefit-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .benefit-card:hover {
+            border-color: var(--cyan);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-8px);
+        }
+
+        .benefit-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--electric), var(--cyan));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1.5rem;
+        }
+
+        .benefit-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .benefit-number {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 3rem;
+            color: var(--electric);
+            margin-bottom: 0.5rem;
+        }
+
+        .benefit-text {
+            color: var(--gray-mid);
+        }
+
+        /* Features */
+        .feature-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+            margin-bottom: 8rem;
+        }
+
+        .feature-block:nth-child(even) {
+            direction: rtl;
+        }
+
+        .feature-block:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .feature-emoji {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-title {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .feature-desc {
+            font-size: 1.15rem;
+            color: var(--gray-mid);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .feature-list li {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(10, 14, 39, 0.08);
+            font-size: 1.05rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .feature-list li::before {
+            content: '◉';
+            color: var(--cyan);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .feature-highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(0, 255, 209, 0.08));
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--electric);
+        }
+
+        .feature-hl-label {
+            font-size: 0.85rem;
+            color: var(--gray-mid);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-hl-value {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 2.5rem;
+            color: var(--electric);
+        }
+
+        .feature-visual {
+            background: linear-gradient(135deg, var(--gray-light), white);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--electric), var(--cyan));
+        }
+
+        .visual-icon {
+            font-size: 8rem;
+            filter: drop-shadow(0 8px 24px rgba(99, 102, 241, 0.2));
+        }
+
+        /* Comparison Table */
+        .compare-table {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .compare-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            background: var(--navy);
+            color: white;
+            padding: 1.5rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .compare-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(10, 14, 39, 0.08);
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .compare-row:hover {
+            background: var(--gray-light);
+        }
+
+        .compare-feature {
+            font-weight: 600;
+        }
+
+        .compare-check {
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .check-yes {
+            color: var(--cyan);
+        }
+
+        .check-no {
+            color: var(--coral);
+        }
+
+        /* Pricing */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .price-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            transition: all 0.4s;
+            position: relative;
+        }
+
+        .price-card:hover {
+            border-color: var(--electric);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-12px);
+        }
+
+        .price-card.featured {
+            border-color: var(--electric);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .price-badge {
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--electric), var(--cyan));
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .price-name {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .price-desc {
+            color: var(--gray-mid);
+            margin-bottom: 2rem;
+        }
+
+        .price-amount {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 4rem;
+            color: var(--electric);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-amount small {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .price-period {
+            color: var(--gray-mid);
+            margin-bottom: 2rem;
+        }
+
+        .price-save {
+            background: rgba(0, 255, 209, 0.1);
+            color: var(--cyan-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .price-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .price-features li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(10, 14, 39, 0.05);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+
+        .price-features li::before {
+            content: '✓';
+            color: var(--cyan);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .price-cta {
+            width: 100%;
+            padding: 1.2rem;
+            font-size: 1.05rem;
+        }
+
+        /* Price Options (avec/sans engagement) */
+        .price-options {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            border: 2px solid rgba(10, 14, 39, 0.1);
+            border-radius: 12px;
+            padding: 0.4rem;
+            background: var(--gray-light);
+        }
+
+        .price-option {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .price-option:hover {
+            background: white;
+        }
+
+        .price-option.selected {
+            background: var(--electric);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Testimonials */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .testimonial {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .testimonial::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 25px;
+            font-size: 6rem;
+            color: var(--electric);
+            opacity: 0.15;
+            font-family: Georgia, serif;
+        }
+
+        .testimonial:hover {
+            border-color: var(--electric);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .testimonial-stars {
+            color: #FFB800;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonial-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--gray-mid);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--electric), var(--cyan));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .author-name {
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .author-role {
+            font-size: 0.85rem;
+            color: var(--gray-mid);
+        }
+
+        /* CTA Final */
+        .cta-final {
+            padding: 8rem 2rem;
+            background: var(--navy);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-final::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 209, 0.08) 0%, transparent 70%);
+            animation: rotate-slow 20s linear infinite;
+        }
+
+        .cta-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-final h2 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .cta-final p {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--navy);
+            padding: 1.3rem 3rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-white:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(255, 255, 255, 0.3);
+        }
+
+        .cta-trust-items {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--navy-light);
+            color: white;
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 3rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .footer-brand .logo {
+            color: white;
+        }
+
+        .footer-desc {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+        }
+
+        .footer-section h4 {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--cyan);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            padding: 0.5rem 0;
+            transition: all 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: var(--cyan);
+            transform: translateX(4px);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 2rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 4rem;
+            }
+
+            .float-card {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .problem-grid,
+            .benefits-grid,
+            .testimonials-grid,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .platforms {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .feature-block {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .feature-block:nth-child(even) {
+                direction: ltr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-features {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .compare-header,
+            .compare-row {
+                grid-template-columns: 2fr 1fr 1fr;
+                font-size: 0.85rem;
+            }
+
+            .cta-final h2 {
+                font-size: 2.5rem;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-wrap">
+            <a href="#" class="logo">
+                <div class="logo-mark">
+                    <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="120" height="120" fill="url(#bg_gradient_nav)"/>
+                        <circle cx="60" cy="60" r="55" stroke="white" stroke-width="3" opacity="0.3"/>
+                        <circle cx="60" cy="60" r="48" fill="white"/>
+                        <path d="M60 35L40 52V75H55V60H65V75H80V52L60 35Z" fill="url(#house_gradient_nav)"/>
+                        <circle cx="78" cy="42" r="6" fill="#00E676"/>
+                        <defs>
+                            <linearGradient id="bg_gradient_nav" x1="0" y1="0" x2="120" y2="120">
+                                <stop offset="0%" stop-color="#00D4FF"/>
+                                <stop offset="100%" stop-color="#0093E9"/>
+                            </linearGradient>
+                            <linearGradient id="house_gradient_nav" x1="60" y1="35" x2="60" y2="75">
+                                <stop offset="0%" stop-color="#00D4FF"/>
+                                <stop offset="100%" stop-color="#0093E9"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                LiveOwnerUnit
+            </a>
+            <ul class="nav-menu">
+                <li><a href="#features">Fonctionnalités</a></li>
+                <li><a href="#pricing">Tarifs</a></li>
+                <li><a href="#blog">Actualités</a></li>
+                <li><a href="/app" class="btn-login">Connexion</a></li>
+                <li><a href="#" class="btn">Essai gratuit →</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-grid">
+            <div>
+                <div class="hero-badge">
+                    <div class="pulse"></div>
+                    <span>CHANNEL MANAGER NOUVELLE GÉNÉRATION</span>
+                </div>
+                
+                <h1>
+                    Le <span class="gradient-text">Channel Manager</span> qui automatise votre activité locative
+                </h1>
+                
+                <p class="hero-subtitle">
+                    Synchronisez vos plateformes en temps réel, automatisez vos tâches répétitives, optimisez votre fiscalité LMNP. Gagnez 10h/semaine et augmentez vos revenus de 25%.
+                </p>
+
+                <div class="hero-features">
+                    <div class="feature-chip">
+                        <div class="icon">✓</div>
+                        <span>Sync Airbnb • Booking • Abritel</span>
+                    </div>
+                    <div class="feature-chip">
+                        <div class="icon">✓</div>
+                        <span>Planning ménage automatique</span>
+                    </div>
+                    <div class="feature-chip">
+                        <div class="icon">✓</div>
+                        <span>Fiscalité LMNP simplifiée</span>
+                    </div>
+                    <div class="feature-chip">
+                        <div class="icon">✓</div>
+                        <span>Fiche voyageur QR WiFi</span>
+                    </div>
+                </div>
+
+                <div class="hero-cta">
+                    <a href="#" class="btn">🚀 Essai gratuit 14 jours</a>
+                    <a href="#" class="btn btn-outline">▶ Voir la démo</a>
+                </div>
+
+                <div class="hero-trust">
+                    <div class="trust-dot">Configuration en 2 min</div>
+                    <div class="trust-dot">Support 7j/7</div>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="float-card float-card-1">
+                    <div class="float-label">Taux d'occupation</div>
+                    <div class="float-value">89%</div>
+                </div>
+
+                <div class="float-card float-card-2">
+                    <div class="float-label">Temps gagné/sem</div>
+                    <div class="float-value">12h</div>
+                </div>
+
+                <div class="dashboard-mock">
+                    <div class="dash-header">
+                        <div class="dash-dot" style="background: #FF5F57;"></div>
+                        <div class="dash-dot" style="background: #FEBC2E;"></div>
+                        <div class="dash-dot" style="background: #28CA42;"></div>
+                    </div>
+
+                    <div class="dash-stats">
+                        <div class="stat-card">
+                            <div class="stat-label">Réservations</div>
+                            <div class="stat-value">24</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Ménages</div>
+                            <div class="stat-value">18</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Revenus</div>
+                            <div class="stat-value">4.2k€</div>
+                        </div>
+                    </div>
+
+                    <div class="dash-calendar">
+                        <div class="cal-day">L</div>
+                        <div class="cal-day">M</div>
+                        <div class="cal-day">M</div>
+                        <div class="cal-day">J</div>
+                        <div class="cal-day">V</div>
+                        <div class="cal-day">S</div>
+                        <div class="cal-day">D</div>
+                        <div class="cal-day">1</div>
+                        <div class="cal-day active">2</div>
+                        <div class="cal-day active">3</div>
+                        <div class="cal-day active">4</div>
+                        <div class="cal-day">5</div>
+                        <div class="cal-day">6</div>
+                        <div class="cal-day">7</div>
+                        <div class="cal-day">8</div>
+                        <div class="cal-day">9</div>
+                        <div class="cal-day active">10</div>
+                        <div class="cal-day active">11</div>
+                        <div class="cal-day active">12</div>
+                        <div class="cal-day">13</div>
+                        <div class="cal-day">14</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="stats-bar">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">10h</div>
+                <div class="stat-text">Gagnées par semaine</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">99.9%</div>
+                <div class="stat-text">Uptime garanti</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">2 min</div>
+                <div class="stat-text">Configuration</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">7j/7</div>
+                <div class="stat-text">Support disponible</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problems -->
+    <section class="section">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-label">PROBLÈMES COURANTS</span>
+                <h2 class="section-title">Ces situations vous parlent ?</h2>
+                <p class="section-subtitle">Arrêtez de perdre du temps et de l'argent</p>
+            </div>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">📅❌</div>
+                    <h3 class="problem-title">Double réservation</h3>
+                    <p class="problem-text">"J'ai eu UNE double réservation. J'ai dû rembourser et gérer des clients furieux pendant des heures... Plus jamais ça."</p>
+                    <div class="problem-impact">
+                        <span>⚠️</span>
+                        <span>Stress maximal + remboursement</span>
+                    </div>
+                </div>
+
+                <div class="problem-card">
+                    <div class="problem-icon">🧹⏰</div>
+                    <h3 class="problem-title">Gestion ménages</h3>
+                    <p class="problem-text">"Je passe 4h chaque dimanche à créer le planning ménage. Entre les plannings, les changements... c'est épuisant."</p>
+                    <div class="problem-impact">
+                        <span>⏱️</span>
+                        <span>16h perdues/mois</span>
+                    </div>
+                </div>
+
+                <div class="problem-card">
+                    <div class="problem-icon">💰😰</div>
+                    <h3 class="problem-title">Cauchemar fiscal</h3>
+                    <p class="problem-text">"LMNP, LMP, régime réel, micro-BIC... Je ne sais même pas quel régime choisir. J'ai peur de me tromper et de payer trop d'impôts."</p>
+                    <div class="problem-impact">
+                        <span>💸</span>
+                        <span>Peur de se tromper de régime</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution -->
+    <section class="section section-alt">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-label">LA SOLUTION</span>
+                <h2 class="section-title">LiveOwnerUnit centralise tout</h2>
+                <p class="section-subtitle">Une plateforme unique qui connecte vos outils et automatise vos processus</p>
+            </div>
+
+            <div class="solution-flow">
+                <div class="platforms">
+                    <div class="platform">
+                        <div class="platform-name" style="color: #FF5A5F;">Airbnb</div>
+                        <div class="platform-status">
+                            <div class="status-dot"></div>
+                            <span>Connecté</span>
+                        </div>
+                    </div>
+                    <div class="platform">
+                        <div class="platform-name" style="color: #003580;">Booking</div>
+                        <div class="platform-status">
+                            <div class="status-dot"></div>
+                            <span>Temps réel</span>
+                        </div>
+                    </div>
+                    <div class="platform">
+                        <div class="platform-name" style="color: #FF6F00;">Abritel</div>
+                        <div class="platform-status">
+                            <div class="status-dot"></div>
+                            <span>Actif</span>
+                        </div>
+                    </div>
+                    <div class="platform">
+                        <div class="platform-name" style="color: #006937;">Gîtes France</div>
+                        <div class="platform-status">
+                            <div class="status-dot"></div>
+                            <span>Synchronisé</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">⇣</div>
+
+                <div class="hub-box">
+                    <div class="hub-box-content">
+                        <h3 class="hub-title">LiveOwnerUnit - Hub Central</h3>
+                        <p class="hub-desc">Synchronisation auto • Planning intelligent • Fiscalité • Analytics</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">⏱️</div>
+                    <h3 class="benefit-title">Temps gagné</h3>
+                    <div class="benefit-number">10h</div>
+                    <p class="benefit-text">par semaine en moyenne</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">📈</div>
+                    <h3 class="benefit-title">Occupation</h3>
+                    <div class="benefit-number">+25%</div>
+                    <p class="benefit-text">grâce à la multi-diffusion</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <h3 class="benefit-title">Économies</h3>
+                    <div class="benefit-number">2 000€</div>
+                    <p class="benefit-text">par an sur la fiscalité</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section" id="features">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-label">FONCTIONNALITÉS</span>
+                <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+                <p class="section-subtitle">Des outils professionnels pensés pour les propriétaires exigeants</p>
+            </div>
+
+            <div class="feature-block">
+                <div>
+                    <div class="feature-emoji">📅</div>
+                    <h3 class="feature-title">Calendrier Unifié Multi-Plateformes</h3>
+                    <p class="feature-desc">Synchronisation bidirectionnelle en temps réel avec toutes vos plateformes. Zéro risque de double réservation.</p>
+                    
+                    <ul class="feature-list">
+                        <li>Import iCal automatique depuis Airbnb, Booking, Abritel</li>
+                        <li>Détection intelligente des conflits avec alertes</li>
+                        <li>Vue multi-propriétés avec code couleur</li>
+                        <li>Sync bidirectionnelle en 30 secondes max</li>
+                        <li>Historique complet + export Excel/PDF</li>
+                    </ul>
+
+                    <div class="feature-highlight">
+                        <div class="feature-hl-label">Impact réel</div>
+                        <div class="feature-hl-value">5h/semaine</div>
+                    </div>
+                </div>
+                <div class="feature-visual">
+                    <div class="visual-icon">📊</div>
+                </div>
+            </div>
+
+            <div class="feature-block">
+                <div>
+                    <div class="feature-emoji">🧹</div>
+                    <h3 class="feature-title">Planning Ménage Automatique</h3>
+                    <p class="feature-desc">L'IA calcule automatiquement le meilleur créneau selon 9 règles métier. Pages spéciales société de ménage ET femme de ménage.</p>
+                    
+                    <ul class="feature-list">
+                        <li>Algorithme respectant vos contraintes</li>
+                        <li>Interface dédiée femme de ménage</li>
+                        <li>Interface dédiée société de ménage</li>
+                        <li>Retour écrit après chaque ménage</li>
+                        <li>Historique complet par gîte</li>
+                    </ul>
+
+                    <div class="feature-highlight">
+                        <div class="feature-hl-label">Efficacité</div>
+                        <div class="feature-hl-value">-70%</div>
+                    </div>
+                </div>
+                <div class="feature-visual">
+                    <div class="visual-icon">📋</div>
+                </div>
+            </div>
+
+            <div class="feature-block">
+                <div>
+                    <div class="feature-emoji">💰</div>
+                    <h3 class="feature-title">Simulation Fiscale LMNP/LMP</h3>
+                    <p class="feature-desc">Testez TOUS les régimes fiscaux pour savoir lequel choisir. Estimatifs URSSAF, calculs impôts, kilomètres URSSAF et IR.</p>
+                    
+                    <ul class="feature-list">
+                        <li>Simulation LMNP / LMP / Foncier / 1% libératoire</li>
+                        <li>Calcul URSSAF conforme (min 1 200€/an)</li>
+                        <li>Impôt sur le revenu barème progressif</li>
+                        <li>Kilomètres URSSAF + Kilomètres IR</li>
+                        <li>Amortissements bâtiment (30 ans) + mobilier (7 ans)</li>
+                        <li>Comparaison régime réel vs micro-BIC</li>
+                    </ul>
+
+                    <div class="feature-highlight">
+                        <div class="feature-hl-label">Testez avant de choisir</div>
+                        <div class="feature-hl-value">Toutes simulations</div>
+                    </div>
+                </div>
+                <div class="feature-visual">
+                    <div class="visual-icon">💸</div>
+                </div>
+            </div>
+
+            <div class="feature-block">
+                <div>
+                    <div class="feature-emoji">📱</div>
+                    <h3 class="feature-title">Fiche Voyageur Auto</h3>
+                    <p class="feature-desc">Créez en 1 clic une fiche complète générée à partir des informations de réservation ET des informations du gîte. QR code WiFi natif.</p>
+                    
+                    <ul class="feature-list">
+                        <li>Génération auto : infos réservation + infos gîte</li>
+                        <li>QR WiFi : scan et connexion instant</li>
+                        <li>Guide local personnalisé (restos, activités)</li>
+                        <li>Consignes arrivée/départ personnalisées</li>
+                        <li>Bilingue FR/EN automatique</li>
+                        <li>Partage WhatsApp, Email, lien</li>
+                    </ul>
+
+                    <div class="feature-highlight">
+                        <div class="feature-hl-label">Résultat</div>
+                        <div class="feature-hl-value">0 appel</div>
+                    </div>
+                </div>
+                <div class="feature-visual">
+                    <div class="visual-icon">📲</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog / Actualités -->
+    <section class="section section-alt" id="blog">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-label">RESSOURCES & ACTUALITÉS</span>
+                <h2 class="section-title">Restez informé du monde du meublé de tourisme</h2>
+                <p class="section-subtitle">Conseils d'experts, tutoriels vidéo, et actualités réglementaires pour optimiser votre activité</p>
+            </div>
+
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">📚</div>
+                    <h3 class="benefit-title">Blog & Conseils</h3>
+                    <p class="benefit-text">Articles pratiques sur la gestion, l'optimisation fiscale, la réglementation LMNP/LMP, et les meilleures pratiques du secteur.</p>
+                    <a href="#" class="btn btn-outline" style="margin-top: 1rem; display: inline-block;">Lire les articles →</a>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎥</div>
+                    <h3 class="benefit-title">Tutoriels Vidéo</h3>
+                    <p class="benefit-text">Formations vidéo pas-à-pas pour maîtriser toutes les fonctionnalités : synchronisation calendriers, planning ménage, fiscalité...</p>
+                    <a href="#" class="btn btn-outline" style="margin-top: 1rem; display: inline-block;">Voir les vidéos →</a>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">📰</div>
+                    <h3 class="benefit-title">Veille Réglementaire</h3>
+                    <p class="benefit-text">Suivez les évolutions légales, nouvelles lois fiscales, changements de réglementation pour rester toujours conforme.</p>
+                    <a href="#" class="btn btn-outline" style="margin-top: 1rem; display: inline-block;">S'abonner →</a>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 4rem; padding: 3rem; background: white; border-radius: 20px; box-shadow: var(--shadow-md);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">💡</div>
+                <h3 style="font-size: 1.8rem; margin-bottom: 1rem; font-weight: 700;">Rejoignez notre communauté</h3>
+                <p style="color: var(--gray-mid); margin-bottom: 2rem; font-size: 1.1rem;">Échangez avec d'autres propriétaires, partagez vos expériences, posez vos questions</p>
+                <a href="#" class="btn">Accéder au forum →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="section">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-label">COMPARAISON</span>
+                <h2 class="section-title">LiveOwnerUnit vs Gestion manuelle</h2>
+                <p class="section-subtitle">Voyez la différence concrète sur votre quotidien</p>
+            </div>
+
+            <div class="compare-table">
+                <div class="compare-header">
+                    <div>Critère</div>
+                    <div style="text-align: center;">Manuel</div>
+                    <div style="text-align: center;">LiveOwnerUnit</div>
+                </div>
+
+                <div class="compare-row">
+                    <div class="compare-feature">Synchronisation calendriers</div>
+                    <div class="compare-check check-no">❌</div>
+                    <div class="compare-check check-yes">✓</div>
+                </div>
+
+                <div class="compare-row">
+                    <div class="compare-feature">Risque double réservation</div>
+                    <div class="compare-check check-no">Élevé</div>
+                    <div class="compare-check check-yes">Zéro</div>
+                </div>
+
+                <div class="compare-row">
+                    <div class="compare-feature">Planning ménage</div>
+                    <div class="compare-check check-no">4h/sem</div>
+                    <div class="compare-check check-yes">Auto</div>
+                </div>
+
+                <div class="compare-row">
+                    <div class="compare-feature">Fiscalité LMNP</div>
+                    <div class="compare-check check-no">1 500€/an</div>
+                    <div class="compare-check check-yes">Inclus</div>
+                </div>
+
+                <div class="compare-row">
+                    <div class="compare-feature">Fiche voyageur</div>
+                    <div class="compare-check check-no">Word</div>
+                    <div class="compare-check check-yes">1 clic</div>
+                </div>
+
+                <div class="compare-row">
+                    <div class="compare-feature">Support</div>
+                    <div class="compare-check check-no">Aucun</div>
+                    <div class="compare-check check-yes">7j/7</div>
+                </div>
+
+                <div class="compare-row">
+                    <div class="compare-feature">Temps gagné/mois</div>
+                    <div class="compare-check check-no">0h</div>
+                    <div class="compare-check check-yes">40h</div>
+                </div>
+
+                <div class="compare-row">
+                    <div class="compare-feature">Coût mensuel</div>
+                    <div class="compare-check check-no">Erreurs</div>
+                    <div class="compare-check check-yes">10€</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="section" id="pricing">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-label">TARIFS</span>
+                <h2 class="section-title">40% moins cher que la concurrence</h2>
+                <p class="section-subtitle">Rentabilisez votre abonnement dès le premier mois</p>
+            </div>
+
+            <div class="pricing-grid">
+                <div class="price-card">
+                    <h3 class="price-name">Solo</h3>
+                    <p class="price-desc">Parfait pour démarrer</p>
+                    
+                    <div class="price-options">
+                        <div class="price-option selected">🔒 Avec engagement<br><strong>10€/mois</strong></div>
+                        <div class="price-option">⌛ Sans engagement<br><strong>15€/mois</strong></div>
+                    </div>
+                    
+                    <div class="price-amount">10€<small>/mois</small></div>
+                    <div class="price-period">1 gîte • Engagement 12 mois</div>
+                    <div class="price-save">Économisez 60€/an</div>
+
+                    <ul class="price-features">
+                        <li>Calendrier multi-plateformes</li>
+                        <li>Planning ménage automatique</li>
+                        <li>Fiscalité LMNP complète</li>
+                        <li>Fiche voyageur QR WiFi</li>
+                        <li>Analytics & stats</li>
+                        <li>Support chat 7j/7</li>
+                    </ul>
+
+                    <a href="#" class="btn btn-outline price-cta">Essayer 14 jours</a>
+                </div>
+
+                <div class="price-card featured">
+                    <div class="price-badge">⭐ Le plus populaire</div>
+                    <h3 class="price-name">Duo</h3>
+                    <p class="price-desc">Pour développer</p>
+                    
+                    <div class="price-options">
+                        <div class="price-option selected">🔒 Avec engagement<br><strong>15€/mois</strong></div>
+                        <div class="price-option">⌛ Sans engagement<br><strong>22€/mois</strong></div>
+                    </div>
+                    
+                    <div class="price-amount">15€<small>/mois</small></div>
+                    <div class="price-period">2 gîtes • Engagement 12 mois</div>
+                    <div class="price-save">Économisez 84€/an</div>
+
+                    <ul class="price-features">
+                        <li>Tout Solo +</li>
+                        <li>2 gîtes synchronisés</li>
+                        <li>Vue multi-propriétés</li>
+                        <li>Équipe ménage multi-sites</li>
+                        <li>Support prioritaire</li>
+                        <li>Formation vidéo</li>
+                    </ul>
+
+                    <a href="#" class="btn price-cta">Essayer 14 jours</a>
+                </div>
+
+                <div class="price-card">
+                    <h3 class="price-name">Quattro</h3>
+                    <p class="price-desc">Pour les pros</p>
+                    
+                    <div class="price-options">
+                        <div class="price-option selected">🔒 Avec engagement<br><strong>23€/mois</strong></div>
+                        <div class="price-option">⌛ Sans engagement<br><strong>33€/mois</strong></div>
+                    </div>
+                    
+                    <div class="price-amount">23€<small>/mois</small></div>
+                    <div class="price-period">4 gîtes • Engagement 12 mois</div>
+                    <div class="price-save">Économisez 120€/an</div>
+
+                    <ul class="price-features">
+                        <li>Tout Duo +</li>
+                        <li>4 gîtes synchronisés</li>
+                        <li>API connexions custom</li>
+                        <li>Tableaux de bord avancés</li>
+                        <li>Support VIP téléphone</li>
+                        <li>Formation 1h perso</li>
+                    </ul>
+
+                    <a href="#" class="btn btn-outline price-cta">Essayer 14 jours</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section class="cta-final">
+        <div class="cta-content">
+            <h2>Prêt à simplifier votre gestion ?</h2>
+            <p>Testez toutes les fonctionnalités pendant 14 jours gratuitement</p>
+            
+            <div class="cta-buttons">
+                <a href="#" class="btn-white">🚀 Démarrer l'essai de 14 jours</a>
+            </div>
+
+            <div class="cta-trust-items">
+                <div class="trust-dot">14 jours gratuits</div>
+                <div class="trust-dot">Config 2 min</div>
+                <div class="trust-dot">Support 7j/7</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="#" class="logo">
+                    <div class="logo-mark">
+                        <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="120" height="120" fill="url(#bg_gradient_footer)"/>
+                            <circle cx="60" cy="60" r="55" stroke="white" stroke-width="3" opacity="0.3"/>
+                            <circle cx="60" cy="60" r="48" fill="white"/>
+                            <path d="M60 35L40 52V75H55V60H65V75H80V52L60 35Z" fill="url(#house_gradient_footer)"/>
+                            <circle cx="78" cy="42" r="6" fill="#00E676"/>
+                            <defs>
+                                <linearGradient id="bg_gradient_footer" x1="0" y1="0" x2="120" y2="120">
+                                    <stop offset="0%" stop-color="#00D4FF"/>
+                                    <stop offset="100%" stop-color="#0093E9"/>
+                                </linearGradient>
+                                <linearGradient id="house_gradient_footer" x1="60" y1="35" x2="60" y2="75">
+                                    <stop offset="0%" stop-color="#00D4FF"/>
+                                    <stop offset="100%" stop-color="#0093E9"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    LiveOwnerUnit
+                </a>
+                <p class="footer-desc">Le channel manager nouvelle génération pour locations saisonnières. Synchronisez, automatisez, optimisez.</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Produit</h4>
+                <ul>
+                    <li><a href="#features">Fonctionnalités</a></li>
+                    <li><a href="#pricing">Tarifs</a></li>
+                    <li><a href="#">Démo</a></li>
+                    <li><a href="#">App mobile</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Entreprise</h4>
+                <ul>
+                    <li><a href="#">À propos</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Carrières</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Légal</h4>
+                <ul>
+                    <li><a href="#">CGU</a></li>
+                    <li><a href="#">CGV</a></li>
+                    <li><a href="#">Confidentialité</a></li>
+                    <li><a href="#">Cookies</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 LiveOwnerUnit - Fait avec 💙 en France</p>
+            <p>support@liveownerunit.fr</p>
+        </div>
+    </footer>
+</body>
+</html>

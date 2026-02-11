@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LiveOwnerUnit - Nouveaux Logos Premium</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            margin-bottom: 50px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+        .logo-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .logo-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        }
+        .logo-preview {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .logo-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        .logo-preview svg {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            z-index: 1;
+        }
+        .logo-info h2 {
+            font-size: 1.5rem;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .logo-info p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+        .logo-info strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ LiveOwnerUnit - Logos Premium</h1>
+        <p class="subtitle">Designs modernes et professionnels pour votre marque</p>
+        <div class="grid">
+            
+            <!-- OPTION 1 - CERCLE MINIMAL ÉLÉGANT -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #00D4FF 0%, #0093E9 100%);">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Cercle extérieur -->
+                        <circle cx="60" cy="60" r="55" stroke="white" stroke-width="3" opacity="0.3"/>
+                        <circle cx="60" cy="60" r="48" fill="white"/>
+                        <!-- Maison minimaliste -->
+                        <path d="M60 35L40 52V75H55V60H65V75H80V52L60 35Z" fill="url(#grad1)"/>
+                        <!-- Notification dot (live) -->
+                        <circle cx="78" cy="42" r="6" fill="#00E676"/>
+                        <circle cx="78" cy="42" r="6" fill="#00E676" opacity="0.3">
+                            <animate attributeName="r" values="6;9;6" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                        <defs>
+                            <linearGradient id="grad1" x1="60" y1="35" x2="60" y2="75">
+                                <stop offset="0%" stop-color="#00D4FF"/>
+                                <stop offset="100%" stop-color="#0093E9"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        🎯 Cercle Minimal
+                        <span class="badge">MODERNE</span>
+                    </h2>
+                    <p><strong>Concept :</strong> Logo épuré dans un cercle, avec un point "live" animé</p>
+                    <p><strong>Message :</strong> Gestion en temps réel, toujours connecté</p>
+                    <p><strong>Utilisation :</strong> Parfait pour app mobile, icône, favicon</p>
+                </div>
+            </div>
+
+            <!-- OPTION 2 - LETTRES LOU STYLISÉES -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- L -->
+                        <path d="M25 25V85H45" stroke="white" stroke-width="8" stroke-linecap="round"/>
+                        <!-- O (maison) -->
+                        <path d="M60 20L45 35V85H75V35L60 20Z" fill="white" stroke="white" stroke-width="2"/>
+                        <rect x="52" y="60" width="16" height="25" fill="#fa709a" opacity="0.6"/>
+                        <!-- U -->
+                        <path d="M85 25V70C85 77 90 80 95 80C100 80 105 77 105 70V25" stroke="white" stroke-width="8" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        ✍️ Monogramme LOU
+                        <span class="badge">UNIQUE</span>
+                    </h2>
+                    <p><strong>Concept :</strong> Lettres L-O-U fusionnées, le O est une maison</p>
+                    <p><strong>Message :</strong> Identité forte de marque, mémorable</p>
+                    <p><strong>Utilisation :</strong> Logo principal, signature</p>
+                </div>
+            </div>
+
+            <!-- OPTION 3 - HEXAGONE TECH -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #0093E9 0%, #80D0C7 100%);">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Hexagone -->
+                        <path d="M60 15L95 35V75L60 95L25 75V35L60 15Z" fill="white"/>
+                        <!-- Maison intérieure -->
+                        <path d="M60 35L45 48V75H55V58H65V75H75V48L60 35Z" fill="url(#grad2)"/>
+                        <!-- Lignes tech -->
+                        <path d="M30 40L25 35M90 40L95 35M30 70L25 75M90 70L95 75" stroke="#0093E9" stroke-width="2" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="grad2" x1="60" y1="35" x2="60" y2="75">
+                                <stop offset="0%" stop-color="#0093E9"/>
+                                <stop offset="100%" stop-color="#80D0C7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        ⚡ Hexagone Tech
+                        <span class="badge">INNOVANT</span>
+                    </h2>
+                    <p><strong>Concept :</strong> Forme hexagonale futuriste avec maison centrale</p>
+                    <p><strong>Message :</strong> Technologie, innovation, structure solide</p>
+                    <p><strong>Utilisation :</strong> Startup tech, plateforme SaaS</p>
+                </div>
+            </div>
+
+            <!-- OPTION 4 - DÉGRADÉ SUNSET -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Arrière-plan soleil -->
+                        <circle cx="60" cy="60" r="45" fill="url(#sunset)"/>
+                        <!-- Maison en silhouette -->
+                        <path d="M60 30L35 52V85H50V65H70V85H85V52L60 30Z" fill="white" opacity="0.95"/>
+                        <!-- Détails fenêtres -->
+                        <rect x="42" y="57" width="6" height="6" rx="1" fill="#f5576c" opacity="0.6"/>
+                        <rect x="72" y="57" width="6" height="6" rx="1" fill="#f5576c" opacity="0.6"/>
+                        <defs>
+                            <linearGradient id="sunset" x1="15" y1="15" x2="105" y2="105">
+                                <stop offset="0%" stop-color="#FFE985"/>
+                                <stop offset="50%" stop-color="#FA742B"/>
+                                <stop offset="100%" stop-color="#f5576c"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        🌅 Sunset Premium
+                        <span class="badge">CHALEUREUX</span>
+                    </h2>
+                    <p><strong>Concept :</strong> Maison devant un coucher de soleil en dégradé</p>
+                    <p><strong>Message :</strong> Accueil chaleureux, vacances, détente</p>
+                    <p><strong>Utilisation :</strong> Locations de vacances, gîtes haut de gamme</p>
+                </div>
+            </div>
+
+            <!-- OPTION 5 - BADGE 3D -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #13547a 0%, #80d0c7 100%);">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Badge shield -->
+                        <path d="M60 15C60 15 85 25 85 45C85 75 60 95 60 95C60 95 35 75 35 45C35 25 60 15 60 15Z" fill="white"/>
+                        <!-- Maison 3D -->
+                        <path d="M60 35L42 50V75H60V35Z" fill="#13547a"/>
+                        <path d="M60 35L78 50V75H60V35Z" fill="#2ba4a4"/>
+                        <path d="M60 35L42 50L60 45L78 50L60 35Z" fill="#80d0c7"/>
+                        <!-- Checkmark quality -->
+                        <path d="M52 82L58 88L72 72" stroke="#00E676" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        🛡️ Badge Qualité
+                        <span class="badge">PREMIUM</span>
+                    </h2>
+                    <p><strong>Concept :</strong> Shield avec maison 3D et validation qualité</p>
+                    <p><strong>Message :</strong> Confiance, sécurité, certification</p>
+                    <p><strong>Utilisation :</strong> Label qualité, programme de certification</p>
+                </div>
+            </div>
+
+            <!-- OPTION 6 - NEON GLOW -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Effet neon -->
+                        <g filter="url(#glow)">
+                            <path d="M60 30L40 48V80H52V60H68V80H80V48L60 30Z" stroke="#00D4FF" stroke-width="3" fill="none"/>
+                            <circle cx="60" cy="30" r="4" fill="#00D4FF"/>
+                            <circle cx="46" cy="55" r="2" fill="#00D4FF"/>
+                            <circle cx="74" cy="55" r="2" fill="#00D4FF"/>
+                        </g>
+                        <defs>
+                            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>
+                        💫 Neon Glow
+                        <span class="badge">TENDANCE</span>
+                    </h2>
+                    <p><strong>Concept :</strong> Outline néon lumineux sur fond sombre</p>
+                    <p><strong>Message :</strong> Moderne, tech, premium night</p>
+                    <p><strong>Utilisation :</strong> Dark mode, app nocturne, jeune public</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

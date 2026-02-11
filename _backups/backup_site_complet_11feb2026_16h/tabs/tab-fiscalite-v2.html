@@ -1,0 +1,1414 @@
+<div class="tab-container">
+    <!-- Header Neo-Brutalism -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 class="section-title-main"><i data-lucide="dollar-sign"></i> Fiscalité <span id="statut-fiscal-title">LMNP</span></h2>
+                <p class="section-description">Optimisez votre déclaration et calculez vos charges</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button type="button" onclick="afficherModalOptions()" class="btn-neo-secondary">
+                    <i data-lucide="settings"></i> Options
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre de gestion d'années -->
+    <div class="card" style="background: #f8f9fa;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <label style="font-weight: 600; color: #2c3e50;"><i data-lucide="calendar"></i> Année fiscale :</label>
+                <select id="annee_selector" onchange="chargerAnnee(this.value)" class="form-control">
+                    <!-- Rempli dynamiquement -->
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="creerNouvelleAnnee()" class="btn-neo" title="Créer l'année suivante">
+                    <i data-lucide="plus"></i> Nouvelle Année
+                </button>
+            </div>
+        </div>
+        <div class="info-box">
+            <span><i data-lucide="info"></i> CA calculé automatiquement | Sauvegarde automatique activée</span>
+        </div>
+    </div>
+
+<div class="card">
+
+    <form id="calculateur-lmp" onsubmit="calculerFiscalite(event)">
+        
+        <!-- Année cachée (gérée par le sélecteur) -->
+        <input type="hidden" id="annee_simulation" value=""  />
+        
+        <!-- BLOC 1 : Chiffre d'affaires + Tableau Comparatif -->
+        <div style="display: grid; grid-template-columns: 350px 1fr; gap: 20px; margin-bottom: 20px;">
+            <!-- CA Card -->
+            <div style="position: relative;">
+                <!-- Badge MODE TEST -->
+                <div id="badge-mode-test" style="display: none; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%); color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; z-index: 100; box-shadow: 0 3px 10px rgba(255,107,107,0.5); letter-spacing: 0.5px; border: 2px solid white;">
+                    🧪 MODE TEST
+                </div>
+                
+                <div class="fiscal-bloc" style="margin: 0; padding: 30px 20px 20px 20px; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 2px solid #e0e0e0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i data-lucide="trending-up" style="width: 18px; height: 18px; color: #00C2CB;"></i>
+                            Chiffre d'affaires annuel
+                        </div>
+                        <input 
+                            type="number" 
+                            id="ca" 
+                            value="0" 
+                            step="0.01" 
+                            placeholder="0"
+                            oninput="calculerTempsReel()"
+                            style="border: 3px solid #00C2CB; border-radius: 12px; padding: 16px; text-align: center; font-size: 2.5rem; font-weight: 900; color: #00C2CB; width: 100%; background: white; box-shadow: 0 2px 8px rgba(0,194,203,0.15); transition: all 0.3s ease;"
+                            onfocus="this.style.boxShadow='0 4px 16px rgba(0,194,203,0.25)'; this.style.transform='scale(1.02)';"
+                            onblur="this.style.boxShadow='0 2px 8px rgba(0,194,203,0.15)'; this.style.transform='scale(1)';"
+                        >
+                        <div style="font-size: 0.75rem; color: #999; margin-top: 8px;">💶 Revenus locatifs annuels</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tableau Comparatif Options Fiscales -->
+            <div class="fiscal-bloc" style="margin: 0;">
+                <div style="padding: 20px;">
+                    <h3 style="margin: 0 0 15px 0; font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="layout-grid"></i> COMPARATIF FISCAL - Toutes Options
+                    </h3>
+                    
+                    <!-- Contrôles : Statut + Classement + Test -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 6px 12px; border-radius: 6px; border: 2px solid #2c3e50;">
+                                <label style="font-weight: 600; color: #2c3e50; margin: 0; font-size: 0.85rem;"><i data-lucide="user-check" style="width: 16px; height: 16px;"></i> Statut :</label>
+                                <select id="statut_fiscal" onchange="changerStatutFiscal()" class="form-control" style="min-width: 100px; margin: 0; font-size: 0.85rem; padding: 4px 8px;">
+                                    <option value="lmnp">LMNP</option>
+                                    <option value="micro">Micro-BIC</option>
+                                    <option value="lmp">LMP</option>
+                                </select>
+                            </div>
+                            <div id="bloc-classement" style="display: none; align-items: center; gap: 8px; background: #f8f9fa; padding: 6px 12px; border-radius: 6px; border: 2px solid #2c3e50;">
+                                <label style="font-weight: 600; color: #2c3e50; margin: 0; font-size: 0.85rem;"><i data-lucide="star" style="width: 16px; height: 16px;"></i> Classement :</label>
+                                <select id="classement_meuble" onchange="calculerTempsReel()" class="form-control" style="min-width: 120px; margin: 0; font-size: 0.85rem; padding: 4px 8px;">
+                                    <option value="non_classe">Non classé</option>
+                                    <option value="classe">Classé ⭐</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="number" id="test-ca-input" placeholder="🧪 CA de test (ex: 25000)" class="form-control" style="font-size: 0.85rem; padding: 6px 10px; width: 220px;" min="0">
+                            <button type="button" onclick="appliquerTestCA()" class="btn-neo-secondary" style="font-size: 0.85rem; padding: 6px 12px;">
+                                <i data-lucide="flask-conical" style="width: 16px; height: 16px;"></i> Tester
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Option Versement Libératoire -->
+                    <div id="bloc-versement-liberatoire" style="display: none; margin-bottom: 15px; padding: 12px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 4px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                            <input type="checkbox" id="option_versement_liberatoire" onchange="calculerTableauComparatif()" 
+                                style="width: 18px; height: 18px; cursor: pointer;">
+                            <span><i data-lucide="percent" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle;"></i> 
+                                Versement libératoire de l'IR (1% ou 1,7%)
+                            </span>
+                            <span class="info-tooltip" style="cursor: help; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #3498db; color: white; font-size: 0.75rem; font-weight: bold; margin-left: 5px;" 
+                                  title="✅ Versement libératoire pour MICRO-ENTREPRENEURS :
+• Loueur classé ⭐ : 1% du CA (au lieu de l'IR progressif)
+• Loueur non classé : 1,7% du CA (au lieu de l'IR progressif)
+
+📋 Conditions d'accès :
+• RFR N-2 < 29 315€ par part fiscale
+• Option avant le 1er octobre N-1
+• Applicable UNIQUEMENT aux régimes Micro-BIC
+
+⚠️ Affiché automatiquement si CA dans les plafonds Micro-BIC">ⓘ</span>
+                        </label>
+                        <div id="vl-eligibilite-message" style="font-size: 0.75rem; margin-top: 6px; margin-left: 28px; color: #2ecc71; font-weight: 500;">
+                            💡 <strong>Option micro-entrepreneurs</strong> : Taux forfaitaire sur le CA au lieu de l'IR progressif
+                        </div>
+                    </div>
+                    
+                    <!-- Alerte seuils -->
+                    <div id="alerte-seuil-statut" style="display: none; margin-bottom: 15px; padding: 10px 12px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; font-size: 0.85rem;">
+                        <strong><i data-lucide="alert-triangle" style="width: 16px; height: 16px;"></i> Attention :</strong> <span id="alerte-seuil-message"></span>
+                    </div>
+                    
+                    <!-- Grille des 4 options -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                        <!-- Option 1: LMNP Réel -->
+                        <div id="option-lmnp-reel" class="card option-fiscale" style="padding: 16px; position: relative;">
+                            <div style="font-weight: 700; margin-bottom: 10px; font-size: 0.95rem;">LMNP Réel</div>
+                            <div style="font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; color: #00C2CB;" id="total-lmnp-reel">0 €</div>
+                            <div style="font-size: 0.8rem; line-height: 1.5; opacity: 0.8;">
+                                <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                    <span>URSSAF:</span>
+                                    <strong id="urssaf-lmnp-reel">0 €</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                    <span>IR:</span>
+                                    <strong id="ir-lmnp-reel">0 €</strong>
+                                </div>
+                            </div>
+                            <div id="conditions-lmnp-reel" style="font-size: 0.65rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color); position: relative; z-index: 1;"></div>
+                            <div id="badge-lmnp-reel" class="badge-option" style="display: none; position: absolute; top: 8px; right: 8px; background: #2ecc71; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 2;">✓ MEILLEUR</div>
+                            <div id="desactive-lmnp-reel" class="badge-desactive" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(220, 53, 69, 0.15); backdrop-filter: blur(2px); border-radius: 8px; z-index: 0;"></div>
+                        </div>
+
+                        <!-- Option 2: LMNP Micro Non Classé -->
+                        <div id="option-micro-non-classe" class="card option-fiscale" style="padding: 16px; position: relative;">
+                            <div style="font-weight: 700; margin-bottom: 10px; font-size: 0.95rem;">Micro-BIC 30%</div>
+                            <div style="font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; color: #00C2CB;" id="total-micro-non-classe">0 €</div>
+                            <div style="font-size: 0.8rem; line-height: 1.5; opacity: 0.8;">
+                                <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                    <span>URSSAF:</span>
+                                    <strong id="cotis-micro-non-classe">0 €</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                    <span id="label-ir-micro-non-classe">IR:</span>
+                                    <strong id="ir-micro-non-classe">0 €</strong>
+                                </div>
+                            </div>
+                            <div id="conditions-micro-non-classe" style="font-size: 0.65rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color); position: relative; z-index: 1;"></div>
+                            <div id="badge-micro-non-classe" class="badge-option" style="display: none; position: absolute; top: 8px; right: 8px; background: #2ecc71; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 2;">✓ MEILLEUR</div>
+                            <div id="desactive-micro-non-classe" class="badge-desactive" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(220, 53, 69, 0.15); backdrop-filter: blur(2px); border-radius: 8px; z-index: 0;"></div>
+                        </div>
+
+                        <!-- Option 3: LMNP Micro Classé -->
+                        <div id="option-micro-classe" class="card option-fiscale" style="padding: 16px; position: relative;">
+                            <div style="font-weight: 700; margin-bottom: 10px; font-size: 0.95rem;">Micro-BIC 50% ⭐</div>
+                            <div style="font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; color: #00C2CB;" id="total-micro-classe">0 €</div>
+                            <div style="font-size: 0.8rem; line-height: 1.5; opacity: 0.8;">
+                                <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                    <span>URSSAF:</span>
+                                    <strong id="cotis-micro-classe">0 €</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                    <span id="label-ir-micro-classe">IR:</span>
+                                    <strong id="ir-micro-classe">0 €</strong>
+                                </div>
+                            </div>
+                            <div id="conditions-micro-classe" style="font-size: 0.65rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color); position: relative; z-index: 1;"></div>
+                            <div id="badge-micro-classe" class="badge-option" style="display: none; position: absolute; top: 8px; right: 8px; background: #2ecc71; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 2;">✓ MEILLEUR</div>
+                            <div id="desactive-micro-classe" class="badge-desactive" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(220, 53, 69, 0.15); backdrop-filter: blur(2px); border-radius: 8px; z-index: 0;"></div>
+                        </div>
+
+                        <!-- Option 4: LMP Réel -->
+                        <div id="option-lmp-reel" class="card option-fiscale" style="padding: 16px; position: relative;">
+                            <div style="font-weight: 700; margin-bottom: 10px; font-size: 0.95rem;">LMP Réel</div>
+                            <div style="font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; color: #00C2CB;" id="total-lmp-reel">0 €</div>
+                            <div style="font-size: 0.8rem; line-height: 1.5; opacity: 0.8;">
+                                <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                    <span>URSSAF:</span>
+                                    <strong id="ssi-lmp-reel">0 €</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                    <span>IR:</span>
+                                    <strong id="ir-lmp-reel">0 €</strong>
+                                </div>
+                            </div>
+                            <div id="conditions-lmp-reel" style="font-size: 0.65rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color); position: relative; z-index: 1;"></div>
+                            <div id="badge-lmp-reel" class="badge-option" style="display: none; position: absolute; top: 8px; right: 8px; background: #2ecc71; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 2;">✓ MEILLEUR</div>
+                            <div id="desactive-lmp-reel" class="badge-desactive" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(220, 53, 69, 0.15); backdrop-filter: blur(2px); border-radius: 8px; z-index: 0;"></div>
+                        </div>
+                    </div>
+                    <div id="meilleure-option" class="info-box" style="margin-top: 15px; text-align: center; font-weight: 700; font-size: 0.95rem;">
+                        💡 Calculez pour voir la meilleure option
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 2 : Charges par gîte (généré dynamiquement) -->
+        <div id="gites-charges-container"></div>
+
+        <!-- BLOC 2C : FRAIS D'EXPLOITATIONS (Englobe les 3 listes) -->
+        <div class="fiscal-bloc collapsible collapsed">
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> <i data-lucide="briefcase"></i> FRAIS D'EXPLOITATIONS</h3>
+            <div class="bloc-content">
+                
+                <!-- Sous-section Travaux/Réparations -->
+                <div class="exploitation-section orange">
+                    <h4 class="exploitation-section-title orange">
+                        <span class="icon"><i data-lucide="wrench"></i></span>
+                        Travaux/Réparations
+                    </h4>
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" onclick="ajouterTravaux()" class="btn btn-secondary btn-orange">
+                            ➕ Ajouter un travail
+                        </button>
+                    </div>
+                    <div id="travaux-liste" style="display: grid; gap: 10px;">
+                    </div>
+                </div>
+
+                <!-- Sous-section Frais divers -->
+                <div class="exploitation-section green">
+                    <h4 class="exploitation-section-title green">
+                        <span style="font-size: 1.5rem;"><i data-lucide="file-text"></i></span>
+                        Frais divers
+                    </h4>
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" onclick="ajouterFraisDivers()" class="btn btn-secondary btn-green">
+                            ➕ Ajouter un frais
+                        </button>
+                    </div>
+                    <div id="frais-divers-liste" style="display: grid; gap: 10px;">
+                    </div>
+                </div>
+
+                <!-- Sous-section Produits d'accueil -->
+                <div class="exploitation-section purple">
+                    <h4 class="exploitation-section-title purple">
+                        <span style="font-size: 1.5rem;"><i data-lucide="shopping-bag"></i></span>
+                        Produits d'accueil
+                    </h4>
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" onclick="ajouterProduitAccueil()" class="btn btn-secondary" style="background: #9c27b0; border-color: #9c27b0;">
+                            ➕ Ajouter un produit
+                        </button>
+                    </div>
+                    <div id="produits-accueil-liste" style="display: grid; gap: 10px;">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- BLOC 3 : Résidence principale (Bureau) -->
+        <div class="fiscal-bloc collapsible collapsed">
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> <i data-lucide="home"></i> Charges résidence principale (Bureau)</h3>
+            <div class="bloc-content">
+                <p class="fiscal-info"><i data-lucide="alert-triangle"></i> Déductibles au prorata de la surface professionnelle</p>
+            
+                <div class="info-box green">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 10px;">
+                        <div class="form-group">
+                            <label>Surface bureau (m²)</label>
+                            <input type="number" id="surface_bureau" step="0.01" placeholder="15" onchange="calculerRatio()">
+                        </div>
+                        <div class="form-group">
+                            <label>Surface totale logement (m²)</label>
+                            <input type="number" id="surface_totale" step="0.01" placeholder="100" onchange="calculerRatio()">
+                        </div>
+                    </div>
+                    <div id="ratio-display" style="font-size: 1.2rem; font-weight: 600; color: #27ae60; text-align: center;">
+                        Ratio : 0%
+                    </div>
+                </div>
+                
+                <!-- Toggle Mensuel/Annuel pour toute la section -->
+                <div class="period-toggle-container">
+                    <label>Périodicité des charges :</label>
+                    <button type="button" class="btn-toggle-period active" data-period="mensuel" data-section="residence" onclick="togglePeriodSection('residence', 'mensuel')">Mensuel</button>
+                    <button type="button" class="btn-toggle-period" data-period="annuel" data-section="residence" onclick="togglePeriodSection('residence', 'annuel')">Annuel</button>
+                </div>
+            
+                <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Intérêts emprunt résidence</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="interets_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="interets_residence">mensuel</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance emprunteur résidence</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="assurance_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="assurance_residence">mensuel</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Électricité résidence</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="electricite_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="electricite_residence">mensuel</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Internet résidence</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="internet_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="internet_residence">mensuel</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Eau résidence</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="eau_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="eau_residence">mensuel</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assurance habitation résidence</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="assurance_hab_residence" step="0.01" placeholder="0.00" data-period-type="mensuel">
+                        <span class="period-label" data-target="assurance_hab_residence">mensuel</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Taxe foncière résidence (annuel)</label>
+                    <input type="number" id="taxe_fonciere_residence" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- BLOC 4 : Frais professionnels -->
+        <div class="fiscal-bloc collapsible collapsed">
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> <i data-lucide="briefcase"></i> Frais professionnels (100% déductibles)</h3>
+            <div class="bloc-content">
+                
+                <!-- Toggle Mensuel/Annuel pour toute la section -->
+                <div class="period-toggle-container">
+                    <label>Périodicité des frais :</label>
+                    <button type="button" class="btn-toggle-period active" data-period="mensuel" data-section="frais_pro" onclick="(function(e){e.stopPropagation(); togglePeriodSection('frais_pro', 'mensuel');})(event)">Mensuel</button>
+                    <button type="button" class="btn-toggle-period" data-period="annuel" data-section="frais_pro" onclick="(function(e){e.stopPropagation(); togglePeriodSection('frais_pro', 'annuel');})(event)">Annuel</button>
+                </div>
+                
+                <div class="fiscal-grid">
+                    <div class="form-group">
+                        <label>Comptable</label>
+                        <input type="number" id="comptable" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Frais bancaires</label>
+                        <input type="number" id="frais_bancaires" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <div class="input-with-select">
+                            <select id="telephone_type" class="type-select">
+                                <option value="mensuel">Mensuel</option>
+                                <option value="annuel">Annuel</option>
+                            </select>
+                            <input type="number" id="telephone" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Matériel informatique</label>
+                        <input type="number" id="materiel_info" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>RC Professionnelle</label>
+                        <input type="number" id="rc_pro" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Formation</label>
+                        <input type="number" id="formation" step="0.01" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fournitures</label>
+                        <div class="input-with-select">
+                            <select id="fournitures_type" class="type-select">
+                                <option value="mensuel">Mensuel</option>
+                                <option value="annuel">Annuel</option>
+                            </select>
+                            <input type="number" id="fournitures" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC 5 : Véhicule -->
+        <div class="fiscal-bloc collapsible collapsed">
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> <i data-lucide="car"></i> Frais de véhicule & Kilomètres professionnels</h3>
+            <div class="bloc-content">
+                <!-- Champs cachés pour la compatibilité -->
+                <input type="hidden" id="vehicule_type" value="thermique">
+                <input type="hidden" id="puissance_fiscale" value="5">
+                <input type="hidden" id="km_professionnels" value="0">
+                <input type="hidden" id="montant_frais_km" value="0">
+                
+                <!-- Configuration principale -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                    <!-- Configuration véhicule -->
+                    <div class="info-box-gradient blue">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="font-size: 2rem; margin-right: 12px;"><i data-lucide="car-front" style="width:32px;height:32px;"></i></div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; color: #1565c0; font-size: 1.1rem; font-weight: 600;">Mon véhicule</h4>
+                                <div id="vehicule-resume" style="margin-top: 6px; font-size: 0.9rem; color: #546e7a; font-weight: 500;">
+                                    <!-- Résumé rempli dynamiquement -->
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="afficherModalConfigVehicule()" class="btn-neo-secondary" style="width: 100%; justify-content: center; background: var(--card); color: #1565c0; font-weight: 600;">
+                            <i data-lucide="settings"></i> Configurer mon véhicule
+                        </button>
+                    </div>
+
+                    <!-- Configuration automatisation -->
+                    <div class="auto-card">
+                        <div class="auto-card-inner">
+                            <div class="auto-icon"><i data-lucide="zap"></i></div>
+                            <div class="auto-content">
+                                <h4 class="auto-title">Automatisation</h4>
+                                <p class="auto-subtitle">Générer vos trajets automatiquement</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="afficherModalConfigKm()" class="btn-auto">
+                            <i data-lucide="settings"></i> Configurer l'automatisation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Résumé annuel -->
+                <div id="km-resume-annuel" class="info-box-gradient green" style="margin-bottom: 25px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
+                        <div>
+                            <div class="km-label">Distance totale</div>
+                            <div id="km-total-annuel" style="font-size: 2rem; font-weight: 700; color: #1b5e20;">0 km</div>
+                        </div>
+                        <div>
+                            <div class="km-label">Nombre de trajets</div>
+                            <div id="km-nombre-trajets" style="font-size: 2rem; font-weight: 700; color: #1b5e20;">0</div>
+                        </div>
+                        <div>
+                            <div class="km-label">Montant déductible</div>
+                            <div id="km-montant-total" style="font-size: 2rem; font-weight: 700; color: #1b5e20;">0,00 €</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestion des trajets -->
+                <div style="background: var(--card); padding: 20px; border-radius: 12px; border: 2px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <!-- Header avec actions -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f5f5f5;">
+                        <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem; font-weight: 600;">
+                            <i data-lucide="calendar-days"></i> Historique des trajets
+                        </h4>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" onclick="afficherModalGestionTrajets()" class="btn-neo-secondary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                                <i data-lucide="clipboard"></i> Voir tous mes trajets
+                            </button>
+                            <button type="button" onclick="afficherModalLieuxFavoris()" class="btn-neo-secondary">
+                                <i data-lucide="map-pin"></i> Gérer mes lieux
+                            </button>
+                            <button type="button" onclick="afficherModalAjoutTrajet()" class="btn-neo">
+                                <i data-lucide="plus"></i> Ajouter un trajet
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Résumé mensuel -->
+                    <div id="km-resume-mensuel" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <!-- Cartes mensuelles avec bouton Voir -->
+                    </div>
+                    
+                    <!-- Liste des trajets (masquée par défaut) -->
+                    <div id="km-liste-trajets" style="display: none; gap: 10px; max-height: 450px; overflow-y: auto; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                        <!-- Trajets affichés quand on clique sur Voir -->
+                    </div>
+                    
+                    <!-- Footer avec export -->
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 2px solid #f5f5f5;">
+                        <button type="button" onclick="exporterTrajetsCSV()" class="btn-neo-secondary">
+                            <i data-lucide="download"></i> Exporter en Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résultats Fiscaux -->
+        <div class="fiscal-bloc collapsible" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; margin-top: 30px;">
+            <h3 class="fiscal-bloc-title" style="color: white !important; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; font-weight: 700 !important; background: transparent !important; border-bottom: none !important;">
+                <span class="toggle-icon">▼</span> <i data-lucide="calculator"></i> RÉSULTATS FISCAUX <span id="statut-fiscal-badge" style="background: #2ecc71; padding: 4px 12px; border-radius: 4px; font-size: 0.85rem; margin-left: 10px;">LMNP</span>
+            </h3>
+            <div class="bloc-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Bénéfice imposable</div>
+                        <div id="preview-benefice" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Cotisations URSSAF</div>
+                        <div id="preview-urssaf" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Reste avant IR</div>
+                        <div id="preview-reste" style="font-size: 1.5rem; font-weight: 700;">0 €</div>
+                    </div>
+                </div>
+                
+                <!-- Détails des calculs URSSAF -->
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h4 style="color: white; margin-bottom: 15px; font-size: 1rem;"><i data-lucide="clipboard"></i> Détails URSSAF :</h4>
+                    <div style="display: grid; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Indemnités journalières (0.85%)</span>
+                            <strong id="detail-indemnites">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Retraite de base (17.75%)</span>
+                            <strong id="detail-retraite-base">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Retraite complémentaire (7%)</span>
+                            <strong id="detail-retraite-compl">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Invalidité-Décès (1.3%)</span>
+                            <strong id="detail-invalidite">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>CSG/CRDS (9.7%)</span>
+                            <strong id="detail-csg-crds">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Formation professionnelle (0.25%)</span>
+                            <strong id="detail-formation-pro">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                            <span>Allocations familiales (0% à 3.1%)</span>
+                            <strong id="detail-allocations">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 4px; font-weight: 600; margin-top: 5px;">
+                            <span>TOTAL URSSAF</span>
+                            <strong id="detail-total-urssaf">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(46, 204, 113, 0.3); border-radius: 4px; font-weight: 600; margin-top: 5px;">
+                            <span>Trimestres de retraite validés</span>
+                            <strong id="detail-trimestres">0</strong>
+                        </div>
+                    </div>
+                    <div id="note-statut-fiscal" style="background: rgba(52, 152, 219, 0.2); padding: 10px; border-radius: 4px; font-size: 0.85rem; margin-top: 10px; border-left: 3px solid #3498db;">
+                        <i data-lucide="lightbulb"></i> <strong><span id="statut-fiscal-note-label">Régime LMNP au réel</span> :</strong> <span id="statut-fiscal-note-text">Les cotisations sont calculées uniquement sur le bénéfice imposable. Pas de cotisations minimales en LMNP.</span> Les taux sont mis à jour automatiquement selon l'année en cours.
+                    </div>
+                </div>
+                
+                <div id="alerte-retraite" style="display: none; background: #e74c3c; padding: 12px; border-radius: 8px; font-weight: 600;">
+                    <i data-lucide="alert-triangle"></i> ATTENTION : Bénéfice en dessous de 7 046 € - Trimestres de retraite non validés !
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparaison Réel vs Micro-BIC (uniquement LMNP) -->
+        <div id="comparaison-reel-micro" class="fiscal-bloc collapsible" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; margin-top: 20px; display: none;">
+            <h3 class="fiscal-bloc-title" style="color: white !important; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; font-weight: 700 !important; background: transparent !important; border-bottom: none !important;">
+                <span class="toggle-icon">▼</span> <i data-lucide="bar-chart-2"></i> COMPARAISON RÉEL vs MICRO-BIC
+            </h3>
+            <div class="bloc-content">
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">RÉGIME</div>
+                            <div style="font-weight: 700; font-size: 1.1rem;"></div>
+                        </div>
+                        <div style="background: rgba(52, 152, 219, 0.3); padding: 15px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3);">
+                            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; text-align: center;">RÉEL</div>
+                            <div id="comp-reel-total" style="font-weight: 700; font-size: 1.5rem; text-align: center;">0 €</div>
+                            <div style="font-size: 0.8rem; margin-top: 10px; opacity: 0.9;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>URSSAF</span>
+                                    <strong id="comp-reel-urssaf">0 €</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>IR (part location)</span>
+                                    <strong id="comp-reel-ir">0 €</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(46, 204, 113, 0.3); padding: 15px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3);">
+                            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; text-align: center;">MICRO-BIC</div>
+                            <div id="comp-micro-total" style="font-weight: 700; font-size: 1.5rem; text-align: center;">0 €</div>
+                            <div style="font-size: 0.8rem; margin-top: 10px; opacity: 0.9;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>Cotisations (21,2%)</span>
+                                    <strong id="comp-micro-cotis">0 €</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>IR (part location)</span>
+                                    <strong id="comp-micro-ir">0 €</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="comp-recommandation" style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; font-weight: 600; text-align: center; font-size: 1.1rem;">
+                        📈 Calcul en cours...
+                    </div>
+                    <div style="background: rgba(52, 152, 219, 0.2); padding: 10px; border-radius: 4px; font-size: 0.85rem; margin-top: 10px; border-left: 3px solid #3498db;">
+                        <i data-lucide="info"></i> <strong>Micro-BIC</strong> : Abattement forfaitaire <strong id="taux-abattement-info">50%</strong> (min 305€). Limité à 77 700€ de CA. Cotisations sociales 21,2% du CA.<br>
+                        <span style="font-size: 0.8rem; opacity: 0.9;">⭐ Meublé classé : 71% d'abattement | Non classé : 50% d'abattement</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== SECTION PERSONNELLE (optionnelle) ========== -->
+        <div id="section-personnelle" style="display: none;">
+        
+        <!-- Calcul Impôt sur le Revenu -->
+        <div class="fiscal-bloc collapsible collapsed">
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> <i data-lucide="receipt"></i> Calcul Impôt sur le Revenu (IR)</h3>
+            <div class="bloc-content">
+                <div class="fiscal-grid">
+                    <div class="form-group">
+                        <label>Salaire annuel Madame (€)</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="salaire_madame" step="0.01" placeholder="0.00" oninput="calculerIR(); verifierSeuilsStatut();" style="flex: 1;">
+                            <button type="button" onclick="openFraisReelsSalarieModal
+                                <i data-lucide="settings"></i> Frais
+                            </button>
+                        </div>
+                        <div id="frais-madame-info" class="frais-info-box" style="margin-top: 5px;">
+                            <strong>Déduction :</strong> <span id="frais-madame-montant">0 €</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Salaire annuel Monsieur (€)</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="salaire_monsieur" step="0.01" placeholder="0.00" oninput="calculerIR(); verifierSeuilsStatut();" style="flex: 1;">
+                            <button type="button" onclick="openFraisReelsSalarieModal
+                                <i data-lucide="settings"></i> Frais
+                            </button>
+                        </div>
+                        <div id="frais-monsieur-info" class="frais-info-box" style="margin-top: 5px;">
+                            <strong>Déduction :</strong> <span id="frais-monsieur-montant">0 €</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Revenu LMP (calculé automatiquement)</label>
+                        <input type="number" id="revenu_lmp" step="0.01" readonly class="input-readonly-green">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nombre d'enfants</label>
+                        <select id="nombre_enfants" onchange="calculerIR()">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5+</option>
+                        </select>
+                    </div>
+                    
+
+                </div>
+                
+                <!-- Champs cachés pour compatibilité - SUPPRIMÉS -->
+                
+                <div id="resultat-ir" style="display: none; margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 10px;">
+                    <div style="display: grid; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                            <span>Revenu imposable total :</span>
+                            <strong id="ir-revenu-total">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                            <span>Nombre de parts fiscales :</span>
+                            <strong id="ir-parts">0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                            <span>Quotient familial :</span>
+                            <strong id="ir-quotient">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 15px 0; font-size: 1.3rem; border-top: 2px solid white; margin-top: 10px;">
+                            <span><i data-lucide="banknote"></i> IMPÔT SUR LE REVENU :</span>
+                            <strong id="ir-montant">0 €</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 1.4rem;">
+                            <span><i data-lucide="check"></i> RESTE APRÈS IR :</span>
+                            <strong id="ir-reste-final">0 €</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC : Crédits personnels (section personnelle) -->
+        <div class="fiscal-bloc collapsible collapsed">
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> <i data-lucide="euro"></i> Crédits personnels</h3>
+            <div class="bloc-content">
+                <div class="info-box">
+                    <p>
+                        <i data-lucide="info"></i> Enregistrez vos crédits mensuels personnels (immobilier, auto, conso...) pour calculer votre reste à vivre.
+                    </p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h4 style="margin: 0; color: #2c3e50;"><i data-lucide="clipboard"></i> Liste des crédits</h4>
+                    <button type="button" onclick="ajouterLigneCredit()" class="btn-neo">
+                        ➕ Ajouter un crédit
+                    </button>
+                </div>
+
+                <!-- Liste des crédits -->
+                <div id="liste-credits-personnels" style="display: grid; gap: 10px; margin-bottom: 20px;">
+                    <!-- Lignes générées dynamiquement -->
+                </div>
+
+                <!-- Récapitulatif -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;"><i data-lucide="euro"></i> Total mensuel des crédits personnels</div>
+                            <div id="total-credits-display" style="font-size: 2rem; font-weight: 700; margin-top: 5px;">0.00 €</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC : Total Charges Annuelles -->
+        <div class="fiscal-bloc collapsible collapsed" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; margin-top: 30px;">
+            <h3 class="fiscal-bloc-title" style="color: white !important; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; font-weight: 700 !important; background: transparent !important; border-bottom: none !important;">
+                <span class="toggle-icon">▼</span> <i data-lucide="briefcase"></i> TOTAL CHARGES ANNUELLES
+            </h3>
+            <div class="bloc-content">
+                <p style="color: white; opacity: 0.9; margin-bottom: 20px;">Récapitulatif de toutes les charges pour le calcul du bénéfice</p>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div id="total-charges-container" style="display: grid; gap: 8px;">
+                        <!-- Les charges par gîte seront générées dynamiquement -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC : Reste à vivre -->
+        <div class="fiscal-bloc collapsible collapsed">
+            <h3 class="fiscal-bloc-title" style="font-weight: 700;">
+                <span class="toggle-icon">▼</span> <i data-lucide="dollar-sign"></i> Reste à vivre après crédits
+            </h3>
+            <div class="bloc-content">
+                <p style="color: #7f8c8d; margin-bottom: 20px;">Calculez votre reste à vivre mensuel en intégrant tous vos revenus (salaires, LMP, amortissements) et toutes vos charges (crédits, frais personnels).</p>
+                
+                <!-- Frais personnels mensuels -->
+                <div class="info-box blue-border">
+                    <h4 style="margin-bottom: 15px; color: #1565c0;"><i data-lucide="home"></i> Frais personnels mensuels (maison)</h4>
+                    <div class="fiscal-grid">
+                        <div class="form-group">
+                            <label>Internet personnel (€/mois)</label>
+                            <input type="number" id="frais_perso_internet" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Électricité personnel (€/mois)</label>
+                            <input type="number" id="frais_perso_electricite" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Eau personnel (€/mois)</label>
+                            <input type="number" id="frais_perso_eau" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Assurance personnel (€/mois)</label>
+                            <input type="number" id="frais_perso_assurance" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Taxe foncière personnel (€/an)</label>
+                            <input type="number" id="frais_perso_taxe" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Autres frais mensuels</label>
+                            <input type="number" id="frais_perso_autres" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Résultat Reste à vivre -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px;">
+                    <h4 style="color: white; margin-bottom: 20px; font-size: 1.2rem;"><i data-lucide="bar-chart-3"></i> Calcul du reste à vivre mensuel</h4>
+                    
+                    <!-- Revenus -->
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <h5 style="color: white; margin-bottom: 10px;"><i data-lucide="dollar-sign"></i> REVENUS MENSUELS</h5>
+                        <div style="display: grid; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Salaire Madame</span>
+                                <strong id="rav-salaire-madame">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Salaire Monsieur</span>
+                                <strong id="rav-salaire-monsieur">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Revenus LMP (après IR)</span>
+                                <strong id="rav-lmp">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Économie frais kilométriques</span>
+                                <strong id="rav-kms">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Amortissements réintégrés</span>
+                                <strong id="rav-amortissements">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 10px 0; font-weight: 700; border-top: 2px solid rgba(255,255,255,0.5); margin-top: 5px;">
+                                <span>TOTAL REVENUS</span>
+                                <strong id="rav-total-revenus">0 €</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dépenses -->
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <h5 style="color: white; margin-bottom: 10px;"><i data-lucide="trending-down"></i> DÉPENSES MENSUELLES</h5>
+                        <div style="display: grid; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Crédits</span>
+                                <strong id="rav-credits">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                                <span>Frais personnels</span>
+                                <strong id="rav-frais-perso">0 €</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 10px 0; font-weight: 700; border-top: 2px solid rgba(255,255,255,0.5); margin-top: 5px;">
+                                <span>TOTAL DÉPENSES</span>
+                                <strong id="rav-total-depenses">0 €</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Résultat final -->
+                    <div style="background: rgba(255,255,255,0.25); padding: 20px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.1rem; margin-bottom: 10px;"><i data-lucide="banknote"></i> RESTE À VIVRE MENSUEL</div>
+                        <div id="rav-final" style="font-size: 2.5rem; font-weight: 900;">0 €</div>
+                        <div id="rav-capital-total" style="font-size: 0.9rem; opacity: 0.9; margin-top: 10px;">Capital restant dû total : 0 €</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION SUIVI TRÉSORERIE (simplifiée) -->
+        <div class="fiscal-bloc collapsible collapsed" style="margin-top: 30px;">
+            <h3 class="fiscal-bloc-title"><span class="toggle-icon">▼</span> <i data-lucide="piggy-bank"></i> Suivi Trésorerie Mensuelle</h3>
+            <div class="bloc-content">
+                <p style="color: #7f8c8d; margin-bottom: 20px;">Ajoutez vos soldes mensuels pour alimenter le graphique du dashboard.</p>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" onclick="afficherModalAjoutSolde()" class="btn-neo">
+                        <i data-lucide="plus"></i> Ajouter un solde
+                    </button>
+                    <button type="button" onclick="afficherHistoriqueSoldes()" class="btn-neo-secondary">
+                        👁️ Voir l'historique
+                    </button>
+                    <button type="button" onclick="exporterSoldesCSV()" class="btn-neo-secondary">
+                        📥 Exporter
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        </div>
+        <!-- ========== FIN SECTION PERSONNELLE ========== -->
+
+    </form>
+    
+</div>
+
+<!-- ==========================================
+     MODAL OPTIONS PERSONNELLES
+     ========================================== -->
+<div id="modal-options" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3><i data-lucide="settings" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Options personnelles</h3>
+            <button onclick="fermerModalOptions()" class="btn-close-modal">&times;</button>
+        </div>
+        
+        <div class="info-box">
+            <p>
+                💡 Activez les options personnelles pour accéder aux calculs d'impôts, crédits et reste à vivre.
+            </p>
+        </div>
+        
+        <div class="modal-toggle-section">
+            <label class="toggle-label">
+                <input type="checkbox" id="checkbox-activer-perso" onchange="toggleOptionsPersonnelles()" class="toggle-checkbox">
+                <span class="toggle-text"><i data-lucide="check" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>Activer les options personnelles</span>
+            </label>
+            <p class="toggle-description">
+                Inclut : Impôt sur le revenu, Crédits personnels, Reste à vivre, Trésorerie mensuelle
+            </p>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" onclick="fermerModalOptions()" class="btn-neo">✓ Valider</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     MODALS - GESTION TRÉSORERIE
+     ========================================== -->
+
+<!-- Modal : Ajouter un solde -->
+<div id="modal-ajout-solde" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: var(--text);"><i data-lucide="euro" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i>Ajouter un solde bancaire</h3>
+            <button onclick="fermerModalAjoutSolde()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <div class="fiscal-grid" style="gap: 15px;">
+            <div class="form-group">
+                <label>Date du relevé *</label>
+                <input type="date" id="modal-solde-date" required style="padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+            </div>
+            
+            <div class="form-group">
+                <label>Solde bancaire (€) *</label>
+                <input type="number" id="modal-solde-montant" step="0.01" required placeholder="0.00" style="padding: 10px; border: 2px solid #ddd; border-radius: 6px; text-align: right;">
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button type="button" onclick="fermerModalAjoutSolde()" class="btn-neo-secondary">Annuler</button>
+            <button type="button" onclick="enregistrerSolde()" class="btn-neo"><i data-lucide="save" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal : Historique des soldes -->
+<div id="modal-historique-soldes" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: var(--text);"><i data-lucide="eye" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i>Historique des soldes</h3>
+            <button onclick="fermerModalHistoriqueSoldes()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+            <label>Filtrer par année :</label>
+            <select id="modal-historique-annee" onchange="chargerHistoriqueSoldes()" style="padding: 8px; border: 2px solid #ddd; border-radius: 6px;">
+                <!-- Généré dynamiquement -->
+            </select>
+            <button type="button" onclick="chargerHistoriqueSoldes()" class="btn-neo-secondary">🔄 Actualiser</button>
+        </div>
+        
+        <div style="max-height: 500px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="position: sticky; top: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <tr>
+                        <th style="padding: 12px; text-align: left;">Date</th>
+                        <th style="padding: 12px; text-align: right;">Solde (€)</th>
+                        <th style="padding: 12px; text-align: center; width: 80px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-historique-soldes">
+                    <!-- Généré dynamiquement -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     MODALS - GESTION KILOMÈTRES
+     ========================================== -->
+
+<!-- Modal : Ajouter un trajet -->
+<div id="modal-ajout-trajet" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: var(--text);"><i data-lucide="plus" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Ajouter un trajet</h3>
+            <button onclick="fermerModalTrajet()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <form id="form-ajout-trajet" onsubmit="soumettreTrajet(event)">
+            <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Date du trajet *</label>
+                    <input type="date" id="trajet-date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Type de trajet *</label>
+                    <select id="trajet-type" required onchange="updateMotifTrajet()">
+                        <option value="menage_entree">Ménage entrée</option>
+                        <option value="menage_sortie">Ménage sortie</option>
+                        <option value="courses">Courses</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Motif *</label>
+                    <input type="text" id="trajet-motif" placeholder="Ex: Ménage entrée - Gîte La Roseraie" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Départ</label>
+                    <input type="text" id="trajet-depart" placeholder="Domicile (par défaut)" value="Domicile">
+                </div>
+                
+                <div class="form-group">
+                    <label>Destination *</label>
+                    <select id="trajet-destination" required onchange="updateDistanceTrajet()">
+                        <option value="">-- Choisir --</option>
+                        <optgroup label="Gîtes" id="optgroup-gites-trajet"></optgroup>
+                        <optgroup label="Lieux favoris" id="optgroup-lieux-trajet"></optgroup>
+                        <option value="autre">Autre (saisir manuellement)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="trajet-destination-autre-group" style="display: none;">
+                    <label>Nom destination</label>
+                    <input type="text" id="trajet-destination-autre" placeholder="Ex: Leroy Merlin Cahors">
+                </div>
+                
+                <div class="form-group">
+                    <label>Distance aller (km) *</label>
+                    <input type="number" id="trajet-distance" step="0.1" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="trajet-aller-retour" checked style="width: auto; margin-right: 5px;">
+                        Aller-retour
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label>Distance totale (calculée)</label>
+                    <input type="number" id="trajet-distance-totale" readonly class="input-readonly-green">
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Notes</label>
+                    <textarea id="trajet-notes" rows="2" placeholder="Notes optionnelles..."></textarea>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="fermerModalTrajet()" class="btn-neo-secondary">Annuler</button>
+                <button type="submit" class="btn-neo">💾 Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal : Configuration automatisation -->
+<div id="modal-config-km" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: var(--text);"><i data-lucide="settings" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Configuration automatisation</h3>
+            <button onclick="fermerModalConfigKm()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <form id="form-config-km" onsubmit="sauvegarderConfigKm(event)">
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; color: #856404; font-size: 0.9rem; font-weight: 500;">
+                    ⚠️ <strong>Important :</strong> Pour que les trajets soient générés, vos gîtes doivent avoir une distance configurée.<br>
+                    Si ce n'est pas le cas, cliquez sur "📍 Gérer mes lieux" pour configurer les distances.
+                </p>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <p style="margin: 0 0 15px 0; color: var(--text-secondary); font-size: 0.95rem;">
+                    Cochez les types de trajets que vous souhaitez créer automatiquement lors de l'ajout d'une réservation :
+                </p>
+                
+                <div style="display: grid; gap: 12px;">
+                    <label style="display: flex; align-items: center; padding: 10px; background: var(--card); border-radius: 6px; cursor: pointer;">
+                        <input type="checkbox" id="config-auto-menage-entree" style="width: auto; margin-right: 10px;">
+                        <div>
+                            <strong>Ménage entrée</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Créer un trajet la veille de l'arrivée client</div>
+                        </div>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; padding: 10px; background: var(--card); border-radius: 6px; cursor: pointer;">
+                        <input type="checkbox" id="config-auto-menage-sortie" style="width: auto; margin-right: 10px;">
+                        <div>
+                            <strong>Ménage sortie</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Créer un trajet le jour du départ client</div>
+                        </div>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; padding: 10px; background: var(--card); border-radius: 6px; cursor: pointer;">
+                        <input type="checkbox" id="config-auto-courses" style="width: auto; margin-right: 10px;">
+                        <div>
+                            <strong>Courses</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Créer un trajet courses avant l'arrivée</div>
+                        </div>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; padding: 10px; background: var(--card); border-radius: 6px; cursor: pointer;">
+                        <input type="checkbox" id="config-auto-maintenance" style="width: auto; margin-right: 10px;">
+                        <div>
+                            <strong>Maintenance</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Créer un trajet de maintenance périodique</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="fermerModalConfigKm()" class="btn-neo-secondary">Annuler</button>
+                <button type="submit" class="btn-neo"><i data-lucide="save" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>Sauvegarder</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal : Gestion lieux favoris -->
+<div id="modal-lieux-favoris" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: var(--text);">📍 Gérer mes lieux</h3>
+            <button onclick="fermerModalLieuxFavoris()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <!-- Gîtes -->
+        <div class="info-box purple">
+            <h4 class="fiscal-title-purple">🏠 Mes gîtes</h4>
+            <div id="liste-distances-gites" style="display: grid; gap: 10px;">
+                <!-- Généré dynamiquement -->
+            </div>
+        </div>
+        
+        <!-- Magasins et autres lieux -->
+        <div class="info-box blue">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h4 style="margin: 0; color: #1565c0;">🏪 Magasins & autres lieux</h4>
+                <button type="button" onclick="afficherFormulaireNouveauLieu()" class="btn-neo-secondary"><i data-lucide="plus" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>Ajouter</button>
+            </div>
+            
+            <div id="form-nouveau-lieu" style="display: none; background: var(--card); padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                <div class="fiscal-grid">
+                    <div class="form-group">
+                        <label>Nom du lieu *</label>
+                        <input type="text" id="nouveau-lieu-nom" placeholder="Ex: Intermarché Cahors">
+                    </div>
+                    <div class="form-group">
+                        <label>Distance (km) *</label>
+                        <input type="number" id="nouveau-lieu-distance" step="0.1" min="0">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Adresse (optionnel)</label>
+                        <input type="text" id="nouveau-lieu-adresse" placeholder="Adresse complète">
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                    <button type="button" onclick="annulerNouveauLieu()" class="btn-neo-secondary">Annuler</button>
+                    <button type="button" onclick="enregistrerNouveauLieu()" class="btn-neo"><i data-lucide="save" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>Enregistrer</button>
+                </div>
+            </div>
+            
+            <div id="liste-lieux-favoris" style="display: grid; gap: 8px;">
+                <!-- Généré dynamiquement -->
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <button type="button" onclick="fermerModalLieuxFavoris()" class="btn-neo">Fermer</button>
+        </div>
+    </div>
+</div>
+<!-- Modal : Configuration véhicule -->
+<div id="modal-config-vehicule" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: var(--text);">🚙 Configuration de mon véhicule</h3>
+            <button onclick="fermerModalConfigVehicule()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <div class="info-box blue" style="padding: 20px;">
+            <div class="fiscal-grid" style="gap: 15px;">
+                <div class="form-group">
+                    <label>Type de véhicule *</label>
+                    <select id="modal-vehicule-type" onchange="togglePuissanceFieldModal()">
+                        <option value="thermique" selected>🛢️ Thermique (essence/diesel)</option>
+                        <option value="electrique">⚡ Électrique</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="modal-puissance-group">
+                    <label>Puissance fiscale (CV) *</label>
+                    <select id="modal-puissance-fiscale">
+                        <option value="3">3 CV</option>
+                        <option value="4">4 CV</option>
+                        <option value="5" selected>5 CV</option>
+                        <option value="6">6 CV</option>
+                        <option value="7">7 CV et +</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.6); padding: 15px; border-radius: 6px; margin-top: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 0.95rem;"><i data-lucide="bar-chart-3"></i> Informations calculées</h4>
+                <div style="display: grid; gap: 8px; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Total km professionnels :</span>
+                        <strong id="modal-km-total">0 km</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Montant déductible 2024 :</span>
+                        <strong id="modal-montant-deductible" style="color: #27ae60;">0,00 €</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button type="button" onclick="fermerModalConfigVehicule()" class="btn-neo-secondary">Annuler</button>
+            <button type="button" onclick="enregistrerConfigVehicule()" class="btn-neo">💾 Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Frais Salariés (Madame/Monsieur) -->
+<div id="modal-frais-salarie" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: #ffffff !important; background-color: white !important; opacity: 1 !important; border-radius: 12px; padding: 0; max-width: 600px; width: 90%; max-height: 90vh; overflow: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <div class="modal-header-gradient-blue">
+            <h3 style="margin: 0; font-size: 1.4rem;">⚙️ Frais - <span id="titre-personne-modal">Madame</span></h3>
+            <button onclick="fermerFraisSalarieModal()" style="background: transparent; border: none; color: white; font-size: 2rem; cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 30px;">
+            <p class="info-message-box">💡 Choisissez entre l'abattement forfaitaire de 10% ou la déduction des frais réels.</p>
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 15px; font-weight: 600; color: #333;">Option de déduction :</label>
+                <div style="display: flex; gap: 15px;">
+                    <label style="flex: 1; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;" onclick="toggleOptionFraisSalarie('forfaitaire')">
+                        <input type="radio" name="option_frais_salarie" value="forfaitaire" checked style="margin-right: 8px;">
+                        <strong>10% Forfaitaire</strong>
+                    </label>
+                    <label style="flex: 1; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;" onclick="toggleOptionFraisSalarie('reel')">
+                        <input type="radio" name="option_frais_salarie" value="reel" style="margin-right: 8px;">
+                        <strong>Frais Réels</strong>
+                    </label>
+                </div>
+            </div>
+            
+            <div id="fields-frais-reel-modal" style="display: none;">
+                <div style="display: grid; gap: 15px;">
+                    <div>
+                        <label>Kilomètres parcourus (an)</label>
+                        <input type="number" id="km_salarie_modal" step="1" placeholder="0" oninput="calculerFraisSalarieModal()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px;">
+                    </div>
+                    <div>
+                        <label>Chevaux fiscaux</label>
+                        <input type="number" id="cv_salarie_modal" step="1" value="5" oninput="calculerFraisSalarieModal()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px;">
+                    </div>
+                    <div>
+                        <label>Péages annuels (€)</label>
+                        <input type="number" id="peages_salarie_modal" step="0.01" placeholder="0.00" oninput="calculerFraisSalarieModal()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px;">
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 0.95rem;">💰 Déduction frais réels</div>
+                    <div id="total-frais-salarie-modal" style="font-size: 1.8rem; font-weight: 700;">0.00 €</div>
+                </div>
+            </div>
+        </div>
+        <div style="padding: 20px 30px; background: #f5f5f5; border-radius: 0 0 12px 12px; display: flex; gap: 15px; justify-content: flex-end;">
+            <button onclick="fermerFraisSalarieModal()" style="padding: 12px 24px; background: #9e9e9e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Annuler</button>
+            <button onclick="validerFraisSalarie()" style="padding: 12px 24px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✓ Valider</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Frais Réels Impôts -->
+<div id="modal-frais-reels" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: #ffffff !important; background-color: white !important; opacity: 1 !important; border-radius: 12px; padding: 0; max-width: 700px; width: 90%; max-height: 90vh; overflow: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <div class="modal-header-gradient-blue">
+            <h3 style="margin: 0; font-size: 1.4rem;">🚗 Déclarer mes frais réels professionnels</h3>
+            <button onclick="closeFraisReelsModal()" style="background: transparent; border: none; color: white; font-size: 2rem; cursor: pointer;">×</button>
+        </div>
+        <div style="padding: 30px;">
+            <p style="color: var(--text-secondary); margin-bottom: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 6px;">⚠️ Ces frais concernent vos déplacements personnels (domicile-travail).</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div><label>Kilomètres parcourus (an)</label><input type="number" id="km_perso_impots_modal" step="1" placeholder="0" oninput="calculerFraisReelsImpots()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px;"></div>
+                <div><label>Chevaux fiscaux</label><input type="number" id="chevaux_fiscaux_impots_modal" step="1" value="5" oninput="calculerFraisReelsImpots()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px;"></div>
+                <div><label>Péages annuels (€)</label><input type="number" id="peages_impots_modal" step="0.01" placeholder="0.00" oninput="calculerFraisReelsImpots()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px;"></div>
+            </div>
+            <div style="margin-top: 25px; padding: 20px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 8px; text-align: center;">
+                <div style="font-size: 0.95rem;">💰 Déduction frais réels totale</div>
+                <div id="total-frais-reels-impots-modal" style="font-size: 2rem; font-weight: 700;">0.00 €</div>
+            </div>
+        </div>
+        <div style="padding: 20px 30px; background: #f5f5f5; border-radius: 0 0 12px 12px; display: flex; gap: 15px; justify-content: flex-end;">
+            <button onclick="closeFraisReelsModal()" style="padding: 12px 24px; background: #9e9e9e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Annuler</button>
+            <button onclick="validerFraisReels()" style="padding: 12px 24px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✓ Valider</button>
+        </div>
+    </div>
+</div>
+<!-- Modal : Gestion de tous les trajets -->
+<div id="modal-gestion-trajets" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: var(--text);">📋 Gestion de tous mes trajets</h3>
+            <button onclick="fermerModalGestionTrajets()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <div id="liste-tous-trajets" style="flex: 1; overflow-y: auto; padding-right: 10px;">
+            <!-- Contenu généré dynamiquement -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal : Modifier un trajet -->
+<div id="modal-modifier-trajet" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #2D3436;">
+            <h3 style="margin: 0; color: var(--text);">✏️ Modifier le trajet</h3>
+            <button onclick="fermerModalModifierTrajet()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <form id="form-modifier-trajet" onsubmit="sauvegarderModificationTrajet(event)">
+            <input type="hidden" id="modifier-trajet-id">
+            
+            <div class="fiscal-grid">
+                <div class="form-group">
+                    <label>Date du trajet *</label>
+                    <input type="date" id="modifier-trajet-date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Motif *</label>
+                    <input type="text" id="modifier-trajet-motif" placeholder="Ex: Ménage entrée" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Destination *</label>
+                    <input type="text" id="modifier-trajet-destination" placeholder="Nom du gîte" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Distance aller (km) *</label>
+                    <input type="number" id="modifier-trajet-distance" step="0.1" min="0" required oninput="calculerDistanceTotaleModif()">
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="modifier-trajet-aller-retour" style="width: auto; margin-right: 10px;" onchange="calculerDistanceTotaleModif()">
+                        <span>Aller-retour (double la distance)</span>
+                    </label>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <div class="resume-center-box">
+                        <div class="km-label-small">Distance totale</div>
+                        <div id="modifier-distance-totale" style="font-size: 1.5rem; font-weight: 700; color: #1b5e20;">0 km</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="fermerModalModifierTrajet()" class="btn-neo-secondary">Annuler</button>
+                <button type="submit" class="btn-neo">💾 Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>

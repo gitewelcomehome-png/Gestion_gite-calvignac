@@ -1,0 +1,51 @@
+<div class="tab-container">
+    <!-- Header -->
+    <div class="card card-header-section">
+        <div class="header-content">
+            <div class="header-title-group">
+                <h2 class="page-title"><i data-lucide="sparkles"></i> PLANNING MÉNAGE</h2>
+                <p class="page-subtitle">Organisation et validation des nettoyages</p>
+            </div>
+            <div class="header-actions">
+                <button onclick="showCleaningRulesModal()" class="btn-neo btn-rules" title="Règles de Ménage">
+                    <i data-lucide="target"></i> RÈGLES
+                </button>
+                <button onclick="showRulesModal()" class="btn-neo btn-show-rules" title="Voir les Règles">
+                    <i data-lucide="clipboard"></i> VOIR RÈGLES
+                </button>
+                <button onclick="ouvrirPageValidation()" class="btn-neo btn-validation" title="Page Validation Société">
+                    <i data-lucide="building"></i> VALIDATION SOCIÉTÉ
+                </button>
+                <button onclick="ouvrirPageFemmeMenage()" class="btn-neo btn-femme-menage" title="Espace Femme de Ménage">
+                    <i data-lucide="sparkles"></i> ESPACE MÉNAGE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section propositions en attente -->
+    <div id="propositionsEnAttente"></div>
+
+    <!-- Planning Container -->
+    <div class="card">
+        <div id="menagePlanningWeeks" class="planning-container">
+            <!-- Le planning sera généré ici par JavaScript -->
+        </div>
+    </div>
+
+    <!-- Retours de la Femme de Ménage -->
+    <div class="card" style="margin-top: 30px;">
+        <div class="header-title-group" style="margin-bottom: 20px;">
+            <h2 class="page-title">
+                <i data-lucide="message-circle"></i> RETOURS DE LA FEMME DE MÉNAGE
+            </h2>
+            <p class="page-subtitle">Observations et signalements des 30 derniers jours</p>
+        </div>
+        <div id="retoursMenugeList">
+            <!-- Les retours seront générés ici par JavaScript -->
+        </div>
+    </div>
+
+
+
+</div>

@@ -1,0 +1,2 @@
+984098b feat(SEO): ajout meta tag Google Search Console verification
+984098b0cc2afd918b442a8843d23319048c761d

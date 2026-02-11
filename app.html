@@ -414,6 +414,29 @@
                     clearInterval(waitForSupabase);
                     loadUserDisplayName();
                     loadNotificationCount();
+                    
+                    // 🔄 Synchronisation iCal automatique toutes les 3 minutes (180000 ms)
+                    if (typeof window.syncAllCalendars === 'function') {
+                        // Lancer la première sync après 10 secondes
+                        setTimeout(() => {
+                            window.syncAllCalendars().catch(err => console.warn('Sync auto iCal:', err));
+                        }, 10000);
+                        
+                        // Puis toutes les 3 minutes
+                        setInterval(() => {
+                            window.syncAllCalendars().catch(err => console.warn('Sync auto iCal:', err));
+                        }, 180000);
+                    }
+                    
+                    // 📅 Mettre à jour l'affichage de la dernière sync toutes les minutes
+                    if (typeof window.updateLastSyncDisplay === 'function') {
+                        // Affichage initial
+                        window.updateLastSyncDisplay();
+                        // Puis mise à jour toutes les 60 secondes
+                        setInterval(() => {
+                            window.updateLastSyncDisplay();
+                        }, 60000);
+                    }
                 }
             }, 100);
             

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Channel Manager - Admin</title>
+    
+    <!-- Filtre erreurs extensions Chrome -->
+    <script>
+        window.onerror = function(msg, source, lineno, colno, error) {
+            const msgStr = String(msg || '');
+            const srcStr = String(source || '');
+            if (msgStr.includes('webpage_content_reporter') || 
+                srcStr.includes('webpage_content_reporter') ||
+                msgStr.includes('Unexpected token') ||
+                msgStr.includes('export') ||
+                msgStr.includes('import') ||
+                srcStr.includes('chrome-extension') ||
+                msgStr.includes('zustand')) {
+                return true;
+            }
+        };
+        
+        window.addEventListener('error', function(event) {
+            const msg = event.message || '';
+            const src = event.filename || '';
+            if (src.includes('webpage_content_reporter') || 
+                msg.includes('webpage_content_reporter') ||
+                msg.includes('Unexpected token') || 
+                msg.includes('export') ||
+                msg.includes('import') ||
+                msg.includes('zustand') ||
+                src.includes('chrome-extension')) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return true;
+            }
+        }, true);
+        
+        const _consoleError = console.error;
+        console.error = function(...args) {
+            const str = args.join(' ');
+            if (str.includes('chrome-extension') || 
+                str.includes('webpage_content_reporter') || 
+                str.includes('Unexpected token') ||
+                str.includes('zustand') ||
+                str.includes('export')) {
+                return;
+            }
+            _consoleError.apply(console, args);
+        };
+    </script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Config Supabase -->
+    <script src="../js/shared-config.js"></script>
+    
+    <!-- CSS Admin -->
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-left">
+            <h1>
+                <i data-lucide="bar-chart-3"></i>
+                Channel Manager Dashboard
+            </h1>
+        </div>
+        <div class="header-right">
+            <!-- Liste des démos/tests -->
+            <div style="display: flex; gap: 10px; margin-right: 15px;">
+                <button onclick="window.location.href='admin-clients-ameliorations-demo.html'" 
+                        style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); 
+                               color: white; 
+                               border: none; 
+                               padding: 12px 20px; 
+                               border-radius: 8px; 
+                               font-weight: 600; 
+                               cursor: pointer; 
+                               display: flex; 
+                               align-items: center; 
+                               gap: 8px;
+                               font-size: 13px;
+                               transition: transform 0.2s, box-shadow 0.2s;"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                        title="Voir les améliorations proposées pour la page Gestion Clients">
+                    <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
+                    Améliorations Admin
+                </button>
+                
+                <button onclick="window.location.href='fiche-client-ameliorations-demo.html'" 
+                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+                               color: white; 
+                               border: none; 
+                               padding: 12px 20px; 
+                               border-radius: 8px; 
+                               font-weight: 600; 
+                               cursor: pointer; 
+                               display: flex; 
+                               align-items: center; 
+                               gap: 8px;
+                               font-size: 13px;
+                               transition: transform 0.2s, box-shadow 0.2s;"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                        title="Voir les améliorations proposées pour la Fiche Client (interface locataires)">
+                    <i data-lucide="smartphone" style="width: 16px; height: 16px;"></i>
+                    Améliorations Fiche
+                </button>
+                
+                <button onclick="window.location.href='onboarding-demo.html'" 
+                        style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+                               color: white; 
+                               border: none; 
+                               padding: 12px 20px; 
+                               border-radius: 8px; 
+                               font-weight: 600; 
+                               cursor: pointer; 
+                               display: flex; 
+                               align-items: center; 
+                               gap: 8px;
+                               font-size: 13px;
+                               transition: transform 0.2s, box-shadow 0.2s;"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                        title="Voir le formulaire d'inscription complet en 4 étapes">
+                    <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i>
+                    Démo Inscription
+                </button>
+            </div>
+            
+            <span class="user-email" id="userEmail">stephanecalvignac@hotmail.fr</span>
+            <button class="btn-icon" id="btnLogout" title="Déconnexion">
+                <i data-lucide="log-out"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="admin-container">
+        
+        <!-- KPIs Section -->
+        <section class="kpis-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon mrr">
+                    <i data-lucide="trending-up"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">MRR (Monthly Recurring Revenue)</div>
+                    <div class="kpi-value" id="kpiMRR">
+                        <span class="loading">Chargement...</span>
+                    </div>
+                    <div class="kpi-change positive" id="kpiMRRChange">
+                        <i data-lucide="arrow-up"></i> <span>+0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon clients">
+                    <i data-lucide="users"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Clients Actifs</div>
+                    <div class="kpi-value" id="kpiClients">
+                        <span class="loading">Chargement...</span>
+                    </div>
+                    <div class="kpi-change positive" id="kpiClientsChange">
+                        <i data-lucide="arrow-up"></i> <span>+0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon nps">
+                    <i data-lucide="heart"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">NPS (Net Promoter Score)</div>
+                    <div class="kpi-value" id="kpiNPS">
+                        <span class="loading">Chargement...</span>
+                    </div>
+                    <div class="kpi-change positive" id="kpiNPSChange">
+                        <i data-lucide="arrow-up"></i> <span>Excellent</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon churn">
+                    <i data-lucide="user-x"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Taux de Churn</div>
+                    <div class="kpi-value" id="kpiChurn">
+                        <span class="loading">Chargement...</span>
+                    </div>
+                    <div class="kpi-change negative" id="kpiChurnChange">
+                        <i data-lucide="arrow-down"></i> <span>-0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #fee2e2;">
+                    <i data-lucide="alert-octagon" style="color: #dc2626;"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Erreurs Critiques</div>
+                    <div class="kpi-value" style="display: flex; flex-direction: column; gap: 8px; font-size: 18px; margin-top: 8px;">
+                        <!-- Ligne 1: Par type -->
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span title="Critiques" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="alert-octagon" style="width: 18px; height: 18px; color: #dc2626;"></i>
+                                <strong id="kpiErrorsCritical" style="color: #dc2626; font-size: 18px;">0</strong>
+                            </span>
+                            <span title="Warnings" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="alert-triangle" style="width: 18px; height: 18px; color: #f59e0b;"></i>
+                                <strong id="kpiErrorsWarning" style="color: #f59e0b; font-size: 18px;">0</strong>
+                            </span>
+                        </div>
+                        <!-- Ligne 2: Total 24h -->
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span title="Dernières 24h" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="clock" style="width: 18px; height: 18px; color: #64748b;"></i>
+                                <strong id="kpiErrors24h" style="color: #64748b; font-size: 18px;">0</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #e3f2fd;">
+                    <i data-lucide="headphones" style="color: #2196f3;"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Support Tickets</div>
+                    <div class="kpi-value" style="display: flex; flex-direction: column; gap: 8px; font-size: 18px; margin-top: 8px;">
+                        <!-- Ligne 1: Statuts -->
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span title="Ouvert" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="inbox" style="width: 18px; height: 18px; color: #9c27b0;"></i>
+                                <strong id="kpiTicketsOuvert" style="color: #9c27b0; font-size: 18px;">0</strong>
+                            </span>
+                            <span title="En cours" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="play-circle" style="width: 18px; height: 18px; color: #2196f3;"></i>
+                                <strong id="kpiTicketsEnCours" style="color: #2196f3; font-size: 18px;">0</strong>
+                            </span>
+                            <span title="En attente" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="clock" style="width: 18px; height: 18px; color: #ff9800;"></i>
+                                <strong id="kpiTicketsEnAttente" style="color: #ff9800; font-size: 18px;">0</strong>
+                            </span>
+                        </div>
+                        <!-- Ligne 2: Priorités -->
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span title="Critique" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="alert-octagon" style="width: 18px; height: 18px; color: #d32f2f;"></i>
+                                <strong id="kpiTicketsCritique" style="color: #d32f2f; font-size: 18px;">0</strong>
+                            </span>
+                            <span title="Haute" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="alert-circle" style="width: 18px; height: 18px; color: #e91e63;"></i>
+                                <strong id="kpiTicketsHaute" style="color: #e91e63; font-size: 18px;">0</strong>
+                            </span>
+                            <span title="Normale" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="circle" style="width: 18px; height: 18px; color: #9e9e9e;"></i>
+                                <strong id="kpiTicketsNormale" style="color: #9e9e9e; font-size: 18px;">0</strong>
+                            </span>
+                            <span title="Basse" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="chevron-down" style="width: 18px; height: 18px; color: #4caf50;"></i>
+                                <strong id="kpiTicketsBasse" style="color: #4caf50; font-size: 18px;">0</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #f3e5f5;">
+                    <i data-lucide="tag" style="color: #9c27b0;"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Promotions Actives</div>
+                    <div class="kpi-value" style="display: flex; flex-direction: column; gap: 8px; font-size: 18px; margin-top: 8px;">
+                        <!-- Ligne 1: Stats -->
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span title="Actives" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="check-circle" style="width: 18px; height: 18px; color: #4caf50;"></i>
+                                <strong id="kpiPromosActives" style="color: #4caf50; font-size: 18px;">0</strong>
+                            </span>
+                            <span title="Utilisations" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="users" style="width: 18px; height: 18px; color: #2196f3;"></i>
+                                <strong id="kpiPromosUtilisations" style="color: #2196f3; font-size: 18px;">0</strong>
+                            </span>
+                        </div>
+                        <!-- Ligne 2: ROI -->
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span title="ROI Moyen" style="display: flex; align-items: center; gap: 5px;">
+                                <i data-lucide="trending-up" style="width: 18px; height: 18px; color: #9c27b0;"></i>
+                                <strong id="kpiPromosROI" style="color: #9c27b0; font-size: 18px;">0%</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🔴 WIDGET ERREURS CRITIQUES -->
+        <div id="errorsWidget"></div>
+
+        <!-- Chart MRR 12 mois -->
+        <section class="chart-section">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2>
+                        <i data-lucide="line-chart"></i>
+                        Évolution MRR (12 derniers mois)
+                    </h2>
+                    <div class="chart-filters">
+                        <button class="btn-filter active" data-period="12">12 mois</button>
+                        <button class="btn-filter" data-period="6">6 mois</button>
+                        <button class="btn-filter" data-period="3">3 mois</button>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <canvas id="mrrChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chart Clients + Derniers Clients -->
+        <section class="two-columns">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2>
+                        <i data-lucide="users"></i>
+                        Évolution Clients
+                    </h2>
+                </div>
+                <div class="chart-body">
+                    <canvas id="clientsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="recent-clients-card">
+                <h3>
+                    <i data-lucide="user-check"></i>
+                    Derniers Clients Inscrits
+                </h3>
+                <div class="recent-clients-list" id="recentClientsList">
+                    <div class="loading-state">Chargement...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Alertes et Opportunités -->
+        <section class="two-columns">
+            <!-- Alertes -->
+            <div class="alerts-card">
+                <h3>
+                    <i data-lucide="alert-triangle"></i>
+                    Alertes
+                </h3>
+                <div class="alerts-list" id="alertsList">
+                    <div class="loading-state">Chargement des alertes...</div>
+                </div>
+            </div>
+
+            <!-- Opportunités -->
+            <div class="opportunities-card">
+                <h3>
+                    <i data-lucide="target"></i>
+                    Opportunités
+                </h3>
+                <div class="opportunities-list" id="opportunitiesList">
+                    <div class="loading-state">Chargement des opportunités...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabs Navigation (pour les autres modules) -->
+        <section class="tabs-navigation">
+            <div class="tabs-sidebar">
+                <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
+                <button class="tab-btn active" data-tab="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="tab-btn" data-tab="clients" onclick="window.location.href='admin-clients.html'">
+                    <i data-lucide="users"></i>
+                    <span>Clients</span>
+                </button>
+                <button class="tab-btn" data-tab="support" onclick="window.location.href='admin-support.html'" style="position: relative;">
+                    <i data-lucide="headphones"></i>
+                    <span>Support</span>
+                    <span id="badge-support-nouveaux" style="display: none; position: absolute; top: 10px; right: 15px; background: #e91e63; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center;">0</span>
+                </button>
+                <button class="tab-btn" data-tab="promotions" onclick="window.location.href='admin-promotions.html'">
+                    <i data-lucide="tag"></i>
+                    <span>Promotions</span>
+                </button>
+                <button class="tab-btn" data-tab="parrainage" onclick="window.location.href='admin-parrainage.html'">
+                    <i data-lucide="gift"></i>
+                    <span>Parrainage</span>
+                </button>
+                <button class="tab-btn" data-tab="finance" onclick="window.location.href='admin-finance.html'">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span>Finance & BI</span>
+                </button>
+                <button class="tab-btn" data-tab="content" onclick="window.location.href='admin-content.html'">
+                    <i data-lucide="pen-tool"></i>
+                    <span>Content IA</span>
+                </button>
+                <button class="tab-btn" data-tab="communications" onclick="window.location.href='admin-communications.html'">
+                    <i data-lucide="megaphone"></i>
+                    <span>Communications</span>
+                </button>
+                <button class="tab-btn" data-tab="monitoring" onclick="window.location.href='admin-monitoring.html'">
+                    <i data-lucide="activity"></i>
+                    <span>Monitoring</span>
+                </button>
+                <button class="tab-btn" data-tab="website">
+                    <i data-lucide="globe"></i>
+                    <span>Site Web</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/error-tracker.js"></script>
+    <script src="../js/admin-error-monitor.js?v=2.0"></script>
+    <script src="../js/admin-dashboard.js"></script>
+    <script src="../js/dashboard-support-widget.js?v=1.0"></script>
+    <script src="../js/dashboard-promotions-widget.js?v=1.0"></script>
+    <script src="../js/widget-errors.js?v=1.0"></script>
+    
+    <script>
+        // Initialiser widget erreurs au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            const errorsContainer = document.getElementById('errorsWidget');
+            if (errorsContainer && window.initErrorsWidget) {
+                errorsContainer.innerHTML = window.initErrorsWidget();
+                
+                // Charger les erreurs
+                setTimeout(() => {
+                    if (window.refreshErrorsWidget) {
+                        window.refreshErrorsWidget();
+                    }
+                }, 1000);
+            }
+        });
+    </script>
+    <script>
+        // Initialiser Lucide Icons
+        lucide.createIcons();
+        
+        // Charger les tickets support après chargement du DOM
+        if (typeof loadSupportTickets === 'function') {
+            setTimeout(() => {
+                loadSupportTickets();
+                // Actualiser toutes les 30 secondes
+                setInterval(loadSupportTickets, 30000);
+            }, 500);
+        }
+        
+        // Charger les stats promotions
+        if (typeof loadPromotionsStats === 'function') {
+            setTimeout(() => {
+                loadPromotionsStats();
+                // Actualiser toutes les 60 secondes
+                setInterval(loadPromotionsStats, 60000);
+            }, 700);
+        }
+    </script>
+</body>
+</html>

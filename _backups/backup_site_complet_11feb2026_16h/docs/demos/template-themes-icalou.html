@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Template Système de Thèmes - iCalou</title>
+    <style>
+        /* ========================================
+           📖 GUIDE POUR L'IA
+           ========================================
+           
+           Ce template contient la structure de base du système de thèmes iCalou.
+           
+           STRUCTURE:
+           1. Variables CSS (:root[data-theme="light"] et :root[data-theme="dark"])
+           2. Reset & styles de base
+           3. Contrôles de thème (toggle jour/nuit + boutons de style)
+           4. Classes de boutons de base (.btn-action + variantes)
+           5. Styles spécifiques par thème (.style-modern, .style-neo-brutal, etc.)
+           
+           COMMENT AJOUTER UN NOUVEAU STYLE:
+           
+           1. Ajouter un bouton dans .style-buttons:
+              <button class="style-btn" data-style="votre-style">🎨 Votre Style</button>
+           
+           2. Créer une section CSS pour votre style:
+              .style-votre-style .btn-action {
+                  // Vos règles CSS spécifiques
+                  border-radius: ...;
+                  box-shadow: ...;
+                  background: ... !important; // Utilisez !important pour forcer les couleurs
+              }
+           
+           3. Les variables CSS de couleurs sont automatiquement héritées
+              depuis :root[data-theme="light"] et :root[data-theme="dark"]
+           
+           CLASSES DE BOUTONS DISPONIBLES:
+           - .btn-ajouter / .btn-add (vert/success)
+           - .btn-supprimer / .btn-remove (rouge/danger)
+           - .btn-modifier / .btn-editer (bleu/primary)
+           - .btn-enregistrer / .btn-sauvegarder (violet/secondary)
+           - .btn-annuler (gris/neutral)
+           - .btn-valider / .btn-confirmer (vert/success)
+           - .btn-fiche-client (gradient spécial)
+           - .btn-info / .btn-details (cyan/info)
+           - .btn-telecharger / .btn-export (violet/secondary)
+           - .btn-actualiser / .btn-refresh (blanc avec bordure)
+           - .btn-imprimer (bleu/primary)
+           - .btn-rechercher (cyan/info)
+           - .btn-plus (vert cercle)
+           - .btn-moins (orange cercle)
+           
+           VARIANTES DE TAILLE:
+           - .btn-sm (petit)
+           - .btn-lg (grand)
+           - .btn-full (pleine largeur)
+           
+           ======================================== */
+
+        /* ========================================
+           VARIABLES CSS - THÈME LIGHT
+           ======================================== */
+        
+        :root[data-theme="light"] {
+            /* Couleurs de base */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            
+            /* Texte */
+            --text-primary: #2D3436;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            
+            /* Bordures & Ombres */
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+            
+            /* Boutons - Couleurs principales (gradients modernes) */
+            --btn-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --btn-success-hover: linear-gradient(135deg, #059669 0%, #047857 100%);
+            --btn-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --btn-danger-hover: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            --btn-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --btn-primary-hover: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            --btn-secondary: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --btn-secondary-hover: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            --btn-neutral: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            --btn-neutral-hover: linear-gradient(135deg, #475569 0%, #334155 100%);
+            --btn-info: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            --btn-info-hover: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+            --btn-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --btn-warning-hover: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            --btn-special: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --btn-special-hover: linear-gradient(135deg, #5568d3 0%, #6a3f91 100%);
+        }
+
+        /* ========================================
+           VARIABLES CSS - THÈME DARK
+           ======================================== */
+        
+        :root[data-theme="dark"] {
+            /* Couleurs de base */
+            --bg-primary: #1e293b;
+            --bg-secondary: #0f172a;
+            --bg-gradient: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+            
+            /* Texte */
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            
+            /* Bordures & Ombres */
+            --border-color: #334155;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+            
+            /* Boutons - Couleurs principales (légèrement plus claires en dark) */
+            --btn-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --btn-success-hover: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            --btn-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --btn-danger-hover: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            --btn-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --btn-primary-hover: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            --btn-secondary: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --btn-secondary-hover: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            --btn-neutral: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            --btn-neutral-hover: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+            --btn-info: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            --btn-info-hover: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+            --btn-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --btn-warning-hover: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            --btn-special: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --btn-special-hover: linear-gradient(135deg, #818cf8 0%, #9333ea 100%);
+        }
+
+        /* ========================================
+           RESET & STYLES DE BASE
+           ======================================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            padding: 40px 20px;
+            min-height: 100vh;
+            transition: background 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 800;
+            transition: color 0.3s ease;
+        }
+
+        /* ========================================
+           CONTRÔLES DE THÈME
+           ======================================== */
+        
+        .theme-controls {
+            position: sticky;
+            top: 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            z-index: 100;
+        }
+
+        .theme-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        /* Toggle Jour/Nuit */
+        .theme-switch {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            background: var(--border-color);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-switch.active {
+            background: var(--btn-special);
+        }
+
+        .theme-switch-toggle {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-switch.active .theme-switch-toggle {
+            transform: translateX(28px);
+        }
+
+        .theme-switch-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+        }
+
+        .theme-switch-icon.sun {
+            left: 6px;
+            color: #f59e0b;
+        }
+
+        .theme-switch-icon.moon {
+            right: 6px;
+            color: #cbd5e1;
+        }
+
+        /* Boutons de Style */
+        .style-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .style-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .style-btn:hover {
+            border-color: #667eea;
+            background: var(--bg-secondary);
+        }
+
+        .style-btn.active {
+            background: var(--btn-special);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* ========================================
+           SYSTÈME DE BOUTONS - STYLES DE BASE
+           ======================================== */
+
+        .btn-action {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            font-family: 'Work Sans', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-action::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-action:hover::before {
+            opacity: 1;
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Classes de Couleurs (héritées des variables CSS) */
+        .btn-ajouter, .btn-add { background: var(--btn-success); color: white; }
+        .btn-ajouter:hover, .btn-add:hover { background: var(--btn-success-hover); }
+
+        .btn-supprimer, .btn-remove { background: var(--btn-danger); color: white; }
+        .btn-supprimer:hover, .btn-remove:hover { background: var(--btn-danger-hover); }
+
+        .btn-modifier, .btn-editer { background: var(--btn-primary); color: white; }
+        .btn-modifier:hover, .btn-editer:hover { background: var(--btn-primary-hover); }
+
+        .btn-enregistrer, .btn-sauvegarder { background: var(--btn-secondary); color: white; }
+        .btn-enregistrer:hover, .btn-sauvegarder:hover { background: var(--btn-secondary-hover); }
+
+        .btn-annuler { background: var(--btn-neutral); color: white; }
+        .btn-annuler:hover { background: var(--btn-neutral-hover); }
+
+        .btn-valider, .btn-confirmer { background: var(--btn-success); color: white; }
+        .btn-valider:hover, .btn-confirmer:hover { background: var(--btn-success-hover); }
+
+        .btn-info, .btn-details { background: var(--btn-info); color: white; }
+        .btn-info:hover, .btn-details:hover { background: var(--btn-info-hover); }
+
+        /* Variantes de Tailles */
+        .btn-action.btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+
+        .btn-action.btn-lg {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            border-radius: 14px;
+        }
+
+        .btn-action.btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ========================================
+           🎨 STYLE MODERNE (par défaut)
+           ========================================
+           Caractéristiques:
+           - Gradients doux
+           - Ombres modernes
+           - Coins arrondis
+           - Effets de survol fluides
+           ======================================== */
+
+        .style-modern .btn-action {
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .style-modern .btn-action:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ========================================
+           ⚡ STYLE NEO-BRUTAL
+           ========================================
+           Caractéristiques:
+           - Bordures épaisses noires
+           - Ombres décalées (offset)
+           - Couleurs plates (pas de gradient)
+           - Coins légèrement arrondis
+           
+           POUR AJOUTER CE STYLE:
+           Utilisez !important pour forcer les couleurs
+           ======================================== */
+
+        .style-neo-brutal .btn-action {
+            border: 3px solid #2D3436;
+            border-radius: 8px;
+            box-shadow: 5px 5px 0 #2D3436;
+        }
+
+        .style-neo-brutal .btn-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 7px 7px 0 #2D3436;
+        }
+
+        .style-neo-brutal .btn-action:active {
+            transform: translateY(0);
+            box-shadow: 3px 3px 0 #2D3436;
+        }
+
+        /* Couleurs plates pour Neo-Brutal */
+        .style-neo-brutal .btn-ajouter,
+        .style-neo-brutal .btn-add,
+        .style-neo-brutal .btn-valider,
+        .style-neo-brutal .btn-confirmer {
+            background: #10b981 !important;
+        }
+
+        .style-neo-brutal .btn-supprimer,
+        .style-neo-brutal .btn-remove {
+            background: #ef4444 !important;
+        }
+
+        .style-neo-brutal .btn-modifier,
+        .style-neo-brutal .btn-editer {
+            background: #3b82f6 !important;
+        }
+
+        .style-neo-brutal .btn-enregistrer,
+        .style-neo-brutal .btn-sauvegarder {
+            background: #8b5cf6 !important;
+        }
+
+        .style-neo-brutal .btn-annuler {
+            background: #64748b !important;
+        }
+
+        .style-neo-brutal .btn-info,
+        .style-neo-brutal .btn-details {
+            background: #06b6d4 !important;
+        }
+
+        /* ========================================
+           ✨ STYLE MINIMAL
+           ========================================
+           Caractéristiques:
+           - Pas de gradient
+           - Ombres très légères
+           - Bordures fines
+           - Coins peu arrondis
+           ======================================== */
+
+        .style-minimal .btn-action {
+            border-radius: 6px;
+            box-shadow: none;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .style-minimal .btn-action:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            transform: none;
+        }
+
+        .style-minimal .btn-action::before {
+            display: none;
+        }
+
+        /* Couleurs plates pour Minimal */
+        .style-minimal .btn-ajouter,
+        .style-minimal .btn-add,
+        .style-minimal .btn-valider,
+        .style-minimal .btn-confirmer {
+            background: #10b981 !important;
+        }
+
+        .style-minimal .btn-supprimer,
+        .style-minimal .btn-remove {
+            background: #ef4444 !important;
+        }
+
+        .style-minimal .btn-modifier,
+        .style-minimal .btn-editer {
+            background: #3b82f6 !important;
+        }
+
+        .style-minimal .btn-enregistrer,
+        .style-minimal .btn-sauvegarder {
+            background: #8b5cf6 !important;
+        }
+
+        .style-minimal .btn-annuler {
+            background: #94a3b8 !important;
+        }
+
+        .style-minimal .btn-info,
+        .style-minimal .btn-details {
+            background: #06b6d4 !important;
+        }
+
+        /* ========================================
+           💎 STYLE GLASS (Glassmorphism)
+           ========================================
+           Caractéristiques:
+           - Effet de verre (backdrop-filter blur)
+           - Transparence
+           - Bordures subtiles
+           - Couleurs semi-transparentes
+           ======================================== */
+
+        .style-glass .btn-action {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.15) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .style-glass .btn-action:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Couleurs avec transparence pour Glass */
+        .style-glass .btn-ajouter,
+        .style-glass .btn-add,
+        .style-glass .btn-valider,
+        .style-glass .btn-confirmer {
+            background: rgba(16, 185, 129, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-supprimer,
+        .style-glass .btn-remove {
+            background: rgba(239, 68, 68, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-modifier,
+        .style-glass .btn-editer {
+            background: rgba(59, 130, 246, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-enregistrer,
+        .style-glass .btn-sauvegarder {
+            background: rgba(139, 92, 246, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-annuler {
+            background: rgba(100, 116, 139, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-glass .btn-info,
+        .style-glass .btn-details {
+            background: rgba(6, 182, 212, 0.3) !important;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Effet Glass sur le container */
+        .style-glass .container {
+            background: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Glass mode dark */
+        :root[data-theme="dark"] .style-glass .container {
+            background: rgba(30, 41, 59, 0.7) !important;
+        }
+
+        /* ========================================
+           📱 RESPONSIVE
+           ======================================== */
+
+        @media (max-width: 768px) {
+            .theme-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .theme-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .style-buttons {
+                width: 100%;
+            }
+
+            .style-btn {
+                flex: 1;
+            }
+        }
+
+        /* ========================================
+           🎨 DÉMO - Styles pour la présentation
+           ======================================== */
+
+        .demo-section {
+            margin-bottom: 40px;
+        }
+
+        .demo-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            transition: color 0.3s;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .alert-info {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Template Système de Thèmes</h1>
+
+        <!-- Contrôles de Thème -->
+        <div class="theme-controls">
+            <div class="theme-section">
+                <span class="theme-label">Mode :</span>
+                <div class="theme-switch" id="themeSwitch">
+                    <span class="theme-switch-icon sun">☀️</span>
+                    <div class="theme-switch-toggle"></div>
+                    <span class="theme-switch-icon moon">🌙</span>
+                </div>
+            </div>
+
+            <div class="theme-section">
+                <span class="theme-label">Style :</span>
+                <div class="style-buttons">
+                    <button class="style-btn active" data-style="modern">🎨 Moderne</button>
+                    <button class="style-btn" data-style="neo-brutal">⚡ Neo-Brutal</button>
+                    <button class="style-btn" data-style="minimal">✨ Minimal</button>
+                    <button class="style-btn" data-style="glass">💎 Glass</button>
+                    <!-- 🤖 AJOUTEZ VOS NOUVEAUX STYLES ICI -->
+                </div>
+            </div>
+        </div>
+
+        <div class="alert-info">
+            <strong>🤖 Pour l'IA :</strong> Ce template contient la structure de base du système de thèmes. 
+            Suivez les commentaires dans le CSS pour ajouter de nouveaux styles. 
+            Chaque style doit avoir sa propre section avec la classe <code>.style-votre-nom</code>.
+        </div>
+
+        <!-- Section Démo : Boutons Principaux -->
+        <div class="demo-section">
+            <h2 class="demo-title">🎯 Boutons d'Action Principaux</h2>
+            <div class="demo-grid">
+                <button class="btn-action btn-ajouter">➕ Ajouter</button>
+                <button class="btn-action btn-modifier">✏️ Modifier</button>
+                <button class="btn-action btn-supprimer">🗑️ Supprimer</button>
+                <button class="btn-action btn-enregistrer">💾 Enregistrer</button>
+                <button class="btn-action btn-annuler">✖️ Annuler</button>
+                <button class="btn-action btn-valider">✅ Valider</button>
+            </div>
+        </div>
+
+        <!-- Section Démo : Variantes de Tailles -->
+        <div class="demo-section">
+            <h2 class="demo-title">📏 Variantes de Tailles</h2>
+            <div class="btn-group">
+                <button class="btn-action btn-ajouter btn-sm">➕ Petit</button>
+                <button class="btn-action btn-ajouter">➕ Normal</button>
+                <button class="btn-action btn-ajouter btn-lg">➕ Grand</button>
+            </div>
+        </div>
+
+        <!-- Section Démo : Groupe de Boutons -->
+        <div class="demo-section">
+            <h2 class="demo-title">👥 Groupe de Boutons</h2>
+            <div class="btn-group">
+                <button class="btn-action btn-modifier">✏️ Modifier</button>
+                <button class="btn-action btn-supprimer">🗑️ Supprimer</button>
+                <button class="btn-action btn-info">ℹ️ Détails</button>
+            </div>
+        </div>
+
+        <!-- Section Démo : Bouton Pleine Largeur -->
+        <div class="demo-section">
+            <h2 class="demo-title">↔️ Bouton Pleine Largeur</h2>
+            <button class="btn-action btn-enregistrer btn-full">💾 Enregistrer Modifications</button>
+        </div>
+    </div>
+
+    <script>
+        /* ========================================
+           SYSTÈME DE GESTION DES THÈMES
+           ======================================== */
+
+        class ThemeManager {
+            constructor() {
+                this.html = document.documentElement;
+                this.themeSwitch = document.getElementById('themeSwitch');
+                this.styleButtons = document.querySelectorAll('.style-btn');
+                
+                // Charger les préférences sauvegardées
+                this.currentTheme = localStorage.getItem('icalou-theme') || 'light';
+                this.currentStyle = localStorage.getItem('icalou-style') || 'modern';
+                
+                this.init();
+            }
+
+            init() {
+                // Appliquer le thème et style sauvegardés
+                this.applyTheme(this.currentTheme);
+                this.applyStyle(this.currentStyle);
+                
+                // Event listeners
+                this.themeSwitch.addEventListener('click', () => this.toggleTheme());
+                
+                this.styleButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const style = e.target.dataset.style;
+                        this.changeStyle(style);
+                    });
+                });
+            }
+
+            toggleTheme() {
+                this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                this.applyTheme(this.currentTheme);
+                localStorage.setItem('icalou-theme', this.currentTheme);
+            }
+
+            applyTheme(theme) {
+                this.html.setAttribute('data-theme', theme);
+                
+                if (theme === 'dark') {
+                    this.themeSwitch.classList.add('active');
+                } else {
+                    this.themeSwitch.classList.remove('active');
+                }
+            }
+
+            changeStyle(style) {
+                this.currentStyle = style;
+                this.applyStyle(style);
+                localStorage.setItem('icalou-style', style);
+                
+                // Mettre à jour les boutons actifs
+                this.styleButtons.forEach(btn => {
+                    if (btn.dataset.style === style) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            applyStyle(style) {
+                // Retirer tous les styles précédents
+                this.html.classList.remove('style-modern', 'style-neo-brutal', 'style-minimal', 'style-glass');
+                
+                // 🤖 AJOUTEZ VOS NOUVEAUX STYLES ICI
+                // this.html.classList.remove('style-votre-nouveau-style');
+                
+                // Appliquer le nouveau style
+                this.html.classList.add(`style-${style}`);
+                
+                // console.log(`✅ Style ${style} appliqué`);
+            }
+        }
+
+        // Initialiser le gestionnaire de thèmes
+        document.addEventListener('DOMContentLoaded', () => {
+            window.themeManager = new ThemeManager();
+            // console.log('🎨 Système de thèmes initialisé');
+        });
+    </script>
+</body>
+</html>

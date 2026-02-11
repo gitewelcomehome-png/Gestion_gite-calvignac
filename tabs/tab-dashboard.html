@@ -8,9 +8,12 @@
             <p class="page-subtitle" id="dashboard-week-info">Semaine en cours</p>
         </div>
         <div class="page-header__actions">
-            <button onclick="updateFinancialIndicators()" class="btn btn--refresh">
-                <i data-lucide="refresh-cw"></i> Actualiser
-            </button>
+            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                <button onclick="updateFinancialIndicators()" class="btn btn--refresh">
+                    <i data-lucide="refresh-cw"></i> Actualiser
+                </button>
+                <small id="last-sync-dashboard" style="color: #888; font-size: 0.75rem; margin-left: 4px;"></small>
+            </div>
             
             <div class="widget-date">
                 <div class="widget-date__current" id="dashboard-date">25 janvier 2026</div>

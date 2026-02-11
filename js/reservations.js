@@ -487,6 +487,11 @@ async function updateReservationsList(keepScrollPosition = false) {
             window.scrollTo(0, scrollY);
         }, 50);
     }
+    
+    // Afficher la dernière synchronisation iCal
+    if (typeof updateLastSyncDisplay === 'function') {
+        updateLastSyncDisplay();
+    }
 }
 
 function generateWeekReservations(reservations, weekKey, cssClass, toutesReservations, validationMap = {}, today = null) {

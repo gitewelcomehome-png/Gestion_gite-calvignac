@@ -2195,6 +2195,11 @@ async function refreshDashboard() {
         await loadClientCommunications();
     }
     
+    // Afficher la dernière synchronisation iCal
+    if (typeof updateLastSyncDisplay === 'function') {
+        updateLastSyncDisplay();
+    }
+    
     // Attacher les boutons "+ Tâche" via data-category (SecurityUtils ne supprime pas les attributs data)
     document.querySelectorAll('[data-todo-category]').forEach(btn => {
         const category = btn.getAttribute('data-todo-category');

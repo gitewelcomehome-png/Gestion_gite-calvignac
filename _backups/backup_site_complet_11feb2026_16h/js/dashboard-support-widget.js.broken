@@ -1,0 +1,144 @@
+// ================================================================
+// 🎫 WIDGET SUPPORT DASHBOARD
+// ================================================================
+// Affiche les tickets support en attente sur le dashboard admin
+// ================================================================
+
+console.log('🚀 DEBUG: Fichier dashboard-support-widget.js chargé');
+
+async function loadSupportTickets() {
+    console.log('🔍 DEBUG: Chargement tickets support...');
+    
+    try {
+        // Vérifier que Supabase est chargé
+        if (!window.supabaseClient) {
+            console.error('❌ DEBUG: window.supabaseClient non disponible');
+            return;
+        }
+        console.log('✅ DEBUG: Supabase client OK');
+        
+        // Vérifier les éléments DOM
+        const section = document.getElementById('dashboard-tickets-support');
+        const badge = document.getElementById('badge-tickets-count');
+        const liste = document.getElementById('liste-tickets-support');
+        
+        console.log('🔍 DEBUG: Éléments DOM:', {
+            section: !!section,
+            badge: !!badge,
+            liste: !!liste
+        });
+        
+        if (!section || !badge || !liste) {
+            console.error('❌ DEBUG: Éléments DOM manquants');
+            return;
+        }
+        
+        // Récupérer les tickets en attente (ouvert, en_cours, en_attente)
+        console.log('🔍 DEBUG: Requête Supabase...');
+        const { data: tickets, error } = await window.supabaseClient
+            .from('cm_support_tickets')
+            .select(`
+                *,
+                cm_clients!inner(nom_entreprise, email)
+            `)
+            .in('statut', ['ouvert', 'en_cours', 'en_attente'])
+            .order('created_at', { ascending: false })
+            .limit(10);
+        
+        if (error) {
+            console.error('❌ DEBUG: Erreur Supabase:', error);
+            throw error;
+        }
+        
+        console.log('📊 DEBUG: Tickets reçus:', tickets ? tickets.length : 0, tickets);
+        
+        if (!tickets || tickets.length === 0) {
+            console.log('⚠️ DEBUG: Aucun ticket en attente - masquage section');
+            section.style.display = 'none';
+            return;
+        }
+        
+        // Afficher la section
+        console.log('✅ DEBUG: Affichage de', tickets.length, 'ticket(s)');
+        section.style.display = 'block';
+        badge.textContent = tickets.length;
+        
+        // Construire le HTML
+        const html = tickets.map(ticket => {
+            const priorityClass = ticket.priorite === 'haute' ? 'danger' : ticket.priorite === 'normale' ? 'warning' : 'info';
+            const statutLabel = {
+                'ouvert': 'Nouveau',
+                'en_cours': 'En cours',
+                'en_attente': 'En attente'
+            }[ticket.statut] || ticket.statut;
+            
+            return `
+                <div class="alert-item" onclick="window.location.href='pages/admin-support.html?ticket=${ticket.id}';" style="cursor: pointer;">
+                    <div class="alert-item__header">
+                        <span class="badge badge--${priorityClass}">${ticket.priorite}</span>
+                        <span class="badge badge--outline">${statutLabel}</span>
+                        <span class="alert-item__date">${getTimeAgo(ticket.created_at)}</span>
+                    </div>
+                    <div class="alert-item__content">
+                        <strong>${escapeHtml(ticket.sujet)}</strong>
+                        <p>${escapeHtml(ticket.cm_clients.nom_entreprise || ticket.cm_clients.email)}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        console.log('📝 DEBUG: HTML généré:', html.substring(0, 200) + '...');
+        liste.innerHTML = html;
+        console.log('✅ DEBUG: Widget tickets support affiché avec succès');
+        
+    } catch (error) {
+        console.error('❌ DEBUG: Erreur chargement tickets support:', error);
+        console.error('❌ DEBUG: Stack:', error.stack
+        console.error('❌ Erreur chargement tickets support:', error);
+    }
+}
+
+function getTimeAgo(date) {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 60) return 'À l\'instant';
+    if (seconds < 3600) return `Il y a ${Math.floor(seconds / 60)} min`;
+    if (seconds < 86400) return `Il y a ${Math.floor(seconds / 3600)} h`;
+    return `Il y a ${Math.floor(seconds / 86400)} j`;
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+console.log('🚀 DEBUG: Initialisation widget support dashboard');
+
+const widgetSection = document.getElementById('dashboard-tickets-support');
+console.log('🔍 DEBUG: Section trouvée:', !!widgetSection);
+
+if (widgetSection) {
+    // Attendre que Supabase soit chargé
+    let attemptCount = 0;
+    const checkSupabase = setInterval(() => {
+        attemptCount++;
+        console.log(`🔍 DEBUG: Tentative ${attemptCount} - Vérification Supabase...`);
+        
+        if (window.supabaseClient) {
+            console.log('✅ DEBUG: Supabase détecté - chargement tickets');
+            clearInterval(checkSupabase);
+            loadSupportTickets();
+            setInterval(loadSupportTickets, 30000); // Actualisation toutes les 30s
+        } else if (attemptCount >= 50) {
+            console.error('❌ DEBUG: Timeout - Supabase non chargé après 5s');
+            clearInterval(checkSupabase);
+        }
+    }, 100);
+} else {
+    console.error('❌ DEBUG: Section dashboard-tickets-support introuvable dans le DOM'
+    
+    // Timeout après 5 secondes
+    setTimeout(() => clearInterval(checkSupabase), 5000);
+}
+
+console.log('✅ Widget Support Dashboard chargé');
+
+})(); // Fin IIFE

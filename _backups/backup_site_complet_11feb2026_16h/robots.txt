@@ -1,0 +1,6 @@
+# www.liveownerunit.fr - Robots.txt
+
+User-agent: *
+Allow: /
+
+Sitemap: https://www.liveownerunit.fr/sitemap.xml

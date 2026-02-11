@@ -1,0 +1,18 @@
+{
+  "name": "gestion-gite-calvignac",
+  "version": "6.2.0",
+  "description": "Système de gestion de gîtes avec intégration Abritel",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "nodemailer": "^6.9.8"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5",
+    "vercel": "^33.0.0"
+  }
+}

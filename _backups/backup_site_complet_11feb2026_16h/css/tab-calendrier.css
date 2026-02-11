@@ -1,0 +1,1209 @@
+/* =========================================
+   TAB-CALENDRIER.CSS - Styles pour onglet Calendrier & Tarifs (Desktop)
+   Modes: Sidebar, Apple Jour, Apple Nuit
+   ========================================= */
+
+/* =========================================
+   MODE SIDEBAR - Liseré Cyan, 2px borders
+   ========================================= */
+html.style-sidebar #tab-calendrier-tarifs .accordion-section {
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-left: 6px solid var(--upstay-cyan, #00C2CB);
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--bg-secondary, #ffffff);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .calendar-controls {
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-left: 4px solid var(--upstay-cyan, #00C2CB);
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--bg-secondary, #ffffff);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .calendar-controls button {
+    border: 2px solid var(--upstay-cyan, #00C2CB);
+    border-radius: 0;
+    background: var(--bg-primary, #ffffff);
+    color: var(--upstay-cyan, #00C2CB);
+    font-weight: 700;
+    box-shadow: none;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .calendar-controls button:hover {
+    background: var(--upstay-cyan, #00C2CB);
+    color: #ffffff;
+    transform: none;
+    box-shadow: none;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-header {
+    background: var(--bg-secondary, #f8f9fa);
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--text-primary, #333333);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card {
+    background: var(--bg-primary, #ffffff);
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card:hover {
+    border-color: var(--upstay-cyan, #00C2CB);
+    transform: none;
+    box-shadow: none;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card.has-tarif {
+    background: rgba(16, 185, 129, 0.05);
+    border-left: 4px solid #10b981;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card.has-tarif.tarif-high {
+    background: rgba(139, 92, 246, 0.05);
+    border-left: 4px solid #8b5cf6;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card.has-tarif.has-promo {
+    background: rgba(251, 146, 60, 0.05);
+    border-left: 4px solid #fb923c;
+    position: relative;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card.has-tarif.has-promo::before {
+    content: "🎁";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card.selected {
+    background: rgba(59, 130, 246, 0.08);
+    border: 2px solid #3b82f6;
+    border-left: 4px solid #3b82f6;
+    box-shadow: none;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card.reserved {
+    background: rgba(148, 163, 184, 0.05);
+    border-left: 4px solid #94a3b8;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-number {
+    color: var(--text-primary, #333333);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-price {
+    color: #059669;
+    font-weight: 700;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card.has-promo .day-price {
+    color: #ea580c;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card.tarif-high .day-price {
+    color: #7c3aed;
+    font-weight: 800;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .day-card.reserved .day-price,
+html.style-sidebar #tab-calendrier-tarifs .day-card.reserved .day-number {
+    color: #64748b;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .accordion-content {
+    background: var(--bg-primary, #ffffff);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .rules-card {
+    background: var(--bg-secondary, #f8f9fa);
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-left: 4px solid var(--upstay-cyan, #00C2CB);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .promo-card {
+    background: var(--bg-primary, #ffffff);
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .tarifs-legend .legend-box {
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-radius: 0;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .tarifs-legend .legend-box.success {
+    background: var(--upstay-cyan, #00C2CB);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .tarifs-legend .legend-box.default {
+    background: var(--bg-primary, #ffffff);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .tarifs-legend .legend-box.warning {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .tarifs-legend .legend-box.promo {
+    background: #fb923c;
+    border-color: #fb923c;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .tarifs-legend .legend-box.high-tarif {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .tarifs-help-box {
+    background: var(--bg-secondary, #f8f9fa);
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-left: 4px solid var(--upstay-cyan, #00C2CB);
+    border-radius: 0;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .btn-neo.btn-save {
+    background: var(--upstay-cyan, #00C2CB);
+    color: #ffffff;
+    border: 2px solid var(--upstay-cyan, #00C2CB);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .btn-neo.btn-save:hover {
+    background: #00a8b0;
+    transform: none;
+    box-shadow: none;
+}
+
+/* =========================================
+   TABLEAU EXCEL / GDF - MODE SIDEBAR
+   ========================================= */
+html.style-sidebar #tab-calendrier-tarifs .table-gdf {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf th {
+    background: var(--upstay-cyan, #00C2CB);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 12px 10px;
+    text-align: center;
+    border: 2px solid var(--border-color, #e0e0e0);
+    font-size: 0.9rem;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf td {
+    padding: 10px 8px;
+    text-align: center;
+    border: 2px solid var(--border-color, #e0e0e0);
+    font-size: 0.85rem;
+    background: var(--bg-primary, #ffffff);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf .cell-available {
+    background: rgba(16, 185, 129, 0.05);
+    color: #059669;
+    font-weight: 700;
+    border-left: 4px solid #10b981;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf .cell-available.high-price {
+    background: rgba(139, 92, 246, 0.05);
+    color: #7c3aed;
+    font-weight: 800;
+    border-left: 4px solid #8b5cf6;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf .cell-available.promo-price {
+    background: rgba(251, 146, 60, 0.05);
+    color: #ea580c;
+    font-weight: 700;
+    border-left: 4px solid #fb923c;
+    position: relative;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf .cell-available.promo-price::after {
+    content: "🎁";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf .cell-reserved {
+    background: rgba(148, 163, 184, 0.05);
+    color: #64748b;
+    font-weight: 600;
+    border-left: 4px solid #94a3b8;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf .cell-empty {
+    background: var(--bg-primary, #ffffff);
+    color: #d1d5db;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf tbody td:first-child {
+    background: var(--bg-secondary, #f8f9fa);
+    font-weight: 700;
+    color: var(--text-primary, #333333);
+    border-right: 2px solid var(--upstay-cyan, #00C2CB);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf tbody tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf tbody tr:hover td {
+    background: rgba(0, 194, 203, 0.03);
+}
+
+/* =========================================
+   MODE APPLE JOUR - Gradients doux, blancs
+   ========================================= */
+html.theme-light.style-apple #tab-calendrier-tarifs .accordion-section {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .calendar-controls {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .calendar-controls button {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    color: #333333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .calendar-controls button:hover {
+    background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-header {
+    background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    color: #495057;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card:hover:not(.reserved) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Jour avec tarif défini - Vert menthe */
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-tarif {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.15));
+    border: 2px solid rgba(5, 150, 105, 0.4);
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.15);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-tarif:hover:not(.reserved) {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.18), rgba(5, 150, 105, 0.22));
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.25);
+}
+
+/* Jour avec tarif élevé - Violet */
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-tarif.tarif-high {
+    background: linear-gradient(145deg, rgba(139, 92, 246, 0.12), rgba(124, 58, 237, 0.15));
+    border: 2px solid rgba(124, 58, 237, 0.4);
+    box-shadow: 0 3px 10px rgba(139, 92, 246, 0.15);
+}
+
+/* Jour avec promotion - Orange doré */
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-tarif.has-promo {
+    background: linear-gradient(145deg, rgba(251, 146, 60, 0.15), rgba(249, 115, 22, 0.2));
+    border: 2px solid rgba(249, 115, 22, 0.5);
+    box-shadow: 0 3px 12px rgba(251, 146, 60, 0.25);
+    position: relative;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-tarif.has-promo::before {
+    content: "🎁";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-tarif.has-promo:hover {
+    background: linear-gradient(145deg, rgba(251, 146, 60, 0.22), rgba(249, 115, 22, 0.28));
+    box-shadow: 0 5px 16px rgba(251, 146, 60, 0.35);
+}
+
+/* Jour sélectionné - Bleu ciel */
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.selected {
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.18), rgba(37, 99, 235, 0.22));
+    border: 2px solid rgba(37, 99, 235, 0.5);
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.selected:hover {
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.3));
+    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
+}
+
+/* Jour réservé - Gris désactivé */
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.reserved {
+    background: linear-gradient(145deg, rgba(148, 163, 184, 0.15), rgba(100, 116, 139, 0.2));
+    border: 2px solid rgba(148, 163, 184, 0.4);
+    box-shadow: 0 2px 6px rgba(148, 163, 184, 0.15);
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Jour d'un autre mois */
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.other-month {
+    background: linear-gradient(145deg, #f5f6fa, #e9ecef);
+    opacity: 0.4;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #1f2937;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-price {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-top: auto;
+    color: #059669;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.has-promo .day-price {
+    color: #ea580c;
+    font-size: 1.05rem;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.tarif-high .day-price {
+    color: #7c3aed;
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.reserved .day-price,
+html.theme-light.style-apple #tab-calendrier-tarifs .day-card.reserved .day-number {
+    color: #64748b;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .rules-card {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .promo-card {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Cartes de promotion colorées */
+html.theme-light.style-apple #tab-calendrier-tarifs .promo-card.success {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.12));
+    border: 2px solid rgba(5, 150, 105, 0.3);
+    box-shadow: 0 3px 8px rgba(16, 185, 129, 0.12);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .promo-card.warning {
+    background: linear-gradient(145deg, rgba(251, 146, 60, 0.08), rgba(249, 115, 22, 0.12));
+    border: 2px solid rgba(249, 115, 22, 0.3);
+    box-shadow: 0 3px 8px rgba(251, 146, 60, 0.12);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .promo-card.primary {
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.08), rgba(37, 99, 235, 0.12));
+    border: 2px solid rgba(37, 99, 235, 0.3);
+    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.12);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box.success {
+    background: linear-gradient(145deg, #10b981, #059669);
+    border: 2px solid rgba(5, 150, 105, 0.4);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box.default {
+    background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    border: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box.warning {
+    background: linear-gradient(145deg, #fb923c, #f97316);
+    border: 2px solid rgba(249, 115, 22, 0.4);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box.promo {
+    background: linear-gradient(145deg, #fb923c, #ea580c);
+    border: 2px solid rgba(234, 88, 12, 0.5);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box.high-tarif {
+    background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+    border: 2px solid rgba(124, 58, 237, 0.4);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .tarifs-help-box {
+    background: linear-gradient(145deg, #e7f3ff, #f0f8ff);
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.08);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .btn-neo.btn-save {
+    background: linear-gradient(145deg, #00C2CB, #00a8b0);
+    color: #ffffff;
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 194, 203, 0.3);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .btn-neo.btn-save:hover {
+    background: linear-gradient(145deg, #00a8b0, #008a92);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 194, 203, 0.4);
+}
+
+/* =========================================
+   MODE APPLE NUIT - Gradients sombres, blancs
+   ========================================= */
+html.theme-dark.style-apple #tab-calendrier-tarifs .accordion-section {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .calendar-controls {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .calendar-controls button {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .calendar-controls button:hover {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .calendar-controls h3 {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .day-header {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .day-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .day-card:hover:not(.reserved) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .day-card.has-tarif {
+    background: linear-gradient(145deg, rgba(0, 194, 203, 0.15), rgba(0, 194, 203, 0.1));
+    border-color: rgba(0, 194, 203, 0.4);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .day-card.selected {
+    background: linear-gradient(145deg, rgba(243, 156, 18, 0.25), rgba(243, 156, 18, 0.15));
+    border-color: rgba(243, 156, 18, 0.5);
+    box-shadow: 0 4px 16px rgba(243, 156, 18, 0.3);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .day-card.other-month {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    opacity: 0.4;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .day-number {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .day-price {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .accordion-content {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .rules-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .rules-card h4 {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .rules-card-title {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .promo-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .promo-header {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .promo-title {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-item span {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box.success {
+    background: #00C2CB;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box.default {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .tarifs-legend .legend-box.warning {
+    background: #f39c12;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .tarifs-help-box {
+    background: linear-gradient(145deg, rgba(52, 152, 219, 0.15), rgba(52, 152, 219, 0.1));
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .tarifs-help-box,
+html.theme-dark.style-apple #tab-calendrier-tarifs .tarifs-help-box * {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .tarifs-help-title {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .btn-neo.btn-save {
+    background: linear-gradient(145deg, #00C2CB, #00a8b0);
+    color: #ffffff;
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.4);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .btn-neo.btn-save:hover {
+    background: linear-gradient(145deg, #00a8b0, #008a92);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 194, 203, 0.5);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .duree-min-label {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .periodes-subtitle {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .remplissage-auto-desc {
+    color: #ffffff !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .input-neo {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .input-neo::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* =========================================
+   CLASSES COMMUNES (tous modes)
+   ========================================= */
+#tab-calendrier-tarifs .sticky-selector {
+    position: sticky;
+    top: 80px;
+    z-index: 100;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+#tab-calendrier-tarifs .calendar-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 30px;
+    padding: 20px;
+}
+
+#tab-calendrier-tarifs .calendar-controls button {
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+#tab-calendrier-tarifs .calendar-controls h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    min-width: 250px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+#tab-calendrier-tarifs .calendar-grid-tarifs,
+#tab-calendrier-tarifs .calendar-grid-reservations {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+    position: relative;
+}
+
+#tab-calendrier-tarifs .day-header {
+    padding: 15px;
+    text-align: center;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+#tab-calendrier-tarifs .day-card {
+    min-height: 100px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    z-index: 1;
+}
+
+#tab-calendrier-tarifs .day-card.reserved {
+    z-index: 2;
+}
+
+#tab-calendrier-tarifs .day-card.selected {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+#tab-calendrier-tarifs .day-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+#tab-calendrier-tarifs .day-price {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-top: auto;
+}
+
+#tab-calendrier-tarifs .tarifs-legend {
+    margin-top: 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#tab-calendrier-tarifs .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#tab-calendrier-tarifs .legend-box {
+    width: 30px;
+    height: 30px;
+}
+
+#tab-calendrier-tarifs .tarifs-help-box {
+    margin-top: 20px;
+}
+
+#tab-calendrier-tarifs .tarifs-help-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+#tab-calendrier-tarifs .tarifs-help-box ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+#tab-calendrier-tarifs .tarifs-help-box li {
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+#tab-calendrier-tarifs .tarifs-help-box li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--upstay-cyan, #00C2CB);
+}
+
+#tab-calendrier-tarifs .rules-card {
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+#tab-calendrier-tarifs .rules-card-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+#tab-calendrier-tarifs .promo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 8px;
+    margin-top: 15px;
+}
+
+#tab-calendrier-tarifs .promo-card {
+    padding: 15px;
+}
+
+#tab-calendrier-tarifs .promo-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+#tab-calendrier-tarifs .promo-title {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+#tab-calendrier-tarifs .duree-min-container {
+    margin-bottom: 20px;
+}
+
+#tab-calendrier-tarifs .duree-min-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+#tab-calendrier-tarifs .periodes-subtitle {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin: 20px 0 10px 0;
+}
+
+#tab-calendrier-tarifs .remplissage-auto-box {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 2px dashed var(--border-color, rgba(0, 0, 0, 0.1));
+}
+
+#tab-calendrier-tarifs .remplissage-auto-desc {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+#tab-calendrier-tarifs .input-neo {
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.2s;
+}
+
+#tab-calendrier-tarifs .btn-neo.btn-save {
+    padding: 15px 30px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#tab-calendrier-tarifs .btn-neo.btn-add-periode {
+    margin-top: 15px;
+    padding: 12px 24px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#tab-calendrier-tarifs .accordion-section {
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+#tab-calendrier-tarifs .accordion-content {
+    padding: 30px;
+    display: none;
+}
+
+#tab-calendrier-tarifs .accordion-content.active {
+    display: block;
+}
+
+/* Toggle Switch */
+#tab-calendrier-tarifs .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+#tab-calendrier-tarifs .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+#tab-calendrier-tarifs .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+    border: 2px solid var(--border-color, rgba(0, 0, 0, 0.1));
+}
+
+#tab-calendrier-tarifs .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+#tab-calendrier-tarifs input:checked + .toggle-slider {
+    background-color: var(--upstay-cyan, #00C2CB);
+}
+
+#tab-calendrier-tarifs input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #tab-calendrier-tarifs .calendar-grid-tarifs,
+    #tab-calendrier-tarifs .calendar-grid-reservations {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+    
+    #tab-calendrier-tarifs .day-card {
+        min-height: 80px;
+        padding: 8px;
+    }
+    
+    #tab-calendrier-tarifs .day-number {
+        font-size: 1.2rem;
+    }
+    
+    #tab-calendrier-tarifs .day-price {
+        font-size: 0.8rem;
+    }
+}
+
+/* =========================================
+   MODAUX
+   ========================================= */
+#tab-calendrier-tarifs .modal-neo {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+#tab-calendrier-tarifs .modal-neo.active {
+    display: flex;
+}
+
+#tab-calendrier-tarifs .modal-content {
+    background: var(--bg-primary, #ffffff);
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .modal-content {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .modal-content h3,
+html.theme-dark.style-apple #tab-calendrier-tarifs .modal-content p,
+html.theme-dark.style-apple #tab-calendrier-tarifs .modal-content label {
+    color: #ffffff !important;
+}
+
+#tab-calendrier-tarifs .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #e74c3c;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: white;
+    transition: all 0.2s;
+}
+
+#tab-calendrier-tarifs .modal-close:hover {
+    background: #c0392b;
+    transform: scale(1.1);
+}
+
+/* =========================================
+   ACCORDION HEADERS
+   ========================================= */
+#tab-calendrier-tarifs .accordion-header {
+    width: 100%;
+    padding: 20px 25px;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+}
+
+#tab-calendrier-tarifs .accordion-icon {
+    margin-left: auto;
+    transition: transform 0.2s;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+#tab-calendrier-tarifs .accordion-header.active .accordion-icon {
+    transform: rotate(180deg);
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .accordion-header span {
+    color: #ffffff !important;
+}
+
+/* =========================================
+   TABLEAU EXCEL / GDF - MODE APPLE JOUR
+   ========================================= */
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf th {
+    background: linear-gradient(145deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 12px 10px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.9rem;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf td {
+    padding: 10px 8px;
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+/* Cellule avec tarif disponible */
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-available {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.12));
+    color: #059669;
+    font-weight: 700;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-available:hover {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.2));
+    transform: scale(1.05);
+}
+
+/* Cellule avec tarif élevé */
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-available.high-price {
+    background: linear-gradient(145deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.15));
+    color: #7c3aed;
+    font-weight: 800;
+}
+
+/* Cellule avec promotion */
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-available.promo-price {
+    background: linear-gradient(145deg, rgba(251, 146, 60, 0.12), rgba(249, 115, 22, 0.18));
+    color: #ea580c;
+    font-weight: 700;
+    position: relative;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-available.promo-price::after {
+    content: "🎁";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+/* Cellule réservée */
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-reserved {
+    background: linear-gradient(145deg, rgba(148, 163, 184, 0.12), rgba(100, 116, 139, 0.18));
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Cellule vide (pas de tarif) */
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-empty {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    color: #d1d5db;
+}
+
+/* Première colonne (jours) */
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf tbody td:first-child {
+    background: linear-gradient(145deg, #f3f4f6, #e5e7eb);
+    font-weight: 700;
+    color: #1f2937;
+    border-right: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Alternance des lignes */
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf tbody tr:nth-child(even) {
+    background: rgba(248, 250, 252, 0.5);
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf tbody tr:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+

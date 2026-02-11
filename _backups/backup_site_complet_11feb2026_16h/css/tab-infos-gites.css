@@ -1,0 +1,363 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB INFOS GÎTES - Styles avec sidebar et adaptation couleurs gîtes
+   ✅ Créé le 28 janvier 2026
+   ⚠️ CIBLAGE SPÉCIFIQUE pour ne pas impacter les autres pages
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Header de la page - Card en haut */
+#infos-gites-header {
+    background: var(--bg-secondary) !important;
+    border: 3px solid var(--border-color) !important;
+    padding: 20px !important;
+    margin-bottom: 25px !important;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.3) !important;
+    border-radius: 16px !important;
+}
+
+html.theme-light #infos-gites-header {
+    background: white !important;
+    border: 3px solid #2D3436 !important;
+    box-shadow: 4px 4px 0 #2D3436 !important;
+}
+
+#infos-gites-header h2 {
+    color: var(--text-primary) !important;
+}
+
+html.theme-light #infos-gites-header h2 {
+    color: #2D3436 !important;
+}
+
+#infos-gites-header p {
+    color: var(--text-secondary) !important;
+}
+
+html.theme-light #infos-gites-header p {
+    color: #666 !important;
+}
+
+/* Select de gîtes */
+#giteSelector {
+    background: var(--bg-secondary) !important;
+    border: 3px solid var(--border-color) !important;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.3) !important;
+    color: var(--text-primary) !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    min-width: 200px !important;
+}
+
+html.theme-light #giteSelector {
+    background: white !important;
+    border: 3px solid #2D3436 !important;
+    box-shadow: 3px 3px 0 #2D3436 !important;
+    color: #2D3436 !important;
+}
+
+/* Sous-sections dans les cards */
+.infos-subsection {
+    background: rgba(255, 255, 255, 0.05) !important;
+    padding: 20px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.theme-light .infos-subsection {
+    background: #f8f9fa !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.infos-subsection h3 {
+    color: var(--gite-color, #667eea) !important;
+    margin-bottom: 15px !important;
+    font-size: 1.2rem !important;
+}
+
+/* Sous-sections colorées */
+/* Orange - Chauffage */
+.infos-subsection-orange {
+    background: rgba(245, 158, 11, 0.15) !important;
+    padding: 20px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+html.theme-light .infos-subsection-orange {
+    background: #fff3e0 !important;
+    border: 1px solid rgba(245, 158, 11, 0.2) !important;
+}
+
+.infos-subsection-orange h3 {
+    color: #f59e0b !important;
+}
+
+/* Vert - Écologie/Nature */
+.infos-subsection-green {
+    background: rgba(34, 197, 94, 0.15) !important;
+    padding: 20px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+html.theme-light .infos-subsection-green {
+    background: #e8f5e9 !important;
+    border: 1px solid rgba(34, 197, 94, 0.2) !important;
+}
+
+.infos-subsection-green h3 {
+    color: #22c55e !important;
+}
+
+/* Bleu - Eau/Information */
+.infos-subsection-blue {
+    background: rgba(59, 130, 246, 0.15) !important;
+    padding: 20px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+html.theme-light .infos-subsection-blue {
+    background: #e3f2fd !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.infos-subsection-blue h3 {
+    color: #3b82f6 !important;
+}
+
+/* Violet - Spécial */
+.infos-subsection-purple {
+    background: rgba(168, 85, 247, 0.15) !important;
+    padding: 20px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(168, 85, 247, 0.3) !important;
+}
+
+html.theme-light .infos-subsection-purple {
+    background: #f3e5f5 !important;
+    border: 1px solid rgba(168, 85, 247, 0.2) !important;
+}
+
+.infos-subsection-purple h3 {
+    color: #a855f7 !important;
+}
+
+/* Section englobante - BASE */
+#gite-content-wrapper {
+    background: var(--bg-secondary) !important;
+    border: 3px solid var(--gite-color, #667eea) !important;
+    padding: 30px !important;
+    border-radius: 16px !important;
+    box-shadow: 4px 4px 0 #2D3436 !important;
+    margin-bottom: 30px !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Mode light : fond blanc */
+html.theme-light #gite-content-wrapper {
+    background: white !important;
+}
+
+/* Indicateur gîte sélectionné - BASE */
+#gite-indicator {
+    background: var(--gite-bg, rgba(102, 126, 234, 0.1)) !important;
+    border: 2px solid var(--gite-color, #667eea) !important;
+    padding: 15px !important;
+    border-radius: 12px !important;
+    margin-bottom: 25px !important;
+    text-align: center !important;
+}
+
+/* Indicateur en mode light */
+html.theme-light #gite-indicator {
+    background: rgba(102, 126, 234, 0.08) !important;
+}
+
+/* Indicateur en mode sidebar + light */
+html.style-sidebar.theme-light #gite-indicator {
+    background: #f8f9fa !important;
+}
+
+#gite-indicator div {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: var(--gite-color, #667eea) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+/* Cards de formulaire - UNIQUEMENT dans gite-content-wrapper */
+#gite-content-wrapper .infos-card {
+    background: #1a1a1d !important;
+    border: 3px solid rgba(255, 255, 255, 0.15) !important;
+    padding: 25px !important;
+    margin-bottom: 25px !important;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.3) !important;
+    border-radius: 16px !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Mode light : cards blanches avec bordure noire */
+html.theme-light #gite-content-wrapper .infos-card {
+    background: white !important;
+    border: 3px solid #2D3436 !important;
+    box-shadow: 4px 4px 0 #2D3436 !important;
+}
+
+#gite-content-wrapper .infos-card-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 15px !important;
+    border-bottom: 2px solid var(--border-color) !important;
+}
+
+html.theme-light #gite-content-wrapper .infos-card-header {
+    border-bottom: 2px solid #ecf0f1 !important;
+}
+
+#gite-content-wrapper .infos-card-icon {
+    font-size: 1.8rem !important;
+}
+
+#gite-content-wrapper .infos-card-title {
+    margin: 0 !important;
+    font-size: 1.3rem !important;
+    color: var(--text-primary) !important;
+    font-weight: 700 !important;
+}
+
+html.theme-light #gite-content-wrapper .infos-card-title {
+    color: #2D3436 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE SIDEBAR - Bordure gauche épaisse avec couleur du gîte
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.style-sidebar #gite-content-wrapper {
+    border: 3px solid var(--border-color, #ddd) !important;
+    border-left: 5px solid var(--gite-color, #667eea) !important;
+    box-shadow: 6px 6px 0 #2D3436 !important;
+}
+
+html.style-sidebar #gite-content-wrapper:hover {
+    border-left-width: 6px !important;
+}
+
+html.style-sidebar #gite-indicator {
+    border: 3px solid var(--gite-color, #667eea) !important;
+    border-left: 4px solid var(--gite-color, #667eea) !important;
+}
+
+/* Cards internes en mode sidebar - MODE NUIT PAR DÉFAUT */
+html.style-sidebar #gite-content-wrapper .infos-card {
+    border: 3px solid rgba(255, 255, 255, 0.15) !important;
+    border-left: 4px solid var(--gite-color, #667eea) !important;
+    background: #1a1a1d !important;
+}
+
+/* Cards internes en mode sidebar - MODE JOUR */
+html.style-sidebar.theme-light #gite-content-wrapper .infos-card {
+    background: #ffffff !important;
+    border: 3px solid rgba(0, 0, 0, 0.1) !important;
+    border-left: 4px solid var(--gite-color, #667eea) !important;
+}
+
+html.style-sidebar #gite-content-wrapper .infos-card:hover {
+    border-left-width: 5px !important;
+}
+
+html.style-sidebar #gite-content-wrapper .infos-card-header {
+    background: #2c3e50 !important;
+    color: #ffffff !important;
+    padding: 15px 20px !important;
+    margin: -25px -25px 20px -25px !important;
+    border-radius: 13px 13px 0 0 !important;
+    border-bottom: 3px solid var(--gite-color, #667eea) !important;
+}
+
+/* Header en mode sidebar + jour */
+html.style-sidebar.theme-light #gite-content-wrapper .infos-card-header {
+    background: #f8f9fa !important;
+    color: #1d1d1f !important;
+}
+
+html.style-sidebar #gite-content-wrapper .infos-card-title {
+    color: #ffffff !important;
+}
+
+/* Titre en mode sidebar + jour */
+html.style-sidebar.theme-light #gite-content-wrapper .infos-card-title {
+    color: #1d1d1f !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE - Style épuré et minimaliste
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.style-apple #gite-content-wrapper {
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    border-left: 3px solid var(--gite-color, #667eea) !important;
+}
+
+html.style-apple #gite-indicator {
+    border-radius: 8px !important;
+    border: 1px solid var(--gite-color, #667eea) !important;
+    background: var(--gite-bg, rgba(102, 126, 234, 0.05)) !important;
+}
+
+html.style-apple #gite-content-wrapper .infos-card {
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important;
+    border-left: 2px solid var(--gite-color, #667eea) !important;
+    background: #232326 !important;
+}
+
+html.style-apple.theme-light #gite-content-wrapper .infos-card {
+    background: white !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
+}
+
+html.style-apple #gite-content-wrapper .infos-card-header {
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+html.style-apple.theme-light #gite-content-wrapper .infos-card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE GLOSS - Effet brillant et moderne
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.style-gloss #gite-content-wrapper {
+    border: 2px solid var(--gite-color, #667eea) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
+}
+
+html.style-gloss #gite-indicator {
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, var(--gite-bg, rgba(102, 126, 234, 0.1)), rgba(255,255,255,0.3)) !important;
+}
+
+html.style-gloss #gite-content-wrapper .infos-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.6) !important;
+    border-left: 3px solid var(--gite-color, #667eea) !important;
+    background: #1a1a1d !important;
+}
+
+html.style-gloss.theme-light #gite-content-wrapper .infos-card {
+    background: white !important;
+}

@@ -111,6 +111,7 @@ async function getAllReservations(forceRefresh) {
         const result = await window.supabaseClient
             .from('reservations')
             .select('*')
+            .neq('status', 'cancelled')
             .order('check_in', { ascending: true });
         
         if (result.error) throw result.error;

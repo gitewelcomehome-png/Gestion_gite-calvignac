@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Parrainage - Admin</title>
+    
+    <!-- Filtre erreurs extensions Chrome -->
+    <script>
+        window.onerror = function(msg, source, lineno, colno, error) {
+            const msgStr = String(msg || '');
+            const srcStr = String(source || '');
+            if (msgStr.includes('webpage_content_reporter') || 
+                srcStr.includes('webpage_content_reporter') ||
+                msgStr.includes('Unexpected token') ||
+                msgStr.includes('export') ||
+                msgStr.includes('import') ||
+                srcStr.includes('chrome-extension') ||
+                msgStr.includes('zustand')) {
+                return true;
+            }
+        };
+    </script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Config Supabase -->
+    <script src="../js/shared-config.js"></script>
+    
+    <!-- CSS Admin -->
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    
+    <style>
+        .campaign-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .campaign-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+        
+        .campaign-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .campaign-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-scheduled {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-full {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .campaign-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .btn-create {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .btn-create:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-edit {
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        
+        .btn-edit:hover {
+            background: #e2e8f0;
+        }
+        
+        .btn-delete {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #06b6d4;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 24px;
+        }
+        
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #06b6d4 0%, #0891b2 100%);
+            transition: width 0.3s;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        
+        .empty-state i {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-left">
+            <h1>
+                <i data-lucide="gift"></i>
+                Gestion Parrainage
+            </h1>
+        </div>
+        <div class="header-right">
+            <button class="btn-create" onclick="openCreateModal()">
+                <i data-lucide="plus"></i>
+                Nouvelle Campagne
+            </button>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <!-- Header structuré -->
+        <header class="page-header">
+            <div class="page-header__content">
+                <p class="page-subtitle">Campagnes de parrainage et statistiques</p>
+            </div>
+            <div class="page-header__actions">
+                <button class="btn btn--primary" onclick="alert('Fonctionnalité à venir')">
+                    <i data-lucide="plus"></i>
+                    Nouvelle Campagne
+                </button>
+            </div>
+        </header>
+        
+        <!-- Tabs Navigation -->
+        <section class="tabs-navigation">
+            <div class="tabs-sidebar">
+                <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
+                <button class="tab-btn" data-tab="dashboard" onclick="window.location.href='admin-channel-manager.html'">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="tab-btn" data-tab="clients" onclick="window.location.href='admin-clients.html'">
+                    <i data-lucide="users"></i>
+                    <span>Clients</span>
+                </button>
+                <button class="tab-btn" data-tab="support" onclick="window.location.href='admin-support.html'">
+                    <i data-lucide="headphones"></i>
+                    <span>Support</span>
+                </button>
+                <button class="tab-btn" data-tab="promotions" onclick="window.location.href='admin-promotions.html'">
+                    <i data-lucide="tag"></i>
+                    <span>Promotions</span>
+                </button>
+                <button class="tab-btn active" data-tab="parrainage">
+                    <i data-lucide="gift"></i>
+                    <span>Parrainage</span>
+                </button>
+                <button class="tab-btn" data-tab="finance" onclick="window.location.href='admin-finance.html'">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span>Finance & BI</span>
+                </button>
+                <button class="tab-btn" data-tab="content" onclick="window.location.href='admin-content.html'">
+                    <i data-lucide="pen-tool"></i>
+                    <span>Content IA</span>
+                </button>
+                <button class="tab-btn" data-tab="communications" onclick="window.location.href='admin-communications.html'">
+                    <i data-lucide="megaphone"></i>
+                    <span>Communications</span>
+                </button>
+                <button class="tab-btn" data-tab="monitoring" onclick="window.location.href='admin-monitoring.html'">
+                    <i data-lucide="activity"></i>
+                    <span>Monitoring</span>
+                </button>
+                <button class="tab-btn" data-tab="website" onclick="window.location.href='admin-channel-manager.html'">
+                    <i data-lucide="globe"></i>
+                    <span>Site Web</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- KPIs Globaux -->
+        <section class="kpis-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #dbeafe;">
+                    <i data-lucide="rocket" style="color: #2563eb;"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Campagnes Actives</div>
+                    <div class="kpi-value" id="kpiActiveCampaigns">0</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #dcfce7;">
+                    <i data-lucide="users" style="color: #16a34a;"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Participants Totaux</div>
+                    <div class="kpi-value" id="kpiTotalParticipants">0</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #fef3c7;">
+                    <i data-lucide="users-2" style="color: #ca8a04;"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Filleuls Générés</div>
+                    <div class="kpi-value" id="kpiTotalReferrals">0</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #e0e7ff;">
+                    <i data-lucide="percent" style="color: #6366f1;"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Bonus Distribués</div>
+                    <div class="kpi-value" id="kpiBonusDistributed">0€</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Liste des campagnes -->
+        <section id="campaignsContainer">
+            <div class="empty-state">
+                <i data-lucide="loader"></i>
+                <p>Chargement des campagnes...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Création/Édition -->
+    <div id="campaignModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Nouvelle Campagne</h2>
+                <button onclick="closeModal()" style="background: none; border: none; cursor: pointer;">
+                    <i data-lucide="x" style="width: 24px; height: 24px; color: #64748b;"></i>
+                </button>
+            </div>
+
+            <form id="campaignForm" onsubmit="saveCampaign(event)">
+                <div class="form-group">
+                    <label class="form-label">Nom de la campagne</label>
+                    <input type="text" class="form-input" id="campaignName" required placeholder="Ex: Double Bonus Février 2026">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Code de la campagne</label>
+                    <input type="text" class="form-input" id="campaignCode" required placeholder="Ex: DOUBLE2026" style="text-transform: uppercase;">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="campaignDescription" placeholder="Décrivez l'objectif de cette campagne..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Type de bonus</label>
+                    <select class="form-select" id="bonusType" required onchange="updateBonusFields()">
+                        <option value="">-- Sélectionner --</option>
+                        <option value="discount_multiplier">Réduction par filleul (%) - Modifie le taux de base</option>
+                        <option value="discount_fixed">Réduction fixe (%) - Ajoute un bonus</option>
+                        <option value="points_multiplier">Multiplicateur de points (x)</option>
+                        <option value="points_fixed">Points bonus fixes</option>
+                    </select>
+                </div>
+
+                <div id="bonusFields"></div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Date de début</label>
+                        <input type="datetime-local" class="form-input" id="startDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Date de fin</label>
+                        <input type="datetime-local" class="form-input" id="endDate" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Participants max (optionnel)</label>
+                        <input type="number" class="form-input" id="maxUses" min="1" placeholder="Illimité">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Min filleuls requis</label>
+                        <input type="number" class="form-input" id="minReferrals" value="0" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Type d'abonnés concernés</label>
+                    <select class="form-select" id="subscriptionTypes">
+                        <option value="">Tous</option>
+                        <option value="standard">Standard uniquement</option>
+                        <option value="gites_france">Gîtes de France uniquement</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i data-lucide="save"></i>
+                    Créer la campagne
+                </button>
+                <button type="button" class="btn-cancel" onclick="closeModal()">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Participants -->
+    <div id="participantsModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="participantsModalTitle">Participants de la campagne</h2>
+                <button onclick="closeParticipantsModal()" style="background: none; border: none; cursor: pointer; font-size: 24px; color: #64748b;">×</button>
+            </div>
+            
+            <div id="participantsList" style="margin-top: 20px;">
+                <div style="text-align: center; padding: 40px; color: #64748b;">
+                    <i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
+                    <p>Chargement...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .participant-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .participant-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .participant-info {
+            flex: 1;
+        }
+        
+        .participant-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        
+        .participant-email {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .participant-date {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        
+        .btn-view-participants {
+            background: #dbeafe;
+            color: #1e40af;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        
+        .btn-view-participants:hover {
+            background: #bfdbfe;
+        }
+    </style>
+
+    <script src="../js/admin-parrainage.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

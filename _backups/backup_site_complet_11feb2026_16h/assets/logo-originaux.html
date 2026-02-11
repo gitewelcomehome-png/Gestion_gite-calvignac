@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LiveOwnerUnit - Logos Originaux Travaillés</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            padding: 60px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 30px rgba(0,200,255,0.5);
+            letter-spacing: -1px;
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.3rem;
+            margin-bottom: 60px;
+            font-weight: 300;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 40px;
+        }
+        .logo-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 50px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .logo-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(0,200,255,0.5);
+            box-shadow: 0 40px 100px rgba(0,200,255,0.3);
+        }
+        .logo-preview {
+            width: 100%;
+            height: 280px;
+            background: #ffffff;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .logo-preview svg {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            z-index: 1;
+        }
+        .logo-info h2 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .tag {
+            display: inline-block;
+            background: rgba(0,200,255,0.2);
+            color: #00C8FF;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+            border: 1px solid rgba(0,200,255,0.3);
+        }
+        .hint {
+            background: rgba(0,200,255,0.1);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #A0D9FF;
+            margin-top: 15px;
+            border-left: 4px solid #00C8FF;
+            line-height: 1.6;
+        }
+        .logo-info p {
+            color: rgba(255,255,255,0.7);
+            line-height: 1.9;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        .logo-info strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 LiveOwnerUnit - Concepts Originaux</h1>
+        <p class="subtitle">20 designs uniques, travaillés et créatifs - Chaque logo a son identité propre</p>
+        <div class="grid">
+
+            <!-- 1. ISOMÉTRIQUE ARCHITECTURAL -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Vue isométrique 3D -->
+                        <path d="M60 20L30 35V70L60 85L90 70V35L60 20Z" fill="url(#iso1)" opacity="0.9"/>
+                        <path d="M60 20L90 35V70L60 85V50V20Z" fill="url(#iso2)"/>
+                        <path d="M30 35L60 50V85L30 70V35Z" fill="url(#iso3)"/>
+                        <!-- Détails architecturaux -->
+                        <rect x="58" y="45" width="4" height="20" fill="#FF6B35" opacity="0.8"/>
+                        <path d="M40 50L60 60V75" stroke="#FFA500" stroke-width="2" opacity="0.6"/>
+                        <circle cx="45" cy="52" r="2" fill="#FFD700"/>
+                        <circle cx="75" cy="52" r="2" fill="#FFD700"/>
+                        <defs>
+                            <linearGradient id="iso1" x1="60" y1="20" x2="60" y2="85">
+                                <stop stop-color="#00E5FF"/>
+                                <stop offset="1" stop-color="#00B8CC"/>
+                            </linearGradient>
+                            <linearGradient id="iso2" x1="90" y1="35" x2="60" y2="85">
+                                <stop stop-color="#00C8E0"/>
+                                <stop offset="1" stop-color="#0091A5"/>
+                            </linearGradient>
+                            <linearGradient id="iso3" x1="30" y1="35" x2="60" y2="85">
+                                <stop stop-color="#14B8D4"/>
+                                <stop offset="1" stop-color="#0D8599"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>🏗️ Isométrique 3D<span class="tag">ARCHITECTURAL</span></h2>
+                    <p><strong>Concept :</strong> Vue isométrique avec 3 faces visibles, effet profondeur</p>
+                    <div class="hint">💡 Design architectural moderne, chaque face a sa propre couleur pour créer du volume. Porte orange en contraste.</div>
+                </div>
+            </div>
+
+            <!-- 2. ORIGAMI PLIÉ -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Plis d'origami -->
+                        <path d="M60 25L35 45L45 55L60 45L75 55L85 45L60 25Z" fill="#00D4FF"/>
+                        <path d="M35 45L45 55L45 80L35 70Z" fill="#00A8CC"/>
+                        <path d="M85 45L75 55L75 80L85 70Z" fill="#00A8CC"/>
+                        <path d="M45 55L60 45L75 55V80L60 90L45 80V55Z" fill="url(#origami)"/>
+                        <!-- Lignes de pliage -->
+                        <path d="M60 25L60 90" stroke="#005F7F" stroke-width="1" opacity="0.3"/>
+                        <path d="M45 55L75 55" stroke="#005F7F" stroke-width="1" opacity="0.3"/>
+                        <path d="M35 45L85 45" stroke="#005F7F" stroke-width="1" opacity="0.3"/>
+                        <!-- Point focal rouge -->
+                        <circle cx="60" cy="65" r="6" fill="#FF4757"/>
+                        <defs>
+                            <linearGradient id="origami" x1="45" y1="45" x2="75" y2="90">
+                                <stop stop-color="#22D3EE"/>
+                                <stop offset="1" stop-color="#0891B2"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>📄 Origami Plié<span class="tag">CRÉATIF</span></h2>
+                    <p><strong>Concept :</strong> Maison créée par pliages de papier, lignes de plis visibles</p>
+                    <div class="hint">💡 Inspiration papier japonais, effet géométrique avec ombres de plis. Centre rouge pour attirer l'œil.</div>
+                </div>
+            </div>
+
+            <!-- 3. PIXEL ART RÉTRO -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: #1a1a2e;">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Pixels 8-bit -->
+                        <rect x="50" y="30" width="8" height="8" fill="#00F5FF"/>
+                        <rect x="58" y="30" width="8" height="8" fill="#00F5FF"/>
+                        <rect x="42" y="38" width="8" height="8" fill="#00D4FF"/>
+                        <rect x="50" y="38" width="8" height="8" fill="#00E5FF"/>
+                        <rect x="58" y="38" width="8" height="8" fill="#00E5FF"/>
+                        <rect x="66" y="38" width="8" height="8" fill="#00D4FF"/>
+                        <rect x="34" y="46" width="8" height="8" fill="#00B8CC"/>
+                        <rect x="42" y="46" width="8" height="8" fill="#00D4FF"/>
+                        <rect x="50" y="46" width="8" height="8" fill="#00E5FF"/>
+                        <rect x="58" y="46" width="8" height="8" fill="#00E5FF"/>
+                        <rect x="66" y="46" width="8" height="8" fill="#00D4FF"/>
+                        <rect x="74" y="46" width="8" height="8" fill="#00B8CC"/>
+                        <!-- Corps -->
+                        <rect x="34" y="54" width="8" height="30" fill="#0891B2"/>
+                        <rect x="42" y="54" width="8" height="30" fill="#00A8CC"/>
+                        <rect x="50" y="54" width="8" height="30" fill="#00C8E0"/>
+                        <rect x="58" y="54" width="8" height="30" fill="#00C8E0"/>
+                        <rect x="66" y="54" width="8" height="30" fill="#00A8CC"/>
+                        <rect x="74" y="54" width="8" height="30" fill="#0891B2"/>
+                        <!-- Fenêtres -->
+                        <rect x="42" y="62" width="6" height="6" fill="#FFD700"/>
+                        <rect x="66" y="62" width="6" height="6" fill="#FFD700"/>
+                        <!-- Porte -->
+                        <rect x="52" y="74" width="12" height="10" fill="#FF6B6B"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>🎮 Pixel Art 8-bit<span class="tag">RÉTRO</span></h2>
+                    <p><strong>Concept :</strong> Style jeu vidéo années 80, grille de pixels visible</p>
+                    <div class="hint">💡 Nostalgie gaming, chaque carré est un pixel. Couleurs vives sur fond sombre. Porte rouge et fenêtres dorées.</div>
+                </div>
+            </div>
+
+            <!-- 4. MOSAÏQUE MAROCAINE -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Forme principale -->
+                        <path d="M60 25L35 45V75L60 95L85 75V45L60 25Z" fill="url(#mosaic)"/>
+                        <!-- Motifs géométriques -->
+                        <path d="M60 25L50 35L60 45L70 35Z" fill="#FFD700" opacity="0.9"/>
+                        <path d="M60 75L50 65L60 55L70 65Z" fill="#FF6B35" opacity="0.9"/>
+                        <circle cx="45" cy="55" r="5" fill="#E8F5FF"/>
+                        <circle cx="75" cy="55" r="5" fill="#E8F5FF"/>
+                        <!-- Bordures décoratives -->
+                        <path d="M60 25L35 45M85 45L60 25M35 45V75M85 45V75M35 75L60 95M85 75L60 95" stroke="#005F7F" stroke-width="1.5" opacity="0.6"/>
+                        <!-- Étoiles -->
+                        <path d="M60 40L62 46L68 46L63 50L65 56L60 52L55 56L57 50L52 46L58 46Z" fill="#FFA500"/>
+                        <defs>
+                            <linearGradient id="mosaic" x1="60" y1="25" x2="60" y2="95">
+                                <stop stop-color="#00E5FF"/>
+                                <stop offset="0.5" stop-color="#00C8E0"/>
+                                <stop offset="1" stop-color="#0891B2"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>🕌 Mosaïque Orientale<span class="tag">ARTISANAL</span></h2>
+                    <p><strong>Concept :</strong> Inspiration zellige marocain, motifs géométriques décoratifs</p>
+                    <div class="hint">💡 Art traditionnel réinterprété. Forme hexagonale avec étoile centrale dorée et ornements. Cyan + or + orange.</div>
+                </div>
+            </div>
+
+            <!-- 5. LOW POLY FACETTÉ -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Facettes triangulaires -->
+                        <path d="M60 20L40 40L60 50Z" fill="#00F5FF"/>
+                        <path d="M60 20L80 40L60 50Z" fill="#00D4FF"/>
+                        <path d="M40 40L30 55L50 60L60 50Z" fill="#00C8E0"/>
+                        <path d="M80 40L90 55L70 60L60 50Z" fill="#00B8CC"/>
+                        <path d="M30 55L40 75L50 60Z" fill="#00A8CC"/>
+                        <path d="M90 55L80 75L70 60Z" fill="#0891B2"/>
+                        <path d="M40 75L60 90L50 60Z" fill="#0E7490"/>
+                        <path d="M80 75L60 90L70 60Z" fill="#0D8599"/>
+                        <path d="M50 60L60 90L70 60Z" fill="#06B6D4"/>
+                        <!-- Accents -->
+                        <circle cx="60" cy="55" r="8" fill="#FF4757"/>
+                        <circle cx="45" cy="50" r="3" fill="#FFA502"/>
+                        <circle cx="75" cy="50" r="3" fill="#FFA502"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>💎 Low Poly Facetté<span class="tag">MODERNE</span></h2>
+                    <p><strong>Concept :</strong> Polygones triangulaires, effet cristal/diamant</p>
+                    <div class="hint">💡 Style 3D low poly très tendance. Chaque triangle a une nuance de cyan différente créant du relief. Centre rouge vif.</div>
+                </div>
+            </div>
+
+            <!-- 6. LIGNE CONTINUE -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Une seule ligne qui dessine tout -->
+                        <path d="M20 85 L50 55 L50 30 L60 20 L70 30 L70 55 L100 85 L90 85 L90 75 L80 75 L80 95 L40 95 L40 75 L30 75 L30 85 Z" 
+                              stroke="url(#lineGrad)" 
+                              stroke-width="4" 
+                              stroke-linecap="round" 
+                              stroke-linejoin="round"
+                              fill="none"/>
+                        <!-- Porte (seul élément plein) -->
+                        <rect x="54" y="75" width="12" height="20" fill="#FF6B35" rx="2"/>
+                        <!-- Points de départ/arrivée -->
+                        <circle cx="20" cy="85" r="4" fill="#00F5FF"/>
+                        <circle cx="20" cy="85" r="6" fill="none" stroke="#00F5FF" stroke-width="1" opacity="0.5"/>
+                        <defs>
+                            <linearGradient id="lineGrad" x1="20" y1="20" x2="100" y2="95">
+                                <stop stop-color="#00F5FF"/>
+                                <stop offset="0.5" stop-color="#00C8E0"/>
+                                <stop offset="1" stop-color="#0891B2"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>✏️ Ligne Continue<span class="tag">MINIMALISTE</span></h2>
+                    <p><strong>Concept :</strong> Dessin d'une seule ligne sans lever le crayon</p>
+                    <div class="hint">💡 Défi artistique : tracer toute la maison d'un seul trait. Dégradé sur la ligne. Porte orange unique élément plein.</div>
+                </div>
+            </div>
+
+            <!-- 7. NÉGATIF INVERSÉ -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #00C8E0 0%, #0891B2 100%);">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Fond cyan, maison en négatif blanc -->
+                        <rect width="120" height="120" fill="url(#negBg)"/>
+                        <path d="M60 30L35 50V85H85V50L60 30Z" fill="white"/>
+                        <!-- Découpes dans le blanc -->
+                        <path d="M60 30L45 42L60 52L75 42Z" fill="#0891B2"/>
+                        <rect x="42" y="60" width="10" height="10" rx="2" fill="#0891B2"/>
+                        <rect x="68" y="60" width="10" height="10" rx="2" fill="#0891B2"/>
+                        <rect x="54" y="72" width="12" height="13" rx="2" fill="#FF4757"/>
+                        <!-- Halo -->
+                        <circle cx="60" cy="60" r="45" stroke="white" stroke-width="2" opacity="0.2"/>
+                        <defs>
+                            <linearGradient id="negBg">
+                                <stop stop-color="#00C8E0"/>
+                                <stop offset="1" stop-color="#0891B2"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>🔳 Espace Négatif<span class="tag">INVERSÉ</span></h2>
+                    <p><strong>Concept :</strong> Fond cyan, maison blanche en découpe (positif/négatif inversé)</p>
+                    <div class="hint">💡 Technique graphique avancée. Le cyan devient le fond, la maison blanche ressort. Fenêtres cyan découpées, porte rouge.</div>
+                </div>
+            </div>
+
+            <!-- 8. SUPERPOSITION GLITCH -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Effet glitch décalé -->
+                        <path d="M60 32L38 50V82H82V50L60 32Z" fill="#FF00FF" opacity="0.3" transform="translate(-3, 0)"/>
+                        <path d="M60 32L38 50V82H82V50L60 32Z" fill="#00FFFF" opacity="0.3" transform="translate(3, 0)"/>
+                        <path d="M60 32L38 50V82H82V50L60 32Z" fill="url(#glitchMain)"/>
+                        <!-- Lignes de scan -->
+                        <rect x="35" y="45" width="50" height="2" fill="#00FF00" opacity="0.3"/>
+                        <rect x="35" y="55" width="50" height="1" fill="#00FF00" opacity="0.2"/>
+                        <rect x="35" y="70" width="50" height="2" fill="#FF0000" opacity="0.3"/>
+                        <!-- Éléments décalés -->
+                        <rect x="52" y="65" width="16" height="17" fill="#FFFFFF" transform="translate(2, 0)"/>
+                        <rect x="52" y="65" width="16" height="17" fill="#000000" opacity="0.5" transform="translate(-1, 0)"/>
+                        <defs>
+                            <linearGradient id="glitchMain" x1="60" y1="32" x2="60" y2="82">
+                                <stop stop-color="#00F5FF"/>
+                                <stop offset="1" stop-color="#0E7490"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>📺 Glitch Numérique<span class="tag">CYBER</span></h2>
+                    <p><strong>Concept :</strong> Effet bug digital, décalages RVB, aberration chromatique</p>
+                    <div class="hint">💡 Esthétique cyberpunk. 3 couches décalées (magenta/cyan/principal). Lignes de scan TV. Impression de mouvement.</div>
+                </div>
+            </div>
+
+            <!-- 9. VITRAIL CATHÉDRALE -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Structure de plomb noir -->
+                        <path d="M60 25L35 47V85H85V47L60 25Z" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+                        <!-- Verres colorés -->
+                        <path d="M60 25L47.5 36L60 47L72.5 36Z" fill="#FFD700" opacity="0.8"/>
+                        <path d="M47.5 36L35 47L47.5 58L60 47Z" fill="#00E5FF" opacity="0.8"/>
+                        <path d="M72.5 36L85 47L72.5 58L60 47Z" fill="#00C8E0" opacity="0.8"/>
+                        <path d="M35 47L47.5 58V85H35V47Z" fill="#0891B2" opacity="0.8"/>
+                        <path d="M85 47L72.5 58V85H85V47Z" fill="#0D8599" opacity="0.8"/>
+                        <path d="M47.5 58L60 70L47.5 85H47.5V58Z" fill="#06B6D4" opacity="0.8"/>
+                        <path d="M72.5 58L60 70L72.5 85V58Z" fill="#14B8D4" opacity="0.8"/>
+                        <path d="M47.5 58L60 47L72.5 58L60 70Z" fill="#FF6B35" opacity="0.9"/>
+                        <!-- Contours noirs épais -->
+                        <path d="M60 25L35 47M85 47L60 25M35 47V85M85 47V85M35 85H85M60 47V70M47.5 36L47.5 85M72.5 36L72.5 85M47.5 58L72.5 58" stroke="#1a1a1a" stroke-width="2.5"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>⛪ Vitrail Gothique<span class="tag">ARTISTIQUE</span></h2>
+                    <p><strong>Concept :</strong> Style vitrail de cathédrale, plombs noirs, verres colorés</p>
+                    <div class="hint">💡 Art médiéval modernisé. Contours noirs épais imitant le plomb. Multiples nuances cyan + or et orange. Effet lumière traversante.</div>
+                </div>
+            </div>
+
+            <!-- 10. DOUBLE EXPOSITION -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Silhouette maison -->
+                        <path d="M60 30L35 50V85H85V50L60 30Z" fill="url(#doubleExp1)"/>
+                        <!-- Texture paysage intégrée -->
+                        <circle cx="50" cy="45" r="8" fill="#FFD700" opacity="0.6"/>
+                        <path d="M35 65Q45 60 55 65T75 65T85 70" fill="#10B981" opacity="0.4"/>
+                        <path d="M35 72Q45 68 55 72T75 72T85 76" fill="#34D399" opacity="0.5"/>
+                        <rect x="40" y="78" width="4" height="7" fill="#0F766E" opacity="0.6"/>
+                        <rect x="50" y="76" width="4" height="9" fill="#0F766E" opacity="0.6"/>
+                        <circle cx="42" cy="76" r="5" fill="#22C55E" opacity="0.5"/>
+                        <circle cx="52" cy="74" r="6" fill="#22C55E" opacity="0.5"/>
+                        <!-- Oiseaux -->
+                        <path d="M55 50Q57 48 59 50M62 48Q64 46 66 48" stroke="#1E3A8A" stroke-width="1.5" opacity="0.4"/>
+                        <defs>
+                            <linearGradient id="doubleExp1" x1="60" y1="30" x2="60" y2="85">
+                                <stop stop-color="#00E5FF" offset="0.3"/>
+                                <stop stop-color="#00C8E0" offset="0.7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>📷 Double Exposition<span class="tag">POÉTIQUE</span></h2>
+                    <p><strong>Concept :</strong> Silhouette maison + paysage superposé (soleil, collines, arbres)</p>
+                    <div class="hint">💡 Technique photo artistique. La maison contient un paysage avec soleil doré, collines vertes et arbres. Évoque nature et habitat.</div>
+                </div>
+            </div>
+
+            <!-- 11. CIRCUIT ÉLECTRONIQUE -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: #0a0a0a;">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Forme principale -->
+                        <path d="M60 30L40 45V75L60 90L80 75V45L60 30Z" fill="none" stroke="#00F5FF" stroke-width="2"/>
+                        <!-- Circuit imprimé -->
+                        <line x1="60" y1="30" x2="60" y2="45" stroke="#00FFB3" stroke-width="2"/>
+                        <line x1="60" y1="45" x2="40" y2="45" stroke="#00FFB3" stroke-width="2"/>
+                        <line x1="40" y1="45" x2="40" y2="60" stroke="#00FFB3" stroke-width="2"/>
+                        <line x1="60" y1="45" x2="80" y2="45" stroke="#00FFB3" stroke-width="2"/>
+                        <line x1="80" y1="45" x2="80" y2="60" stroke="#00FFB3" stroke-width="2"/>
+                        <line x1="40" y1="60" x2="60" y2="60" stroke="#00FFB3" stroke-width="2"/>
+                        <line x1="80" y1="60" x2="60" y2="60" stroke="#00FFB3" stroke-width="2"/>
+                        <line x1="60" y1="60" x2="60" y2="90" stroke="#00FFB3" stroke-width="2"/>
+                        <!-- Composants -->
+                        <circle cx="60" cy="45" r="3" fill="#FFD700"/>
+                        <circle cx="40" cy="60" r="3" fill="#FF4757"/>
+                        <circle cx="80" cy="60" r="3" fill="#FF4757"/>
+                        <circle cx="60" cy="60" r="4" fill="#00F5FF"/>
+                        <rect x="58" y="73" width="4" height="10" fill="#FFA500"/>
+                        <!-- Noeuds de connexion -->
+                        <circle cx="60" cy="30" r="2" fill="#00FFB3"/>
+                        <circle cx="40" cy="45" r="2" fill="#00FFB3"/>
+                        <circle cx="80" cy="45" r="2" fill="#00FFB3"/>
+                        <circle cx="60" cy="90" r="2" fill="#00FFB3"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>🔌 Circuit Électronique<span class="tag">TECH</span></h2>
+                    <p><strong>Concept :</strong> Maison dessinée comme un circuit imprimé avec composants</p>
+                    <div class="hint">💡 Style PCB (carte électronique). Lignes de circuit vert néon, composants colorés (résistances, LED). Fond noir tech.</div>
+                </div>
+            </div>
+
+            <!-- 12. AQUARELLE FLUIDE -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Taches aquarelle -->
+                        <ellipse cx="60" cy="60" rx="40" ry="35" fill="#A5F3FC" opacity="0.3"/>
+                        <ellipse cx="55" cy="55" rx="35" ry="30" fill="#67E8F9" opacity="0.4"/>
+                        <ellipse cx="65" cy="65" rx="38" ry="32" fill="#22D3EE" opacity="0.3"/>
+                        <!-- Forme maison douce -->
+                        <path d="M60 30Q45 40 40 50Q38 65 40 75Q45 85 60 88Q75 85 80 75Q82 65 80 50Q75 40 60 30Z" fill="url(#aqua)" opacity="0.8"/>
+                        <!-- Détails flous -->
+                        <circle cx="48" cy="55" r="4" fill="#FFA500" opacity="0.6"/>
+                        <circle cx="72" cy="55" r="4" fill="#FFA500" opacity="0.6"/>
+                        <rect x="54" y="68" width="12" height="15" rx="2" fill="#FF6B6B" opacity="0.7"/>
+                        <!-- Éclaboussures -->
+                        <circle cx="35" cy="45" r="2" fill="#06B6D4" opacity="0.5"/>
+                        <circle cx="85" cy="48" r="3" fill="#0891B2" opacity="0.4"/>
+                        <circle cx="42" cy="75" r="2" fill="#14B8D4" opacity="0.5"/>
+                        <defs>
+                            <radialGradient id="aqua">
+                                <stop stop-color="#00E5FF" offset="0.3"/>
+                                <stop stop-color="#06B6D4" offset="1"/>
+                            </radialGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>🎨 Aquarelle Fluide<span class="tag">ORGANIQUE</span></h2>
+                    <p><strong>Concept :</strong> Peinture à l'eau, formes douces, superposition de taches</p>
+                    <div class="hint">💡 Art pictural. Pas de lignes droites, tout est organique. Taches cyan se chevauchant, éclaboussures. Fenêtres orange floues.</div>
+                </div>
+            </div>
+
+            <!-- 13. NEON SIGN -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: #000;">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Tubes néon avec glow -->
+                        <path d="M40 80L50 60L50 40L60 30L70 40L70 60L80 80" 
+                              stroke="#00F5FF" 
+                              stroke-width="4" 
+                              stroke-linecap="round"
+                              filter="url(#glow1)"/>
+                        <path d="M40 80H80" 
+                              stroke="#FF006E" 
+                              stroke-width="4" 
+                              stroke-linecap="round"
+                              filter="url(#glow2)"/>
+                        <path d="M52 65H68" 
+                              stroke="#FFD700" 
+                              stroke-width="3" 
+                              stroke-linecap="round"
+                              filter="url(#glow3)"/>
+                        <!-- Petits néons décoratifs -->
+                        <circle cx="55" cy="50" r="3" fill="#00F5FF" filter="url(#glow1)"/>
+                        <circle cx="65" cy="50" r="3" fill="#00F5FF" filter="url(#glow1)"/>
+                        <!-- Fixations -->
+                        <circle cx="50" cy="60" r="1.5" fill="#666"/>
+                        <circle cx="70" cy="60" r="1.5" fill="#666"/>
+                        <circle cx="60" cy="30" r="1.5" fill="#666"/>
+                        <defs>
+                            <filter id="glow1">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                            <filter id="glow2">
+                                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                            <filter id="glow3">
+                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>💡 Enseigne Néon<span class="tag">NOCTURNE</span></h2>
+                    <p><strong>Concept :</strong> Tubes néon lumineux, halos colorés, fixations métalliques</p>
+                    <div class="hint">💡 Motel américain vintage. Effet glow réaliste sur fond noir. Cyan électrique + magenta + or. Petits points de fixation gris.</div>
+                </div>
+            </div>
+
+            <!-- 14. CONSTELLATION ÉTOILÉE -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: radial-gradient(circle, #1a1a3e 0%, #0a0a1a 100%);">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Points étoiles -->
+                        <circle cx="60" cy="25" r="2" fill="#FFD700"/>
+                        <circle cx="40" cy="45" r="2" fill="#00F5FF"/>
+                        <circle cx="80" cy="45" r="2" fill="#00F5FF"/>
+                        <circle cx="35" cy="70" r="2" fill="#00E5FF"/>
+                        <circle cx="85" cy="70" r="2" fill="#00E5FF"/>
+                        <circle cx="50" cy="85" r="2" fill="#00D4FF"/>
+                        <circle cx="70" cy="85" r="2" fill="#00D4FF"/>
+                        <!-- Lignes de constellation -->
+                        <path d="M60 25L40 45L35 70L50 85L70 85L85 70L80 45L60 25Z" 
+                              stroke="#00C8FF" 
+                              stroke-width="1" 
+                              opacity="0.6"/>
+                        <!-- Étoiles supplémentaires -->
+                        <circle cx="55" cy="55" r="1.5" fill="#FFA500"/>
+                        <circle cx="65" cy="58" r="1.5" fill="#FFA500"/>
+                        <!-- Grande étoile centrale -->
+                        <path d="M60 50L62 56L68 56L63 60L65 66L60 62L55 66L57 60L52 56L58 56Z" fill="#FFD700"/>
+                        <!-- Petites étoiles décoratives -->
+                        <circle cx="45" cy="35" r="0.5" fill="#FFF" opacity="0.8"/>
+                        <circle cx="75" cy="38" r="0.5" fill="#FFF" opacity="0.7"/>
+                        <circle cx="50" cy="75" r="0.5" fill="#FFF" opacity="0.6"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>⭐ Constellation Céleste<span class="tag">ASTRONOMIQUE</span></h2>
+                    <p><strong>Concept :</strong> La maison formée par des étoiles reliées (like the Big Dipper)</p>
+                    <div class="hint">💡 Carte du ciel. Points lumineux (étoiles) connectés formant une maison. Fond nuit profonde. Étoile dorée centrale comme repère.</div>
+                </div>
+            </div>
+
+            <!-- 15. RUBAN ENTRELACÉ -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Ruban cyan qui s'entrelace -->
+                        <path d="M30 60Q30 40 50 30L70 30Q90 40 90 60L90 80Q70 90 50 90L30 80Z" 
+                              fill="url(#ribbon1)" 
+                              opacity="0.8"/>
+                        <path d="M35 60Q35 45 50 37L70 37Q85 45 85 60L85 77Q70 85 50 85L35 77Z" 
+                              fill="#FFFFFF" 
+                              opacity="0.3"/>
+                        <!-- Pli central -->
+                        <path d="M60 30L60 90" stroke="#0891B2" stroke-width="2" opacity="0.5"/>
+                        <!-- Point de croisement -->
+                        <circle cx="60" cy="60" r="12" fill="url(#ribbon2)"/>
+                        <circle cx="60" cy="60" r="6" fill="#FF4757"/>
+                        <!-- Détails de pli -->
+                        <path d="M45 50L75 50" stroke="#005F7F" stroke-width="1" opacity="0.4"/>
+                        <path d="M45 70L75 70" stroke="#005F7F" stroke-width="1" opacity="0.4"/>
+                        <defs>
+                            <linearGradient id="ribbon1" x1="30" y1="30" x2="90" y2="90">
+                                <stop stop-color="#00E5FF"/>
+                                <stop offset="1" stop-color="#0891B2"/>
+                            </linearGradient>
+                            <radialGradient id="ribbon2">
+                                <stop stop-color="#22D3EE" offset="0.5"/>
+                                <stop stop-color="#06B6D4" offset="1"/>
+                            </radialGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>🎀 Ruban Möbius<span class="tag">ABSTRAIT</span></h2>
+                    <p><strong>Concept :</strong> Ruban qui se plie et s'entrelace formant une maison</p>
+                    <div class="hint">💡 Forme impossible inspirée du ruban de Möbius. Plis et retournements créant une structure 3D. Centre rouge comme point focal.</div>
+                </div>
+            </div>
+
+            <!-- 16. PAPIER DÉCOUPÉ (Kirigami) -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Ombres portées -->
+                        <path d="M60 28L38 48V84H82V48L60 28Z" fill="#0891B2" opacity="0.3" transform="translate(3, 3)"/>
+                        <!-- Couche 1 (fond) -->
+                        <path d="M60 30L40 48V82H80V48L60 30Z" fill="#0D8599"/>
+                        <!-- Couche 2 -->
+                        <path d="M60 35L43 50V78H77V50L60 35Z" fill="#00A8CC"/>
+                        <!-- Couche 3 (premier plan) -->
+                        <path d="M60 40L47 52V74H73V52L60 40Z" fill="url(#kirigami)"/>
+                        <!-- Découpes -->
+                        <path d="M60 40L53 46L60 52L67 46Z" fill="white"/>
+                        <rect x="52" y="58" width="6" height="6" fill="white" rx="1"/>
+                        <rect x="62" y="58" width="6" height="6" fill="white" rx="1"/>
+                        <rect x="56" y="66" width="8" height="8" fill="#FF6B35" rx="1"/>
+                        <defs>
+                            <linearGradient id="kirigami" x1="60" y1="40" x2="60" y2="74">
+                                <stop stop-color="#00E5FF"/>
+                                <stop offset="1" stop-color="#00C8E0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>✂️ Papier Découpé<span class="tag">ARTISANAL</span></h2>
+                    <p><strong>Concept :</strong> 3 couches de papier superposées avec ombres (kirigami)</p>
+                    <div class="hint">💡 Art japonais du papier découpé. 3 niveaux de profondeur avec dégradés de cyan. Ombres réalistes entre couches. Découpes blanches.</div>
+                </div>
+            </div>
+
+            <!-- 17. GRAFFITI STREET ART -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Ombre spray -->
+                        <ellipse cx="60" cy="90" rx="35" ry="8" fill="#000" opacity="0.4"/>
+                        <!-- Contour épais -->
+                        <path d="M60 25L35 48V85H85V48L60 25Z" 
+                              stroke="#000" 
+                              stroke-width="8" 
+                              fill="none"
+                              stroke-linejoin="round"/>
+                        <!-- Remplissage graffiti -->
+                        <path d="M60 25L35 48V85H85V48L60 25Z" 
+                              fill="url(#graffiti)" 
+                              stroke="#000" 
+                              stroke-width="3"
+                              stroke-linejoin="round"/>
+                        <!-- Highlights blancs -->
+                        <path d="M45 50L55 45L65 50" stroke="#FFF" stroke-width="4" opacity="0.8" stroke-linecap="round"/>
+                        <circle cx="48" cy="62" r="6" stroke="#FFF" stroke-width="3" opacity="0.7"/>
+                        <circle cx="72" cy="62" r="6" stroke="#FFF" stroke-width="3" opacity="0.7"/>
+                        <!-- Tag signature -->
+                        <text x="50" y="78" font-family="Arial Black" font-size="12" fill="#FF006E" font-weight="bold">LOU</text>
+                        <!-- Gouttes de peinture -->
+                        <ellipse cx="42" cy="83" rx="1.5" ry="3" fill="#00F5FF" opacity="0.6"/>
+                        <ellipse cx="78" cy="83" rx="1.5" ry="3" fill="#00F5FF" opacity="0.6"/>
+                        <defs>
+                            <linearGradient id="graffiti" x1="35" y1="25" x2="85" y2="85">
+                                <stop stop-color="#00F5FF"/>
+                                <stop offset="0.5" stop-color="#00C8E0"/>
+                                <stop offset="1" stop-color="#FF006E"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>🎨 Graffiti Urbain<span class="tag">STREET</span></h2>
+                    <p><strong>Concept :</strong> Bomb spray, contour noir épais, highlights, tag "LOU"</p>
+                    <div class="hint">💡 Culture hip-hop. Gros contour noir (outline), remplissage dégradé cyan→magenta, reflets blancs. Gouttes de spray. Tag signature.</div>
+                </div>
+            </div>
+
+            <!-- 18. HOLOGRAMME 3D -->
+            <div class="logo-card">
+                <div class="logo-preview" style="background: #000;">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Grille holographique -->
+                        <defs>
+                            <pattern id="grid" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#00F5FF" stroke-width="0.5" opacity="0.3"/>
+                            </pattern>
+                        </defs>
+                        <rect width="120" height="120" fill="url(#grid)"/>
+                        <!-- Base hologramme -->
+                        <ellipse cx="60" cy="95" rx="30" ry="5" stroke="#00F5FF" stroke-width="1" fill="none" opacity="0.6"/>
+                        <!-- Projection -->
+                        <path d="M40 95L50 25" stroke="#00F5FF" stroke-width="0.5" opacity="0.4"/>
+                        <path d="M80 95L70 25" stroke="#00F5FF" stroke-width="0.5" opacity="0.4"/>
+                        <!-- Maison holographique -->
+                        <path d="M60 20L40 35V70L60 85L80 70V35L60 20Z" 
+                              stroke="url(#holoGrad)" 
+                              stroke-width="2" 
+                              fill="none"
+                              opacity="0.9"/>
+                        <!-- Lignes de scan -->
+                        <rect x="38" y="40" width="44" height="1" fill="#00F5FF" opacity="0.5"/>
+                        <rect x="38" y="50" width="44" height="1" fill="#00F5FF" opacity="0.4"/>
+                        <rect x="38" y="60" width="44" height="1" fill="#00F5FF" opacity="0.5"/>
+                        <rect x="38" y="70" width="44" height="1" fill="#00F5FF" opacity="0.3"/>
+                        <!-- Points lumineux -->
+                        <circle cx="60" cy="20" r="2" fill="#00F5FF">
+                            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="40" cy="35" r="1.5" fill="#0891B2">
+                            <animate attributeName="opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="80" cy="35" r="1.5" fill="#0891B2">
+                            <animate attributeName="opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                        <defs>
+                            <linearGradient id="holoGrad" x1="60" y1="20" x2="60" y2="85">
+                                <stop stop-color="#00F5FF"/>
+                                <stop offset="0.5" stop-color="#00C8E0"/>
+                                <stop offset="1" stop-color="#0891B2"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>👾 Hologramme Sci-Fi<span class="tag">FUTURISTE</span></h2>
+                    <p><strong>Concept :</strong> Projection 3D, grille, lignes de scan, base émettrice</p>
+                    <div class="hint">💡 Science-fiction. Grille de fond, lignes de balayage horizontales, projection depuis une base. Points clignotants. Cyan néon.</div>
+                </div>
+            </div>
+
+            <!-- 19. TRIBAL POLYNÉSIEN -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Forme principale -->
+                        <path d="M60 25L38 45V80L60 95L82 80V45L60 25Z" fill="url(#tribal)"/>
+                        <!-- Motifs tribaux -->
+                        <path d="M60 30L50 35L52 45L60 40L68 45L70 35Z" fill="#000" opacity="0.8"/>
+                        <path d="M42 50L48 55L48 65L42 60Z" fill="#000" opacity="0.7"/>
+                        <path d="M78 50L72 55L72 65L78 60Z" fill="#000" opacity="0.7"/>
+                        <!-- Dents/pointes -->
+                        <path d="M42 68L44 72L46 68L48 72L50 68L52 72L54 68" stroke="#000" stroke-width="2" fill="none"/>
+                        <path d="M66 68L68 72L70 68L72 72L74 68L76 72L78 68" stroke="#000" stroke-width="2" fill="none"/>
+                        <!-- Cercles -->
+                        <circle cx="50" cy="55" r="4" stroke="#000" stroke-width="2" fill="none"/>
+                        <circle cx="70" cy="55" r="4" stroke="#000" stroke-width="2" fill="none"/>
+                        <!-- Spirales simplifiées -->
+                        <path d="M60 75Q55 75 55 80Q55 85 60 85Q65 85 65 80Q65 77 63 75" stroke="#000" stroke-width="2" fill="none"/>
+                        <!-- Accents oranges -->
+                        <circle cx="50" cy="55" r="2" fill="#FF6B35"/>
+                        <circle cx="70" cy="55" r="2" fill="#FF6B35"/>
+                        <rect x="58" y="82" width="4" height="8" fill="#FFA500"/>
+                        <defs>
+                            <linearGradient id="tribal" x1="60" y1="25" x2="60" y2="95">
+                                <stop stop-color="#00E5FF"/>
+                                <stop offset="1" stop-color="#00A8CC"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>🗿 Tatouage Tribal<span class="tag">ETHNIQUE</span></h2>
+                    <p><strong>Concept :</strong> Motifs polynésiens (dents, spirales, formes géométriques)</p>
+                    <div class="hint">💡 Art maori/polynésien. Patterns tribaux noirs sur cyan. Dents caractéristiques, spirales, cercles. Touches orange pour contraste.</div>
+                </div>
+            </div>
+
+            <!-- 20. WIREFRAME ARCHITECTURAL -->
+            <div class="logo-card">
+                <div class="logo-preview">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Plan architectural en fil de fer -->
+                        <path d="M60 25L35 47V85H85V47L60 25Z" stroke="#00E5FF" stroke-width="0.5" fill="none"/>
+                        <!-- Grille de construction -->
+                        <line x1="35" y1="47" x2="85" y2="47" stroke="#00C8E0" stroke-width="0.5" opacity="0.5"/>
+                        <line x1="35" y1="60" x2="85" y2="60" stroke="#00C8E0" stroke-width="0.5" opacity="0.5"/>
+                        <line x1="35" y1="72" x2="85" y2="72" stroke="#00C8E0" stroke-width="0.5" opacity="0.5"/>
+                        <line x1="47" y1="47" x2="47" y2="85" stroke="#00C8E0" stroke-width="0.5" opacity="0.5"/>
+                        <line x1="60" y1="25" x2="60" y2="85" stroke="#00C8E0" stroke-width="0.5" opacity="0.5"/>
+                        <line x1="73" y1="47" x2="73" y2="85" stroke="#00C8E0" stroke-width="0.5" opacity="0.5"/>
+                        <!-- Arêtes principales -->
+                        <path d="M60 25L35 47M60 25L85 47M35 47V85M85 47V85M35 85H85" 
+                              stroke="#00F5FF" 
+                              stroke-width="2"/>
+                        <!-- Cotes et mesures -->
+                        <line x1="88" y1="47" x2="88" y2="85" stroke="#FFA500" stroke-width="1"/>
+                        <line x1="86" y1="47" x2="90" y2="47" stroke="#FFA500" stroke-width="1"/>
+                        <line x1="86" y1="85" x2="90" y2="85" stroke="#FFA500" stroke-width="1"/>
+                        <!-- Cotation horizontale -->
+                        <line x1="35" y1="88" x2="85" y2="88" stroke="#FFA500" stroke-width="1"/>
+                        <line x1="35" y1="86" x2="35" y2="90" stroke="#FFA500" stroke-width="1"/>
+                        <line x1="85" y1="86" x2="85" y2="90" stroke="#FFA500" stroke-width="1"/>
+                        <!-- Noeuds -->
+                        <circle cx="60" cy="25" r="2" fill="#00F5FF"/>
+                        <circle cx="35" cy="47" r="2" fill="#00F5FF"/>
+                        <circle cx="85" cy="47" r="2" fill="#00F5FF"/>
+                        <circle cx="35" cy="85" r="2" fill="#00F5FF"/>
+                        <circle cx="85" cy="85" r="2" fill="#00F5FF"/>
+                        <!-- Vue en coupe -->
+                        <rect x="50" y="65" width="20" height="20" stroke="#FF4757" stroke-width="1.5" fill="none" stroke-dasharray="2,2"/>
+                        <line x1="50" y1="65" x2="70" y2="85" stroke="#FF4757" stroke-width="0.5" opacity="0.5"/>
+                        <line x1="70" y1="65" x2="50" y2="85" stroke="#FF4757" stroke-width="0.5" opacity="0.5"/>
+                    </svg>
+                </div>
+                <div class="logo-info">
+                    <h2>📐 Blueprint Technique<span class="tag">PROFESSIONNEL</span></h2>
+                    <p><strong>Concept :</strong> Plan d'architecte, grille construction, cotes, vue coupe</p>
+                    <div class="hint">💡 Document technique. Wireframe cyan, grille de construction, lignes de cote orange, zone de coupe rouge en pointillés. Très pro.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

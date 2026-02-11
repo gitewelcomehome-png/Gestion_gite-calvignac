@@ -1,0 +1,28 @@
+<div class="tab-container">
+    <!-- Header -->
+    <div class="card card-header-section">
+        <div class="header-content">
+            <div class="header-title-group">
+                <h2 class="page-title"><i data-lucide="calendar"></i> RÉSERVATIONS</h2>
+                <p class="page-subtitle">Planning et gestion des séjours</p>
+            </div>
+            <div class="header-actions">
+                <button onclick="forceRefreshReservations()" class="btn-neo btn-refresh" title="Actualiser les données">
+                    <i data-lucide="refresh-cw"></i> ACTUALISER
+                </button>
+                <input type="text" id="searchReservations" class="search-input" placeholder="Rechercher..." oninput="filterReservations(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Planning Container -->
+    <div class="card">
+        <!-- Statut synchronisation -->
+        <div id="syncStatus" class="sync-status" style="display: none;">
+            <i data-lucide="loader" id="syncStatusIcon"></i> <span id="syncStatusText">Synchronisation en cours...</span>
+        </div>
+        
+        <div id="planning-container" class="planning-container">
+            <!-- Le planning sera généré ici par JavaScript -->
+        </div>
+    </div>

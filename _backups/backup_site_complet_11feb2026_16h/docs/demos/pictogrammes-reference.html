@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Bibliothèque de Pictogrammes - iCalou</title>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2D3436;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .intro {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            color: #2D3436;
+        }
+
+        .category {
+            margin-bottom: 50px;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2D3436;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .icon-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .icon-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .icon-symbol {
+            min-width: 30px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-symbol svg {
+            width: 24px;
+            height: 24px;
+            stroke: #667eea;
+            stroke-width: 2;
+        }
+
+        .icon-label {
+            color: #2D3436;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .copy-notice {
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .copy-notice.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .icon-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+    </style>copier son nom d'icône Lucide. 
+            Utilisez ensuite <code>&lt;i data-lucide="nom-icone"&gt;&lt;/i&gt;</code> dans votre code HTML.
+            <br><br>
+            <strong>🔗 Documentation :</strong> <a href="https://lucide.dev/icons/" target="_blank" style="color: #667eea; font-weight: 600;">lucide.dev/icons</a>
+</head>
+<body>
+    <div class="copy-notice" id="copyNotice">✅ Copié !</div>
+
+    <div class="container">
+        <h1>📚 Bibliothèque de Pictogrammes iCalou</h1>
+
+        <div class="intro">
+            <strong>📖 Mode d'emploi :</strong> Cliquez sur un pictogramme pour le copier dans votre presse-papier. Collez-le ensuite où vous voulez (Ctrl+V / Cmd+V).
+        </div>
+
+        <!-- Actions Principales -->
+        <div class="category">plus">
+                    <span class="icon-symbol"><i data-lucide="plus"></i></span>
+                    <span class="icon-label">Ajouter / Créer</span>
+                </div>
+                <div class="icon-item" data-icon="pencil">
+                    <span class="icon-symbol"><i data-lucide="pencil"></i></span>
+                    <span class="icon-label">Modifier / Éditer</span>
+                </div>
+                <div class="icon-item" data-icon="trash-2">
+                    <span class="icon-symbol"><i data-lucide="trash-2"></i></span>
+                    <span class="icon-label">Supprimer</span>
+                </div>
+                <div class="icon-item" data-icon="save">
+                    <span class="icon-symbol"><i data-lucide="save"></i></span>
+                    <span class="icon-label">Enregistrer</span>
+                </div>
+                <div class="icon-item" data-icon="check">
+                    <span class="icon-symbol"><i data-lucide="check"></i></span>
+                    <span class="icon-label">Valider</span>
+                </div>
+                <div class="icon-item" data-icon="x">
+                    <span class="icon-symbol"><i data-lucide="x"></i></span>
+                    <span class="icon-label">Annuler</span>
+                </div>
+                <div class="icon-item" data-icon="x-circle">
+                    <span class="icon-symbol"><i data-lucide="x-circle"></i></span>
+                    <span class="icon-label">Fermer</span>
+                </div>
+                <div class="icon-item" data-icon="corner-up-left">
+                    <span class="icon-symbol"><i data-lucide="corner-up-left"></i>mer</span>
+                </div>
+                <div class="icon-item" data-icon="↩️">
+                    <span class="icon-symbol">↩️</span>
+                    <span class="icon-label">Retour</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation & Onglets -->
+        <div class="category">
+            <h2 class="category-title">🧭 Navigation & Onglets Application</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="clipboard-list">
+                    <span class="icon-symbol"><i data-lucide="clipboard-list"></i></span>
+                    <span class="icon-label">Fiche Client</span>
+                </div>
+                <div class="icon-item" data-icon="calendar">
+                    <span class="icon-symbol"><i data-lucide="calendar"></i></span>
+                    <span class="icon-label">Calendrier</span>
+                </div>
+                <div class="icon-item" data-icon="home">
+                    <span class="icon-symbol"><i data-lucide="home"></i></span>
+                    <span class="icon-label">Réservations</span>
+                </div>
+                <div class="icon-item" data-icon="wallet">
+                    <span class="icon-symbol"><i data-lucide="wallet"></i></span>
+                    <span class="icon-label">Fiscalité</span>
+                </div>
+                <div class="icon-item" data-icon="sparkles">
+                    <span class="icon-symbol"><i data-lucide="sparkles"></i></span>
+                    <span class="icon-label">Ménage</span>
+                </div>
+                <div class="icon-item" data-icon="bed">
+                    <span class="icon-symbol"><i data-lucide="bed"></i></span>
+                    <span class="icon-label">Draps</span>
+                </div>
+                <div class="icon-item" data-icon="compass">
+                    <span class="icon-symbol"><i data-lucide="compass"></i></span>
+                    <span class="icon-label">Découvrir</span>
+                </div>
+                <div class="icon-item" data-icon="settings">
+                    <span class="icon-symbol"><i data-lucide="settings"></i></span>
+                    <span class="icon-label">Gestion</span>
+                </div>
+                <div class="icon-item" data-icon="bar-chart-3">
+                    <span class="icon-symbol"><i data-lucide="bar-chart-3"></i></span>
+                    <span class="icon-label">Statistiques</span>
+                </div>
+                <div class="icon-item" data-icon="building">
+                    <span class="icon-symbol"><i data-lucide="building"></i></span>
+                    <span class="icon-label">Gîtes</span>
+                </div>
+                <div class="icon-item" data-icon="building-2">
+                    <span class="icon-symbol"><i data-lucide="building-2"></i></span>
+                    <span class="icon-label">Résidences</span>
+                </div>
+                <div class="icon-item" data-icon="warehouse">
+                    <span class="icon-symbol"><i data-lucide="warehouse"></i></span>
+                    <span class="icon-label">Propriétés</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fichiers & Documents -->
+        <div class="category">
+            <h2 class="category-title">📁 Fichiers & Documents</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="download">
+                    <span class="icon-symbol"><i data-lucide="download"></i></span>
+                    <span class="icon-label">Télécharger</span>
+                </div>
+                <div class="icon-item" data-icon="upload">
+                    <span class="icon-symbol"><i data-lucide="upload"></i></span>
+                    <span class="icon-label">Exporter</span>
+                </div>
+                <div class="icon-item" data-icon="printer">
+                    <span class="icon-symbol"><i data-lucide="printer"></i></span>
+                    <span class="icon-label">Imprimer</span>
+                </div>
+                <div class="icon-item" data-icon="file-text">
+                    <span class="icon-symbol"><i data-lucide="file-text"></i></span>
+                    <span class="icon-label">Document / PDF</span>
+                </div>
+                <div class="icon-item" data-icon="sheet">
+                    <span class="icon-symbol"><i data-lucide="sheet"></i></span>
+                    <span class="icon-label">Excel / Tableur</span>
+                </div>
+                <div class="icon-item" data-icon="sticky-note">
+                    <span class="icon-symbol"><i data-lucide="sticky-note"></i></span>
+                    <span class="icon-label">Note / Texte</span>
+                </div>
+                <div class="icon-item" data-icon="paperclip">
+                    <span class="icon-symbol"><i data-lucide="paperclip"></i></span>
+                    <span class="icon-label">Pièce jointe</span>
+                </div>
+                <div class="icon-item" data-icon="folder-open">
+                    <span class="icon-symbol"><i data-lucide="folder-open"></i></span>
+                    <span class="icon-label">Dossier</span>
+                </div>
+                <div class="icon-item" data-icon="file">
+                    <span class="icon-symbol"><i data-lucide="file"></i></span>
+                    <span class="icon-label">Fichier</span>
+                </div>
+                <div class="icon-item" data-icon="archive">
+                    <span class="icon-symbol"><i data-lucide="archive"></i></span>
+                    <span class="icon-label">Archive</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statuts & Alertes -->
+        <div class="category">
+            <h2 class="category-title">⚡ Statuts & Alertes</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="check-circle">
+                    <span class="icon-symbol"><i data-lucide="check-circle"></i></span>
+                    <span class="icon-label">Succès</span>
+                </div>
+                <div class="icon-item" data-icon="x-circle">
+                    <span class="icon-symbol"><i data-lucide="x-circle"></i></span>
+                    <span class="icon-label">Erreur</span>
+                </div>
+                <div class="icon-item" data-icon="alert-triangle">
+                    <span class="icon-symbol"><i data-lucide="alert-triangle"></i></span>
+                    <span class="icon-label">Attention / Warning</span>
+                </div>
+                <div class="icon-item" data-icon="info">
+                    <span class="icon-symbol"><i data-lucide="info"></i></span>
+                    <span class="icon-label">Information</span>
+                </div>
+                <div class="icon-item" data-icon="bell">
+                    <span class="icon-symbol"><i data-lucide="bell"></i></span>
+                    <span class="icon-label">Notification</span>
+                </div>
+                <div class="icon-item" data-icon="clock">
+                    <span class="icon-symbol"><i data-lucide="clock"></i></span>
+                    <span class="icon-label">En attente</span>
+                </div>
+                <div class="icon-item" data-icon="circle-dot">
+                    <span class="icon-symbol"><i data-lucide="circle-dot"></i></span>
+                    <span class="icon-label">Actif / En ligne</span>
+                </div>
+                <div class="icon-item" data-icon="circle">
+                    <span class="icon-symbol"><i data-lucide="circle"></i></span>
+                    <span class="icon-label">Inactif / Hors ligne</span>
+                </div>
+                <div class="icon-item" data-icon="loader">
+                    <span class="icon-symbol"><i data-lucide="loader"></i></span>
+                    <span class="icon-label">En cours</span>
+                </div>
+                <div class="icon-item" data-icon="minus-circle">
+                    <span class="icon-symbol"><i data-lucide="minus-circle"></i></span>
+                    <span class="icon-label">Occupé</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestion & Paramètres -->
+        <div class="category">
+            <h2 class="category-title">⚙️ Gestion & Paramètres</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="refresh-cw">
+                    <span class="icon-symbol"><i data-lucide="refresh-cw"></i></span>
+                    <span class="icon-label">Actualiser</span>
+                </div>
+                <div class="icon-item" data-icon="settings">
+                    <span class="icon-symbol"><i data-lucide="settings"></i></span>
+                    <span class="icon-label">Paramètres</span>
+                </div>
+                <div class="icon-item" data-icon="search">
+                    <span class="icon-symbol"><i data-lucide="search"></i></span>
+                    <span class="icon-label">Rechercher</span>
+                </div>
+                <div class="icon-item" data-icon="link">
+                    <span class="icon-symbol"><i data-lucide="link"></i></span>
+                    <span class="icon-label">Synchroniser / Lien</span>
+                </div>
+                <div class="icon-item" data-icon="user">
+                    <span class="icon-symbol"><i data-lucide="user"></i></span>
+                    <span class="icon-label">Utilisateur</span>
+                </div>
+                <div class="icon-item" data-icon="users">
+                    <span class="icon-symbol"><i data-lucide="users"></i></span>
+                    <span class="icon-label">Groupe / Équipe</span>
+                </div>
+                <div class="icon-item" data-icon="lock">
+                    <span class="icon-symbol"><i data-lucide="lock"></i></span>
+                    <span class="icon-label">Verrouiller</span>
+                </div>
+                <div class="icon-item" data-icon="unlock">
+                    <span class="icon-symbol"><i data-lucide="unlock"></i></span>
+                    <span class="icon-label">Déverrouiller</span>
+                </div>
+                <div class="icon-item" data-icon="log-out">
+                    <span class="icon-symbol"><i data-lucide="log-out"></i></span>
+                    <span class="icon-label">Déconnexion</span>
+                </div>
+                <div class="icon-item" data-icon="key">
+                    <span class="icon-symbol"><i data-lucide="key"></i></span>
+                    <span class="icon-label">Mot de passe / Clé</span>
+                </div>
+                <div class="icon-item" data-icon="shield">
+                    <span class="icon-symbol"><i data-lucide="shield"></i></span>
+                    <span class="icon-label">Sécurité</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finances & Paiements -->
+        <div class="category">
+            <h2 class="category-title">💳 Finances & Paiements</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="banknote">
+                    <span class="icon-symbol"><i data-lucide="banknote"></i></span>
+                    <span class="icon-label">Argent / Paiement</span>
+                </div>
+                <div class="icon-item" data-icon="credit-card">
+                    <span class="icon-symbol"><i data-lucide="credit-card"></i></span>
+                    <span class="icon-label">Carte bancaire</span>
+                </div>
+                <div class="icon-item" data-icon="wallet">
+                    <span class="icon-symbol"><i data-lucide="wallet"></i></span>
+                    <span class="icon-label">Espèces</span>
+                </div>
+                <div class="icon-item" data-icon="landmark">
+                    <span class="icon-symbol"><i data-lucide="landmark"></i></span>
+                    <span class="icon-label">Banque / Virement</span>
+                </div>
+                <div class="icon-item" data-icon="receipt">
+                    <span class="icon-symbol"><i data-lucide="receipt"></i></span>
+                    <span class="icon-label">Facture / Reçu</span>
+                </div>
+                <div class="icon-item" data-icon="trending-up">
+                    <span class="icon-symbol"><i data-lucide="trending-up"></i></span>
+                    <span class="icon-label">Revenus / Gains</span>
+                </div>
+                <div class="icon-item" data-icon="trending-down">
+                    <span class="icon-symbol"><i data-lucide="trending-down"></i></span>
+                    <span class="icon-label">Dépenses / Pertes</span>
+                </div>
+                <div class="icon-item" data-icon="calculator">
+                    <span class="icon-symbol"><i data-lucide="calculator"></i></span>
+                    <span class="icon-label">Comptabilité</span>
+                </div>
+                <div class="icon-item" data-icon="arrow-right-left">
+                    <span class="icon-symbol"><i data-lucide="arrow-right-left"></i></span>
+                    <span class="icon-label">Transfert d'argent</span>
+                </div>
+                <div class="icon-item" data-icon="coins">
+                    <span class="icon-symbol"><i data-lucide="coins"></i></span>
+                    <span class="icon-label">Prix / Tarif</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Communication -->
+        <div class="category">
+            <h2 class="category-title">💬 Communication</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="mail">
+                    <span class="icon-symbol"><i data-lucide="mail"></i></span>
+                    <span class="icon-label">Email</span>
+                </div>
+                <div class="icon-item" data-icon="smartphone">
+                    <span class="icon-symbol"><i data-lucide="smartphone"></i></span>
+                    <span class="icon-label">SMS / Mobile</span>
+                </div>
+                <div class="icon-item" data-icon="phone">
+                    <span class="icon-symbol"><i data-lucide="phone"></i></span>
+                    <span class="icon-label">Téléphone / Appel</span>
+                </div>
+                <div class="icon-item" data-icon="message-circle">
+                    <span class="icon-symbol"><i data-lucide="message-circle"></i></span>
+                    <span class="icon-label">Message / Chat</span>
+                </div>
+                <div class="icon-item" data-icon="bell">
+                    <span class="icon-symbol"><i data-lucide="bell"></i></span>
+                    <span class="icon-label">Notification</span>
+                </div>
+                <div class="icon-item" data-icon="megaphone">
+                    <span class="icon-symbol"><i data-lucide="megaphone"></i></span>
+                    <span class="icon-label">Annonce</span>
+                </div>
+                <div class="icon-item" data-icon="message-square">
+                    <span class="icon-symbol"><i data-lucide="message-square"></i></span>
+                    <span class="icon-label">Commentaire</span>
+                </div>
+                <div class="icon-item" data-icon="mail-open">
+                    <span class="icon-symbol"><i data-lucide="mail-open"></i></span>
+                    <span class="icon-label">Courrier</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dates & Temps -->
+        <div class="category">
+            <h2 class="category-title">📅 Dates & Temps</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="calendar">
+                    <span class="icon-symbol"><i data-lucide="calendar"></i></span>
+                    <span class="icon-label">Calendrier</span>
+                </div>
+                <div class="icon-item" data-icon="calendar-days">
+                    <span class="icon-symbol"><i data-lucide="calendar-days"></i></span>
+                    <span class="icon-label">Date</span>
+                </div>
+                <div class="icon-item" data-icon="clock">
+                    <span class="icon-symbol"><i data-lucide="clock"></i></span>
+                    <span class="icon-label">Heure</span>
+                </div>
+                <div class="icon-item" data-icon="alarm-clock">
+                    <span class="icon-symbol"><i data-lucide="alarm-clock"></i></span>
+                    <span class="icon-label">Alarme / Rappel</span>
+                </div>
+                <div class="icon-item" data-icon="timer">
+                    <span class="icon-symbol"><i data-lucide="timer"></i></span>
+                    <span class="icon-label">Chronomètre</span>
+                </div>
+                <div class="icon-item" data-icon="hourglass">
+                    <span class="icon-symbol"><i data-lucide="hourglass"></i></span>
+                    <span class="icon-label">Compte à rebours</span>
+                </div>
+                <div class="icon-item" data-icon="calendar-range">
+                    <span class="icon-symbol"><i data-lucide="calendar-range"></i></span>
+                    <span class="icon-label">Planning / Agenda</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Localisation -->
+        <div class="category">
+            <h2 class="category-title">🗺️ Localisation & Géographie</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="map">
+                    <span class="icon-symbol"><i data-lucide="map"></i></span>
+                    <span class="icon-label">Carte</span>
+                </div>
+                <div class="icon-item" data-icon="map-pin">
+                    <span class="icon-symbol"><i data-lucide="map-pin"></i></span>
+                    <span class="icon-label">Position / Lieu</span>
+                </div>
+                <div class="icon-item" data-icon="compass">
+                    <span class="icon-symbol"><i data-lucide="compass"></i></span>
+                    <span class="icon-label">Navigation</span>
+                </div>
+                <div class="icon-item" data-icon="home">
+                    <span class="icon-symbol"><i data-lucide="home"></i></span>
+                    <span class="icon-label">Adresse / Maison</span>
+                </div>
+                <div class="icon-item" data-icon="globe">
+                    <span class="icon-symbol"><i data-lucide="globe"></i></span>
+                    <span class="icon-label">Monde / Global</span>
+                </div>
+                <div class="icon-item" data-icon="pin">
+                    <span class="icon-symbol"><i data-lucide="pin"></i></span>
+                    <span class="icon-label">Épingle / Marquer</span>
+                </div>
+                <div class="icon-item" data-icon="building-2">
+                    <span class="icon-symbol"><i data-lucide="building-2"></i></span>
+                    <span class="icon-label">Ville</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Médias -->
+        <div class="category">
+            <h2 class="category-title">🎬 Médias & Contenu</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="image">
+                    <span class="icon-symbol"><i data-lucide="image"></i></span>
+                    <span class="icon-label">Image</span>
+                </div>
+                <div class="icon-item" data-icon="camera">
+                    <span class="icon-symbol"><i data-lucide="camera"></i></span>
+                    <span class="icon-label">Photo</span>
+                </div>
+                <div class="icon-item" data-icon="video">
+                    <span class="icon-symbol"><i data-lucide="video"></i></span>
+                    <span class="icon-label">Vidéo</span>
+                </div>
+                <div class="icon-item" data-icon="music">
+                    <span class="icon-symbol"><i data-lucide="music"></i></span>
+                    <span class="icon-label">Audio / Musique</span>
+                </div>
+                <div class="icon-item" data-icon="video">
+                    <span class="icon-symbol"><i data-lucide="video"></i></span>
+                    <span class="icon-label">Caméra</span>
+                </div>
+                <div class="icon-item" data-icon="gallery-horizontal">
+                    <span class="icon-symbol"><i data-lucide="gallery-horizontal"></i></span>
+                    <span class="icon-label">Galerie / Art</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Symboles Utiles -->
+        <div class="category">
+            <h2 class="category-title">🔤 Symboles & Divers</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="star">
+                    <span class="icon-symbol"><i data-lucide="star"></i></span>
+                    <span class="icon-label">Favori / Important</span>
+                </div>
+                <div class="icon-item" data-icon="lightbulb">
+                    <span class="icon-symbol"><i data-lucide="lightbulb"></i></span>
+                    <span class="icon-label">Idée / Astuce</span>
+                </div>
+                <div class="icon-item" data-icon="flame">
+                    <span class="icon-symbol"><i data-lucide="flame"></i></span>
+                    <span class="icon-label">Populaire / Tendance</span>
+                </div>
+                <div class="icon-item" data-icon="zap">
+                    <span class="icon-symbol"><i data-lucide="zap"></i></span>
+                    <span class="icon-label">Rapide / Flash</span>
+                </div>
+                <div class="icon-item" data-icon="gift">
+                    <span class="icon-symbol"><i data-lucide="gift"></i></span>
+                    <span class="icon-label">Cadeau / Bonus</span>
+                </div>
+                <div class="icon-item" data-icon="trophy">
+                    <span class="icon-symbol"><i data-lucide="trophy"></i></span>
+                    <span class="icon-label">Trophée / Réussite</span>
+                </div>
+                <div class="icon-item" data-icon="heart">
+                    <span class="icon-symbol"><i data-lucide="heart"></i></span>
+                    <span class="icon-label">Coeur / J'aime</span>
+                </div>
+                <div class="icon-item" data-icon="thumbs-up">
+                    <span class="icon-symbol"><i data-lucide="thumbs-up"></i></span>
+                    <span class="icon-label">Pouce levé / OK</span>
+                </div>
+                <div class="icon-item" data-icon="target">
+                    <span class="icon-symbol"><i data-lucide="target"></i></span>
+                    <span class="icon-label">Objectif / Cible</span>
+                </div>
+                <div class="icon-item" data-icon="rocket">
+                    <span class="icon-symbol"><i data-lucide="rocket"></i></span>
+                    <span class="icon-label">Lancement / Fusée</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contrôles -->
+        <div class="category">
+            <h2 class="category-title">🎮 Contrôles & Navigation</h2>
+            <div class="icon-grid">
+                <div class="icon-item" data-icon="play">
+                    <span class="icon-symbol"><i data-lucide="play"></i></span>
+                    <span class="icon-label">Lecture / Play</span>
+                </div>
+                <div class="icon-item" data-icon="pause">
+                    <span class="icon-symbol"><i data-lucide="pause"></i></span>
+                    <span class="icon-label">Pause</span>
+                </div>
+                <div class="icon-item" data-icon="square">
+                    <span class="icon-symbol"><i data-lucide="square"></i></span>
+                    <span class="icon-label">Stop</span>
+                </div>
+                <div class="icon-item" data-icon="rewind">
+                    <span class="icon-symbol"><i data-lucide="rewind"></i></span>
+                    <span class="icon-label">Retour rapide</span>
+                </div>
+                <div class="icon-item" data-icon="fast-forward">
+                    <span class="icon-symbol"><i data-lucide="fast-forward"></i></span>
+                    <span class="icon-label">Avance rapide</span>
+                </div>
+                <div class="icon-item" data-icon="arrow-up">
+                    <span class="icon-symbol"><i data-lucide="arrow-up"></i></span>
+                    <span class="icon-label">Haut / Upload</span>
+                </div>
+                <div class="icon-item" data-icon="arrow-down">
+                    <span class="icon-symbol"><i data-lucide="arrow-down"></i></span>
+                    <span class="icon-label">Bas / Download</span>
+                </div>
+                <div class="icon-item" data-icon="arrow-left">
+                    <span class="icon-symbol"><i data-lucide="arrow-left"></i></span>
+                    <span class="icon-label">Gauche / Retour</span>
+                </div>
+                <div class="icon-item" data-icon="arrow-right">
+                    <span class="icon-symbol"><i data-lucide="arrow-right"></i></span>
+                    <span class="icon-label">Droite / Suivant</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialiser Lucide Icons
+        lucide.createIcons();
+
+        // Système de copie dans le presse-papier
+        document.querySelectorAll('.icon-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const iconName = this.dataset.icon;
+                
+                // Copier le nom de l'icône dans le presse-papier
+                navigator.clipboard.writeText(iconName).then(() => {
+                    // Afficher la notification
+                    const notice = document.getElementById('copyNotice');
+                    notice.textContent = `✅ "${iconName}" copié !`;
+                    notice.classList.add('show');
+                    
+                    // Masquer après 2 secondes
+                    setTimeout(() => {
+                        notice.classList.remove('show');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Erreur de copie:', err);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

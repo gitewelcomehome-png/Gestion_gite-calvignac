@@ -1,0 +1,1019 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB RÉSERVATIONS - Styles propres
+   ✅ Créé le 27 janvier 2026
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ HEADER SECTION ═══ */
+.card-header-section {
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-title-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.page-title {
+    margin: 0 0 8px 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.page-subtitle {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    opacity: 0.7;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ═══ BOUTON ACTUALISER ═══ */
+.btn-refresh {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+    transform: translateY(-2px);
+}
+
+/* ═══ SEARCH INPUT ═══ */
+.search-input {
+    padding: 12px 18px;
+    width: 280px;
+    font-size: 0.95rem;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 500;
+}
+
+/* ═══ SYNC STATUS ═══ */
+.sync-status {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE SIDEBAR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.style-sidebar .page-title {
+    color: var(--text);
+}
+
+html.style-sidebar .page-subtitle {
+    color: #64748b;
+}
+
+html.style-sidebar .btn-refresh {
+    background: var(--card);
+    color: #667eea;
+    border: 3px solid #667eea;
+    box-shadow: 4px 4px 0 #667eea;
+    border-radius: 10px;
+}
+
+html.style-sidebar .btn-refresh:hover {
+    box-shadow: 5px 5px 0 #667eea;
+}
+
+html.style-sidebar .search-input {
+    background: var(--card);
+    color: var(--text);
+    border: 3px solid #2D3436;
+    box-shadow: 3px 3px 0 #2D3436;
+    border-radius: 10px;
+}
+
+html.style-sidebar .sync-status {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border: 2px solid #667eea;
+    color: #667eea;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE - JOUR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.theme-light.style-apple .card-header-section {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.03) 0%, #ffffff 100%);
+    border: 1px solid rgba(0, 194, 203, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-light.style-apple .page-title {
+    color: #1d1d1f;
+}
+
+html.theme-light.style-apple .page-subtitle {
+    color: #6e6e73;
+}
+
+html.theme-light.style-apple .btn-refresh {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.05) 0%, #ffffff 100%);
+    color: #00C2CB;
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 194, 203, 0.15);
+    border-radius: 12px;
+}
+
+html.theme-light.style-apple .btn-refresh:hover {
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.25);
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.08) 0%, #ffffff 100%);
+}
+
+html.theme-light.style-apple .search-input {
+    background: rgba(255, 255, 255, 0.8);
+    color: #1d1d1f;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+}
+
+html.theme-light.style-apple .search-input:focus {
+    border-color: #00C2CB;
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.1);
+}
+
+html.theme-light.style-apple .sync-status {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.08) 0%, rgba(0, 82, 136, 0.08) 100%);
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    color: #00C2CB;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE APPLE - NUIT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.theme-dark.style-apple .card-header-section {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.08) 0%, #1a1a1a 100%);
+    border: 1px solid rgba(0, 194, 203, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+html.theme-dark.style-apple .page-title {
+    color: #ffffff;
+}
+
+html.theme-dark.style-apple .page-subtitle {
+    color: #a1a1a6;
+}
+
+html.theme-dark.style-apple .btn-refresh {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.1) 0%, #2a2a2a 100%);
+    color: #00C2CB;
+    border: 1px solid rgba(0, 194, 203, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 194, 203, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-apple .btn-refresh:hover {
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.3);
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.15) 0%, #2a2a2a 100%);
+}
+
+html.theme-dark.style-apple .search-input {
+    background: rgba(42, 42, 42, 0.8);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-apple .search-input:focus {
+    border-color: #00C2CB;
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.2);
+}
+
+html.theme-dark.style-apple .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+html.theme-dark.style-apple .sync-status {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.12) 0%, rgba(0, 82, 136, 0.12) 100%);
+    border: 1px solid rgba(0, 194, 203, 0.4);
+    color: #00C2CB;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PLANNING - STRUCTURE GRILLE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Container principal du planning */
+.planning-container {
+    width: 100%;
+}
+
+.planning-weeks {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Grille des semaines (4 colonnes = 4 gîtes) */
+.weeks-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    width: 100%;
+    min-width: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* ═══ COLONNES DE SEMAINE ═══ */
+.week-column {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ═══ CADRE COMPLET DES COLONNES EN MODE SIDEBAR ═══ */
+html.style-sidebar .week-column {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.style-sidebar .week-column::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+html.style-sidebar .week-column:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Couleurs par colonne */
+html.style-sidebar .week-column:has(.week-column-header-trevoux)::before {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 2px 0 12px rgba(59, 130, 246, 0.5);
+}
+
+html.style-sidebar .week-column:has(.week-column-header-couzon)::before {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 2px 0 12px rgba(239, 68, 68, 0.5);
+}
+
+html.style-sidebar .week-column:has(.week-column-header-3eme)::before {
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+    box-shadow: 2px 0 12px rgba(16, 185, 129, 0.5);
+}
+
+html.style-sidebar .week-column:has(.week-column-header-4eme)::before {
+    background: linear-gradient(180deg, #06b6d4 0%, #0891b2 100%);
+    box-shadow: 2px 0 12px rgba(6, 182, 212, 0.5);
+}
+
+/* Ajustement des headers et body pour s'intégrer dans le cadre */
+html.style-sidebar .week-column-header {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
+    position: relative;
+    padding-left: 24px; /* Espace pour la bordure latérale */
+    margin-bottom: 0;
+}
+
+html.style-sidebar .week-column-body {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
+}
+
+/* Style des headers individuels avec bordure latérale */
+html.style-sidebar .week-column-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    transition: all 0.2s ease;
+}
+
+html.style-sidebar .week-column-header-trevoux::before {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 2px 0 8px rgba(59, 130, 246, 0.4);
+}
+
+html.style-sidebar .week-column-header-couzon::before {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 2px 0 8px rgba(239, 68, 68, 0.4);
+}
+
+html.style-sidebar .week-column-header-3eme::before {
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+    box-shadow: 2px 0 8px rgba(16, 185, 129, 0.4);
+}
+
+html.style-sidebar .week-column-header-4eme::before {
+    background: linear-gradient(180deg, #06b6d4 0%, #0891b2 100%);
+    box-shadow: 2px 0 8px rgba(6, 182, 212, 0.4);
+}
+
+/* En-têtes des colonnes (un par gîte) */
+.week-column-header {
+    padding: 12px 20px;
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+    border: 3px solid var(--stroke);
+    border-bottom: none;
+    box-shadow: 4px 4px 0 var(--stroke);
+}
+
+/* Override Sidebar sur week-column-header */
+html.style-sidebar .week-column-header {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 0;
+}
+
+/* Couleurs par gîte - Base neutre pour Sidebar */
+.week-column-header-trevoux,
+.week-column-header-couzon,
+.week-column-header-3eme,
+.week-column-header-4eme {
+    background: var(--card);
+    color: var(--text);
+}
+
+/* Badge coloré discret pour identifier le gîte */
+.week-column-header-trevoux .week-column-header-gite::before {
+    content: '●';
+    color: #3b82f6;
+    margin-right: 6px;
+    font-size: 1.2rem;
+}
+
+.week-column-header-couzon .week-column-header-gite::before {
+    content: '●';
+    color: #ef4444;
+    margin-right: 6px;
+    font-size: 1.2rem;
+}
+
+.week-column-header-3eme .week-column-header-gite::before {
+    content: '●';
+    color: #10b981;
+    margin-right: 6px;
+    font-size: 1.2rem;
+}
+
+.week-column-header-4eme .week-column-header-gite::before {
+    content: '●';
+    color: #06b6d4;
+    margin-right: 6px;
+    font-size: 1.2rem;
+}
+
+.week-column-header-gite {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+    color: var(--text);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.week-column-header-week {
+    font-size: 1rem;
+    margin-bottom: 2px;
+    color: var(--text);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.week-column-header-dates {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    color: var(--text);
+}
+
+/* Corps de la colonne (contient les réservations) */
+.week-column-body {
+    background: var(--bg);
+    border: 3px solid var(--stroke);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 20px;
+    min-height: 120px;
+    box-shadow: 4px 4px 0 var(--stroke);
+}
+
+/* Override Sidebar sur week-column-body */
+html.style-sidebar .week-column-body {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+/* ═══ CARTES DE RÉSERVATION ═══ */
+.week-reservation {
+    padding: 20px;
+    background: var(--card);
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: 3px solid var(--stroke);
+    transition: all 0.2s ease;
+}
+
+.week-reservation:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ═══ BOUTONS DE RÉSERVATION ═══ */
+.reservation-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-reservation {
+    background: var(--card);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    box-shadow: 2px 2px 0;
+    transition: all 0.2s;
+    min-width: 36px;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid;
+    flex-shrink: 0;
+}
+
+.btn-reservation svg {
+    flex-shrink: 0;
+}
+
+.btn-reservation-edit {
+    border-color: #667eea;
+    color: #667eea;
+    box-shadow: 2px 2px 0 #667eea;
+}
+
+.btn-reservation-edit:hover {
+    transform: translateY(-1px);
+    box-shadow: 3px 3px 0 #667eea;
+}
+
+.btn-reservation-view {
+    border-color: #27ae60;
+    color: #27ae60;
+    box-shadow: 2px 2px 0 #27ae60;
+}
+
+.btn-reservation-view:hover {
+    transform: translateY(-1px);
+    box-shadow: 3px 3px 0 #27ae60;
+}
+
+.btn-reservation-delete {
+    border-color: #e74c3c;
+    color: #e74c3c;
+    box-shadow: 2px 2px 0 #e74c3c;
+}
+
+.btn-reservation-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 3px 3px 0 #e74c3c;
+}
+
+/* ═══ CONTENU DES RÉSERVATIONS ═══ */
+.reservation-name {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text);
+    margin-bottom: 14px;
+    line-height: 1.3;
+}
+
+.reservation-details {
+    font-size: 1.05rem;
+    color: var(--text);
+    margin-bottom: 18px;
+    line-height: 1.8;
+    font-weight: 500;
+}
+
+.reservation-dates-text {
+    color: #667eea;
+}
+
+.reservation-time-arrival {
+    color: #27AE60;
+    font-size: 0.95rem;
+}
+
+.reservation-time-departure {
+    color: #E74C3C;
+    font-size: 0.95rem;
+}
+
+.reservation-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.reservation-price {
+    color: #27ae60;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Badges de plateforme */
+.platform-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.platform-badge-airbnb {
+    background: #FF5A5F;
+    color: white;
+}
+
+.platform-badge-abritel {
+    background: #0060DF;
+    color: white;
+}
+
+.platform-badge-gdf {
+    background: #667eea;
+    color: white;
+}
+
+/* Info nettoyage */
+.reservation-cleaning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 2px solid var(--border);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.reservation-cleaning-icon {
+    font-size: 1.1rem;
+}
+
+.reservation-cleaning-date {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Statut validation */
+.validation-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.validation-status.validated {
+    background: #27ae60;
+    color: white;
+}
+
+.validation-status.notvalidated {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Slot vide */
+.week-empty {
+    padding: 30px 20px;
+    text-align: center;
+    color: #95a5a6;
+    font-size: 1rem;
+    font-weight: 600;
+    font-style: italic;
+}
+
+/* Statut de synchronisation */
+.sync-status {
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STYLES PAR MODE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ MODE SIDEBAR - Style indicateurs avec bordure latérale ═══ */
+html.style-sidebar .week-reservation {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: visible;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.style-sidebar .week-reservation::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+html.style-sidebar .week-reservation::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+html.style-sidebar .week-reservation:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+html.style-sidebar .week-reservation:hover::after {
+    opacity: 1;
+}
+
+/* Couleurs par gîte - Style Trévoux (Bleu) */
+html.style-sidebar .week-reservation.trevoux::before {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 2px 0 12px rgba(59, 130, 246, 0.5);
+}
+
+html.style-sidebar .week-reservation.trevoux::after {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.06) 0%, transparent 100%);
+}
+
+html.style-sidebar .week-reservation.trevoux:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* Couleurs par gîte - Style Couzon (Rouge) */
+html.style-sidebar .week-reservation.couzon::before {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 2px 0 12px rgba(239, 68, 68, 0.5);
+}
+
+html.style-sidebar .week-reservation.couzon::after {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.06) 0%, transparent 100%);
+}
+
+html.style-sidebar .week-reservation.couzon:hover {
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* ═══ MODE APPLE JOUR ═══ */
+html.theme-light.style-apple .week-column-header {
+    border: 1px solid rgba(0, 194, 203, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    font-weight: 700;
+}
+
+html.theme-light.style-apple .week-column-header-trevoux {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+    color: #3b82f6;
+}
+
+html.theme-light.style-apple .week-column-header-couzon {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+    color: #ef4444;
+}
+
+html.theme-light.style-apple .week-column-header-3eme {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+    color: #10b981;
+}
+
+html.theme-light.style-apple .week-column-header-4eme {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%);
+    color: #06b6d4;
+}
+
+html.theme-light.style-apple .week-column-header-gite,
+html.theme-light.style-apple .week-column-header-week,
+html.theme-light.style-apple .week-column-header-dates {
+    color: inherit;
+    opacity: 1;
+}
+
+html.theme-light.style-apple .week-column-body {
+    border: 1px solid rgba(0, 194, 203, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+}
+
+html.theme-light.style-apple .week-reservation {
+    border: 1px solid rgba(0, 194, 203, 0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.02) 0%, #ffffff 100%);
+}
+
+html.theme-light.style-apple .week-reservation:hover {
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.15);
+    transform: translateY(-3px);
+}
+
+html.theme-light.style-apple .btn-reservation {
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 194, 203, 0.1);
+}
+
+html.theme-light.style-apple .week-empty {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.03) 0%, #ffffff 100%);
+    color: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+}
+
+/* ═══ MODE APPLE NUIT ═══ */
+
+/* Colonnes complètes */
+html.theme-dark.style-apple .week-column {
+    background: rgba(15, 15, 15, 0.8);
+    border: 1px solid rgba(0, 194, 203, 0.2);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+/* Headers avec dégradé cyan lumineux par gîte */
+html.theme-dark.style-apple .week-column-header {
+    border: none;
+    border-bottom: 1px solid rgba(0, 194, 203, 0.3);
+    box-shadow: none;
+    border-radius: 0;
+    padding: 16px 20px;
+}
+
+html.theme-dark.style-apple .week-column-header-trevoux {
+    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%);
+}
+
+html.theme-dark.style-apple .week-column-header-couzon {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+html.theme-dark.style-apple .week-column-header-3eme {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+html.theme-dark.style-apple .week-column-header-4eme {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
+html.theme-dark.style-apple .week-column-header-gite,
+html.theme-dark.style-apple .week-column-header-week,
+html.theme-dark.style-apple .week-column-header-dates {
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+html.theme-dark.style-apple .week-column-header-week {
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+html.theme-dark.style-apple .week-column-header-dates {
+    opacity: 0.95;
+}
+
+/* Body des colonnes */
+html.theme-dark.style-apple .week-column-body {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 20px;
+}
+
+/* Réservations */
+html.theme-dark.style-apple .week-reservation {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.1) 0%, rgba(0, 82, 136, 0.05) 100%);
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+html.theme-dark.style-apple .week-reservation:hover {
+    box-shadow: 0 8px 24px rgba(0, 194, 203, 0.3);
+    transform: translateY(-4px);
+    border-color: rgba(0, 194, 203, 0.5);
+}
+
+/* Texte des réservations */
+html.theme-dark.style-apple .reservation-name {
+    color: #00C2CB;
+    font-weight: 800;
+}
+
+html.theme-dark.style-apple .reservation-dates-text {
+    color: #00C2CB;
+}
+
+html.theme-dark.style-apple .reservation-price {
+    color: #34d399;
+}
+
+/* Boutons */
+html.theme-dark.style-apple .btn-reservation {
+    background: rgba(0, 194, 203, 0.1);
+    border: 1px solid rgba(0, 194, 203, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 194, 203, 0.2);
+    transition: all 0.2s ease;
+}
+
+html.theme-dark.style-apple .btn-reservation:hover {
+    background: rgba(0, 194, 203, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 194, 203, 0.4);
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-apple .btn-reservation-edit {
+    border-color: #60a5fa;
+    color: #60a5fa;
+}
+
+html.theme-dark.style-apple .btn-reservation-edit:hover {
+    background: rgba(96, 165, 250, 0.2);
+    box-shadow: 0 4px 16px rgba(96, 165, 250, 0.4);
+}
+
+html.theme-dark.style-apple .btn-reservation-view {
+    border-color: #34d399;
+    color: #34d399;
+}
+
+html.theme-dark.style-apple .btn-reservation-view:hover {
+    background: rgba(52, 211, 153, 0.2);
+    box-shadow: 0 4px 16px rgba(52, 211, 153, 0.4);
+}
+
+html.theme-dark.style-apple .btn-reservation-delete {
+    border-color: #f87171;
+    color: #f87171;
+}
+
+html.theme-dark.style-apple .btn-reservation-delete:hover {
+    background: rgba(248, 113, 113, 0.2);
+    box-shadow: 0 4px 16px rgba(248, 113, 113, 0.4);
+}
+
+/* Badges */
+html.theme-dark.style-apple .platform-badge {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    font-weight: 800;
+}
+
+/* Slot vide */
+html.theme-dark.style-apple .week-empty {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.05) 0%, transparent 100%);
+    color: rgba(0, 194, 203, 0.6);
+    border: 1px dashed rgba(0, 194, 203, 0.3);
+    border-radius: 12px;
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+/* Nettoyage */
+html.theme-dark.style-apple .reservation-cleaning {
+    border-top: 1px solid rgba(0, 194, 203, 0.2);
+}
+
+html.theme-dark.style-apple .reservation-cleaning-date {
+    color: #00C2CB;
+}
+
+/* Statut validation */
+html.theme-dark.style-apple .validation-status.validated {
+    background: #34d399;
+    box-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
+}
+
+html.theme-dark.style-apple .validation-status.notvalidated {
+    background: #f87171;
+    box-shadow: 0 0 12px rgba(248, 113, 113, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .header-title-group {
+        min-width: 100%;
+    }
+    
+    .header-actions {
+        width: 100%;
+    }
+    
+    .btn-refresh,
+    .search-input {
+        width: 100%;
+    }
+    
+    /* Planning en mode mobile */
+    .weeks-grid {
+        grid-template-columns: 1fr;
+        padding: 10px;
+        gap: 15px;
+    }
+    
+    .week-column-header {
+        padding: 10px 15px;
+    }
+    
+    .week-column-body {
+        padding: 15px;
+    }
+    
+    .week-reservation {
+        padding: 15px;
+    }
+    
+    .reservation-name {
+        font-size: 1.1rem;
+    }
+    
+    .reservation-details {
+        font-size: 0.95rem;
+    }
+}
+
