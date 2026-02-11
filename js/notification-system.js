@@ -32,7 +32,11 @@ class NotificationSystem {
      * Démarrer le système de notifications
      */
     async start() {
+        console.log('🚀 [DÉMARRAGE] NotificationSystem.start()');
         try {
+            // Charger les notifications existantes depuis localStorage
+            this.loadNotifications();
+            
             // Charger les préférences utilisateur
             await this.loadUserPreferences();
             
@@ -49,6 +53,8 @@ class NotificationSystem {
             
             // Créer le badge de notification dans le header
             this.createNotificationBadge();
+            
+            console.log('✅ [DÉMARRAGE] NotificationSystem démarré avec succès');
         } catch (error) {
             console.error('⚠️ Erreur démarrage NotificationSystem (table notifications absente?):', error);
             // Forcer le compteur à 0 et masquer le badge
@@ -184,6 +190,7 @@ class NotificationSystem {
             const newDemandes = data.filter(d => new Date(d.created_at) > lastCheckDate);
 
             if (newDemandes.length > 0) {
+                console.log('📩 [DEMANDES] Nouvelles demandes détectées:', newDemandes.length);
                 newDemandes.forEach(demande => {
                     this.addNotification({
                         type: 'demande',
@@ -301,6 +308,12 @@ class NotificationSystem {
      * Ajouter une notification
      */
     addNotification(notif) {
+        console.log('🔔 [NOTIF] Tentative ajout notification:', {
+            type: notif.type,
+            title: notif.title,
+            total_actuel: this.notifications.length
+        });
+        
         // Vérifier si pas déjà présente
         const exists = this.notifications.some(n => 
             n.type === notif.type && 
@@ -311,6 +324,7 @@ class NotificationSystem {
             notif.id = Date.now() + Math.random();
             notif.read = false;
             this.notifications.unshift(notif);
+            console.log('✅ [NOTIF] Notification ajoutée, nouveau total:', this.notifications.length);
             
             // Limiter à 50 notifications max
             if (this.notifications.length > 50) {
@@ -494,7 +508,16 @@ class NotificationSystem {
      * Compter les non lues
      */
     getUnreadCount() {
-        return this.notifications.filter(n => !n.read).length;
+        const unread = this.notifications.filter(n => !n.read);
+        console.log('📊 [COMPTAGE] Notifications non lues:', {
+            total: this.notifications.length,
+            non_lues: unread.length,
+            types: this.notifications.reduce((acc, n) => {
+                acc[n.type] = (acc[n.type] || 0) + 1;
+                return acc;
+            }, {})
+        });
+        return unread.length;
     }
 
     /**
@@ -512,9 +535,24 @@ class NotificationSystem {
         if (stored) {
             try {
                 this.notifications = JSON.parse(stored);
+                console.log('📦 [CHARGEMENT] Notifications chargées depuis localStorage:', {
+                    total: this.notifications.length,
+                    types: this.notifications.reduce((acc, n) => {
+                        acc[n.type] = (acc[n.type] || 0) + 1;
+                        return acc;
+                    }, {}),
+                    premieres_5: this.notifications.slice(0, 5).map(n => ({
+                        type: n.type,
+                        title: n.title,
+                        read: n.read,
+                        timestamp: n.timestamp
+                    }))
+                });
             } catch (e) {
                 console.error('Erreur chargement notifications:', e);
             }
+        } else {
+            console.log('📭 [CHARGEMENT] Aucune notification dans localStorage');
         }
     }
 

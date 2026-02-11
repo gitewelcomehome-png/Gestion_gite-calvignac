@@ -112,8 +112,8 @@
     <!-- 📧 Email Sender (Resend API) -->
     <script src="js/email-sender.js"></script>
     
-    <!-- 🔔 Notification System - DÉSACTIVÉ TEMPORAIREMENT -->
-    <!-- SCRIPT COMPLÈTEMENT SUPPRIMÉ - NE PAS CHARGER -->
+    <!-- 🔔 Notification System -->
+    <script src="js/notification-system.js?v=2.2"></script>
     
     <!-- ✨ AI Assistant -->
     <script src="js/ai-assistant.js"></script>
@@ -177,7 +177,8 @@
     <link rel="stylesheet" href="css/gite-form-modern.css?v=6.1" />
 </head>
 <body>
-    <!-- 🧹 NETTOYAGE IMMÉDIAT DU TITRE -->
+    <!-- 🧹 NETTOYAGE IMMÉDIAT DU TITRE - DÉSACTIVÉ POUR DEBUG -->
+    <!-- 
     <script>
         // Exécution IMMÉDIATE avant tout le reste
         localStorage.removeItem('notif_lastCheck');
@@ -199,6 +200,56 @@
                 }
             }
         });
+    </script>
+    -->
+    
+    <!-- 🐛 PANNEAU DEBUG NOTIFICATIONS (TEMPORAIRE) -->
+    <div id="debugNotifications" style="position: fixed; bottom: 20px; right: 20px; background: #000; color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 11px; max-width: 400px; max-height: 300px; overflow: auto; z-index: 999999; box-shadow: 0 0 20px rgba(0,255,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #0f0;">
+            <strong style="color: #0ff;">🐛 DEBUG NOTIFICATIONS</strong>
+            <button onclick="this.parentElement.parentElement.remove();" style="background: none; border: none; color: #f00; cursor: pointer; font-size: 16px; padding: 0; width: 20px; height: 20px;">×</button>
+        </div>
+        
+        <div id="debugContent" style="margin-bottom: 10px;">
+            <p style="margin: 5px 0;">Chargement...</p>
+        </div>
+        
+        <button onclick="localStorage.removeItem('notifications'); localStorage.removeItem('notif_lastCheck'); document.title = 'Gestion Gîtes'; location.reload();" style="width: 100%; padding: 8px; background: #f00; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 5px;">
+            🗑️ VIDER NOTIFICATIONS + RELOAD
+        </button>
+        
+        <button onclick="
+            const stored = localStorage.getItem('notifications');
+            const notifs = stored ? JSON.parse(stored) : [];
+            document.getElementById('debugContent').innerHTML = '<pre style=&quot;margin: 0; font-size: 10px; white-space: pre-wrap;&quot;>' + JSON.stringify(notifs, null, 2) + '</pre>';
+        " style="width: 100%; padding: 8px; background: #0f0; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            🔍 AFFICHER DÉTAILS JSON
+        </button>
+    </div>
+    
+    <script>
+        // Mise à jour du panneau debug automatiquement
+        (function updateDebugPanel() {
+            const debugContent = document.getElementById('debugContent');
+            if (!debugContent) return;
+            
+            const stored = localStorage.getItem('notifications');
+            const notifs = stored ? JSON.parse(stored) : [];
+            const types = {};
+            
+            notifs.forEach(n => {
+                types[n.type] = (types[n.type] || 0) + 1;
+            });
+            
+            debugContent.innerHTML = `
+                <p style="margin: 5px 0; color: #ff0;">Total: <strong>${notifs.length}</strong> notifications</p>
+                <p style="margin: 5px 0;">Types: ${JSON.stringify(types)}</p>
+                <p style="margin: 5px 0;">Non lues: <strong>${notifs.filter(n => !n.read).length}</strong></p>
+                <p style="margin: 5px 0; font-size: 9px; opacity: 0.7;">Dernière vérif: ${localStorage.getItem('notif_lastCheck') || 'jamais'}</p>
+            `;
+            
+            setTimeout(updateDebugPanel, 1000);
+        })();
     </script>
     
     <!-- 🎨 CONTRÔLES ADMIN -->
@@ -4360,25 +4411,12 @@
             // console.log('📦 Versions: main.css v15.5 | gites-crud.js v5.2 | gite-form-modern.css v6.1 | ical-config-modern.js v1.0');
             
             // Attendre que Supabase soit initialisé
-            /* ============================================================
-               SYSTÈME NOTIFICATIONS - DÉSACTIVÉ TEMPORAIREMENT
-               
-               Pour RÉACTIVER les notifications :
-               1. Décommentez le bloc de code ci-dessous
-               2. Supprimez le nettoyage localStorage en bas
-               3. Assurez-vous que la table 'notifications' existe dans Supabase
-               
-               Le système fonctionnera normalement avec :
-               - Badge avec compteur de notifications
-               - Titre de page "(X) Gestion Gîtes"
-               - Panel de notifications cliquable
-            ============================================================ */
-            /*
             const waitForSupabase = setInterval(() => {
                 if (window.supabaseClient) {
                     clearInterval(waitForSupabase);
                     
-                    // Initialiser le système de notifications
+                    // Initialiser le système de notifications AVEC LOGS
+                    console.log('🔔 Initialisation NotificationSystem...');
                     window.notificationSystem = new NotificationSystem();
                     window.notificationSystem.start();
                 }
@@ -4386,11 +4424,6 @@
             
             // Timeout après 5 secondes
             setTimeout(() => clearInterval(waitForSupabase), 5000);
-            */
-            
-            // Masquer le badge (le nettoyage localStorage est fait au début du <body>)
-            const badge = document.getElementById('notificationBadge');
-            if (badge) badge.style.display = 'none';
         });
     </script>
     

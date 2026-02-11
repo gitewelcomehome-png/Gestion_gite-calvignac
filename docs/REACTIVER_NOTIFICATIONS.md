@@ -5,7 +5,15 @@ Les notifications sont **désactivées** pour éviter le bug du (50) dans le tit
 
 ## Pour Réactiver (quand vous serez prêt)
 
-### 1. Dans app.html (ligne ~4340)
+### 1. Dans app.html (ligne ~116) - Décommenter le script
+
+**Décommentez :**
+```html
+<!-- 🔔 Notification System - DÉSACTIVÉ TEMPORAIREMENT -->
+<script src="js/notification-system.js?v=2.1"></script>
+```
+
+### 2. Dans app.html (ligne ~4340) - Décommenter l'initialisation
 
 **Décommentez ce bloc :**
 ```javascript
