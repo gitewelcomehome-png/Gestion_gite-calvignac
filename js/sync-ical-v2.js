@@ -388,9 +388,7 @@ async function syncCalendar(giteId, platform, url) {
                 });
                 cancelled++;
             } else {
-                console.log(`      ✅ Toujours présente`): existing.gite_id
-                });
-                cancelled++;
+                console.log(`      ✅ Toujours présente`);
             }
         }
         
