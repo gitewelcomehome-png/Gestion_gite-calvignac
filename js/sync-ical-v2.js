@@ -284,6 +284,17 @@ async function syncCalendar(giteId, platform, url) {
         const totalDatesUniques = Object.keys(existingByDates).length;
         const totalReservations = Object.values(existingByDates).flat().length;
         console.log(`  🔍 ${totalReservations} réservation(s) sur ${totalDatesUniques} plage(s) de dates unique(s)`);
+        
+        // 🚨 DÉTECTER LES DOUBLONS (plusieurs réservations avec les mêmes dates)
+        const doublons = Object.entries(existingByDates).filter(([_, resa]) => resa.length > 1);
+        if (doublons.length > 0) {
+            console.warn(`  ⚠️ DOUBLONS DÉTECTÉS : ${doublons.length} plage(s) de dates avec plusieurs réservations !`);
+            doublons.forEach(([dateKey, resas]) => {
+                console.warn(`    🔴 ${dateKey.replace('|', ' → ')}: ${resas.length} réservations`);
+                resas.forEach(r => console.warn(`       - ${r.client_name} (${r.status}, ID: ${r.id})`));
+            });
+            console.warn(`  💡 Exécutez sql/clean-doublons-reservations.sql pour nettoyer`);
+        }
 
         // 2. TRAITER CHAQUE ÉVÉNEMENT DU FLUX iCal
         for (const vevent of vevents) {
