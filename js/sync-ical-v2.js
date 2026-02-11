@@ -17,7 +17,10 @@ window.pendingCancellations = [];
  * Synchroniser tous les calendriers iCal
  */
 async function syncAllCalendars() {
+    console.log('🔄 DÉBUT SYNCHRONISATION iCal');
+    
     if (syncInProgress) {
+        console.log('⏸️ Sync déjà en cours, annulation');
         return;
     }
 
@@ -25,6 +28,7 @@ async function syncAllCalendars() {
         syncInProgress = true;
 
         const gites = await window.gitesManager.getAll();
+        console.log(`📋 ${gites.length} gîte(s) à synchroniser`);
         
         let totalAdded = 0;
         let totalUpdated = 0;
@@ -33,6 +37,7 @@ async function syncAllCalendars() {
         let totalErrors = 0;
 
         for (const gite of gites) {
+            console.log(`🏠 Synchronisation gîte: ${gite.name} (ID: ${gite.id})`);
             addMessage(`Synchronisation ${gite.name}...`, 'info');
             
             // Récupérer les sources iCal (format unifié objet)
@@ -47,9 +52,12 @@ async function syncAllCalendars() {
             const platforms = Object.entries(icalSources).filter(([platform, url]) => url && typeof url === 'string');
 
             if (platforms.length === 0) {
+                console.log(`  ℹ️ Aucune source iCal configurée pour ${gite.name}`);
                 addMessage(`  ℹ️ Aucune source iCal configurée`, 'info');
                 continue;
             }
+            
+            console.log(`  📡 ${platforms.length} plateforme(s) configurée(s):`, platforms.map(p => p[0]));
 
             for (const [platform, url] of platforms) {
                 try {
@@ -106,7 +114,17 @@ async function syncAllCalendars() {
         if (window.pendingCancellations.length > 0) {
             console.log(`⚠️ ${window.pendingCancellations.length} annulation(s) détectée(s) - Affichage modal`);
             showCancellationConfirmationModal();
+        } else {
+            console.log('✅ Aucune annulation détectée');
         }
+
+        console.log(`✅ FIN SYNCHRONISATION - Résumé:`, {
+            ajoutées: totalAdded,
+            mises_à_jour: totalUpdated,
+            annulées: totalCancelled,
+            ignorées: totalSkipped,
+            erreurs: totalErrors
+        });
 
         return {
             added: totalAdded,
@@ -117,11 +135,12 @@ async function syncAllCalendars() {
         };
 
     } catch (error) {
-        console.error('Erreur sync globale:', error);
+        console.error('❌ ERREUR sync globale:', error);
         addMessage('❌ Erreur de synchronisation', 'error');
         throw error;
     } finally {
         syncInProgress = false;
+        console.log('🔓 Sync terminée, verrou libéré');
     }
 }
 
@@ -702,30 +721,24 @@ function showCancellationConfirmationModal() {
  */
 function updateLastSyncDisplay() {
     const lastSync = localStorage.getItem('lastIcalSync');
-    if (!lastSync) return;
+    if (!lastSync) {
+        const dashboardEl = document.getElementById('last-sync-dashboard');
+        const reservationsEl = document.getElementById('last-sync-reservations');
+        if (dashboardEl) dashboardEl.textContent = '🔄 Aucune sync';
+        if (reservationsEl) reservationsEl.textContent = '🔄 Aucune sync';
+        return;
+    }
 
     const date = new Date(lastSync);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-
-    let timeText;
-    if (diffMins < 1) {
-        timeText = "À l'instant";
-    } else if (diffMins === 1) {
-        timeText = "Il y a 1 min";
-    } else if (diffMins < 60) {
-        timeText = `Il y a ${diffMins} min`;
-    } else {
-        const hours = Math.floor(diffMins / 60);
-        if (hours === 1) {
-            timeText = "Il y a 1h";
-        } else if (hours < 24) {
-            timeText = `Il y a ${hours}h`;
-        } else {
-            timeText = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-        }
-    }
+    
+    // Format: "11/02/2026 à 15:45"
+    const timeText = date.toLocaleDateString('fr-FR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit'
+    });
 
     // Mettre à jour les deux endroits
     const dashboardEl = document.getElementById('last-sync-dashboard');
