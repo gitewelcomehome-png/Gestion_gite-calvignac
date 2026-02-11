@@ -432,8 +432,6 @@
                         }, 180000);
                         
                         console.log('✅ Synchronisation automatique configurée: première dans 10s, puis toutes les 3 min');
-                    } else {
-                        console.warn('⚠️ window.syncAllCalendars non disponible');
                     }
                     
                     // 📅 Mettre à jour l'affichage de la dernière sync toutes les minutes
@@ -445,8 +443,6 @@
                         setInterval(() => {
                             window.updateLastSyncDisplay();
                         }, 60000);
-                    } else {
-                        console.warn('⚠️ window.updateLastSyncDisplay non disponible');
                     }
                 }
             }, 100);
