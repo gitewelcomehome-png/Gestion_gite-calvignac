@@ -371,7 +371,7 @@ async function syncCalendar(giteId, platform, url) {
             };
 
             // Vérifier si la réservation existe déjà (par dates d'abord, puis UID)
-            const dateKey = `${dateDebut}|${dateFin}`;
+            // dateKey déjà déclaré ligne 342, on le réutilise
             const existingByDateMatch = existingByDates[dateKey]; // Array ou undefined
             
             // Si ces dates sont déjà occupées → MISE À JOUR (pas ajout)
