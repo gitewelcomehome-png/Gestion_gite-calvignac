@@ -143,51 +143,6 @@ async function syncAllCalendars() {
         } else {
             console.log('✅ Aucune annulation détectée');
         }
-        
-        // 🔍 VÉRIFICATION GLOBALE : Réservations iCal anciennes non vues depuis > 7 jours
-        console.log('🔍 VÉRIFICATION GLOBALE des réservations iCal anciennes...');
-        
-        const { data: oldReservations } = await window.supabaseClient
-            .from('reservations')
-            .select('*')
-            .not('ical_uid', 'is', null)
-            .eq('status', 'confirmed')
-            .gte('check_out', new Date().toISOString().split('T')[0]); // Futures ou en cours
-        
-        if (oldReservations && oldReservations.length > 0) {
-            console.log(`  📊 ${oldReservations.length} réservation(s) iCal futures trouvée(s)`);
-            
-            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-            
-            oldReservations.forEach(r => {
-                const lastSeen = r.last_seen_in_ical ? new Date(r.last_seen_in_ical) : null;
-                
-                // ⚠️ IMPORTANT : Ne détecter QUE les réservations qui ONT ÉTÉ vues puis ont disparu
-                // Ignorer les NULL (jamais synchronisées) pour éviter les faux positifs
-                if (lastSeen && lastSeen < sevenDaysAgo) {
-                    console.log(`  🔴 ANCIENNE: ${r.client_name} (${r.check_in}) - Dernière sync: ${lastSeen.toLocaleDateString('fr-FR')}`);
-                    
-                    // Ajouter aux annulations si pas déjà présente
-                    const alreadyAdded = window.pendingCancellations.some(c => c.id === r.id);
-                    if (!alreadyAdded) {
-                        window.pendingCancellations.push({
-                            id: r.id,
-                            client_name: r.client_name || 'Client',
-                            check_in: r.check_in,
-                            check_out: r.check_out,
-                            platform: r.synced_from || r.platform,
-                            gite_id: r.gite_id
-                        });
-                        totalCancelled++;
-                    }
-                }
-            });
-            
-            if (window.pendingCancellations.length > 0) {
-                console.log(`  ⚠️ ${window.pendingCancellations.length} réservation(s) ancienne(s) ajoutée(s) pour confirmation`);
-                await showCancellationConfirmationModal();
-            }
-        }
 
         console.log(`✅ FIN SYNCHRONISATION - Résumé:`, {
             ajoutées: totalAdded,
