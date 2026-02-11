@@ -363,7 +363,9 @@ async function syncCalendar(giteId, platform, url) {
                     }
                 }
             }
-        }dates absentes du flux iCal)
+        }
+
+        // 3. DÉTECTER LES ANNULATIONS (dates absentes du flux iCal)
         console.log(`  🔎 DÉTECTION ANNULATIONS (par dates):`);
         console.log(`    - ${Object.keys(existingByDates).length} plage(s) de dates en BDD`);
         console.log(`    - ${presentDates.size} plage(s) dans flux iCal`);
