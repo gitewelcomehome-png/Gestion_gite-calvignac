@@ -254,65 +254,47 @@ async function syncCalendar(giteId, platform, url) {
         let cancelled = 0;
         let skipped = 0;
 
-        // Sets pour tracker les UID et DATES présents dans le flux
-        const presentUids = new Set();
-        const presentDates = new Set(); // ✅ NOUVELLE LOGIQUE : tracker les dates
-        
         console.log(`  📥 Parsing flux iCal: ${vevents.length} événement(s) trouvé(s)`);
 
-        // 1. RÉCUPÉRER LES RÉSERVATIONS FUTURES de ce gîte + plateforme
-        // ⚠️ IMPORTANT : Filtrer check_out >= aujourd'hui pour ignorer les réservations passées
+        // ==========================================
+        // ÉTAPE 1 : CHARGER LES RÉSERVATIONS BDD
+        // ==========================================
         const today = new Date().toISOString().split('T')[0];
-        console.log(`  📊 Recherche réservations BDD pour:`, { giteId, platform, depuis: today });
+        console.log(`  📊 Chargement BDD (gîte: ${giteName}, plateforme: ${platform}, date: ${today})`);
         
         const { data: existingReservations, error: dbError } = await window.supabaseClient
             .from('reservations')
             .select('*')
             .eq('gite_id', giteId)
             .eq('synced_from', platform)
-            .gte('check_out', today); // Ne charger QUE les réservations futures/en cours
+            .gte('check_out', today); // Toutes les réservations futures (y compris cancelled pour éviter doublons)
         
         if (dbError) {
             console.error(`  ❌ Erreur lecture BDD:`, dbError);
+            return { added: 0, updated: 0, cancelled: 0, skipped: 0 };
         }
 
-        console.log(`  💾 ${existingReservations?.length || 0} réservation(s) future(s) trouvée(s) en BDD`);
+        console.log(`  💾 ${existingReservations?.length || 0} réservation(s) trouvée(s) en BDD`);
         
-        // Indexer par UID ET par dates (nouvelle logique)
-        const existingByUid = {};
-        const existingByDates = {}; // ✅ Garder TOUTES les réservations par date (array)
+        // Indexer par DATES uniquement (logique simplifiée)
+        const bddByDates = {}; // { "2026-03-06|2026-03-08": [...réservations...] }
         if (existingReservations) {
             existingReservations.forEach(r => {
-                if (r.ical_uid) {
-                    existingByUid[r.ical_uid] = r;
-                    // Clé de date pour comparaison
-                    const dateKey = `${r.check_in}|${r.check_out}`;
-                    // ✅ GARDER TOUTES les réservations avec ces dates (pas écraser)
-                    if (!existingByDates[dateKey]) {
-                        existingByDates[dateKey] = [];
-                    }
-                    existingByDates[dateKey].push(r);
-                    console.log(`    🔑 BDD: ${r.client_name} → ${r.check_in} au ${r.check_out}`);
+                const dateKey = `${r.check_in}|${r.check_out}`;
+                if (!bddByDates[dateKey]) {
+                    bddByDates[dateKey] = [];
                 }
+                bddByDates[dateKey].push(r);
+                const statusEmoji = r.status === 'cancelled' ? '❌' : '✅';
+                console.log(`    ${statusEmoji} BDD: ${r.client_name} → ${r.check_in} au ${r.check_out} (${r.status})`);
             });
         }
         
-        const totalDatesUniques = Object.keys(existingByDates).length;
-        const totalReservations = Object.values(existingByDates).flat().length;
-        console.log(`  🔍 ${totalReservations} réservation(s) sur ${totalDatesUniques} plage(s) de dates unique(s)`);
+        // ==========================================
+        // ÉTAPE 2 : TRAITER CHAQUE ÉVÉNEMENT iCAL
+        // ==========================================
+        const icalDates = new Set(); // Tracker les dates présentes dans iCal
         
-        // 🚨 DÉTECTER LES DOUBLONS (plusieurs réservations avec les mêmes dates)
-        const doublons = Object.entries(existingByDates).filter(([_, resa]) => resa.length > 1);
-        if (doublons.length > 0) {
-            console.warn(`  ⚠️ DOUBLONS DÉTECTÉS : ${doublons.length} plage(s) de dates avec plusieurs réservations !`);
-            doublons.forEach(([dateKey, resas]) => {
-                console.warn(`    🔴 ${dateKey.replace('|', ' → ')}: ${resas.length} réservations`);
-                resas.forEach(r => console.warn(`       - ${r.client_name} (${r.status}, ID: ${r.id})`));
-            });
-            console.warn(`  💡 Exécutez sql/clean-doublons-reservations.sql pour nettoyer`);
-        }
-
-        // 2. TRAITER CHAQUE ÉVÉNEMENT DU FLUX iCal
         for (const vevent of vevents) {
             const event = new ICAL.Event(vevent);
 
@@ -329,18 +311,22 @@ async function syncCalendar(giteId, platform, url) {
                 summaryLower.includes('not available') || 
                 summaryLower.includes('indisponible') ||
                 summaryLower.includes('unavailable')) {
-                skipped++;
                 continue;
             }
 
             const dateDebut = formatDateForIcal(dtstart);
             const dateFin = formatDateForIcal(dtend);
-
-            // Marquer ce UID ET ces dates comme présents
-            presentUids.add(uid);
             const dateKey = `${dateDebut}|${dateFin}`;
-            presentDates.add(dateKey);
-            console.log(`    ✅ iCal: ${summary} → ${dateDebut} au ${dateFin}`);
+
+            // ⏳ IGNORER LES ÉVÉNEMENTS PASSÉS (check_out < aujourd'hui)
+            if (dateFin < today) {
+                continue; // Silencieux - pas besoin de logguer chaque événement passé
+            }
+
+            // Marquer ces dates comme présentes dans iCal
+            icalDates.add(dateKey);
+            
+            console.log(`    📅 iCal: ${summary} → ${dateDebut} au ${dateFin}`);
 
             // Déterminer le site (nom affiché de la plateforme)
             let site;
@@ -370,19 +356,25 @@ async function syncCalendar(giteId, platform, url) {
                 icalUid: uid
             };
 
-            // Vérifier si la réservation existe déjà (par dates d'abord, puis UID)
-            // dateKey déjà déclaré ligne 342, on le réutilise
-            const existingByDateMatch = existingByDates[dateKey]; // Array ou undefined
+            // ==========================================
+            // LOGIQUE SIMPLE : DATES EN BDD ?
+            // ==========================================
+            const reservationsAvecCesDates = bddByDates[dateKey];
             
-            // Si ces dates sont déjà occupées → MISE À JOUR (pas ajout)
-            if (existingByDateMatch && existingByDateMatch.length > 0) {
-                const existing = existingByDateMatch[0]; // Prendre la première
+            if (reservationsAvecCesDates && reservationsAvecCesDates.length > 0) {
+                // ✅ DATES DÉJÀ EN BDD
+                const existing = reservationsAvecCesDates[0]; // Prendre la première
                 
-                // MISE À JOUR seulement si pas manual_override
                 if (existing.manual_override) {
+                    // Protection : ne jamais toucher aux réservations manuelles
                     skipped++;
                     console.log(`      ⏭️ Ignorée (manual_override)`);
+                } else if (existing.status === 'cancelled') {
+                    // Réservation annulée mais réapparue dans iCal → RÉACTIVER
+                    skipped++;
+                    console.log(`      ⚠️ Ignorée (déjà cancelled, ne pas réactiver)`);
                 } else {
+                    // Mise à jour normale
                     try {
                         await updateReservationFromIcal(existing.id, reservation);
                         updated++;
@@ -392,7 +384,7 @@ async function syncCalendar(giteId, platform, url) {
                     }
                 }
             } else {
-                // DATES LIBRES → NOUVELLE RÉSERVATION
+                // ⭕ DATES LIBRES → NOUVELLE RÉSERVATION
                 try {
                     await addReservationFromIcal(reservation);
                     added++;
@@ -403,40 +395,47 @@ async function syncCalendar(giteId, platform, url) {
             }
         }
 
-        // 3. DÉTECTER LES ANNULATIONS (dates absentes du flux iCal)
-        console.log(`  🔎 DÉTECTION ANNULATIONS (par dates):`);
-        console.log(`    - ${totalReservations} réservation(s) en BDD à vérifier`);
-        console.log(`    - ${presentDates.size} plage(s) dans flux iCal`);
+        // ==========================================
+        // ÉTAPE 3 : DÉTECTER LES ANNULATIONS
+        // ==========================================
+        console.log(`  🔎 Détection annulations:`);
+        console.log(`    - ${Object.keys(bddByDates).length} plage(s) de dates en BDD`);
+        console.log(`    - ${icalDates.size} plage(s) de dates dans iCal`);
         
-        // ✅ PARCOURIR LES DATES UNIQUES (pas les UID)
-        for (const [dateKey, reservations] of Object.entries(existingByDates)) {
-            console.log(`    🔍 Vérification dates: ${dateKey.replace('|', ' → ')}`);
+        for (const [dateKey, reservations] of Object.entries(bddByDates)) {
+            const [checkIn, checkOut] = dateKey.split('|');
             
-            // Si ces DATES ne sont plus dans le feed → annulation
-            if (!presentDates.has(dateKey)) {
-                console.log(`      🗑️ ANNULATION: dates absentes du flux iCal`);
+            // ✅ DATES EN BDD mais PAS DANS iCAL → ANNULATION
+            if (!icalDates.has(dateKey)) {
+                // Filtrer : ne proposer l'annulation que pour les réservations actives
+                const reservationsActives = reservations.filter(r => 
+                    r.status !== 'cancelled' && // Déjà annulée
+                    !r.manual_override           // Protected manuellement
+                );
                 
-                // ✅ Si doublons détectés sur ces dates, n'afficher qu'UNE FOIS dans le modal
-                // mais préparer la suppression de TOUS les doublons
-                const idsToDelete = reservations.map(r => r.id);
-                
-                window.pendingCancellations.push({
-                    id: reservations[0].id, // ID principal pour le modal
-                    allIds: idsToDelete,    // Tous les IDs à supprimer (doublons inclus)
-                    client_name: reservations[0].client_name || 'Client Airbnb',
-                    check_in: reservations[0].check_in,
-                    check_out: reservations[0].check_out,
-                    platform: reservations[0].synced_from || reservations[0].platform,
-                    gite_id: reservations[0].gite_id,
-                    hasDoublons: reservations.length > 1
-                });
-                cancelled++;
-            } else {
-                console.log(`      ✅ Dates toujours présentes`);
+                if (reservationsActives.length > 0) {
+                    console.log(`    🗑️ ANNULATION: ${checkIn} → ${checkOut} (${reservationsActives.length} réservation(s))`);
+                    
+                    // Ajouter au modal d'annulation
+                    const idsToDelete = reservationsActives.map(r => r.id);
+                    window.pendingCancellations.push({
+                        id: reservationsActives[0].id,
+                        allIds: idsToDelete,
+                        client_name: reservationsActives[0].client_name || 'Client inconnu',
+                        check_in: checkIn,
+                        check_out: checkOut,
+                        platform: platform,
+                        gite_id: giteId,
+                        hasDoublons: reservationsActives.length > 1
+                    });
+                    cancelled++;
+                } else {
+                    console.log(`    ⏭️ Ignorée: ${checkIn} → ${checkOut} (déjà cancelled ou manual_override)`);
+                }
             }
         }
         
-        console.log(`  📊 Résultat: ${cancelled} annulation(s) détectée(s)`);
+        console.log(`  📊 Résultat: ${added} ajoutées, ${updated} mises à jour, ${cancelled} annulées, ${skipped} ignorées`);
 
         return { added, updated, cancelled, skipped };
 
