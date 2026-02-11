@@ -2183,6 +2183,7 @@ async function refreshDashboard() {
     await updateDashboardMenages();
     await updateTodoLists();
     await updateFinancialIndicators();
+    await updateKPIPerformance();
     await afficherGraphiqueTresorerieDashboard();
     // initializeTodoModal(); // Supprimé - modal créé dynamiquement
     initializeReponseWhatsappModal();
