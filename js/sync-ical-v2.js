@@ -42,14 +42,18 @@ async function syncAllCalendars() {
             
             // Récupérer les sources iCal (format unifié objet)
             const icalSources = gite.ical_sources || {};
+            console.log(`  📦 ical_sources pour ${gite.name}:`, typeof icalSources, icalSources);
             
             // Vérifier que c'est bien un objet
             if (typeof icalSources !== 'object' || Array.isArray(icalSources)) {
+                console.error(`  ❌ Format ical_sources invalide:`, typeof icalSources, Array.isArray(icalSources));
                 addMessage(`  ❌ Format ical_sources invalide (utilisez l'interface pour corriger)`, 'error');
                 continue;
             }
 
             const platforms = Object.entries(icalSources).filter(([platform, url]) => url && typeof url === 'string');
+            console.log(`  🔍 Entrées trouvées:`, Object.entries(icalSources));
+            console.log(`  ✅ Entrées valides (url string):`, platforms);
 
             if (platforms.length === 0) {
                 console.log(`  ℹ️ Aucune source iCal configurée pour ${gite.name}`);
