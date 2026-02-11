@@ -360,14 +360,18 @@ html.theme-dark.style-apple .btn-femme-menage:hover {
     border-left: 4px solid #27ae60 !important;
 }
 
+.menage-card-main {
+    background: white;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
 .menage-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-}
-
-.menage-card-date {
+    margin-bottom: 10px;
     font-size: 1rem;
     font-weight: 700;
     color: var(--text);
@@ -376,7 +380,23 @@ html.theme-dark.style-apple .btn-femme-menage:hover {
 .menage-card-time {
     font-size: 0.9rem;
     color: #555;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.menage-card-infos {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+.menage-card-infos span {
+    display: inline-flex;
+    align-items: center;
 }
 
 .menage-card-info {
@@ -510,8 +530,15 @@ html.style-sidebar .menage-card:hover {
     transform: translateY(-2px);
 }
 
+html.style-sidebar .menage-card-main {
+    background: white !important;
+    border: 2px solid #2D3436 !important;
+    box-shadow: 3px 3px 0 #2D3436 !important;
+    border-radius: 8px !important;
+}
+
 /* Textes Sidebar - Style neo-brutalism */
-html.style-sidebar .menage-card-date {
+html.style-sidebar .menage-card-header {
     font-size: 1.05rem !important;
     font-weight: 900 !important;
     color: var(--text) !important;
@@ -523,7 +550,11 @@ html.style-sidebar .menage-card-time {
     font-size: 0.95rem !important;
     font-weight: 700 !important;
     color: var(--text) !important;
-    margin-top: 8px;
+}
+
+html.style-sidebar .menage-card-infos {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
 }
 
 html.style-sidebar .menage-card-info {

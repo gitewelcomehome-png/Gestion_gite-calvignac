@@ -694,20 +694,26 @@ function generateMenageCardHTML(menageInfo) {
     
     return `
         <div class="${cardClass}">
-            <div class="menage-card-header" style="display:flex;justify-content:space-between;align-items:center;">
-                <span>
-                    <svg style="width:16px;height:16px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    ${dateStr}
-                </span>
-                <div class="${badgeClass}">
-                    ${badgeIcon}
+            <div class="menage-card-main">
+                <div class="menage-card-header">
+                    <span>
+                        <svg style="width:16px;height:16px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        ${dateStr}
+                    </span>
+                    <div class="${badgeClass}">
+                        ${badgeIcon}
+                    </div>
                 </div>
+                <div class="menage-card-time">
+                    ${timeDisplay}
+                </div>
+                ${(departInfo || arriveeInfo) ? `
+                <div class="menage-card-infos">
+                    ${departInfo ? `<span><svg style="width:14px;height:14px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><path d="m14 20 1.5-1.5c1-.999 1.5-2 1.5-2.5m-5 4-1.5-1.5c-1-.999-1.5-2-1.5-2.5m0-3c0-.5.5-1.5 1.5-2.5L11 9m3 3c0-.5-.5-1.5-1.5-2.5L11 9m3 0-1.5 1.5M21 5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg> Départ: ${departInfo}</span>` : ''}
+                    ${arriveeInfo ? `<span><svg style="width:14px;height:14px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg> Arrivée: ${arriveeInfo}</span>` : ''}
+                </div>
+                ` : ''}
             </div>
-            <div class="menage-card-time">
-                ${timeDisplay}
-            </div>
-            ${departInfo ? `<div class="menage-card-info"><svg style="width:14px;height:14px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><path d="m14 20 1.5-1.5c1-.999 1.5-2 1.5-2.5m-5 4-1.5-1.5c-1-.999-1.5-2-1.5-2.5m0-3c0-.5.5-1.5 1.5-2.5L11 9m3 3c0-.5-.5-1.5-1.5-2.5L11 9m3 0-1.5 1.5M21 5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg> Départ: ${departInfo}</div>` : ''}
-            ${arriveeInfo ? `<div class="menage-card-info"><svg style="width:14px;height:14px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg> Arrivée: ${arriveeInfo}</div>` : ''}
             
             ${proposedByCompany ? `
                 <div class="menage-company-proposal">
@@ -728,8 +734,8 @@ function generateMenageCardHTML(menageInfo) {
                     <div class="menage-edit-inputs">
                         <input type="date" id="date-${reservation.id}" value="${displayDate.toISOString().split('T')[0]}" class="menage-input-date">
                         <select id="time-${reservation.id}" class="menage-input-time">
-                            <option value="morning" ${savedTime === 'morning' ? 'selected' : ''}><svg style="width:14px;height:14px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Matin</option>
-                            <option value="afternoon" ${savedTime === 'afternoon' ? 'selected' : ''}><svg style="width:14px;height:14px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> AM</option>
+                            <option value="morning" ${savedTime === 'morning' ? 'selected' : ''}>Matin</option>
+                            <option value="afternoon" ${savedTime === 'afternoon' ? 'selected' : ''}>AM</option>
                         </select>
                         <button onclick="modifierDateMenage('${reservation.id}')" class="menage-btn-save"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
                     </div>
