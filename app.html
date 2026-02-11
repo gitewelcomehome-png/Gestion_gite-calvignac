@@ -426,26 +426,26 @@
                     
                     // 🔄 Synchronisation iCal automatique toutes les 3 minutes (180000 ms)
                     if (typeof window.syncAllCalendars === 'function') {
-                        console.log('⏰ Configuration de la synchronisation automatique iCal');
+                        // console.log('⏰ Configuration de la synchronisation automatique iCal');
                         
                         // Lancer la première sync après 10 secondes
                         setTimeout(() => {
-                            console.log('🚀 Lancement première sync iCal (10s après chargement)');
+                            // console.log('🚀 Lancement première sync iCal (10s après chargement)');
                             window.syncAllCalendars().catch(err => console.error('❌ Erreur sync auto iCal:', err));
                         }, 10000);
                         
                         // Puis toutes les 3 minutes
                         setInterval(() => {
-                            console.log('🔁 Lancement sync iCal périodique (toutes les 3 min)');
+                            // console.log('🔁 Lancement sync iCal périodique (toutes les 3 min)');
                             window.syncAllCalendars().catch(err => console.error('❌ Erreur sync auto iCal:', err));
                         }, 180000);
                         
-                        console.log('✅ Synchronisation automatique configurée: première dans 10s, puis toutes les 3 min');
+                        // console.log('✅ Synchronisation automatique configurée: première dans 10s, puis toutes les 3 min');
                     }
                     
                     // 📅 Mettre à jour l'affichage de la dernière sync toutes les minutes
                     if (typeof window.updateLastSyncDisplay === 'function') {
-                        console.log('⏰ Configuration mise à jour affichage dernière sync');
+                        // console.log('⏰ Configuration mise à jour affichage dernière sync');
                         // Affichage initial
                         window.updateLastSyncDisplay();
                         // Puis mise à jour toutes les 60 secondes
