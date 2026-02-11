@@ -214,22 +214,35 @@ async function syncCalendar(giteId, platform, url) {
 
         // Map pour tracker les ical_uid présents dans le flux
         const presentUids = new Set();
+        
+        console.log(`  📥 Parsing flux iCal: ${vevents.length} événement(s) trouvé(s)`);
 
         // 1. RÉCUPÉRER TOUTES LES RÉSERVATIONS EXISTANTES de ce gîte + plateforme
-        const { data: existingReservations } = await window.supabaseClient
+        console.log(`  📊 Recherche réservations BDD pour:`, { giteId, platform });
+        
+        const { data: existingReservations, error: dbError } = await window.supabaseClient
             .from('reservations')
             .select('*')
             .eq('gite_id', giteId)
             .eq('synced_from', platform);
+        
+        if (dbError) {
+            console.error(`  ❌ Erreur lecture BDD:`, dbError);
+        }
 
+        console.log(`  💾 ${existingReservations?.length || 0} réservation(s) trouvée(s) en BDD pour cette plateforme`);
+        
         const existingByUid = {};
         if (existingReservations) {
             existingReservations.forEach(r => {
                 if (r.ical_uid) {
                     existingByUid[r.ical_uid] = r;
+                    console.log(`    🔑 BDD: UID ${r.ical_uid} → ${r.client_name} (${r.check_in})`);
                 }
             });
         }
+        
+        console.log(`  🔍 ${Object.keys(existingByUid).length} réservation(s) avec ical_uid en BDD`);
 
         // 2. TRAITER CHAQUE ÉVÉNEMENT DU FLUX iCal
         for (const vevent of vevents) {
@@ -257,6 +270,7 @@ async function syncCalendar(giteId, platform, url) {
 
             // Marquer ce UID comme présent
             presentUids.add(uid);
+            console.log(`    ✅ iCal: UID ${uid} → ${summary} (${dateDebut})`);
 
             // Déterminer le site (nom affiché de la plateforme)
             let site;
@@ -315,10 +329,21 @@ async function syncCalendar(giteId, platform, url) {
         }
 
         // 3. DÉTECTER LES ANNULATIONS (réservations absentes du flux)
+        console.log(`  🔎 DÉTECTION ANNULATIONS:`);
+        console.log(`    - ${Object.keys(existingByUid).length} UID(s) en BDD`);
+        console.log(`    - ${presentUids.size} UID(s) dans flux iCal`);
+        
         for (const [uid, existing] of Object.entries(existingByUid)) {
+            console.log(`    🔍 Vérification UID ${uid}:`, {
+                present_dans_ical: presentUids.has(uid),
+                manual_override: existing.manual_override,
+                client: existing.client_name,
+                dates: `${existing.check_in} → ${existing.check_out}`
+            });
+            
             if (!presentUids.has(uid) && !existing.manual_override) {
                 // Réservation disparue du flux iCal → Stocker pour confirmation utilisateur
-                console.log(`🗑️ Annulation détectée: ${existing.client_name} (${existing.check_in})`);
+                console.log(`🗑️ ANNULATION DÉTECTÉE: ${existing.client_name} (${existing.check_in})`);
                 
                 window.pendingCancellations.push({
                     id: existing.id,
@@ -331,6 +356,8 @@ async function syncCalendar(giteId, platform, url) {
                 cancelled++;
             }
         }
+        
+        console.log(`  📊 Résultat: ${cancelled} annulation(s) détectée(s)`);
 
         return { added, updated, cancelled, skipped };
 
