@@ -243,20 +243,23 @@ async function syncCalendar(giteId, platform, url) {
         
         console.log(`  📥 Parsing flux iCal: ${vevents.length} événement(s) trouvé(s)`);
 
-        // 1. RÉCUPÉRER TOUTES LES RÉSERVATIONS EXISTANTES de ce gîte + plateforme
-        console.log(`  📊 Recherche réservations BDD pour:`, { giteId, platform });
+        // 1. RÉCUPÉRER LES RÉSERVATIONS FUTURES de ce gîte + plateforme
+        // ⚠️ IMPORTANT : Filtrer check_out >= aujourd'hui pour ignorer les réservations passées
+        const today = new Date().toISOString().split('T')[0];
+        console.log(`  📊 Recherche réservations BDD pour:`, { giteId, platform, depuis: today });
         
         const { data: existingReservations, error: dbError } = await window.supabaseClient
             .from('reservations')
             .select('*')
             .eq('gite_id', giteId)
-            .eq('synced_from', platform);
+            .eq('synced_from', platform)
+            .gte('check_out', today); // Ne charger QUE les réservations futures/en cours
         
         if (dbError) {
             console.error(`  ❌ Erreur lecture BDD:`, dbError);
         }
 
-        console.log(`  💾 ${existingReservations?.length || 0} réservation(s) trouvée(s) en BDD pour cette plateforme`);
+        console.log(`  💾 ${existingReservations?.length || 0} réservation(s) future(s) trouvée(s) en BDD`);
         
         const existingByUid = {};
         if (existingReservations) {
@@ -268,7 +271,7 @@ async function syncCalendar(giteId, platform, url) {
             });
         }
         
-        console.log(`  🔍 ${Object.keys(existingByUid).length} réservation(s) avec ical_uid en BDD`);
+        console.log(`  🔍 ${Object.keys(existingByUid).length} réservation(s) future(s) avec ical_uid en BDD`);
 
         // 2. TRAITER CHAQUE ÉVÉNEMENT DU FLUX iCal
         for (const vevent of vevents) {
