@@ -303,9 +303,9 @@ class AuthManager {
             
             if (isFirstLogin) {
                 // Rediriger vers dashboard avec flag pour ouvrir "Gérer mes Gîtes"
-                window.location.href = '/index.html?firstLogin=true';
+                window.location.href = 'app.html?firstLogin=true';
             } else {
-                window.location.href = '/index.html';
+                window.location.href = 'app.html';
             }
             return;
         }

@@ -2884,7 +2884,7 @@ function renderProblemeCard(pb, isUrgent) {
     }[pb.urgence] || 'Non défini';
     
     return `
-        <div style="background: var(--card); padding: 15px; border-radius: 10px; border-left: 5px solid ${urgenceColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px;">
+        <div style="background: var(--card); padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px;">
             <!-- En-tête avec nom client -->
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0;">
                 <span style="font-size: 1.2rem;">👤</span>

@@ -4006,18 +4006,18 @@ html.style-sidebar .dashboard-icalou .section-alert::before {
 }
 
 html.style-sidebar .dashboard-icalou .section-alert--warning::before {
-    background: #ffc107;
-    box-shadow: 2px 0 10px rgba(255, 193, 7, 0.4);
+    background: #00bcd4;
+    box-shadow: 2px 0 10px rgba(0, 188, 212, 0.4);
 }
 
 html.style-sidebar .dashboard-icalou .section-alert--danger::before {
-    background: #ef4444;
-    box-shadow: 2px 0 10px rgba(239, 68, 68, 0.4);
+    background: #00bcd4;
+    box-shadow: 2px 0 10px rgba(0, 188, 212, 0.4);
 }
 
 html.style-sidebar .dashboard-icalou .section-alert--info::before {
-    background: #3498db;
-    box-shadow: 2px 0 10px rgba(52, 152, 219, 0.4);
+    background: #00bcd4;
+    box-shadow: 2px 0 10px rgba(0, 188, 212, 0.4);
 }
 
 /* Cards - Uniformisation totale */
@@ -4314,18 +4314,18 @@ html.style-apple .dashboard-icalou .section-alert {
 }
 
 html.style-apple .dashboard-icalou .section-alert--warning {
-    background: rgba(255, 193, 7, 0.08);
-    border-color: #ffc107;
+    background: rgba(0, 188, 212, 0.08);
+    border-color: #00bcd4;
 }
 
 html.style-apple .dashboard-icalou .section-alert--danger {
-    background: rgba(239, 68, 68, 0.08);
-    border-color: #ef4444;
+    background: rgba(0, 188, 212, 0.08);
+    border-color: #00bcd4;
 }
 
 html.style-apple .dashboard-icalou .section-alert--info {
-    background: rgba(52, 152, 219, 0.08);
-    border-color: #3498db;
+    background: rgba(0, 188, 212, 0.08);
+    border-color: #00bcd4;
 }
 
 /* Cards */
