@@ -250,7 +250,26 @@ const ZohoMailAPI = {
     
     // Récupérer un message spécifique
     async getMessage(accountId, messageId) {
-        return this.request(`/api/accounts/${accountId}/messages/${messageId}/view`);
+        // Test de plusieurs endpoints possibles
+        const endpoints = [
+            `/api/accounts/${accountId}/messages/view?messageId=${messageId}`,
+            `/api/accounts/${accountId}/messages/${messageId}/content`,
+            `/api/accounts/${accountId}/messages/view/${messageId}`,
+            `/api/accounts/${accountId}/messages?messageId=${messageId}`,
+        ];
+        
+        for (const endpoint of endpoints) {
+            try {
+                console.log(`Test getMessage: ${endpoint}`);
+                const response = await this.request(endpoint);
+                console.log(`✅ getMessage SUCCESS: ${endpoint}`);
+                return response;
+            } catch (error) {
+                console.log(`❌ getMessage FAILED: ${endpoint} - ${error.message}`);
+            }
+        }
+        
+        throw new Error('Aucun endpoint getMessage ne fonctionne');
     },
     
     // Envoyer un email
