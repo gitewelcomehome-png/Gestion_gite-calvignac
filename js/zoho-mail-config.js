@@ -197,11 +197,6 @@ const ZohoMailAPI = {
     async request(endpoint, options = {}) {
         let token = ZohoAuth.getAccessToken();
         
-        console.log('=== ZohoMailAPI.request ===');
-        console.log('Endpoint:', endpoint);
-        console.log('Options:', options);
-        console.log('Token exists:', !!token);
-        
         // Vérifier et rafraîchir le token si nécessaire
         if (!ZohoAuth.isTokenValid()) {
             const refreshed = await refreshAccessToken();
@@ -215,11 +210,7 @@ const ZohoMailAPI = {
         const authDomain = localStorage.getItem('zoho_auth_domain') || ZOHO_CONFIG.authDomain;
         const region = authDomain.includes('.eu') ? 'eu' : 'com';
         
-        console.log('Auth domain:', authDomain);
-        console.log('Region:', region);
-        
         const proxyUrl = window.location.origin + '/api/zoho-proxy';
-        console.log('Proxy URL:', proxyUrl);
         
         const payload = {
             endpoint: endpoint,
@@ -228,8 +219,6 @@ const ZohoMailAPI = {
             token: token,
             region: region
         };
-        
-        console.log('Payload:', payload);
         
         // Utiliser le proxy serverless pour éviter les problèmes CORS
         const response = await fetch(proxyUrl, {
@@ -240,18 +229,13 @@ const ZohoMailAPI = {
             body: JSON.stringify(payload)
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Response error text:', errorText);
+            console.error('Zoho API Error:', response.status, errorText);
             throw new Error(`API Error: ${response.status} - ${errorText}`);
         }
         
-        const data = await response.json();
-        console.log('Response data:', data);
-        return data;
+        return await response.json();
     },
     
     // Récupérer les comptes email
@@ -259,40 +243,9 @@ const ZohoMailAPI = {
         return this.request('/api/accounts');
     },
     
-    // Récupérer les messages - utilise le folderId numérique
+    // Récupérer les messages - ENDPOINT CORRECT TROUVÉ: /messages/view
     async getMessages(accountId, folderId, limit = 50) {
-        return this.request(`/api/accounts/${accountId}/folders/${folderId}/messages?limit=${limit}`);
-    },
-    
-    // TESTEUR D'ENDPOINTS - trouvez le bon endpoint pour les messages
-    async testMessageEndpoints(accountId, folderId, limit = 10) {
-        const endpoints = [
-            `/api/accounts/${accountId}/folders/${folderId}/messages?limit=${limit}`,
-            `/api/accounts/${accountId}/messages?folderId=${folderId}&limit=${limit}`,
-            `/api/accounts/${accountId}/messages/view?folderId=${folderId}&limit=${limit}`,
-            `/api/accounts/${accountId}/folders/${folderId}?limit=${limit}`,
-            `/api/messages?accountId=${accountId}&folderId=${folderId}&limit=${limit}`
-        ];
-        
-        console.log('🔍 Test de plusieurs endpoints Zoho Mail API...');
-        const results = [];
-        
-        for (const endpoint of endpoints) {
-            try {
-                console.log(`Test: ${endpoint}`);
-                const response = await this.request(endpoint);
-                console.log(`✅ SUCCESS:`, endpoint);
-                console.log('Response:', response);
-                results.push({ endpoint, success: true, data: response });
-                return { endpoint, data: response }; // Retourne dès qu'on trouve un qui marche
-            } catch (error) {
-                console.log(`❌ FAILED: ${endpoint} - ${error.message}`);
-                results.push({ endpoint, success: false, error: error.message });
-            }
-        }
-        
-        console.log('📊 Résumé des tests:', results);
-        throw new Error('Aucun endpoint ne fonctionne');
+        return this.request(`/api/accounts/${accountId}/messages/view?folderId=${folderId}&limit=${limit}`);
     },
     
     // Récupérer un message spécifique

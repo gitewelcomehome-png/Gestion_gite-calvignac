@@ -621,32 +621,19 @@
                 
                 // Récupérer le compte
                 const accounts = await ZohoMailAPI.getAccounts();
-                console.log('Accounts:', accounts);
                 
                 if (accounts && accounts.data && accounts.data.length > 0) {
                     currentAccount = accounts.data[0].accountId;
-                    console.log('Current account ID:', currentAccount);
                     
                     // Récupérer les folders et trouver l'INBOX
                     const foldersResponse = await ZohoMailAPI.getFolders(currentAccount);
                     folders = foldersResponse.data || [];
-                    console.log(`${folders.length} folders chargés`);
                     
                     // Trouver le folderId de l'Inbox
                     const inboxFolder = folders.find(f => f.folderType === 'Inbox');
                     if (inboxFolder) {
                         currentFolderId = inboxFolder.folderId;
-                        console.log('Inbox folderId:', currentFolderId);
-                        
-                        // TEST: Essayer plusieurs endpoints pour trouver le bon
-                        console.log('🔍 Recherche du bon endpoint Zoho Mail API...');
-                        const testResult = await ZohoMailAPI.testMessageEndpoints(currentAccount, currentFolderId);
-                        if (testResult) {
-                            console.log('✅ Endpoint trouvé:', testResult.endpoint);
-                            console.log('📧 Messages reçus:', testResult.data);
-                        }
-                        
-                        // await loadEmails(); // Désactivé pendant les tests
+                        await loadEmails();
                     } else {
                         console.error('Inbox folder not found');
                     }
