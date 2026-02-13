@@ -264,6 +264,37 @@ const ZohoMailAPI = {
         return this.request(`/api/accounts/${accountId}/folders/${folderId}/messages?limit=${limit}`);
     },
     
+    // TESTEUR D'ENDPOINTS - trouvez le bon endpoint pour les messages
+    async testMessageEndpoints(accountId, folderId, limit = 10) {
+        const endpoints = [
+            `/api/accounts/${accountId}/folders/${folderId}/messages?limit=${limit}`,
+            `/api/accounts/${accountId}/messages?folderId=${folderId}&limit=${limit}`,
+            `/api/accounts/${accountId}/messages/view?folderId=${folderId}&limit=${limit}`,
+            `/api/accounts/${accountId}/folders/${folderId}?limit=${limit}`,
+            `/api/messages?accountId=${accountId}&folderId=${folderId}&limit=${limit}`
+        ];
+        
+        console.log('🔍 Test de plusieurs endpoints Zoho Mail API...');
+        const results = [];
+        
+        for (const endpoint of endpoints) {
+            try {
+                console.log(`Test: ${endpoint}`);
+                const response = await this.request(endpoint);
+                console.log(`✅ SUCCESS:`, endpoint);
+                console.log('Response:', response);
+                results.push({ endpoint, success: true, data: response });
+                return { endpoint, data: response }; // Retourne dès qu'on trouve un qui marche
+            } catch (error) {
+                console.log(`❌ FAILED: ${endpoint} - ${error.message}`);
+                results.push({ endpoint, success: false, error: error.message });
+            }
+        }
+        
+        console.log('📊 Résumé des tests:', results);
+        throw new Error('Aucun endpoint ne fonctionne');
+    },
+    
     // Récupérer un message spécifique
     async getMessage(accountId, messageId) {
         return this.request(`/api/accounts/${accountId}/messages/${messageId}`);

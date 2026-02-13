@@ -637,7 +637,16 @@
                     if (inboxFolder) {
                         currentFolderId = inboxFolder.folderId;
                         console.log('Inbox folderId:', currentFolderId);
-                        await loadEmails();
+                        
+                        // TEST: Essayer plusieurs endpoints pour trouver le bon
+                        console.log('🔍 Recherche du bon endpoint Zoho Mail API...');
+                        const testResult = await ZohoMailAPI.testMessageEndpoints(currentAccount, currentFolderId);
+                        if (testResult) {
+                            console.log('✅ Endpoint trouvé:', testResult.endpoint);
+                            console.log('📧 Messages reçus:', testResult.data);
+                        }
+                        
+                        // await loadEmails(); // Désactivé pendant les tests
                     } else {
                         console.error('Inbox folder not found');
                     }
