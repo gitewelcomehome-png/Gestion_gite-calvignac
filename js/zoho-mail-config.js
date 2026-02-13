@@ -1,7 +1,7 @@
 // Configuration Zoho Mail API
 const ZOHO_CONFIG = {
     clientId: '1000.VNA95CXS18E0IC5F9U12K2DAXTNZ6P',
-    clientSecret: 'd7d84ca438fdba28be76ff9ced58385b9fcdf0ae97',
+    // CLIENT_SECRET supprimé - géré côté serveur pour la sécurité
     // Redirection URI basée sur le domaine actuel
     get redirectUri() {
         const hostname = window.location.hostname;
@@ -93,7 +93,7 @@ async function initiateZohoAuth() {
     window.location.href = authUrl;
 }
 
-// Échanger le code contre un token
+// Échanger le code contre un token (via serveur pour sécurité)
 async function exchangeCodeForToken(code) {
     try {
         // Détecter le domaine Zoho depuis les paramètres de l'URL
@@ -109,31 +109,30 @@ async function exchangeCodeForToken(code) {
             authDomain = 'https://accounts.zoho.eu';
         }
         
-        console.log('Échange de code avec:', authDomain);
+        console.log('Échange de code via API serverless avec:', authDomain);
         
-        const response = await fetch(`${authDomain}/oauth/v2/token`, {
+        // Appeler notre API serverless (sécurisé)
+        const response = await fetch('/api/zoho-oauth', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/json'
             },
-            body: new URLSearchParams({
+            body: JSON.stringify({
                 code: code,
-                client_id: ZOHO_CONFIG.clientId,
-                client_secret: ZOHO_CONFIG.clientSecret,
-                redirect_uri: ZOHO_CONFIG.redirectUri,
-                grant_type: 'authorization_code'
+                redirectUri: ZOHO_CONFIG.redirectUri,
+                authDomain: authDomain
             })
         });
         
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Erreur HTTP:', response.status, errorText);
+            const errorData = await response.json();
+            console.error('Erreur API:', response.status, errorData);
             return false;
         }
         
         const data = await response.json();
         
-        console.log('Réponse Zoho:', data);
+        console.log('Token reçu avec succès');
         
         if (data.access_token) {
             ZohoAuth.setAccessToken(data.access_token);
@@ -144,7 +143,7 @@ async function exchangeCodeForToken(code) {
             return true;
         }
         
-        console.error('Erreur dans la réponse:', data);
+        console.error('Pas de token dans la réponse:', data);
         return false;
     } catch (error) {
         console.error('Erreur échange code:', error);
@@ -152,7 +151,7 @@ async function exchangeCodeForToken(code) {
     }
 }
 
-// Rafraîchir le token
+// Rafraîchir le token (via serveur pour sécurité)
 async function refreshAccessToken() {
     const refreshToken = ZohoAuth.getRefreshToken();
     if (!refreshToken) return false;
@@ -161,18 +160,22 @@ async function refreshAccessToken() {
     const authDomain = localStorage.getItem('zoho_auth_domain') || ZOHO_CONFIG.authDomain;
     
     try {
-        const response = await fetch(`${authDomain}/oauth/v2/token`, {
+        // Appeler notre API serverless (sécurisé)
+        const response = await fetch('/api/zoho-refresh', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/json'
             },
-            body: new URLSearchParams({
-                refresh_token: refreshToken,
-                client_id: ZOHO_CONFIG.clientId,
-                client_secret: ZOHO_CONFIG.clientSecret,
-                grant_type: 'refresh_token'
+            body: JSON.stringify({
+                refreshToken: refreshToken,
+                authDomain: authDomain
             })
         });
+        
+        if (!response.ok) {
+            console.error('Erreur refresh:', response.status);
+            return false;
+        }
         
         const data = await response.json();
         
