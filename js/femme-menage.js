@@ -37,7 +37,7 @@ function showToast(message, type = 'success') {
  * Peuple tous les selects de gîtes avec les données dynamiques
  */
 async function peuplerSelectsGites() {
-    const gites = await window.gitesManager.getAll();
+    const gites = await window.gitesManager.getVisibleGites();
     if (!gites || gites.length === 0) {
         console.error('❌ Aucun gîte trouvé pour peupler les selects');
         return;
@@ -69,7 +69,7 @@ async function peuplerSelectsGites() {
             select.appendChild(option);
         });
         
-        // Option "Les deux" uniquement pour achats et travaux
+        // Option "Tous les gîtes" uniquement pour achats et travaux
         if (selectId !== 'retour-gite' && gites.length > 1) {
             const option = document.createElement('option');
             option.value = 'all';
@@ -187,18 +187,32 @@ async function chargerInterventions() {
             const dateDebut = semaine.debut.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
             const dateFin = weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
             
+            // Colonnes par gîte avec gitesManager - Filtrer selon abonnement
+            const allGiteIds = Object.keys(semaine.gites).sort();
+            const visibleGites = await window.gitesManager.getVisibleGites();
+            const visibleGiteIds = visibleGites.map(g => g.id);
+            
+            // Ne garder que les gîtes visibles selon l'abonnement
+            const giteIds = allGiteIds.filter(id => visibleGiteIds.includes(id));
+            
+            // Style de centrage selon le nombre de gîtes
+            let bodyStyle = '';
+            if (giteIds.length === 1) {
+                bodyStyle = ' style="max-width: 600px; margin: 0 auto;"';
+            } else if (giteIds.length === 2) {
+                bodyStyle = ' style="max-width: 1000px; margin: 0 auto;"';
+            }
+            
             html += `
                 <div class="cleaning-week-table">
                     <div class="cleaning-week-header">
                         <div class="week-number-big">📅 Semaine ${weekNumber}</div>
                         <div class="week-dates-small">${dateDebut} - ${dateFin}</div>
                     </div>
-                    <div class="cleaning-week-body">
+                    <div class="cleaning-week-body"${bodyStyle}>
             `;
             
-            // Colonnes par gîte avec gitesManager
-            const giteIds = Object.keys(semaine.gites).sort();
-            giteIds.forEach(giteId => {
+            giteIds.forEach((giteId) => {
                 const menagesGite = semaine.gites[giteId];
                 const gite = window.gitesManager?.getById(giteId);
                 const giteName = gite?.name || 'Gîte inconnu';
@@ -243,21 +257,6 @@ async function chargerInterventions() {
                     </div>
                 `;
             });
-            
-            // Compléter avec des colonnes vides si nécessaire
-            const nbGites = giteIds.length;
-            for (let i = nbGites; i < 4; i++) {
-                html += `
-                    <div class="cleaning-column" data-gite="empty">
-                        <div class="cleaning-column-header">
-                            -
-                        </div>
-                        <div class="cleaning-item empty">
-                            Aucun ménage prévu
-                        </div>
-                    </div>
-                `;
-            }
             
             html += `
                     </div>
@@ -439,7 +438,7 @@ let stocksParGite = {};
 
 async function chargerStocksDraps() {
     try {
-        const gites = await window.gitesManager.getAll();
+        const gites = await window.gitesManager.getVisibleGites();
         if (!gites || gites.length === 0) {
             console.error('❌ Aucun gîte pour charger les stocks');
             return;

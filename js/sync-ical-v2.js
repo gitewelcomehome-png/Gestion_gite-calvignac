@@ -202,14 +202,25 @@ async function syncCalendar(giteId, platform, url) {
     }
 
     // Essayer plusieurs proxies CORS
-    // 1. Notre proxy Vercel serverless (priorité)
+    // 1. Notre proxy Vercel serverless (priorité en production uniquement)
     // 2. Proxies publics (fallback)
-    const proxies = [
-        `/api/cors-proxy?url=${encodeURIComponent(url)}`,
+    const proxies = [];
+    
+    // N'utiliser le proxy local qu'en production (pas sur github.dev ou localhost)
+    const isDev = window.location.hostname.includes('github.dev') || 
+                  window.location.hostname === 'localhost' ||
+                  window.location.hostname === '127.0.0.1';
+    
+    if (!isDev) {
+        proxies.push(`/api/cors-proxy?url=${encodeURIComponent(url)}`);
+    }
+    
+    // Ajouter les proxies publics (toujours disponibles)
+    proxies.push(
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
         `https://api.codetabs.com/v1/proxy/?quest=${url}`
-    ];
+    );
 
     let text;
     let lastError;
@@ -224,18 +235,21 @@ async function syncCalendar(giteId, platform, url) {
             
             const response = await Promise.race([fetchPromise, timeoutPromise]);
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                // Erreur HTTP normale (404, 500, etc.) - continuer avec proxy suivant
+                continue;
             }
             text = await response.text();
 
             if (!text.includes('BEGIN:VCALENDAR')) {
-                throw new Error('Réponse invalide');
+                // Réponse invalide - continuer avec proxy suivant
+                continue;
             }
 
+            // Succès !
             break;
         } catch (err) {
             lastError = err;
-            // Erreurs réseau silencieuses - continuer avec le proxy suivant
+            // Erreurs réseau/timeout silencieuses - continuer avec le proxy suivant
             continue;
         }
     }

@@ -7,19 +7,32 @@
                 <p class="page-subtitle">Organisation et validation des nettoyages</p>
             </div>
             <div class="header-actions">
-                <button onclick="showCleaningRulesModal()" class="btn-neo btn-rules" title="Règles de Ménage">
-                    <i data-lucide="target"></i> RÈGLES
-                </button>
-                <button onclick="showRulesModal()" class="btn-neo btn-show-rules" title="Voir les Règles">
-                    <i data-lucide="clipboard"></i> VOIR RÈGLES
-                </button>
-                <button onclick="ouvrirPageValidation()" class="btn-neo btn-validation" title="Page Validation Société">
-                    <i data-lucide="building"></i> VALIDATION SOCIÉTÉ
-                </button>
-                <button onclick="ouvrirPageFemmeMenage()" class="btn-neo btn-femme-menage" title="Espace Femme de Ménage">
-                    <i data-lucide="sparkles"></i> ESPACE MÉNAGE
-                </button>
+                <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                    <button onclick="forceRefreshMenage()" class="btn-neo btn-refresh" title="Actualiser les données">
+                        <i data-lucide="refresh-cw"></i> ACTUALISER
+                    </button>
+                    <small id="last-sync-menage" style="color: #888; font-size: 0.75rem; margin-left: 4px;"></small>
+                </div>
+                <input type="text" id="searchMenage" class="search-input" placeholder="Rechercher..." oninput="filterMenage(this.value)">
             </div>
+        </div>
+    </div>
+
+    <!-- Actions spécifiques -->
+    <div class="card actions-menage-section">
+        <div class="actions-menage-buttons">
+            <button onclick="showCleaningRulesModal()" class="btn-neo btn-rules" title="Règles de Ménage">
+                <i data-lucide="target"></i> RÈGLES
+            </button>
+            <button onclick="showRulesModal()" class="btn-neo btn-show-rules" title="Voir les Règles">
+                <i data-lucide="clipboard"></i> VOIR RÈGLES
+            </button>
+            <button onclick="ouvrirPageValidation()" class="btn-neo btn-validation" title="Page Validation Société">
+                <i data-lucide="building"></i> VALIDATION SOCIÉTÉ
+            </button>
+            <button onclick="ouvrirPageFemmeMenage()" class="btn-neo btn-femme-menage" title="Espace Femme de Ménage">
+                <i data-lucide="user-check"></i> ESPACE MÉNAGE
+            </button>
         </div>
     </div>
 
@@ -28,6 +41,11 @@
 
     <!-- Planning Container -->
     <div class="card">
+        <!-- Statut synchronisation -->
+        <div id="syncStatusMenage" class="sync-status" style="display: none;">
+            <i data-lucide="loader" id="syncStatusIconMenage"></i> <span id="syncStatusTextMenage">Synchronisation en cours...</span>
+        </div>
+        
         <div id="menagePlanningWeeks" class="planning-container">
             <!-- Le planning sera généré ici par JavaScript -->
         </div>
@@ -45,7 +63,5 @@
             <!-- Les retours seront générés ici par JavaScript -->
         </div>
     </div>
-
-
 
 </div>

@@ -326,7 +326,7 @@ async function updateReservationsList(keepScrollPosition = false) {
     
     // ⚠️ IMPORTANT : forceRefresh=true pour recharger depuis BDD après sync
     const reservations = await getAllReservations(true);
-    const gites = await window.gitesManager.getAll(); // Charger les gîtes
+    const gites = await window.gitesManager.getVisibleGites(); // Charger les gîtes visibles selon abonnement
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -417,7 +417,7 @@ async function updateReservationsList(keepScrollPosition = false) {
         const weekDates = getWeekDates(parseInt(year), weekNum);
         
         // En-tête de semaine
-        // Adapter l'affichage selon le nombre de gîtes (1 à 4)
+        // Adapter l'affichage selon le nombre de gîtes visibles (1 à 4)
         let gridStyle;
         let gap = '20px';
         let padding = '20px';
@@ -425,7 +425,7 @@ async function updateReservationsList(keepScrollPosition = false) {
         if (gites.length === 1) {
             gridStyle = 'display: flex; justify-content: center; max-width: 800px; margin: 0 auto;';
         } else if (gites.length === 2) {
-            gridStyle = `display: grid; grid-template-columns: repeat(2, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
+            gridStyle = `display: grid; grid-template-columns: repeat(2, 1fr); gap: ${gap}; max-width: 1200px; margin: 0 auto;`;
         } else if (gites.length === 3) {
             gridStyle = `display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}; width: 100%; min-width: 0;`;
         } else if (gites.length >= 4) {
@@ -433,10 +433,10 @@ async function updateReservationsList(keepScrollPosition = false) {
         }
         
         html += `
-            <div class="weeks-grid">
+            <div class="weeks-grid" style="${gridStyle}">
         `;
         
-        // Générer colonnes pour chaque gîte
+        // Générer colonnes pour chaque gîte visible
         const colors = [
             '#3b82f6', '#ef4444', '#10b981', '#06b6d4'
         ];

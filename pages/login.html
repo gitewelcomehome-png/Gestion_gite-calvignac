@@ -115,6 +115,16 @@
             color: var(--text-primary);
             margin-bottom: 8px;
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        .logo h1 .unit-small {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: -2px;
         }
         
         .logo p {
@@ -280,7 +290,7 @@
         <div class="login-container">
             <div class="logo">
                 <div class="logo-icon">🏡</div>
-                <h1><span class="brand-cyan">L</span>ive<span class="brand-cyan">o</span>wner<span class="brand-cyan">u</span>nit</h1>
+                <h1><span><span class="brand-cyan">L</span>ive<span class="brand-cyan">O</span>wner</span><span class="unit-small"><span class="brand-cyan">U</span>nit</span></h1>
                 <p>Gestion Synchronisée de Gîtes</p>
             </div>
             
@@ -450,10 +460,20 @@
                 // console.log('✅ Connexion réussie!');
                 showAlert('Connexion réussie ! Redirection...', 'success');
                 
-                // Redirection après 1 seconde
-                setTimeout(() => {
-                    window.location.href = '/app';
-                }, 1000);
+                // ✅ Attendre que la session soit bien établie avant de rediriger
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Vérifier que la session est bien disponible
+                const { data: { session: verifiedSession } } = await window.supabaseClient.auth.getSession();
+                if (!verifiedSession) {
+                    console.error('⚠️ Session non disponible après connexion');
+                    showAlert('Erreur: session non établie');
+                    setLoading(false);
+                    return;
+                }
+                
+                // Redirection immédiate maintenant que la session est confirmée
+                window.location.href = '/app';
                 
             } catch (error) {
                 console.error('❌ Erreur inattendue:', error);

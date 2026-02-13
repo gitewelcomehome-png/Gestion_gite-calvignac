@@ -1,47 +1,57 @@
 <div class="tab-container">
-    <!-- Header Neo-Brutalism -->
+    <!-- Header -->
     <div id="infos-gites-header" class="infos-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
             <div>
-                <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; text-transform: uppercase;"><i data-lucide="clipboard"></i> INFOS PRATIQUES</h2>
-                <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Informations essentielles pour vos clients</p>
+                <h2 style="margin: 0; font-size: 1.4rem; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="clipboard" style="width: 20px; height: 20px;"></i> INFOS PRATIQUES
+                </h2>
+                <p style="margin: 6px 0 0 0; font-size: 0.85rem; color: #718096;">Informations essentielles</p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <!-- NOUVEAU: Bouton amélioration globale -->
-                <button type="button" onclick="improveAllTexts()" style="
-                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-                    border: 3px solid #2D3436;
-                    box-shadow: 3px 3px 0 #2D3436;
-                    color: white;
-                    cursor: pointer;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    transition: all 0.2s;
-                    font-weight: 700;
-                    font-size: 1rem;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                " title="Améliorer tous les textes avec l'IA" 
-                   onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" 
-                   onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
-                    <span style="font-size: 1.3rem;">✨</span> Améliorer tous les textes
+                <!-- Bouton IA unique -->
+                <button type="button" 
+                        id="btn-ai-improve"
+                        data-feature="ai_autocomplete"
+                        onclick="improveAllTexts()" 
+                        class="btn-header-action"
+                        style="background: #00C2CB; border: 1px solid rgba(45,52,54,0.2); color: white; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1); white-space: nowrap;" 
+                        title="Améliorer tous les textes avec l'IA"
+                        onmouseover="this.style.background='#00a8b0'; this.style.boxShadow='0 2px 6px rgba(0,194,203,0.3)';" 
+                        onmouseout="this.style.background='#00C2CB'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)';">
+                    ✨ IA
                 </button>
-                <!-- Bouton configuration IA -->
-                <button type="button" onclick="window.aiAssistant.showApiKeyModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;" title="Configurer l'Assistant IA" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
-                    <span style="font-size: 1.2rem;">✨</span> Assistant IA
-                </button>
+                
                 <!-- Liste déroulante de sélection de gîte -->
-                <select id="giteSelector" onchange="selectGiteFromDropdown(this.value)">
-                    <option value=""><i data-lucide="home"></i> Choisir un gîte...</option>
+                <select id="giteSelector" 
+                        onchange="selectGiteFromDropdown(this.value)"
+                        style="padding: 7px 16px; border: 2px solid #2D3436; border-radius: 6px; font-size: 0.875rem; font-weight: 600; cursor: pointer; background: white; color: #2d3748; transition: all 0.15s ease; box-shadow: 2px 2px 0 #2D3436; min-width: 180px;"
+                        onfocus="this.style.borderColor='#00C2CB'; this.style.boxShadow='3px 3px 0 #00C2CB';"
+                        onblur="this.style.borderColor='#2D3436'; this.style.boxShadow='2px 2px 0 #2D3436';"
+                        onmouseover="this.style.transform='translate(-1px, -1px)'; this.style.boxShadow='3px 3px 0 #2D3436';"
+                        onmouseout="this.style.transform=''; this.style.boxShadow='2px 2px 0 #2D3436';">
+                    <option value="">🏠 Choisir un gîte...</option>
                 </select>
+                
                 <!-- Bouton langue FR/EN -->
-                <button type="button" id="btnToggleLangInfos" onclick="toggleLanguageInfos()" style="background: #3498db; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; font-weight: 700; font-size: 0.9rem;" title="Basculer FR/EN" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
-                    <span id="langLabelInfos">🇫🇷 FR</span>
+                <button type="button" 
+                        id="btnToggleLangInfos" 
+                        onclick="toggleLanguageInfos()" 
+                        style="background: white; border: 1px solid #cbd5e0; color: #2d3748; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.875rem; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-width: 50px; text-align: center;" 
+                        title="Basculer FR/EN"
+                        onmouseover="this.style.background='#f7fafc'; this.style.borderColor='#00C2CB';" 
+                        onmouseout="this.style.background='white'; this.style.borderColor='#cbd5e0';">
+                    <span id="langLabelInfos">FR</span>
                 </button>
+                
                 <!-- Bouton effacer -->
-                <button type="button" onclick="resetGiteInfosQuick()" style="background: #ff7675; border: 3px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; color: white; font-size: 1.2rem; cursor: pointer; padding: 10px; border-radius: 8px; transition: all 0.2s;" title="Effacer toutes les informations" onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='5px 5px 0 #2D3436';" onmouseout="this.style.transform=''; this.style.boxShadow='3px 3px 0 #2D3436';">
-                    <i data-lucide="trash-2"></i>
+                <button type="button" 
+                        onclick="resetGiteInfosQuick()" 
+                        style="background: white; border: 1px solid #cbd5e0; color: #e53e3e; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; transition: all 0.15s ease; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" 
+                        title="Effacer toutes les informations"
+                        onmouseover="this.style.background='#fff5f5'; this.style.borderColor='#e53e3e';" 
+                        onmouseout="this.style.background='white'; this.style.borderColor='#cbd5e0';">
+                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
         </div>
@@ -272,16 +282,9 @@
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions détaillées pour récupérer les clés <span style="color: #ef4444;">*</span></label>
-                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                        <textarea id="infos_instructionsCles" class="form-control" rows="6" placeholder="1. Garez-vous sur le parking
+                                    <textarea id="infos_instructionsCles" class="form-control" rows="6" placeholder="1. Garez-vous sur le parking
 2. La boîte à clés est sur le mur à droite
-3. Composez le code 1234..." style="flex: 1;"></textarea>
-                                        <button type="button" onclick="showAIAssistantModal('infos_instructionsCles', 'keys')" 
-                                                style="padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; height: 44px; flex-shrink: 0; transition: transform 0.2s;" 
-                                                title="Générer avec l'IA"
-                                                onmouseover="this.style.transform='scale(1.05)'"
-                                                onmouseout="this.style.transform='scale(1)'">✨</button>
-                                    </div>
+3. Composez le code 1234..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -407,15 +410,8 @@
                             <div style="display: grid; gap: 15px;">
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Instructions Lave-Linge</label>
-                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                        <textarea id="infos_instructionsLaveLinge" class="form-control" rows="6" placeholder="Lave-linge Samsung :
-- Lessive fournie..." style="flex: 1;"></textarea>
-                                        <button type="button" onclick="showAIAssistantModal('infos_instructionsLaveLinge', 'equipment')" 
-                                                style="padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; height: 44px; flex-shrink: 0; transition: transform 0.2s;" 
-                                                title="Générer avec l'IA"
-                                                onmouseover="this.style.transform='scale(1.05)'"
-                                                onmouseout="this.style.transform='scale(1)'">✨</button>
-                                    </div>
+                                    <textarea id="infos_instructionsLaveLinge" class="form-control" rows="6" placeholder="Lave-linge Samsung :
+- Lessive fournie..."></textarea>
                                 </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                     <div>
@@ -434,16 +430,9 @@
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Linge de maison fourni</label>
-                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                        <textarea id="infos_lingeFourni" class="form-control" rows="4" placeholder="Fourni :
+                                    <textarea id="infos_lingeFourni" class="form-control" rows="4" placeholder="Fourni :
 - Draps (lits faits)
-- Serviettes (2 par personne)..." style="flex: 1;"></textarea>
-                                        <button type="button" onclick="showAIAssistantModal('infos_lingeFourni', 'linen')" 
-                                                style="padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; height: 44px; flex-shrink: 0; transition: transform 0.2s;" 
-                                                title="Générer avec l'IA"
-                                                onmouseover="this.style.transform='scale(1.05)'"
-                                                onmouseout="this.style.transform='scale(1)'">✨</button>
-                                    </div>
+- Serviettes (2 par personne)..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -453,15 +442,8 @@
                             <h3 style="color: #9c27b0; margin-bottom: 15px; font-size: 1.2rem;"><i data-lucide="bed"></i> Chambres</h3>
                             <div>
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Configuration des chambres</label>
-                                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                    <textarea id="infos_configurationChambres" class="form-control" rows="6" placeholder="CHAMBRE 1 : 1 lit double 160x200cm
-CHAMBRE 2 : 2 lits simples..." style="flex: 1;"></textarea>
-                                    <button type="button" onclick="showAIAssistantModal('infos_configurationChambres', 'equipment')" 
-                                            style="padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; height: 44px; flex-shrink: 0; transition: transform 0.2s;" 
-                                            title="Générer avec l'IA"
-                                            onmouseover="this.style.transform='scale(1.05)'"
-                                            onmouseout="this.style.transform='scale(1)'">✨</button>
-                                </div>
+                                <textarea id="infos_configurationChambres" class="form-control" rows="6" placeholder="CHAMBRE 1 : 1 lit double 160x200cm
+CHAMBRE 2 : 2 lits simples..."></textarea>
                             </div>
                         </div>
                     </div>

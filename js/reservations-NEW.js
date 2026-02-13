@@ -6,9 +6,9 @@ async function updateReservationsList() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // 1. CHARGER LES DONNÉES
+    // 1. CHARGER LES DONNÉES (respecte l'abonnement)
     const reservations = await getAllReservations(true);
-    const gites = await window.gitesManager.getAll();
+    const gites = await window.gitesManager.getVisibleGites();
     
     // 2. FILTRER : réservations futures avec vrai nom de client (pas BLOCKED/Reserved)
     const active = reservations.filter(r => {

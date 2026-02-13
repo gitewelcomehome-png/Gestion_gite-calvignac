@@ -11,7 +11,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/providers/auth-provider';
 import { supabase } from '@/services/supabase';
 import type { CleaningSchedule, Reservation } from '@/types/models';
-import { endOfDay, startOfDay, toIsoString } from '@/utils/dates';
+import { endOfDay, startOfDay, startOfWeek, toIsoString } from '@/utils/dates';
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -32,7 +32,9 @@ export default function DashboardScreen() {
     setErrorMessage(null);
 
     const today = new Date();
-    const start = startOfDay(today);
+    const todayStart = startOfDay(today);
+    // Début de la semaine en cours (lundi)
+    const weekStart = startOfWeek(today);
     // Fin de semaine = aujourd'hui + 7 jours
     const endWeek = new Date(today);
     endWeek.setDate(endWeek.getDate() + 7);
@@ -43,12 +45,12 @@ export default function DashboardScreen() {
       cleaningsResult,
       weeklyStatsResult,
     ] = await Promise.all([
-      // Les 3 prochaines réservations (peu importe la date)
+      // Les 3 réservations en cours ou à venir (check_out >= aujourd'hui)
       supabase
         .from('reservations')
         .select('id,gite_id,gite,check_in,check_out,client_name,client_phone,client_email,status,platform,total_price,guest_count,owner_user_id')
         .eq('owner_user_id', user.id)
-        .gte('check_in', toIsoString(start))
+        .gte('check_out', toIsoString(todayStart))
         .order('check_in', { ascending: true })
         .limit(3),
       // Ménages de la semaine
@@ -56,15 +58,15 @@ export default function DashboardScreen() {
         .from('cleaning_schedule')
         .select('id,gite_id,gite,scheduled_date,status,gites(name)')
         .eq('owner_user_id', user.id)
-        .gte('scheduled_date', toIsoString(start))
+        .gte('scheduled_date', toIsoString(todayStart))
         .lte('scheduled_date', toIsoString(end))
         .order('scheduled_date', { ascending: true }),
-      // Stats de la semaine (CA + nombre)
+      // Stats de la semaine (CA + nombre depuis le début de la semaine)
       supabase
         .from('reservations')
         .select('total_price')
         .eq('owner_user_id', user.id)
-        .gte('check_in', toIsoString(start))
+        .gte('check_in', toIsoString(weekStart))
         .lte('check_in', toIsoString(end)),
     ]);
 

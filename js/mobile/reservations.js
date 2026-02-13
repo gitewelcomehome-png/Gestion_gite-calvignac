@@ -11,7 +11,7 @@ async function updateReservationsList() {
     const reservations = await getAllReservations(true);
     // console.log('📊 Réservations chargées:', reservations?.length || 0);
     
-    const gites = await window.gitesManager.getAll();
+    const gites = await window.gitesManager.getVisibleGites();
     // console.log('🏠 Gîtes chargés:', gites?.length || 0);
     
     const today = new Date();

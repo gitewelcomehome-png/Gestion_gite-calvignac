@@ -532,6 +532,15 @@ html.theme-dark .dropdown-divider-modern {
     line-height: 0.9;
     margin: 0;
     color: var(--text-primary);
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.brand-name .unit-small {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: -2px;
 }
 
 /* Lettres L, O, U en cyan */
@@ -4081,6 +4090,11 @@ html.style-sidebar .dashboard-icalou .dashboard-container-menages::before {
     box-shadow: 2px 0 10px rgba(0, 194, 203, 0.4);
 }
 
+html.style-sidebar .dashboard-icalou .communications-widget::before {
+    background: linear-gradient(135deg, #00C2CB 0%, #00a8b0 100%);
+    box-shadow: 2px 0 10px rgba(0, 194, 203, 0.4);
+}
+
 html.style-sidebar .dashboard-icalou .dashboard-container-semaine::before {
     background: linear-gradient(135deg, #00C2CB 0%, #00a8b0 100%);
     box-shadow: 2px 0 10px rgba(0, 194, 203, 0.4);
@@ -4691,6 +4705,18 @@ html.style-apple .dashboard-icalou .badge--info {
 
 .dashboard-icalou .gap-lg {
     gap: 20px;
+}
+
+.dashboard-icalou .gap-sm,
+.gap-sm {
+    gap: 0.5rem;
+}
+
+/* Grille 2 colonnes dans les cartes fiscales (grid--4) */
+.grid--4 .grid--2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
 }
 
 /* Layout flexbox colonnes */
@@ -5553,27 +5579,27 @@ html.style-apple .dashboard-graph-container-benefice .section-header {
 .grid--4 {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.35rem;
-    max-width: 99%;
+    gap: 1rem;
+    width: 100%;
 }
 
 .grid--4 .card--spacious {
-    padding: 0.35rem !important;
+    padding: 1rem !important;
     min-width: 0;
 }
 
 .grid--4 .section-title {
-    font-size: 0.85rem !important;
-    margin-bottom: 7px !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 0.5rem !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .grid--4 .indicator {
-    padding: 0.4rem !important;
+    padding: 0.75rem !important;
     min-width: 0;
-    max-width: calc(100% - 22px);
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -5708,4 +5734,94 @@ html.style-apple .dashboard-graph-container-benefice .section-header {
 select option:disabled {
     color: #999 !important;
     opacity: 0.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE - GRILLE 4 COLONNES (VISION GLOBALE)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Tablette (max 1200px) : 2 colonnes */
+@media (max-width: 1200px) {
+    .grid--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+}
+
+/* Tablette Portrait (max 900px) : 2 colonnes compactes */
+@media (max-width: 900px) {
+    .grid--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+}
+
+/* Mobile (max 768px) : 1 colonne */
+@media (max-width: 768px) {
+    .grid--4 {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .grid--4 .card--spacious {
+        padding: 1rem !important;
+    }
+    
+    .grid--4 .section-title {
+        font-size: 1rem !important;
+        white-space: normal;
+    }
+}
+
+/* RESPONSIVE - GRILLE 6 COLONNES (KPI PERFORMANCE) */
+
+/* Desktop Large (max 1400px) : 3 colonnes */
+@media (max-width: 1400px) {
+    .grid--6 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+}
+
+/* Tablette (max 1024px) : 2 colonnes */
+@media (max-width: 1024px) {
+    .grid--6 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+    
+    .grid--6 .card--compact {
+        padding: 0.75rem !important;
+    }
+}
+
+/* Mobile (max 768px) : 1 colonne */
+@media (max-width: 768px) {
+    .grid--6 {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .grid--6 .section-title-small {
+        font-size: 0.9rem !important;
+        white-space: normal;
+    }
+    
+    /* Ajustement des grilles Dashboard pour mobile */
+    .dashboard-icalou .grid--2 {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .dashboard-icalou .grid--auto-lg {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* Tablette (max 1024px) : Ajustements grilles dashboard */
+@media (max-width: 1024px) {
+    .dashboard-icalou .grid--auto-lg {
+        grid-template-columns: 1fr;
+    }
 }

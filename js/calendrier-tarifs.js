@@ -101,21 +101,36 @@ async function initCalendrierTarifs() {
 
 async function loadGitesSelector() {
     try {
+        // Attendre que le subscription manager soit initialisé
+        let retries = 0;
+        while ((!window.subscriptionManager || !window.subscriptionManager.currentSubscription) && retries < 100) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+        }
+        
+        if (!window.subscriptionManager || !window.subscriptionManager.currentSubscription) {
+            console.warn('⚠️ Subscription manager non initialisé après 10 secondes');
+        }
+        
         let gites = [];
         
         // Essayer d'utiliser GitesManager d'abord
         if (window.GitesManager && window.GitesManager.loaded) {
-            gites = await window.GitesManager.getAll();
+            gites = await window.gitesManager.getVisibleGites();
         } else {
             // Fallback : requête directe si GitesManager non disponible
             // RLS filtre automatiquement par owner_user_id
             const { data, error } = await window.supabaseClient
                 .from('gites')
                 .select('id, name, color')
+                .order('ordre_affichage', { ascending: true, nullsFirst: false })
                 .order('name', { ascending: true });
             
             if (error) throw error;
-            gites = data;
+            
+            // Appliquer manuellement la limite d'abonnement si GitesManager non dispo
+            const maxGites = window.subscriptionManager?.currentSubscription?.plan?.max_gites || 1;
+            gites = (data || []).slice(0, maxGites);
         }
         
         if (!gites || gites.length === 0) {
@@ -128,135 +143,70 @@ async function loadGitesSelector() {
             return;
         }
         
-        container.innerHTML = '';
+        // Créer un select au lieu de boutons
+        const select = document.createElement('select');
+        select.id = 'gite-selector';
+        select.style.cssText = `
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            background: var(--card);
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            min-width: 280px;
+            transition: all 0.2s;
+        `;
         
+        // Ajouter les options
         gites.forEach((gite, index) => {
-            const button = document.createElement('button');
-            button.className = 'gite-button';
-            button.dataset.giteId = gite.id;
-            button.dataset.color = gite.color || '#667eea';
-            button.style.cssText = `
-                background: var(--card);
-                border: 3px solid ${gite.color || '#667eea'};
-                color: ${gite.color || '#667eea'};
-                padding: 15px 25px;
-                border-radius: 12px;
-                font-size: 1rem;
-                font-weight: 700;
-                cursor: pointer;
-                box-shadow: 4px 4px 0 #2D3436;
-                transition: all 0.2s;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                min-width: 180px;
-                justify-content: center;
-            `;
-            button.innerHTML = `
-                <span style="font-size: 1.5rem;">🏡</span>
-                <span style="font-weight: 700;">${gite.name}</span>
-            `;
+            const option = document.createElement('option');
+            option.value = gite.id;
+            option.textContent = `🏡 ${gite.name}`;
+            option.dataset.color = gite.color || '#667eea';
+            select.appendChild(option);
+        });
+        
+        // Événement de changement
+        select.addEventListener('change', async () => {
+            const selectedOption = select.options[select.selectedIndex];
+            const giteId = select.value;
+            const gite = gites.find(g => g.id === giteId);
             
-            button.addEventListener('click', async () => {
-                // Retirer la classe active de tous les boutons
-                document.querySelectorAll('.gite-button').forEach(btn => {
-                    btn.classList.remove('active');
-                    const color = btn.dataset.color || '#667eea';
-                    btn.style.cssText = `
-                        background: var(--card);
-                        border: 3px solid ${color};
-                        color: ${color};
-                        padding: 15px 25px;
-                        border-radius: 12px;
-                        font-size: 1rem;
-                        font-weight: 700;
-                        cursor: pointer;
-                        box-shadow: 4px 4px 0 #2D3436;
-                        transition: all 0.2s;
-                        display: flex;
-                        align-items: center;
-                        gap: 10px;
-                        min-width: 180px;
-                        justify-content: center;
-                    `;
-                });
-                // Activer ce bouton
-                button.classList.add('active');
-                button.style.cssText = `
-                    background: ${gite.color || '#667eea'};
-                    border: 3px solid #2D3436;
-                    color: white;
-                    padding: 15px 25px;
-                    border-radius: 12px;
-                    font-size: 1rem;
-                    font-weight: 700;
-                    cursor: pointer;
-                    box-shadow: 6px 6px 0 #2D3436;
-                    transform: translateY(-2px);
-                    transition: all 0.2s;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    min-width: 180px;
-                    justify-content: center;
-                `;
-                
+            if (gite) {
                 currentGiteId = gite.id;
+                
+                // Appliquer la couleur du gîte au select
+                const giteColor = gite.color || '#667eea';
+                select.style.borderColor = giteColor;
+                select.style.color = giteColor;
+                
                 updateGiteHeader(gite);
                 await loadAllData();
                 await saveConfiguration();
-            });
-            
-            button.addEventListener('mouseenter', () => {
-                if (!button.classList.contains('active')) {
-                    button.style.transform = 'translateY(-2px)';
-                    button.style.boxShadow = '6px 6px 0 #2D3436';
-                }
-            });
-            
-            button.addEventListener('mouseleave', () => {
-                if (!button.classList.contains('active')) {
-                    button.style.transform = 'translateY(0)';
-                    button.style.boxShadow = '4px 4px 0 #2D3436';
-                }
-            });
-            
-            container.appendChild(button);
+            }
         });
+        
+        container.innerHTML = '';
+        container.appendChild(select);
         
         // Sélectionner le premier gîte par défaut
         if (gites.length > 0 && !currentGiteId) {
             currentGiteId = gites[0].id;
-            const firstButton = container.querySelector('.gite-button');
-            if (firstButton) {
-                firstButton.classList.add('active');
-                const color = gites[0].color || '#667eea';
-                firstButton.style.cssText = `
-                    background: ${color};
-                    border: 3px solid #2D3436;
-                    color: white;
-                    padding: 15px 25px;
-                    border-radius: 12px;
-                    font-size: 1rem;
-                    font-weight: 700;
-                    cursor: pointer;
-                    box-shadow: 6px 6px 0 #2D3436;
-                    transform: translateY(-2px);
-                    transition: all 0.2s;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    min-width: 180px;
-                    justify-content: center;
-                `;
-                updateGiteHeader(gites[0]);
-                // Charger les données du premier gîte
-                await loadAllData();
-                // Afficher le calendrier
-                renderCalendrierTarifs();
-            }
+            select.value = currentGiteId;
+            
+            // Appliquer la couleur du premier gîte
+            const firstColor = gites[0].color || '#667eea';
+            select.style.borderColor = firstColor;
+            select.style.color = firstColor;
+            
+            updateGiteHeader(gites[0]);
+            // Charger les données du premier gîte
+            await loadAllData();
+            // Afficher le calendrier
+            renderCalendrierTarifs();
         }
-        
         
     } catch (error) {
         console.error('❌ Erreur chargement gîtes:', error);

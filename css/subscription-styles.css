@@ -1,0 +1,497 @@
+/**
+ * ===================================================================
+ * SUBSCRIPTION STYLES - STYLES POUR LE SYSTÈME D'ABONNEMENTS
+ * ===================================================================
+ * Date: 12 février 2026
+ * Description: Styles pour le feature gating, modals d'upgrade,
+ *              bandeaux d'abonnement et contrôles d'accès
+ * ===================================================================
+ */
+
+/* ===========================
+   FEATURES VERROUILLÉES
+   =========================== */
+
+.feature-locked {
+  position: relative;
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  filter: grayscale(60%);
+  transition: all 0.3s;
+}
+
+.feature-locked::after {
+  content: '🔒';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  pointer-events: none;
+}
+
+/* Bandeau fonctionnalité verrouillée */
+.locked-feature-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.locked-feature-banner .lock-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.locked-feature-banner strong {
+  color: #2d3748;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.locked-feature-banner p {
+  color: #718096;
+  margin: 0;
+  font-size: 14px;
+}
+
+.locked-feature-banner .btn-upgrade {
+  margin-left: auto;
+  padding: 10px 20px;
+  background: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.locked-feature-banner .btn-upgrade:hover {
+  background: #3182ce;
+}
+
+/* Placeholder GDF verrouillé */
+.gdf-locked-placeholder {
+  margin: 20px 0;
+}
+
+/* ===========================
+   BANDEAU ABONNEMENT
+   =========================== */
+
+#subscription-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  margin: 0 0 0 4px;
+  background: transparent;
+}
+
+.plan-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: rgba(0, 194, 203, 0.15);
+  color: #00C2CB;
+  border: 1px solid rgba(0, 194, 203, 0.3);
+}
+
+.plan-solo,
+.plan-duo,
+.plan-quattro {
+  background: rgba(0, 194, 203, 0.15);
+  color: #00C2CB;
+  border: 1px solid rgba(0, 194, 203, 0.3);
+}
+
+/* ===========================
+   COMPTEUR LIMITE GÎTES
+   =========================== */
+
+[data-display="gites-limit"] {
+  font-size: 14px;
+  color: #718096;
+  padding: 8px 12px;
+  background: #f7fafc;
+  border-radius: 6px;
+  display: inline-block;
+  border: 1px solid #e2e8f0;
+}
+
+[data-display="gites-limit"].limit-reached {
+  background: #fed7d7;
+  color: #742a2a;
+  font-weight: 600;
+  border-color: #fc8181;
+}
+
+/* ===========================
+   MODALS
+   =========================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+  animation: slideUp 0.3s;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #2d3748;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #a0aec0;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.modal-close:hover {
+  background: #f7fafc;
+  color: #2d3748;
+}
+
+.modal-body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* ===========================
+   CONTENU MODAL UPGRADE
+   =========================== */
+
+.upgrade-modal-content p {
+  margin: 0 0 16px;
+  color: #4a5568;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.current-plan {
+  color: #718096;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.plan-benefits {
+  margin: 24px 0;
+  padding: 20px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.plan-benefits h4 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #2d3748;
+}
+
+.plan-benefits ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-benefits li {
+  padding: 6px 0;
+  color: #4a5568;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.price-info {
+  text-align: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  font-size: 18px;
+}
+
+.price-info strong {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* ===========================
+   CONTENU MODAL LIMITE
+   =========================== */
+
+.limit-modal-content p {
+  margin: 0 0 16px;
+  color: #4a5568;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.upgrade-suggestion {
+  margin: 24px 0;
+  padding: 20px;
+  background: #f0fff4;
+  border: 2px solid #9ae6b4;
+  border-radius: 8px;
+}
+
+.upgrade-suggestion p {
+  margin-bottom: 12px;
+  color: #276749;
+}
+
+.price-diff {
+  text-align: center;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  font-size: 18px;
+  color: #38a169;
+  font-weight: 600;
+}
+
+/* ===========================
+   BOUTONS
+   =========================== */
+
+.btn-primary {
+  padding: 12px 24px;
+  background: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 15px;
+}
+
+.btn-primary:hover {
+  background: #3182ce;
+}
+
+.btn-primary:active {
+  background: #2c5282;
+}
+
+.btn-outline {
+  padding: 12px 24px;
+  background: transparent;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 15px;
+}
+
+.btn-outline:hover {
+  border-color: #cbd5e0;
+  background: #f7fafc;
+}
+
+.btn-outline:active {
+  background: #edf2f7;
+}
+
+/* ===========================
+   ANIMATIONS
+   =========================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Bloquer le scroll quand modal ouverte */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+
+@media (max-width: 768px) {
+  .modal-container {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .locked-feature-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .locked-feature-banner .btn-upgrade {
+    margin: 12px auto 0;
+  }
+
+  .subscription-info {
+    flex-wrap: wrap;
+  }
+
+  .btn-manage {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .feature-locked::after {
+    font-size: 18px;
+  }
+
+  .modal-header h3 {
+    font-size: 18px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .plan-benefits {
+    padding: 12px;
+  }
+
+  .price-info {
+    font-size: 16px;
+  }
+
+  .price-info strong {
+    font-size: 20px;
+  }
+}
+
+/* ===========================
+   DARK MODE (Optionnel)
+   =========================== */
+
+@media (prefers-color-scheme: dark) {
+  .locked-feature-banner {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border-color: #4a5568;
+  }
+
+  .locked-feature-banner strong {
+    color: #e2e8f0;
+  }
+
+  .locked-feature-banner p {
+    color: #a0aec0;
+  }
+
+  .modal-container {
+    background: #2d3748;
+  }
+
+  .modal-header {
+    border-bottom-color: #4a5568;
+  }
+
+  .modal-header h3 {
+    color: #e2e8f0;
+  }
+
+  .modal-body {
+    color: #cbd5e0;
+  }
+
+  .modal-footer {
+    border-top-color: #4a5568;
+  }
+
+  .upgrade-modal-content p,
+  .limit-modal-content p {
+    color: #cbd5e0;
+  }
+
+  .plan-benefits {
+    background: #1a202c;
+    border-color: #4a5568;
+  }
+
+  .plan-benefits h4 {
+    color: #e2e8f0;
+  }
+
+  .plan-benefits li {
+    color: #cbd5e0;
+  }
+}

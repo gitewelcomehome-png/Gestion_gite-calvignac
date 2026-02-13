@@ -507,6 +507,221 @@
             </div>
         </div>
         
+        <!-- MON ABONNEMENT -->
+        <div class="section-card" style="margin-bottom: 2rem;">
+            <div class="section-header">
+                <div class="section-icon">💳</div>
+                <div class="section-title">Mon Abonnement</div>
+            </div>
+            <p class="section-description">
+                Gérez votre plan d'abonnement et accédez à plus de fonctionnalités
+            </p>
+            
+            <div id="subscriptionLoading" style="text-align: center; padding: 3rem; display: none;">
+                <div style="display: inline-block; width: 50px; height: 50px; border: 4px solid #e5e7eb; border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">Chargement de votre abonnement...</p>
+            </div>
+            
+            <div id="subscriptionContent">
+                <!-- Plan actuel -->
+                <div id="currentPlanBanner" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 12px; margin: 1.5rem 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.25rem;">Votre plan actuel</div>
+                        <div style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem;" id="currentPlanName">DUO</div>
+                        <div style="font-size: 0.95rem; opacity: 0.9;" id="currentPlanLimits">🏡 Jusqu'à 2 gîtes • 📊 Statistiques • 💰 Fiscalité</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 2rem; font-weight: 700;" id="currentPlanPrice">15€</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9;" id="currentPlanPeriod">/mois</div>
+                        <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem;" id="currentPlanNextBilling">Prochain paiement le 13 mars 2026</div>
+                    </div>
+                </div>
+                
+                <!-- Sélecteur période de paiement -->
+                <div style="text-align: center; margin: 2rem 0;">
+                    <div style="display: inline-flex; background: var(--bg-secondary); border-radius: 12px; padding: 0.5rem; gap: 0.5rem;">
+                        <button id="btnPeriodMonthly" onclick="switchPricingPeriod('monthly')" style="padding: 0.75rem 1.5rem; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                            💳 Mensuel
+                        </button>
+                        <button id="btnPeriodCommitment" onclick="switchPricingPeriod('commitment')" style="padding: 0.75rem 1.5rem; border: none; border-radius: 8px; background: transparent; color: var(--text-secondary); font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                            🔒 Engagement 12 mois
+                        </button>
+                        <button id="btnPeriodAnnual" onclick="switchPricingPeriod('annual')" style="padding: 0.75rem 1.5rem; border: none; border-radius: 8px; background: transparent; color: var(--text-secondary); font-weight: 600; cursor: pointer; transition: all 0.3s; position: relative;">
+                            💰 Annuel
+                            <span style="position: absolute; top: -8px; right: -8px; background: #10b981; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; font-weight: 700;">-5€</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plans disponibles -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                    <!-- Plan SOLO -->
+                    <div class="pricing-card" data-plan="solo" style="border: 2px solid var(--border-color); border-radius: 16px; padding: 2rem; background: var(--bg-primary); transition: all 0.3s ease; position: relative; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.5rem 1rem; border-radius: 8px; display: inline-block; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;">
+                            🌱 SOLO
+                        </div>
+                        <div class="pricing-amount" data-monthly="15" data-commitment="10" data-annual="115" style="font-size: 2.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                            15€<span class="pricing-period" style="font-size: 1rem; font-weight: 400; color: var(--text-secondary);">/mois</span>
+                        </div>
+                        <div class="pricing-savings" style="color: #10b981; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; min-height: 1.2rem; visibility: hidden;">Économisez 60€/an</div>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; min-height: 2.5rem;">Idéal pour démarrer avec 1 gîte</p>
+                        
+                        <ul style="list-style: none; margin-bottom: 2rem; space-y: 0.75rem;">
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary);"><strong>1 gîte</strong> maximum</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary);">Calendrier & réservations</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary);">Planning ménage basique</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary);">Fiscalité LMNP complète</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #10b981; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary);">Fiche voyageur QR WiFi</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #ef4444; font-size: 1.2rem;">✗</span>
+                                <span style="color: var(--text-secondary); text-decoration: line-through;">🤖 Auto-complétion IA</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #ef4444; font-size: 1.2rem;">✗</span>
+                                <span style="color: var(--text-secondary); text-decoration: line-through;">🏛️ Tableau Gîtes de France</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #ef4444; font-size: 1.2rem;">✗</span>
+                                <span style="color: var(--text-secondary); text-decoration: line-through;">📊 Tableaux de bord avancés</span>
+                            </li>
+                        </ul>
+                        
+                        <button class="pricing-btn" data-plan="solo" onclick="handleSubscriptionAction('solo')" style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s;">
+                            Passer au plan SOLO
+                        </button>
+                    </div>
+                    
+                    <!-- Plan DUO -->
+                    <div class="pricing-card popular" data-plan="duo" style="border: 3px solid #667eea; border-radius: 16px; padding: 2rem; background: var(--bg-primary); transition: all 0.3s ease; position: relative; overflow: hidden; box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);">
+                        <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.5rem 1.5rem; border-radius: 0 16px 0 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">
+                            ⭐ POPULAIRE
+                        </div>
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.5rem 1rem; border-radius: 8px; display: inline-block; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; margin-top: 1.5rem;">
+                            🏘️ DUO
+                        </div>
+                        <div class="pricing-amount" data-monthly="22" data-commitment="15" data-annual="170" style="font-size: 2.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                            22€<span class="pricing-period" style="font-size: 1rem; font-weight: 400; color: var(--text-secondary);">/mois</span>
+                        </div>
+                        <div class="pricing-savings" style="color: #667eea; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; min-height: 1.2rem; visibility: hidden;">Économisez 90€/an</div>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; min-height: 2.5rem;">Parfait pour gérer 2 gîtes</p>
+                        
+                        <ul style="list-style: none; margin-bottom: 2rem;">
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #667eea; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary); font-weight: 600;"><strong>2 gîtes</strong> maximum</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #667eea; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary);">Tout SOLO +</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #667eea; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">🤖 Auto-complétion IA</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #667eea; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">🏛️ Tableau Gîtes de France</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #667eea; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary);">Vue multi-propriétés</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #667eea; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">🎬 Formation vidéo</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #ef4444; font-size: 1.2rem;">✗</span>
+                                <span style="color: var(--text-secondary); text-decoration: line-through;">💬 Communication IA</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #ef4444; font-size: 1.2rem;">✗</span>
+                                <span style="color: var(--text-secondary); text-decoration: line-through;">� Tableaux de bord avancés</span>
+                            </li>
+                        </ul>
+                        
+                        <button class="pricing-btn current" data-plan="duo" onclick="handleSubscriptionAction('duo')" style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; font-size: 1rem; cursor: not-allowed; transition: all 0.2s; opacity: 0.7;">
+                            ✓ Plan actuel
+                        </button>
+                    </div>
+                    
+                    <!-- Plan QUATTRO -->
+                    <div class="pricing-card" data-plan="quattro" style="border: 2px solid var(--border-color); border-radius: 16px; padding: 2rem; background: var(--bg-primary); transition: all 0.3s ease; position: relative; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 0.5rem 1rem; border-radius: 8px; display: inline-block; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;">
+                            🏆 QUATTRO
+                        </div>
+                        <div class="pricing-amount" data-monthly="33" data-commitment="23" data-annual="256" style="font-size: 2.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                            33€<span class="pricing-period" style="font-size: 1rem; font-weight: 400; color: var(--text-secondary);">/mois</span>
+                        </div>
+                        <div class="pricing-savings" style="color: #f59e0b; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; min-height: 1.2rem; visibility: hidden;">Économisez 120€/an</div>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; min-height: 2.5rem;">Pour les professionnels avec 4 gîtes</p>
+                        
+                        <ul style="list-style: none; margin-bottom: 2rem;">
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #f59e0b; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary); font-weight: 600;"><strong>4 gîtes</strong> maximum</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #f59e0b; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary);">Tout DUO +</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #f59e0b; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">💬 Communication IA</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #f59e0b; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">📊 Tableaux de bord avancés</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #f59e0b; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">🎥 Webinaire mensuel collectif</span>
+                            </li>
+                            <li style="display: flex; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="color: #f59e0b; font-size: 1.2rem;">✓</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">⚡ Support VIP (réponse 4h)</span>
+                            </li>
+                        </ul>
+                        
+                        <button class="pricing-btn" data-plan="quattro" onclick="handleSubscriptionAction('quattro')" style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s;">
+                            Passer au plan QUATTRO
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Historique de facturation -->
+                <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+                    <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary);">📄 Historique de facturation</h3>
+                    <div id="billingHistory" style="background: var(--bg-secondary); border-radius: 12px; padding: 1.5rem;">
+                        <p style="text-align: center; color: var(--text-secondary);">Chargement de l'historique...</p>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button class="btn btn-secondary" onclick="manageBilling()">
+                            💳 Gérer mes moyens de paiement
+                        </button>
+                        <button class="btn btn-secondary" onclick="cancelSubscription()">
+                            ⚠️ Annuler mon abonnement
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="sections-grid">
             <!-- OUTILS DE GESTION -->
             <div class="section-card" style="grid-column: 1 / -1;">
@@ -717,6 +932,303 @@
             document.documentElement.classList.remove('theme-light', 'theme-dark');
             document.documentElement.classList.add('theme-' + theme);
         }
+        
+        // ==========================================
+        // 💳 GESTION DES ABONNEMENTS
+        // ==========================================
+        
+        async function loadCurrentSubscription() {
+            const loading = document.getElementById('subscriptionLoading');
+            const content = document.getElementById('subscriptionContent');
+            
+            try {
+                loading.style.display = 'block';
+                content.style.display = 'none';
+                
+                // Récupérer l'utilisateur courant
+                const { data: { user } } = await window.supabaseClient.auth.getUser();
+                if (!user) throw new Error('Utilisateur non authentifié');
+                
+                // Récupérer l'abonnement actuel
+                const { data: subscription, error } = await window.supabaseClient
+                    .from('user_subscriptions')
+                    .select(`
+                        *,
+                        plan:subscriptions_plans(*)
+                    `)
+                    .eq('user_id', user.id)
+                    .eq('status', 'active')
+                    .single();
+                
+                if (error) throw error;
+                
+                if (subscription && subscription.plan) {
+                    // Mettre à jour le banner du plan actuel
+                    document.getElementById('currentPlanName').textContent = subscription.plan.display_name;
+                    document.getElementById('currentPlanPrice').textContent = subscription.plan.price + '€';
+                    
+                    // Limites du plan
+                    const limits = [];
+                    limits.push(`🏡 Jusqu'à ${subscription.plan.max_gites} gîte${subscription.plan.max_gites > 1 ? 's' : ''}`);
+                    if (subscription.plan.level >= 2) limits.push('📊 Statistiques');
+                    if (subscription.plan.level >= 2) limits.push('💰 Fiscalité');
+                    if (subscription.plan.level >= 3) limits.push('📈 Export données');
+                    if (subscription.plan.level >= 3) limits.push('🤖 Automatisations');
+                    document.getElementById('currentPlanLimits').textContent = limits.join(' • ');
+                    
+                    // Prochain paiement
+                    if (subscription.next_billing_date) {
+                        const nextDate = new Date(subscription.next_billing_date);
+                        document.getElementById('currentPlanNextBilling').textContent = 
+                            `Prochain paiement le ${nextDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+                    }
+                    
+                    // Mettre à jour les boutons des plans
+                    document.querySelectorAll('.pricing-btn').forEach(btn => {
+                        const planId = btn.dataset.plan;
+                        if (planId === subscription.plan.plan_id) {
+                            btn.classList.add('current');
+                            btn.textContent = '✓ Plan actuel';
+                            btn.style.cursor = 'not-allowed';
+                            btn.style.opacity = '0.7';
+                            btn.disabled = true;
+                        } else {
+                            btn.classList.remove('current');
+                            btn.disabled = false;
+                            btn.style.cursor = 'pointer';
+                            btn.style.opacity = '1';
+                            
+                            const currentLevel = subscription.plan.level;
+                            const targetPlan = ['solo', 'duo', 'quattro'].indexOf(planId) + 1;
+                            
+                            if (targetPlan > currentLevel) {
+                                btn.textContent = `Passer au plan ${planId.toUpperCase()}`;
+                            } else {
+                                btn.textContent = `Rétrograder au plan ${planId.toUpperCase()}`;
+                            }
+                        }
+                    });
+                    
+                    // Charger l'historique de facturation
+                    await loadBillingHistory(user.id);
+                }
+                
+                loading.style.display = 'none';
+                content.style.display = 'block';
+                
+            } catch (error) {
+                console.error('❌ Erreur chargement abonnement:', error);
+                loading.style.display = 'none';
+                content.style.display = 'block';
+                
+                // Afficher un message d'erreur
+                alert('⚠️ Impossible de charger votre abonnement. Veuillez réessayer.');
+            }
+        }
+        
+        async function loadBillingHistory(userId) {
+            const historyContainer = document.getElementById('billingHistory');
+            
+            try {
+                // Récupérer l'historique des paiements (à implémenter avec Stripe)
+                // Pour l'instant, afficher un message
+                historyContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">📜 Votre historique de facturation</p>
+                        <p style="font-size: 0.9rem;">Vous n'avez pas encore de factures</p>
+                        <p style="font-size: 0.85rem; margin-top: 1rem; opacity: 0.7;">
+                            Les factures apparaîtront ici après votre premier paiement
+                        </p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('❌ Erreur chargement historique:', error);
+                historyContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #ef4444;">
+                        <p>⚠️ Impossible de charger l'historique de facturation</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function handleSubscriptionAction(targetPlan) {
+            // Vérifier si c'est un upgrade ou downgrade
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            if (!user) {
+                alert('⚠️ Vous devez être connecté');
+                return;
+            }
+            
+            const { data: currentSubscription } = await window.supabaseClient
+                .from('user_subscriptions')
+                .select('*, plan:subscriptions_plans(*)')
+                .eq('user_id', user.id)
+                .eq('status', 'active')
+                .single();
+            
+            if (!currentSubscription) {
+                alert('⚠️ Aucun abonnement actif trouvé');
+                return;
+            }
+            
+            const currentLevel = currentSubscription.plan.level;
+            const targetLevel = ['solo', 'duo', 'quattro'].indexOf(targetPlan) + 1;
+            
+            if (targetLevel === currentLevel) {
+                return; // Déjà sur ce plan
+            }
+            
+            const isUpgrade = targetLevel > currentLevel;
+            const action = isUpgrade ? 'passer' : 'rétrograder';
+            const planName = targetPlan.toUpperCase();
+            
+            const confirmed = confirm(
+                `Voulez-vous vraiment ${action} au plan ${planName} ?\n\n` +
+                `${isUpgrade ? '✓' : '⚠️'} Cette modification sera effective immédiatement.\n` +
+                `${isUpgrade ? 'Vous serez facturé au prorata.' : 'Le montant sera ajusté lors du prochain cycle.'}`
+            );
+            
+            if (!confirmed) return;
+            
+            try {
+                // TODO: Intégration Stripe
+                // 1. Pour upgrade : créer une session Checkout Stripe
+                // 2. Pour downgrade : mettre à jour via Customer Portal ou API
+                
+                alert('🚧 Fonctionnalité en cours de développement\n\nL\'intégration Stripe sera disponible prochainement.\n\nContactez le support pour modifier votre abonnement : support@liveownerunit.com');
+                
+                // Code futur avec Stripe :
+                /*
+                const response = await fetch('/api/stripe/change-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        targetPlan: targetPlan
+                    })
+                });
+                
+                const { url } = await response.json();
+                window.location.href = url; // Rediriger vers Stripe Checkout ou Customer Portal
+                */
+                
+            } catch (error) {
+                console.error('❌ Erreur changement abonnement:', error);
+                alert('⚠️ Une erreur est survenue. Veuillez réessayer ou contacter le support.');
+            }
+        }
+        
+        function manageBilling() {
+            alert('🚧 Gestion des moyens de paiement\n\nCette fonctionnalité sera disponible avec l\'intégration Stripe.\n\nVous pourrez alors :\n• Ajouter/supprimer des cartes bancaires\n• Modifier votre méthode de paiement\n• Consulter vos coordonnées de facturation');
+        }
+        
+        function cancelSubscription() {
+            const confirmed = confirm(
+                '⚠️ ATTENTION : Annulation d\'abonnement\n\n' +
+                'Êtes-vous sûr de vouloir annuler votre abonnement ?\n\n' +
+                '• Vous perdrez l\'accès à toutes vos données\n' +
+                '• L\'annulation sera effective à la fin de votre période de facturation\n' +
+                '• Vous pouvez réactiver votre compte à tout moment\n\n' +
+                'Tapez OUI pour confirmer l\'annulation.'
+            );
+            
+            if (!confirmed) return;
+            
+            const doubleConfirm = prompt('⚠️ Dernière confirmation\n\nPour annuler définitivement, tapez "ANNULER" en majuscules :');
+            
+            if (doubleConfirm !== 'ANNULER') {
+                alert('❌ Annulation abandonnée');
+                return;
+            }
+            
+            // TODO: Intégration Stripe Cancellation
+            alert('🚧 Annulation d\'abonnement\n\nPour annuler votre abonnement, veuillez contacter le support :\nsupport@liveownerunit.com\n\nNous traiterons votre demande dans les plus brefs délais.');
+        }
+        
+        // ==========================================
+        // 💰 GESTION DES PÉRIODES DE PAIEMENT
+        // ==========================================
+        
+        let currentPricingPeriod = 'monthly'; // monthly, commitment, annual
+        
+        function switchPricingPeriod(period) {
+            currentPricingPeriod = period;
+            
+            // Mettre à jour les boutons
+            document.getElementById('btnPeriodMonthly').style.background = 
+                period === 'monthly' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent';
+            document.getElementById('btnPeriodMonthly').style.color = 
+                period === 'monthly' ? 'white' : 'var(--text-secondary)';
+            
+            document.getElementById('btnPeriodCommitment').style.background = 
+                period === 'commitment' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent';
+            document.getElementById('btnPeriodCommitment').style.color = 
+                period === 'commitment' ? 'white' : 'var(--text-secondary)';
+            
+            document.getElementById('btnPeriodAnnual').style.background = 
+                period === 'annual' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent';
+            document.getElementById('btnPeriodAnnual').style.color = 
+                period === 'annual' ? 'white' : 'var(--text-secondary)';
+            
+            // Mettre à jour les prix affichés
+            document.querySelectorAll('.pricing-amount').forEach(priceEl => {
+                const monthly = parseInt(priceEl.dataset.monthly);
+                const commitment = parseInt(priceEl.dataset.commitment);
+                const annual = parseInt(priceEl.dataset.annual);
+                
+                let displayPrice, displayPeriod;
+                
+                if (period === 'monthly') {
+                    displayPrice = monthly;
+                    displayPeriod = '/mois';
+                } else if (period === 'commitment') {
+                    displayPrice = commitment;
+                    displayPeriod = '/mois';
+                } else { // annual
+                    displayPrice = annual;
+                    displayPeriod = '/an';
+                }
+                
+                priceEl.innerHTML = displayPrice + '€<span class="pricing-period" style="font-size: 1rem; font-weight: 400; color: var(--text-secondary);">' + displayPeriod + '</span>';
+            });
+            
+            // Mettre à jour les économies affichées
+            document.querySelectorAll('.pricing-savings').forEach((savingsEl, index) => {
+                const priceEl = document.querySelectorAll('.pricing-amount')[index];
+                const monthly = parseInt(priceEl.dataset.monthly);
+                const commitment = parseInt(priceEl.dataset.commitment);
+                const annual = parseInt(priceEl.dataset.annual);
+                
+                if (period === 'monthly') {
+                    savingsEl.style.visibility = 'hidden';
+                } else if (period === 'commitment') {
+                    const savings = (monthly - commitment) * 12;
+                    savingsEl.textContent = `Économisez ${savings}€/an`;
+                    savingsEl.style.visibility = 'visible';
+                } else { // annual
+                    const commitmentTotal = commitment * 12;
+                    const savings = commitmentTotal - annual;
+                    savingsEl.textContent = `Économisez ${savings}€ sur l'année`;
+                    savingsEl.style.visibility = 'visible';
+                }
+            });
+        }
+        
+        // Charger l'abonnement au chargement de la page
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Attendre que Supabase soit prêt
+            let attempts = 0;
+            const waitForSupabase = setInterval(async () => {
+                attempts++;
+                if (window.supabaseClient) {
+                    clearInterval(waitForSupabase);
+                    await loadCurrentSubscription();
+                } else if (attempts >= 50) {
+                    clearInterval(waitForSupabase);
+                    console.error('❌ Supabase non initialisé');
+                }
+            }, 100);
+        });
         
         function selectAppTheme(theme) {
             selectedAppTheme = theme;

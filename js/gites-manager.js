@@ -92,7 +92,7 @@ class GitesManager {
     }
 
     /**
-     * Obtenir tous les gîtes
+     * Obtenir tous les gîtes (SANS FILTRE - pour grilles/colonnes)
      */
     async getAll(forceReload = false) {
         // Si pas encore chargé ou rechargement forcé, charger depuis Supabase
@@ -101,6 +101,39 @@ class GitesManager {
             await this.loadGites();
         }
         return this.gites;
+    }
+    
+    /**
+     * Obtenir les gîtes visibles selon le plan d'abonnement (pour selects/listes)
+     */
+    async getVisibleGites(forceReload = false) {
+        if (!this.loaded || forceReload) {
+            await this.loadGites();
+        }
+        
+        // Attendre que le subscription manager soit initialisé
+        let retries = 0;
+        while (!window.subscriptionManager && retries < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+        }
+        
+        // Filtrer selon la limite du plan d'abonnement
+        if (window.subscriptionManager && window.subscriptionManager.currentSubscription) {
+            const maxGites = window.subscriptionManager.currentSubscription.plan?.max_gites || 1;
+            // Retourner uniquement les N premiers gîtes selon ordre_affichage
+            return this.gites.slice(0, maxGites);
+        }
+        
+        // Par défaut, retourner 1 gîte minimum (plan gratuit SOLO)
+        return this.gites.slice(0, 1);
+    }
+    
+    /**
+     * Obtenir TOUS les gîtes sans filtre (alias pour compatibilité admin)
+     */
+    async getAllUnfiltered(forceReload = false) {
+        return this.getAll(forceReload);
     }
 
     /**

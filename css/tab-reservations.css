@@ -674,7 +674,7 @@ html.style-sidebar .week-reservation {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html.style-sidebar .week-reservation::before {
+/* html.style-sidebar .week-reservation::before {
     content: '';
     position: absolute;
     left: 0;
@@ -683,7 +683,7 @@ html.style-sidebar .week-reservation::before {
     width: 4px;
     transition: all 0.2s ease;
     pointer-events: none;
-}
+} */
 
 html.style-sidebar .week-reservation::after {
     content: '';
@@ -707,10 +707,10 @@ html.style-sidebar .week-reservation:hover::after {
 }
 
 /* Couleurs par gîte - Style Trévoux (Bleu) */
-html.style-sidebar .week-reservation.trevoux::before {
+/* html.style-sidebar .week-reservation.trevoux::before {
     background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
     box-shadow: 2px 0 12px rgba(59, 130, 246, 0.5);
-}
+} */
 
 html.style-sidebar .week-reservation.trevoux::after {
     background: linear-gradient(90deg, rgba(59, 130, 246, 0.06) 0%, transparent 100%);
@@ -721,10 +721,10 @@ html.style-sidebar .week-reservation.trevoux:hover {
 }
 
 /* Couleurs par gîte - Style Couzon (Rouge) */
-html.style-sidebar .week-reservation.couzon::before {
+/* html.style-sidebar .week-reservation.couzon::before {
     background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
     box-shadow: 2px 0 12px rgba(239, 68, 68, 0.5);
-}
+} */
 
 html.style-sidebar .week-reservation.couzon::after {
     background: linear-gradient(90deg, rgba(239, 68, 68, 0.06) 0%, transparent 100%);

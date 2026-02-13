@@ -59,64 +59,268 @@
     transform: translateY(-2px);
 }
 
+/* ═══ BOUTON ACTUALISER ═══ */
+.btn-refresh {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+    transform: translateY(-2px);
+}
+
+/* ═══ SEARCH INPUT ═══ */
+.search-input {
+    padding: 12px 18px;
+    width: 280px;
+    font-size: 0.95rem;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 500;
+}
+
+/* ═══ SYNC STATUS ═══ */
+.sync-status {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* ═══ SECTION ACTIONS MÉNAGE ═══ */
+.actions-menage-section {
+    margin-bottom: 25px;
+    padding: 20px;
+}
+
+.actions-menage-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
-   MODE SIDEBAR
+   MODE SIDEBAR - JOUR
    ═══════════════════════════════════════════════════════════════════════ */
 
-html.style-sidebar .page-title {
-    color: var(--text);
+html.theme-light.style-sidebar .card-header-section {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.03) 0%, #ffffff 100%);
+    border: 1px solid rgba(0, 194, 203, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-html.style-sidebar .page-subtitle {
-    color: #64748b;
+html.theme-light.style-sidebar .page-title {
+    color: #1d1d1f;
 }
 
-html.style-sidebar .btn-rules {
-    background: #a29bfe;
-    color: white;
-    border: 3px solid #2D3436;
-    box-shadow: 4px 4px 0 #2D3436;
-    border-radius: 10px;
+html.theme-light.style-sidebar .page-subtitle {
+    color: #6e6e73;
 }
 
-html.style-sidebar .btn-rules:hover {
-    box-shadow: 5px 5px 0 #2D3436;
+html.theme-light.style-sidebar .btn-rules {
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.1) 0%, #ffffff 100%);
+    color: #a29bfe;
+    border: 1px solid rgba(162, 155, 254, 0.3);
+    box-shadow: 0 2px 8px rgba(162, 155, 254, 0.15);
+    border-radius: 12px;
 }
 
-html.style-sidebar .btn-show-rules {
-    background: #ffeaa7;
-    color: #2D3436;
-    border: 3px solid #2D3436;
-    box-shadow: 4px 4px 0 #2D3436;
-    border-radius: 10px;
+html.theme-light.style-sidebar .btn-rules:hover {
+    box-shadow: 0 4px 12px rgba(162, 155, 254, 0.25);
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.15) 0%, #ffffff 100%);
 }
 
-html.style-sidebar .btn-show-rules:hover {
-    box-shadow: 5px 5px 0 #2D3436;
+html.theme-light.style-sidebar .btn-show-rules {
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.3) 0%, #ffffff 100%);
+    color: #f39c12;
+    border: 1px solid rgba(243, 156, 18, 0.3);
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.15);
+    border-radius: 12px;
 }
 
-html.style-sidebar .btn-validation {
-    background: #74b9ff;
-    color: white;
-    border: 3px solid #2D3436;
-    box-shadow: 4px 4px 0 #2D3436;
-    border-radius: 10px;
+html.theme-light.style-sidebar .btn-show-rules:hover {
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.25);
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.4) 0%, #ffffff 100%);
 }
 
-html.style-sidebar .btn-validation:hover {
-    box-shadow: 5px 5px 0 #2D3436;
+html.theme-light.style-sidebar .btn-validation {
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.1) 0%, #ffffff 100%);
+    color: #74b9ff;
+    border: 1px solid rgba(116, 185, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(116, 185, 255, 0.15);
+    border-radius: 12px;
 }
 
-html.style-sidebar .btn-femme-menage {
-    background: #55efc4;
-    color: #2D3436;
-    border: 3px solid #2D3436;
-    box-shadow: 4px 4px 0 #2D3436;
-    border-radius: 10px;
+html.theme-light.style-sidebar .btn-validation:hover {
+    box-shadow: 0 4px 12px rgba(116, 185, 255, 0.25);
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.15) 0%, #ffffff 100%);
 }
 
-html.style-sidebar .btn-femme-menage:hover {
-    box-shadow: 5px 5px 0 #2D3436;
+html.theme-light.style-sidebar .btn-femme-menage {
+    background: linear-gradient(135deg, rgba(85, 239, 196, 0.2) 0%, #ffffff 100%);
+    color: #00b894;
+    border: 1px solid rgba(0, 184, 148, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 184, 148, 0.15);
+    border-radius: 12px;
+}
+
+html.theme-light.style-sidebar .btn-femme-menage:hover {
+    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.25);
+    background: linear-gradient(135deg, rgba(85, 239, 196, 0.3) 0%, #ffffff 100%);
+}
+
+html.theme-light.style-sidebar .btn-refresh {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.05) 0%, #ffffff 100%);
+    color: #00C2CB;
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 194, 203, 0.15);
+    border-radius: 12px;
+}
+
+html.theme-light.style-sidebar .btn-refresh:hover {
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.25);
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.08) 0%, #ffffff 100%);
+}
+
+html.theme-light.style-sidebar .search-input {
+    background: rgba(255, 255, 255, 0.8);
+    color: #1d1d1f;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+}
+
+html.theme-light.style-sidebar .search-input:focus {
+    border-color: #00C2CB;
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.1);
+}
+
+html.theme-light.style-sidebar .sync-status {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.08) 0%, rgba(0, 82, 136, 0.08) 100%);
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    color: #00C2CB;
+}
+
+html.theme-light.style-sidebar .actions-menage-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 249, 249, 1) 100%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODE SIDEBAR - NUIT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.theme-dark.style-sidebar .card-header-section {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.08) 0%, rgba(30, 30, 30, 0.95) 100%);
+    border: 1px solid rgba(0, 194, 203, 0.25);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+html.theme-dark.style-sidebar .page-title {
+    color: #f5f5f7;
+}
+
+html.theme-dark.style-sidebar .page-subtitle {
+    color: #a1a1a6;
+}
+
+html.theme-dark.style-sidebar .btn-rules {
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.15) 0%, rgba(45, 45, 50, 0.8) 100%);
+    color: #c7c1ff;
+    border: 1px solid rgba(162, 155, 254, 0.4);
+    box-shadow: 0 2px 12px rgba(162, 155, 254, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-sidebar .btn-rules:hover {
+    box-shadow: 0 4px 16px rgba(162, 155, 254, 0.3);
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.2) 0%, rgba(45, 45, 50, 0.9) 100%);
+}
+
+html.theme-dark.style-sidebar .btn-show-rules {
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.15) 0%, rgba(45, 45, 50, 0.8) 100%);
+    color: #ffeaa7;
+    border: 1px solid rgba(255, 234, 167, 0.4);
+    box-shadow: 0 2px 12px rgba(255, 234, 167, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-sidebar .btn-show-rules:hover {
+    box-shadow: 0 4px 16px rgba(255, 234, 167, 0.3);
+    background: linear-gradient(135deg, rgba(255, 234, 167, 0.2) 0%, rgba(45, 45, 50, 0.9) 100%);
+}
+
+html.theme-dark.style-sidebar .btn-validation {
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.15) 0%, rgba(45, 45, 50, 0.8) 100%);
+    color: #a0d1ff;
+    border: 1px solid rgba(116, 185, 255, 0.4);
+    box-shadow: 0 2px 12px rgba(116, 185, 255, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-sidebar .btn-validation:hover {
+    box-shadow: 0 4px 16px rgba(116, 185, 255, 0.3);
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.2) 0%, rgba(45, 45, 50, 0.9) 100%);
+}
+
+html.theme-dark.style-sidebar .btn-femme-menage {
+    background: linear-gradient(135deg, rgba(85, 239, 196, 0.15) 0%, rgba(45, 45, 50, 0.8) 100%);
+    color: #7dffdb;
+    border: 1px solid rgba(85, 239, 196, 0.4);
+    box-shadow: 0 2px 12px rgba(85, 239, 196, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-sidebar .btn-femme-menage:hover {
+    box-shadow: 0 4px 16px rgba(85, 239, 196, 0.3);
+    background: linear-gradient(135deg, rgba(85, 239, 196, 0.2) 0%, rgba(45, 45, 50, 0.9) 100%);
+}
+
+html.theme-dark.style-sidebar .btn-refresh {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.12) 0%, rgba(30, 30, 35, 0.9) 100%);
+    color: #66d9e8;
+    border: 1px solid rgba(0, 194, 203, 0.4);
+    box-shadow: 0 2px 12px rgba(0, 194, 203, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-sidebar .btn-refresh:hover {
+    box-shadow: 0 4px 16px rgba(0, 194, 203, 0.3);
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.15) 0%, rgba(30, 30, 35, 1) 100%);
+}
+
+html.theme-dark.style-sidebar .search-input {
+    background: rgba(40, 40, 45, 0.8);
+    color: #f5f5f7;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-sidebar .search-input:focus {
+    border-color: #00C2CB;
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.15);
+}
+
+html.theme-dark.style-sidebar .sync-status {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.12) 0%, rgba(0, 82, 136, 0.12) 100%);
+    border: 1px solid rgba(0, 194, 203, 0.4);
+    color: #66d9e8;
+}
+
+html.theme-dark.style-sidebar .actions-menage-section {
+    background: linear-gradient(135deg, rgba(40, 40, 45, 0.95) 0%, rgba(30, 30, 35, 1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -189,6 +393,44 @@ html.theme-light.style-apple .btn-femme-menage:hover {
     background: linear-gradient(135deg, rgba(85, 239, 196, 0.3) 0%, #ffffff 100%);
 }
 
+html.theme-light.style-apple .btn-refresh {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.05) 0%, #ffffff 100%);
+    color: #00C2CB;
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 194, 203, 0.15);
+    border-radius: 12px;
+}
+
+html.theme-light.style-apple .btn-refresh:hover {
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.25);
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.08) 0%, #ffffff 100%);
+}
+
+html.theme-light.style-apple .search-input {
+    background: rgba(255, 255, 255, 0.8);
+    color: #1d1d1f;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+}
+
+html.theme-light.style-apple .search-input:focus {
+    border-color: #00C2CB;
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.1);
+}
+
+html.theme-light.style-apple .sync-status {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.08) 0%, rgba(0, 82, 136, 0.08) 100%);
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    color: #00C2CB;
+}
+
+html.theme-light.style-apple .actions-menage-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 249, 249, 1) 100%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    MODE APPLE - NUIT
    ═══════════════════════════════════════════════════════════════════════ */
@@ -259,28 +501,92 @@ html.theme-dark.style-apple .btn-femme-menage:hover {
     background: linear-gradient(135deg, rgba(85, 239, 196, 0.2) 0%, rgba(45, 45, 50, 0.9) 100%);
 }
 
+html.theme-dark.style-apple .btn-refresh {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.1) 0%, #2a2a2a 100%);
+    color: #00C2CB;
+    border: 1px solid rgba(0, 194, 203, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 194, 203, 0.2);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-apple .btn-refresh:hover {
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.3);
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.15) 0%, #2a2a2a 100%);
+}
+
+html.theme-dark.style-apple .search-input {
+    background: rgba(42, 42, 42, 0.8);
+    color: #f5f5f7;
+    border: 1px solid rgba(0, 194, 203, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+}
+
+html.theme-dark.style-apple .search-input:focus {
+    border-color: #00C2CB;
+    box-shadow: 0 0 0 3px rgba(0, 194, 203, 0.15);
+}
+
+html.theme-dark.style-apple .sync-status {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.12) 0%, rgba(0, 82, 136, 0.12) 100%);
+    border: 1px solid rgba(0, 194, 203, 0.4);
+    color: #66d9e8;
+}
+
+html.theme-dark.style-apple .actions-menage-section {
+    background: linear-gradient(135deg, rgba(40, 40, 45, 0.95) 0%, rgba(30, 30, 35, 1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    PLANNING MÉNAGE - STRUCTURE (Classes JS existantes)
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Conteneur semaine */
 .menage-week-container {
-    background: var(--card);
-    border-radius: 16px;
-    overflow: hidden;
     margin-bottom: 25px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--border-color);
+    border: none !important;
+    box-shadow: none !important;
 }
 
-/* Grille gîtes */
+/* Grilles gîtes adaptatives */
+.menage-grid-1 {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    background: var(--bg-secondary);
+    padding: 2px;
+}
+
+.menage-grid-1 .gite-column {
+    max-width: 600px;
+    width: 100%;
+}
+
+.menage-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(350px, 450px));
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
+    border: none !important;
+}
+
+.menage-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--bg-secondary);
+    padding: 2px;
+}
+
 .menage-grid-4 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 2px;
     background: var(--bg-secondary);
     padding: 2px;
-}
 }
 
 /* Colonnes gîtes */
@@ -289,13 +595,18 @@ html.theme-dark.style-apple .btn-femme-menage:hover {
     padding: 0;
     min-height: 150px;
     position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .gite-column-header {
     padding: 15px 20px;
     text-align: center;
     color: white;
-    border-bottom: 3px solid rgba(0, 0, 0, 0.1);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
 }
 
 /* Couleurs de header selon data-gite-bg */
@@ -347,7 +658,7 @@ html.theme-dark.style-apple .btn-femme-menage:hover {
     border-radius: 12px;
     transition: all 0.2s;
     position: relative;
-    border: 1px solid var(--border-color);
+    border: none !important;
 }
 
 .menage-card:hover {
@@ -476,294 +787,512 @@ html.theme-dark.style-apple .btn-femme-menage:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MODE SIDEBAR - Styles pour le planning
+   SIDEBAR JOUR - Styles pour le planning  
    ═══════════════════════════════════════════════════════════════════════ */
 
-html.style-sidebar .menage-week-container {
-    border: 4px solid #2D3436 !important;
-    border-radius: 0 !important;
-    box-shadow: 6px 6px 0 #2D3436 !important;
+html.theme-light.style-sidebar .menage-week-container {
+    border: 1px solid rgba(162, 155, 254, 0.2) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px rgba(162, 155, 254, 0.1) !important;
     background: var(--card) !important;
     padding: 0 !important;
 }
 
-html.style-sidebar .menage-grid-4 {
-    background: #dfe6e9 !important;
+html.theme-light.style-sidebar .menage-grid-4,
+html.theme-light.style-sidebar .menage-grid-3,
+html.theme-light.style-sidebar .menage-grid-2 {
+    background: transparent !important;
+    gap: 16px;
+}
+
+html.theme-light.style-sidebar .gite-column {
+    border: 1px solid rgba(162, 155, 254, 0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 12px rgba(162, 155, 254, 0.08) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(162, 155, 254, 0.02) 100%) !important;
+}
+
+html.theme-light.style-sidebar .gite-column-header {
+    border-bottom: 1px solid rgba(162, 155, 254, 0.15) !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+html.theme-light.style-sidebar .gite-column-body {
+    background: transparent !important;
+}
+
+html.theme-light.style-sidebar .gite-column-body-empty {
+    border: 1px dashed rgba(162, 155, 254, 0.3) !important;
+    border-radius: 12px !important;
+    margin: 15px;
+    padding: 40px 20px;
+    color: rgba(162, 155, 254, 0.6) !important;
+    font-weight: 500;
+    font-style: italic;
+    background: rgba(162, 155, 254, 0.03);
+}
+
+html.theme-light.style-sidebar .menage-card {
+    border: 1px solid rgba(162, 155, 254, 0.15) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    box-shadow: 0 2px 8px rgba(162, 155, 254, 0.08) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(162, 155, 254, 0.05) 100%) !important;
+    transition: all 0.2s ease;
+}
+
+html.theme-light.style-sidebar .menage-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 8px 20px rgba(162, 155, 254, 0.15) !important;
+}
+
+html.theme-light.style-sidebar .menage-card-main {
+    background: rgba(255, 255, 255, 0.7) !important;
     border: none !important;
-    border-radius: 0 !important;
-    gap: 4px;
-    padding: 4px;
+    border-radius: 12px !important;
 }
 
-html.style-sidebar .gite-column {
-    border: 3px solid #2D3436 !important;
-    border-left: 3px solid #2D3436 !important;
-    border-right: 3px solid #2D3436 !important;
-    border-top: 3px solid #2D3436 !important;
-    border-bottom: 3px solid #2D3436 !important;
-    border-radius: 0 !important;
-    background: #ffffff !important;
-    box-shadow: 3px 3px 0 #2D3436 !important;
+/* Bordures colorées selon gîte parent - SIDEBAR JOUR */
+html.theme-light.style-sidebar [data-gite-color="#667eea"] .menage-card {
+    border-left: 3px solid #667eea !important;
 }
 
-html.style-sidebar .gite-column[style*="border-left"],
-html.style-sidebar .gite-column[style*="border-radius"] {
-    border-left: 3px solid #2D3436 !important;
-    border-radius: 0 !important;
+html.theme-light.style-sidebar [data-gite-color="#f5576c"] .menage-card {
+    border-left: 3px solid #f5576c !important;
 }
 
-html.style-sidebar .gite-column-header {
-    border-bottom: 3px solid rgba(0, 0, 0, 0.2) !important;
-    border-radius: 0 !important;
+html.theme-light.style-sidebar [data-gite-color="#27AE60"] .menage-card {
+    border-left: 3px solid #27AE60 !important;
 }
 
-html.style-sidebar .gite-column-body {
-    background: #ffffff !important;
+html.theme-light.style-sidebar [data-gite-color="#3498DB"] .menage-card {
+    border-left: 3px solid #3498DB !important;
 }
 
-html.style-sidebar .menage-card {
-    background: var(--bg-secondary) !important;
-    border-radius: 8px !important;
+html.theme-light.style-sidebar [data-gite-color="#E67E22"] .menage-card {
+    border-left: 3px solid #E67E22 !important;
 }
 
-html.style-sidebar .menage-card:hover {
+html.theme-light.style-sidebar [data-gite-color="#9B59B6"] .menage-card {
+    border-left: 3px solid #9B59B6 !important;
+}
+
+html.theme-light.style-sidebar .menage-card-validated {
+    border-left: 4px solid #27ae60 !important;
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.08) 0%, rgba(255, 255, 255, 0.9) 100%) !important;
+    box-shadow: 0 2px 12px rgba(39, 174, 96, 0.15) !important;
+}
+
+/* Textes Sidebar Jour - Style élégant */
+html.theme-light.style-sidebar .menage-card-header,
+html.theme-light.style-sidebar .menage-card-date {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+html.theme-light.style-sidebar .menage-card-time {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+html.theme-light.style-sidebar .menage-card-infos,
+html.theme-light.style-sidebar .menage-card-info {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+html.theme-light.style-sidebar .menage-status-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(162, 155, 254, 0.2);
+}
+
+/* Boutons sauvegarder - SIDEBAR JOUR */
+html.theme-light.style-sidebar [data-gite-color="#667eea"] .menage-btn-save {
+    background: linear-gradient(135deg, #667eea 0%, #5a6fd8 100%);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    color: white;
+    border-radius: 10px;
+}
+
+html.theme-light.style-sidebar [data-gite-color="#667eea"] .menage-btn-save:hover {
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
     transform: translateY(-2px);
 }
 
-html.style-sidebar .menage-card-main {
-    background: white !important;
-    border: 2px solid #2D3436 !important;
-    box-shadow: 3px 3px 0 #2D3436 !important;
-    border-radius: 8px !important;
+html.theme-light.style-sidebar [data-gite-color="#f5576c"] .menage-btn-save {
+    background: linear-gradient(135deg, #f5576c 0%, #e64558 100%);
+    border: 1px solid rgba(245, 87, 108, 0.3);
+    box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+    color: white;
+    border-radius: 10px;
 }
 
-/* Textes Sidebar - Style neo-brutalism */
-html.style-sidebar .menage-card-header {
-    font-size: 1.05rem !important;
-    font-weight: 900 !important;
-    color: var(--text) !important;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+html.theme-light.style-sidebar [data-gite-color="#f5576c"] .menage-btn-save:hover {
+    box-shadow: 0 4px 16px rgba(245, 87, 108, 0.4);
+    transform: translateY(-2px);
 }
 
-html.style-sidebar .menage-card-time {
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    color: var(--text) !important;
+html.theme-light.style-sidebar [data-gite-color="#27AE60"] .menage-btn-save {
+    background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
+    border: 1px solid rgba(39, 174, 96, 0.3);
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+    color: white;
+    border-radius: 10px;
 }
 
-html.style-sidebar .menage-card-infos {
-    font-size: 0.9rem !important;
-    font-weight: 600 !important;
+html.theme-light.style-sidebar [data-gite-color="#27AE60"] .menage-btn-save:hover {
+    box-shadow: 0 4px 16px rgba(39, 174, 96, 0.4);
+    transform: translateY(-2px);
 }
 
-html.style-sidebar .menage-card-info {
-    font-size: 0.9rem !important;
-    font-weight: 600 !important;
-    color: var(--text-secondary) !important;
-    margin-top: 6px;
+html.theme-light.style-sidebar [data-gite-color="#3498DB"] .menage-btn-save {
+    background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    color: white;
+    border-radius: 10px;
 }
 
-html.style-sidebar .menage-status-badge {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 4px !important;
-    font-weight: 900 !important;
-    font-size: 1.1rem !important;
+html.theme-light.style-sidebar [data-gite-color="#3498DB"] .menage-btn-save:hover {
+    box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
+    transform: translateY(-2px);
 }
 
-/* Cartes de ménage avec liseré gauche selon couleur du gîte parent */
-html.style-sidebar [data-gite-color="#667eea"] .menage-card {
-    border: 2px solid var(--border-color) !important;
-    border-left: 5px solid #667eea !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
+html.theme-light.style-sidebar [data-gite-color="#E67E22"] .menage-btn-save {
+    background: linear-gradient(135deg, #E67E22 0%, #D35400 100%);
+    border: 1px solid rgba(230, 126, 34, 0.3);
+    box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
+    color: white;
+    border-radius: 10px;
 }
 
-html.style-sidebar [data-gite-color="#667eea"] .menage-card:hover {
-    border-left-color: #667eea !important;
-    box-shadow: var(--shadow) !important;
+html.theme-light.style-sidebar [data-gite-color="#E67E22"] .menage-btn-save:hover {
+    box-shadow: 0 4px 16px rgba(230, 126, 34, 0.4);
+    transform: translateY(-2px);
 }
 
-html.style-sidebar [data-gite-color="#f5576c"] .menage-card {
-    border: 2px solid var(--border-color) !important;
-    border-left: 5px solid #f5576c !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
+html.theme-light.style-sidebar [data-gite-color="#9B59B6"] .menage-btn-save {
+    background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
+    border: 1px solid rgba(155, 89, 182, 0.3);
+    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.3);
+    color: white;
+    border-radius: 10px;
 }
 
-html.style-sidebar [data-gite-color="#f5576c"] .menage-card:hover {
-    border-left-color: #f5576c !important;
-    box-shadow: var(--shadow) !important;
+html.theme-light.style-sidebar [data-gite-color="#9B59B6"] .menage-btn-save:hover {
+    box-shadow: 0 4px 16px rgba(155, 89, 182, 0.4);
+    transform: translateY(-2px);
 }
 
-html.style-sidebar [data-gite-color="#27AE60"] .menage-card {
-    border: 2px solid var(--border-color) !important;
-    border-left: 5px solid #27AE60 !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
+html.theme-light.style-sidebar .menage-input-date,
+html.theme-light.style-sidebar .menage-input-time {
+    border: 1px solid rgba(162, 155, 254, 0.3);
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--text);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(162, 155, 254, 0.05);
 }
 
-html.style-sidebar [data-gite-color="#27AE60"] .menage-card:hover {
-    border-left-color: #27AE60 !important;
-    box-shadow: var(--shadow) !important;
+html.theme-light.style-sidebar .gite-column-header-title {
+    font-weight: 600;
+    letter-spacing: 0;
+    text-shadow: none;
 }
 
-html.style-sidebar [data-gite-color="#3498DB"] .menage-card {
-    border: 2px solid var(--border-color) !important;
-    border-left: 5px solid #3498DB !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
+html.theme-light.style-sidebar .gite-column-header-week {
+    display: block;
+    font-size: 0.85rem;
+    opacity: 0.8;
 }
 
-html.style-sidebar [data-gite-color="#3498DB"] .menage-card:hover {
-    border-left-color: #3498DB !important;
-    box-shadow: var(--shadow) !important;
+/* Couleurs de fond sidebar JOUR selon data-gite-bg */
+html.theme-light.style-sidebar .gite-column-header[data-gite-bg="#667eea"] { 
+    background: linear-gradient(135deg, #667eea 0%, #5a6fd8 100%) !important; 
+}
+html.theme-light.style-sidebar .gite-column-header[data-gite-bg="#f5576c"] { 
+    background: linear-gradient(135deg, #f5576c 0%, #e64558 100%) !important; 
+}
+html.theme-light.style-sidebar .gite-column-header[data-gite-bg="#27AE60"] { 
+    background: linear-gradient(135deg, #27AE60 0%, #229954 100%) !important; 
+}
+html.theme-light.style-sidebar .gite-column-header[data-gite-bg="#3498DB"] { 
+    background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%) !important; 
+}
+html.theme-light.style-sidebar .gite-column-header[data-gite-bg="#E67E22"] { 
+    background: linear-gradient(135deg, #E67E22 0%, #D35400 100%) !important; 
+}
+html.theme-light.style-sidebar .gite-column-header[data-gite-bg="#9B59B6"] { 
+    background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%) !important; 
 }
 
-html.style-sidebar [data-gite-color="#E67E22"] .menage-card {
-    border: 2px solid var(--border-color) !important;
-    border-left: 5px solid #E67E22 !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
+/* ═══════════════════════════════════════════════════════════════════════
+   SIDEBAR NUIT - Styles pour le planning
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.theme-dark.style-sidebar .menage-week-container {
+    border: 1px solid rgba(162, 155, 254, 0.3) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 24px rgba(162, 155, 254, 0.2) !important;
+    background: rgba(30, 30, 35, 0.95) !important;
+    padding: 0 !important;
 }
 
-html.style-sidebar [data-gite-color="#E67E22"] .menage-card:hover {
-    border-left-color: #E67E22 !important;
-    box-shadow: var(--shadow) !important;
+html.theme-dark.style-sidebar .menage-grid-4,
+html.theme-dark.style-sidebar .menage-grid-3,
+html.theme-dark.style-sidebar .menage-grid-2 {
+    background: transparent !important;
+    gap: 16px;
 }
 
-html.style-sidebar [data-gite-color="#9B59B6"] .menage-card {
-    border: 2px solid var(--border-color) !important;
-    border-left: 5px solid #9B59B6 !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
+html.theme-dark.style-sidebar .gite-column {
+    border: 1px solid rgba(162, 155, 254, 0.25) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 16px rgba(162, 155, 254, 0.15), 0 0 40px rgba(162, 155, 254, 0.05) !important;
+    background: linear-gradient(135deg, rgba(45, 45, 50, 0.9) 0%, rgba(162, 155, 254, 0.05) 100%) !important;
 }
 
-html.style-sidebar [data-gite-color="#9B59B6"] .menage-card:hover {
-    border-left-color: #9B59B6 !important;
-    box-shadow: var(--shadow) !important;
+html.theme-dark.style-sidebar .gite-column-header {
+    border-bottom: 1px solid rgba(162, 155, 254, 0.2) !important;
+    border-radius: 12px 12px 0 0 !important;
 }
 
-html.style-sidebar .menage-card-validated {
-    border-left: 6px solid #27ae60 !important;
-    background: var(--bg-secondary) !important;
+html.theme-dark.style-sidebar .gite-column-body {
+    background: transparent !important;
 }
 
-html.style-sidebar .menage-status-badge {
-    border: 2px solid #2D3436 !important;
-    box-shadow: 2px 2px 0 #2D3436 !important;
-}
-
-html.style-sidebar .menage-input-date,
-html.style-sidebar .menage-input-time {
-    border: 2px solid #2D3436 !important;
-    background: var(--bg) !important;
-    color: var(--text) !important;
-    border-radius: 6px !important;
-}
-
-/* Boutons sauvegarder avec couleur du gîte parent */
-html.style-sidebar [data-gite-color="#667eea"] .menage-btn-save {
-    border: 3px solid #667eea !important;
-    box-shadow: 3px 3px 0 #667eea !important;
-    background: #667eea !important;
-    color: white !important;
-}
-
-html.style-sidebar [data-gite-color="#667eea"] .menage-btn-save:hover {
-    box-shadow: 5px 5px 0 #667eea !important;
-}
-
-html.style-sidebar [data-gite-color="#f5576c"] .menage-btn-save {
-    border: 3px solid #f5576c !important;
-    box-shadow: 3px 3px 0 #f5576c !important;
-    background: #f5576c !important;
-    color: white !important;
-}
-
-html.style-sidebar [data-gite-color="#f5576c"] .menage-btn-save:hover {
-    box-shadow: 5px 5px 0 #f5576c !important;
-}
-
-html.style-sidebar [data-gite-color="#27AE60"] .menage-btn-save {
-    border: 3px solid #27AE60 !important;
-    box-shadow: 3px 3px 0 #27AE60 !important;
-    background: #27AE60 !important;
-    color: white !important;
-}
-
-html.style-sidebar [data-gite-color="#27AE60"] .menage-btn-save:hover {
-    box-shadow: 5px 5px 0 #27AE60 !important;
-}
-
-html.style-sidebar [data-gite-color="#3498DB"] .menage-btn-save {
-    border: 3px solid #3498DB !important;
-    box-shadow: 3px 3px 0 #3498DB !important;
-    background: #3498DB !important;
-    color: white !important;
-}
-
-html.style-sidebar [data-gite-color="#3498DB"] .menage-btn-save:hover {
-    box-shadow: 5px 5px 0 #3498DB !important;
-}
-
-html.style-sidebar [data-gite-color="#E67E22"] .menage-btn-save {
-    border: 3px solid #E67E22 !important;
-    box-shadow: 3px 3px 0 #E67E22 !important;
-    background: #E67E22 !important;
-    color: white !important;
-}
-
-html.style-sidebar [data-gite-color="#E67E22"] .menage-btn-save:hover {
-    box-shadow: 5px 5px 0 #E67E22 !important;
-}
-
-html.style-sidebar [data-gite-color="#9B59B6"] .menage-btn-save {
-    border: 3px solid #9B59B6 !important;
-    box-shadow: 3px 3px 0 #9B59B6 !important;
-    background: #9B59B6 !important;
-    color: white !important;
-}
-
-html.style-sidebar [data-gite-color="#9B59B6"] .menage-btn-save:hover {
-    box-shadow: 5px 5px 0 #9B59B6 !important;
-}
-
-html.style-sidebar .gite-column-body-empty {
-    border: 2px solid #2D3436 !important;
-    border-radius: 0 !important;
+html.theme-dark.style-sidebar .gite-column-body-empty {
+    border: 1px dashed rgba(162, 155, 254, 0.3) !important;
+    border-radius: 12px !important;
     margin: 15px;
     padding: 40px 20px;
-    color: #2D3436 !important;
+    color: rgba(162, 155, 254, 0.5) !important;
+    font-weight: 500;
+    font-style: italic;
+    background: rgba(162, 155, 254, 0.05);
+}
+
+html.theme-dark.style-sidebar .menage-card {
+    border: 1px solid rgba(162, 155, 254, 0.2) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    box-shadow: 0 2px 12px rgba(162, 155, 254, 0.1), 0 0 30px rgba(162, 155, 254, 0.03) !important;
+    background: linear-gradient(135deg, rgba(45, 45, 50, 0.8) 0%, rgba(162, 155, 254, 0.08) 100%) !important;
+    transition: all 0.2s ease;
+}
+
+html.theme-dark.style-sidebar .menage-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 8px 24px rgba(162, 155, 254, 0.2), 0 0 50px rgba(162, 155, 254, 0.1) !important;
+}
+
+html.theme-dark.style-sidebar .menage-card-main {
+    background: rgba(45, 45, 50, 0.6) !important;
+    border: none !important;
+    border-radius: 12px !important;
+}
+
+/* Bordures colorées selon gîte parent - SIDEBAR NUIT */
+html.theme-dark.style-sidebar [data-gite-color="#667eea"] .menage-card {
+    border-left: 3px solid #667eea !important;
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2), 0 0 30px rgba(102, 126, 234, 0.1) !important;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#f5576c"] .menage-card {
+    border-left: 3px solid #f5576c !important;
+    box-shadow: 0 2px 12px rgba(245, 87, 108, 0.2), 0 0 30px rgba(245, 87, 108, 0.1) !important;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#27AE60"] .menage-card {
+    border-left: 3px solid #27AE60 !important;
+    box-shadow: 0 2px 12px rgba(39, 174, 96, 0.2), 0 0 30px rgba(39, 174, 96, 0.1) !important;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#3498DB"] .menage-card {
+    border-left: 3px solid #3498DB !important;
+    box-shadow: 0 2px 12px rgba(52, 152, 219, 0.2), 0 0 30px rgba(52, 152, 219, 0.1) !important;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#E67E22"] .menage-card {
+    border-left: 3px solid #E67E22 !important;
+    box-shadow: 0 2px 12px rgba(230, 126, 34, 0.2), 0 0 30px rgba(230, 126, 34, 0.1) !important;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#9B59B6"] .menage-card {
+    border-left: 3px solid #9B59B6 !important;
+    box-shadow: 0 2px 12px rgba(155, 89, 182, 0.2), 0 0 30px rgba(155, 89, 182, 0.1) !important;
+}
+
+html.theme-dark.style-sidebar .menage-card-validated {
+    border-left: 4px solid #27ae60 !important;
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.15) 0%, rgba(45, 45, 50, 0.8) 100%) !important;
+    box-shadow: 0 2px 16px rgba(39, 174, 96, 0.25), 0 0 40px rgba(39, 174, 96, 0.1) !important;
+}
+
+/* Textes Sidebar Nuit - Style élégant */
+html.theme-dark.style-sidebar .menage-card-header,
+html.theme-dark.style-sidebar .menage-card-date {
+    font-size: 1rem;
     font-weight: 600;
-    font-style: normal !important;
-    box-shadow: 3px 3px 0 #2D3436 !important;
+    color: var(--text);
+    letter-spacing: -0.3px;
 }
 
-html.style-sidebar .gite-column-header-title {
-    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3) !important;
-    font-weight: 900 !important;
-    letter-spacing: 1px !important;
+html.theme-dark.style-sidebar .menage-card-time {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
 }
 
-html.style-sidebar .gite-column-header {
-    border-bottom: 3px solid rgba(0, 0, 0, 0.2) !important;
-    border-radius: 0 !important;
-    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2) !important;
+html.theme-dark.style-sidebar .menage-card-infos,
+html.theme-dark.style-sidebar .menage-card-info {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
 }
 
-html.style-sidebar .gite-column-header-week {
-    display: none !important;
+html.theme-dark.style-sidebar .menage-status-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 12px rgba(162, 155, 254, 0.3), 0 0 20px rgba(162, 155, 254, 0.1);
 }
 
-/* Couleurs de fond sidebar selon data-gite-bg */
-html.style-sidebar .gite-column-header[data-gite-bg="#667eea"] { background: #667eea !important; }
-html.style-sidebar .gite-column-header[data-gite-bg="#f5576c"] { background: #f5576c !important; }
-html.style-sidebar .gite-column-header[data-gite-bg="#27AE60"] { background: #27AE60 !important; }
-html.style-sidebar .gite-column-header[data-gite-bg="#3498DB"] { background: #3498DB !important; }
-html.style-sidebar .gite-column-header[data-gite-bg="#E67E22"] { background: #E67E22 !important; }
-html.style-sidebar .gite-column-header[data-gite-bg="#9B59B6"] { background: #9B59B6 !important; }
+/* Boutons sauvegarder - SIDEBAR NUIT */
+html.theme-dark.style-sidebar [data-gite-color="#667eea"] .menage-btn-save {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(90, 111, 216, 0.85) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.4), 0 0 20px rgba(102, 126, 234, 0.2);
+    color: white;
+    border-radius: 10px;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#667eea"] .menage-btn-save:hover {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5), 0 0 40px rgba(102, 126, 234, 0.3);
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#f5576c"] .menage-btn-save {
+    background: linear-gradient(135deg, rgba(245, 87, 108, 0.9) 0%, rgba(230, 69, 88, 0.85) 100%);
+    border: 1px solid rgba(245, 87, 108, 0.4);
+    box-shadow: 0 2px 12px rgba(245, 87, 108, 0.4), 0 0 20px rgba(245, 87, 108, 0.2);
+    color: white;
+    border-radius: 10px;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#f5576c"] .menage-btn-save:hover {
+    box-shadow: 0 4px 20px rgba(245, 87, 108, 0.5), 0 0 40px rgba(245, 87, 108, 0.3);
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#27AE60"] .menage-btn-save {
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.9) 0%, rgba(34, 153, 84, 0.85) 100%);
+    border: 1px solid rgba(39, 174, 96, 0.4);
+    box-shadow: 0 2px 12px rgba(39, 174, 96, 0.4), 0 0 20px rgba(39, 174, 96, 0.2);
+    color: white;
+    border-radius: 10px;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#27AE60"] .menage-btn-save:hover {
+    box-shadow: 0 4px 20px rgba(39, 174, 96, 0.5), 0 0 40px rgba(39, 174, 96, 0.3);
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#3498DB"] .menage-btn-save {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.9) 0%, rgba(41, 128, 185, 0.85) 100%);
+    border: 1px solid rgba(52, 152, 219, 0.4);
+    box-shadow: 0 2px 12px rgba(52, 152, 219, 0.4), 0 0 20px rgba(52, 152, 219, 0.2);
+    color: white;
+    border-radius: 10px;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#3498DB"] .menage-btn-save:hover {
+    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.5), 0 0 40px rgba(52, 152, 219, 0.3);
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#E67E22"] .menage-btn-save {
+    background: linear-gradient(135deg, rgba(230, 126, 34, 0.9) 0%, rgba(211, 84, 0, 0.85) 100%);
+    border: 1px solid rgba(230, 126, 34, 0.4);
+    box-shadow: 0 2px 12px rgba(230, 126, 34, 0.4), 0 0 20px rgba(230, 126, 34, 0.2);
+    color: white;
+    border-radius: 10px;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#E67E22"] .menage-btn-save:hover {
+    box-shadow: 0 4px 20px rgba(230, 126, 34, 0.5), 0 0 40px rgba(230, 126, 34, 0.3);
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#9B59B6"] .menage-btn-save {
+    background: linear-gradient(135deg, rgba(155, 89, 182, 0.9) 0%, rgba(142, 68, 173, 0.85) 100%);
+    border: 1px solid rgba(155, 89, 182, 0.4);
+    box-shadow: 0 2px 12px rgba(155, 89, 182, 0.4), 0 0 20px rgba(155, 89, 182, 0.2);
+    color: white;
+    border-radius: 10px;
+}
+
+html.theme-dark.style-sidebar [data-gite-color="#9B59B6"] .menage-btn-save:hover {
+    box-shadow: 0 4px 20px rgba(155, 89, 182, 0.5), 0 0 40px rgba(155, 89, 182, 0.3);
+    transform: translateY(-2px);
+}
+
+html.theme-dark.style-sidebar .menage-input-date,
+html.theme-dark.style-sidebar .menage-input-time {
+    border: 1px solid rgba(162, 155, 254, 0.3);
+    background: rgba(45, 45, 50, 0.8);
+    color: var(--text);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(162, 155, 254, 0.1);
+}
+
+html.theme-dark.style-sidebar .gite-column-header-title {
+    font-weight: 600;
+    letter-spacing: 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html.theme-dark.style-sidebar .gite-column-header-week {
+    display: block;
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* Couleurs de fond sidebar NUIT selon data-gite-bg */
+html.theme-dark.style-sidebar .gite-column-header[data-gite-bg="#667eea"] { 
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(90, 111, 216, 0.85) 100%) !important; 
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+html.theme-dark.style-sidebar .gite-column-header[data-gite-bg="#f5576c"] { 
+    background: linear-gradient(135deg, rgba(245, 87, 108, 0.9) 0%, rgba(230, 69, 88, 0.85) 100%) !important; 
+    box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+}
+html.theme-dark.style-sidebar .gite-column-header[data-gite-bg="#27AE60"] { 
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.9) 0%, rgba(34, 153, 84, 0.85) 100%) !important; 
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+html.theme-dark.style-sidebar .gite-column-header[data-gite-bg="#3498DB"] { 
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.9) 0%, rgba(41, 128, 185, 0.85) 100%) !important; 
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+html.theme-dark.style-sidebar .gite-column-header[data-gite-bg="#E67E22"] { 
+    background: linear-gradient(135deg, rgba(230, 126, 34, 0.9) 0%, rgba(211, 84, 0, 0.85) 100%) !important; 
+    box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+}
+html.theme-dark.style-sidebar .gite-column-header[data-gite-bg="#9B59B6"] { 
+    background: linear-gradient(135deg, rgba(155, 89, 182, 0.9) 0%, rgba(142, 68, 173, 0.85) 100%) !important; 
+    box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    MODE APPLE - Styles pour le planning
@@ -1067,11 +1596,19 @@ html.theme-dark.style-apple .menage-btn-save:hover {
     .menage-grid-4 {
         grid-template-columns: repeat(2, 1fr) !important;
     }
+    
+    .menage-grid-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
 }
 
 @media (max-width: 768px) {
-    .menage-grid-4 {
+    .menage-grid-4,
+    .menage-grid-3,
+    .menage-grid-2 {
         grid-template-columns: 1fr !important;
+        gap: 15px !important;
+        padding: 10px !important;
     }
 
     .header-actions {

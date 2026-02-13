@@ -6,6 +6,15 @@ export function endOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
 }
 
+export function startOfWeek(date: Date) {
+  const result = new Date(date);
+  const day = result.getDay();
+  // En France, la semaine commence le lundi (1), le dimanche est 0
+  const diff = day === 0 ? -6 : 1 - day;
+  result.setDate(result.getDate() + diff);
+  return startOfDay(result);
+}
+
 export function toIsoString(date: Date) {
   return date.toISOString();
 }

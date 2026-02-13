@@ -41,7 +41,7 @@ async function chargerGites() {
         }
 
         if (window.gitesManager) {
-            const gites = await window.gitesManager.getAll();
+            const gites = await window.gitesManager.getVisibleGites();
             
             if (gites && gites.length > 0) {
                 select.innerHTML = '<option value="">Tous les gîtes</option>';

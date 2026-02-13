@@ -46,8 +46,8 @@ function isTableNotFound(error) {
 async function initChecklistsTab() {
     // console.log('📋 Initialisation onglet Check-lists');
     
-    // Charger les gîtes dynamiquement et remplir le select
-    const gites = await window.gitesManager.getAll();
+    // Charger les gîtes visibles selon l'abonnement et remplir le select
+    const gites = await window.gitesManager.getVisibleGites();
     const giteSelect = document.getElementById('checklist-gite-select');
     
     if (giteSelect && gites && gites.length > 0) {

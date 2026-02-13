@@ -205,8 +205,13 @@ function updateDashboardHeader() {
 async function updateDashboardAlerts() {
     const alerts = [];
     
-    // Récupérer les réservations
-    const reservations = await getAllReservations();
+    // Récupérer les gîtes visibles selon l'abonnement
+    const gitesVisibles = await window.gitesManager.getVisibleGites();
+    const gitesVisiblesIds = gitesVisibles.map(g => g.id);
+    
+    // Récupérer les réservations des gîtes visibles uniquement
+    const allReservations = await getAllReservations();
+    const reservations = allReservations.filter(r => gitesVisiblesIds.includes(r.gite_id));
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -376,7 +381,13 @@ async function updateDashboardStats() {
 // ==========================================
 
 async function updateDashboardReservations() {
-    const reservations = await getAllReservations();
+    // Récupérer les gîtes visibles selon l'abonnement
+    const gitesVisibles = await window.gitesManager.getVisibleGites();
+    const gitesVisiblesIds = gitesVisibles.map(g => g.id);
+    
+    // Récupérer les réservations des gîtes visibles uniquement
+    const allReservations = await getAllReservations();
+    const reservations = allReservations.filter(r => gitesVisiblesIds.includes(r.gite_id));
     
     // ✅ Charger le planning ménage dashboard en parallèle
     updateDashboardMenages().catch(err => console.error('Erreur planning ménage:', err));
@@ -686,10 +697,11 @@ async function updateDashboardMenages() {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
     
+    // Filtrer uniquement les ménages à partir d'aujourd'hui (pas les dates passées)
     const { data: cleanings } = await window.supabaseClient
         .from('cleaning_schedule')
         .select('*')
-        .gte('scheduled_date', weekStart.toISOString().split('T')[0])
+        .gte('scheduled_date', today.toISOString().split('T')[0])
         .lte('scheduled_date', weekEnd.toISOString().split('T')[0])
         .order('scheduled_date', { ascending: true });
     
@@ -1358,8 +1370,13 @@ async function updateFinancialIndicators() {
     const anneePrecedente = anneeActuelle - 1;
     const moisActuel = new Date().getMonth() + 1; // 1-12
     
+    // Récupérer les gîtes visibles selon l'abonnement
+    const gitesVisibles = await window.gitesManager.getVisibleGites();
+    const gitesVisiblesIds = gitesVisibles.map(g => g.id);
+    
     // 1. Calculer le bénéfice RÉEL de l'année en cours
-    const reservations = await getAllReservations();
+    const allReservations = await getAllReservations();
+    const reservations = allReservations.filter(r => gitesVisiblesIds.includes(r.gite_id));
     // Note: Table 'charges' n'existe plus, remplacée par historical_data dans l'onglet Charges
     // const charges = await getAllCharges();
     
@@ -1429,7 +1446,7 @@ async function updateFinancialIndicators() {
         // ✅ UTILISER LA NOUVELLE FONCTION GLOBALE (calcul dynamique multi-gîtes)
         try {
             // Récupérer les gîtes
-            const gites = await window.gitesManager.getAll();
+            const gites = await window.gitesManager.getVisibleGites();
             const charges = await window.calculerChargesParGiteSansAmortissement(simFiscale, gites);
             totalChargesAnnee = charges.total;
         } catch (error) {
@@ -1660,8 +1677,13 @@ async function calculerChargesSansAmortissement(simFiscale) {
 
 async function calculerBeneficesMensuels(totalChargesAnnee = 0, urssafMensuel = 0) {
     try {
-        // Récupérer toutes les réservations
-        const reservations = await getAllReservations();
+        // Récupérer les gîtes visibles selon l'abonnement
+        const gitesVisibles = await window.gitesManager.getVisibleGites();
+        const gitesVisiblesIds = gitesVisibles.map(g => g.id);
+        
+        // Récupérer toutes les réservations et filtrer par gîtes visibles
+        const allReservations = await getAllReservations();
+        const reservations = allReservations.filter(r => gitesVisiblesIds.includes(r.gite_id));
         
         const anneeActuelle = new Date().getFullYear();
         const benefices = [];
@@ -1689,7 +1711,7 @@ async function calculerBeneficesMensuels(totalChargesAnnee = 0, urssafMensuel = 
             
             if (simFiscale && typeof window.calculerChargesParGiteSansAmortissement === 'function') {
                 // Récupérer les gîtes
-                const gites = await window.gitesManager.getAll();
+                const gites = await window.gitesManager.getVisibleGites();
                 // Utiliser la nouvelle fonction globale pour calculer les charges par gîte
                 const charges = await window.calculerChargesParGiteSansAmortissement(simFiscale, gites);
                 chargesParGite = charges.parGite; // charges par gite_id
@@ -1811,12 +1833,19 @@ async function updateKPIPerformance() {
     today.setHours(0, 0, 0, 0);
     
     try {
-        // Récupérer toutes les réservations 2026
-        const { data: reservations } = await window.supabaseClient
+        // Récupérer les gîtes visibles selon l'abonnement
+        const gitesVisibles = await window.gitesManager.getVisibleGites();
+        const gitesVisiblesIds = gitesVisibles.map(g => g.id);
+        
+        // Récupérer les réservations 2026 des gîtes visibles uniquement
+        const { data: allReservations } = await window.supabaseClient
             .from('reservations')
             .select('*')
             .gte('check_in', `${anneeActuelle}-01-01`)
             .lte('check_out', `${anneeActuelle}-12-31`);
+        
+        // Filtrer par gîtes visibles
+        const reservations = (allReservations || []).filter(r => gitesVisiblesIds.includes(r.gite_id));
         
         if (!reservations || reservations.length === 0) {
             document.getElementById('dashboard-taux-occupation').textContent = '-';
@@ -2074,7 +2103,7 @@ async function afficherGraphiqueCAComparaison() {
     const reservations = await getAllReservations();
     
     // Récupérer les gîtes
-    const gites = await window.gitesManager.getAll();
+    const gites = await window.gitesManager.getVisibleGites();
     const gitesById = {};
     gites.forEach(g => {
         gitesById[g.id] = g.slug;
@@ -2291,7 +2320,7 @@ async function updatePropositionsMenage() {
         // Charger les gîtes pour avoir les noms
         let gites = [];
         if (window.gitesManager) {
-            gites = await window.gitesManager.getAll();
+            gites = await window.gitesManager.getVisibleGites();
         }
         
         let html = '';

@@ -121,47 +121,39 @@ function displayClientCommunications(communications) {
         const style = typeColors[comm.type] || typeColors.info;
         
         return `
-            <div class="comm-item" data-theme-light data-theme-dark
+            <div class="comm-item" 
                  onclick="window.openCommModal('${comm.id}')"
-                 style="
-                     cursor: pointer;
-                     transition: all 0.3s ease;
-                     border-radius: 12px;
-                     overflow: hidden;
-                     position: relative;">
-                <div class="comm-item-content" style="
-                    padding: 16px 20px;
-                    display: flex;
-                    align-items: center;
-                    gap: 16px;">
-                    
-                    ${saved ? `<div class="comm-saved-badge" style="position: absolute; top: 8px; right: 8px; background: #10b981; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">
+                 onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--upstay-cyan)';" 
+                 onmouseout="this.style.transform=''; this.style.borderColor='';"
+                 style="cursor: pointer; padding: 16px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); transition: all 0.2s; position: relative;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    ${saved ? `<div style="position: absolute; top: 8px; right: 8px; background: #10b981; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 4px;">
                         <i data-lucide="bookmark" style="width: 12px; height: 12px;"></i> SAUVEGARDÉ
                     </div>` : ''}
                     
-                    <div class="comm-icon">
-                        <i data-lucide="${style.light.icon}"></i>
+                    <div style="width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--bg-hover); flex-shrink: 0;">
+                        <i data-lucide="${style.light.icon}" style="width: 22px; height: 22px;"></i>
                     </div>
                     
                     <div style="flex: 1; min-width: 0;">
-                        <div class="comm-title">${comm.titre}</div>
-                        ${comm.date_fin ? `<div class="comm-date">Expire le ${new Date(comm.date_fin).toLocaleDateString()}</div>` : ''}
+                        <div style="font-weight: 600; font-size: 15px; margin-bottom: 4px; color: var(--text-primary);">${comm.titre}</div>
+                        ${comm.date_fin ? `<div style="font-size: 12px; opacity: 0.7; color: var(--text-secondary);">Expire le ${new Date(comm.date_fin).toLocaleDateString('fr-FR')}</div>` : ''}
                     </div>
                     
-                    <i data-lucide="chevron-right" class="comm-arrow"></i>
+                    <i data-lucide="chevron-right" style="width: 20px; height: 20px; opacity: 0.5; flex-shrink: 0;"></i>
                 </div>
             </div>
         `;
     }).join('');
     
     container.innerHTML = `
-        <div class="card card--spacious communications-widget" data-theme-light data-theme-dark style="margin-bottom: 20px;">
-            <header class="section-header" style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
-                <h3 class="section-title" style="display: flex; align-items: center; gap: 10px; margin: 0;">
+        <div class="card card--spacious communications-widget">
+            <header class="section-header">
+                <h3 class="section-title">
                     <i data-lucide="megaphone"></i>
                     Informations importantes
                 </h3>
-                <span class="badge" style="background: var(--upstay-cyan); color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 700;">
+                <span class="badge badge--info" style="background: var(--upstay-cyan); color: white;">
                     ${communications.length}
                 </span>
             </header>
@@ -171,9 +163,6 @@ function displayClientCommunications(communications) {
         </div>
     `;
     
-    // Appliquer les styles CSS dynamiques
-    applyCommunicationsStyles();
-    
     // Réinitialiser les icônes Lucide
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
@@ -181,102 +170,7 @@ function displayClientCommunications(communications) {
 }
 
 function applyCommunicationsStyles() {
-    const styleId = 'comm-dynamic-styles';
-    let styleEl = document.getElementById(styleId);
-    
-    if (!styleEl) {
-        styleEl = document.createElement('style');
-        styleEl.id = styleId;
-        document.head.appendChild(styleEl);
-    }
-    
-    styleEl.textContent = `
-        /* Mode JOUR (Thème Light par défaut) */
-        html.theme-light .communications-widget .comm-item,
-        .communications-widget .comm-item {
-            background: #ffffff !important;
-            border: 2px solid #e2e8f0 !important;
-        }
-        html.theme-light .communications-widget .comm-item:hover,
-        .communications-widget .comm-item:hover {
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
-            border-color: var(--upstay-cyan) !important;
-        }
-        html.theme-light .communications-widget .comm-icon,
-        .communications-widget .comm-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            background: #f8fafc !important;
-            color: #000000 !important;
-        }
-        html.theme-light .communications-widget .comm-icon svg,
-        html.theme-light .communications-widget .comm-icon i,
-        .communications-widget .comm-icon svg,
-        .communications-widget .comm-icon i {
-            width: 22px;
-            height: 22px;
-            color: #000000 !important;
-            stroke: #000000 !important;
-        }
-        html.theme-light .communications-widget .comm-title,
-        .communications-widget .comm-title {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 4px;
-            color: #000000 !important;
-        }
-        html.theme-light .communications-widget .comm-date,
-        .communications-widget .comm-date {
-            font-size: 12px;
-            opacity: 0.7;
-            color: #000000 !important;
-        }
-        html.theme-light .communications-widget .comm-arrow,
-        .communications-widget .comm-arrow {
-            width: 20px;
-            height: 20px;
-            opacity: 0.5;
-            flex-shrink: 0;
-            color: #000000 !important;
-            stroke: #000000 !important;
-        }
-        
-        /* Mode NUIT (Thème Dark) */
-        html.theme-dark .communications-widget .comm-item {
-            background: #0f172a !important;
-            border: 2px solid #334155 !important;
-        }
-        html.theme-dark .communications-widget .comm-item:hover {
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-            border-color: #38bdf8 !important;
-        }
-        html.theme-dark .communications-widget .comm-icon {
-            background: #1e293b !important;
-            color: #ffffff !important;
-        }
-        html.theme-dark .communications-widget .comm-icon svg,
-        html.theme-dark .communications-widget .comm-icon i {
-            color: #ffffff !important;
-            stroke: #ffffff !important;
-        }
-        html.theme-dark .communications-widget .comm-title {
-            color: #ffffff !important;
-        }
-        html.theme-dark .communications-widget .comm-date {
-            color: #ffffff !important;
-        }
-        html.theme-dark .communications-widget .comm-arrow {
-            color: #ffffff !important;
-            stroke: #ffffff !important;
-        }
-    `;
+    // Plus besoin de styles personnalisés - utilisation des classes du design system existantes
 }
 
 // Stocker les communications pour la modal

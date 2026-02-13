@@ -53,7 +53,23 @@ class AuthManager {
             
             if (error) {
                 if (window.logger) window.logger.error('Erreur vérification auth', error);
-                this.redirectToLogin();
+                // ⏳ Attendre 500ms avant de rediriger (la session peut être en cours d'établissement)
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Réessayer une fois
+                const { data: { session: retrySession } } = await window.supabaseClient.auth.getSession();
+                if (!retrySession) {
+                    this.redirectToLogin();
+                    return;
+                }
+                // Session trouvée au retry
+                this.currentUser = retrySession.user;
+                await this.loadUserRoles();
+                this.updateUI();
+                
+                if (window.emailConfirmationGuard) {
+                    await window.emailConfirmationGuard.start();
+                }
                 return;
             }
             
@@ -67,7 +83,23 @@ class AuthManager {
                     await window.emailConfirmationGuard.start();
                 }
             } else {
-                this.redirectToLogin();
+                // ⏳ Pas de session: attendre 500ms avant de rediriger (cas où on vient de se connecter)
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Réessayer une fois
+                const { data: { session: retrySession } } = await window.supabaseClient.auth.getSession();
+                if (!retrySession) {
+                    this.redirectToLogin();
+                    return;
+                }
+                // Session trouvée au retry
+                this.currentUser = retrySession.user;
+                await this.loadUserRoles();
+                this.updateUI();
+                
+                if (window.emailConfirmationGuard) {
+                    await window.emailConfirmationGuard.start();
+                }
             }
         } catch (error) {
             if (window.logger) window.logger.error('Erreur checkAuthState', error);

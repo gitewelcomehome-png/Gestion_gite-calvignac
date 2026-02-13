@@ -382,8 +382,8 @@ async function afficherPlanningParSemaine() {
     // Charger les règles de ménage actives
     await loadActiveCleaningRules();
     
-    // Charger les gîtes dynamiquement
-    const gites = await window.gitesManager.getAll();
+    // Charger les gîtes dynamiquement selon l'abonnement
+    const gites = await window.gitesManager.getVisibleGites();
     if (!gites || gites.length === 0) {
         console.error('❌ Aucun gîte trouvé');
         return;

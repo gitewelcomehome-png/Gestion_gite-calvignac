@@ -494,19 +494,50 @@ function calculerTableauComparatif() {
     }
     
     // Vérifier critères LMP
-    const urssafReel = parseDisplayedAmount('preview-urssaf');
     const beneficeReel = parseDisplayedAmount('preview-benefice');
-    const resteAvantIRReel = parseDisplayedAmount('preview-reste');
+    const resteAvantIRReelAffiche = parseDisplayedAmount('preview-reste');
+    
+    // 🔧 RECALCULER LES URSSAF POUR LMNP (indépendamment du statut actuel)
+    // Cela évite que les cotisations minimales LMP affectent le calcul LMNP
+    let urssafLMNP = 0;
+    const SEUIL_EXONERATION_LMNP = 23000;
+    
+    if (beneficeReel > 0 && ca >= SEUIL_EXONERATION_LMNP) {
+        // Recalcul URSSAF pour LMNP (même formule que calculerTempsReel mais sans minimum LMP)
+        const urssafConfig = config.URSSAF;
+        const indemnites = beneficeReel * urssafConfig.indemnites_journalieres.taux;
+        const revenuPlafonne = Math.min(beneficeReel, urssafConfig.retraite_base.plafond);
+        const retraiteBase = revenuPlafonne * urssafConfig.retraite_base.taux;
+        const retraiteCompl = beneficeReel * urssafConfig.retraite_complementaire.taux;
+        const invalidite = beneficeReel * urssafConfig.invalidite_deces.taux;
+        const csgCrds = beneficeReel * urssafConfig.csg_crds.taux;
+        const formationPro = ca * urssafConfig.formation_pro.taux;
+        let allocations = 0;
+        const af = urssafConfig.allocations_familiales;
+        if (beneficeReel > af.seuil_debut) {
+            const baseAF = Math.min(beneficeReel - af.seuil_debut, af.seuil_fin - af.seuil_debut);
+            const tauxAF = (baseAF / (af.seuil_fin - af.seuil_debut)) * af.taux_max;
+            allocations = beneficeReel * tauxAF;
+        }
+        urssafLMNP = indemnites + retraiteBase + retraiteCompl + invalidite + csgCrds + formationPro + allocations;
+    }
+    // Si CA < 23k€, urssafLMNP reste à 0 (exonération totale)
+    
+    const resteAvantIRReel = beneficeReel - urssafLMNP;
     
     // Vérifier le statut actuel pour forcer LMP si nécessaire
     const forceLMP = statutActuelSelect === 'lmp';
     
-    // Sinon, vérifier les critères
+    // Critères LMP basés sur le CA et les revenus
     const revenusGlobauxReel = revenusSalaries + resteAvantIRReel;
     const partLocative = revenusGlobauxReel > 0 ? (resteAvantIRReel / revenusGlobauxReel) * 100 : 0;
     const critereCA_LMP = ca > 23000;
     const criterePart_LMP = partLocative > 50;
-    const peutEtreLMP = forceLMP || (critereCA_LMP && criterePart_LMP);
+    
+    // LMP disponible si :
+    // - Statut LMP sélectionné OU
+    // - CA > 23k (critère minimum, même si on ne peut pas vérifier la part exacte en Micro-BIC)
+    const peutEtreLMP = forceLMP || critereCA_LMP;
     
     const options = [];
     
@@ -521,9 +552,9 @@ function calculerTableauComparatif() {
     const irTotalLMNPReel = calculerIR(revenusGlobauxReel, nombreParts);
     const partLocationLMNPReel = revenusGlobauxReel > 0 ? resteAvantIRReel / revenusGlobauxReel : 0;
     const irPartLMNPReel = irTotalLMNPReel * partLocationLMNPReel;
-    const totalLMNPReel = urssafReel + irPartLMNPReel;
+    const totalLMNPReel = urssafLMNP + irPartLMNPReel;
     
-    document.getElementById('urssaf-lmnp-reel').textContent = urssafReel.toFixed(0) + ' €';
+    document.getElementById('urssaf-lmnp-reel').textContent = urssafLMNP.toFixed(0) + ' €';
     document.getElementById('ir-lmnp-reel').textContent = irPartLMNPReel.toFixed(0) + ' €';
     document.getElementById('total-lmnp-reel').textContent = totalLMNPReel.toFixed(0) + ' €';
     
@@ -707,7 +738,8 @@ function calculerTableauComparatif() {
     `;
     
     if (peutEtreLMP) {
-        const urssafLMP = Math.max(urssafReel, COTISATIONS_MINIMALES_LMP);
+        // Pour LMP : même calcul URSSAF que LMNP mais avec cotisations minimales
+        const urssafLMP = Math.max(urssafLMNP, COTISATIONS_MINIMALES_LMP);
         const resteAvantIRLMP = beneficeReel - urssafLMP;
         const revenusGlobauxLMP = revenusSalaries + resteAvantIRLMP;
         const irTotalLMP = calculerIR(revenusGlobauxLMP, nombreParts);
@@ -910,7 +942,7 @@ function changerStatutFiscal() {
     const statut = document.getElementById('statut_fiscal').value;
     const statutUpperCase = statut.toUpperCase();
     
-    // Gérer l'affichage du bloc classement (UNIQUEMENT pour Micro-BIC)
+    // ✅ Afficher le bloc classement UNIQUEMENT pour Micro-BIC
     const blocClassement = document.getElementById('bloc-classement');
     if (blocClassement) {
         blocClassement.style.display = statut === 'micro' ? 'flex' : 'none';
@@ -1089,18 +1121,61 @@ function verifierSeuilsStatut() {
     const peutEtreLMP = forceLMP || (critereCA_LMP && criterePart_LMP);
     
     // ADAPTER LE SELECT SELON LES MÊMES RÈGLES QUE LE TABLEAU
-    // Micro-BIC : désactivé si CA > seuils (comme dans le tableau)
-    const estClasse = document.getElementById('classement_meuble')?.value === 'classe';
-    const seuilMicro = estClasse ? 77700 : 15000;
-    const microDepasseSeuil = ca > seuilMicro;
+    // Micro-BIC : toujours accessible jusqu'à 77 700€, mais force le classement si > 15 000€
+    const PLAFOND_MICRO_NON_CLASSE = 15000;
+    const PLAFOND_MICRO_CLASSE = 77700;
+    const selectClassement = document.getElementById('classement_meuble');
+    const estClasse = selectClassement?.value === 'classe';
     
+    // 🔄 FORÇAGE AUTOMATIQUE DU CLASSEMENT si CA > 15 000€
+    if (ca > PLAFOND_MICRO_NON_CLASSE && ca <= PLAFOND_MICRO_CLASSE && !estClasse) {
+        // Forcer automatiquement "Classé ⭐"
+        if (selectClassement) {
+            selectClassement.value = 'classe';
+            // Les calculs suivants (calculerTableauComparatif) utiliseront automatiquement la nouvelle valeur
+        }
+    }
+    
+    // 🔒 Verrouiller le select classement selon le CA
+    if (selectClassement) {
+        const optionNonClasse = selectClassement.querySelector('option[value="non_classe"]');
+        const optionClasse = selectClassement.querySelector('option[value="classe"]');
+        
+        if (ca > PLAFOND_MICRO_NON_CLASSE && ca <= PLAFOND_MICRO_CLASSE) {
+            // Désactiver "Non classé" si CA > 15 000€
+            if (optionNonClasse) {
+                optionNonClasse.disabled = true;
+                optionNonClasse.textContent = 'Non classé (⛔ CA > 15 000 €)';
+            }
+            if (optionClasse) {
+                optionClasse.disabled = false;
+                optionClasse.textContent = 'Classé ⭐';
+            }
+        } else {
+            // Réactiver les deux options si CA ≤ 15 000€
+            if (optionNonClasse) {
+                optionNonClasse.disabled = false;
+                optionNonClasse.textContent = 'Non classé';
+            }
+            if (optionClasse) {
+                optionClasse.disabled = false;
+                optionClasse.textContent = 'Classé ⭐';
+            }
+        }
+    }
+    
+    // Micro-BIC désactivé UNIQUEMENT si CA > 77 700€ (plafond classé)
     if (optionMicro) {
-        if (microDepasseSeuil) {
+        if (ca > PLAFOND_MICRO_CLASSE) {
             optionMicro.disabled = true;
-            optionMicro.textContent = `Micro-BIC (⛔ CA > ${seuilMicro.toLocaleString('fr-FR')} €)`;
+            optionMicro.textContent = `Micro-BIC (⛔ CA > ${PLAFOND_MICRO_CLASSE.toLocaleString('fr-FR')} €)`;
         } else {
             optionMicro.disabled = false;
-            optionMicro.textContent = 'Micro-BIC';
+            if (ca > PLAFOND_MICRO_NON_CLASSE && ca <= PLAFOND_MICRO_CLASSE) {
+                optionMicro.textContent = 'Micro-BIC (⭐ classé requis)';
+            } else {
+                optionMicro.textContent = 'Micro-BIC';
+            }
         }
     }
     
@@ -1122,8 +1197,8 @@ function verifierSeuilsStatut() {
     }
     
     // FORÇAGE AUTOMATIQUE DU STATUT
-    // Si Micro-BIC sélectionné mais CA > seuils → basculer automatiquement
-    if (statut === 'micro' && microDepasseSeuil) {
+    // Si Micro-BIC sélectionné mais CA > 77 700€ (plafond absolu) → basculer automatiquement
+    if (statut === 'micro' && ca > PLAFOND_MICRO_CLASSE) {
         if (lmpObligatoire) {
             selectStatut.value = 'lmp';
         } else {
@@ -1138,9 +1213,22 @@ function verifierSeuilsStatut() {
         changerStatutFiscal();
     }
     
-    // Afficher les alertes (ne pas afficher pour Micro)
+    // Afficher les alertes
     if (statut === 'micro') {
-        alerteDiv.style.display = 'none';
+        // Afficher alerte spécifique pour Micro-BIC si classement forcé
+        if (ca > PLAFOND_MICRO_NON_CLASSE && ca <= PLAFOND_MICRO_CLASSE) {
+            alerteDiv.style.display = 'block';
+            alerteDiv.style.background = '#fff3cd';
+            alerteDiv.style.borderLeft = '4px solid #ffc107';
+            alerteMessage.innerHTML = `⚠️ <strong>Classement ⭐ obligatoire</strong> : CA (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) > 15 000 € → Passage automatique en meublé classé (plafond 77 700 €)`;
+        } else if (ca <= PLAFOND_MICRO_NON_CLASSE) {
+            alerteDiv.style.display = 'block';
+            alerteDiv.style.background = '#d4edda';
+            alerteDiv.style.borderLeft = '4px solid #28a745';
+            alerteMessage.innerHTML = `✅ <strong>Statut Micro-BIC valide</strong> : CA ≤ ${PLAFOND_MICRO_NON_CLASSE.toLocaleString('fr-FR')} € → Choix libre du classement`;
+        } else {
+            alerteDiv.style.display = 'none';
+        }
     } else if (lmpObligatoire) {
         alerteDiv.style.display = 'block';
         alerteDiv.style.background = '#f8d7da';
@@ -1188,7 +1276,7 @@ function calculerTempsReel() {
     }
     
     clearTimeout(calculTempsReelTimeout);
-    calculTempsReelTimeout = setTimeout(() => {
+    calculTempsReelTimeout = setTimeout(async () => {
         isCalculatingTempsReel = true;
         const ca = parseFloat(document.getElementById('ca')?.value || 0);
         if (ca === 0) {
@@ -1217,8 +1305,8 @@ function calculerTempsReel() {
             return;
         }
         
-        // Calcul des charges de tous les gîtes dynamiquement
-        const gites = window.GITES_DATA || [];
+        // ✅ FISCALITÉ : Charger TOUS les gîtes (pas seulement ceux visibles selon l'abonnement)
+        const gites = await window.gitesManager.getAll();
         let chargesBiens = 0;
         gites.forEach(gite => {
             const giteSlug = gite.name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -1430,7 +1518,6 @@ function calculerChargesBien(type) {
     // });
     
     return total;
-        // ⚠️ CORRECTION : Ne pas inclure amortissement_${type} car déjà calculé via calculerAmortissementsAnneeCourante()
 }
 
 function calculerChargesResidence() {
@@ -1469,7 +1556,7 @@ window.calculerChargesParGiteSansAmortissement = async function(simFiscale = nul
     // console.log('🔧 calculerChargesParGiteSansAmortissement appelée (MÉTHODE DOM)');
     // console.log('🔧 simFiscale:', simFiscale ? 'Présente' : 'Absente');
     
-    const gites = gitesData || window.GITES_DATA || await window.gitesManager.getAll();
+    const gites = gitesData || window.GITES_DATA || await window.gitesManager.getVisibleGites();
     // console.log('🔧 Nombre de gîtes:', gites.length);
     
     // ✅ ÉTAPE 1 : Récupérer le TOTAL CHARGES depuis le DOM (élément affiché)
@@ -3678,11 +3765,11 @@ async function genererBlocsChargesGites() {
     const container = document.getElementById('gites-charges-container');
     if (!container) return;
 
-    // Récupérer les gîtes depuis gitesManager
+    // Récupérer les gîtes visibles depuis gitesManager
     let gites = [];
     if (window.gitesManager) {
         try {
-            gites = await window.gitesManager.getAll();
+            gites = await window.gitesManager.getVisibleGites();
         } catch (error) {
             console.error('❌ Erreur chargement gîtes:', error);
         }
@@ -3757,11 +3844,11 @@ async function genererRecapitulatifCharges() {
     const container = document.getElementById('total-charges-container');
     if (!container) return;
 
-    // Récupérer les gîtes depuis gitesManager
+    // Récupérer les gîtes visibles depuis gitesManager
     let gites = window.GITES_DATA || [];
     if (gites.length === 0 && window.gitesManager) {
         try {
-            gites = await window.gitesManager.getAll();
+            gites = await window.gitesManager.getVisibleGites();
             window.GITES_DATA = gites;
         } catch (error) {
             console.error('❌ Erreur chargement gîtes:', error);

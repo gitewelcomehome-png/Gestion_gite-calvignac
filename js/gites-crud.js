@@ -77,9 +77,20 @@ window.showGitesManager = async function() {
         existingModal.closest('.modal-overlay').remove();
     }
     
-    // Charger les gîtes depuis le gestionnaire
-    const gites = await window.gitesManager.getAll();
-    // console.log('📋 LISTE GÎTES MODERNE V2.0 - Gîtes chargés:', gites.length);
+    // Charger TOUS les gîtes (sans filtre d'abonnement) pour la gestion
+    const allGites = await window.gitesManager.getAllUnfiltered();
+    // console.log('📋 LISTE GÎTES MODERNE V2.0 - Gîtes chargés:', allGites.length);
+    
+    // Récupérer la limite de gîtes selon le plan
+    let maxGites = 999; // Par défaut, pas de limite
+    let limitsHtml = '';
+    if (window.subscriptionManager) {
+        const limits = await window.subscriptionManager.checkGitesLimit();
+        maxGites = limits.max;
+        const planName = window.subscriptionManager.currentSubscription?.plan?.name || 'SOLO';
+        const limitColor = limits.canAdd ? '#718096' : '#e53e3e';
+        limitsHtml = `<span style="color: ${limitColor}; font-size: 0.9rem; font-weight: 500;">${limits.current} / ${limits.max} gîtes (${planName})</span>`;
+    }
     
     // Créer la modal MODERNE
     const modal = document.createElement('div');
@@ -96,15 +107,21 @@ window.showGitesManager = async function() {
                 </button>
             </div>
             <div class="modal-body-modern">
-                <div class="gites-list-header-modern">
-                    <button class="btn-add-modern" onclick="window.showAddGiteForm()">
+                <div class="gites-list-header-modern" style="display: flex; justify-content: space-between; align-items: center;">
+                    <button class="btn-add-modern" onclick="window.checkGiteLimitAndAdd()">
                         <i data-lucide="plus"></i>
                         Ajouter un gîte
                     </button>
+                    ${limitsHtml}
                 </div>
                 <div class="gites-grid-modern">
-                    ${gites.map((gite, index) => `
-                        <div class="gite-card-modern" data-gite-id="${gite.id}">
+                    ${allGites.map((gite, index) => {
+                        const isOverLimit = index >= maxGites;
+                        const overLimitStyle = isOverLimit ? 'opacity: 0.5; border: 2px dashed #e53e3e;' : '';
+                        const overLimitBadge = isOverLimit ? '<div style="position: absolute; top: 8px; right: 8px; background: #e53e3e; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">🚫 HORS LIMITE</div>' : '';
+                        return `
+                        <div class="gite-card-modern" data-gite-id="${gite.id}" style="position: relative; ${overLimitStyle}">
+                            ${overLimitBadge}
                             <div class="gite-order-number-modern">${index + 1}</div>
                             <div class="gite-card-header-modern" style="background: ${gite.color || '#667eea'}">
                                 <div class="gite-icon-modern">${window.getPropertyIcon(gite.icon || 'house')}</div>
@@ -139,7 +156,7 @@ window.showGitesManager = async function() {
                                 <button class="btn-icon-modern" onclick="window.moveGiteOrder('${gite.id}', 'up')" title="Monter" ${index === 0 ? 'disabled' : ''}>
                                     <i data-lucide="chevron-up"></i>
                                 </button>
-                                <button class="btn-icon-modern" onclick="window.moveGiteOrder('${gite.id}', 'down')" title="Descendre" ${index === gites.length - 1 ? 'disabled' : ''}>
+                                <button class="btn-icon-modern" onclick="window.moveGiteOrder('${gite.id}', 'down')" title="Descendre" ${index === allGites.length - 1 ? 'disabled' : ''}>
                                     <i data-lucide="chevron-down"></i>
                                 </button>
                                 <button class="btn-icon-modern delete" onclick="window.deleteGite('${gite.id}')" title="Supprimer">
@@ -147,7 +164,8 @@ window.showGitesManager = async function() {
                                 </button>
                             </div>
                         </div>
-                    `).join('')}
+                    `;
+                    }).join('')}
                 </div>
             </div>
         </div>
@@ -159,6 +177,34 @@ window.showGitesManager = async function() {
     if (window.lucide) {
         window.lucide.createIcons();
     }
+};
+
+/**
+ * Vérifier la limite de gîtes avant d'ajouter
+ */
+window.checkGiteLimitAndAdd = async function() {
+    // Vérifier si subscriptionManager est disponible
+    if (!window.subscriptionManager) {
+        console.warn('⚠️ SubscriptionManager non disponible, création autorisée par défaut');
+        window.showAddGiteForm();
+        return;
+    }
+    
+    const limits = await window.subscriptionManager.checkGitesLimit();
+    
+    if (!limits.canAdd) {
+        // Limite atteinte
+        const planName = window.subscriptionManager.currentSubscription?.plan?.name || 'SOLO';
+        showNotification(
+            `🚫 Limite atteinte : Votre plan ${planName} permet ${limits.max} gîte${limits.max > 1 ? 's' : ''} maximum. Passez au plan supérieur pour en ajouter davantage.`,
+            'error',
+            5000
+        );
+        return;
+    }
+    
+    // Limite OK, afficher le formulaire
+    window.showAddGiteForm();
 };
 
 /**

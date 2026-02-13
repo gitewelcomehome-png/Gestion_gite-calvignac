@@ -96,7 +96,7 @@
     <script src="js/shared-config.js"></script>
     <script src="js/gites-manager.js"></script>
     <!-- 🔒 PHASE 1 SÉCURITÉ: Authentification obligatoire -->
-    <script src="js/auth.js"></script>
+    <script src="js/auth.js?v=1.1"></script>
     <!-- 🛡️ PHASE 3 SÉCURITÉ: Protection XSS -->
     <script src="js/security-utils.js"></script>
     <!-- 🛡️ PHASE 4 SÉCURITÉ: Validation des entrées -->
@@ -131,7 +131,7 @@
     <script src="js/dashboard-support-widget.js?v=1.0"></script>
     <script src="js/sync-ical-v2.js?v=2.3"></script>
     <script src="js/statistiques.js?v=2.2"></script>
-    <script src="js/menage.js?v=1737504444"></script>
+    <script src="js/menage.js?v=1739379600"></script>
     <script src="js/cleaning-rules.js"></script>
     <script src="js/cleaning-rules-modal.js"></script>
     <script src="js/decouvrir.js?v=3.0"></script>
@@ -146,12 +146,12 @@
     <script src="js/fiches-clients.js"></script>
     <script src="js/checklists.js"></script>
     <script src="js/parrainage.js?v=1.4"></script>
-    <script src="js/draps.js?v=2.7"></script>
+    <script src="js/draps.js?v=3.0"></script>
     <script src="js/platform-icons.js"></script>
     <script src="js/property-icons.js"></script>
     <script src="js/gites-crud.js?v=5.2"></script>
     <script src="js/ical-config-modern.js?v=1.0"></script>
-    <script src="js/calendrier-tarifs.js?v=4.3"></script>
+    <script src="js/calendrier-tarifs.js?v=4.4"></script>
     <script src="js/remplissage-auto-tarifs.js?v=1.8"></script>
     
     <!-- SheetJS pour export Excel -->
@@ -168,13 +168,17 @@
     <link rel="stylesheet" href="css/main.css?v=15.6" />
     <link rel="stylesheet" href="css/notifications.css?v=2.2" />
     <link rel="stylesheet" href="css/tab-reservations.css?v=2.3" />
-    <link rel="stylesheet" href="css/tab-menage.css?v=1.0" />
+    <link rel="stylesheet" href="css/tab-menage.css?v=1739380400" />
     <link rel="stylesheet" href="css/tab-fiscalite.css?v=1.0" />
     <link rel="stylesheet" href="css/tab-infos-gites.css?v=1.7" />
     <link rel="stylesheet" href="css/tab-calendrier-tarifs.css?v=1.0" />
     <link rel="stylesheet" href="css/tab-calendrier.css?v=1.0" />
     <link rel="stylesheet" href="css/tab-statistiques.css?v=2.1" />
     <link rel="stylesheet" href="css/gite-form-modern.css?v=6.1" />
+    
+    <!-- 💳 SYSTÈME D'ABONNEMENTS -->
+    <link rel="stylesheet" href="css/subscription-styles.css?v=1.0" />
+    <script src="js/subscription-manager.js?v=1.0" defer></script>
 </head>
 <body>
     <!-- 🧹 NETTOYAGE IMMÉDIAT DU TITRE - DÉSACTIVÉ POUR DEBUG -->
@@ -203,55 +207,6 @@
     </script>
     -->
     
-    <!-- 🐛 PANNEAU DEBUG NOTIFICATIONS (TEMPORAIRE) -->
-    <div id="debugNotifications" style="position: fixed; bottom: 20px; right: 20px; background: #000; color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 11px; max-width: 400px; max-height: 300px; overflow: auto; z-index: 999999; box-shadow: 0 0 20px rgba(0,255,0,0.3);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #0f0;">
-            <strong style="color: #0ff;">🐛 DEBUG NOTIFICATIONS</strong>
-            <button onclick="this.parentElement.parentElement.remove();" style="background: none; border: none; color: #f00; cursor: pointer; font-size: 16px; padding: 0; width: 20px; height: 20px;">×</button>
-        </div>
-        
-        <div id="debugContent" style="margin-bottom: 10px;">
-            <p style="margin: 5px 0;">Chargement...</p>
-        </div>
-        
-        <button onclick="localStorage.removeItem('notifications'); localStorage.removeItem('notif_lastCheck'); document.title = 'Gestion Gîtes'; location.reload();" style="width: 100%; padding: 8px; background: #f00; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 5px;">
-            🗑️ VIDER NOTIFICATIONS + RELOAD
-        </button>
-        
-        <button onclick="
-            const stored = localStorage.getItem('notifications');
-            const notifs = stored ? JSON.parse(stored) : [];
-            document.getElementById('debugContent').innerHTML = '<pre style=&quot;margin: 0; font-size: 10px; white-space: pre-wrap;&quot;>' + JSON.stringify(notifs, null, 2) + '</pre>';
-        " style="width: 100%; padding: 8px; background: #0f0; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-            🔍 AFFICHER DÉTAILS JSON
-        </button>
-    </div>
-    
-    <script>
-        // Mise à jour du panneau debug automatiquement
-        (function updateDebugPanel() {
-            const debugContent = document.getElementById('debugContent');
-            if (!debugContent) return;
-            
-            const stored = localStorage.getItem('notifications');
-            const notifs = stored ? JSON.parse(stored) : [];
-            const types = {};
-            
-            notifs.forEach(n => {
-                types[n.type] = (types[n.type] || 0) + 1;
-            });
-            
-            debugContent.innerHTML = `
-                <p style="margin: 5px 0; color: #ff0;">Total: <strong>${notifs.length}</strong> notifications</p>
-                <p style="margin: 5px 0;">Types: ${JSON.stringify(types)}</p>
-                <p style="margin: 5px 0;">Non lues: <strong>${notifs.filter(n => !n.read).length}</strong></p>
-                <p style="margin: 5px 0; font-size: 9px; opacity: 0.7;">Dernière vérif: ${localStorage.getItem('notif_lastCheck') || 'jamais'}</p>
-            `;
-            
-            setTimeout(updateDebugPanel, 1000);
-        })();
-    </script>
-    
     <!-- 🎨 CONTRÔLES ADMIN -->
     <div class="theme-controls">
         <span id="userDisplayName" class="user-display-name" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.3s;">
@@ -260,6 +215,7 @@
                 <circle cx="12" cy="7" r="4"/>
             </svg>
             <span id="userNameText">...</span>
+            <div id="subscription-banner"></div>
         </span>
         <button onclick="showAdminMenu()" class="ctrl-btn ctrl-btn-admin" title="Menu Admin">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -496,6 +452,17 @@
                 if (window.supabaseClient) {
                     clearInterval(waitForSupabase);
                     loadUserDisplayName();
+                    
+                    // 💳 Initialiser le système d'abonnements AVANT tout le reste
+                    if (typeof initializeFeatureGates === 'function') {
+                        initializeFeatureGates()
+                            .then(() => {
+                                // ✅ Abonnement chargé, on peut continuer
+                                console.log('✅ Système d\'abonnements initialisé');
+                            })
+                            .catch(err => console.error('❌ Erreur init abonnements:', err));
+                    }
+                    
                     // ✅ Le NotificationSystem gère automatiquement le badge (voir notification-system.js)
                     // loadNotificationCount(); // ❌ NE PLUS APPELER - conflit avec NotificationSystem
                     
@@ -804,7 +771,7 @@
                 <!-- Nom LiveOwnerUnit -->
                 <div class="brand-identity">
                     <h1 class="brand-name">
-                        <span class="brand-cyan">L</span>ive<span class="brand-cyan">o</span>wner<span class="brand-cyan">u</span>nit
+                        <span><span class="brand-cyan">L</span>ive<span class="brand-cyan">O</span>wner</span><span class="unit-small"><span class="brand-cyan">U</span>nit</span>
                     </h1>
                     <p class="brand-tagline">Gestion Synchronisée</p>
                 </div>

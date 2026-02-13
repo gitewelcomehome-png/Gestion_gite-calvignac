@@ -290,6 +290,14 @@
                     return response;
                 }
                 
+                // Ignorer les erreurs sur les proxies CORS (normales en dev/fallback)
+                if (url.includes('cors-proxy') || 
+                    url.includes('allorigins.win') || 
+                    url.includes('corsproxy.io') || 
+                    url.includes('codetabs.com')) {
+                    return response;
+                }
+                
                 // Ne logger que les erreurs importantes (pas 404 sur assets)
                 if (response.status >= 500 || (response.status >= 400 && !url.includes('.css') && !url.includes('.js'))) {
                     const errorData = {

@@ -53,7 +53,7 @@ async function chargerGitesOptions() {
     if (!select) return;
     
     try {
-        const gites = await window.gitesManager.getAll();
+        const gites = await window.gitesManager.getVisibleGites();
         
         // Garder l'option "Tous"
         select.innerHTML = '<option value="tous">📍 Tous les gîtes</option>';

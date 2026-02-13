@@ -428,7 +428,7 @@ async function updateStats() {
             return year === selectedYear;
         });
         
-        const gites = await window.gitesManager.getAll();
+        const gites = await window.gitesManager.getVisibleGites();
         caTotal = 0;
         totalReservations = 0;
         

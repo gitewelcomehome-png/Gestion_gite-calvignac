@@ -14,7 +14,7 @@
 // ==========================================
 
 async function genererHTMLStatsGites() {
-    const gites = await window.gitesManager.getAll();
+    const gites = await window.gitesManager.getVisibleGites();
     
     // Générer les cartes de taux d'occupation
     const tauxContainer = document.getElementById('taux-occupation-container');
@@ -107,7 +107,7 @@ async function updateAdvancedStats(reservations) {
     // Utiliser directement les réservations passées (déjà filtrées si nécessaire)
     
     // Taux d'occupation (dynamique pour N gîtes)
-    const gites = await window.gitesManager.getAll();
+    const gites = await window.gitesManager.getVisibleGites();
     const joursAnnee = 365;
     
     gites.forEach(gite => {
@@ -254,7 +254,7 @@ async function filterStatsByYear() {
     updateAdvancedStats(filteredReservations);
     
     // Calcul dynamique pour N gîtes
-    const gites = await window.gitesManager.getAll();
+    const gites = await window.gitesManager.getVisibleGites();
     let caTotal = 0;
     let totalReservations = 0;
     
@@ -337,7 +337,7 @@ async function updateAllCharts(filteredReservations = null) {
     ];
     
     // Récupérer les gîtes pour le mapping
-    const gites = await window.gitesManager.getAll();
+    const gites = await window.gitesManager.getVisibleGites();
     const gitesById = {};
     gites.forEach(g => {
         gitesById[g.id] = g.slug;

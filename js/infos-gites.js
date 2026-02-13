@@ -955,10 +955,10 @@ async function generateGitesButtons() {
     }
 
     try {
-        // Récupérer les gîtes depuis le gitesManager
+        // Récupérer les gîtes VISIBLES selon l'abonnement
         let gites = [];
-        if (window.gitesManager && window.gitesManager.gites) {
-            gites = window.gitesManager.gites;
+        if (window.gitesManager) {
+            gites = await window.gitesManager.getVisibleGites();
         } else {
             // Fallback: charger directement depuis Supabase
             const { data, error } = await supabase
@@ -1993,7 +1993,6 @@ window.toggleLanguageInfos = async function() {
     if (currentLangInfos === 'en') {
         const needsTranslation = checkIfNeedsTranslation();
         if (needsTranslation) {
-            // console.log('🌍 Champs EN vides détectés → Traduction automatique...');
             if (typeof showNotification === 'function') {
                 showNotification('🌍 Traduction automatique en cours...', 'info', 2000);
             }
@@ -2042,58 +2041,41 @@ function applyLanguageDisplay() {
         return;
     }
     
-    // Sélectionner toutes les cards du formulaire SAUF la première (boutons) et la englishCard
-    const allCards = Array.from(document.querySelectorAll('#infosGiteForm .card'));
-    const firstCard = allCards[0]; // Card avec les boutons de gîtes
-    const frenchCards = allCards.filter(c => c !== firstCard && c !== englishCard);
-    
-    // console.log('🔍 DEBUG applyLanguageDisplay:', {
-    //     langue: currentLangInfos,
-    //     totalCards: allCards.length,
-    //     frenchCards: frenchCards.length,
-    //     englishCard: englishCard ? 'trouvée' : 'MANQUANTE',
-    //     englishCardVisible: englishCard ? window.getComputedStyle(englishCard).display : 'N/A'
-    // });
+    // Sélectionner toutes les cards du formulaire SAUF la englishCard
+    const allCards = Array.from(document.querySelectorAll('#infosGiteForm .infos-card'));
+    const frenchCards = allCards.filter(c => c !== englishCard);
     
     if (currentLangInfos === 'en') {
         // Mode ANGLAIS : afficher la card EN, cacher les cards FR
         btn.style.background = '#27ae60';
-        label.textContent = '🇬🇧 EN';
+        btn.style.color = 'white';
+        label.textContent = 'EN';
         
         // Afficher la card anglaise globale
         if (englishCard) {
             englishCard.style.display = 'block';
-            // console.log('✅ Card EN affichée (display: block)');
         }
         
-        // Cacher toutes les cards FR (sauf la première avec les boutons)
-        let cachees = 0;
+        // Cacher toutes les cards FR
         frenchCards.forEach(card => {
             card.style.display = 'none';
-            cachees++;
         });
-        
-        // console.log(`🇬🇧 Mode EN activé : ${cachees} cards FR cachées, 1 card EN affichée`);
         
     } else {
         // Mode FRANÇAIS : cacher la card EN, afficher toutes les cards FR
-        btn.style.background = '#3498db';
-        label.textContent = '🇫🇷 FR';
+        btn.style.background = 'white';
+        btn.style.color = '#2d3748';
+        label.textContent = 'FR';
         
         // Cacher la card anglaise globale
         if (englishCard) {
             englishCard.style.display = 'none';
-            // console.log('✅ Card EN cachée (display: none)');
         }
         
         // Afficher toutes les cards FR
-        let affichees = 0;
         frenchCards.forEach(card => {
             card.style.display = '';
-            affichees++;
         });
-        
-        // console.log(`🇫🇷 Mode FR activé : ${affichees} cards FR affichées, 1 card EN cachée`);
     }
 }
 

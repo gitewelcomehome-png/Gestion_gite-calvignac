@@ -31,10 +31,14 @@ export default function ShoppingScreen() {
   // Modals
   const [showListModal, setShowListModal] = useState(false);
   const [showLieuModal, setShowLieuModal] = useState(false);
+  const [showCreateListModal, setShowCreateListModal] = useState(false);
   
   // Lieux favoris
   const [lieux, setLieux] = useState<KmLieuFavori[]>([]);
   const [selectedLieuId, setSelectedLieuId] = useState<string>('');
+  
+  // Création de liste
+  const [newListName, setNewListName] = useState('');
 
   const currentList = lists.find(l => l.id === currentListId);
 
@@ -172,6 +176,43 @@ export default function ShoppingScreen() {
     }
   };
 
+  const createNewList = async () => {
+    if (!supabase || !user) return;
+    if (!newListName.trim()) {
+      Alert.alert('⚠️ Nom requis', 'Veuillez saisir un nom pour la liste.');
+      return;
+    }
+
+    try {
+      const newList = {
+        owner_user_id: user.id,
+        name: newListName.trim(),
+        status: 'en_cours',
+        created_date: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from('shopping_lists')
+        .insert(newList)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erreur création liste:', error);
+        Alert.alert('Erreur', 'Impossible de créer la liste.');
+      } else {
+        setShowCreateListModal(false);
+        setNewListName('');
+        await loadLists();
+        setCurrentListId(data.id);
+        Alert.alert('✅ Liste créée !', `La liste "${newListName}" a été créée avec succès.`);
+      }
+    } catch (err) {
+      console.error('❌ Erreur:', err);
+      Alert.alert('Erreur', 'Une erreur est survenue.');
+    }
+  };
+
   const validateList = async () => {
     if (!currentListId || !user) return;
 
@@ -271,13 +312,22 @@ export default function ShoppingScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadLists} />}>
         {errorMessage ? <ErrorBanner message={errorMessage} /> : null}
 
+        {/* Bouton créer une nouvelle liste */}
+        <ThemedView style={styles.card}>
+          <TouchableOpacity 
+            style={styles.createButton}
+            onPress={() => setShowCreateListModal(true)}>
+            <ThemedText style={styles.createButtonText}>+ Créer une nouvelle liste</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+
         {lists.length === 0 ? (
           <ThemedView style={styles.emptyState}>
             <ThemedText style={styles.emptyText}>
               Aucune liste de courses active.
             </ThemedText>
             <ThemedText style={styles.emptyTextSub}>
-              Créez-en une sur le dashboard web.
+              Créez votre première liste ci-dessus !
             </ThemedText>
           </ThemedView>
         ) : (
@@ -390,6 +440,45 @@ export default function ShoppingScreen() {
           </>
         )}
       </ScrollView>
+
+      {/* Modal de création de liste */}
+      <Modal
+        visible={showCreateListModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCreateListModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>📝 Nouvelle liste</ThemedText>
+              <TouchableOpacity onPress={() => {
+                setShowCreateListModal(false);
+                setNewListName('');
+              }}>
+                <ThemedText style={styles.modalClose}>×</ThemedText>
+              </TouchableOpacity>
+            </View>
+            <View style={{ padding: 20 }}>
+              <ThemedText style={styles.label}>Nom de la liste</ThemedText>
+              <TextInput
+                style={[styles.input, { marginTop: 10, marginBottom: 20 }]}
+                placeholder="Ex: Courses semaine, Stock hiver..."
+                placeholderTextColor="#999"
+                value={newListName}
+                onChangeText={setNewListName}
+                autoFocus={true}
+              />
+              <TouchableOpacity
+                onPress={createNewList}
+                style={[styles.validateButton, { marginTop: 0 }]}>
+                <ThemedText style={styles.validateButtonText}>
+                  ✓ Créer la liste
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Modal de sélection de liste */}
       <Modal
@@ -668,6 +757,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#999',
     textAlign: 'center',
+  },
+  createButton: {
+    backgroundColor: '#00C2CB',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  createButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   modalOverlay: {
     flex: 1,
