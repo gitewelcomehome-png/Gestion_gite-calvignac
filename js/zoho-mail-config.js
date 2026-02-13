@@ -206,17 +206,28 @@ const ZohoMailAPI = {
             token = ZohoAuth.getAccessToken();
         }
         
-        const response = await fetch(`${ZOHO_CONFIG.apiDomain}/api${endpoint}`, {
-            ...options,
+        // Déterminer la région
+        const authDomain = localStorage.getItem('zoho_auth_domain') || ZOHO_CONFIG.authDomain;
+        const region = authDomain.includes('.eu') ? 'eu' : 'com';
+        
+        // Utiliser le proxy serverless pour éviter les problèmes CORS
+        const response = await fetch('/api/zoho-proxy', {
+            method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                endpoint: endpoint,
+                method: options.method || 'GET',
+                body: options.body ? JSON.parse(options.body) : undefined,
+                token: token,
+                region: region
+            })
         });
         
         if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(`API Error: ${response.status} - ${errorData.error || 'Unknown'}`);
         }
         
         return response.json();
@@ -224,22 +235,22 @@ const ZohoMailAPI = {
     
     // Récupérer les comptes email
     async getAccounts() {
-        return this.request('/accounts');
+        return this.request('/api/accounts');
     },
     
     // Récupérer les messages
     async getMessages(accountId, folderId = 'INBOX', limit = 50) {
-        return this.request(`/accounts/${accountId}/folders/${folderId}/messages?limit=${limit}`);
+        return this.request(`/api/accounts/${accountId}/folders/${folderId}/messages?limit=${limit}`);
     },
     
     // Récupérer un message spécifique
     async getMessage(accountId, messageId) {
-        return this.request(`/accounts/${accountId}/messages/${messageId}`);
+        return this.request(`/api/accounts/${accountId}/messages/${messageId}`);
     },
     
     // Envoyer un email
     async sendMessage(accountId, messageData) {
-        return this.request(`/accounts/${accountId}/messages`, {
+        return this.request(`/api/accounts/${accountId}/messages`, {
             method: 'POST',
             body: JSON.stringify(messageData)
         });
@@ -247,7 +258,7 @@ const ZohoMailAPI = {
     
     // Récupérer les dossiers
     async getFolders(accountId) {
-        return this.request(`/accounts/${accountId}/folders`);
+        return this.request(`/api/accounts/${accountId}/folders`);
     }
 };
 
