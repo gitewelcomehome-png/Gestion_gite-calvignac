@@ -274,10 +274,47 @@ const ZohoMailAPI = {
     
     // Envoyer un email
     async sendMessage(accountId, messageData) {
-        return this.request(`/api/accounts/${accountId}/messages`, {
-            method: 'POST',
-            body: JSON.stringify(messageData)
-        });
+        // Essai avec différents formats possibles
+        const formats = [
+            {
+                fromAddress: messageData.fromAddress || 'contact@liveownerunit.fr',
+                toAddress: messageData.toAddress,
+                subject: messageData.subject,
+                content: messageData.content,
+                mailFormat: 'plaintext'
+            },
+            {
+                from: messageData.fromAddress || 'contact@liveownerunit.fr',
+                to: messageData.toAddress,
+                subject: messageData.subject,
+                content: messageData.content
+            },
+            {
+                fromAddress: messageData.fromAddress || 'contact@liveownerunit.fr',
+                toAddress: messageData.toAddress,
+                ccAddress: '',
+                bccAddress: '',
+                subject: messageData.subject,
+                content: messageData.content,
+                mailFormat: 'plaintext',
+                askReceipt: 'no'
+            }
+        ];
+        
+        for (let i = 0; i < formats.length; i++) {
+            try {
+                console.log(`Test sendMessage format ${i + 1}:`, formats[i]);
+                const response = await this.request(`/api/accounts/${accountId}/messages`, {
+                    method: 'POST',
+                    body: JSON.stringify(formats[i])
+                });
+                console.log(`✅ sendMessage SUCCESS avec format ${i + 1}`);
+                return response;
+            } catch (error) {
+                console.log(`❌ sendMessage FAILED format ${i + 1}: ${error.message}`);
+                if (i === formats.length - 1) throw error;
+            }
+        }
     },
     
     // Récupérer les dossiers
