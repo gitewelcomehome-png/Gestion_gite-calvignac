@@ -259,9 +259,10 @@ const ZohoMailAPI = {
         return this.request('/api/accounts');
     },
     
-    // Récupérer les messages
+    // Récupérer les messages - structure correcte Zoho Mail API
     async getMessages(accountId, folderId = 'INBOX', limit = 50) {
-        return this.request(`/api/accounts/${accountId}/folders/${folderId}/messages?limit=${limit}`);
+        // Zoho Mail utilise /messages directement avec des query params
+        return this.request(`/api/accounts/${accountId}/messages?folder=${folderId}&limit=${limit}`);
     },
     
     // Récupérer un message spécifique
