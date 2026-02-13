@@ -627,18 +627,18 @@
                     console.log('Current account ID:', currentAccount);
                     
                     // D'abord récupérer les folders pour debug
-                    try {
-                        const folders = await ZohoMailAPI.getFolders(currentAccount);
-                        console.log('Folders structure:', folders);
-                console.log('Folders JSON complet:', JSON.stringify(folders, null, 2));
-                
-                // Afficher chaque folder individuellement
-                if (folders.data && Array.isArray(folders.data)) {
-                    console.log(`=== ${folders.data.length} Folders trouvés ===`);
-                    folders.data.forEach((folder, index) => {
-                        console.log(`Folder ${index + 1}:`, JSON.stringify(folder, null, 2));
-                    });
-                }
+                    const folders = await ZohoMailAPI.getFolders(currentAccount);
+                    console.log('Folders structure:', folders);
+                    console.log('Folders JSON complet:', JSON.stringify(folders, null, 2));
+                    
+                    // Afficher chaque folder individuellement
+                    if (folders.data && Array.isArray(folders.data)) {
+                        console.log(`=== ${folders.data.length} Folders trouvés ===`);
+                        folders.data.forEach((folder, index) => {
+                            console.log(`Folder ${index + 1}:`, JSON.stringify(folder, null, 2));
+                        });
+                    }
+                    
                     await loadEmails();
                 }
             } catch (error) {
