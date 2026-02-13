@@ -607,6 +607,7 @@
         let currentFolderId = null;
         let folders = [];
         let emails = [];
+        let currentEmailIndex = null; // Email actuellement affiché
         
         // Vérifier l'authentification au chargement
         window.addEventListener('DOMContentLoaded', async () => {
@@ -722,6 +723,7 @@
             const email = emails[index];
             const viewer = document.getElementById('emailViewer');
             
+            currentEmailIndex = index; // Sauvegarder l'index pour les actions
             console.log('📧 Données email disponibles:', email);
             
             viewer.innerHTML = `
@@ -732,19 +734,19 @@
                         <span><strong>Date:</strong> ${formatDate(email.receivedTime)}</span>
                     </div>
                     <div class="email-viewer-actions">
-                        <button class="action-btn" onclick="replyEmail(${index})" title="Répondre">
+                        <button class="action-btn" onclick="replyEmail()" title="Répondre">
                             <i data-lucide="reply" style="width: 16px; height: 16px;"></i>
                             Répondre
                         </button>
-                        <button class="action-btn" onclick="replyAllEmail(${index})" title="Répondre à tous">
+                        <button class="action-btn" onclick="replyAllEmail()" title="Répondre à tous">
                             <i data-lucide="reply-all" style="width: 16px; height: 16px;"></i>
                             Répondre à tous
                         </button>
-                        <button class="action-btn" onclick="forwardEmail(${index})" title="Transférer">
+                        <button class="action-btn" onclick="forwardEmail()" title="Transférer">
                             <i data-lucide="forward" style="width: 16px; height: 16px;"></i>
                             Transférer
                         </button>
-                        <button class="action-btn danger" onclick="deleteEmail(${index})" title="Supprimer">
+                        <button class="action-btn danger" onclick="deleteEmail()" title="Supprimer">
                             <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                             Supprimer
                         </button>
@@ -763,14 +765,27 @@
             lucide.createIcons();
         }
         
+        // Vider le viewer
+        function clearViewer() {
+            currentEmailIndex = null;
+            document.getElementById('emailViewer').innerHTML = `
+                <div class="empty-state">
+                    <i data-lucide="mail-open" style="width: 60px; height: 60px; opacity: 0.3;"></i>
+                    <p>Sélectionnez un email pour le lire</p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+        
         // Actualiser
         async function refreshEmails() {
             await loadEmails();
         }
         
         // Répondre à un email
-        function replyEmail(index) {
-            const email = emails[index];
+        function replyEmail() {
+            if (currentEmailIndex === null) return;
+            const email = emails[currentEmailIndex];
             openCompose();
             
             document.getElementById('composeTo').value = email.fromAddress;
@@ -779,8 +794,9 @@
         }
         
         // Répondre à tous
-        function replyAllEmail(index) {
-            const email = emails[index];
+        function replyAllEmail() {
+            if (currentEmailIndex === null) return;
+            const email = emails[currentEmailIndex];
             openCompose();
             
             // TODO : ajouter CC si disponible dans l'API
@@ -790,8 +806,9 @@
         }
         
         // Transférer un email
-        function forwardEmail(index) {
-            const email = emails[index];
+        function forwardEmail() {
+            if (currentEmailIndex === null) return;
+            const email = emails[currentEmailIndex];
             openCompose();
             
             document.getElementById('composeSubject').value = `Fwd: ${email.subject || ''}`;
@@ -799,19 +816,22 @@
         }
         
         // Supprimer un email
-        async function deleteEmail(index) {
+        async function deleteEmail() {
+            if (currentEmailIndex === null) return;
             if (!confirm('Supprimer cet email ?')) return;
             
             try {
-                const email = emails[index];
-                // TODO : implémenter API de suppression Zoho
-                // await ZohoMailAPI.deleteMessage(currentAccount, email.messageId);
+                const email = emails[currentEmailIndex];
+                await ZohoMailAPI.deleteMessage(currentAccount, email.messageId);
                 
-                alert('Fonction de suppression à implémenter avec l\'API Zoho');
-                console.log('Email à supprimer:', email.messageId);
+                // Vider le viewer et rafraîchir la liste
+                clearViewer();
+                await loadEmails();
+                
+                alert('Email supprimé');
             } catch (error) {
                 console.error('Erreur suppression:', error);
-                alert('Erreur lors de la suppression');
+                alert('Erreur lors de la suppression : ' + error.message);
             }
         }
         
@@ -911,6 +931,9 @@
                     currentFolderId = folderId;
                     document.querySelectorAll('.folder-item').forEach(item => item.classList.remove('active'));
                     folderItem.classList.add('active');
+                    
+                    // Vider le viewer avant de charger les nouveaux emails
+                    clearViewer();
                     await loadEmails();
                 } else {
                     console.error(`Dossier ${folderName} introuvable`);

@@ -317,6 +317,13 @@ const ZohoMailAPI = {
         }
     },
     
+    // Supprimer un email
+    async deleteMessage(accountId, messageId) {
+        return this.request(`/api/accounts/${accountId}/messages/${messageId}`, {
+            method: 'DELETE'
+        });
+    },
+    
     // Récupérer les dossiers
     async getFolders(accountId) {
         return this.request(`/api/accounts/${accountId}/folders`);
