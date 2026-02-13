@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messagerie - Admin LiveOwnerUnit</title>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Config Supabase -->
+    <script src="../js/shared-config.js"></script>
+    
+    <!-- Zoho Mail Config -->
+    <script src="../js/zoho-mail-config.js"></script>
+    
+    <!-- CSS Admin -->
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            overflow: hidden;
+        }
+        
+        .email-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 8px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .email-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .email-container {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+        }
+        
+        /* Sidebar */
+        .email-sidebar {
+            width: 250px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .compose-btn {
+            margin: 1rem;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .folder-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        
+        .folder-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #64748b;
+        }
+        
+        .folder-item:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        
+        .folder-item.active {
+            background: #eef2ff;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        /* Liste emails */
+        .email-list {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .email-list-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .email-items {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .email-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .email-item:hover {
+            background: #f8fafc;
+        }
+        
+        .email-item.unread {
+            background: #f0f9ff;
+        }
+        
+        .email-item.active {
+            background: #eef2ff;
+            border-left: 3px solid #667eea;
+        }
+        
+        .email-item-from {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        
+        .email-item-subject {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .email-item-preview {
+            color: #94a3b8;
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .email-item-date {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 0.5rem;
+        }
+        
+        /* Viewer */
+        .email-viewer {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .email-viewer-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .email-viewer-subject {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .email-viewer-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .email-viewer-body {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            line-height: 1.6;
+            color: #334155;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #94a3b8;
+            gap: 1rem;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f1f5f9;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Auth screen */
+        .auth-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .auth-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .auth-text {
+            color: #64748b;
+            margin-bottom: 2rem;
+            max-width: 400px;
+        }
+        
+        .auth-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s;
+        }
+        
+        .auth-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Compose modal */
+        .compose-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .compose-modal.active {
+            display: flex;
+        }
+        
+        .compose-form {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .compose-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .compose-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .compose-body {
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #334155;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 300px;
+            resize: vertical;
+        }
+        
+        .compose-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="email-header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='admin-channel-manager.html'">
+                <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                Retour
+            </button>
+            <h1 class="email-title">
+                <i data-lucide="mail" style="color: #667eea;"></i>
+                Messagerie
+            </h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" id="refreshBtn" onclick="refreshEmails()">
+                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                Actualiser
+            </button>
+        </div>
+    </header>
+
+    <!-- Email Container -->
+    <div class="email-container" id="emailContainer">
+        <!-- Auth Screen (par défaut) -->
+        <div class="auth-screen" id="authScreen">
+            <div class="auth-icon">
+                <i data-lucide="mail" style="width: 50px; height: 50px; color: white;"></i>
+            </div>
+            <h2 class="auth-title">Connectez votre messagerie</h2>
+            <p class="auth-text">
+                Connectez-vous avec Zoho Mail pour accéder à vos emails directement depuis votre interface d'administration.
+            </p>
+            <button class="auth-btn" onclick="initiateZohoAuth()">
+                <i data-lucide="log-in" style="width: 20px; height: 20px;"></i>
+                Se connecter à Zoho Mail
+            </button>
+        </div>
+
+        <!-- Main App (caché par défaut) -->
+        <div style="display: none; flex: 1;" id="mainApp">
+            <!-- Sidebar -->
+            <div class="email-sidebar">
+                <button class="compose-btn" onclick="openCompose()">
+                    <i data-lucide="pencil" style="width: 18px; height: 18px;"></i>
+                    Nouveau message
+                </button>
+                <div class="folder-list" id="folderList">
+                    <div class="folder-item active" data-folder="INBOX">
+                        <i data-lucide="inbox" style="width: 18px; height: 18px;"></i>
+                        <span>Boîte de réception</span>
+                    </div>
+                    <div class="folder-item" data-folder="Sent">
+                        <i data-lucide="send" style="width: 18px; height: 18px;"></i>
+                        <span>Envoyés</span>
+                    </div>
+                    <div class="folder-item" data-folder="Drafts">
+                        <i data-lucide="file-text" style="width: 18px; height: 18px;"></i>
+                        <span>Brouillons</span>
+                    </div>
+                    <div class="folder-item" data-folder="Trash">
+                        <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                        <span>Corbeille</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email List -->
+            <div class="email-list">
+                <div class="email-list-header">Boîte de réception</div>
+                <div class="email-items" id="emailItems">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Viewer -->
+            <div class="email-viewer" id="emailViewer">
+                <div class="empty-state">
+                    <i data-lucide="mail-open" style="width: 60px; height: 60px; opacity: 0.3;"></i>
+                    <p>Sélectionnez un email pour le lire</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compose Modal -->
+    <div class="compose-modal" id="composeModal">
+        <div class="compose-form">
+            <div class="compose-header">
+                <h3 class="compose-title">Nouveau message</h3>
+                <button class="btn-secondary" style="border: none; cursor: pointer;" onclick="closeCompose()">
+                    <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                </button>
+            </div>
+            <div class="compose-body">
+                <div class="form-group">
+                    <label>Destinataire</label>
+                    <input type="email" id="composeTo" placeholder="destinataire@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Objet</label>
+                    <input type="text" id="composeSubject" placeholder="Objet du message">
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="composeBody" placeholder="Votre message..."></textarea>
+                </div>
+            </div>
+            <div class="compose-footer">
+                <button class="btn btn-secondary" onclick="closeCompose()">Annuler</button>
+                <button class="btn" onclick="sendEmail()">
+                    <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+                    Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        let currentAccount = null;
+        let currentFolder = 'INBOX';
+        let emails = [];
+        
+        // Vérifier l'authentification au chargement
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Vérifier si on revient après OAuth
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            
+            if (code) {
+                // Échanger le code contre un token
+                document.getElementById('authScreen').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+                const success = await exchangeCodeForToken(code);
+                
+                if (success) {
+                    // Nettoyer l'URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    await loadEmailApp();
+                } else {
+                    alert('Erreur de connexion. Veuillez réessayer.');
+                    location.reload();
+                }
+            } else if (ZohoAuth.getAccessToken() && ZohoAuth.isTokenValid()) {
+                // Déjà connecté
+                await loadEmailApp();
+            }
+            
+            lucide.createIcons();
+        });
+        
+        // Charger l'app email
+        async function loadEmailApp() {
+            try {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                
+                // Récupérer le compte
+                const accounts = await ZohoMailAPI.getAccounts();
+                if (accounts && accounts.data && accounts.data.length > 0) {
+                    currentAccount = accounts.data[0].accountId;
+                    await loadEmails();
+                }
+            } catch (error) {
+                console.error('Erreur chargement app:', error);
+                if (error.message.includes('Token expired')) {
+                    ZohoAuth.clearTokens();
+                    location.reload();
+                }
+            }
+        }
+        
+        // Charger les emails
+        async function loadEmails() {
+            try {
+                const emailItemsDiv = document.getElementById('emailItems');
+                emailItemsDiv.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+                
+                const response = await ZohoMailAPI.getMessages(currentAccount, currentFolder);
+                emails = response.data || [];
+                
+                if (emails.length === 0) {
+                    emailItemsDiv.innerHTML = '<div class="empty-state"><p>Aucun email</p></div>';
+                    return;
+                }
+                
+                emailItemsDiv.innerHTML = emails.map((email, index) => `
+                    <div class="email-item ${email.isRead ? '' : 'unread'}" onclick="viewEmail(${index})">
+                        <div class="email-item-from">${escapeHtml(email.fromAddress)}</div>
+                        <div class="email-item-subject">${escapeHtml(email.subject || '(sans objet)')}</div>
+                        <div class="email-item-preview">${escapeHtml(email.summary || '')}</div>
+                        <div class="email-item-date">${formatDate(email.receivedTime)}</div>
+                    </div>
+                `).join('');
+                
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Erreur chargement emails:', error);
+                document.getElementById('emailItems').innerHTML = '<div class="empty-state"><p>Erreur de chargement</p></div>';
+            }
+        }
+        
+        // Voir un email
+        async function viewEmail(index) {
+            const email = emails[index];
+            const viewer = document.getElementById('emailViewer');
+            
+            viewer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            try {
+                const fullEmail = await ZohoMailAPI.getMessage(currentAccount, email.messageId);
+                
+                viewer.innerHTML = `
+                    <div class="email-viewer-header">
+                        <div class="email-viewer-subject">${escapeHtml(fullEmail.data.subject || '(sans objet)')}</div>
+                        <div class="email-viewer-meta">
+                            <span><strong>De:</strong> ${escapeHtml(fullEmail.data.fromAddress)}</span>
+                            <span><strong>Date:</strong> ${formatDate(fullEmail.data.receivedTime)}</span>
+                        </div>
+                    </div>
+                    <div class="email-viewer-body">
+                        ${fullEmail.data.content || fullEmail.data.textContent || '<p>Aucun contenu</p>'}
+                    </div>
+                `;
+                
+                // Marquer comme actif
+                document.querySelectorAll('.email-item').forEach((item, i) => {
+                    item.classList.toggle('active', i === index);
+                });
+                
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Erreur affichage email:', error);
+                viewer.innerHTML = '<div class="empty-state"><p>Erreur de chargement</p></div>';
+            }
+        }
+        
+        // Actualiser
+        async function refreshEmails() {
+            await loadEmails();
+        }
+        
+        // Composer
+        function openCompose() {
+            document.getElementById('composeModal').classList.add('active');
+            document.getElementById('composeTo').value = '';
+            document.getElementById('composeSubject').value = '';
+            document.getElementById('composeBody').value = '';
+        }
+        
+        function closeCompose() {
+            document.getElementById('composeModal').classList.remove('active');
+        }
+        
+        // Envoyer
+        async function sendEmail() {
+            const to = document.getElementById('composeTo').value;
+            const subject = document.getElementById('composeSubject').value;
+            const body = document.getElementById('composeBody').value;
+            
+            if (!to || !subject) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+            
+            try {
+                await ZohoMailAPI.sendMessage(currentAccount, {
+                    toAddress: to,
+                    subject: subject,
+                    content: body
+                });
+                
+                alert('Email envoyé !');
+                closeCompose();
+            } catch (error) {
+                console.error('Erreur envoi:', error);
+                alert('Erreur lors de l\'envoi');
+            }
+        }
+        
+        // Utilitaires
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+        
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const today = new Date();
+            
+            if (date.toDateString() === today.toDateString()) {
+                return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+        }
+        
+        // Changement de dossier
+        document.addEventListener('click', async (e) => {
+            const folderItem = e.target.closest('.folder-item');
+            if (folderItem) {
+                currentFolder = folderItem.dataset.folder;
+                document.querySelectorAll('.folder-item').forEach(item => item.classList.remove('active'));
+                folderItem.classList.add('active');
+                await loadEmails();
+            }
+        });
+    </script>
+</body>
+</html>
