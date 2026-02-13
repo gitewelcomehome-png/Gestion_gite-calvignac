@@ -1,5 +1,5 @@
 // Vercel Serverless Function - Refresh Token Zoho
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     // Autoriser CORS depuis notre domaine
     res.setHeader('Access-Control-Allow-Origin', 'https://liveownerunit.fr');
     res.setHeader('Access-Control-Allow-Methods', 'POST');
@@ -63,4 +63,4 @@ module.exports = async (req, res) => {
             message: error.message
         });
     }
-};
+}
