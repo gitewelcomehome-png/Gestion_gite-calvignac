@@ -582,13 +582,27 @@
                 document.getElementById('authScreen').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
                 const success = await exchangeCodeForToken(code);
                 
+                // Nettoyer l'URL IMMÉDIATEMENT (avant le reload)
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
                 if (success) {
-                    // Nettoyer l'URL
-                    window.history.replaceState({}, document.title, window.location.pathname);
                     await loadEmailApp();
                 } else {
-                    alert('Erreur de connexion. Veuillez réessayer.');
-                    location.reload();
+                    // Afficher l'écran d'auth avec message d'erreur
+                    document.getElementById('authScreen').innerHTML = `
+                        <div class="auth-icon">
+                            <i data-lucide="alert-circle" style="width: 50px; height: 50px; color: #ef4444;"></i>
+                        </div>
+                        <h2 class="auth-title" style="color: #ef4444;">Erreur de connexion</h2>
+                        <p class="auth-text">
+                            L'authentification avec Zoho Mail a échoué. Vérifiez la console pour plus de détails.
+                        </p>
+                        <button class="auth-btn" onclick="location.reload()">
+                            <i data-lucide="refresh-cw" style="width: 20px; height: 20px;"></i>
+                            Réessayer
+                        </button>
+                    `;
+                    lucide.createIcons();
                 }
             } else if (ZohoAuth.getAccessToken() && ZohoAuth.isTokenValid()) {
                 // Déjà connecté
