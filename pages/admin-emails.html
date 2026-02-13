@@ -15,7 +15,7 @@
     <script src="../js/shared-config.js"></script>
     
     <!-- Zoho Mail Config -->
-    <script src="../js/zoho-mail-config.js"></script>
+    <script src="../js/zoho-mail-config.js?v=20260213-1"></script>
     
     <!-- CSS Admin -->
     <link rel="stylesheet" href="../css/admin-dashboard.css">
@@ -620,8 +620,20 @@
                 
                 // Récupérer le compte
                 const accounts = await ZohoMailAPI.getAccounts();
+                console.log('Accounts:', accounts);
+                
                 if (accounts && accounts.data && accounts.data.length > 0) {
                     currentAccount = accounts.data[0].accountId;
+                    console.log('Current account ID:', currentAccount);
+                    
+                    // D'abord récupérer les folders pour debug
+                    try {
+                        const folders = await ZohoMailAPI.getFolders(currentAccount);
+                        console.log('Folders structure:', folders);
+                    } catch (e) {
+                        console.error('Error getting folders:', e);
+                    }
+                    
                     await loadEmails();
                 }
             } catch (error) {
