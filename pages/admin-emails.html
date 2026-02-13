@@ -742,6 +742,7 @@
             
             try {
                 await ZohoMailAPI.sendMessage(currentAccount, {
+                    fromAddress: 'contact@liveownerunit.fr',
                     toAddress: to,
                     subject: subject,
                     content: body

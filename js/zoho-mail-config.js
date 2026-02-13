@@ -250,7 +250,7 @@ const ZohoMailAPI = {
     
     // Récupérer un message spécifique
     async getMessage(accountId, messageId) {
-        return this.request(`/api/accounts/${accountId}/messages/${messageId}`);
+        return this.request(`/api/accounts/${accountId}/messages/${messageId}/view`);
     },
     
     // Envoyer un email
