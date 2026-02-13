@@ -1,5 +1,5 @@
 // Vercel Serverless Function - Échange code OAuth Zoho
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
     // Autoriser CORS depuis notre domaine
     res.setHeader('Access-Control-Allow-Origin', 'https://liveownerunit.fr');
     res.setHeader('Access-Control-Allow-Methods', 'POST');
@@ -65,4 +65,4 @@ export default async function handler(req, res) {
             message: error.message
         });
     }
-}
+};

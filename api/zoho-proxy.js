@@ -1,5 +1,5 @@
 // Vercel Serverless Function - Proxy pour API Zoho Mail
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
     // Autoriser CORS depuis notre domaine
     res.setHeader('Access-Control-Allow-Origin', 'https://liveownerunit.fr');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
@@ -53,4 +53,4 @@ export default async function handler(req, res) {
             message: error.message
         });
     }
-}
+};
