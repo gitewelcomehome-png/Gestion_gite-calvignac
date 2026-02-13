@@ -695,8 +695,6 @@
                 const response = await ZohoMailAPI.getMessages(currentAccount, currentFolderId);
                 emails = response.data || [];
                 
-                console.log('📬 Emails reçus:', emails.length, emails.length > 0 ? emails[0] : 'aucun');
-                
                 if (emails.length === 0) {
                     emailItemsDiv.innerHTML = '<div class="empty-state"><p>Aucun email</p></div>';
                     return;
@@ -914,8 +912,6 @@
                     f.folderName && f.folderName.toLowerCase().includes(folderName.toLowerCase())
                 );
             }
-            
-            console.log(`🔍 Recherche dossier "${folderName}" (type: ${folderType}) →`, folder ? `Trouvé: ${folder.folderId}` : 'NON TROUVÉ');
             
             return folder ? folder.folderId : null;
         }
