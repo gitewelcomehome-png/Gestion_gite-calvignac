@@ -629,6 +629,8 @@
                     const foldersResponse = await ZohoMailAPI.getFolders(currentAccount);
                     folders = foldersResponse.data || [];
                     
+                    console.log('📁 Dossiers disponibles:', folders.map(f => `${f.folderName} (${f.folderType}) = ${f.folderId}`));
+                    
                     // Trouver le folderId de l'Inbox
                     const inboxFolder = folders.find(f => f.folderType === 'Inbox');
                     if (inboxFolder) {
@@ -772,14 +774,39 @@
             return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
         }
         
+        // Trouver le folderId à partir du nom de dossier
+        function getFolderIdByName(folderName) {
+            // Mapping entre data-folder HTML et folderType API Zoho
+            const folderTypeMap = {
+                'INBOX': 'Inbox',
+                'Sent': 'Sent',
+                'Drafts': 'Draft',
+                'Trash': 'Trash'
+            };
+            
+            const folderType = folderTypeMap[folderName];
+            const folder = folders.find(f => f.folderType === folderType);
+            
+            console.log(`🔍 Recherche dossier "${folderName}" (type: ${folderType}) →`, folder ? `Trouvé: ${folder.folderId}` : 'NON TROUVÉ');
+            
+            return folder ? folder.folderId : null;
+        }
+        
         // Changement de dossier
         document.addEventListener('click', async (e) => {
             const folderItem = e.target.closest('.folder-item');
             if (folderItem) {
-                currentFolder = folderItem.dataset.folder;
-                document.querySelectorAll('.folder-item').forEach(item => item.classList.remove('active'));
-                folderItem.classList.add('active');
-                await loadEmails();
+                const folderName = folderItem.dataset.folder;
+                const folderId = getFolderIdByName(folderName);
+                
+                if (folderId) {
+                    currentFolderId = folderId;
+                    document.querySelectorAll('.folder-item').forEach(item => item.classList.remove('active'));
+                    folderItem.classList.add('active');
+                    await loadEmails();
+                } else {
+                    console.error(`Dossier ${folderName} introuvable`);
+                }
             }
         });
     </script>
