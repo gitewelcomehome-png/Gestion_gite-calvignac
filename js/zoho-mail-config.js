@@ -1,14 +1,25 @@
 // Configuration Zoho Mail API
-// Sauvegarder l'origin au chargement de la page (avant redirection OAuth)
-if (!localStorage.getItem('zoho_redirect_origin')) {
-    localStorage.setItem('zoho_redirect_origin', window.location.origin);
-}
-
 const ZOHO_CONFIG = {
     clientId: '1000.VNA95CXS18E0IC5F9U12K2DAXTNZ6P',
     clientSecret: 'd7d84ca438fdba28be76ff9ced58385b9fcdf0ae97',
-    // Utiliser l'origin sauvegardé
-    redirectUri: localStorage.getItem('zoho_redirect_origin') + '/pages/admin-emails.html',
+    // Redirection URI basée sur le domaine actuel
+    get redirectUri() {
+        const hostname = window.location.hostname;
+        // Production
+        if (hostname === 'liveownerunit.fr' || hostname === 'www.liveownerunit.fr') {
+            return 'https://liveownerunit.fr/pages/admin-emails.html';
+        }
+        // Développement local
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return `http://${hostname}:${window.location.port || 8080}/pages/admin-emails.html`;
+        }
+        // Codespace GitHub
+        if (hostname.includes('github.dev')) {
+            return `https://${hostname}/pages/admin-emails.html`;
+        }
+        // Fallback production
+        return 'https://liveownerunit.fr/pages/admin-emails.html';
+    },
     scopes: [
         'ZohoMail.messages.READ',
         'ZohoMail.messages.CREATE',
