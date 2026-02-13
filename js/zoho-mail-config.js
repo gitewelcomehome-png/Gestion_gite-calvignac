@@ -197,6 +197,11 @@ const ZohoMailAPI = {
     async request(endpoint, options = {}) {
         let token = ZohoAuth.getAccessToken();
         
+        console.log('=== ZohoMailAPI.request ===');
+        console.log('Endpoint:', endpoint);
+        console.log('Options:', options);
+        console.log('Token exists:', !!token);
+        
         // Vérifier et rafraîchir le token si nécessaire
         if (!ZohoAuth.isTokenValid()) {
             const refreshed = await refreshAccessToken();
@@ -210,27 +215,43 @@ const ZohoMailAPI = {
         const authDomain = localStorage.getItem('zoho_auth_domain') || ZOHO_CONFIG.authDomain;
         const region = authDomain.includes('.eu') ? 'eu' : 'com';
         
+        console.log('Auth domain:', authDomain);
+        console.log('Region:', region);
+        
+        const proxyUrl = window.location.origin + '/api/zoho-proxy';
+        console.log('Proxy URL:', proxyUrl);
+        
+        const payload = {
+            endpoint: endpoint,
+            method: options.method || 'GET',
+            body: options.body ? JSON.parse(options.body) : undefined,
+            token: token,
+            region: region
+        };
+        
+        console.log('Payload:', payload);
+        
         // Utiliser le proxy serverless pour éviter les problèmes CORS
-        const response = await fetch('/api/zoho-proxy', {
+        const response = await fetch(proxyUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                endpoint: endpoint,
-                method: options.method || 'GET',
-                body: options.body ? JSON.parse(options.body) : undefined,
-                token: token,
-                region: region
-            })
+            body: JSON.stringify(payload)
         });
         
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`API Error: ${response.status} - ${errorData.error || 'Unknown'}`);
+            const errorText = await response.text();
+            console.error('Response error text:', errorText);
+            throw new Error(`API Error: ${response.status} - ${errorText}`);
         }
         
-        return response.json();
+        const data = await response.json();
+        console.log('Response data:', data);
+        return data;
     },
     
     // Récupérer les comptes email

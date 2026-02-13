@@ -1,22 +1,34 @@
 // Vercel Serverless Function - Proxy pour API Zoho Mail
 export default async function handler(req, res) {
+    console.log('=== Zoho Proxy Called ===');
+    console.log('Method:', req.method);
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    
     // Autoriser CORS depuis notre domaine
     res.setHeader('Access-Control-Allow-Origin', 'https://liveownerunit.fr');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     
     if (req.method === 'OPTIONS') {
+        console.log('OPTIONS request - returning 200');
         return res.status(200).end();
     }
     
-    const { endpoint, method = 'GET', body, token, region = 'com' } = req.body || req.query;
+    const { endpoint, method = 'GET', body, token, region = 'com' } = req.body || {};
+    
+    console.log('Parsed params:', { endpoint, method, hasBody: !!body, hasToken: !!token, region });
     
     if (!endpoint || !token) {
+        console.error('Missing endpoint or token');
         return res.status(400).json({ error: 'Missing endpoint or token' });
     }
     
     // Déterminer le domaine selon la région
     const apiDomain = region === 'eu' ? 'https://mail.zoho.eu' : 'https://mail.zoho.com';
+    const fullUrl = `${apiDomain}${endpoint}`;
+    
+    console.log('Calling Zoho API:', fullUrl);
     
     try {
         const options = {
@@ -31,7 +43,9 @@ export default async function handler(req, res) {
             options.body = JSON.stringify(body);
         }
         
-        const response = await fetch(`${apiDomain}${endpoint}`, options);
+        const response = await fetch(fullUrl, options);
+        
+        console.log('Zoho response status:', response.status);
         
         if (!response.ok) {
             const errorText = await response.text();
@@ -44,6 +58,7 @@ export default async function handler(req, res) {
         }
         
         const data = await response.json();
+        console.log('Zoho response success');
         return res.status(200).json(data);
         
     } catch (error) {
