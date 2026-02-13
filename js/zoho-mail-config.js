@@ -317,46 +317,6 @@ const ZohoMailAPI = {
         }
     },
     
-    // Supprimer un email (déplacer vers corbeille)
-    async deleteMessage(accountId, messageId) {
-        // Essayer plusieurs méthodes de suppression Zoho
-        const methods = [
-            // Méthode 1 : Action trash
-            {
-                endpoint: `/api/accounts/${accountId}/messages/${messageId}/actions/trash`,
-                options: { method: 'PUT' }
-            },
-            // Méthode 2 : Mise à jour avec isTrash
-            {
-                endpoint: `/api/accounts/${accountId}/messages/${messageId}`,
-                options: { 
-                    method: 'PUT',
-                    body: JSON.stringify({ status: 'trash' })
-                }
-            },
-            // Méthode 3 : PATCH
-            {
-                endpoint: `/api/accounts/${accountId}/messages/${messageId}`,
-                options: { 
-                    method: 'PATCH',
-                    body: JSON.stringify({ status: 'trash' })
-                }
-            }
-        ];
-        
-        for (let i = 0; i < methods.length; i++) {
-            try {
-                console.log(`🗑️ Test suppression méthode ${i + 1}:`, methods[i].endpoint);
-                const response = await this.request(methods[i].endpoint, methods[i].options);
-                console.log(`✅ Suppression SUCCESS avec méthode ${i + 1}`);
-                return response;
-            } catch (error) {
-                console.log(`❌ Suppression FAILED méthode ${i + 1}: ${error.message}`);
-                if (i === methods.length - 1) throw error;
-            }
-        }
-    },
-    
     // Récupérer les dossiers
     async getFolders(accountId) {
         return this.request(`/api/accounts/${accountId}/folders`);

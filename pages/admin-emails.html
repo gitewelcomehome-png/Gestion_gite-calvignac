@@ -744,10 +744,7 @@
                             <i data-lucide="forward" style="width: 16px; height: 16px;"></i>
                             Transférer
                         </button>
-                        <button class="action-btn danger" onclick="deleteEmail()" title="Supprimer">
-                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-                            Supprimer
-                        </button>
+                        <!-- Suppression non disponible dans l'API Zoho Mail -->
                     </div>
                 </div>
                 <div class="email-viewer-body">
@@ -811,26 +808,6 @@
             
             document.getElementById('composeSubject').value = `Fwd: ${email.subject || ''}`;
             document.getElementById('composeBody').value = `\n\n---\nMessage transféré---\nDe: ${email.fromAddress}\nDate: ${formatDate(email.receivedTime)}\nObjet: ${email.subject || '(sans objet)'}\n\n${email.textContent || email.summary || ''}`;
-        }
-        
-        // Supprimer un email
-        async function deleteEmail() {
-            if (currentEmailIndex === null) return;
-            if (!confirm('Supprimer cet email ?')) return;
-            
-            try {
-                const email = emails[currentEmailIndex];
-                await ZohoMailAPI.deleteMessage(currentAccount, email.messageId);
-                
-                // Vider le viewer et rafraîchir la liste
-                clearViewer();
-                await loadEmails();
-                
-                alert('Email supprimé');
-            } catch (error) {
-                console.error('Erreur suppression:', error);
-                alert('Erreur lors de la suppression : ' + error.message);
-            }
         }
         
         // Composer
