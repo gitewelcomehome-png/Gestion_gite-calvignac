@@ -125,6 +125,13 @@ async function exchangeCodeForToken(code) {
             })
         });
         
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Erreur HTTP:', response.status, errorText);
+            alert(`Erreur OAuth (${response.status}): ${errorText}`);
+            return false;
+        }
+        
         const data = await response.json();
         
         console.log('Réponse Zoho:', data);
@@ -139,9 +146,11 @@ async function exchangeCodeForToken(code) {
         }
         
         console.error('Erreur dans la réponse:', data);
+        alert(`Erreur Zoho: ${data.error || 'Échec de l\'authentification'}`);
         return false;
     } catch (error) {
         console.error('Erreur échange code:', error);
+        alert(`Erreur réseau: ${error.message}`);
         return false;
     }
 }
