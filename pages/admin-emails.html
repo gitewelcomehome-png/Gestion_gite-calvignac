@@ -272,6 +272,42 @@
             font-size: 14px;
         }
         
+        .email-viewer-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f1f5f9;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            color: #475569;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        
+        .action-btn.danger {
+            color: #dc2626;
+        }
+        
+        .action-btn.danger:hover {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+        
         .email-viewer-body {
             flex: 1;
             padding: 1.5rem;
@@ -695,6 +731,24 @@
                         <span><strong>De:</strong> ${escapeHtml(email.fromAddress)}</span>
                         <span><strong>Date:</strong> ${formatDate(email.receivedTime)}</span>
                     </div>
+                    <div class="email-viewer-actions">
+                        <button class="action-btn" onclick="replyEmail(${index})" title="Répondre">
+                            <i data-lucide="reply" style="width: 16px; height: 16px;"></i>
+                            Répondre
+                        </button>
+                        <button class="action-btn" onclick="replyAllEmail(${index})" title="Répondre à tous">
+                            <i data-lucide="reply-all" style="width: 16px; height: 16px;"></i>
+                            Répondre à tous
+                        </button>
+                        <button class="action-btn" onclick="forwardEmail(${index})" title="Transférer">
+                            <i data-lucide="forward" style="width: 16px; height: 16px;"></i>
+                            Transférer
+                        </button>
+                        <button class="action-btn danger" onclick="deleteEmail(${index})" title="Supprimer">
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                            Supprimer
+                        </button>
+                    </div>
                 </div>
                 <div class="email-viewer-body">
                     ${email.content || email.textContent || email.summary || '<p>Contenu non disponible - Vérifier les logs</p>'}
@@ -712,6 +766,53 @@
         // Actualiser
         async function refreshEmails() {
             await loadEmails();
+        }
+        
+        // Répondre à un email
+        function replyEmail(index) {
+            const email = emails[index];
+            openCompose();
+            
+            document.getElementById('composeTo').value = email.fromAddress;
+            document.getElementById('composeSubject').value = `Re: ${email.subject || ''}`;
+            document.getElementById('composeBody').value = `\n\n---\nDe: ${email.fromAddress}\nDate: ${formatDate(email.receivedTime)}\nObjet: ${email.subject || '(sans objet)'}\n\n${email.textContent || email.summary || ''}`;
+        }
+        
+        // Répondre à tous
+        function replyAllEmail(index) {
+            const email = emails[index];
+            openCompose();
+            
+            // TODO : ajouter CC si disponible dans l'API
+            document.getElementById('composeTo').value = email.fromAddress;
+            document.getElementById('composeSubject').value = `Re: ${email.subject || ''}`;
+            document.getElementById('composeBody').value = `\n\n---\nDe: ${email.fromAddress}\nDate: ${formatDate(email.receivedTime)}\nObjet: ${email.subject || '(sans objet)'}\n\n${email.textContent || email.summary || ''}`;
+        }
+        
+        // Transférer un email
+        function forwardEmail(index) {
+            const email = emails[index];
+            openCompose();
+            
+            document.getElementById('composeSubject').value = `Fwd: ${email.subject || ''}`;
+            document.getElementById('composeBody').value = `\n\n---\nMessage transféré---\nDe: ${email.fromAddress}\nDate: ${formatDate(email.receivedTime)}\nObjet: ${email.subject || '(sans objet)'}\n\n${email.textContent || email.summary || ''}`;
+        }
+        
+        // Supprimer un email
+        async function deleteEmail(index) {
+            if (!confirm('Supprimer cet email ?')) return;
+            
+            try {
+                const email = emails[index];
+                // TODO : implémenter API de suppression Zoho
+                // await ZohoMailAPI.deleteMessage(currentAccount, email.messageId);
+                
+                alert('Fonction de suppression à implémenter avec l\'API Zoho');
+                console.log('Email à supprimer:', email.messageId);
+            } catch (error) {
+                console.error('Erreur suppression:', error);
+                alert('Erreur lors de la suppression');
+            }
         }
         
         // Composer
@@ -780,12 +881,19 @@
             const folderTypeMap = {
                 'INBOX': 'Inbox',
                 'Sent': 'Sent',
-                'Drafts': 'Draft',
+                'Drafts': 'Draft', // Tenter Draft d'abord
                 'Trash': 'Trash'
             };
             
             const folderType = folderTypeMap[folderName];
-            const folder = folders.find(f => f.folderType === folderType);
+            let folder = folders.find(f => f.folderType === folderType);
+            
+            // Fallback : chercher par nom de dossier si folderType échoue
+            if (!folder) {
+                folder = folders.find(f => 
+                    f.folderName && f.folderName.toLowerCase().includes(folderName.toLowerCase())
+                );
+            }
             
             console.log(`🔍 Recherche dossier "${folderName}" (type: ${folderType}) →`, folder ? `Trouvé: ${folder.folderId}` : 'NON TROUVÉ');
             
