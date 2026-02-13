@@ -656,6 +656,8 @@
                 const response = await ZohoMailAPI.getMessages(currentAccount, currentFolderId);
                 emails = response.data || [];
                 
+                console.log('📬 Emails reçus:', emails.length, emails.length > 0 ? emails[0] : 'aucun');
+                
                 if (emails.length === 0) {
                     emailItemsDiv.innerHTML = '<div class="empty-state"><p>Aucun email</p></div>';
                     return;
@@ -682,34 +684,27 @@
             const email = emails[index];
             const viewer = document.getElementById('emailViewer');
             
-            viewer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            console.log('📧 Données email disponibles:', email);
             
-            try {
-                const fullEmail = await ZohoMailAPI.getMessage(currentAccount, email.messageId);
-                
-                viewer.innerHTML = `
-                    <div class="email-viewer-header">
-                        <div class="email-viewer-subject">${escapeHtml(fullEmail.data.subject || '(sans objet)')}</div>
-                        <div class="email-viewer-meta">
-                            <span><strong>De:</strong> ${escapeHtml(fullEmail.data.fromAddress)}</span>
-                            <span><strong>Date:</strong> ${formatDate(fullEmail.data.receivedTime)}</span>
-                        </div>
+            viewer.innerHTML = `
+                <div class="email-viewer-header">
+                    <div class="email-viewer-subject">${escapeHtml(email.subject || '(sans objet)')}</div>
+                    <div class="email-viewer-meta">
+                        <span><strong>De:</strong> ${escapeHtml(email.fromAddress)}</span>
+                        <span><strong>Date:</strong> ${formatDate(email.receivedTime)}</span>
                     </div>
-                    <div class="email-viewer-body">
-                        ${fullEmail.data.content || fullEmail.data.textContent || '<p>Aucun contenu</p>'}
-                    </div>
-                `;
-                
-                // Marquer comme actif
-                document.querySelectorAll('.email-item').forEach((item, i) => {
-                    item.classList.toggle('active', i === index);
-                });
-                
-                lucide.createIcons();
-            } catch (error) {
-                console.error('Erreur affichage email:', error);
-                viewer.innerHTML = '<div class="empty-state"><p>Erreur de chargement</p></div>';
-            }
+                </div>
+                <div class="email-viewer-body">
+                    ${email.content || email.textContent || email.summary || '<p>Contenu non disponible - Vérifier les logs</p>'}
+                </div>
+            `;
+            
+            // Marquer comme actif
+            document.querySelectorAll('.email-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            
+            lucide.createIcons();
         }
         
         // Actualiser
@@ -750,6 +745,9 @@
                 
                 alert('Email envoyé !');
                 closeCompose();
+                
+                // Rafraîchir la liste pour voir le mail envoyé
+                await loadEmails();
             } catch (error) {
                 console.error('Erreur envoi:', error);
                 alert('Erreur lors de l\'envoi');
