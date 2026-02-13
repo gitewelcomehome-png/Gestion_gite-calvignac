@@ -568,7 +568,8 @@
         lucide.createIcons();
         
         let currentAccount = null;
-        let currentFolder = 'INBOX';
+        let currentFolderId = null;
+        let folders = [];
         let emails = [];
         
         // Vérifier l'authentification au chargement
@@ -626,20 +627,20 @@
                     currentAccount = accounts.data[0].accountId;
                     console.log('Current account ID:', currentAccount);
                     
-                    // D'abord récupérer les folders pour debug
-                    const folders = await ZohoMailAPI.getFolders(currentAccount);
-                    console.log('Folders structure:', folders);
-                    console.log('Folders JSON complet:', JSON.stringify(folders, null, 2));
+                    // Récupérer les folders et trouver l'INBOX
+                    const foldersResponse = await ZohoMailAPI.getFolders(currentAccount);
+                    folders = foldersResponse.data || [];
+                    console.log(`${folders.length} folders chargés`);
                     
-                    // Afficher chaque folder individuellement
-                    if (folders.data && Array.isArray(folders.data)) {
-                        console.log(`=== ${folders.data.length} Folders trouvés ===`);
-                        folders.data.forEach((folder, index) => {
-                            console.log(`Folder ${index + 1}:`, JSON.stringify(folder, null, 2));
-                        });
+                    // Trouver le folderId de l'Inbox
+                    const inboxFolder = folders.find(f => f.folderType === 'Inbox');
+                    if (inboxFolder) {
+                        currentFolderId = inboxFolder.folderId;
+                        console.log('Inbox folderId:', currentFolderId);
+                        await loadEmails();
+                    } else {
+                        console.error('Inbox folder not found');
                     }
-                    
-                    await loadEmails();
                 }
             } catch (error) {
                 console.error('Erreur chargement app:', error);
@@ -656,7 +657,7 @@
                 const emailItemsDiv = document.getElementById('emailItems');
                 emailItemsDiv.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
                 
-                const response = await ZohoMailAPI.getMessages(currentAccount, currentFolder);
+                const response = await ZohoMailAPI.getMessages(currentAccount, currentFolderId);
                 emails = response.data || [];
                 
                 if (emails.length === 0) {
