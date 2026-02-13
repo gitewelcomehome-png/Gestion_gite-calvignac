@@ -29,8 +29,15 @@ const ZOHO_CONFIG = {
         'ZohoMail.accounts.READ',
         'ZohoMail.partner.organization.READ'
     ].join(','),
-    apiDomain: 'https://mail.zoho.com',
-    authDomain: 'https://accounts.zoho.com'
+    // Domaines API détectés automatiquement
+    get apiDomain() {
+        const saved = localStorage.getItem('zoho_auth_domain');
+        if (saved && saved.includes('.eu')) {
+            return 'https://mail.zoho.eu';
+        }
+        return 'https://mail.zoho.com';
+    },
+    authDomain: 'https://accounts.zoho.com' // Par défaut, détecté lors de l'OAuth
 };
 
 // Stockage sécurisé du token (à améliorer avec encryption)
@@ -89,7 +96,22 @@ async function initiateZohoAuth() {
 // Échanger le code contre un token
 async function exchangeCodeForToken(code) {
     try {
-        const response = await fetch(`${ZOHO_CONFIG.authDomain}/oauth/v2/token`, {
+        // Détecter le domaine Zoho depuis les paramètres de l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const accountsServer = urlParams.get('accounts-server');
+        const location = urlParams.get('location') || 'com';
+        
+        // Utiliser le bon domaine selon la région
+        let authDomain = ZOHO_CONFIG.authDomain;
+        if (accountsServer) {
+            authDomain = decodeURIComponent(accountsServer);
+        } else if (location === 'eu') {
+            authDomain = 'https://accounts.zoho.eu';
+        }
+        
+        console.log('Échange de code avec:', authDomain);
+        
+        const response = await fetch(`${authDomain}/oauth/v2/token`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -105,13 +127,18 @@ async function exchangeCodeForToken(code) {
         
         const data = await response.json();
         
+        console.log('Réponse Zoho:', data);
+        
         if (data.access_token) {
             ZohoAuth.setAccessToken(data.access_token);
             ZohoAuth.setRefreshToken(data.refresh_token);
             ZohoAuth.setTokenExpiry(Date.now() + (data.expires_in * 1000));
+            // Sauvegarder le domaine pour les futurs appels
+            localStorage.setItem('zoho_auth_domain', authDomain);
             return true;
         }
         
+        console.error('Erreur dans la réponse:', data);
         return false;
     } catch (error) {
         console.error('Erreur échange code:', error);
@@ -124,8 +151,11 @@ async function refreshAccessToken() {
     const refreshToken = ZohoAuth.getRefreshToken();
     if (!refreshToken) return false;
     
+    // Utiliser le domaine sauvegardé ou par défaut
+    const authDomain = localStorage.getItem('zoho_auth_domain') || ZOHO_CONFIG.authDomain;
+    
     try {
-        const response = await fetch(`${ZOHO_CONFIG.authDomain}/oauth/v2/token`, {
+        const response = await fetch(`${authDomain}/oauth/v2/token`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
