@@ -744,11 +744,7 @@
                             <i data-lucide="forward" style="width: 16px; height: 16px;"></i>
                             Transférer
                         </button>
-                        <button class="action-btn" onclick="archiveEmail()" title="Archiver">
-                            <i data-lucide="archive" style="width: 16px; height: 16px;"></i>
-                            Archiver
-                        </button>
-                        <!-- Suppression non disponible dans l'API Zoho Mail -->
+                        <!-- Archiver/Supprimer non disponibles dans l'API Zoho Mail -->
                     </div>
                 </div>
                 <div class="email-viewer-body">
@@ -812,35 +808,6 @@
             
             document.getElementById('composeSubject').value = `Fwd: ${email.subject || ''}`;
             document.getElementById('composeBody').value = `\n\n---\nMessage transféré---\nDe: ${email.fromAddress}\nDate: ${formatDate(email.receivedTime)}\nObjet: ${email.subject || '(sans objet)'}\n\n${email.textContent || email.summary || ''}`;
-        }
-        
-        // Archiver un email
-        async function archiveEmail() {
-            if (currentEmailIndex === null) return;
-            if (!confirm('Archiver cet email ?')) return;
-            
-            try {
-                const email = emails[currentEmailIndex];
-                
-                // Trouver le dossier Archive
-                const archiveFolder = folders.find(f => f.folderType === 'Archive');
-                if (!archiveFolder) {
-                    alert('Dossier Archive introuvable');
-                    return;
-                }
-                
-                // Déplacer l'email vers Archive
-                await ZohoMailAPI.moveMessage(currentAccount, email.messageId, archiveFolder.folderId);
-                
-                // Vider le viewer et rafraîchir la liste
-                clearViewer();
-                await loadEmails();
-                
-                alert('Email archivé');
-            } catch (error) {
-                console.error('Erreur archivage:', error);
-                alert('Erreur lors de l\'archivage : ' + error.message);
-            }
         }
         
         // Composer

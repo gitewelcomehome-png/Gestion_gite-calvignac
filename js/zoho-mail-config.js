@@ -317,46 +317,6 @@ const ZohoMailAPI = {
         }
     },
     
-    // Déplacer un email vers un dossier
-    async moveMessage(accountId, messageId, targetFolderId) {
-        // Essayer plusieurs méthodes pour déplacer un message
-        const methods = [
-            // Méthode 1 : Action move
-            {
-                endpoint: `/api/accounts/${accountId}/messages/${messageId}/move`,
-                options: { 
-                    method: 'PUT',
-                    body: JSON.stringify({ folderId: targetFolderId })
-                }
-            },
-            // Méthode 2 : Update avec folderId
-            {
-                endpoint: `/api/accounts/${accountId}/messages/${messageId}`,
-                options: { 
-                    method: 'PUT',
-                    body: JSON.stringify({ folderId: targetFolderId })
-                }
-            },
-            // Méthode 3 : PATCH
-            {
-                endpoint: `/api/accounts/${accountId}/messages/${messageId}`,
-                options: { 
-                    method: 'PATCH',
-                    body: JSON.stringify({ folderId: targetFolderId })
-                }
-            }
-        ];
-        
-        for (let i = 0; i < methods.length; i++) {
-            try {
-                const response = await this.request(methods[i].endpoint, methods[i].options);
-                return response;
-            } catch (error) {
-                if (i === methods.length - 1) throw error;
-            }
-        }
-    },
-    
     // Récupérer les dossiers
     async getFolders(accountId) {
         return this.request(`/api/accounts/${accountId}/folders`);
