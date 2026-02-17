@@ -18,7 +18,10 @@ async function translateToEnglish(text) {
     if (!text || text.trim() === '') return '';
     
     try {
-        const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`);
+        const response = await Promise.race([
+            fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Translation timeout')), 2000))
+        ]);
         const data = await response.json();
         
         if (data.responseStatus === 200 && data.responseData) {
@@ -47,7 +50,22 @@ async function initChecklistsTab() {
     // console.log('📋 Initialisation onglet Check-lists');
     
     // Charger les gîtes visibles selon l'abonnement et remplir le select
-    const gites = await window.gitesManager.getVisibleGites();
+    let gites = [];
+    try {
+        if (window.gitesManager) {
+            const hasSubscriptionManager = !!(window.subscriptionManager && window.subscriptionManager.initialized);
+            if (hasSubscriptionManager && typeof window.gitesManager.getVisibleGites === 'function') {
+                gites = await window.gitesManager.getVisibleGites();
+            } else if (typeof window.gitesManager.getAll === 'function') {
+                gites = await window.gitesManager.getAll();
+            } else if (typeof window.gitesManager.getVisibleGites === 'function') {
+                gites = await window.gitesManager.getVisibleGites();
+            }
+        }
+    } catch (error) {
+        console.warn('⚠️ Impossible de charger les gîtes pour Check-lists:', error);
+        gites = [];
+    }
     const giteSelect = document.getElementById('checklist-gite-select');
     
     if (giteSelect && gites && gites.length > 0) {
@@ -61,27 +79,32 @@ async function initChecklistsTab() {
         });
         
         // Initialiser avec le premier gîte si pas encore défini
-        if (!currentGiteFilter) {
+        const hasCurrentFilter = gites.some(gite => gite.id === currentGiteFilter);
+        if (!currentGiteFilter || !hasCurrentFilter) {
             currentGiteFilter = gites[0].id;
         }
         giteSelect.value = currentGiteFilter;
         
         // Listener pour changement de gîte
-        giteSelect.addEventListener('change', (e) => {
-            currentGiteFilter = e.target.value;
-            loadChecklistItems();
-        });
+        if (!giteSelect.dataset.checklistBound) {
+            giteSelect.addEventListener('change', (e) => {
+                currentGiteFilter = e.target.value;
+                loadChecklistItems();
+            });
+            giteSelect.dataset.checklistBound = 'true';
+        }
     }
     
     // Listener pour changement de type
     const typeSelect = document.getElementById('checklist-type-select');
-    if (typeSelect) {
+    if (typeSelect && !typeSelect.dataset.checklistBound) {
         typeSelect.addEventListener('change', (e) => {
             currentTypeFilter = e.target.value;
             loadChecklistItems();
         });
+        typeSelect.dataset.checklistBound = 'true';
     }
-    
+
     // 🎯 Appliquer le filtre depuis le dashboard si présent
     const checklistFilterData = localStorage.getItem('checklistFilter');
     if (checklistFilterData) {
@@ -159,41 +182,22 @@ async function loadChecklistItems() {
         // Affichage des items
         let html = '';
         data.forEach((item, index) => {
-            // Encoder les données pour éviter les problèmes d'échappement
             const texteEncoded = encodeURIComponent(item.texte || '');
             const descriptionEncoded = encodeURIComponent(item.description || '');
-            
+
             html += `
-                <div class="checklist-item" data-id="${item.id}" data-texte="${texteEncoded}" data-description="${descriptionEncoded}">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; margin-bottom: 5px;">
-                            ${index + 1}. ${item.texte}
+                <div class="checklist-item" draggable="true" data-id="${item.id}" data-texte="${texteEncoded}" data-description="${descriptionEncoded}">
+                    <div class="checklist-item-drag-handle" title="Glisser pour réordonner">⋮⋮</div>
+                    <div class="checklist-item-content-block">
+                        <div class="checklist-item-title-row">
+                            <span class="checklist-item-index">${index + 1}</span>
+                            <span class="checklist-item-title-text">${item.texte}</span>
                         </div>
-                        ${item.description ? `<div style="font-size: 0.9rem; color: var(--text-secondary);">${item.description}</div>` : ''}
+                        ${item.description ? `<div class="checklist-item-description-text">${item.description}</div>` : ''}
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button data-action="move-up" data-item-id="${item.id}" 
-                                ${index === 0 ? 'disabled' : ''}
-                                style="background: var(--bg-secondary); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center;" 
-                                title="Monter">
-                            <svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-                        </button>
-                        <button data-action="move-down" data-item-id="${item.id}" 
-                                ${index === data.length - 1 ? 'disabled' : ''}
-                                style="background: var(--bg-secondary); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center;" 
-                                title="Descendre">
-                            <svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-                        </button>
-                        <button data-action="edit-item" data-item-id="${item.id}" 
-                                style="background: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center;" 
-                                title="Modifier">
-                            <svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        </button>
-                        <button data-action="delete-item" data-item-id="${item.id}" 
-                                style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center;" 
-                                title="Supprimer">
-                            <svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                        </button>
+                    <div class="checklist-item-actions">
+                        <button data-action="edit-item" data-item-id="${item.id}" class="checklist-action-btn checklist-action-edit" title="Modifier">✏️ Modifier</button>
+                        <button data-action="delete-item" data-item-id="${item.id}" class="checklist-action-btn checklist-action-delete" title="Supprimer">🗑️ Supprimer</button>
                     </div>
                 </div>
             `;
@@ -214,18 +218,35 @@ async function loadChecklistItems() {
 // EVENT DELEGATION POUR BOUTONS DYNAMIQUES
 // =============================================
 
-let checklistListenerAttached = false; // Flag pour éviter les doublons
+let currentChecklistEditingId = null;
 
 function attachChecklistEventListeners() {
     const container = document.getElementById('checklist-items-list');
     if (!container) return;
-    
-    // Éviter d'attacher plusieurs fois le même listener
-    if (checklistListenerAttached) return;
-    
-    // Event delegation : un seul listener pour tous les boutons
-    container.addEventListener('click', handleChecklistClick);
-    checklistListenerAttached = true;
+
+    if (!container.dataset.clickBound) {
+        container.addEventListener('click', handleChecklistClick);
+        container.dataset.clickBound = 'true';
+    }
+
+    if (!container.dataset.dragContainerBound) {
+        container.addEventListener('dragover', handleChecklistDragOver);
+        container.addEventListener('drop', handleChecklistDrop);
+        container.dataset.dragContainerBound = 'true';
+    }
+
+    attachChecklistItemDragBindings(container);
+}
+
+function attachChecklistItemDragBindings(container) {
+    const items = container.querySelectorAll('.checklist-item');
+    items.forEach((item) => {
+        if (item.dataset.dragItemBound) return;
+        item.setAttribute('draggable', 'true');
+        item.addEventListener('dragstart', handleChecklistDragStart);
+        item.addEventListener('dragend', handleChecklistDragEnd);
+        item.dataset.dragItemBound = 'true';
+    });
 }
 
 function handleChecklistClick(e) {
@@ -260,6 +281,83 @@ function handleChecklistClick(e) {
     }
 }
 
+function handleChecklistDragStart(e) {
+    const target = e.target instanceof Element ? e.target : null;
+    if (!target) return;
+    if (target.closest('.checklist-item-actions')) return;
+
+    const currentTargetItem = e.currentTarget instanceof Element && e.currentTarget.classList.contains('checklist-item')
+        ? e.currentTarget
+        : null;
+    const item = currentTargetItem || target.closest('.checklist-item');
+    if (!item) return;
+
+    item.classList.add('dragging');
+    if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.getAttribute('data-id') || '');
+    }
+}
+
+function handleChecklistDragOver(e) {
+    const container = document.getElementById('checklist-items-list');
+    if (!container) return;
+
+    e.preventDefault();
+    const overItem = e.target.closest('.checklist-item');
+    const draggingItem = container.querySelector('.checklist-item.dragging');
+    if (!overItem || !draggingItem || overItem === draggingItem) return;
+
+    const rect = overItem.getBoundingClientRect();
+    const after = e.clientY > rect.top + rect.height / 2;
+    if (after) {
+        container.insertBefore(draggingItem, overItem.nextSibling);
+    } else {
+        container.insertBefore(draggingItem, overItem);
+    }
+}
+
+async function handleChecklistDrop(e) {
+    e.preventDefault();
+    await persistChecklistOrder();
+}
+
+function handleChecklistDragEnd() {
+    const container = document.getElementById('checklist-items-list');
+    if (!container) return;
+    container.querySelectorAll('.checklist-item.dragging').forEach((item) => item.classList.remove('dragging'));
+}
+
+async function persistChecklistOrder() {
+    const container = document.getElementById('checklist-items-list');
+    if (!container) return;
+
+    const orderedItems = Array.from(container.querySelectorAll('.checklist-item'));
+    if (orderedItems.length === 0) return;
+
+    try {
+        for (let index = 0; index < orderedItems.length; index += 1) {
+            const itemId = orderedItems[index].getAttribute('data-id');
+            if (!itemId) continue;
+
+            const { error } = await supabaseClient
+                .from('checklist_templates')
+                .update({ ordre: index + 1 })
+                .eq('id', itemId);
+
+            if (error) {
+                if (isTableNotFound(error) || error.code === '42703' || error.code === '42P01') return;
+                throw error;
+            }
+        }
+
+        await loadChecklistItems();
+    } catch (error) {
+        console.error('❌ Erreur mise à jour ordre:', error);
+        notifyChecklist('❌ Impossible de mettre à jour l\'ordre', 'error');
+    }
+}
+
 // =============================================
 // AJOUT D'UN ITEM
 // =============================================
@@ -273,7 +371,12 @@ async function addChecklistItem() {
     const texte = texteInput.value.trim();
     if (!texte) {
         alert('⚠️ Veuillez saisir le texte de l\'item');
-        return;
+        return false;
+    }
+
+    if (!currentGiteFilter) {
+        notifyChecklist('⚠️ Aucun gîte sélectionné', 'warning');
+        return false;
     }
     
     try {
@@ -288,8 +391,8 @@ async function addChecklistItem() {
         
         if (maxError) {
             if (isTableNotFound(maxError) || maxError.code === '42703' || maxError.code === '42P01') {
-                showNotification('⚠️ Table checklist_templates non disponible', 'warning');
-                return;
+                notifyChecklist('⚠️ Table checklist_templates non disponible', 'warning');
+                return false;
             }
             throw maxError;
         }
@@ -324,22 +427,22 @@ async function addChecklistItem() {
             });
         
         if (error) {
-            if (isTableNotFound(error)) return;
+            if (isTableNotFound(error)) return false;
             throw error;
         }
         
         // Rafraîchir la liste
         await loadChecklistItems();
         
-        // Vider le formulaire
-        texteInput.value = '';
-        descriptionInput.value = '';
+        clearChecklistForm();
         
-        showNotification('✅ Item ajouté avec succès', 'success');
+        notifyChecklist('✅ Item ajouté avec succès', 'success');
+        return true;
         
     } catch (error) {
         console.error('❌ Erreur ajout item:', error);
         alert(`Erreur lors de l'ajout: ${error.message}`);
+        return false;
     }
 }
 
@@ -366,32 +469,30 @@ function editChecklistItem(itemId) {
     if (texteInput) texteInput.value = texteActuel;
     if (descriptionInput) descriptionInput.value = descriptionActuelle;
     
-    // Modifier le bouton d'ajout en bouton de mise à jour
+    currentChecklistEditingId = itemId;
+    openChecklistCreateModal('edit');
+
     const btnSubmit = document.getElementById('btn-checklist-submit');
     if (btnSubmit) {
-        btnSubmit.textContent = '✅ Mettre à jour';
-        btnSubmit.style.background = '#10b981';
-        btnSubmit.onclick = () => updateChecklistItem(itemId);
-        // Stocker l'ID pour le reset
+        btnSubmit.textContent = '💾 Fermer et modifier';
+        btnSubmit.classList.add('is-editing');
         btnSubmit.setAttribute('data-editing-id', itemId);
     } else {
         console.error('❌ Bouton submit non trouvé');
     }
     
-    // Scroll vers le formulaire
-    texteInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 async function updateChecklistItem(itemId) {
     const texteInput = document.getElementById('checklist-new-text');
     const descriptionInput = document.getElementById('checklist-new-description');
     
-    if (!texteInput || !descriptionInput) return;
+    if (!texteInput || !descriptionInput) return false;
     
     const texte = texteInput.value.trim();
     if (!texte) {
         alert('⚠️ Veuillez saisir le texte de l\'item');
-        return;
+        return false;
     }
     
     try {
@@ -418,7 +519,7 @@ async function updateChecklistItem(itemId) {
             .eq('id', itemId);
         
         if (error) {
-            if (isTableNotFound(error)) return;
+            if (isTableNotFound(error)) return false;
             throw error;
         }
         
@@ -426,23 +527,25 @@ async function updateChecklistItem(itemId) {
         await loadChecklistItems();
         
         // Réinitialiser le formulaire
-        texteInput.value = '';
-        descriptionInput.value = '';
+        clearChecklistForm();
+        currentChecklistEditingId = null;
         
         // Réinitialiser le bouton
         const btnSubmit = document.getElementById('btn-checklist-submit');
         if (btnSubmit) {
-            btnSubmit.textContent = '➕ Ajouter l\'item';
-            btnSubmit.style.background = '#27ae60';
+            btnSubmit.textContent = '➕ Créer l\'item';
+            btnSubmit.classList.remove('is-editing');
             btnSubmit.onclick = addChecklistItem;
             btnSubmit.removeAttribute('data-editing-id');
         }
         
-        showNotification('✅ Item modifié avec succès', 'success');
+        notifyChecklist('✅ Item modifié avec succès', 'success');
+        return true;
         
     } catch (error) {
         console.error('❌ Erreur modification item:', error);
         alert(`Erreur lors de la modification: ${error.message}`);
+        return false;
     }
 }
 
@@ -465,7 +568,7 @@ async function deleteChecklistItem(itemId) {
         }
         
         await loadChecklistItems();
-        showNotification('✅ Item supprimé', 'success');
+        notifyChecklist('✅ Item supprimé', 'success');
         
     } catch (error) {
         console.error('❌ Erreur suppression:', error);
@@ -542,11 +645,62 @@ function clearChecklistForm() {
     // Réinitialiser le bouton s'il était en mode "Mise à jour"
     const btnSubmit = document.getElementById('btn-checklist-submit');
     if (btnSubmit) {
-        btnSubmit.textContent = '➕ Ajouter l\'item';
-        btnSubmit.style.background = '#27ae60';
+        btnSubmit.textContent = '➕ Créer l\'item';
+        btnSubmit.classList.remove('is-editing');
         btnSubmit.onclick = addChecklistItem;
         btnSubmit.removeAttribute('data-editing-id');
     }
+
+    currentChecklistEditingId = null;
+}
+
+function openChecklistCreateModal(mode = 'create') {
+    const modal = document.getElementById('checklistCreateModal');
+    const title = document.getElementById('checklist-modal-title');
+    const btnSubmit = document.getElementById('btn-checklist-submit');
+    if (!modal) return;
+
+    if (mode === 'create') {
+        clearChecklistForm();
+        if (title) title.textContent = 'Créer un item';
+        if (btnSubmit) {
+            btnSubmit.textContent = '✅ Fermer et sauvegarder';
+            btnSubmit.classList.remove('is-editing');
+        }
+    } else {
+        if (title) title.textContent = 'Modifier un item';
+    }
+
+    modal.hidden = false;
+    if (!modal.dataset.boundClose) {
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeChecklistCreateModal(false);
+            }
+        });
+        modal.dataset.boundClose = 'true';
+    }
+    document.getElementById('checklist-new-text')?.focus();
+}
+
+async function closeChecklistCreateModal(save = true) {
+    const modal = document.getElementById('checklistCreateModal');
+    if (!modal) return;
+
+    if (save) {
+        let success = false;
+        if (currentChecklistEditingId) {
+            success = await updateChecklistItem(currentChecklistEditingId);
+        } else {
+            success = await addChecklistItem();
+        }
+
+        if (!success) {
+            return;
+        }
+    }
+
+    modal.hidden = true;
 }
 
 // =============================================
@@ -601,7 +755,7 @@ async function loadReservationsProgress() {
             const { data: templates, error: templatesError } = await supabaseClient
                 .from('checklist_templates')
                 .select('*')
-                .eq('gite', resa.gite_id)
+                .eq('gite_id', resa.gite_id)
                 .eq('actif', true)
                 .order('type', { ascending: true })
                 .order('ordre', { ascending: true });
@@ -730,6 +884,10 @@ async function loadReservationsProgress() {
     }
 }
 
+async function loadChecklistsTab() {
+    await loadReservationsProgress();
+}
+
 // =============================================
 // CALCUL DE LA PROGRESSION D'UNE RÉSERVATION
 // =============================================
@@ -813,13 +971,13 @@ function formatDate(dateString) {
     return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-function showNotification(message, type = 'info') {
-    // Réutilisation du système de notification existant
-    if (typeof window.showNotification === 'function') {
-        window.showNotification(message, type);
-    } else {
-        alert(message);
+function notifyChecklist(message, type = 'info') {
+    const globalNotifier = window.showNotification;
+    if (typeof globalNotifier === 'function' && globalNotifier !== notifyChecklist) {
+        globalNotifier(message, type);
+        return;
     }
+    alert(message);
 }
 
 // =============================================
@@ -952,5 +1110,11 @@ async function loadChecklistDetailForReservation(reservationId) {
 
 // Exposer globalement
 window.toggleChecklistDetail = toggleChecklistDetail;
+window.addChecklistItem = addChecklistItem;
+window.clearChecklistForm = clearChecklistForm;
+window.initChecklistsTab = initChecklistsTab;
+window.loadChecklistsTab = loadChecklistsTab;
+window.openChecklistCreateModal = openChecklistCreateModal;
+window.closeChecklistCreateModal = closeChecklistCreateModal;
 
 // console.log('✅ checklists.js chargé');

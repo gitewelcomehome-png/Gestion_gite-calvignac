@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion Promotions - Channel Manager</title>
-    <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/admin-dashboard.css">
+    <link rel="stylesheet" href="../css/admin-promotions.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body style="background: #F9FAFB;">
@@ -29,19 +29,19 @@
     <section class="tabs-navigation">
         <div class="tabs-sidebar">
             <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
-            <button class="tab-btn" onclick="window.location.href='admin-channel-manager.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-channel-manager.html'">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-clients.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-clients.html'">
                 <i data-lucide="users"></i>
                 <span>Clients</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-support.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-support.html'">
                 <i data-lucide="headphones"></i>
                 <span>Support</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-emails.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-emails.html?build=20260217-4'">
                 <i data-lucide="mail"></i>
                 <span>Messagerie</span>
             </button>
@@ -49,23 +49,23 @@
                 <i data-lucide="tag"></i>
                 <span>Promotions</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-parrainage.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-parrainage.html'">
                 <i data-lucide="gift"></i>
                 <span>Parrainage</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-finance.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-finance.html'">
                 <i data-lucide="bar-chart-2"></i>
                 <span>Finance & BI</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-content.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-content.html'">
                 <i data-lucide="pen-tool"></i>
                 <span>Content IA</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-communications.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-communications.html'">
                 <i data-lucide="megaphone"></i>
                 <span>Communications</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-monitoring.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-monitoring.html'">
                 <i data-lucide="activity"></i>
                 <span>Monitoring</span>
             </button>
@@ -84,12 +84,6 @@
             <header class="page-header">
                 <div class="page-header__content">
                     <p class="page-subtitle">Créez et gérez vos codes promotionnels</p>
-                </div>
-                <div class="page-header__actions">
-                    <button class="btn btn--primary" id="btnNewPromo">
-                        <i data-lucide="plus"></i>
-                        Nouvelle Promotion
-                    </button>
                 </div>
             </header>
             

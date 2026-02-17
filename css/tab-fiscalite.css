@@ -553,6 +553,14 @@ html.theme-dark.style-apple .card {
 .section-title-main {
     font-size: 1.8rem;
     margin: 0 0 8px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title-main i,
+.section-title-main svg {
+    flex-shrink: 0;
 }
 
 .section-description {

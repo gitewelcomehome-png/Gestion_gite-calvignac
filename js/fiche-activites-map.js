@@ -21,14 +21,23 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 // Estimer les temps de trajet
 function estimateTravel(distanceKm) {
-    // Vitesses moyennes
-    const speedWalk = 5; // km/h
-    const speedBike = 15; // km/h
-    const speedCar = 50; // km/h (moyenne avec arrêts, circulation)
+    // Appliquer un facteur de détour routier (les routes ne sont pas des lignes droites)
+    // En zone urbaine/rurale, les routes font environ 1.6 à 2x la distance à vol d'oiseau
+    const routeFactor = 1.7;
+    const realDistance = distanceKm * routeFactor;
     
-    const timeWalk = Math.ceil((distanceKm / speedWalk) * 60); // minutes
-    const timeBike = Math.ceil((distanceKm / speedBike) * 60);
-    const timeCar = Math.ceil((distanceKm / speedCar) * 60);
+    // Vitesses moyennes RÉALISTES (avec circulation, virages, arrêts, feux...)
+    const speedWalk = 4.5; // km/h (vitesse réelle avec pauses)
+    const speedBike = 12; // km/h (avec relief, virages, prudence)
+    const speedCar = 22; // km/h (circulation urbaine, limitations 30-50, arrêts)
+    
+    // Temps de base (stationnement, démarrage, préparation)
+    const baseTimeCar = 2; // minutes
+    const baseTimeBike = 1;
+    
+    const timeWalk = Math.ceil((realDistance / speedWalk) * 60);
+    const timeBike = Math.ceil((realDistance / speedBike) * 60) + baseTimeBike;
+    const timeCar = Math.ceil((realDistance / speedCar) * 60) + baseTimeCar;
     
     return {
         walk: timeWalk,
@@ -203,7 +212,6 @@ window.displayActivitesListInteractive = function(activites, giteLat, giteLon) {
                     <div class="travel-time">
                         <span><i data-lucide="person-standing" style="width: 14px; height: 14px; margin-right: 0.25rem; vertical-align: middle;"></i>${formatTravelTime(travel.walk)}</span>
                         <span><i data-lucide="bike" style="width: 14px; height: 14px; margin-right: 0.25rem; vertical-align: middle;"></i>${formatTravelTime(travel.bike)}</span>
-                        <span><i data-lucide="car" style="width: 14px; height: 14px; margin-right: 0.25rem; vertical-align: middle;"></i>${formatTravelTime(travel.car)}</span>
                     </div>
                 </div>
                 ${descriptionSafe ? `<p class="activite-description">${descriptionSafe}</p>` : ''}

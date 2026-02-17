@@ -111,9 +111,9 @@ class GitesManager {
             await this.loadGites();
         }
         
-        // Attendre que le subscription manager soit initialisé
+        // Attendre que le subscription manager soit initialisé ET que l'abonnement soit chargé
         let retries = 0;
-        while (!window.subscriptionManager && retries < 50) {
+        while ((!window.subscriptionManager || !window.subscriptionManager.currentSubscription) && retries < 50) {
             await new Promise(resolve => setTimeout(resolve, 100));
             retries++;
         }
@@ -125,8 +125,9 @@ class GitesManager {
             return this.gites.slice(0, maxGites);
         }
         
-        // Par défaut, retourner 1 gîte minimum (plan gratuit SOLO)
-        return this.gites.slice(0, 1);
+        // Si timeout, retourner tous les gîtes pour ne pas bloquer l'utilisateur
+        console.warn('⚠️ Timeout chargement abonnement, affichage de tous les gîtes');
+        return this.gites;
     }
     
     /**

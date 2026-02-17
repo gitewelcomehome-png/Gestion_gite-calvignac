@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Options - LiveOwnerUnit</title>
-    <link rel="stylesheet" href="../css/main.css?v=14.9" />
+    <link rel="stylesheet" href="../css/main.css" />
     
     <style>
         :root {
@@ -49,6 +49,71 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
+        }
+
+        .options-layout {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .options-sidebar {
+            position: sticky;
+            top: 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            padding: 1rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            padding: 0 0.5rem;
+        }
+
+        .sidebar-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .sidebar-separator {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 0.85rem 0;
+        }
+
+        .sidebar-link {
+            display: block;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.65rem 0.75rem;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .sidebar-link:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.18), rgba(8, 145, 178, 0.1));
+            border-color: var(--primary-color);
+        }
+
+        .options-main {
+            min-width: 0;
         }
         
         .page-header {
@@ -331,10 +396,416 @@
         .tool-button svg {
             flex-shrink: 0;
         }
+
+        .support-native {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .support-native-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .support-native-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .support-native-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.85rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .support-native-input,
+        .support-native-select,
+        .support-native-textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .support-native-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .support-native-input:focus,
+        .support-native-select:focus,
+        .support-native-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .support-native-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .support-native-count {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .support-ticket-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .support-ticket-item {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem;
+            background: var(--bg-primary);
+        }
+
+        .support-ticket-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.65rem;
+            align-items: flex-start;
+            margin-bottom: 0.45rem;
+        }
+
+        .support-ticket-subject {
+            font-weight: 700;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .support-ticket-meta {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.45rem;
+        }
+
+        .support-ticket-badge {
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+        }
+
+        .support-ticket-desc {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            margin-bottom: 0.55rem;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .support-ticket-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .support-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .support-modal-overlay.active {
+            display: flex;
+        }
+
+        .support-modal {
+            width: min(860px, 100%);
+            max-height: 90vh;
+            overflow: auto;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1rem;
+        }
+
+        .support-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.9rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .support-conversation {
+            display: grid;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .support-message {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+        }
+
+        .support-message strong {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .support-message p {
+            margin: 0;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .support-message-time {
+            margin-top: 0.45rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .support-toast {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            z-index: 10000;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            box-shadow: var(--shadow-md);
+            display: none;
+            max-width: 360px;
+        }
+
+        .support-toast.show {
+            display: block;
+        }
+
+        .notif-layout {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .notif-hero {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            padding: 1rem;
+        }
+
+        .notif-hero-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.35rem;
+        }
+
+        .notif-hero-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        .notif-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.9rem;
+        }
+
+        .notif-card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            padding: 1rem;
+        }
+
+        .notif-card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.7rem;
+        }
+
+        .notif-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            transition: border-color 0.2s ease;
+        }
+
+        .notif-row + .notif-row {
+            margin-top: 0.6rem;
+        }
+
+        .notif-row:hover {
+            border-color: var(--primary-color);
+        }
+
+        .notif-row-label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            min-width: 0;
+        }
+
+        .notif-row-label strong {
+            font-size: 0.92rem;
+            color: var(--text-primary);
+            line-height: 1.35;
+        }
+
+        .notif-row-label span {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.35;
+        }
+
+        .notif-switch {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .notif-status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            background: var(--bg-primary);
+            white-space: nowrap;
+        }
+
+        .notif-status.is-loading {
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+        }
+
+        .notif-status.is-success {
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+        }
+
+        .notif-status.is-error {
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .parrainage-host {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            padding: 1rem;
+        }
+
+        .tools-inline-panel {
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            overflow: hidden;
+        }
+
+        .tools-inline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-primary);
+        }
+
+        .tools-inline-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .tools-inline-content {
+            padding: 0.5rem;
+        }
+
+        .options-tools-inline-wrapper {
+            --card: var(--bg-primary);
+            --card-bg: var(--bg-primary);
+            --hover-bg: var(--bg-secondary);
+            --input-bg: var(--bg-primary);
+            --text: var(--text-primary);
+            --text-secondary: var(--text-secondary);
+            --text-muted: var(--text-secondary);
+            --primary: var(--primary-color);
+            --primary-dark: var(--primary-hover);
+            --border-color: var(--border-color);
+            min-height: 620px;
+        }
+
+        .options-parrainage-wrapper {
+            --card: var(--bg-primary);
+            --card-bg: var(--bg-primary);
+            --hover-bg: var(--bg-secondary);
+            --input-bg: var(--bg-primary);
+            --text: var(--text-primary);
+            --text-secondary: var(--text-secondary);
+            --text-muted: var(--text-secondary);
+            --primary: var(--primary-color);
+            --primary-dark: var(--primary-hover);
+            --border-color: var(--border-color);
+        }
         
         @media (max-width: 768px) {
             body {
                 padding: 1rem 0.75rem;
+            }
+
+            .options-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .options-sidebar {
+                position: static;
+            }
+
+            .sidebar-links {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
             }
             
             .page-title {
@@ -392,9 +863,28 @@
             <span style="font-size: 1.5rem;">✓</span>
             <span>Paramètres enregistrés avec succès !</span>
         </div>
+
+        <div class="options-layout">
+            <aside class="options-sidebar">
+                <div class="sidebar-title">Navigation Options</div>
+                <nav class="sidebar-links">
+                    <a href="#options-profile" class="sidebar-link" data-panel="options-profile">👤 Mon Profil</a>
+                    <a href="#options-subscription" class="sidebar-link" data-panel="options-subscription">💳 Mon Abonnement</a>
+                    <a href="#options-tools" class="sidebar-link" data-panel="options-tools">🛠️ Outils de Gestion</a>
+                    <a href="#options-theme-interface" class="sidebar-link" data-panel="options-theme-interface">🌓 Thème & Style</a>
+                    <a href="#options-archives" class="sidebar-link" data-panel="options-archives">📦 Archives</a>
+                    <a href="#options-support" class="sidebar-link" data-panel="options-support">🎫 Support</a>
+                    <a href="#options-notifications" class="sidebar-link" data-panel="options-notifications">🔔 Notifications</a>
+                    <a href="#options-parrainage" class="sidebar-link" data-panel="options-parrainage">🤝 Parrainage</a>
+                    <hr class="sidebar-separator">
+                    <a href="../app.html" class="sidebar-link">↩️ Retour au Dashboard</a>
+                </nav>
+            </aside>
+
+            <main class="options-main">
         
         <!-- PROFIL UTILISATEUR (Pleine largeur) -->
-        <div class="section-card" style="margin-bottom: 2rem;">
+        <div id="options-profile" data-options-panel class="section-card" style="margin-bottom: 2rem; scroll-margin-top: 1rem;">
             <div class="section-header">
                 <div class="section-icon">👤</div>
                 <div class="section-title">Mon Profil</div>
@@ -492,14 +982,6 @@
                     </div>
                 </div>
                 
-                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button class="btn btn-secondary" onclick="loadProfile()">
-                        🔄 Réinitialiser
-                    </button>
-                    <button class="btn" onclick="saveProfile()">
-                        💾 Enregistrer le Profil
-                    </button>
-                </div>
             </div>
             
             <div id="profileError" style="display: none; background: #fee2e2; border: 2px solid #fca5a5; color: #991b1b; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
@@ -508,7 +990,7 @@
         </div>
         
         <!-- MON ABONNEMENT -->
-        <div class="section-card" style="margin-bottom: 2rem;">
+        <div id="options-subscription" data-options-panel class="section-card" style="margin-bottom: 2rem; scroll-margin-top: 1rem;">
             <div class="section-header">
                 <div class="section-icon">💳</div>
                 <div class="section-title">Mon Abonnement</div>
@@ -533,6 +1015,7 @@
                     <div style="text-align: right;">
                         <div style="font-size: 2rem; font-weight: 700;" id="currentPlanPrice">15€</div>
                         <div style="font-size: 0.9rem; opacity: 0.9;" id="currentPlanPeriod">/mois</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 0.35rem;" id="currentPlanDiscountInfo"></div>
                         <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem;" id="currentPlanNextBilling">Prochain paiement le 13 mars 2026</div>
                     </div>
                 </div>
@@ -719,12 +1202,19 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="footer-actions" style="margin-top: 1.5rem; justify-content: flex-end;">
+                    <button class="btn" onclick="saveProfile()">
+                        <span>💾</span>
+                        Enregistrer le Profil
+                    </button>
+                </div>
             </div>
         </div>
         
         <div class="sections-grid">
             <!-- OUTILS DE GESTION -->
-            <div class="section-card" style="grid-column: 1 / -1;">
+            <div id="options-tools" data-options-panel class="section-card" style="grid-column: 1 / -1; scroll-margin-top: 1rem;">
                 <div class="section-header">
                     <div class="section-icon">🛠️</div>
                     <div class="section-title">Outils de Gestion</div>
@@ -733,7 +1223,7 @@
                     Créez et gérez vos FAQ et check-lists
                 </p>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                    <button onclick="goToTab('faq')" class="tool-button" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                    <button onclick="openToolsInlinePanel('faq')" class="tool-button" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
                             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
@@ -741,7 +1231,7 @@
                         </svg>
                         <span>Créer une FAQ</span>
                     </button>
-                    <button onclick="goToTab('checklists')" class="tool-button" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                    <button onclick="openToolsInlinePanel('checklists')" class="tool-button" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 11l3 3L22 4"/>
                             <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
@@ -749,13 +1239,264 @@
                         <span>Créer une Check-list</span>
                     </button>
                 </div>
+
+                <div id="optionsToolsInlinePanel" class="tools-inline-panel" hidden>
+                    <div class="tools-inline-header">
+                        <div id="optionsToolsInlineTitle" class="tools-inline-title">FAQ</div>
+                        <button type="button" class="btn btn-secondary" style="width: auto; min-width: 90px;" onclick="closeToolsInlinePanel()">Fermer</button>
+                    </div>
+                    <div class="tools-inline-content">
+                        <div id="optionsToolsInlineLoading" style="text-align: center; color: var(--text-secondary); padding: 1rem;">Chargement...</div>
+                        <div id="optionsToolsInlineContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUPPORT -->
+            <div id="options-support" data-options-panel class="section-card" style="grid-column: 1 / -1; scroll-margin-top: 1rem;">
+                <div class="section-header">
+                    <div class="section-icon">🎫</div>
+                    <div class="section-title">Support</div>
+                </div>
+                <p class="section-description">
+                    Accédez au support sans quitter la page Options.
+                </p>
+
+                <div class="support-native">
+                    <div class="support-native-card">
+                        <div class="support-native-title">Nouveau ticket</div>
+                        <form id="optionsSupportCreateForm">
+                            <div class="support-native-grid">
+                                <select id="optionsSupportCategory" class="support-native-select" required>
+                                    <option value="">Catégorie</option>
+                                    <option value="technique">Technique</option>
+                                    <option value="facturation">Facturation</option>
+                                    <option value="fonctionnalite">Fonctionnalité</option>
+                                    <option value="bug">Bug</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                                <select id="optionsSupportPriority" class="support-native-select" required>
+                                    <option value="basse">Priorité basse</option>
+                                    <option value="normale" selected>Priorité normale</option>
+                                    <option value="haute">Priorité haute</option>
+                                    <option value="urgente">Priorité urgente</option>
+                                </select>
+                            </div>
+                            <input id="optionsSupportTitle" class="support-native-input" type="text" maxlength="180" placeholder="Sujet du ticket" required />
+                            <textarea id="optionsSupportDescription" class="support-native-textarea" maxlength="1000" placeholder="Décrivez votre demande" required></textarea>
+                            <div class="support-native-actions">
+                                <span id="optionsSupportCharCount" class="support-native-count">0 / 1000</span>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button type="button" id="optionsSupportResetBtn" class="btn btn-secondary" style="width: auto; min-width: 120px;">Réinitialiser</button>
+                                    <button type="submit" id="optionsSupportSubmitBtn" class="btn" style="width: auto; min-width: 140px;">Créer le ticket</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="support-native-card">
+                        <div class="support-native-actions" style="margin-top: 0; margin-bottom: 0.75rem;">
+                            <div class="support-native-title" style="margin: 0;">Mes tickets</div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span id="optionsSupportTicketCount" class="support-native-count">0 ticket</span>
+                                <select id="optionsSupportFilter" class="support-native-select" style="min-width: 190px;">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="ouvert">Ouvert</option>
+                                    <option value="en_cours">En cours</option>
+                                    <option value="en_attente_client">En attente client</option>
+                                    <option value="résolu">Résolu</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="optionsSupportTickets" class="support-ticket-list">
+                            <p style="text-align: center; color: var(--text-secondary); padding: 1rem;">Chargement...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="options-notifications" data-options-panel class="section-card" style="grid-column: 1 / -1; scroll-margin-top: 1rem;">
+                <div class="section-header">
+                    <div class="section-icon">🔔</div>
+                    <div class="section-title">Notifications</div>
+                </div>
+                <p class="section-description">Configurez vos préférences sans quitter le mode onglets.</p>
+
+                <div class="notif-layout">
+                    <div class="notif-hero">
+                        <div class="notif-hero-title">Préférences de réception</div>
+                        <p class="notif-hero-subtitle">Activez uniquement les alertes utiles et choisissez la fréquence d’envoi la plus adaptée à votre organisation.</p>
+                    </div>
+
+                    <div class="notif-grid">
+                        <div class="notif-card">
+                            <div class="notif-card-title">Canal email</div>
+
+                            <label class="notif-row" for="optionsNotifEmailEnabled">
+                                <span class="notif-row-label">
+                                    <strong>Activer les emails</strong>
+                                    <span>Recevoir les notifications par email</span>
+                                </span>
+                                <input id="optionsNotifEmailEnabled" class="notif-switch" type="checkbox" />
+                            </label>
+
+                            <div style="margin-top: 0.7rem;">
+                                <label for="optionsNotifEmailAddress" style="display: block; margin-bottom: 0.45rem; color: var(--text-secondary); font-size: 0.86rem;">Adresse email de destination</label>
+                                <input id="optionsNotifEmailAddress" type="email" class="support-native-input" placeholder="votre@email.com" />
+                            </div>
+                        </div>
+
+                        <div class="notif-card">
+                            <div class="notif-card-title">Types de notifications</div>
+
+                            <label class="notif-row" for="optionsNotifDemandes">
+                                <span class="notif-row-label">
+                                    <strong>📩 Demandes d'horaires</strong>
+                                    <span>Nouvelles demandes d’arrivée ou départ</span>
+                                </span>
+                                <input id="optionsNotifDemandes" class="notif-switch" type="checkbox" />
+                            </label>
+
+                            <label class="notif-row" for="optionsNotifReservations">
+                                <span class="notif-row-label">
+                                    <strong>📅 Réservations</strong>
+                                    <span>Nouvelles réservations reçues</span>
+                                </span>
+                                <input id="optionsNotifReservations" class="notif-switch" type="checkbox" />
+                            </label>
+
+                            <label class="notif-row" for="optionsNotifTaches">
+                                <span class="notif-row-label">
+                                    <strong>🧹 Tâches de ménage</strong>
+                                    <span>Nouvelles tâches en attente</span>
+                                </span>
+                                <input id="optionsNotifTaches" class="notif-switch" type="checkbox" />
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="notif-card">
+                        <div class="support-native-grid" style="align-items: end;">
+                            <div>
+                                <label for="optionsNotifFrequency" style="display: block; margin-bottom: 0.45rem; color: var(--text-secondary); font-size: 0.86rem;">Fréquence d'envoi</label>
+                                <select id="optionsNotifFrequency" class="support-native-select">
+                                    <option value="immediate">Immédiat (dès réception)</option>
+                                    <option value="hourly">Toutes les heures (groupé)</option>
+                                    <option value="daily">Quotidien (résumé)</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; justify-content: flex-end; align-items: center;">
+                                <div id="optionsNotifStatus" class="notif-status is-loading">Chargement des préférences...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="options-parrainage" data-options-panel class="section-card" style="grid-column: 1 / -1; scroll-margin-top: 1rem;">
+                <div class="section-header">
+                    <div class="section-icon">🤝</div>
+                    <div class="section-title">Parrainage</div>
+                </div>
+                <p class="section-description">Gérez votre programme de parrainage sans quitter la page Options.</p>
+
+                <div class="parrainage-host">
+                    <div id="optionsParrainageLoading" style="text-align: center; color: var(--text-secondary); padding: 1rem;">Chargement du parrainage...</div>
+                    <div id="optionsParrainageContainer" hidden></div>
+                </div>
+            </div>
+
+            <div id="optionsSupportModalOverlay" class="support-modal-overlay" onclick="closeSupportTicketModalInOptions(event)">
+                <div class="support-modal" onclick="event.stopPropagation()">
+                    <div class="support-modal-header">
+                        <strong id="optionsSupportModalTitle">Détail du ticket</strong>
+                        <button type="button" class="btn btn-secondary" style="width: auto; min-width: 90px;" onclick="closeSupportTicketModalInOptions()">Fermer</button>
+                    </div>
+                    <div id="optionsSupportModalBody"></div>
+                </div>
+            </div>
+
+            <div id="optionsSupportToast" class="support-toast"></div>
+
+            <!-- ARCHIVES -->
+            <div id="options-archives" data-options-panel class="section-card" style="grid-column: 1 / -1; scroll-margin-top: 1rem;">
+                <div class="section-header">
+                    <div class="section-icon">📦</div>
+                    <div class="section-title">Archives</div>
+                </div>
+                <p class="section-description">
+                    Accédez aux archives sans quitter la page Options.
+                </p>
+
+                <div class="card" style="margin-bottom: 1.25rem;">
+                    <div class="card-header">
+                        <span class="card-icon">📅</span>
+                        <h2 class="card-title">Réservations archivées</h2>
+                    </div>
+                    <div id="optionsArchivesReservations" style="padding: 1rem;">
+                        <p style="text-align: center; color: var(--text-secondary); padding: 1rem;">Chargement...</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">✅</span>
+                        <h2 class="card-title">Tâches terminées</h2>
+                        <button onclick="clearArchivedTodosInOptions()" 
+                                style="background: rgba(231, 76, 60, 0.1); border: 1px solid #E74C3C; color: #E74C3C; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">
+                            🗑️ Vider l'archive
+                        </button>
+                    </div>
+                    <div id="optionsArchivedTodos" style="padding: 1rem;">
+                        <p style="text-align: center; color: var(--text-secondary); padding: 1rem;">Chargement...</p>
+                    </div>
+                </div>
+
+                <div id="optionsArchiveEditModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10050; display: none; align-items: center; justify-content: center; padding: 1rem;">
+                    <div style="width: min(720px, 95vw); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: var(--shadow-lg);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color);">
+                            <h3 style="margin: 0; font-size: 1.1rem;">Modifier la réservation archivée</h3>
+                            <button type="button" onclick="closeArchiveEditModalInOptions()" style="border: none; background: transparent; color: var(--text-secondary); font-size: 1.1rem; cursor: pointer;">✖</button>
+                        </div>
+                        <div style="padding: 1rem 1.25rem; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0.9rem;">
+                            <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
+                                <span>Client</span>
+                                <input id="archiveEditClientName" type="text" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                            </label>
+                            <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
+                                <span>Gîte</span>
+                                <input id="archiveEditGiteName" type="text" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                            </label>
+                            <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
+                                <span>Plateforme</span>
+                                <input id="archiveEditPlatform" type="text" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                            </label>
+                            <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
+                                <span>Montant (€)</span>
+                                <input id="archiveEditAmount" type="number" step="0.01" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                            </label>
+                            <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
+                                <span>Date arrivée</span>
+                                <input id="archiveEditCheckIn" type="date" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                            </label>
+                            <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
+                                <span>Date départ</span>
+                                <input id="archiveEditCheckOut" type="date" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                            </label>
+                        </div>
+                        <div style="padding: 0 1.25rem 1rem; display: flex; justify-content: flex-end; gap: 0.6rem;">
+                            <button type="button" onclick="closeArchiveEditModalInOptions()" style="border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); padding: 0.65rem 0.95rem; border-radius: 8px; cursor: pointer;">Annuler</button>
+                            <button type="button" onclick="saveArchiveReservationInOptions()" style="border: none; background: #3498DB; color: #fff; padding: 0.65rem 1rem; border-radius: 8px; cursor: pointer;">Enregistrer</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <!-- THÈME INTERFACE -->
-            <div class="section-card">
+            <!-- THÈME & STYLE -->
+            <div id="options-theme-interface" data-options-panel class="section-card" style="scroll-margin-top: 1rem;">
                 <div class="section-header">
                     <div class="section-icon">🌓</div>
-                    <div class="section-title">Thème Interface</div>
+                    <div class="section-title">Thème & Style</div>
                 </div>
                 <p class="section-description">
                     Choisissez le mode d'affichage : clair (Jour) ou sombre (Nuit)
@@ -776,15 +1517,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- STYLE NAVIGATION -->
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-icon">🎨</div>
-                    <div class="section-title">Style Navigation</div>
-                </div>
-                <p class="section-description">
+
+                <p class="section-description" style="margin-top: 1.5rem; margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
                     Définissez la disposition du menu de navigation
                 </p>
                 <div class="options-grid">
@@ -803,15 +1537,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- THÈME FICHE CLIENT -->
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-icon">🏠</div>
-                    <div class="section-title">Thème Fiche Client</div>
-                </div>
-                <p class="section-description">
+
+                <p class="section-description" style="margin-top: 1.5rem; margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
                     Personnalisez l'apparence des fiches clients pour vos locataires
                 </p>
                 <div class="options-grid">
@@ -830,68 +1557,1086 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="footer-actions" style="margin-top: 1.5rem; justify-content: flex-end;">
+                    <button class="btn" onclick="saveSettings()">
+                        <span>💾</span>
+                        Enregistrer les Paramètres
+                    </button>
+                </div>
             </div>
         </div>
         
-        <!-- ACTIONS SUPPLÉMENTAIRES -->
-        <div class="action-buttons-grid">
-            <div class="action-card">
-                <div class="action-icon">📦</div>
-                <div class="action-title">Archives</div>
-                <div class="action-description">
-                    Consultez l'historique de vos réservations passées et exportez les données
-                </div>
-                <button class="btn" onclick="window.opener.postMessage({type:'switchTab', tab:'archives'},'*'); window.close();">
-                    <span>📦</span> Accéder aux Archives
-                </button>
-            </div>
-            
-            <div class="action-card">
-                <div class="action-icon">🎫</div>
-                <div class="action-title">Support & Tickets</div>
-                <div class="action-description">
-                    Contactez l'assistance technique et suivez vos demandes de support
-                </div>
-                <a href="client-support.html" class="btn">
-                    <span>🎫</span> Ouvrir le Support
-                </a>
-            </div>
-            
-            <div class="action-card">
-                <div class="action-icon">🔔</div>
-                <div class="action-title">Notifications</div>
-                <div class="action-description">
-                    Personnalisez vos préférences de notifications et alertes
-                </div>
-                <button class="btn" onclick="openNotificationSettings()">
-                    <span>🔔</span> Configurer
-                </button>
-            </div>
-        </div>
-        
-        <div class="footer-actions">
-            <button class="btn" onclick="saveSettings()">
-                <span>💾</span>
-                Enregistrer les Paramètres
-            </button>
-            <a href="../index.html" class="btn btn-secondary">
-                <span>←</span>
-                Retour au Dashboard
-            </a>
+            </main>
         </div>
     </div>
     
     <!-- Supabase Client - CHARGER AVANT LE SCRIPT PRINCIPAL -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="../js/shared-config.js"></script>
+    <script src="../js/security-utils.js"></script>
+    <script src="../js/gites-manager.js"></script>
+    <script src="../js/faq.js?v=3.0"></script>
+    <script src="../js/checklists.js"></script>
+    <script src="../js/parrainage.js?v=1.4"></script>
 
     <script>
         let selectedTheme = 'cyan';
         let selectedAppTheme = 'dark';
         let selectedAppStyle = 'sidebar';
+        const optionsSupportState = {
+            initialized: false,
+            loading: false,
+            currentFilter: '',
+            currentUser: null,
+            currentClient: null,
+            tickets: []
+        };
+        const optionsNotificationState = {
+            initialized: false,
+            loading: false,
+            user: null,
+            preferences: null
+        };
+        const optionsParrainageState = {
+            initialized: false,
+            loading: false
+        };
+        const optionsToolsInlineState = {
+            activeType: null,
+            loadedTypes: new Set()
+        };
+
+        function showOptionsPanel(panelId) {
+            const panels = document.querySelectorAll('[data-options-panel]');
+            const links = document.querySelectorAll('.sidebar-link[data-panel]');
+
+            panels.forEach(panel => {
+                panel.hidden = panel.id !== panelId;
+            });
+
+            links.forEach(link => {
+                link.classList.toggle('active', link.dataset.panel === panelId);
+            });
+
+            if (panelId === 'options-archives') {
+                loadArchivesInOptions();
+            }
+
+            if (panelId === 'options-support') {
+                initSupportInOptions();
+            }
+
+            if (panelId === 'options-notifications') {
+                initNotificationsInOptions();
+            }
+
+            if (panelId === 'options-parrainage') {
+                initParrainageInOptions();
+            }
+        }
+
+        function scopeParrainageStylesInOptions(rawCss) {
+            if (!rawCss) return '';
+            return rawCss.replace(/(^|})\s*([^{@}][^{]+)\s*\{/g, (match, prefix, selectors) => {
+                const scopedSelectors = selectors
+                    .split(',')
+                    .map((selector) => {
+                        const clean = selector.trim();
+                        if (!clean) return clean;
+                        if (clean.startsWith('.options-parrainage-wrapper')) return clean;
+                        if (clean.startsWith(':root')) return '.options-parrainage-wrapper';
+                        return `.options-parrainage-wrapper ${clean}`;
+                    })
+                    .join(', ');
+                return `${prefix} ${scopedSelectors} {`;
+            });
+        }
+
+        async function initParrainageInOptions(forceReload = false) {
+            if (optionsParrainageState.loading) return;
+            if (optionsParrainageState.initialized && !forceReload) return;
+
+            const loading = document.getElementById('optionsParrainageLoading');
+            const container = document.getElementById('optionsParrainageContainer');
+            if (!loading || !container) return;
+
+            optionsParrainageState.loading = true;
+            loading.hidden = false;
+            container.hidden = true;
+
+            try {
+                if (!window.supabaseClient) {
+                    throw new Error('Supabase non initialisé');
+                }
+
+                window.supabase = window.supabaseClient;
+
+                if (typeof window.showToast !== 'function') {
+                    window.showToast = function (message) {
+                        supportToastInOptions(message);
+                    };
+                }
+
+                const response = await fetch('../tabs/tab-parrainage.html', { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error('Impossible de charger le contenu parrainage');
+                }
+
+                const html = await response.text();
+                const styleMatches = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)];
+                const mergedStyles = styleMatches.map((match) => match[1] || '').join('\n');
+                const markupWithoutStyles = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+
+                container.innerHTML = `<div class="options-parrainage-wrapper">${markupWithoutStyles}</div>`;
+
+                const existingStyle = document.getElementById('optionsParrainageScopedStyles');
+                if (existingStyle) {
+                    existingStyle.remove();
+                }
+
+                if (mergedStyles.trim()) {
+                    const styleTag = document.createElement('style');
+                    styleTag.id = 'optionsParrainageScopedStyles';
+                    styleTag.textContent = scopeParrainageStylesInOptions(mergedStyles);
+                    document.head.appendChild(styleTag);
+                }
+
+                container.hidden = false;
+                loading.hidden = true;
+
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+
+                if (typeof initReferralSystem === 'function') {
+                    await initReferralSystem();
+                }
+
+                optionsParrainageState.initialized = true;
+            } catch (error) {
+                console.error('Erreur chargement parrainage options:', error);
+                loading.textContent = 'Impossible de charger la page parrainage';
+            } finally {
+                optionsParrainageState.loading = false;
+            }
+        }
+
+        function buildDefaultNotificationPreferencesInOptions(email = '') {
+            return {
+                email_enabled: true,
+                email_address: email || '',
+                notify_demandes: true,
+                notify_reservations: true,
+                notify_taches: true,
+                email_frequency: 'immediate'
+            };
+        }
+
+        function setNotificationStatusInOptions(message, type = 'default') {
+            const status = document.getElementById('optionsNotifStatus');
+            if (!status) return;
+
+            status.textContent = message;
+            status.classList.remove('is-loading', 'is-success', 'is-error');
+
+            if (type === 'loading') status.classList.add('is-loading');
+            if (type === 'success') status.classList.add('is-success');
+            if (type === 'error') status.classList.add('is-error');
+        }
+
+        async function ensureNotificationPreferencesInOptions() {
+            if (optionsNotificationState.user && optionsNotificationState.preferences) {
+                return;
+            }
+
+            const { data: { user }, error: userError } = await window.supabaseClient.auth.getUser();
+            if (userError || !user) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            optionsNotificationState.user = user;
+
+            const { data, error } = await window.supabaseClient
+                .from('user_notification_preferences')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
+
+            if (error && error.code !== 'PGRST116') {
+                throw error;
+            }
+
+            if (!data) {
+                const defaultPrefs = {
+                    user_id: user.id,
+                    ...buildDefaultNotificationPreferencesInOptions(user.email)
+                };
+
+                const { data: inserted, error: insertError } = await window.supabaseClient
+                    .from('user_notification_preferences')
+                    .insert(defaultPrefs)
+                    .select('*')
+                    .single();
+
+                if (insertError) throw insertError;
+                optionsNotificationState.preferences = inserted;
+            } else {
+                optionsNotificationState.preferences = {
+                    ...buildDefaultNotificationPreferencesInOptions(user.email),
+                    ...data
+                };
+            }
+        }
+
+        function renderNotificationPreferencesInOptions() {
+            const prefs = optionsNotificationState.preferences || buildDefaultNotificationPreferencesInOptions();
+
+            const emailEnabled = document.getElementById('optionsNotifEmailEnabled');
+            const emailAddress = document.getElementById('optionsNotifEmailAddress');
+            const notifyDemandes = document.getElementById('optionsNotifDemandes');
+            const notifyReservations = document.getElementById('optionsNotifReservations');
+            const notifyTaches = document.getElementById('optionsNotifTaches');
+            const emailFrequency = document.getElementById('optionsNotifFrequency');
+
+            if (emailEnabled) emailEnabled.checked = !!prefs.email_enabled;
+            if (emailAddress) emailAddress.value = prefs.email_address || optionsNotificationState.user?.email || '';
+            if (notifyDemandes) notifyDemandes.checked = !!prefs.notify_demandes;
+            if (notifyReservations) notifyReservations.checked = !!prefs.notify_reservations;
+            if (notifyTaches) notifyTaches.checked = !!prefs.notify_taches;
+            if (emailFrequency) emailFrequency.value = prefs.email_frequency || 'immediate';
+
+            setNotificationStatusInOptions('Préférences chargées', 'success');
+        }
+
+        async function loadNotificationSettingsInOptions() {
+            if (optionsNotificationState.loading || !window.supabaseClient) return;
+            optionsNotificationState.loading = true;
+            setNotificationStatusInOptions('Chargement des préférences...', 'loading');
+
+            try {
+                await ensureNotificationPreferencesInOptions();
+                renderNotificationPreferencesInOptions();
+            } catch (error) {
+                console.error('Erreur chargement préférences notifications:', error);
+                setNotificationStatusInOptions('Erreur de chargement', 'error');
+            } finally {
+                optionsNotificationState.loading = false;
+            }
+        }
+
+        async function saveNotificationPreferenceInOptions(key, value) {
+            if (!window.supabaseClient || !optionsNotificationState.user) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('user_notification_preferences')
+                    .update({ [key]: value })
+                    .eq('user_id', optionsNotificationState.user.id);
+
+                if (error) throw error;
+                optionsNotificationState.preferences = {
+                    ...(optionsNotificationState.preferences || {}),
+                    [key]: value
+                };
+                setNotificationStatusInOptions('Préférence sauvegardée', 'success');
+            } catch (error) {
+                console.error('Erreur sauvegarde préférence notification:', error);
+                setNotificationStatusInOptions('Erreur de sauvegarde', 'error');
+            }
+        }
+
+        function initNotificationHandlersInOptions() {
+            if (optionsNotificationState.initialized) return;
+
+            const emailEnabled = document.getElementById('optionsNotifEmailEnabled');
+            const emailAddress = document.getElementById('optionsNotifEmailAddress');
+            const notifyDemandes = document.getElementById('optionsNotifDemandes');
+            const notifyReservations = document.getElementById('optionsNotifReservations');
+            const notifyTaches = document.getElementById('optionsNotifTaches');
+            const emailFrequency = document.getElementById('optionsNotifFrequency');
+
+            if (emailEnabled) {
+                emailEnabled.addEventListener('change', (event) => {
+                    saveNotificationPreferenceInOptions('email_enabled', event.target.checked);
+                });
+            }
+
+            if (emailAddress) {
+                emailAddress.addEventListener('change', (event) => {
+                    saveNotificationPreferenceInOptions('email_address', event.target.value || '');
+                });
+            }
+
+            if (notifyDemandes) {
+                notifyDemandes.addEventListener('change', (event) => {
+                    saveNotificationPreferenceInOptions('notify_demandes', event.target.checked);
+                });
+            }
+
+            if (notifyReservations) {
+                notifyReservations.addEventListener('change', (event) => {
+                    saveNotificationPreferenceInOptions('notify_reservations', event.target.checked);
+                });
+            }
+
+            if (notifyTaches) {
+                notifyTaches.addEventListener('change', (event) => {
+                    saveNotificationPreferenceInOptions('notify_taches', event.target.checked);
+                });
+            }
+
+            if (emailFrequency) {
+                emailFrequency.addEventListener('change', (event) => {
+                    saveNotificationPreferenceInOptions('email_frequency', event.target.value || 'immediate');
+                });
+            }
+
+            optionsNotificationState.initialized = true;
+        }
+
+        async function initNotificationsInOptions() {
+            initNotificationHandlersInOptions();
+            await loadNotificationSettingsInOptions();
+        }
+
+        function escapeSupportHtmlInOptions(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatSupportDateInOptions(dateValue, withTime = false) {
+            if (!dateValue) return '';
+            const parsedDate = new Date(dateValue);
+            if (Number.isNaN(parsedDate.getTime())) return '';
+            if (withTime) {
+                return parsedDate.toLocaleString('fr-FR');
+            }
+            return parsedDate.toLocaleDateString('fr-FR');
+        }
+
+        function formatSupportTimeAgoInOptions(dateValue) {
+            if (!dateValue) return '';
+            const seconds = Math.floor((Date.now() - new Date(dateValue).getTime()) / 1000);
+            if (!Number.isFinite(seconds)) return '';
+            if (seconds < 60) return 'À l\'instant';
+            if (seconds < 3600) return `Il y a ${Math.floor(seconds / 60)} min`;
+            if (seconds < 86400) return `Il y a ${Math.floor(seconds / 3600)} h`;
+            if (seconds < 604800) return `Il y a ${Math.floor(seconds / 86400)} j`;
+            return formatSupportDateInOptions(dateValue);
+        }
+
+        function supportToastInOptions(message) {
+            const toast = document.getElementById('optionsSupportToast');
+            if (!toast) {
+                alert(message);
+                return;
+            }
+
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
+        async function ensureSupportClientInOptions() {
+            if (optionsSupportState.currentClient && optionsSupportState.currentUser) {
+                return true;
+            }
+            if (!window.supabaseClient) return false;
+
+            const { data: { user }, error: userError } = await window.supabaseClient.auth.getUser();
+            if (userError || !user) {
+                window.location.href = '../index.html';
+                return false;
+            }
+
+            optionsSupportState.currentUser = user;
+
+            let { data: client, error: clientError } = await window.supabaseClient
+                .from('cm_clients')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
+
+            if (clientError || !client) {
+                const emailParts = (user.email || '').split('@')[0].split('.');
+                const prenom = emailParts[0] || 'Prénom';
+                const nom = emailParts[1] || 'Nom';
+
+                const { data: newClient, error: createError } = await window.supabaseClient
+                    .from('cm_clients')
+                    .insert([{
+                        user_id: user.id,
+                        email_principal: user.email,
+                        nom_contact: nom.charAt(0).toUpperCase() + nom.slice(1),
+                        prenom_contact: prenom.charAt(0).toUpperCase() + prenom.slice(1),
+                        type_abonnement: 'basic',
+                        statut: 'trial',
+                        date_inscription: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
+
+                if (createError || !newClient) {
+                    throw createError || new Error('Création client impossible');
+                }
+
+                client = newClient;
+            }
+
+            optionsSupportState.currentClient = client;
+            return true;
+        }
+
+        function renderSupportTicketsInOptions() {
+            const container = document.getElementById('optionsSupportTickets');
+            const countElement = document.getElementById('optionsSupportTicketCount');
+            if (!container) return;
+
+            const tickets = optionsSupportState.tickets;
+            if (countElement) {
+                countElement.textContent = `${tickets.length} ticket${tickets.length > 1 ? 's' : ''}`;
+            }
+
+            if (!tickets.length) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 1rem;">Aucun ticket pour ce filtre</p>';
+                return;
+            }
+
+            container.innerHTML = tickets.map(ticket => `
+                <div class="support-ticket-item">
+                    <div class="support-ticket-top">
+                        <div class="support-ticket-subject">${escapeSupportHtmlInOptions(ticket.sujet || 'Sans sujet')}</div>
+                        <div class="support-ticket-meta">
+                            <span class="support-ticket-badge">${escapeSupportHtmlInOptions(ticket.statut || '')}</span>
+                            <span class="support-ticket-badge">${escapeSupportHtmlInOptions(ticket.priorite || '')}</span>
+                        </div>
+                    </div>
+                    <div class="support-ticket-meta">
+                        <span class="support-ticket-badge">${escapeSupportHtmlInOptions(ticket.categorie || 'autre')}</span>
+                        <span class="support-ticket-badge">${formatSupportTimeAgoInOptions(ticket.created_at)}</span>
+                    </div>
+                    <div class="support-ticket-desc">${escapeSupportHtmlInOptions(ticket.description || '')}</div>
+                    <div class="support-ticket-actions">
+                        <button class="btn btn-secondary" style="width: auto; min-width: 140px;" onclick="openSupportTicketDetailInOptions('${ticket.id}')">Voir le détail</button>
+                        <button class="btn btn-secondary" style="width: auto; min-width: 110px;" onclick="deleteSupportTicketInOptions('${ticket.id}')">Supprimer</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadSupportTicketsInOptions() {
+            if (optionsSupportState.loading) return;
+            const container = document.getElementById('optionsSupportTickets');
+            if (!container || !window.supabaseClient) return;
+
+            optionsSupportState.loading = true;
+            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 1rem;">Chargement...</p>';
+
+            try {
+                const clientReady = await ensureSupportClientInOptions();
+                if (!clientReady) return;
+
+                let query = window.supabaseClient
+                    .from('cm_support_tickets')
+                    .select('*')
+                    .eq('client_id', optionsSupportState.currentClient.id)
+                    .order('created_at', { ascending: false });
+
+                if (optionsSupportState.currentFilter) {
+                    query = query.eq('statut', optionsSupportState.currentFilter);
+                }
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                optionsSupportState.tickets = data || [];
+                renderSupportTicketsInOptions();
+            } catch (error) {
+                console.error('Erreur chargement support options:', error);
+                container.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 1rem;">Impossible de charger les tickets</p>';
+            } finally {
+                optionsSupportState.loading = false;
+            }
+        }
+
+        async function createSupportTicketInOptions(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('optionsSupportSubmitBtn');
+            const category = document.getElementById('optionsSupportCategory')?.value;
+            const priority = document.getElementById('optionsSupportPriority')?.value || 'normale';
+            const title = document.getElementById('optionsSupportTitle')?.value?.trim() || '';
+            const description = document.getElementById('optionsSupportDescription')?.value?.trim() || '';
+
+            if (!category || !title || !description) {
+                supportToastInOptions('Veuillez remplir tous les champs du ticket');
+                return;
+            }
+
+            try {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Création...';
+                }
+
+                const clientReady = await ensureSupportClientInOptions();
+                if (!clientReady) return;
+
+                const { error } = await window.supabaseClient
+                    .from('cm_support_tickets')
+                    .insert([{
+                        client_id: optionsSupportState.currentClient.id,
+                        sujet: title,
+                        description,
+                        categorie: category,
+                        priorite: priority,
+                        statut: 'ouvert'
+                    }]);
+
+                if (error) throw error;
+
+                document.getElementById('optionsSupportCreateForm')?.reset();
+                const count = document.getElementById('optionsSupportCharCount');
+                if (count) count.textContent = '0 / 1000';
+                supportToastInOptions('Ticket créé avec succès');
+                await loadSupportTicketsInOptions();
+            } catch (error) {
+                console.error('Erreur création ticket support options:', error);
+                supportToastInOptions('Erreur lors de la création du ticket');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Créer le ticket';
+                }
+            }
+        }
+
+        async function openSupportTicketDetailInOptions(ticketId) {
+            const ticket = optionsSupportState.tickets.find(item => item.id === ticketId);
+            if (!ticket || !window.supabaseClient) return;
+
+            const modal = document.getElementById('optionsSupportModalOverlay');
+            const title = document.getElementById('optionsSupportModalTitle');
+            const body = document.getElementById('optionsSupportModalBody');
+            if (!modal || !title || !body) return;
+
+            try {
+                title.textContent = `Ticket #${String(ticket.id).slice(0, 8)} - ${ticket.sujet || 'Sans sujet'}`;
+                body.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 1rem;">Chargement...</p>';
+                modal.classList.add('active');
+
+                const { data: comments, error: commentsError } = await window.supabaseClient
+                    .from('cm_support_comments')
+                    .select('*')
+                    .eq('ticket_id', ticketId)
+                    .order('created_at', { ascending: true });
+
+                if (commentsError) throw commentsError;
+
+                await window.supabaseClient
+                    .from('cm_support_notifications')
+                    .update({ lu: true })
+                    .eq('ticket_id', ticketId)
+                    .eq('client_id', optionsSupportState.currentClient?.id || '');
+
+                const conversation = [
+                    {
+                        role: 'Votre demande',
+                        content: ticket.description || '',
+                        created_at: ticket.created_at
+                    },
+                    ...(comments || []).map(comment => ({
+                        role: comment.author_role === 'client'
+                            ? 'Vous'
+                            : (comment.is_ai_generated ? 'Réponse automatique IA' : 'Support'),
+                        content: comment.content || '',
+                        created_at: comment.created_at
+                    }))
+                ];
+
+                body.innerHTML = `
+                    <div class="support-ticket-meta" style="margin-bottom: 0.75rem;">
+                        <span class="support-ticket-badge">${escapeSupportHtmlInOptions(ticket.statut || '')}</span>
+                        <span class="support-ticket-badge">${escapeSupportHtmlInOptions(ticket.priorite || '')}</span>
+                        <span class="support-ticket-badge">${escapeSupportHtmlInOptions(ticket.categorie || '')}</span>
+                        <span class="support-ticket-badge">Créé le ${formatSupportDateInOptions(ticket.created_at, true)}</span>
+                    </div>
+                    <div class="support-conversation">
+                        ${conversation.map(message => `
+                            <div class="support-message">
+                                <strong>${escapeSupportHtmlInOptions(message.role)}</strong>
+                                <p>${escapeSupportHtmlInOptions(message.content)}</p>
+                                <div class="support-message-time">${formatSupportDateInOptions(message.created_at, true)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${ticket.statut !== 'résolu' ? `
+                        <form id="optionsSupportReplyForm" onsubmit="sendSupportReplyInOptions(event, '${ticket.id}')">
+                            <textarea id="optionsSupportReplyText" class="support-native-textarea" maxlength="2000" placeholder="Votre réponse" required></textarea>
+                            <div class="support-native-actions">
+                                <span class="support-native-count">Le ticket restera ouvert après votre réponse</span>
+                                <button type="submit" class="btn" style="width: auto; min-width: 140px;">Envoyer</button>
+                            </div>
+                        </form>
+                    ` : `
+                        <div class="support-native-card" style="padding: 0.85rem;">
+                            <p style="margin-bottom: 0.6rem; color: var(--text-secondary);">Ce ticket est résolu.</p>
+                            <button type="button" class="btn" style="width: auto; min-width: 150px;" onclick="reopenSupportTicketInOptions('${ticket.id}')">Ré-ouvrir le ticket</button>
+                        </div>
+                    `}
+                `;
+
+                await loadSupportTicketsInOptions();
+            } catch (error) {
+                console.error('Erreur ouverture ticket support options:', error);
+                body.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 1rem;">Impossible de charger le détail du ticket</p>';
+            }
+        }
+
+        async function sendSupportReplyInOptions(event, ticketId) {
+            event.preventDefault();
+            const textarea = document.getElementById('optionsSupportReplyText');
+            const reply = textarea?.value?.trim() || '';
+            if (!reply || !window.supabaseClient || !optionsSupportState.currentUser) return;
+
+            try {
+                const { error: insertError } = await window.supabaseClient
+                    .from('cm_support_comments')
+                    .insert({
+                        ticket_id: ticketId,
+                        user_id: optionsSupportState.currentUser.id,
+                        content: reply,
+                        is_internal: false,
+                        is_ai_generated: false,
+                        author_role: 'client'
+                    });
+
+                if (insertError) throw insertError;
+
+                const { error: updateError } = await window.supabaseClient
+                    .from('cm_support_tickets')
+                    .update({
+                        statut: 'en_cours',
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', ticketId)
+                    .eq('statut', 'en_attente_client');
+
+                if (updateError) throw updateError;
+
+                supportToastInOptions('Réponse envoyée');
+                await openSupportTicketDetailInOptions(ticketId);
+            } catch (error) {
+                console.error('Erreur réponse support options:', error);
+                supportToastInOptions('Erreur lors de l\'envoi de la réponse');
+            }
+        }
+
+        async function reopenSupportTicketInOptions(ticketId) {
+            const confirmed = confirm('Voulez-vous ré-ouvrir ce ticket ?');
+            if (!confirmed || !window.supabaseClient) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('cm_support_tickets')
+                    .update({
+                        statut: 'ouvert',
+                        resolved_at: null,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', ticketId);
+
+                if (error) throw error;
+
+                supportToastInOptions('Ticket ré-ouvert');
+                await loadSupportTicketsInOptions();
+                await openSupportTicketDetailInOptions(ticketId);
+            } catch (error) {
+                console.error('Erreur réouverture ticket support options:', error);
+                supportToastInOptions('Erreur lors de la ré-ouverture du ticket');
+            }
+        }
+
+        async function deleteSupportTicketInOptions(ticketId) {
+            const confirmed = confirm('Supprimer ce ticket ? Cette action est irréversible.');
+            if (!confirmed || !window.supabaseClient) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .rpc('delete_ticket_with_dependencies', { p_ticket_id: ticketId });
+
+                if (error) throw error;
+
+                supportToastInOptions('Ticket supprimé');
+                closeSupportTicketModalInOptions();
+                await loadSupportTicketsInOptions();
+            } catch (error) {
+                console.error('Erreur suppression ticket support options:', error);
+                supportToastInOptions('Erreur lors de la suppression du ticket');
+            }
+        }
+
+        function closeSupportTicketModalInOptions(event) {
+            if (event && event.target && event.target.id !== 'optionsSupportModalOverlay') {
+                return;
+            }
+            const modal = document.getElementById('optionsSupportModalOverlay');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function initSupportEventHandlersInOptions() {
+            if (optionsSupportState.initialized) return;
+
+            const form = document.getElementById('optionsSupportCreateForm');
+            const resetButton = document.getElementById('optionsSupportResetBtn');
+            const description = document.getElementById('optionsSupportDescription');
+            const charCount = document.getElementById('optionsSupportCharCount');
+            const filter = document.getElementById('optionsSupportFilter');
+
+            if (form) {
+                form.addEventListener('submit', createSupportTicketInOptions);
+            }
+
+            if (resetButton && form) {
+                resetButton.addEventListener('click', () => {
+                    form.reset();
+                    if (charCount) charCount.textContent = '0 / 1000';
+                });
+            }
+
+            if (description) {
+                description.addEventListener('input', (event) => {
+                    const length = event.target.value.length;
+                    if (charCount) {
+                        charCount.textContent = `${Math.min(length, 1000)} / 1000`;
+                    }
+                    if (length > 1000) {
+                        event.target.value = event.target.value.slice(0, 1000);
+                    }
+                });
+            }
+
+            if (filter) {
+                filter.addEventListener('change', (event) => {
+                    optionsSupportState.currentFilter = event.target.value || '';
+                    loadSupportTicketsInOptions();
+                });
+            }
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeSupportTicketModalInOptions();
+                }
+            });
+
+            optionsSupportState.initialized = true;
+        }
+
+        async function initSupportInOptions() {
+            initSupportEventHandlersInOptions();
+            if (!window.supabaseClient) return;
+            await loadSupportTicketsInOptions();
+        }
+
+        window.openSupportTicketDetailInOptions = openSupportTicketDetailInOptions;
+        window.deleteSupportTicketInOptions = deleteSupportTicketInOptions;
+        window.sendSupportReplyInOptions = sendSupportReplyInOptions;
+        window.reopenSupportTicketInOptions = reopenSupportTicketInOptions;
+        window.closeSupportTicketModalInOptions = closeSupportTicketModalInOptions;
+
+        function formatOptionsArchiveDate(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        function getReservationArchiveField(reservation, keys, fallback = '') {
+            for (const key of keys) {
+                if (reservation[key] !== undefined && reservation[key] !== null && reservation[key] !== '') {
+                    return reservation[key];
+                }
+            }
+            return fallback;
+        }
+
+        const optionsArchiveEditState = {
+            reservationId: null,
+            reservation: null
+        };
+
+        function toDateInputValue(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toISOString().split('T')[0];
+        }
+
+        function setFirstExistingReservationField(payload, reservation, keys, value) {
+            const existingKey = keys.find((key) => Object.prototype.hasOwnProperty.call(reservation, key));
+            if (!existingKey) return false;
+            payload[existingKey] = value;
+            return true;
+        }
+
+        async function loadArchivesInOptions() {
+            await Promise.all([
+                loadArchivedReservationsInOptions(),
+                loadArchivedTodosInOptions()
+            ]);
+        }
+
+        async function loadArchivedReservationsInOptions() {
+            const container = document.getElementById('optionsArchivesReservations');
+            if (!container || !window.supabaseClient) return;
+
+            try {
+                const { data: reservations, error } = await window.supabaseClient
+                    .from('reservations')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(500);
+
+                if (error) throw error;
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const archivedReservations = (reservations || [])
+                    .filter((reservation) => {
+                        const endRaw = getReservationArchiveField(reservation, ['check_out', 'date_fin', 'dateFin']);
+                        if (!endRaw) return false;
+                        const endDate = new Date(endRaw);
+                        return !Number.isNaN(endDate.getTime()) && endDate < today;
+                    })
+                    .sort((firstReservation, secondReservation) => {
+                        const firstEnd = new Date(getReservationArchiveField(firstReservation, ['check_out', 'date_fin', 'dateFin']));
+                        const secondEnd = new Date(getReservationArchiveField(secondReservation, ['check_out', 'date_fin', 'dateFin']));
+                        return secondEnd - firstEnd;
+                    });
+
+                if (archivedReservations.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 1rem;">Aucune archive</p>';
+                    return;
+                }
+
+                const html = archivedReservations.map((reservation) => {
+                    const reservationId = reservation.id;
+                    const clientName = getReservationArchiveField(reservation, ['client_name', 'nom_client', 'nom'], 'Client');
+                    const giteName = getReservationArchiveField(reservation, ['gite', 'gite_name'], 'Gîte');
+                    const platform = getReservationArchiveField(reservation, ['platform', 'plateforme', 'site'], 'Plateforme');
+                    const startDate = getReservationArchiveField(reservation, ['check_in', 'date_debut', 'dateDebut']);
+                    const endDate = getReservationArchiveField(reservation, ['check_out', 'date_fin', 'dateFin']);
+                    const amount = getReservationArchiveField(reservation, ['total_price', 'montant'], 0);
+
+                    return `
+                        <div style="border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: var(--bg-secondary);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                                <strong>${clientName} - ${giteName}</strong>
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">${platform}</span>
+                            </div>
+                            <div style="margin-top: 6px; font-size: 0.9rem; color: var(--text-secondary);">
+                                📅 ${formatOptionsArchiveDate(startDate)} → ${formatOptionsArchiveDate(endDate)}
+                            </div>
+                            <div style="margin-top: 6px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                                <span>💰 ${Number(amount || 0).toFixed(2)} €</span>
+                                <button type="button" onclick="openArchivedReservationInOptions('${reservationId}')" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 0.9rem;">✏️ Modifier</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Erreur chargement archives réservations:', error);
+                container.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 1rem;">Impossible de charger les archives de réservations</p>';
+            }
+        }
+
+        async function openArchivedReservationInOptions(reservationId) {
+            if (!reservationId) return;
+
+            try {
+                const { data: reservation, error } = await window.supabaseClient
+                    .from('reservations')
+                    .select('*')
+                    .eq('id', reservationId)
+                    .single();
+
+                if (error) throw error;
+                if (!reservation) return;
+
+                optionsArchiveEditState.reservationId = reservationId;
+                optionsArchiveEditState.reservation = reservation;
+
+                document.getElementById('archiveEditClientName').value = getReservationArchiveField(reservation, ['client_name', 'nom_client', 'nom'], '');
+                document.getElementById('archiveEditGiteName').value = getReservationArchiveField(reservation, ['gite', 'gite_name'], '');
+                document.getElementById('archiveEditPlatform').value = getReservationArchiveField(reservation, ['platform', 'plateforme', 'site'], '');
+                document.getElementById('archiveEditAmount').value = Number(getReservationArchiveField(reservation, ['total_price', 'montant'], 0)) || '';
+                document.getElementById('archiveEditCheckIn').value = toDateInputValue(getReservationArchiveField(reservation, ['check_in', 'date_debut', 'dateDebut'], ''));
+                document.getElementById('archiveEditCheckOut').value = toDateInputValue(getReservationArchiveField(reservation, ['check_out', 'date_fin', 'dateFin'], ''));
+
+                const modal = document.getElementById('optionsArchiveEditModal');
+                if (modal) modal.style.display = 'flex';
+            } catch (error) {
+                console.error('Erreur ouverture édition archive:', error);
+                alert('Impossible d\'ouvrir la réservation pour modification.');
+            }
+        }
+
+        function closeArchiveEditModalInOptions() {
+            const modal = document.getElementById('optionsArchiveEditModal');
+            if (modal) modal.style.display = 'none';
+            optionsArchiveEditState.reservationId = null;
+            optionsArchiveEditState.reservation = null;
+        }
+
+        async function saveArchiveReservationInOptions() {
+            const reservationId = optionsArchiveEditState.reservationId;
+            const reservation = optionsArchiveEditState.reservation;
+            if (!reservationId || !reservation || !window.supabaseClient) return;
+
+            const payload = {};
+
+            const clientName = document.getElementById('archiveEditClientName')?.value?.trim() || '';
+            const giteName = document.getElementById('archiveEditGiteName')?.value?.trim() || '';
+            const platform = document.getElementById('archiveEditPlatform')?.value?.trim() || '';
+            const checkIn = document.getElementById('archiveEditCheckIn')?.value || null;
+            const checkOut = document.getElementById('archiveEditCheckOut')?.value || null;
+            const amountRaw = document.getElementById('archiveEditAmount')?.value;
+            const amount = amountRaw === '' || amountRaw === null || amountRaw === undefined ? null : Number(amountRaw);
+
+            setFirstExistingReservationField(payload, reservation, ['client_name', 'nom_client', 'nom'], clientName);
+            setFirstExistingReservationField(payload, reservation, ['gite', 'gite_name'], giteName);
+            setFirstExistingReservationField(payload, reservation, ['platform', 'plateforme', 'site'], platform);
+            setFirstExistingReservationField(payload, reservation, ['check_in', 'date_debut', 'dateDebut'], checkIn);
+            setFirstExistingReservationField(payload, reservation, ['check_out', 'date_fin', 'dateFin'], checkOut);
+            if (amount !== null && !Number.isNaN(amount)) {
+                setFirstExistingReservationField(payload, reservation, ['total_price', 'montant'], amount);
+            }
+
+            if (Object.keys(payload).length === 0) {
+                closeArchiveEditModalInOptions();
+                return;
+            }
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('reservations')
+                    .update(payload)
+                    .eq('id', reservationId);
+
+                if (error) throw error;
+
+                closeArchiveEditModalInOptions();
+                await loadArchivedReservationsInOptions();
+            } catch (error) {
+                console.error('Erreur sauvegarde archive:', error);
+                alert('Impossible d\'enregistrer les modifications.');
+            }
+        }
+
+        async function loadArchivedTodosInOptions() {
+            const container = document.getElementById('optionsArchivedTodos');
+            if (!container || !window.supabaseClient) return;
+
+            try {
+                const { data: todos, error } = await window.supabaseClient
+                    .from('todos')
+                    .select('id, title, description, category, archived_at')
+                    .not('archived_at', 'is', null)
+                    .order('archived_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!todos || todos.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 1rem;">Aucune tâche archivée</p>';
+                    return;
+                }
+
+                const html = todos.map((todo) => `
+                    <div style="border-left: 4px solid #667eea; padding: 12px; margin-bottom: 10px; background: var(--bg-secondary); border-radius: 8px; opacity: 0.9;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; text-decoration: line-through; color: var(--text-secondary);">${todo.title || 'Sans titre'}</div>
+                                ${todo.description ? `<div style="font-size: 0.85rem; color: #888; margin-top: 4px;">${todo.description}</div>` : ''}
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px;">✅ Terminé le ${formatOptionsArchiveDate(todo.archived_at)}</div>
+                            </div>
+                            <button onclick="restoreArchivedTodoInOptions(${todo.id})" style="background: #3498DB; border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">↶ Restaurer</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Erreur chargement archives tâches:', error);
+                container.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 1rem;">Impossible de charger les tâches archivées</p>';
+            }
+        }
+
+        async function restoreArchivedTodoInOptions(todoId) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('todos')
+                    .update({ completed: false, archived_at: null })
+                    .eq('id', todoId);
+
+                if (error) throw error;
+                await loadArchivedTodosInOptions();
+            } catch (error) {
+                console.error('Erreur restauration tâche archivée:', error);
+                alert('Erreur lors de la restauration');
+            }
+        }
+
+        async function clearArchivedTodosInOptions() {
+            const confirmed = confirm('Supprimer définitivement toutes les tâches archivées ? Cette action est irréversible.');
+            if (!confirmed) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('todos')
+                    .delete()
+                    .not('archived_at', 'is', null);
+
+                if (error) throw error;
+                await loadArchivedTodosInOptions();
+            } catch (error) {
+                console.error('Erreur suppression tâches archivées:', error);
+                alert('Erreur lors de la suppression');
+            }
+        }
+
+        function initOptionsSidebarTabs() {
+            const links = document.querySelectorAll('.sidebar-link[data-panel]');
+
+            links.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const panelId = link.dataset.panel;
+                    if (!panelId) return;
+
+                    showOptionsPanel(panelId);
+                    history.replaceState(null, '', `#${panelId}`);
+                });
+            });
+
+            const hashPanel = window.location.hash?.replace('#', '');
+            const isHashValid = hashPanel && document.getElementById(hashPanel)?.hasAttribute('data-options-panel');
+            showOptionsPanel(isHashValid ? hashPanel : 'options-profile');
+        }
         
         // Charger tous les paramètres depuis localStorage
         window.addEventListener('DOMContentLoaded', async () => {
+            initOptionsSidebarTabs();
+
             const savedTheme = localStorage.getItem('ficheClientTheme') || 'cyan';
             const savedAppTheme = localStorage.getItem('theme') || localStorage.getItem('icalou-theme') || 'dark';
             const savedAppStyle = localStorage.getItem('style') || localStorage.getItem('icalou-style') || 'sidebar';
@@ -913,6 +2658,19 @@
                 if (window.supabaseClient) {
                     clearInterval(waitForSupabase);
                     await loadProfile();
+                    const activePanel = document.querySelector('[data-options-panel]:not([hidden])');
+                    if (activePanel?.id === 'options-archives') {
+                        await loadArchivesInOptions();
+                    }
+                    if (activePanel?.id === 'options-support') {
+                        await initSupportInOptions();
+                    }
+                    if (activePanel?.id === 'options-notifications') {
+                        await initNotificationsInOptions();
+                    }
+                    if (activePanel?.id === 'options-parrainage') {
+                        await initParrainageInOptions();
+                    }
                 } else if (attempts >= maxAttempts) {
                     clearInterval(waitForSupabase);
                     console.error('❌ Supabase non initialisé après 5 secondes');
@@ -936,6 +2694,80 @@
         // ==========================================
         // 💳 GESTION DES ABONNEMENTS
         // ==========================================
+
+        function normalizePlanCode(rawPlan) {
+            if (!rawPlan) return null;
+            const value = String(rawPlan).trim().toLowerCase();
+            if (value.includes('quattro')) return 'quattro';
+            if (value.includes('duo')) return 'duo';
+            if (value.includes('solo')) return 'solo';
+            return null;
+        }
+
+        function getCurrentPlanCode(plan) {
+            if (!plan) return null;
+            return (
+                normalizePlanCode(plan.plan_id) ||
+                normalizePlanCode(plan.name) ||
+                normalizePlanCode(plan.code) ||
+                normalizePlanCode(plan.slug) ||
+                normalizePlanCode(plan.display_name)
+            );
+        }
+
+        function parseSubscriptionPrice(rawPrice) {
+            if (rawPrice === null || rawPrice === undefined || rawPrice === '') return null;
+            if (typeof rawPrice === 'number') {
+                return Number.isFinite(rawPrice) ? rawPrice : null;
+            }
+
+            const normalized = String(rawPrice)
+                .replace(/\s/g, '')
+                .replace('€', '')
+                .replace(',', '.');
+
+            const parsed = Number(normalized);
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        async function getReferralDiscountPercentForSubscription(userId) {
+            if (!userId || !window.supabaseClient) return 0;
+
+            try {
+                const { data: settings, error: settingsError } = await window.supabaseClient
+                    .from('user_settings')
+                    .select('subscription_type')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (!settingsError && settings?.subscription_type === 'gites_france') {
+                    return 0;
+                }
+            } catch (_) {
+                // Table/settings non disponible: fallback sur calcul standard
+            }
+
+            try {
+                const { data: activeReferrals, error } = await window.supabaseClient
+                    .from('referrals')
+                    .select('bonus_rate_pct')
+                    .eq('referrer_id', userId)
+                    .eq('status', 'active')
+                    .eq('is_currently_paying', true);
+
+                if (error) return 0;
+
+                const totalDiscount = (activeReferrals || []).reduce((sum, referral) => {
+                    const rate = Number(referral?.bonus_rate_pct);
+                    return sum + (Number.isFinite(rate) ? rate : 5);
+                }, 0);
+
+                return Math.min(Math.max(totalDiscount, 0), 100);
+            } catch (error) {
+                console.error('Erreur calcul réduction parrainage abonnement:', error);
+                return 0;
+            }
+        }
         
         async function loadCurrentSubscription() {
             const loading = document.getElementById('subscriptionLoading');
@@ -965,7 +2797,38 @@
                 if (subscription && subscription.plan) {
                     // Mettre à jour le banner du plan actuel
                     document.getElementById('currentPlanName').textContent = subscription.plan.display_name;
-                    document.getElementById('currentPlanPrice').textContent = subscription.plan.price + '€';
+                    const discountInfoElement = document.getElementById('currentPlanDiscountInfo');
+                    const rawPrice =
+                        subscription.plan.price ??
+                        subscription.plan.price_monthly ??
+                        subscription.plan.prix_mensuel ??
+                        subscription.plan.amount;
+                    const numericPrice = parseSubscriptionPrice(rawPrice);
+                    const hasValidPrice = numericPrice !== null;
+
+                    if (hasValidPrice) {
+                        const referralDiscountPct = await getReferralDiscountPercentForSubscription(user.id);
+                        const discountAmount = (numericPrice * referralDiscountPct) / 100;
+                        const finalPrice = Math.max(numericPrice - discountAmount, 0);
+                        const priceElement = document.getElementById('currentPlanPrice');
+
+                        if (referralDiscountPct > 0) {
+                            priceElement.innerHTML = `<span style="font-size: 1rem; opacity: 0.8; text-decoration: line-through; margin-right: 0.35rem;">${numericPrice.toFixed(2)}€</span>${finalPrice.toFixed(2)}€`;
+                            if (discountInfoElement) {
+                                discountInfoElement.textContent = `Réduction parrainage appliquée: -${referralDiscountPct.toFixed(0)}%`;
+                            }
+                        } else {
+                            priceElement.textContent = `${numericPrice.toFixed(2)}€`;
+                            if (discountInfoElement) {
+                                discountInfoElement.textContent = '';
+                            }
+                        }
+                    } else {
+                        document.getElementById('currentPlanPrice').textContent = '';
+                        if (discountInfoElement) {
+                            discountInfoElement.textContent = '';
+                        }
+                    }
                     
                     // Limites du plan
                     const limits = [];
@@ -984,11 +2847,15 @@
                     }
                     
                     // Mettre à jour les boutons des plans
+                    const currentPlanCode = getCurrentPlanCode(subscription.plan);
+                    const planOrder = { solo: 1, duo: 2, quattro: 3 };
+                    const currentLevel = planOrder[currentPlanCode] || 0;
+
                     document.querySelectorAll('.pricing-btn').forEach(btn => {
                         const planId = btn.dataset.plan;
-                        if (planId === subscription.plan.plan_id) {
+                        if (planId === currentPlanCode) {
                             btn.classList.add('current');
-                            btn.textContent = '✓ Plan actuel';
+                            btn.textContent = 'Votre abonnement';
                             btn.style.cursor = 'not-allowed';
                             btn.style.opacity = '0.7';
                             btn.disabled = true;
@@ -997,12 +2864,13 @@
                             btn.disabled = false;
                             btn.style.cursor = 'pointer';
                             btn.style.opacity = '1';
-                            
-                            const currentLevel = subscription.plan.level;
-                            const targetPlan = ['solo', 'duo', 'quattro'].indexOf(planId) + 1;
-                            
-                            if (targetPlan > currentLevel) {
-                                btn.textContent = `Passer au plan ${planId.toUpperCase()}`;
+
+                            const targetLevel = planOrder[planId] || 0;
+
+                            if (!currentLevel || !targetLevel) {
+                                btn.textContent = `Choisir le plan ${planId.toUpperCase()}`;
+                            } else if (targetLevel > currentLevel) {
+                                btn.textContent = `Upgrade au plan ${planId.toUpperCase()}`;
                             } else {
                                 btn.textContent = `Rétrograder au plan ${planId.toUpperCase()}`;
                             }
@@ -1350,7 +3218,129 @@
             // Sauvegarder l'onglet cible dans localStorage
             localStorage.setItem('pendingTabSwitch', tabName);
             // Rediriger vers le dashboard
-            window.location.href = '../index.html';
+            window.location.href = '../app.html';
+        }
+
+        function openArchivesFromOptions(event) {
+            if (event) event.preventDefault();
+            showOptionsPanel('options-archives');
+            history.replaceState(null, '', '#options-archives');
+            loadArchivesInOptions();
+        }
+
+        function openParrainageFromOptions(event) {
+            if (event) event.preventDefault();
+            showOptionsPanel('options-parrainage');
+            history.replaceState(null, '', '#options-parrainage');
+            initParrainageInOptions();
+        }
+
+        function closeToolsInlinePanel() {
+            const panel = document.getElementById('optionsToolsInlinePanel');
+            if (panel) panel.hidden = true;
+        }
+
+        function scopeToolsInlineStyles(rawCss) {
+            if (!rawCss) return '';
+            return rawCss.replace(/(^|})\s*([^{@}][^{]+)\s*\{/g, (match, prefix, selectors) => {
+                const scopedSelectors = selectors
+                    .split(',')
+                    .map((selector) => {
+                        const clean = selector.trim();
+                        if (!clean) return clean;
+                        if (clean.startsWith('.options-tools-inline-wrapper')) return clean;
+                        if (clean.startsWith(':root')) return '.options-tools-inline-wrapper';
+                        return `.options-tools-inline-wrapper ${clean}`;
+                    })
+                    .join(', ');
+                return `${prefix} ${scopedSelectors} {`;
+            });
+        }
+
+        async function loadToolsInlineContent(type) {
+            const content = document.getElementById('optionsToolsInlineContent');
+            const loading = document.getElementById('optionsToolsInlineLoading');
+            if (!content || !loading) return;
+
+            const filePath = type === 'faq' ? '../tabs/tab-faq.html' : '../tabs/tab-checklists.html';
+            loading.hidden = false;
+            content.hidden = true;
+
+            try {
+                const response = await fetch(filePath, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Contenu indisponible');
+
+                const rawHtml = await response.text();
+                const styleMatches = [...rawHtml.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)];
+                const scriptMatches = [...rawHtml.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)];
+                const mergedStyles = styleMatches.map((match) => match[1] || '').join('\n');
+                const inlineScripts = scriptMatches.map((match) => match[1] || '');
+                const markupOnly = rawHtml
+                    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+                    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+
+                content.innerHTML = `<div class="options-tools-inline-wrapper">${markupOnly}</div>`;
+
+                const existingStyle = document.getElementById('optionsToolsInlineScopedStyles');
+                if (existingStyle) existingStyle.remove();
+
+                if (mergedStyles.trim()) {
+                    const styleTag = document.createElement('style');
+                    styleTag.id = 'optionsToolsInlineScopedStyles';
+                    styleTag.textContent = scopeToolsInlineStyles(mergedStyles);
+                    document.head.appendChild(styleTag);
+                }
+
+                if (type === 'faq') {
+                    inlineScripts.forEach((scriptContent) => {
+                        if (!scriptContent.trim()) return;
+                        const script = document.createElement('script');
+                        script.textContent = scriptContent;
+                        content.appendChild(script);
+                    });
+                }
+
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+
+                if (type === 'faq' && typeof window.initFAQ === 'function') {
+                    await window.initFAQ();
+                }
+
+                if (type === 'checklists') {
+                    if (typeof window.initChecklistsTab === 'function') {
+                        await window.initChecklistsTab();
+                    }
+                    if (typeof window.loadChecklistsTab === 'function') {
+                        await window.loadChecklistsTab();
+                    }
+                }
+
+                optionsToolsInlineState.loadedTypes.add(type);
+                content.hidden = false;
+                loading.hidden = true;
+            } catch (error) {
+                console.error('Erreur chargement outils intégrés:', error);
+                loading.textContent = 'Impossible de charger ce module';
+            }
+        }
+
+        function openToolsInlinePanel(type) {
+            const panel = document.getElementById('optionsToolsInlinePanel');
+            const title = document.getElementById('optionsToolsInlineTitle');
+            if (!panel || !title) return;
+
+            const isFaq = type === 'faq';
+            title.textContent = isFaq ? 'FAQ' : 'Check-lists';
+
+            panel.hidden = false;
+            const shouldReload = optionsToolsInlineState.activeType !== type || !optionsToolsInlineState.loadedTypes.has(type);
+            optionsToolsInlineState.activeType = type;
+            if (shouldReload) {
+                loadToolsInlineContent(type);
+            }
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         // Écouter les messages du parent
@@ -1362,14 +3352,9 @@
         
         // Ouvrir les paramètres de notification
         function openNotificationSettings() {
-            // Si ouvert depuis le dashboard, utiliser le système parent
-            if (window.opener && window.opener.notificationSystem) {
-                window.opener.notificationSystem.openNotificationSettings();
-                window.close();
-            } else {
-                // Sinon, rediriger vers le dashboard avec un paramètre pour ouvrir les notifications
-                window.location.href = '../index.html?openNotifications=true';
-            }
+            showOptionsPanel('options-notifications');
+            history.replaceState(null, '', '#options-notifications');
+            initNotificationsInOptions();
         }
         
         // ================================================================

@@ -1,6 +1,29 @@
 /**
  * APPLICATION FICHE CLIENT INTERACTIVE
  * Gestion de la fiche personnalisée par réservation pour les clients
+ * 
+ * @version 2.10.0 - 15 février 2026
+ * - Ajout export PDF de la fiche client
+ *   • Bibliothèque html2pdf.js
+ *   • Bouton dans le header
+ *   • Génération automatique du nom de fichier
+ *   • Tous les onglets inclus dans le PDF
+ *   • Optimisation pour impression
+ * 
+ * @version 2.9.1 - 15 février 2026
+ * - Suppression de l'élément giteName inutile
+ * - Correction affichage nom client (visible maintenant)
+ * - Simplification du header (uniquement "Bienvenue [Nom Client] !")
+ * 
+ * @version 2.9.0 - 15 février 2026
+ * - Ajout de TOUS les champs manquants de l'onglet Infos Gîtes :
+ *   • Détails WiFi supplémentaires (débit, localisation, zones)
+ *   • Accès au bâtiment (étage, ascenseur, itinéraire, première visite)
+ *   • Équipements linge (sèche-linge, fer à repasser, linge fourni)
+ *   • Configuration des chambres
+ *   • Équipements de sécurité (détecteur fumée, extincteur, coupure eau, disjoncteur)
+ *   • Flexibilité arrivée tardive et départ tardif
+ * - Couverture complète : 100% des champs admin affichés côté client
  */
 
 // ==================== CONFIGURATION ====================
@@ -15,6 +38,8 @@ if (!window.ficheClientAppLoaded) {
     if (!window.ficheClientSupabase) {
         const { createClient } = window.supabase;
         window.ficheClientSupabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Alias pour compatibilité avec d'autres modules
+        window.supabaseClient = window.ficheClientSupabase;
     }
     
     // Service Worker désactivé temporairement (404 sur Vercel)
@@ -49,6 +74,54 @@ if (!window.ficheClientAppLoaded) {
 
 // Référence Supabase (utiliser var pour éviter redéclaration)
 var supabase = window.ficheClientSupabase;
+
+// ==================== FONCTIONS UTILITAIRES TRAJET ====================
+// Calculer la distance entre deux points GPS (formule de Haversine)
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Rayon de la Terre en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance en km
+}
+
+// Estimer les temps de trajet
+function estimateTravel(distanceKm) {
+    // Appliquer un facteur de détour routier (les routes ne sont pas des lignes droites)
+    // En zone urbaine/rurale, les routes font environ 1.6 à 2x la distance à vol d'oiseau
+    const routeFactor = 1.7;
+    const realDistance = distanceKm * routeFactor;
+    
+    // Vitesses moyennes RÉALISTES (avec circulation, virages, arrêts, feux...)
+    const speedWalk = 4.5; // km/h (vitesse réelle avec pauses)
+    const speedBike = 12; // km/h (avec relief, virages, prudence)
+    const speedCar = 22; // km/h (circulation urbaine, limitations 30-50, arrêts)
+    
+    // Temps de base (stationnement, démarrage, préparation)
+    const baseTimeCar = 2; // minutes
+    const baseTimeBike = 1;
+    
+    const timeWalk = Math.ceil((realDistance / speedWalk) * 60);
+    const timeBike = Math.ceil((realDistance / speedBike) * 60) + baseTimeBike;
+    const timeCar = Math.ceil((realDistance / speedCar) * 60) + baseTimeCar;
+    
+    return {
+        walk: timeWalk,
+        bike: timeBike,
+        car: timeCar
+    };
+}
+
+// Formater le temps de trajet
+function formatTravelTime(minutes) {
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h${mins}` : `${hours}h`;
+}
 
 // ==================== HELPER FUNCTIONS ====================
 // Fonction pour normaliser le nom du gîte (juste minuscules, GARDER les accents)
@@ -155,6 +228,7 @@ const translations = {
         tab_entree: 'Entrée',
         tab_pendant: 'Pendant',
         tab_sortie: 'Sortie',
+        tab_prestations: 'Prestations',
         tab_activites: 'Activités et commerces',
         tab_probleme: 'Demandes',
         tab_evaluation: 'Évaluation',
@@ -169,6 +243,7 @@ const translations = {
         annuler: 'Annuler',
         code_entree: 'Code d\'entrée',
         instructions_acces: 'Instructions d\'accès',
+        galerie_photos: 'Galerie photos',
         reseau: 'Réseau',
         mot_de_passe: 'Mot de passe',
         checklist_entree: 'Checklist d\'arrivée',
@@ -209,6 +284,8 @@ const translations = {
         tri_dechets: 'Tri des déchets',
         securite_urgence: 'Sécurité & Urgence',
         partager: 'Partager',
+        export_pdf: 'PDF',
+        generation_pdf: 'Génération du PDF...',
         bienvenue: 'Bienvenue',
         votre_sejour: 'Votre séjour',
         chargement: 'Chargement de votre guide...',
@@ -216,6 +293,17 @@ const translations = {
         acces_rapide: 'Accédez rapidement à votre guide, même hors ligne',
         installer: 'Installer',
         plus_tard: 'Plus tard',
+        panier_titre: 'Votre panier',
+        panier_sous_total: 'Sous-total',
+        panier_commission: 'Commission',
+        panier_total: 'Total',
+        panier_commander: 'Passer la commande',
+        prestations_tous: 'Tous',
+        prestations_repas: 'Repas',
+        prestations_activite: 'Activités',
+        prestations_menage: 'Ménage',
+        prestations_location: 'Location',
+        prestations_vide: 'Aucune prestation disponible pour le moment',
         countdown_label: 'Votre séjour commence dans',
         countdown_checkout: 'Fin de votre séjour dans',
         jours: 'jours',
@@ -269,6 +357,7 @@ const translations = {
         tab_entree: 'Check-in',
         tab_pendant: 'During stay',
         tab_sortie: 'Check-out',
+        tab_prestations: 'Services',
         tab_activites: 'Activities & Shops',
         tab_probleme: 'Requests',
         tab_evaluation: 'Review',
@@ -283,6 +372,7 @@ const translations = {
         annuler: 'Cancel',
         code_entree: 'Entry code',
         instructions_acces: 'Access instructions',
+        galerie_photos: 'Photo Gallery',
         reseau: 'Network',
         mot_de_passe: 'Password',
         checklist_entree: 'Check-in checklist',
@@ -323,6 +413,8 @@ const translations = {
         tri_dechets: 'Waste Sorting',
         securite_urgence: 'Safety & Emergency',
         partager: 'Share',
+        export_pdf: 'PDF',
+        generation_pdf: 'Generating PDF...',
         bienvenue: 'Welcome',
         votre_sejour: 'Your stay',
         chargement: 'Loading your guide...',
@@ -330,6 +422,17 @@ const translations = {
         acces_rapide: 'Quick access to your guide, even offline',
         installer: 'Install',
         plus_tard: 'Later',
+        panier_titre: 'Your cart',
+        panier_sous_total: 'Subtotal',
+        panier_commission: 'Commission',
+        panier_total: 'Total',
+        panier_commander: 'Place order',
+        prestations_tous: 'All',
+        prestations_repas: 'Meals',
+        prestations_activite: 'Activities',
+        prestations_menage: 'Cleaning',
+        prestations_location: 'Rental',
+        prestations_vide: 'No services available at the moment',
         countdown_label: 'Your stay starts in',
         countdown_checkout: 'Your stay ends in',
         jours: 'days',
@@ -393,8 +496,6 @@ function updateTranslations() {
         // Cas spéciaux : ne pas écraser le contenu dynamique
         if (key === 'bienvenue' && reservationData?.client_name) {
             el.textContent = `${translation} ${reservationData.client_name} !`;
-        } else if (key === 'votre_sejour' && reservationData?.gite) {
-            el.textContent = reservationData.gite;
         } else if (el.tagName === 'BUTTON' || el.tagName === 'SPAN') {
             // Pour les boutons et spans, seulement mettre à jour si pas de contenu mixte
             if (!el.querySelector('span')) {
@@ -583,6 +684,11 @@ async function loadGiteInfo() {
             }
         });
     }
+    
+    // 📦 Charger les prestations supplémentaires
+    if (typeof loadPrestationsForGite === 'function' && reservationData.gite_id) {
+        await loadPrestationsForGite(reservationData.gite_id);
+    }
 }
 
 async function loadCleaningSchedule() {
@@ -615,8 +721,8 @@ function initializeUI() {
         clientNameEl.textContent = `${welcomeText} ${reservationData.client_name} !`;
     }
     
-    // Titre du gîte
-    document.getElementById('giteName').textContent = `${reservationData.gite}`;
+    // 📸 Afficher les photos du gîte
+    displayGitePhotos();
     
     // ✨ NOUVEAU : Initialiser Hero Section
     initHeroSection();
@@ -644,11 +750,258 @@ function initializeUI() {
     initHeroSection();
     initTimelineSection();
     
-    // 🎨 Sélecteur de thème
+    // � Initialiser lightbox photos
+    initPhotoLightbox();
+    
+    // �🎨 Sélecteur de thème
     initThemeSwitcher();
     
     // Appliquer les traductions
     updateTranslations();
+}
+
+// �️ Gestion Lightbox Photos
+let lightboxPhotos = [];
+let currentPhotoIndex = 0;
+
+function openPhotoLightbox(photos, startIndex = 0) {
+    // Accepte une seule photo (string) ou un tableau
+    lightboxPhotos = Array.isArray(photos) ? photos : [photos];
+    currentPhotoIndex = startIndex;
+    
+    const lightbox = document.getElementById('photoLightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const prevBtn = document.getElementById('prevPhoto');
+    const nextBtn = document.getElementById('nextPhoto');
+    const counter = document.getElementById('photoCounter');
+    
+    // Afficher la modale
+    lightbox.style.display = 'flex';
+    
+    // Afficher la photo actuelle
+    updateLightboxPhoto();
+    
+    // Afficher les flèches uniquement si plusieurs photos
+    console.log('🖼️ Lightbox ouverte avec', lightboxPhotos.length, 'photo(s)');
+    if (lightboxPhotos.length > 1) {
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+        counter.style.display = 'block';
+        console.log('✅ Flèches affichées (galerie de', lightboxPhotos.length, 'photos)');
+    } else {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        counter.style.display = 'none';
+        console.log('ℹ️ Photo unique, pas de navigation');
+    }
+}
+
+function updateLightboxPhoto() {
+    const lightboxImage = document.getElementById('lightboxImage');
+    const counter = document.getElementById('photoCounter');
+    
+    lightboxImage.src = lightboxPhotos[currentPhotoIndex];
+    
+    if (lightboxPhotos.length > 1) {
+        counter.textContent = `${currentPhotoIndex + 1} / ${lightboxPhotos.length}`;
+    }
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById('photoLightbox');
+    lightbox.style.display = 'none';
+    lightboxPhotos = [];
+    currentPhotoIndex = 0;
+}
+
+function nextPhotoLightbox() {
+    currentPhotoIndex = (currentPhotoIndex + 1) % lightboxPhotos.length;
+    updateLightboxPhoto();
+}
+
+function prevPhotoLightbox() {
+    currentPhotoIndex = (currentPhotoIndex - 1 + lightboxPhotos.length) % lightboxPhotos.length;
+    updateLightboxPhoto();
+}
+
+// 🎬 Initialiser les écouteurs de la lightbox
+function initPhotoLightbox() {
+    document.getElementById('closeLightbox').addEventListener('click', closeLightbox);
+    document.getElementById('nextPhoto').addEventListener('click', nextPhotoLightbox);
+    document.getElementById('prevPhoto').addEventListener('click', prevPhotoLightbox);
+    
+    // Fermer avec Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowRight') nextPhotoLightbox();
+        if (e.key === 'ArrowLeft') prevPhotoLightbox();
+    });
+    
+    // Fermer en cliquant sur le fond noir
+    document.getElementById('photoLightbox').addEventListener('click', (e) => {
+        if (e.target.id === 'photoLightbox') closeLightbox();
+    });
+}
+
+// �📸 Affichage des photos du gîte
+function displayGitePhotos() {
+    if (!giteInfo || !giteInfo.photos) {
+        console.log('ℹ️ Aucune photo disponible pour ce gîte');
+        return;
+    }
+    
+    const photos = giteInfo.photos;
+    
+    // 1. PHOTO DE COUVERTURE dans le header
+    const couvertureUrl = photos.couverture?.url || photos.couverture;
+    if (couvertureUrl && typeof couvertureUrl === 'string') {
+        const headerEl = document.getElementById('mainHeader');
+        if (headerEl) {
+            // Récupérer le style existant et remplacer uniquement le background
+            const currentStyle = headerEl.getAttribute('style') || '';
+            const newStyle = currentStyle.replace(/background[^;]*;?/gi, '') + 
+                `background: url('${couvertureUrl}') center/cover;`;
+            headerEl.setAttribute('style', newStyle);
+        }
+    }
+    
+    // 2. PHOTO GALERIE - Afficher la première image si disponible
+    if (photos.galerie && Array.isArray(photos.galerie) && photos.galerie.length > 0) {
+        displayGalleryPhotos(photos.galerie);
+    }
+    
+    // 3. PHOTO BOITE À CLÉS - Dans la section parking/accès
+    if (photos.boite_cles && Array.isArray(photos.boite_cles) && photos.boite_cles.length > 0) {
+        displayPhotoInSection('boite_cles', photos.boite_cles[0], 'Boîte à clés');
+    }
+    
+    // 4. PHOTO PARKING
+    if (photos.parking && Array.isArray(photos.parking) && photos.parking.length > 0) {
+        displayPhotoInSection('parking', photos.parking[0], 'Parking');
+    }
+    
+    // 5. PHOTO ENTRÉE
+    if (photos.entree && Array.isArray(photos.entree) && photos.entree.length > 0) {
+        displayPhotoInSection('entree', photos.entree[0], 'Entrée');
+    }
+}
+
+function displayGalleryPhotos(galleryPhotos) {
+    if (!galleryPhotos || galleryPhotos.length === 0) return;
+    
+    // Filtrer les URLs valides (extraire .url si c'est un objet)
+    const validPhotos = galleryPhotos
+        .map(photo => photo?.url || photo)
+        .filter(url => typeof url === 'string' && url.trim() !== '');
+    if (validPhotos.length === 0) return;
+    
+    const entreeTab = document.getElementById('tab-entree');
+    if (!entreeTab) return;
+    
+    // Vérifier si la galerie existe déjà
+    let galerieSection = document.getElementById('galerieGiteSection');
+    if (!galerieSection) {
+        galerieSection = document.createElement('div');
+        galerieSection.id = 'galerieGiteSection';
+        galerieSection.className = 'card';
+        galerieSection.innerHTML = `
+            <div class="card-header">
+                <h2 class="card-title"><i data-lucide="images"></i> <span data-i18n="galerie_photos">Galerie photos</span></h2>
+            </div>
+            <div id="galeriePhotosContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; padding: 1rem;">
+            </div>
+        `;
+        // Insérer après le premier élément (généralement les infos d'accès)
+        entreeTab.insertBefore(galerieSection, entreeTab.children[1] || entreeTab.firstChild);
+    }
+    
+    const container = document.getElementById('galeriePhotosContainer');
+    if (container) {
+        container.innerHTML = validPhotos.map((url, index) => `
+            <div class="photo-gallery-item" data-photo-index="${index}" style="position: relative; padding-bottom: 75%; overflow: hidden; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;">
+                <img src="${url}" alt="Photo du gîte" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            </div>
+        `).join('');
+        
+        // Stocker les photos dans une variable globale pour la galerie
+        window.currentGalleryPhotos = validPhotos;
+        
+        // Ajouter les écouteurs de clic
+        container.querySelectorAll('.photo-gallery-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-photo-index'));
+                openPhotoLightbox(window.currentGalleryPhotos, index);
+            });
+        });
+        
+        // Réinitialiser les icônes Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+}
+
+function displayPhotoInSection(sectionType, photo, sectionTitle) {
+    // Extraire l'URL si c'est un objet
+    const photoUrl = photo?.url || photo;
+    
+    // Vérifier que l'URL est valide
+    if (!photoUrl || typeof photoUrl !== 'string' || photoUrl.trim() === '') return;
+    
+    // Mapping des IDs de sections selon le type
+    const sectionMap = {
+        'boite_cles': 'accordionInstructions', // Après les instructions d'accès
+        'parking': 'parkingSection', // Dans la section parking
+        'entree': 'accordionInstructions' // Après les instructions d'accès
+    };
+    
+    const sectionId = sectionMap[sectionType];
+    if (!sectionId) return;
+    
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+    
+    // Vérifier si la photo existe déjà
+    const photoId = `photo_${sectionType}`;
+    let photoContainer = document.getElementById(photoId);
+    
+    if (!photoContainer) {
+        photoContainer = document.createElement('div');
+        photoContainer.id = photoId;
+        photoContainer.style.cssText = 'margin-top: 1rem; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
+        photoContainer.innerHTML = `
+            <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="camera" style="width: 16px; height: 16px;"></i> ${sectionTitle}</p>
+            <img class="single-photo" data-photo-url="${photoUrl}" src="${photoUrl}" alt="${sectionTitle}" style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+        `;
+        
+        // Ajouter écouteur de clic pour la lightbox
+        const imgElement = photoContainer.querySelector('.single-photo');
+        if (imgElement) {
+            imgElement.addEventListener('click', function() {
+                const url = this.getAttribute('data-photo-url');
+                openPhotoLightbox([url], 0);
+            });
+        }
+        
+        // Insertion selon le type de section
+        if (sectionType === 'parking') {
+            // Dans parkingSection, ajouter après le contenu
+            const parkingInfo = document.getElementById('parkingInfo');
+            if (parkingInfo) {
+                parkingInfo.insertAdjacentElement('afterend', photoContainer);
+            } else {
+                section.appendChild(photoContainer);
+            }
+        } else {
+            // Pour boite_cles et entree, ajouter après accordionInstructions
+            section.insertAdjacentElement('afterend', photoContainer);
+        }
+        
+        // Réinitialiser les icônes Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
 }
 
 // ✨ NOUVEAU : Initialisation du Hero Section
@@ -1076,6 +1429,7 @@ function initOngletEntree() {
         `https://www.google.com/maps?q=${gpsLat},${gpsLon}`;
     
     // Horaire d'arrivée
+    const arriveeFlexible = currentLanguage === 'fr' ? giteInfo.arrivee_tardive : giteInfo.arrivee_tardive_en;
     const heureArrivee = currentLanguage === 'fr' ? giteInfo.heure_arrivee : giteInfo.heure_arrivee_en;
     // // console.log('🕒 Heure arrivée brute:', heureArrivee, 'Standard:', giteInfo.heure_arrivee_standard, 'Validée:', giteInfo.heure_arrivee_validee, 'Lang:', currentLanguage);
     
@@ -1083,7 +1437,11 @@ function initOngletEntree() {
     const heureArriveeEffective = giteInfo.heure_arrivee_validee || heureArrivee || giteInfo.heure_arrivee_standard || '17:00';
     const heureArriveeFormatted = formatTime(heureArriveeEffective);
     // // console.log('🕒 Heure arrivée formatée:', heureArriveeFormatted);
-    document.getElementById('heureArrivee').textContent = heureArriveeFormatted;
+    let heureArriveeText = heureArriveeFormatted;
+    if (arriveeFlexible) {
+        heureArriveeText += ` <span style="background: var(--primary-light, #e8f5e9); color: var(--primary, #68a84f); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; margin-left: 0.5rem;">✓ Flexible</span>`;
+    }
+    document.getElementById('heureArrivee').innerHTML = heureArriveeText;
     
     // Générer les options de sélection horaire (toutes les 30 min)
     const selectArrivee = document.getElementById('heureArriveeDemandee');
@@ -1217,6 +1575,64 @@ function initOngletEntree() {
         qrContainer.style.display = 'block';
     } else if (qrContainer) {
         qrContainer.style.display = 'none';
+    }
+    
+    // DÉTAILS WiFi SUPPLÉMENTAIRES (débit, localisation, zones)
+    const wifiDebit = currentLanguage === 'fr' ? giteInfo.wifi_debit : giteInfo.wifi_debit_en;
+    const wifiLocalisation = currentLanguage === 'fr' ? giteInfo.wifi_localisation : giteInfo.wifi_localisation_en;
+    const wifiZones = currentLanguage === 'fr' ? giteInfo.wifi_zones : giteInfo.wifi_zones_en;
+    
+    let wifiDetailsHTML = '';
+    if (wifiDebit) {
+        wifiDetailsHTML += `<p style="margin-bottom: 0.5rem;"><strong>📡 Débit approximatif :</strong> ${wifiDebit}</p>`;
+    }
+    if (wifiLocalisation) {
+        wifiDetailsHTML += `<p style="margin-bottom: 0.5rem;"><strong>📍 Localisation box/routeur :</strong> ${wifiLocalisation}</p>`;
+    }
+    if (wifiZones) {
+        wifiDetailsHTML += `<p style="white-space: pre-line; line-height: 1.5;"><strong>📶 Zones de meilleure réception :</strong><br>${wifiZones}</p>`;
+    }
+    
+    const wifiDetailsSection = document.getElementById('wifiDetailsSection');
+    if (wifiDetailsHTML) {
+        document.getElementById('wifiDetailsContent').innerHTML = wifiDetailsHTML;
+        wifiDetailsSection.style.display = 'block';
+    } else {
+        wifiDetailsSection.style.display = 'none';
+    }
+    
+    // ACCÈS AU BÂTIMENT (étage, ascenseur, itinéraire, première visite)
+    const etage = currentLanguage === 'fr' ? giteInfo.etage : giteInfo.etage_en;
+    const ascenseur = currentLanguage === 'fr' ? giteInfo.ascenseur : giteInfo.ascenseur_en;
+    const itineraire = currentLanguage === 'fr' ? giteInfo.itineraire_logement : giteInfo.itineraire_logement_en;
+    const premiereVisite = currentLanguage === 'fr' ? giteInfo.premiere_visite : giteInfo.premiere_visite_en;
+    
+    let accesHTML = '';
+    if (etage) {
+        accesHTML += `<p style="margin-bottom: 0.5rem;"><strong>🏢 Étage du logement :</strong> ${etage}</p>`;
+    }
+    if (ascenseur) {
+        accesHTML += `<p style="margin-bottom: 0.5rem;"><strong>🛗 Ascenseur disponible :</strong> ${ascenseur}</p>`;
+    }
+    if (itineraire) {
+        accesHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
+            <strong>🚶 Itinéraire parking → porte :</strong><br>
+            <p style="white-space: pre-line; line-height: 1.5; margin-top: 0.5rem;">${itineraire}</p>
+        </div>`;
+    }
+    if (premiereVisite) {
+        accesHTML += `<div style="background: var(--primary-light, #e8f5e9); padding: 0.75rem; border-radius: 0.5rem; border-left: 4px solid var(--primary, #68a84f);">
+            <strong>💡 À savoir pour votre première visite :</strong><br>
+            <p style="white-space: pre-line; line-height: 1.5; margin-top: 0.5rem;">${premiereVisite}</p>
+        </div>`;
+    }
+    
+    const accesSection = document.getElementById('accesLogementSection');
+    if (accesHTML) {
+        document.getElementById('accesLogementInfo').innerHTML = accesHTML;
+        accesSection.style.display = 'block';
+    } else {
+        accesSection.style.display = 'none';
     }
     
     // PARKING
@@ -1376,6 +1792,68 @@ function initOngletPendant() {
         dechetsSection.style.display = 'none';
     }
     
+    // ÉQUIPEMENTS LINGE & CHAMBRES
+    const secheLinge = currentLanguage === 'fr' ? giteInfo.seche_linge : giteInfo.seche_linge_en;
+    const ferRepasser = currentLanguage === 'fr' ? giteInfo.fer_repasser : giteInfo.fer_repasser_en;
+    const lingeFourni = currentLanguage === 'fr' ? giteInfo.linge_fourni : giteInfo.linge_fourni_en;
+    const configChambres = currentLanguage === 'fr' ? giteInfo.configuration_chambres : giteInfo.configuration_chambres_en;
+    
+    let lingeHTML = '';
+    if (secheLinge) {
+        lingeHTML += `<p style="margin-bottom: 0.5rem;"><strong>🌀 Sèche-linge :</strong> ${secheLinge}</p>`;
+    }
+    if (ferRepasser) {
+        lingeHTML += `<p style="margin-bottom: 0.5rem;"><strong>👔 Fer et planche à repasser :</strong> ${ferRepasser}</p>`;
+    }
+    if (lingeFourni) {
+        lingeHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
+            <strong>🛏️ Linge fourni :</strong><br>
+            <p style="white-space: pre-line; line-height: 1.5; margin-top: 0.5rem;">${lingeFourni}</p>
+        </div>`;
+    }
+    if (configChambres) {
+        lingeHTML += `<div style="background: var(--primary-light, #e8f5e9); padding: 0.75rem; border-radius: 0.5rem;">
+            <strong>🛌 Configuration des chambres :</strong><br>
+            <p style="white-space: pre-line; line-height: 1.5; margin-top: 0.5rem;">${configChambres}</p>
+        </div>`;
+    }
+    
+    const lingeSection = document.getElementById('lingeChambresSection');
+    if (lingeHTML) {
+        document.getElementById('lingeChambresInfo').innerHTML = lingeHTML;
+        lingeSection.style.display = 'block';
+    } else {
+        lingeSection.style.display = 'none';
+    }
+    
+    // SÉCURITÉ & ÉQUIPEMENTS OBLIGATOIRES
+    const detecteurFumee = currentLanguage === 'fr' ? giteInfo.detecteur_fumee : giteInfo.detecteur_fumee_en;
+    const extincteur = currentLanguage === 'fr' ? giteInfo.extincteur : giteInfo.extincteur_en;
+    const coupureEau = currentLanguage === 'fr' ? giteInfo.coupure_eau : giteInfo.coupure_eau_en;
+    const disjoncteur = currentLanguage === 'fr' ? giteInfo.disjoncteur : giteInfo.disjoncteur_en;
+    
+    let securiteHTML = '';
+    if (detecteurFumee) {
+        securiteHTML += `<p style="margin-bottom: 0.5rem;"><strong>🔔 Détecteur de fumée :</strong> ${detecteurFumee}</p>`;
+    }
+    if (extincteur) {
+        securiteHTML += `<p style="margin-bottom: 0.5rem;"><strong>🧯 Extincteur :</strong> ${extincteur}</p>`;
+    }
+    if (coupureEau) {
+        securiteHTML += `<p style="margin-bottom: 0.5rem;"><strong>💧 Coupure d'eau :</strong> ${coupureEau}</p>`;
+    }
+    if (disjoncteur) {
+        securiteHTML += `<p><strong>⚡ Disjoncteur général :</strong> ${disjoncteur}</p>`;
+    }
+    
+    const securiteSection = document.getElementById('securiteSection');
+    if (securiteHTML) {
+        document.getElementById('securiteInfo').innerHTML = securiteHTML;
+        securiteSection.style.display = 'block';
+    } else {
+        securiteSection.style.display = 'none';
+    }
+    
     // Équipements
     if (giteInfo.equipements && giteInfo.equipements.length > 0) {
         const container = document.getElementById('equipementsContainer');
@@ -1453,6 +1931,7 @@ function initOngletPendant() {
 
 function initOngletSortie() {
     // Horaire de départ
+    const departFlexible = currentLanguage === 'fr' ? giteInfo.depart_tardif : giteInfo.depart_tardif_en;
     const heureDepart = currentLanguage === 'fr' ? giteInfo.heure_depart : giteInfo.heure_depart_en;
     
     // ✅ PRIORITÉ: Heure validée > Heure configurée > Heure standard
@@ -1460,7 +1939,11 @@ function initOngletSortie() {
     const heureDepartFormatted = formatTime(heureDepartEffective);
     const heureDepartElement = document.getElementById('heureDepart');
     if (heureDepartElement) {
-        heureDepartElement.textContent = heureDepartFormatted;
+        let heureDepartText = heureDepartFormatted;
+        if (departFlexible) {
+            heureDepartText += ` <span style="background: var(--primary-light, #e8f5e9); color: var(--primary, #68a84f); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; margin-left: 0.5rem;">✓ Flexible</span>`;
+        }
+        heureDepartElement.innerHTML = heureDepartText;
     }
     
     // Générer les options de sélection horaire départ (toutes les 30 min)
@@ -1957,6 +2440,9 @@ function initializeEventListeners() {
     
     // Bouton partage
     document.getElementById('btnShare')?.addEventListener('click', sharePageLink);
+    
+    // Bouton export PDF
+    document.getElementById('btnExportPDF')?.addEventListener('click', generatePDF);
 }
 
 function switchTab(tabId) {
@@ -2422,11 +2908,57 @@ function openActiviteModal(activite) {
         webLink.parentElement.style.display = 'none';
     }
     
+    // Calculer et afficher les temps de trajet
+    const travelTimesDiv = document.getElementById('modalActiviteTravelTimes');
+    
+    if (activite.latitude && activite.longitude && reservationData && reservationData.gite_latitude && reservationData.gite_longitude) {
+        try {
+            // Vérifier que les fonctions existent
+            if (typeof calculateDistance !== 'function' || typeof estimateTravel !== 'function' || typeof formatTravelTime !== 'function') {
+                console.warn('⚠️ Fonctions de calcul de trajet non disponibles');
+                travelTimesDiv.style.display = 'none';
+            } else {
+                // Calculer la distance
+                const distance = calculateDistance(
+                    parseFloat(reservationData.gite_latitude),
+                    parseFloat(reservationData.gite_longitude),
+                    parseFloat(activite.latitude),
+                    parseFloat(activite.longitude)
+                );
+                
+                console.log('📍 Distance calculée:', distance.toFixed(2), 'km');
+                
+                // Estimer les temps de trajet
+                const times = estimateTravel(distance);
+                
+                console.log('⏱️ Temps:', times);
+                
+                // Afficher les temps
+                document.getElementById('travelTimeCar').textContent = formatTravelTime(times.car);
+                document.getElementById('travelTimeBike').textContent = formatTravelTime(times.bike);
+                document.getElementById('travelTimeWalk').textContent = formatTravelTime(times.walk);
+                
+                travelTimesDiv.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('❌ Erreur calcul temps de trajet:', error);
+            travelTimesDiv.style.display = 'none';
+        }
+    } else {
+        console.warn('⚠️ Coordonnées manquantes pour calcul trajet');
+        travelTimesDiv.style.display = 'none';
+    }
+    
     document.getElementById('modalActiviteItineraire').onclick = () => {
         openItineraire(activite.latitude, activite.longitude);
     };
     
     modal.classList.add('active');
+    
+    // Réinitialiser les icônes Lucide
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 }
 
 // Ouvrir itinéraire Google Maps
@@ -2436,6 +2968,88 @@ function openItineraire(lat, lng) {
 }
 
 // Partage de page avec options multiples
+// ==================== EXPORT PDF ====================
+
+async function generatePDF() {
+    try {
+        // Afficher un loader
+        const btnPDF = document.getElementById('btnExportPDF');
+        const originalHTML = btnPDF.innerHTML;
+        btnPDF.innerHTML = `<i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i> ${t('generation_pdf')}`;
+        btnPDF.disabled = true;
+        
+        // Créer un clone de la page pour le PDF
+        const element = document.body.cloneNode(true);
+        
+        // Nettoyer les éléments inutiles pour le PDF
+        const toRemove = element.querySelectorAll(
+            '.bottom-nav, .language-switch, #btnShare, #btnExportPDF, .tab-navigation, script, .modal'
+        );
+        toRemove.forEach(el => el.remove());
+        
+        // Forcer tous les onglets à être visibles dans le PDF
+        element.querySelectorAll('.tab-content').forEach(tab => {
+            tab.style.display = 'block';
+            tab.classList.add('active');
+        });
+        
+        // Améliorer le style pour le PDF
+        const style = document.createElement('style');
+        style.textContent = `
+            @media print {
+                body { background: white; }
+                .card { page-break-inside: avoid; margin-bottom: 20px; }
+                header { background: linear-gradient(135deg, #68a84f 0%, #8fbd73 100%) !important; }
+            }
+        `;
+        element.appendChild(style);
+        
+        // Configuration PDF
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: `Fiche-Client-${reservationData.gite}-${reservationData.client_name}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2,
+                useCORS: true,
+                letterRendering: true,
+                scrollY: 0,
+                scrollX: 0
+            },
+            jsPDF: { 
+                unit: 'mm', 
+                format: 'a4', 
+                orientation: 'portrait',
+                compress: true
+            },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+        
+        // Générer le PDF
+        await html2pdf().set(opt).from(element).save();
+        
+        // Restaurer le bouton
+        btnPDF.innerHTML = originalHTML;
+        btnPDF.disabled = false;
+        lucide.createIcons();
+        
+    } catch (error) {
+        console.error('❌ Erreur génération PDF:', error);
+        alert(currentLanguage === 'fr' 
+            ? 'Erreur lors de la génération du PDF. Veuillez réessayer.' 
+            : 'Error generating PDF. Please try again.'
+        );
+        
+        // Restaurer le bouton en cas d'erreur
+        const btnPDF = document.getElementById('btnExportPDF');
+        btnPDF.innerHTML = `<i data-lucide="file-down"></i> ${t('export_pdf')}`;
+        btnPDF.disabled = false;
+        lucide.createIcons();
+    }
+}
+
+// ==================== PARTAGE ====================
+
 async function sharePageLink() {
     const url = window.location.href;
     const titre = `Fiche Client - ${reservationData.gite}`;
@@ -3311,12 +3925,45 @@ function initThemeSwitcher() {
             activeBtn.style.color = 'white';
         }
         
+        // Récupérer le hero section
+        const heroSection = document.getElementById('heroSection');
+        
+        // Éléments à styliser selon le thème
+        const codeDisplay = document.querySelector('.code-display');
+        const codeEntree = document.getElementById('codeEntree');
+        const clientNameEl = document.getElementById('clientName');
+        const btnShare = document.getElementById('btnShare');
+        
         // Appliquer le thème
         if (theme === 'cyan') {
             // Thème entreprise (Cyan moderne)
             root.style.setProperty('--primary', '#06b6d4');
             root.style.setProperty('--primary-dark', '#0891b2');
             header.style.background = 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)';
+            
+            // Hero section en bleu cyan
+            if (heroSection) {
+                heroSection.style.background = 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)';
+                heroSection.style.boxShadow = '0 10px 40px rgba(6, 182, 212, 0.3)';
+            }
+            
+            // Textes en blanc pour mode cyan
+            if (codeDisplay) {
+                codeDisplay.style.background = 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)';
+                codeDisplay.style.boxShadow = '0 4px 12px rgba(6, 182, 212, 0.2)';
+            }
+            if (codeEntree) codeEntree.style.color = 'white';
+            if (clientNameEl) {
+                clientNameEl.style.color = 'white';
+                clientNameEl.style.background = 'transparent';
+                clientNameEl.style.border = 'none';
+                clientNameEl.style.padding = '0';
+            }
+            if (btnShare) {
+                btnShare.style.background = 'rgba(255,255,255,0.2)';
+                btnShare.style.borderColor = 'rgba(255,255,255,0.3)';
+                btnShare.style.color = 'white';
+            }
             
             // Afficher logo LiveOwnerUnit
             if (logoLiveOwner) logoLiveOwner.style.display = 'block';
@@ -3328,6 +3975,32 @@ function initThemeSwitcher() {
             root.style.setProperty('--primary-dark', '#527f3c');
             header.style.background = 'linear-gradient(135deg, #68a84f 0%, #8fbd73 100%)';
             
+            // Hero section en vert Gîtes de France
+            if (heroSection) {
+                heroSection.style.background = 'linear-gradient(135deg, #68a84f 0%, #8fbd73 100%)';
+                heroSection.style.boxShadow = '0 10px 40px rgba(104, 168, 79, 0.3)';
+            }
+            
+            // Textes en vert Gîtes de France
+            if (codeDisplay) {
+                codeDisplay.style.background = 'linear-gradient(135deg, #68a84f 0%, #8fbd73 100%)';
+                codeDisplay.style.boxShadow = '0 4px 12px rgba(104, 168, 79, 0.2)';
+            }
+            if (codeEntree) codeEntree.style.color = 'white';
+            if (clientNameEl) {
+                clientNameEl.style.color = 'white';
+                clientNameEl.style.background = 'linear-gradient(135deg, #527f3c 0%, #68a84f 100%)';
+                clientNameEl.style.border = '2px solid #8fbd73';
+                clientNameEl.style.padding = '0.5rem 1rem';
+                clientNameEl.style.borderRadius = '0.75rem';
+                clientNameEl.style.display = 'inline-block';
+            }
+            if (btnShare) {
+                btnShare.style.background = 'rgba(104, 168, 79, 0.2)';
+                btnShare.style.borderColor = '#68a84f';
+                btnShare.style.color = '#68a84f';
+            }
+            
             // Afficher logo Gîtes de France
             if (logoLiveOwner) logoLiveOwner.style.display = 'none';
             if (logoGites) logoGites.style.display = 'block';
@@ -3336,6 +4009,11 @@ function initThemeSwitcher() {
         
         // Sauvegarder le choix
         localStorage.setItem('ficheClientTheme', theme);
+        
+        // 📸 Réappliquer la photo de couverture après changement de thème
+        if (typeof displayGitePhotos === 'function') {
+            displayGitePhotos();
+        }
     }
     
     // Écouter les changements de thème

@@ -757,6 +757,11 @@ async function editGiteInfo(gite) {
         
         openModal('modalEditGite');
         
+        // Charger les photos du gîte
+        if (typeof window.loadGitePhotos === 'function') {
+            await window.loadGitePhotos(gite);
+        }
+        
     } catch (error) {
         console.error('Erreur:', error);
         showNotification('❌ Erreur de chargement', 'error');

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion Clients - Channel Manager</title>
-    <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/admin-dashboard.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -398,15 +397,9 @@
     <header class="admin-header">
         <div class="header-left">
             <h1>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="users" aria-hidden="true" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                <i data-lucide="users"></i>
                 Gestion Clients
             </h1>
-        </div>
-        <div class="header-right">
-            <button class="btn-primary" onclick="openCreateModal()">
-                <i data-lucide="plus"></i>
-                Nouvelle Campagne
-            </button>
         </div>
     </header>
 
@@ -414,7 +407,7 @@
     <section class="tabs-navigation">
         <div class="tabs-sidebar">
             <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
-            <button class="tab-btn" onclick="window.location.href='admin-channel-manager.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-channel-manager.html'">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </button>
@@ -422,35 +415,35 @@
                 <i data-lucide="users"></i>
                 <span>Clients</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-support.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-support.html'">
                 <i data-lucide="headphones"></i>
                 <span>Support</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-emails.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-emails.html?build=20260217-4'">
                 <i data-lucide="mail"></i>
                 <span>Messagerie</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-promotions.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-promotions.html'">
                 <i data-lucide="tag"></i>
                 <span>Promotions</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-parrainage.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-parrainage.html'">
                 <i data-lucide="gift"></i>
                 <span>Parrainage</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-finance.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-finance.html'">
                 <i data-lucide="bar-chart-2"></i>
                 <span>Finance & BI</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-content.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-content.html'">
                 <i data-lucide="pen-tool"></i>
                 <span>Content IA</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-communications.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-communications.html'">
                 <i data-lucide="megaphone"></i>
                 <span>Communications</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-monitoring.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-monitoring.html'">
                 <i data-lucide="activity"></i>
                 <span>Monitoring</span>
             </button>
@@ -472,7 +465,7 @@
                 </p>
             </div>
             <div class="page-header__actions">
-                <button onclick="window.location.href='admin-clients-ameliorations-demo.html'" class="btn btn--primary">
+                <button onclick="window.location.href='/pages/admin-clients-ameliorations-demo.html'" class="btn btn--primary">
                     <i data-lucide="zap"></i>
                     Voir les améliorations
                 </button>
@@ -615,5 +608,9 @@
     <script src="../js/shared-config.js"></script>
     <script src="../js/error-tracker.js"></script>
     <script src="../js/admin-clients.js"></script>
+    <script>
+        // Initialiser Lucide icons
+        lucide.createIcons();
+    </script>
 </body>
 </html>

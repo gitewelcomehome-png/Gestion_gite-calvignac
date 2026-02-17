@@ -26,6 +26,18 @@ class NotificationSystem {
         this.checkInterval = null;
         this.CHECK_FREQUENCY = 30000; // Vérifier toutes les 30 secondes
         this.userPreferences = null; // Préférences email de l'utilisateur
+        this.notificationButtonBound = false;
+    }
+
+    buildDefaultPreferences(email = '') {
+        return {
+            email_enabled: true,
+            email_address: email || '',
+            notify_demandes: true,
+            notify_reservations: true,
+            notify_taches: true,
+            email_frequency: 'immediate'
+        };
     }
 
     /**
@@ -52,6 +64,7 @@ class NotificationSystem {
             
             // Créer le badge de notification dans le header
             this.createNotificationBadge();
+            this.bindNotificationButtons();
             
         } catch (error) {
             console.error('⚠️ Erreur démarrage NotificationSystem (table notifications absente?):', error);
@@ -63,6 +76,24 @@ class NotificationSystem {
                 badge.textContent = '0';
             }
         }
+    }
+
+    bindNotificationButtons() {
+        const buttons = [
+            document.getElementById('notificationBtn'),
+            document.getElementById('notificationButton')
+        ].filter(Boolean);
+
+        buttons.forEach(btn => {
+            if (btn.dataset.notifBound === '1') return;
+
+            btn.addEventListener('click', (event) => {
+                event.preventDefault();
+                this.toggleNotificationPanel();
+            });
+
+            btn.dataset.notifBound = '1';
+        });
     }
 
     /**
@@ -96,7 +127,10 @@ class NotificationSystem {
     async loadUserPreferences() {
         try {
             const { data: { user } } = await window.supabaseClient.auth.getUser();
-            if (!user) return;
+            if (!user) {
+                this.userPreferences = this.buildDefaultPreferences('');
+                return;
+            }
 
             const { data, error } = await window.supabaseClient
                 .from('user_notification_preferences')
@@ -134,6 +168,12 @@ class NotificationSystem {
 
         } catch (error) {
             console.error('❌ Erreur chargement préférences:', error);
+            try {
+                const { data: { user } } = await window.supabaseClient.auth.getUser();
+                this.userPreferences = this.buildDefaultPreferences(user?.email || '');
+            } catch (_) {
+                this.userPreferences = this.buildDefaultPreferences('');
+            }
         }
     }
 
@@ -534,9 +574,16 @@ class NotificationSystem {
             return;
         }
 
-        // Vérifier si le badge existe déjà
+        // Si bouton statique déjà présent dans le DOM, l'utiliser
+        if (document.getElementById('notificationBtn')) {
+            this.createNotificationPanel();
+            return;
+        }
+
+        // Vérifier si le badge dynamique existe déjà
         if (document.getElementById('notificationButton')) {
-            return; // Badge déjà créé
+            this.createNotificationPanel();
+            return;
         }
 
         // Créer le bouton de notification
@@ -572,10 +619,21 @@ class NotificationSystem {
     /**
      * Ouvrir la configuration des notifications
      */
-    openNotificationSettings() {
+    async openNotificationSettings() {
         const modal = document.getElementById('notificationSettingsModal');
+        const container = document.getElementById('notificationSettingsContent');
+
         if (modal) {
             modal.style.display = 'flex';
+
+            if (container) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Chargement...</p>';
+            }
+
+            if (!this.userPreferences) {
+                await this.loadUserPreferences();
+            }
+
             this.renderNotificationSettings();
         }
     }
@@ -585,14 +643,30 @@ class NotificationSystem {
      */
     updateBadge() {
         const badge = document.getElementById('notificationBadge');
+        const mainBtn = document.getElementById('notificationBtn');
+        const dynamicBtn = document.getElementById('notificationButton');
         if (!badge) return;
 
         const count = this.getUnreadCount();
         if (count > 0) {
             badge.textContent = count > 99 ? '99+' : count;
             badge.style.display = 'flex';
+            if (mainBtn) {
+                mainBtn.classList.add('has-notifications');
+                mainBtn.style.display = 'flex';
+            }
+            if (dynamicBtn) {
+                dynamicBtn.classList.add('has-notifications');
+                dynamicBtn.style.display = 'flex';
+            }
         } else {
             badge.style.display = 'none';
+            if (mainBtn) {
+                mainBtn.classList.remove('has-notifications');
+            }
+            if (dynamicBtn) {
+                dynamicBtn.classList.remove('has-notifications');
+            }
         }
         
         // Mettre à jour le titre de l'onglet
@@ -650,7 +724,11 @@ class NotificationSystem {
      */
     renderNotificationSettings() {
         const container = document.getElementById('notificationSettingsContent');
-        if (!container || !this.userPreferences) return;
+        if (!container) return;
+
+        if (!this.userPreferences) {
+            this.userPreferences = this.buildDefaultPreferences('');
+        }
 
         container.innerHTML = `
             <div style="padding: 30px;">
@@ -788,10 +866,8 @@ class NotificationSystem {
         const isVisible = panel.style.display === 'block';
         
         if (isVisible) {
-            // ✅ FERMETURE : Marquer toutes comme lues et effacer le titre
+            // FERMETURE : ne pas valider automatiquement les notifications
             panel.style.display = 'none';
-            this.markAllAsRead();
-            this.updatePageTitle(0); // Enlever le compteur du titre
         } else {
             // OUVERTURE : Afficher le panel
             this.renderNotifications();
@@ -812,7 +888,7 @@ class NotificationSystem {
         }
 
         list.innerHTML = this.notifications.map(n => `
-            <div class="notification-item ${n.read ? 'read' : 'unread'}" onclick="window.notificationSystem.markAsRead(${n.id})">
+            <div class="notification-item ${n.read ? 'read' : 'unread'}" onclick="window.notificationSystem.handleNotificationClick(${n.id})">
                 <div class="notification-content">
                     <strong>${n.title}</strong>
                     <p>${n.message}</p>
@@ -823,6 +899,39 @@ class NotificationSystem {
                 </button>
             </div>
         `).join('');
+    }
+
+    handleNotificationClick(notifId) {
+        const notif = this.notifications.find(n => n.id === notifId);
+        if (!notif) return;
+
+        if (notif.type === 'reservation' && notif.data?.id) {
+            this.openReservationEditFromNotification(notif.data.id);
+        }
+    }
+
+    openReservationEditFromNotification(reservationId) {
+        try {
+            if (typeof window.switchTab === 'function') {
+                window.switchTab('reservations');
+            }
+
+            const startedAt = Date.now();
+            const maxWaitMs = 6000;
+            const interval = setInterval(() => {
+                if (typeof window.openEditModal === 'function') {
+                    clearInterval(interval);
+                    window.openEditModal(reservationId);
+                    return;
+                }
+
+                if (Date.now() - startedAt > maxWaitMs) {
+                    clearInterval(interval);
+                }
+            }, 200);
+        } catch (error) {
+            console.error('❌ Impossible d\'ouvrir la réservation depuis la notification:', error);
+        }
     }
 
     /**

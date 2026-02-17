@@ -484,7 +484,8 @@ body {
     left: 0;
     top: 80px; /* Hauteur du header */
     bottom: 0;
-    width: 250px;
+    width: 250px !important;
+    max-width: 250px !important;
     background: white;
     border-right: 1px solid var(--border-color);
     overflow-y: auto;
@@ -697,7 +698,8 @@ body {
 
     .tabs-navigation {
         position: static;
-        width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
         border-right: none;
         border-bottom: 1px solid var(--border-color);
         padding: 10px 0;

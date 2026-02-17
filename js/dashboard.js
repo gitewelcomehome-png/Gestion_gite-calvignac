@@ -202,6 +202,87 @@ function updateDashboardHeader() {
 // 🔔 ALERTES & NOTIFICATIONS
 // ==========================================
 
+function showDashboardReminderNotification(message) {
+    if (typeof showNotification === 'function') {
+        showNotification(message, 'warning');
+        return;
+    }
+
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+        max-width: 420px;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, 3500);
+}
+
+async function ensureReservationReminderTodo(sendReminderReservations) {
+    if (!sendReminderReservations || sendReminderReservations.length === 0) return;
+
+    const now = new Date();
+    const dateLabel = now.toLocaleDateString('fr-FR');
+    const title = `📄 Envoyer fiches clients J-3 (${dateLabel})`;
+
+    const { data: existingTodo, error: checkError } = await window.supabaseClient
+        .from('todos')
+        .select('id')
+        .eq('category', 'reservations')
+        .eq('title', title)
+        .eq('completed', false)
+        .maybeSingle();
+
+    if (checkError) {
+        console.error('❌ Erreur vérification tâche J-3:', checkError);
+        return;
+    }
+
+    if (existingTodo?.id) return;
+
+    const reservationsPreview = sendReminderReservations
+        .slice(0, 5)
+        .map(r => r.client_name || 'Client')
+        .join(', ');
+
+    const description = reservationsPreview
+        ? `${sendReminderReservations.length} fiche(s) à envoyer aujourd'hui. Clients: ${reservationsPreview}${sendReminderReservations.length > 5 ? ', ...' : ''}`
+        : `${sendReminderReservations.length} fiche(s) à envoyer aujourd'hui.`;
+
+    const { data: authData } = await window.supabaseClient.auth.getUser();
+    const ownerUserId = authData?.user?.id || null;
+
+    const { error: insertError } = await window.supabaseClient
+        .from('todos')
+        .insert({
+            owner_user_id: ownerUserId,
+            category: 'reservations',
+            title,
+            description,
+            completed: false,
+            status: 'in_progress',
+            created_at: new Date().toISOString()
+        });
+
+    if (insertError) {
+        console.error('❌ Erreur création tâche J-3:', insertError);
+    }
+}
+
 async function updateDashboardAlerts() {
     const alerts = [];
     
@@ -223,12 +304,13 @@ async function updateDashboardAlerts() {
     });
     
     if (sendReminderReservations.length > 0) {
-        alerts.push({
-            type: 'info',
-            icon: '📄',
-            message: `${sendReminderReservations.length} fiche(s) client à envoyer (J-3)`,
-            action: () => switchTab('dashboard')
-        });
+        const notificationKey = `${today.toISOString().split('T')[0]}-${sendReminderReservations.length}`;
+        if (window.__dashboardLastJ3NotificationKey !== notificationKey) {
+            showDashboardReminderNotification(`📄 ${sendReminderReservations.length} fiche(s) client à envoyer (J-3)`);
+            window.__dashboardLastJ3NotificationKey = notificationKey;
+        }
+
+        await ensureReservationReminderTodo(sendReminderReservations);
     }
     
     // Vérifier les ménages refusés
@@ -243,6 +325,22 @@ async function updateDashboardAlerts() {
             icon: '🧹',
             message: `${cleanings.length} ménage(s) refusé(s) nécessitent votre attention`,
             action: () => switchTab('menage')
+        });
+    }
+
+    // Vérifier les propositions de changement de date ménage (société)
+    const { data: propositionsMenage } = await window.supabaseClient
+        .from('cleaning_schedule')
+        .select('id')
+        .eq('status', 'pending_validation')
+        .eq('proposed_by', 'company');
+
+    if (propositionsMenage && propositionsMenage.length > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: '🧹',
+            message: `${propositionsMenage.length} proposition(s) de changement ménage en attente`,
+            action: () => switchTab('dashboard')
         });
     }
     
@@ -380,6 +478,29 @@ async function updateDashboardStats() {
 // 📅 RÉSERVATIONS DE LA SEMAINE
 // ==========================================
 
+// Récupérer le nombre de commandes prestations par réservation
+async function getCommandesPrestationsCount() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('commandes_prestations')
+            .select('reservation_id, id')
+            .neq('statut', 'cancelled');
+        
+        if (error) throw error;
+        
+        // Créer un objet avec le compteur par reservation_id
+        const countMap = {};
+        (data || []).forEach(cmd => {
+            countMap[cmd.reservation_id] = (countMap[cmd.reservation_id] || 0) + 1;
+        });
+        
+        return countMap;
+    } catch (err) {
+        console.error('❌ Erreur récupération commandes prestations:', err);
+        return {};
+    }
+}
+
 async function updateDashboardReservations() {
     // Récupérer les gîtes visibles selon l'abonnement
     const gitesVisibles = await window.gitesManager.getVisibleGites();
@@ -388,6 +509,9 @@ async function updateDashboardReservations() {
     // Récupérer les réservations des gîtes visibles uniquement
     const allReservations = await getAllReservations();
     const reservations = allReservations.filter(r => gitesVisiblesIds.includes(r.gite_id));
+    
+    // Récupérer les compteurs de commandes prestations
+    const commandesCountMap = await getCommandesPrestationsCount();
     
     // ✅ Charger le planning ménage dashboard en parallèle
     updateDashboardMenages().catch(err => console.error('Erreur planning ménage:', err));
@@ -538,6 +662,10 @@ async function updateDashboardReservations() {
         
         const platformInfo = getPlatformInfo(r.site);
         
+        // Vérifier si des commandes prestations existent
+        const commandesCount = commandesCountMap[r.id] || 0;
+        const hasPrestations = commandesCount > 0;
+        
         // Calculer jours avant arrivée
         const daysUntilArrival = Math.ceil((dateDebut - today) / (1000 * 60 * 60 * 24));
         const shouldSendReminder = daysUntilArrival === 3;
@@ -582,7 +710,10 @@ async function updateDashboardReservations() {
             // ========================================
             html += `
                 <div style="background: #ffffff; border: 2px solid ${giteColor}; padding: 8px; border-radius: 10px; box-shadow: 2px 2px 0 #2D3436; margin-bottom: 8px;">
-                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${r.nom}</div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px;">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">${r.nom}</div>
+                        ${hasPrestations ? `<button data-reservation-id="${r.id}" class="btn-voir-commande-prestations" style="background: #27AE60; color: white; border: 2px solid #2D3436; padding: 3px 8px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 700; box-shadow: 1px 1px 0 #2D3436; white-space: nowrap;">🛒 ${commandesCount}</button>` : ''}
+                    </div>
                     <div style="font-size: 0.7rem; color: #27AE60; margin-bottom: 3px; font-weight: 600;"><i data-lucide="arrow-down-to-line" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> ${formatDateFromObj(dateDebut).split(' ').slice(0,2).join(' ')} ${horaireArrivee}</div>
                     <div style="font-size: 0.7rem; color: #E74C3C; margin-bottom: 6px; font-weight: 600;">📤 ${formatDateFromObj(dateFin).split(' ').slice(0,2).join(' ')} ${horaireDepart}</div>
                     ${showFicheButton ? `<div style="display: flex; align-items: center; gap: 6px; justify-content: space-between;"><button onclick="aperçuFicheClient('${r.id}')" style="flex: 1; background: #74b9ff; color: white; border: 2px solid #2D3436; padding: 6px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: 600; box-shadow: 2px 2px 0 #2D3436;">📄 Fiche</button><div style="display: inline-block; padding: 3px 8px; background: ${platformInfo.color}; color: white; border-radius: 4px; font-size: 0.65rem; font-weight: 700; white-space: nowrap;">${platformInfo.name}</div></div>` : `<div style="display: inline-block; padding: 3px 8px; background: ${platformInfo.color}; color: white; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">${platformInfo.name}</div>`}
@@ -622,6 +753,12 @@ async function updateDashboardReservations() {
                         <span class="dashboard-reservation-payment" title="${r.paiement}">${paiementIcon}</span>
                     </div>
                     <div class="dashboard-reservation-actions" style="display: flex; align-items: center; gap: 6px;">
+                        ${hasPrestations ? `
+                        <button data-reservation-id="${r.id}" class="btn-voir-commande-prestations dashboard-reservation-btn" style="background: #27AE60; color: white; border: 2px solid var(--stroke); font-weight: 700; padding: 8px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.75rem; box-shadow: 2px 2px 0 var(--stroke); transition: transform 0.1s;">
+                            <svg style="width:18px;height:18px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            <span>${commandesCount}</span>
+                        </button>
+                        ` : ''}
                         ${showFicheButton ? `
                         <button onclick="aperçuFicheClient('${r.id}')" class="dashboard-reservation-btn dashboard-reservation-btn-primary">
                             <svg style="width:20px;height:20px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -667,6 +804,158 @@ async function updateDashboardReservations() {
     if (typeof lucide !== 'undefined') {
         setTimeout(() => lucide.createIcons(), 50);
     }
+    
+    // ✅ Event delegation pour les boutons de commandes prestations
+    const reservationsContainer = document.getElementById('dashboard-reservations');
+    if (reservationsContainer) {
+        // Supprimer l'ancien listener s'il existe
+        if (window.commandesPrestationsBtnClickHandler) {
+            reservationsContainer.removeEventListener('click', window.commandesPrestationsBtnClickHandler);
+        }
+        
+        // Ajouter le nouveau listener
+        window.commandesPrestationsBtnClickHandler = async (e) => {
+            const btn = e.target.closest('.btn-voir-commande-prestations');
+            if (btn) {
+                const reservationId = btn.getAttribute('data-reservation-id');
+                await voirCommandePrestations(reservationId);
+            }
+        };
+        reservationsContainer.addEventListener('click', window.commandesPrestationsBtnClickHandler);
+    }
+}
+
+// ==========================================
+// 🛒 MODAL DÉTAILS COMMANDES PRESTATIONS
+// ==========================================
+
+async function voirCommandePrestations(reservationId) {
+    try {
+        // Récupérer les commandes avec les lignes de commande
+        const { data: commandes, error } = await window.supabaseClient
+            .from('commandes_prestations')
+            .select(`
+                *,
+                lignes_commande_prestations(*)
+            `)
+            .eq('reservation_id', reservationId)
+            .neq('statut', 'cancelled')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!commandes || commandes.length === 0) {
+            showNotification('Aucune commande trouvée', 'error');
+            return;
+        }
+        
+        // Récupérer les infos de la réservation
+        const { data: reservation, error: resError } = await window.supabaseClient
+            .from('reservations')
+            .select('client_name, gite')
+            .eq('id', reservationId)
+            .single();
+        
+        if (resError) console.warn('⚠️ Erreur récupération réservation:', resError);
+        
+        // Construire le HTML du modal
+        let commandesHtml = '';
+        
+        commandes.forEach(commande => {
+            const dateCommande = new Date(commande.created_at).toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            const statutBadge = commande.statut === 'paid' 
+                ? '<span style="background: #27AE60; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">Payé</span>'
+                : '<span style="background: #F39C12; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">En attente</span>';
+            
+            let lignesHtml = '';
+            (commande.lignes_commande_prestations || []).forEach(ligne => {
+                lignesHtml += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text);">${ligne.nom_prestation}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Quantité: ${ligne.quantite} × ${parseFloat(ligne.prix_unitaire).toFixed(2)}€</div>
+                        </div>
+                        <div style="font-weight: 700; color: var(--text); font-size: 1.1rem;">${parseFloat(ligne.prix_total).toFixed(2)}€</div>
+                    </div>
+                `;
+            });
+            
+            commandesHtml += `
+                <div style="background: #f8f9fa; border: 2px solid var(--stroke); border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 2px 2px 0 var(--stroke);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div>
+                            <div style="font-weight: 700; color: var(--text); font-size: 1rem;">Commande #${commande.numero_commande || commande.id.slice(0, 8)}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">${dateCommande}</div>
+                        </div>
+                        ${statutBadge}
+                    </div>
+                    
+                    <div style="margin-bottom: 12px;">
+                        ${lignesHtml}
+                    </div>
+                    
+                    <div style="border-top: 2px solid var(--stroke); padding-top: 10px; margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="color: var(--text-secondary);">Sous-total prestations</span>
+                            <span style="font-weight: 600;">${parseFloat(commande.montant_prestations).toFixed(2)}€</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="color: var(--text-secondary);">Commission (5%)</span>
+                            <span style="font-weight: 600;">${parseFloat(commande.montant_commission).toFixed(2)}€</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--stroke);">
+                            <span style="font-weight: 700; font-size: 1.1rem;">Vous recevez</span>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: #27AE60;">${parseFloat(commande.montant_net_owner).toFixed(2)}€</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Créer et afficher le modal
+        const modal = document.createElement('div');
+        modal.id = 'modal-commande-prestations';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px;';
+        
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 15px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; border: 2px solid var(--stroke); box-shadow: 4px 4px 0 var(--stroke);">
+                <div style="position: sticky; top: 0; background: white; border-bottom: 2px solid var(--stroke); padding: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 15px 15px 0 0; z-index: 1;">
+                    <div>
+                        <h3 style="margin: 0; color: var(--text); font-size: 1.3rem;">🛒 Commandes Prestations</h3>
+                        ${reservation ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">${reservation.client_name} - ${reservation.gite}</div>` : ''}
+                    </div>
+                    <button id="btn-close-modal-commande" style="background: #E74C3C; color: white; border: 2px solid var(--stroke); width: 40px; height: 40px; border-radius: 10px; cursor: pointer; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0 var(--stroke); transition: transform 0.1s;">×</button>
+                </div>
+                <div style="padding: 20px;">
+                    ${commandesHtml}
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Event listeners avec pattern delegation
+        document.getElementById('btn-close-modal-commande').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+        
+    } catch (err) {
+        console.error('❌ Erreur affichage commandes prestations:', err);
+        showNotification('Erreur lors de l\'affichage des commandes', 'error');
+    }
 }
 
 // ========================================
@@ -681,6 +970,182 @@ function changeDashboardReservationsPage(direction) {
     
     // Recharger les réservations avec la nouvelle page
     updateDashboardReservations();
+}
+
+// ==========================================
+// 🛒 COMMANDES PRESTATIONS PAR PÉRIODE
+// ==========================================
+
+/**
+ * Récupérer les commandes prestations pour une période donnée avec les gîtes respectant l'ordre
+ */
+async function getCommandesPrestationsPeriod(startDate, endDate) {
+    try {
+        // Récupérer les gîtes visibles dans l'ordre défini
+        const gitesVisibles = await window.gitesManager.getVisibleGites();
+        
+        // Récupérer toutes les commandes de la période (non annulées)
+        const { data: commandes, error } = await window.supabaseClient
+            .from('commandes_prestations')
+            .select(`
+                *,
+                lignes_commande_prestations(*),
+                reservations!inner(gite, gite_id)
+            `)
+            .gte('created_at', startDate.toISOString())
+            .lte('created_at', endDate.toISOString())
+            .neq('statut', 'cancelled');
+        
+        if (error) throw error;
+        
+        // Organiser par gîte en respectant l'ordre de gitesVisibles
+        const dataByGite = {};
+        
+        gitesVisibles.forEach(gite => {
+            dataByGite[gite.id] = {
+                gite: gite,
+                commandes: [],
+                nombreTotal: 0,
+                prestations: [],
+                caTotal: 0
+            };
+        });
+        
+        // Remplir avec les commandes
+        (commandes || []).forEach(commande => {
+            const giteId = commande.gite_id;
+            
+            if (dataByGite[giteId]) {
+                dataByGite[giteId].commandes.push(commande);
+                dataByGite[giteId].nombreTotal += 1;
+                dataByGite[giteId].caTotal += parseFloat(commande.montant_prestations || 0);
+                
+                // Ajouter les prestations (lignes de commande)
+                (commande.lignes_commande_prestations || []).forEach(ligne => {
+                    const existing = dataByGite[giteId].prestations.find(p => p.nom === ligne.nom_prestation);
+                    if (existing) {
+                        existing.quantite += ligne.quantite;
+                        existing.total += parseFloat(ligne.prix_total || 0);
+                    } else {
+                        dataByGite[giteId].prestations.push({
+                            nom: ligne.nom_prestation,
+                            quantite: ligne.quantite,
+                            total: parseFloat(ligne.prix_total || 0)
+                        });
+                    }
+                });
+            }
+        });
+        
+        // Retourner dans l'ordre des gîtes
+        return gitesVisibles.map(gite => dataByGite[gite.id]).filter(data => data.nombreTotal > 0);
+        
+    } catch (err) {
+        console.error('❌ Erreur récupération commandes prestations:', err);
+        return [];
+    }
+}
+
+/**
+ * Afficher le tableau des commandes prestations
+ */
+async function displayCommandesPrestations(containerId, startDate, endDate, title) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    const data = await getCommandesPrestationsPeriod(startDate, endDate);
+    
+    if (data.length === 0) {
+        window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">Aucune commande pour cette période</p>');
+        return;
+    }
+    
+    // Calculer les totaux
+    let totalCommandes = 0;
+    let totalCA = 0;
+    
+    data.forEach(d => {
+        totalCommandes += d.nombreTotal;
+        totalCA += d.caTotal;
+    });
+    
+    // Construire le tableau
+    let html = `
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: var(--bg-secondary); border-bottom: 2px solid var(--stroke);">
+                        <th style="padding: 12px; text-align: left; font-weight: 700; color: var(--text);">Gîte</th>
+                        <th style="padding: 12px; text-align: center; font-weight: 700; color: var(--text);">Commandes</th>
+                        <th style="padding: 12px; text-align: left; font-weight: 700; color: var(--text);">Prestations</th>
+                        <th style="padding: 12px; text-align: right; font-weight: 700; color: var(--text);">CA Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    data.forEach(d => {
+        const prestationsText = d.prestations
+            .map(p => `${p.nom} (×${p.quantite})`)
+            .join(', ');
+        
+        html += `
+            <tr style="border-bottom: 1px solid var(--stroke);">
+                <td style="padding: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 10px; height: 10px; border-radius: 50%; background: ${d.gite.color};"></div>
+                        <strong>${d.gite.name}</strong>
+                    </div>
+                </td>
+                <td style="padding: 12px; text-align: center;">
+                    <span style="background: #3b82f6; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">${d.nombreTotal}</span>
+                </td>
+                <td style="padding: 12px; font-size: 0.85rem; color: var(--text-secondary);">
+                    ${prestationsText}
+                </td>
+                <td style="padding: 12px; text-align: right; font-weight: 700; color: #27AE60; font-size: 1rem;">
+                    ${d.caTotal.toFixed(2)}€
+                </td>
+            </tr>
+        `;
+    });
+    
+    // Ligne totale
+    html += `
+                </tbody>
+                <tfoot>
+                    <tr style="background: var(--bg-secondary); border-top: 2px solid var(--stroke); font-weight: 700;">
+                        <td style="padding: 12px;">TOTAL</td>
+                        <td style="padding: 12px; text-align: center; font-size: 1.1rem; color: #3b82f6;">${totalCommandes}</td>
+                        <td style="padding: 12px;"></td>
+                        <td style="padding: 12px; text-align: right; font-size: 1.1rem; color: #27AE60;">${totalCA.toFixed(2)}€</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    `;
+    
+    window.SecurityUtils.setInnerHTML(container, html);
+}
+
+/**
+ * Mettre à jour la section prestations du dashboard (uniquement semaine)
+ */
+async function updateDashboardPrestations() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Semaine en cours (lundi à dimanche)
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // Lundi
+    weekStart.setHours(0, 0, 0, 0);
+    
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6); // Dimanche
+    weekEnd.setHours(23, 59, 59, 999);
+    
+    // Afficher uniquement la semaine
+    await displayCommandesPrestations('dashboard-prestations-semaine', weekStart, weekEnd, 'Cette Semaine');
 }
 
 // ==========================================
@@ -780,9 +1245,10 @@ async function updateTodoList(category) {
     try {
         const { data: todos, error } = await window.supabaseClient
             .from('todos')
-            .select('id, title, description, category, completed, archived_at, gite_id, created_at, owner_user_id')
+            .select('id, title, description, category, completed, archived_at, gite_id, created_at, owner_user_id, status')
             .eq('completed', false)
             .eq('category', category)
+            .eq('status', 'in_progress')  // ✅ Afficher uniquement les tâches EN COURS
             .order('created_at', { ascending: true });
         
         if (error) {
@@ -837,7 +1303,7 @@ async function updateTodoList(category) {
     }
 }
 
-async function addTodoItem(category) {
+async function addTodoItem(category, initialStatus = 'in_progress') {
     // console.log('🎯 addTodoItem appelé pour:', category);
     
     // Supprimer ancien modal s'il existe
@@ -860,35 +1326,36 @@ async function addTodoItem(category) {
     const showGiteSelector = category === 'travaux';
     
     window.SecurityUtils.setInnerHTML(modal, `
-        <div style="background: var(--card); border-radius: 16px; padding: 25px; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;">
+        <div style="background: var(--bg-secondary); border-radius: 16px; padding: 25px; max-width: 500px; width: 100%; box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
                 <span style="font-size: 1.5rem;">📝</span>
-                <h2 style="margin: 0; font-size: 1.2rem; color: #2c3e50;">Nouvelle Tâche</h2>
+                <h2 style="margin: 0; font-size: 1.2rem; color: var(--text-primary);">Nouvelle Tâche</h2>
             </div>
             
             <form id="addTodoFormDynamic">
                 <input type="hidden" id="todoCategoryDynamic" value="${category}">
+                <input type="hidden" id="todoInitialStatusDynamic" value="${initialStatus}">
                 
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                         Titre <span style="color: #E74C3C;">*</span>
                     </label>
                     <input type="text" id="todoTitleDynamic" required 
                            placeholder="Ex: Réparer robinet"
-                           style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                           style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-primary); color: var(--text-primary);">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Description</label>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">Description</label>
                     <textarea id="todoDescriptionDynamic" rows="3" 
                               placeholder="Détails supplémentaires..."
-                              style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+                              style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; resize: vertical; background: var(--bg-primary); color: var(--text-primary);"></textarea>
                 </div>
                 
                 ${showGiteSelector ? `
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Gîte concerné</label>
-                    <select id="todoGiteDynamic" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">Gîte concerné</label>
+                    <select id="todoGiteDynamic" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-primary); color: var(--text-primary);">
                         <option value="">Non spécifié</option>
                         <option value="Trevoux">Trevoux</option>
                         <option value="Couzon">Couzon</option>
@@ -897,7 +1364,7 @@ async function addTodoItem(category) {
                 ` : ''}
                 
                 <div style="margin-bottom: 15px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary);">
                         <input type="checkbox" id="todoRecurrentDynamic" style="width: 18px; height: 18px; cursor: pointer;">
                         <span style="font-weight: 600;">🔁 Tâche récurrente</span>
                     </label>
@@ -905,8 +1372,8 @@ async function addTodoItem(category) {
                 
                 <div id="recurrentOptionsDynamic" style="display: none; margin-left: 26px; margin-bottom: 15px;">
                     <div style="margin-bottom: 10px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Fréquence</label>
-                        <select id="todoFrequencyDynamic" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">Fréquence</label>
+                        <select id="todoFrequencyDynamic" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-primary); color: var(--text-primary);">
                             <option value="weekly">Hebdomadaire</option>
                             <option value="biweekly">Bimensuelle (2 semaines)</option>
                             <option value="monthly">Mensuelle</option>
@@ -914,8 +1381,8 @@ async function addTodoItem(category) {
                     </div>
                     
                     <div id="weeklyOptionsDynamic" style="margin-bottom: 10px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Jour de la semaine</label>
-                        <select id="todoWeekdayDynamic" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">Jour de la semaine</label>
+                        <select id="todoWeekdayDynamic" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-primary); color: var(--text-primary);">
                             <option value="1">Lundi</option>
                             <option value="2">Mardi</option>
                             <option value="3">Mercredi</option>
@@ -927,9 +1394,9 @@ async function addTodoItem(category) {
                     </div>
                     
                     <div id="monthlyOptionsDynamic" style="display: none; margin-bottom: 10px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Jour du mois</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">Jour du mois</label>
                         <input type="number" id="todoDayOfMonthDynamic" min="1" max="31" value="1" 
-                               style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                               style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-primary); color: var(--text-primary);">
                     </div>
                 </div>
                 
@@ -1004,12 +1471,15 @@ async function addTodoItem(category) {
         // Récupérer l'user ID (API Supabase v2)
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         
+        const initialStatus = document.getElementById('todoInitialStatusDynamic').value || 'in_progress';
+        
         const todoData = {
             owner_user_id: user?.id,
             category: category,
             title: title,
             description: description || null,
             completed: false,
+            status: initialStatus, // 'in_progress' depuis Dashboard, 'todo' depuis Kanban
             created_at: new Date().toISOString()
         };
         
@@ -1056,6 +1526,11 @@ async function addTodoItem(category) {
         
         // Rafraîchir la liste
         await updateTodoList(category);
+        
+        // Rafraîchir aussi le Kanban si disponible
+        if (typeof window.refreshKanban === 'function') {
+            await window.refreshKanban();
+        }
     });
 }
 
@@ -1210,6 +1685,12 @@ async function toggleTodo(id, completed) {
     }
     
     await updateTodoLists();
+    
+    // Rafraîchir aussi le Kanban si disponible
+    if (typeof window.refreshKanban === 'function') {
+        await window.refreshKanban();
+    }
+    
     await updateDashboardStats();
 }
 
@@ -1228,6 +1709,12 @@ async function deleteTodo(id) {
     
     // Recharger toutes les listes
     await updateTodoLists();
+    
+    // Rafraîchir aussi le Kanban si disponible
+    if (typeof window.refreshKanban === 'function') {
+        await window.refreshKanban();
+    }
+    
     await updateDashboardStats();
 }
 
@@ -1343,6 +1830,12 @@ async function editTodo(id) {
         showToast('✓ Tâche modifiée', 'success');
         closeAddTodoModal();
         await updateTodoList(todo.category);
+        
+        // Rafraîchir aussi le Kanban si disponible
+        if (typeof window.refreshKanban === 'function') {
+            await window.refreshKanban();
+        }
+        
         await updateDashboardStats();
     };
     
@@ -2206,9 +2699,11 @@ async function refreshDashboard() {
     updateDashboardHeader();
     await updateDashboardAlerts();
     await updateDemandesClients();
+    await updatePropositionsMenage();
     await updateProblemesClients();
     await updateDashboardStats();
     await updateDashboardReservations();
+    await updateDashboardPrestations(); // 🛒 Commandes prestations
     await updateDashboardMenages();
     await updateTodoLists();
     await updateFinancialIndicators();
@@ -2280,7 +2775,7 @@ function initializeReponseWhatsappModal() {
 
 async function updatePropositionsMenage() {
     try {
-        // Charger les ménages avec status = 'pending_validation'
+        // Charger uniquement les propositions de la société de ménage
         const { data: propositions, error } = await supabaseClient
             .from('cleaning_schedule')
             .select(`
@@ -2294,6 +2789,7 @@ async function updatePropositionsMenage() {
                 )
             `)
             .eq('status', 'pending_validation')
+            .eq('proposed_by', 'company')
             .order('scheduled_date', { ascending: true });
         
         if (error) {
@@ -2301,9 +2797,9 @@ async function updatePropositionsMenage() {
             throw error;
         }
         
-        const container = document.getElementById('liste-demandes-clients');
-        const badge = document.getElementById('badge-demandes-count');
-        const card = document.getElementById('dashboard-demandes-clients');
+        const container = document.getElementById('liste-propositions-menage');
+        const badge = document.getElementById('badge-propositions-menage-count');
+        const card = document.getElementById('dashboard-propositions-menage');
         
         if (!container || !badge || !card) return;
         
@@ -2401,9 +2897,9 @@ async function updatePropositionsMenage() {
     } catch (err) {
         console.error('❌ [DEBUG] Erreur dans updatePropositionsMenage:', err);
         
-        const container = document.getElementById('liste-demandes-clients');
-        const card = document.getElementById('dashboard-demandes-clients');
-        const badge = document.getElementById('badge-demandes-count');
+        const container = document.getElementById('liste-propositions-menage');
+        const card = document.getElementById('dashboard-propositions-menage');
+        const badge = document.getElementById('badge-propositions-menage-count');
         
         if (container && card && badge) {
             card.style.display = 'block';
@@ -2419,7 +2915,7 @@ async function updatePropositionsMenage() {
 
 // Event delegation pour les propositions de changement de date ménage
 function attachPropositionsMenageEventListeners() {
-    const container = document.getElementById('liste-demandes-clients');
+    const container = document.getElementById('liste-propositions-menage');
     if (!container) return;
     
     container.removeEventListener('click', handlePropositionsMenageClick);

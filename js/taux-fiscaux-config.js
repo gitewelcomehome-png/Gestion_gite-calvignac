@@ -20,6 +20,7 @@ const TAUX_FISCAUX = {
         2024: {
             // PASS (Plafond Annuel Sécurité Sociale)
             PASS: 46368,
+            SMIC_HORAIRE: 11.65,
             
             // COTISATIONS URSSAF (LMP/TNS au réel)
             URSSAF: {
@@ -161,6 +162,7 @@ const TAUX_FISCAUX = {
         2025: {
             // PASS 2025 (identique 2024)
             PASS: 46368,
+            SMIC_HORAIRE: 11.88,
             
             // COTISATIONS URSSAF 2025 (identiques 2024 - vérifier février 2025)
             URSSAF: {
@@ -280,6 +282,12 @@ const TAUX_FISCAUX = {
                     { max: Infinity, formule: (d) => d * 0.484 }
                 ]
             }
+        },
+
+        2026: {
+            // PASS 2026 (provisoire, aligné 2025)
+            PASS: 46368,
+            SMIC_HORAIRE: 11.88 // à mettre à jour selon revalorisation janvier 2026
         }
     },
     
@@ -291,7 +299,51 @@ const TAUX_FISCAUX = {
      * Récupérer la configuration pour une année donnée
      */
     getConfig: function(annee) {
-        return this.TAUX_ANNEES[annee] || this.TAUX_ANNEES[2024];
+        const base2024 = this.TAUX_ANNEES[2024] || {};
+        const base2025 = this.TAUX_ANNEES[2025] || base2024;
+        const yearConfig = this.TAUX_ANNEES[annee];
+
+        const buildConfig = (baseConfig, overrideConfig = {}) => ({
+            ...baseConfig,
+            ...overrideConfig,
+            URSSAF: {
+                ...(baseConfig.URSSAF || {}),
+                ...(overrideConfig.URSSAF || {})
+            },
+            COTISATIONS_MINIMALES: {
+                ...(baseConfig.COTISATIONS_MINIMALES || {}),
+                ...(overrideConfig.COTISATIONS_MINIMALES || {})
+            },
+            MICRO_BIC: {
+                ...(baseConfig.MICRO_BIC || {}),
+                ...(overrideConfig.MICRO_BIC || {})
+            },
+            RETRAITE: {
+                ...(baseConfig.RETRAITE || {}),
+                ...(overrideConfig.RETRAITE || {})
+            },
+            ABATTEMENT_SALAIRE: {
+                ...(baseConfig.ABATTEMENT_SALAIRE || {}),
+                ...(overrideConfig.ABATTEMENT_SALAIRE || {})
+            },
+            BAREME_IR: overrideConfig.BAREME_IR || baseConfig.BAREME_IR,
+            BAREME_KM: overrideConfig.BAREME_KM || baseConfig.BAREME_KM
+        });
+
+        let config;
+        if (yearConfig) {
+            const base = annee === 2026 ? base2025 : base2024;
+            config = buildConfig(base, yearConfig);
+        } else if (annee === 2026) {
+            config = buildConfig(base2025, this.TAUX_ANNEES[2026] || {});
+        } else {
+            config = buildConfig(base2024, {});
+        }
+
+        if (!config.PASS) config.PASS = 46368;
+        if (!config.SMIC_HORAIRE) config.SMIC_HORAIRE = config.RETRAITE?.smic_horaire || 11.88;
+
+        return config;
     },
     
     /**
@@ -344,8 +396,9 @@ const TAUX_FISCAUX = {
             details.allocations_familiales = 0;
         }
         
-        // Formation professionnelle (sur CA)
-        details.formation_pro = ca * urssaf.formation_pro.taux;
+        // Formation professionnelle (CFP = 0,25% du PASS)
+        const PASS = config.PASS || 46368;
+        details.formation_pro = PASS * urssaf.formation_pro.taux;
         total += details.formation_pro;
         
         // Appliquer minimum si applicable

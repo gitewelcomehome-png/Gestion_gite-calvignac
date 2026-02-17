@@ -84,8 +84,8 @@ async function genererHTMLBesoins() {
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) return;
         
-        // Charger les gîtes visibles selon l'abonnement
-        const gitesVisibles = await window.gitesManager.getVisibleGites();
+        // Charger TOUS les gîtes (pas de limitation d'abonnement pour draps)
+        const gitesVisibles = await window.gitesManager.getAll();
         
         // Charger tous les besoins depuis la table linen_needs
         const { data: besoins, error } = await window.supabaseClient
@@ -158,8 +158,8 @@ async function genererHTMLStocks() {
     const container = document.getElementById('stocks-container');
     if (!container) return;
     
-    // Charger les gîtes visibles selon l'abonnement
-    const gitesVisibles = await window.gitesManager.getVisibleGites();
+    // Charger TOUS les gîtes (pas de limitation d'abonnement pour draps)
+    const gitesVisibles = await window.gitesManager.getAll();
     
     const colors = [
         '#667eea', '#f5576c', '#27AE60', '#3498DB', '#E67E22', '#9B59B6'
@@ -789,8 +789,8 @@ function afficherModalDecrementationStock(modifications) {
 }
 
 async function initDraps() {
-    // Charger les gîtes
-    gites = await window.gitesManager.getVisibleGites();
+    // Charger TOUS les gîtes (pas de limitation d'abonnement pour draps)
+    gites = await window.gitesManager.getAll();
     
     // Initialiser les besoins standards si nécessaire
     await initialiserBesoinsStandards();
@@ -798,8 +798,8 @@ async function initDraps() {
     // Générer le HTML dynamiquement
     await genererHTMLBesoins();
     
-    // Initialiser stocksActuels pour chaque gîte visible
-    const gitesVisiblesInit = await window.gitesManager.getVisibleGites();
+    // Initialiser stocksActuels pour tous les gîtes
+    const gitesVisiblesInit = await window.gitesManager.getAll();
     gitesVisiblesInit.forEach(g => {
         stocksActuels[g.id] = {};
     });
@@ -843,9 +843,17 @@ window.initDraps = initDraps;
 
 async function chargerStocks() {
     try {
-        // Récupérer l'utilisateur connecté
+        // Sécurité: si pas de client Supabase ou pas d'utilisateur, on sort sans casser l'affichage
+        if (!window.supabaseClient || !window.supabaseClient.auth) {
+            console.warn('[stocks] Supabase non initialisé, chargement ignoré');
+            return;
+        }
+
         const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) throw new Error('Utilisateur non connecté');
+        if (!user) {
+            console.warn('[stocks] Utilisateur non connecté, chargement ignoré');
+            return;
+        }
 
         // Charger les stocks dynamiques avec filtre RLS
         const { data, error } = await window.supabaseClient
@@ -869,8 +877,8 @@ async function chargerStocks() {
             stocksActuels[item.gite_id][item.item_key] = item.quantity || 0;
         });
 
-        // Charger les gîtes visibles selon l'abonnement
-        const gitesVisibles = await window.gitesManager.getVisibleGites();
+        // Charger TOUS les gîtes (pas de limitation d'abonnement pour draps)
+        const gitesVisibles = await window.gitesManager.getAll();
 
         // Remplir les champs selon les besoins configurés
         gitesVisibles.forEach(gite => {
@@ -887,7 +895,7 @@ async function chargerStocks() {
         // Ignorer les erreurs de fetch initial (Supabase pas encore prêt)
         if (!error.message?.includes('Failed to fetch')) {
             console.error('Erreur chargement stocks:', error);
-            alert(`❌ Erreur lors du chargement des stocks: ${error.message}`);
+            // Ne pas alerter en prod pour éviter de casser l'UX
         }
     }
 }
@@ -898,12 +906,19 @@ async function chargerStocks() {
 
 async function sauvegarderStocks() {
     try {
-        // Récupérer l'utilisateur connecté
-        const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) throw new Error('Utilisateur non connecté');
+        if (!window.supabaseClient || !window.supabaseClient.auth) {
+            console.warn('[stocks] Supabase non initialisé, sauvegarde ignorée');
+            return;
+        }
 
-        // Charger les gîtes visibles selon l'abonnement
-        const gitesVisibles = await window.gitesManager.getVisibleGites();
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) {
+            console.warn('[stocks] Utilisateur non connecté, sauvegarde ignorée');
+            return;
+        }
+
+        // Charger TOUS les gîtes (pas de limitation d'abonnement pour draps)
+        const gitesVisibles = await window.gitesManager.getAll();
 
         for (const gite of gitesVisibles) {
             const slug = gite.slug;
@@ -966,8 +981,8 @@ async function analyserReservations() {
             throw new Error(`Erreur analyse réservations: ${error.message}`);
         }
 
-        // Charger les gîtes visibles selon l'abonnement
-        const gitesVisibles = await window.gitesManager.getVisibleGites();
+        // Charger TOUS les gîtes (pas de limitation d'abonnement pour draps)
+        const gitesVisibles = await window.gitesManager.getAll();
 
         // Grouper par gîte
         const resaParGite = {};
@@ -1108,7 +1123,7 @@ function calculerAEmmener(resaParGite, infosCouverture, gitesVisibles) {
 // NOUVEAU CALCUL : CE QU'IL FAUT EMMENER (MANQUE RÉEL)
 // ================================================================
 
-let giteSelectionne = null;
+let giteSelectionneDraps = null;
 
 async function initialiserSelectGites() {
     const container = document.getElementById('boutons-gites-emmener');
@@ -1116,8 +1131,8 @@ async function initialiserSelectGites() {
     
     container.innerHTML = '';
     
-    // Récupérer les gîtes visibles selon l'abonnement
-    const gitesVisibles = await window.gitesManager.getVisibleGites();
+    // Récupérer TOUS les gîtes (pas de limitation d'abonnement)
+    const gitesVisibles = await window.gitesManager.getAll();
     
     const colors = [
         '#667eea', '#f5576c', '#27AE60', '#3498DB', '#E67E22', '#9B59B6'
@@ -1152,7 +1167,7 @@ async function initialiserSelectGites() {
             // Sélectionner ce bouton
             btn.style.background = color;
             btn.style.color = 'white';
-            giteSelectionne = gite.id;
+            giteSelectionneDraps = gite.id;
             
             // Calculer automatiquement
             calculerManquePourGite();
@@ -1170,7 +1185,7 @@ async function initialiserSelectGites() {
         
         // Recalculer si on change la date et qu'un gîte est sélectionné
         dateInput.addEventListener('change', function() {
-            if (giteSelectionne) {
+            if (giteSelectionneDraps) {
                 calculerManquePourGite();
             }
         });
@@ -1183,7 +1198,7 @@ async function calculerManquePourGite() {
     
     if (!dateInput || !container) return;
     
-    const giteId = giteSelectionne;
+    const giteId = giteSelectionneDraps;
     const dateLimite = dateInput.value;
     
     if (!giteId) {
@@ -1485,8 +1500,8 @@ async function simulerBesoins() {
         
         // console.log('✅ Réservations récupérées:', reservations?.length);
 
-        // Charger les gîtes visibles selon l'abonnement
-        const gitesVisibles = await window.gitesManager.getVisibleGites();
+        // Charger TOUS les gîtes (pas de limitation d'abonnement pour draps)
+        const gitesVisibles = await window.gitesManager.getAll();
 
         // Grouper par gîte (UUID)
         const resaParGite = {};
@@ -1617,8 +1632,8 @@ async function afficherAEmmenerDepuisSimulation() {
     const container = document.getElementById('a-emmener');
     let html = '';
 
-    // Charger les gîtes visibles selon l'abonnement
-    const gitesVisibles = await window.gitesManager.getVisibleGites();
+    // Charger TOUS les gîtes (pas de limitation d'abonnement pour draps)
+    const gitesVisibles = await window.gitesManager.getAll();
 
     for (const gite of gitesVisibles) {
         const resas = resaParGite[gite.id] || [];

@@ -164,6 +164,51 @@ function calculerDateMenage(reservation, toutesReservations) {
     };
 }
 
+function toYmdLocal(date) {
+    if (!(date instanceof Date)) return null;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function getAllowedCleaningDates(reservation, reservations) {
+    const departureDate = parseLocalDate(reservation.dateFin || reservation.date_fin);
+    departureDate.setHours(0, 0, 0, 0);
+
+    const nextReservation = reservations
+        .filter(next => next.gite_id === reservation.gite_id && next.id !== reservation.id)
+        .map(next => ({ ...next, _startDate: parseLocalDate(next.dateDebut || next.date_debut) }))
+        .filter(next => next._startDate >= departureDate)
+        .sort((a, b) => a._startDate - b._startDate)[0];
+
+    const limitDate = nextReservation ? nextReservation._startDate : departureDate;
+    const allowedDates = [];
+    const morningOnlyDates = [];
+    const cursor = new Date(departureDate);
+    const departureDateYmd = toYmdLocal(departureDate);
+    const nextArrivalDateYmd = nextReservation ? toYmdLocal(limitDate) : null;
+
+    while (cursor <= limitDate) {
+        const dateYmd = toYmdLocal(cursor);
+        allowedDates.push(dateYmd);
+
+        if (dateYmd === departureDateYmd || (nextArrivalDateYmd && dateYmd === nextArrivalDateYmd)) {
+            morningOnlyDates.push(dateYmd);
+        }
+
+        if (!nextReservation) {
+            break;
+        }
+
+        cursor.setDate(cursor.getDate() + 1);
+    }
+
+    return {
+        departureDate: departureDateYmd,
+        nextArrivalDate: nextArrivalDateYmd,
+        allowedDates,
+        morningOnlyDates
+    };
+}
+
 /**
  * Vérifie si une date est un jour férié français
  * @param {Date} date - Date à vérifier
@@ -290,21 +335,25 @@ async function genererPlanningMenage() {
         return;
     }
     
-    // Sauvegarder les dates calculées dans cleaning_schedule (uniquement si inexistant ou pending)
+    // Mettre à jour uniquement les enregistrements existants en pending (évite les POST upsert bloqués par RLS)
     for (const p of planning) {
         const reservation = relevant.find(r => r.nom === p.clientName && r.gite_id === p.gite_id);
         if (!reservation) continue;
         
         try {
             // Vérifier si l'enregistrement existe déjà
-            const { data: existing } = await window.supabaseClient
+            const { data: existing, error: existingError } = await window.supabaseClient
                 .from('cleaning_schedule')
                 .select('status, validated_by_company')
                 .eq('reservation_id', reservation.id)
-                .single();
+                .maybeSingle();
+
+            if (existingError) {
+                continue;
+            }
             
-            // Ne mettre à jour que si inexistant ou statut 'pending' (ne pas écraser les validations/propositions)
-            if (!existing || existing.status === 'pending') {
+            // Ne mettre à jour que si déjà existant et statut pending (ne pas écraser les validations/propositions)
+            if (existing && existing.status === 'pending') {
                 const timeOfDay = p.heure.startsWith('07') || p.heure.startsWith('08') ? 'morning' : 'afternoon';
                 
                 // Chercher la prochaine réservation
@@ -314,20 +363,20 @@ async function genererPlanningMenage() {
                 
                 await window.supabaseClient
                     .from('cleaning_schedule')
-                    .upsert({
-                        reservation_id: reservation.id,
+                    .update({
                         owner_user_id: user.id,
-                        gite: p.gite,
+                        gite: reservation.gite,
                         scheduled_date: p.date.toISOString().split('T')[0],
                         time_of_day: timeOfDay,
                         status: 'pending',
                         validated_by_company: false,
                         reservation_end: p.departDate.toISOString().split('T')[0],
                         reservation_start_after: nextRes ? parseLocalDate(nextRes.dateDebut).toISOString().split('T')[0] : null
-                    }, { onConflict: 'reservation_id' });
+                    })
+                    .eq('reservation_id', reservation.id);
             }
         } catch (error) {
-            console.error('Erreur sauvegarde cleaning_schedule:', error);
+            // Échec silencieux: ne pas bloquer l'affichage du planning
         }
     }
     
@@ -471,8 +520,8 @@ async function afficherPlanningParSemaine() {
             };
         }
         
-        // Sauvegarder si pas encore fait ou si status pending
-        if (!validation || validation.status === 'pending') {
+        // Mettre à jour uniquement les enregistrements existants en pending (évite les POST upsert bloqués par RLS)
+        if (validation && validation.status === 'pending') {
             const nextRes = reservations
                 .filter(next => next.gite === r.gite && parseLocalDate(next.dateFin) > dateFin)
                 .sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut))[0];
@@ -487,23 +536,27 @@ async function afficherPlanningParSemaine() {
                     nextResDateStr = `${nextResDate.getFullYear()}-${String(nextResDate.getMonth() + 1).padStart(2, '0')}-${String(nextResDate.getDate()).padStart(2, '0')}`;
                 }
                 
-                await window.supabaseClient.from('cleaning_schedule').upsert({
-                    owner_user_id: user.id,
-                    reservation_id: r.id,
-                    gite: r.gite,
-                    gite_id: r.gite_id,
-                    scheduled_date: scheduledDateStr,
-                    time_of_day: calculatedTimeOfDay,
-                    status: 'pending',
-                    validated_by_company: false,
-                    reservation_end: reservationEndStr,
-                    reservation_start_after: nextResDateStr
-                }, { onConflict: 'reservation_id' });
+                await window.supabaseClient
+                    .from('cleaning_schedule')
+                    .update({
+                        owner_user_id: user.id,
+                        gite: r.gite,
+                        gite_id: r.gite_id,
+                        scheduled_date: scheduledDateStr,
+                        time_of_day: calculatedTimeOfDay,
+                        status: 'pending',
+                        validated_by_company: false,
+                        reservation_end: reservationEndStr,
+                        reservation_start_after: nextResDateStr
+                    })
+                    .eq('reservation_id', r.id);
             } catch (err) {
-                console.error('Erreur upsert:', err);
+                // Échec silencieux: ne pas bloquer l'affichage du planning
             }
         }
         
+        const dateWindow = getAllowedCleaningDates(r, reservations);
+
         const menageInfo = {
             reservation: r,
             dateMenage: dateMenage,
@@ -513,7 +566,9 @@ async function afficherPlanningParSemaine() {
             timeOfDay: validation ? validation.time_of_day : calculatedTimeOfDay,
             proposedBy: validation ? validation.proposed_by : null,
             reservationEndBefore: dateFin,
-            reservationStartAfter: null // À calculer
+            reservationStartAfter: null, // À calculer
+            allowedDates: dateWindow.allowedDates,
+            morningOnlyDates: dateWindow.morningOnlyDates
         };
         
         // Debug log pour vérifier les données
@@ -650,7 +705,7 @@ async function afficherPlanningParSemaine() {
  * @returns {string} - HTML de la card
  */
 function generateMenageCardHTML(menageInfo) {
-    const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay, proposedBy } = menageInfo;
+    const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay, proposedBy, allowedDates, morningOnlyDates } = menageInfo;
     const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
     
     // Statut
@@ -678,6 +733,21 @@ function generateMenageCardHTML(menageInfo) {
     });
     
     const savedTime = timeOfDay || localStorage.getItem(`cleaning_time_${reservation.id}`) || 'afternoon';
+    const displayDateYmd = toYmdLocal(displayDate);
+    const selectableDates = Array.isArray(allowedDates) ? allowedDates : [];
+    const morningOnlyDateValues = Array.isArray(morningOnlyDates) ? morningOnlyDates : [];
+    const selectedDateValue = selectableDates.includes(displayDateYmd)
+        ? displayDateYmd
+        : (selectableDates[0] || displayDateYmd);
+    const minDateValue = selectableDates.length > 0 ? selectableDates[0] : selectedDateValue;
+    const maxDateValue = selectableDates.length > 0 ? selectableDates[selectableDates.length - 1] : selectedDateValue;
+    const initialMorningOnly = morningOnlyDateValues.includes(selectedDateValue);
+    const timeOptionsHtml = initialMorningOnly
+        ? '<option value="morning" selected>Matin</option>'
+        : `
+            <option value="morning" ${savedTime === 'morning' ? 'selected' : ''}>Matin</option>
+            <option value="afternoon" ${savedTime === 'afternoon' ? 'selected' : ''}>AM</option>
+        `;
     const timeDisplay = savedTime === 'morning' 
         ? '<svg style="width:16px;height:16px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Matin (avant 12h)'
         : '<svg style="width:16px;height:16px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> Après-midi (après 12h)';
@@ -732,10 +802,9 @@ function generateMenageCardHTML(menageInfo) {
             ` : `
                 <div class="menage-edit-form">
                     <div class="menage-edit-inputs">
-                        <input type="date" id="date-${reservation.id}" value="${displayDate.toISOString().split('T')[0]}" class="menage-input-date">
+                        <input type="date" id="date-${reservation.id}" value="${selectedDateValue}" min="${minDateValue}" max="${maxDateValue}" class="menage-input-date" data-allowed-dates="${selectableDates.join(',')}" data-morning-only-dates="${morningOnlyDateValues.join(',')}" onchange="onMenageDateChanged('${reservation.id}')">
                         <select id="time-${reservation.id}" class="menage-input-time">
-                            <option value="morning" ${savedTime === 'morning' ? 'selected' : ''}>Matin</option>
-                            <option value="afternoon" ${savedTime === 'afternoon' ? 'selected' : ''}>AM</option>
+                            ${timeOptionsHtml}
                         </select>
                         <button onclick="modifierDateMenage('${reservation.id}')" class="menage-btn-save"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
                     </div>
@@ -750,6 +819,46 @@ function generateMenageCardHTML(menageInfo) {
  */
 function generateCleaningItemHTML(menageInfo) {
     return generateMenageCardHTML(menageInfo);
+}
+
+function onMenageDateChanged(reservationId) {
+    const dateInput = document.getElementById(`date-${reservationId}`);
+    const timeSelect = document.getElementById(`time-${reservationId}`);
+    if (!dateInput || !timeSelect) return;
+
+    const allowedDates = (dateInput.dataset.allowedDates || '')
+        .split(',')
+        .map(d => d.trim())
+        .filter(Boolean);
+    const morningOnlyDates = (dateInput.dataset.morningOnlyDates || '')
+        .split(',')
+        .map(d => d.trim())
+        .filter(Boolean);
+
+    const selectedDate = dateInput.value;
+    if (!allowedDates.includes(selectedDate)) {
+        dateInput.value = allowedDates[0] || selectedDate;
+    }
+
+    const currentValue = timeSelect.value;
+    const effectiveDate = dateInput.value;
+    const isMorningOnly = morningOnlyDates.includes(effectiveDate);
+
+    if (isMorningOnly) {
+        timeSelect.innerHTML = '<option value="morning" selected>Matin</option>';
+        return;
+    }
+
+    window.SecurityUtils.setInnerHTML(timeSelect, `
+        <option value="morning">Matin</option>
+        <option value="afternoon">AM</option>
+    `);
+
+    if (currentValue === 'afternoon') {
+        timeSelect.value = 'afternoon';
+    } else {
+        timeSelect.value = 'morning';
+    }
 }
 
 /**
@@ -824,6 +933,51 @@ async function modifierDateMenage(reservationId) {
     }
     
     try {
+        const { data: reservationData, error: reservationError } = await window.supabaseClient
+            .from('reservations')
+            .select('id, gite_id, date_debut, date_fin')
+            .eq('id', reservationId)
+            .single();
+
+        if (reservationError || !reservationData) {
+            throw new Error('Réservation introuvable');
+        }
+
+        const { data: giteReservations, error: giteReservationsError } = await window.supabaseClient
+            .from('reservations')
+            .select('id, gite_id, date_debut, date_fin')
+            .eq('gite_id', reservationData.gite_id)
+            .order('date_debut', { ascending: true });
+
+        if (giteReservationsError || !giteReservations) {
+            throw new Error('Impossible de vérifier les disponibilités du gîte');
+        }
+
+        const normalizedReservations = giteReservations.map(resa => ({
+            id: resa.id,
+            gite_id: resa.gite_id,
+            dateDebut: resa.date_debut,
+            dateFin: resa.date_fin
+        }));
+
+        const normalizedCurrentReservation = {
+            id: reservationData.id,
+            gite_id: reservationData.gite_id,
+            dateDebut: reservationData.date_debut,
+            dateFin: reservationData.date_fin
+        };
+
+        const dateWindow = getAllowedCleaningDates(normalizedCurrentReservation, normalizedReservations);
+        if (!dateWindow.allowedDates.includes(newDate)) {
+            showToast('Date non autorisée : choisissez une date libre entre départ et arrivée suivante', 'error');
+            return;
+        }
+
+        if (dateWindow.morningOnlyDates.includes(newDate) && newTime !== 'morning') {
+            showToast('Créneau non autorisé : cette date est disponible uniquement le matin', 'error');
+            return;
+        }
+
         // UPDATE au lieu d'UPSERT pour éviter les conflits RLS
         const { error } = await window.supabaseClient
             .from('cleaning_schedule')
@@ -1038,5 +1192,6 @@ window.ouvrirPageFemmeMenage = ouvrirPageFemmeMenage;
 window.acceptCompanyProposal = acceptCompanyProposal;
 window.refuseCompanyProposal = refuseCompanyProposal;
 window.modifierDateMenage = modifierDateMenage;
+window.onMenageDateChanged = onMenageDateChanged;
 window.loadRetoursMenuge = loadRetoursMenuge;
 window.validerRetourMenage = validerRetourMenage;

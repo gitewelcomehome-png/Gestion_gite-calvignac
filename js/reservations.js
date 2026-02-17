@@ -12,8 +12,37 @@
 // - Badges de plateforme avec bordures et ombres
 // - Typographie améliorée et espacements optimisés
 
-// ==========================================// UTILITAIRES
+// Variable globale pour stocker les compteurs de commandes prestations
+window.commandesPrestationsCountMap = {};
+
 // ==========================================
+// UTILITAIRES
+// ==========================================
+
+/**
+ * Récupérer le nombre de commandes prestations par réservation
+ */
+async function getCommandesPrestationsCount() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('commandes_prestations')
+            .select('reservation_id, id')
+            .neq('statut', 'cancelled');
+        
+        if (error) throw error;
+        
+        // Créer un objet avec le compteur par reservation_id
+        const countMap = {};
+        (data || []).forEach(cmd => {
+            countMap[cmd.reservation_id] = (countMap[cmd.reservation_id] || 0) + 1;
+        });
+        
+        return countMap;
+    } catch (err) {
+        console.error('❌ Erreur récupération commandes prestations:', err);
+        return {};
+    }
+}
 
 /**
  * Échapper les caractères HTML pour éviter les erreurs de syntaxe
@@ -179,10 +208,15 @@ function displayFilteredReservations(reservations) {
             '<span class="incomplete-badge">⚠️ À COMPLÉTER</span>' : 
             '';
         
+        // Vérifier si des commandes prestations existent
+        const commandesCount = window.commandesPrestationsCountMap[r.id] || 0;
+        const hasPrestations = commandesCount > 0;
+        
         html += `
             <div class="week-reservation ${isIncomplete ? 'week-reservation-incomplete' : ''}">
                 <div style="position: relative;">
                     <div class="reservation-buttons">
+                        ${hasPrestations ? `<button data-reservation-id="${r.id}" class="btn-reservation btn-voir-commande-prestations" style="background: #27AE60; border-color: #27AE60;" title="Voir commandes prestations"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> ${commandesCount}</button>` : ''}
                         <button class="btn-reservation btn-reservation-edit" onclick="openEditModal('${r.id}')" title="Modifier"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
                         <button class="btn-reservation btn-reservation-view" onclick="aperçuFicheClient('${r.id}')" title="Page Client"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>
                         <button class="btn-reservation btn-reservation-delete" onclick="deleteReservationById('${r.id}')" title="Supprimer"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
@@ -324,9 +358,12 @@ async function updateReservationsList(keepScrollPosition = false) {
         }
     }
     
-    // ⚠️ IMPORTANT : forceRefresh=true pour recharger depuis BDD après sync
+    // ⚠️ IMPORTANT : forceRefresh=true  pour recharger depuis BDD après sync
     const reservations = await getAllReservations(true);
     const gites = await window.gitesManager.getVisibleGites(); // Charger les gîtes visibles selon abonnement
+    
+    // Récupérer les compteurs de commandes prestations
+    window.commandesPrestationsCountMap = await getCommandesPrestationsCount();
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -488,6 +525,25 @@ async function updateReservationsList(keepScrollPosition = false) {
         }, 50);
     }
     
+    // ✅ Event delegation pour les boutons de commandes prestations
+    const planningContainer = document.getElementById('planning-container');
+    if (planningContainer) {
+        // Supprimer l'ancien listener s'il existe
+        if (window.reservationsCommandesPrestationsBtnClickHandler) {
+            planningContainer.removeEventListener('click', window.reservationsCommandesPrestationsBtnClickHandler);
+        }
+        
+        // Ajouter le nouveau listener
+        window.reservationsCommandesPrestationsBtnClickHandler = async (e) => {
+            const btn = e.target.closest('.btn-voir-commande-prestations');
+            if (btn) {
+                const reservationId = btn.getAttribute('data-reservation-id');
+                await voirCommandePrestations(reservationId);
+            }
+        };
+        planningContainer.addEventListener('click', window.reservationsCommandesPrestationsBtnClickHandler);
+    }
+    
     // Afficher la dernière synchronisation iCal
     if (typeof updateLastSyncDisplay === 'function') {
         updateLastSyncDisplay();
@@ -567,10 +623,16 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         const isExpired = today && dateFin.getTime() <= today.getTime();
         const ficheClientButton = isExpired ? '' : `<button class="btn-reservation btn-reservation-view" onclick="aperçuFicheClient('${r.id}')" title="Page Client"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>`;
         
+        // Vérifier si des commandes prestations existent
+        const commandesCount = window.commandesPrestationsCountMap[r.id] || 0;
+        const hasPrestations = commandesCount > 0;
+        const prestationsButton = hasPrestations ? `<button data-reservation-id="${r.id}" class="btn-reservation btn-voir-commande-prestations" style="background: #27AE60; border-color: #27AE60;" title="Voir commandes prestations"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> ${commandesCount}</button>` : '';
+        
         html += `
             <div class="week-reservation ${cssClass}">
                 <!-- Boutons en haut -->
                 <div class="reservation-buttons">
+                    ${prestationsButton}
                     <button class="btn-reservation btn-reservation-edit" onclick="openEditModal('${r.id}')" title="Modifier"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
                     ${ficheClientButton}
                     <button class="btn-reservation btn-reservation-delete" onclick="deleteReservationById('${r.id}')" title="Supprimer"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
@@ -629,6 +691,139 @@ function getPlatformLogo(platform) {
 
 
 // ==========================================
+// 🛒 MODAL DÉTAILS COMMANDES PRESTATIONS
+// ==========================================
+
+async function voirCommandePrestations(reservationId) {
+    try {
+        // Récupérer les commandes avec les lignes de commande
+        const { data: commandes, error } = await window.supabaseClient
+            .from('commandes_prestations')
+            .select(`
+                *,
+                lignes_commande_prestations(*)
+            `)
+            .eq('reservation_id', reservationId)
+            .neq('statut', 'cancelled')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!commandes || commandes.length === 0) {
+            showNotification('Aucune commande trouvée', 'error');
+            return;
+        }
+        
+        // Récupérer les infos de la réservation
+        const { data: reservation, error: resError } = await window.supabaseClient
+            .from('reservations')
+            .select('client_name, gite')
+            .eq('id', reservationId)
+            .single();
+        
+        if (resError) console.warn('⚠️ Erreur récupération réservation:', resError);
+        
+        // Construire le HTML du modal
+        let commandesHtml = '';
+        
+        commandes.forEach(commande => {
+            const dateCommande = new Date(commande.created_at).toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            const statutBadge = commande.statut === 'paid' 
+                ? '<span style="background: #27AE60; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">Payé</span>'
+                : '<span style="background: #F39C12; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">En attente</span>';
+            
+            let lignesHtml = '';
+            (commande.lignes_commande_prestations || []).forEach(ligne => {
+                lignesHtml += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text);">${ligne.nom_prestation}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Quantité: ${ligne.quantite} × ${parseFloat(ligne.prix_unitaire).toFixed(2)}€</div>
+                        </div>
+                        <div style="font-weight: 700; color: var(--text); font-size: 1.1rem;">${parseFloat(ligne.prix_total).toFixed(2)}€</div>
+                    </div>
+                `;
+            });
+            
+            commandesHtml += `
+                <div style="background: #f8f9fa; border: 2px solid var(--stroke); border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 2px 2px 0 var(--stroke);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div>
+                            <div style="font-weight: 700; color: var(--text); font-size: 1rem;">Commande #${commande.numero_commande || commande.id.slice(0, 8)}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">${dateCommande}</div>
+                        </div>
+                        ${statutBadge}
+                    </div>
+                    
+                    <div style="margin-bottom: 12px;">
+                        ${lignesHtml}
+                    </div>
+                    
+                    <div style="border-top: 2px solid var(--stroke); padding-top: 10px; margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="color: var(--text-secondary);">Sous-total prestations</span>
+                            <span style="font-weight: 600;">${parseFloat(commande.montant_prestations).toFixed(2)}€</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="color: var(--text-secondary);">Commission (5%)</span>
+                            <span style="font-weight: 600;">${parseFloat(commande.montant_commission).toFixed(2)}€</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--stroke);">
+                            <span style="font-weight: 700; font-size: 1.1rem;">Vous recevez</span>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: #27AE60;">${parseFloat(commande.montant_net_owner).toFixed(2)}€</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Créer et afficher le modal
+        const modal = document.createElement('div');
+        modal.id = 'modal-commande-prestations';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px;';
+        
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 15px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; border: 2px solid var(--stroke); box-shadow: 4px 4px 0 var(--stroke);">
+                <div style="position: sticky; top: 0; background: white; border-bottom: 2px solid var(--stroke); padding: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 15px 15px 0 0; z-index: 1;">
+                    <div>
+                        <h3 style="margin: 0; color: var(--text); font-size: 1.3rem;">🛒 Commandes Prestations</h3>
+                        ${reservation ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">${reservation.client_name} - ${reservation.gite}</div>` : ''}
+                    </div>
+                    <button id="btn-close-modal-commande" style="background: #E74C3C; color: white; border: 2px solid var(--stroke); width: 40px; height: 40px; border-radius: 10px; cursor: pointer; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0 var(--stroke); transition: transform 0.1s;">×</button>
+                </div>
+                <div style="padding: 20px;">
+                    ${commandesHtml}
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Event listeners avec pattern delegation
+        document.getElementById('btn-close-modal-commande').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+        
+    } catch (err) {
+        console.error('❌ Erreur affichage commandes prestations:', err);
+        showNotification('Erreur lors de l\'affichage des commandes', 'error');
+    }
+}
+
+// ==========================================
 // 🌐 EXPORTS GLOBAUX
 // ==========================================
 
@@ -643,6 +838,7 @@ window.updateReservationsList = updateReservationsList;
 window.generateWeekReservations = generateWeekReservations;
 window.getPlatformLogo = getPlatformLogo;
 window.filterReservationsByMonth = filterReservationsByMonth;
+window.voirCommandePrestations = voirCommandePrestations;
 
 // ==========================================
 // 🎯 INITIALISATION

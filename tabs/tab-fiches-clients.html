@@ -290,6 +290,94 @@
                 <textarea id="editReglementEn" class="textarea" rows="5"></textarea>
             </div>
             
+            <!-- Images Fiche Client -->
+            <h3 style="margin-top: 30px; margin-bottom: 15px;"><i data-lucide="image" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Images Fiche Client</h3>
+            
+            <div class="alert alert-info" style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                <i data-lucide="info" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>
+                <strong>Ces photos seront affichées sur la fiche client</strong> pour aider vos visiteurs (photo de couverture, galerie, localisation de la boîte à clés, parking, etc.)
+            </div>
+            
+            <!-- Photo de couverture -->
+            <div class="form-group" style="border: 2px dashed #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <label class="label" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
+                    <i data-lucide="star" style="width: 18px; height: 18px; color: #f59e0b;"></i> Photo de couverture
+                </label>
+                <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 12px;">Photo principale affichée en hero de la fiche client (façade, vue d'ensemble)</p>
+                
+                <input type="file" id="uploadCouverture" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event, 'couverture')">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadCouverture').click()" style="margin-bottom: 10px;">
+                    <i data-lucide="upload"></i> Choisir une photo
+                </button>
+                
+                <div id="previewCouverture" style="display: none; margin-top: 10px;">
+                    <img id="imgCouverture" src="" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover;">
+                    <button type="button" class="btn btn-danger" onclick="removePhoto('couverture')" style="margin-top: 8px; font-size: 0.85rem;">
+                        <i data-lucide="trash-2"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Galerie -->
+            <div class="form-group" style="border: 2px dashed #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <label class="label" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
+                    <i data-lucide="images"></i> Galerie (Intérieur du gîte)
+                </label>
+                <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 12px;">Photos du salon, cuisine, chambres, salle de bain (max 6 photos recommandé)</p>
+                
+                <input type="file" id="uploadGalerie" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event, 'galerie')">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadGalerie').click()">
+                    <i data-lucide="upload"></i> Ajouter des photos
+                </button>
+                
+                <div id="previewGalerie" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+            </div>
+            
+            <!-- Boîte à clés -->
+            <div class="form-group" style="border: 2px dashed #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <label class="label" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
+                    <i data-lucide="key" style="color: #ef4444;"></i> Boîte à clés
+                </label>
+                <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 12px;">Photos montrant l'emplacement et la vue rapprochée de la boîte à clés</p>
+                
+                <input type="file" id="uploadBoiteCles" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event, 'boite_cles')">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadBoiteCles').click()">
+                    <i data-lucide="upload"></i> Ajouter des photos
+                </button>
+                
+                <div id="previewBoiteCles" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+            </div>
+            
+            <!-- Parking -->
+            <div class="form-group" style="border: 2px dashed #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <label class="label" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
+                    <i data-lucide="car" style="color: #10b981;"></i> Parking
+                </label>
+                <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 12px;">Photos du parking ou de l'emplacement de stationnement</p>
+                
+                <input type="file" id="uploadParking" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event, 'parking')">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadParking').click()">
+                    <i data-lucide="upload"></i> Ajouter des photos
+                </button>
+                
+                <div id="previewParking" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+            </div>
+            
+            <!-- Entrée -->
+            <div class="form-group" style="border: 2px dashed #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <label class="label" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
+                    <i data-lucide="door-open" style="color: #8b5cf6;"></i> Entrée principale
+                </label>
+                <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 12px;">Photos de la porte d'entrée et de son environnement immédiat</p>
+                
+                <input type="file" id="uploadEntree" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event, 'entree')">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadEntree').click()">
+                    <i data-lucide="upload"></i> Ajouter des photos
+                </button>
+                
+                <div id="previewEntree" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+            </div>
+            
             <div style="text-align: right; margin-top: 20px;">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditGite')" style="margin-right: 10px;">
                     Annuler

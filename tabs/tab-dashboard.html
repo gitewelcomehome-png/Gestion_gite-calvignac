@@ -35,6 +35,19 @@
         </div>
     </section>
 
+    <!-- 🧹 PROPOSITIONS CHANGEMENT DATE MÉNAGE -->
+    <section id="dashboard-propositions-menage" class="section-alert section-alert--warning mb-md" style="display: none;">
+        <header class="section-header">
+            <h2 class="section-title">
+                <i data-lucide="calendar-clock"></i> PROPOSITIONS CHANGEMENT DATE MÉNAGE
+            </h2>
+            <span id="badge-propositions-menage-count" class="badge badge--warning badge--count">0</span>
+        </header>
+        <div id="liste-propositions-menage" class="section-content section-content--compact">
+            <p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune proposition de changement en attente</p>
+        </div>
+    </section>
+
     <!-- 🎫 TICKETS SUPPORT EN ATTENTE -->
     <section id="dashboard-tickets-support" class="section-alert section-alert--warning mb-md" style="display: none;">
         <header class="section-header">
@@ -106,6 +119,24 @@
                 <button onclick="changeDashboardReservationsPage('next')" id="btn-next-reservations" class="pagination-btn">
                     Suivant <i data-lucide="chevron-right"></i>
                 </button>
+            </div>
+        </div>
+        
+        <!-- 🛒 COMMANDES PRESTATIONS - SEMAINE -->
+        <div class="card card--spacious communications-widget dashboard-prestations-widget mb-lg">
+            <header class="section-header">
+                <h3 class="section-title">
+                    <i data-lucide="shopping-bag"></i>
+                    Commandes Prestations - Cette Semaine
+                </h3>
+                <span class="badge badge--info" id="badge-prestations-count" style="background: var(--upstay-cyan); color: white;">…</span>
+            </header>
+            <div class="prestations-table-container">
+                <div class="table-responsive">
+                    <div id="dashboard-prestations-semaine">
+                        <p style="text-align: center; color: var(--text-secondary); padding: 20px;">Chargement...</p>
+                    </div>
+                </div>
             </div>
         </div>
         

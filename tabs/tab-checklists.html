@@ -1,3 +1,222 @@
+<style>
+    .checklist-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 12px;
+    }
+
+    .checklist-form-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .checklist-btn-submit,
+    .checklist-btn-clear,
+    .checklist-btn-create {
+        border: 1px solid var(--border-color, #d1d5db);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s ease, filter 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .checklist-btn-submit {
+        background: var(--primary-color, #22c55e);
+        color: #fff;
+    }
+
+    .checklist-btn-create {
+        background: var(--primary-color, #22c55e);
+        color: #fff;
+    }
+
+    .checklist-btn-submit.is-editing {
+        background: var(--info-color, #3b82f6);
+    }
+
+    .checklist-btn-clear {
+        background: var(--bg-secondary, #f3f4f6);
+        color: var(--text-color, #111827);
+    }
+
+    .checklist-btn-submit:hover,
+    .checklist-btn-clear:hover,
+    .checklist-btn-create:hover,
+    .checklist-action-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+    }
+
+    .checklist-btn-submit:disabled,
+    .checklist-btn-clear:disabled,
+    .checklist-btn-create:disabled,
+    .checklist-action-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .checklist-action-btn {
+        border: 1px solid var(--border-color, #d1d5db);
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .checklist-action-neutral {
+        background: var(--bg-secondary, #f3f4f6);
+        color: var(--text-color, #111827);
+    }
+
+    .checklist-action-edit {
+        background: var(--info-color, #3b82f6);
+        color: #fff;
+        border-color: transparent;
+    }
+
+    .checklist-action-delete {
+        background: var(--danger-color, #ef4444);
+        color: #fff;
+        border-color: transparent;
+    }
+
+    .checklist-items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .checklist-item {
+        display: grid;
+        grid-template-columns: 28px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid var(--border-color, #d1d5db);
+        border-radius: 12px;
+        background: var(--card-bg, #fff);
+        cursor: grab;
+    }
+
+    .checklist-item.dragging {
+        opacity: 0.6;
+        cursor: grabbing;
+    }
+
+    .checklist-item-drag-handle {
+        user-select: none;
+        cursor: grab;
+        color: var(--text-secondary, #6b7280);
+        font-size: 1rem;
+        line-height: 1;
+        text-align: center;
+    }
+
+    .checklist-item-content-block {
+        min-width: 0;
+    }
+
+    .checklist-item-title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 2px;
+    }
+
+    .checklist-item-index {
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-secondary, #f3f4f6);
+        color: var(--text-secondary, #6b7280);
+        font-size: 0.75rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .checklist-item-title-text {
+        font-weight: 600;
+        color: var(--text-color, #111827);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .checklist-item-description-text {
+        font-size: 0.85rem;
+        color: var(--text-secondary, #6b7280);
+        margin-left: 30px;
+    }
+
+    .checklist-item-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .checklist-empty {
+        text-align: center;
+        padding: 18px;
+        color: var(--text-secondary, #6b7280);
+        border: 1px dashed var(--border-color, #d1d5db);
+        border-radius: 12px;
+    }
+
+    .checklist-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 16px;
+    }
+
+    .checklist-modal[hidden] {
+        display: none;
+    }
+
+    .checklist-modal-content {
+        width: min(640px, 95vw);
+        background: var(--card-bg, #fff);
+        border: 1px solid var(--border-color, #d1d5db);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+    }
+
+    .checklist-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+
+    .checklist-modal-close {
+        border: none;
+        background: transparent;
+        font-size: 1.1rem;
+        cursor: pointer;
+        color: var(--text-secondary, #6b7280);
+    }
+</style>
+
 <div class="tab-container">
     <!-- Header Neo-Brutalism -->
     <div class="checklist-header">
@@ -17,26 +236,9 @@
         </div>
     </div>
     
-    <script>
-        // Charger automatiquement les checklists quand cet onglet est affiché
-        setTimeout(function() {
-            if (typeof window.loadChecklistsTab === 'function') {
-                try {
-                    window.loadChecklistsTab();
-                } catch (error) {
-                    console.error('Erreur chargement checklists:', error);
-                    const container = document.getElementById('checklist-reservations-container');
-                    if (container) {
-                        container.innerHTML = '<p style="color: #e74c3c;">Erreur de chargement. Rechargez la page.</p>';
-                    }
-                }
-            }
-        }, 500);
-    </script>
-    
     <!-- ➕ CRÉER DES ITEMS DE CHECK-LIST -->
     <div class="checklist-card-create">
-        <h3 class="checklist-section-title">➕ Créer des items de check-list</h3>
+        <h3 class="checklist-section-title">Items Check list</h3>
         
         <div class="checklist-form-grid">
             <!-- Sélection gîte -->
@@ -60,34 +262,41 @@
         
         <!-- Liste des items existants -->
         <div class="checklist-items-section">
-            <h4 class="checklist-items-title">Items existants</h4>
+            <div class="checklist-toolbar">
+                <button type="button" class="checklist-btn-create" onclick="openChecklistCreateModal()">
+                    ➕ Créer
+                </button>
+            </div>
+            <h4 class="checklist-items-title">Liste des items (glisser-déposer pour l'ordre)</h4>
             <div id="checklist-items-list" class="checklist-items-list">
                 <p class="text-muted" style="font-style: italic;">Chargement...</p>
             </div>
         </div>
-        
-        <!-- Formulaire d'ajout -->
-        <div class="checklist-form-box">
-            <h4 class="checklist-form-subtitle">Ajouter un nouvel item</h4>
-            
+    </div>
+
+    <div id="checklistCreateModal" class="checklist-modal" hidden>
+        <div class="checklist-modal-content">
+            <div class="checklist-modal-header">
+                <h4 id="checklist-modal-title" class="checklist-form-subtitle" style="margin: 0;">Créer un item</h4>
+                <button type="button" class="checklist-modal-close" onclick="closeChecklistCreateModal(false)">✖</button>
+            </div>
+
             <div style="margin-bottom: 15px;">
                 <label class="checklist-form-label">Texte de l'item</label>
-                <input type="text" id="checklist-new-text" placeholder="Ex: Vérifier l'état du logement" 
-                       class="checklist-form-input">
+                <input type="text" id="checklist-new-text" placeholder="Ex: Vérifier l'état du logement" class="checklist-form-input">
             </div>
-            
+
             <div style="margin-bottom: 15px;">
                 <label class="checklist-form-label">Description (optionnel)</label>
-                <textarea id="checklist-new-description" placeholder="Détails supplémentaires..." 
-                          class="checklist-form-textarea"></textarea>
+                <textarea id="checklist-new-description" placeholder="Détails supplémentaires..." class="checklist-form-textarea"></textarea>
             </div>
-            
+
             <div class="checklist-form-buttons">
-                <button id="btn-checklist-submit" onclick="addChecklistItem()" class="checklist-btn-submit">
-                    ➕ Ajouter l'item
+                <button id="btn-checklist-submit" type="button" class="checklist-btn-submit" onclick="closeChecklistCreateModal(true)">
+                    ✅ Fermer et sauvegarder
                 </button>
-                <button onclick="clearChecklistForm()" class="checklist-btn-clear">
-                    <i data-lucide="trash-2"></i> Effacer
+                <button type="button" onclick="closeChecklistCreateModal(false)" class="checklist-btn-clear">
+                    Annuler
                 </button>
             </div>
         </div>

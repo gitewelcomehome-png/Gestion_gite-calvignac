@@ -9,6 +9,17 @@
                 <p style="margin: 6px 0 0 0; font-size: 0.85rem; color: #718096;">Informations essentielles</p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
+                <!-- Bouton Photos Fiche Client -->
+                <button type="button" 
+                        onclick="openModalPhotosGite()" 
+                        class="btn-header-action"
+                        style="background: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); color: white; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1); white-space: nowrap;" 
+                        title="Gérer les photos de la fiche client"
+                        onmouseover="this.style.background='#7c3aed'; this.style.boxShadow='0 2px 6px rgba(139, 92, 246, 0.3)';" 
+                        onmouseout="this.style.background='#8b5cf6'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)';">
+                    📸 Photos Fiche Client
+                </button>
+                
                 <!-- Bouton IA unique -->
                 <button type="button" 
                         id="btn-ai-improve"
@@ -37,11 +48,11 @@
                 <button type="button" 
                         id="btnToggleLangInfos" 
                         onclick="toggleLanguageInfos()" 
-                        style="background: white; border: 1px solid #cbd5e0; color: #2d3748; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.875rem; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-width: 50px; text-align: center;" 
+                        style="background: transparent; border: none; cursor: pointer; transition: all 0.2s ease; padding: 0; line-height: 1;" 
                         title="Basculer FR/EN"
-                        onmouseover="this.style.background='#f7fafc'; this.style.borderColor='#00C2CB';" 
-                        onmouseout="this.style.background='white'; this.style.borderColor='#cbd5e0';">
-                    <span id="langLabelInfos">FR</span>
+                        onmouseover="this.style.transform='scale(1.1)'; this.style.filter='drop-shadow(0 2px 4px rgba(0,0,0,0.2))';" 
+                        onmouseout="this.style.transform='scale(1)'; this.style.filter='none';">
+                    <img id="langLabelInfos" src="../images/flag-fr.svg" alt="FR" style="width: 32px; height: 24px; display: block; border-radius: 3px;">
                 </button>
                 
                 <!-- Bouton effacer -->
@@ -902,3 +913,196 @@ EN CAS DE FUITE : coupez l'eau..."></textarea>
             
             </div>
             <!-- FIN SECTION ENGLOBANTE -->
+
+            <!-- ==================== MODALE PHOTOS FICHE CLIENT ==================== -->
+            <div id="modalPhotosGite" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+                <div style="background: white; border-radius: 16px; max-width: 1000px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                    <!-- Header modale -->
+                    <div style="position: sticky; top: 0; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 25px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <i data-lucide="image" style="width: 32px; height: 32px; color: white;"></i>
+                            <h2 style="margin: 0; color: white; font-size: 1.75rem; font-weight: 700;">Photos Fiche Client</h2>
+                        </div>
+                        <button type="button" onclick="document.getElementById('modalPhotosGite').style.display='none'" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; hover:background: rgba(255, 255, 255, 0.3);">
+                            <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+                        </button>
+                    </div>
+
+                    <!-- Contenu modale -->
+                    <div style="padding: 30px;">
+                        <div style="display: grid; gap: 25px;">
+                            <!-- Alerte explicative -->
+                            <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6;">
+                                <div style="display: flex; gap: 15px; align-items: start;">
+                                    <i data-lucide="info" style="width: 24px; height: 24px; color: #1e40af; flex-shrink: 0; margin-top: 2px;"></i>
+                                    <div>
+                                        <h4 style="color: #1e40af; margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 700;">À quoi servent ces photos ?</h4>
+                                        <p style="color: #1e3a8a; margin: 0; line-height: 1.6;">
+                                            Ces images seront affichées sur la <strong>fiche client</strong> que vos voyageurs reçoivent. 
+                                            Une belle présentation améliore leur expérience et facilite leur arrivée !
+                                        </p>
+                                        <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #1e3a8a;">
+                                            <li><strong>Photo de couverture</strong> : Image principale du gîte</li>
+                                            <li><strong>Galerie</strong> : Plusieurs photos d'ambiance</li>
+                                            <li><strong>Boîte à clés / Parking / Entrée</strong> : Photos utiles pour l'arrivée</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Photo de couverture -->
+                            <div style="background: #fafafa; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e0;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 1.2rem; color: #2d3748; display: flex; align-items: center; gap: 10px;">
+                                    <i data-lucide="image" style="width: 20px; height: 20px; color: #00C2CB;"></i>
+                                    Photo de Couverture
+                                </h3>
+                                <p style="margin: 0 0 15px 0; color: #718096; font-size: 0.95rem;">
+                                    Image principale du gîte (format paysage recommandé, max 5MB)
+                                </p>
+                                <input type="file" 
+                                       id="uploadPhotoCouverture" 
+                                       accept="image/jpeg,image/jpg,image/png,image/webp" 
+                                       style="display: none;" 
+                                       onchange="handlePhotoUploadInfosGites(event, 'couverture')">
+                                <button type="button" 
+                                        onclick="document.getElementById('uploadPhotoCouverture').click()" 
+                                        class="btn" 
+                                        style="background: #00C2CB; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                                    <i data-lucide="upload" style="width: 18px; height: 18px;"></i>
+                                    Choisir une photo de couverture
+                                </button>
+                                
+                                <!-- Prévisualisation couverture -->
+                                <div id="previewCouverture" style="margin-top: 20px; display: none;">
+                                    <div style="position: relative; display: inline-block;">
+                                        <img id="imgCouverture" src="" alt="Couverture" style="max-width: 100%; max-height: 300px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                        <button type="button" 
+                                                onclick="removePhotoInfosGites('couverture')" 
+                                                style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                                            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Galerie -->
+                            <div style="background: #fafafa; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e0;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 1.2rem; color: #2d3748; display: flex; align-items: center; gap: 10px;">
+                                    <i data-lucide="images" style="width: 20px; height: 20px; color: #00C2CB;"></i>
+                                    Galerie Photos
+                                </h3>
+                                <p style="margin: 0 0 15px 0; color: #718096; font-size: 0.95rem;">
+                                    Ajoutez plusieurs photos d'ambiance du gîte (max 5MB chacune)
+                                </p>
+                                <input type="file" 
+                                       id="uploadPhotoGalerie" 
+                                       accept="image/jpeg,image/jpg,image/png,image/webp" 
+                                       multiple
+                                       style="display: none;" 
+                                       onchange="handlePhotoUploadInfosGites(event, 'galerie')">
+                                <button type="button" 
+                                        onclick="document.getElementById('uploadPhotoGalerie').click()" 
+                                        class="btn" 
+                                        style="background: #00C2CB; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                                    <i data-lucide="upload" style="width: 18px; height: 18px;"></i>
+                                    Ajouter des photos
+                                </button>
+                                
+                                <!-- Prévisualisation galerie -->
+                                <div id="previewGalerie" style="margin-top: 20px; display: none;">
+                                    <div id="gridGalerie" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Photos Pratiques -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                                <!-- Boîte à clés -->
+                                <div style="background: #fafafa; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e0;">
+                                    <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: #2d3748; display: flex; align-items: center; gap: 8px;">
+                                        <i data-lucide="key" style="width: 18px; height: 18px; color: #f59e0b;"></i>
+                                        Boîte à Clés
+                                    </h4>
+                                    <input type="file" 
+                                           id="uploadPhotoBoiteCles" 
+                                           accept="image/jpeg,image/jpg,image/png,image/webp" 
+                                           style="display: none;" 
+                                           onchange="handlePhotoUploadInfosGites(event, 'boite_cles')">
+                                    <button type="button" 
+                                            onclick="document.getElementById('uploadPhotoBoiteCles').click()" 
+                                            class="btn" 
+                                            style="background: #f59e0b; color: white; padding: 8px 16px; border-radius: 6px; font-size: 0.875rem; width: 100%;">
+                                        <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+                                        Ajouter photo
+                                    </button>
+                                    <div id="previewBoiteCles" style="margin-top: 15px; display: none;">
+                                        <div id="gridBoiteCles" style="display: grid; grid-template-columns: 1fr; gap: 10px;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Parking -->
+                                <div style="background: #fafafa; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e0;">
+                                    <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: #2d3748; display: flex; align-items: center; gap: 8px;">
+                                        <i data-lucide="car" style="width: 18px; height: 18px; color: #10b981;"></i>
+                                        Parking
+                                    </h4>
+                                    <input type="file" 
+                                           id="uploadPhotoParking" 
+                                           accept="image/jpeg,image/jpg,image/png,image/webp" 
+                                           style="display: none;" 
+                                           onchange="handlePhotoUploadInfosGites(event, 'parking')">
+                                    <button type="button" 
+                                            onclick="document.getElementById('uploadPhotoParking').click()" 
+                                            class="btn" 
+                                            style="background: #10b981; color: white; padding: 8px 16px; border-radius: 6px; font-size: 0.875rem; width: 100%;">
+                                        <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+                                        Ajouter photo
+                                    </button>
+                                    <div id="previewParking" style="margin-top: 15px; display: none;">
+                                        <div id="gridParking" style="display: grid; grid-template-columns: 1fr; gap: 10px;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Entrée -->
+                                <div style="background: #fafafa; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e0;">
+                                    <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: #2d3748; display: flex; align-items: center; gap: 8px;">
+                                        <i data-lucide="door-open" style="width: 18px; height: 18px; color: #8b5cf6;"></i>
+                                        Entrée
+                                    </h4>
+                                    <input type="file" 
+                                           id="uploadPhotoEntree" 
+                                           accept="image/jpeg,image/jpg,image/png,image/webp" 
+                                           style="display: none;" 
+                                           onchange="handlePhotoUploadInfosGites(event, 'entree')">
+                                    <button type="button" 
+                                            onclick="document.getElementById('uploadPhotoEntree').click()" 
+                                            class="btn" 
+                                            style="background: #8b5cf6; color: white; padding: 8px 16px; border-radius: 6px; font-size: 0.875rem; width: 100%;">
+                                        <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+                                        Ajouter photo
+                                    </button>
+                                    <div id="previewEntree" style="margin-top: 15px; display: none;">
+                                        <div id="gridEntree" style="display: grid; grid-template-columns: 1fr; gap: 10px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Conseils -->
+                            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b;">
+                                <div style="display: flex; gap: 15px; align-items: start;">
+                                    <i data-lucide="lightbulb" style="width: 24px; height: 24px; color: #92400e; flex-shrink: 0; margin-top: 2px;"></i>
+                                    <div>
+                                        <h4 style="color: #92400e; margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 700;">Conseils pour de belles photos</h4>
+                                        <ul style="margin: 0; padding-left: 20px; color: #78350f; line-height: 1.8;">
+                                            <li>Prenez les photos en lumière naturelle (évitez le flash)</li>
+                                            <li>Rangez et nettoyez les espaces avant de photographier</li>
+                                            <li>Pour la boîte à clés : photo claire montrant son emplacement exact</li>
+                                            <li>Pour le parking : vue d'ensemble facilitant le repérage</li>
+                                            <li>Format paysage recommandé pour la couverture</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>

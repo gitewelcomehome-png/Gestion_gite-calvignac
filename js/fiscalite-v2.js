@@ -26,6 +26,81 @@ function getFieldValue(id, defaultValue = 0) {
     return parseFloat(document.getElementById(id)?.value || defaultValue);
 }
 
+function getAutresRevenusProfessionnelsFoyer() {
+    const salaireMadame = getFieldValue('salaire_madame');
+    const salaireMonsieur = getFieldValue('salaire_monsieur');
+
+    const autresChampsProfessionnels = [
+        'revenus_bic_autres',
+        'revenus_bnc',
+        'revenus_agricoles',
+        'autres_revenus_professionnels'
+    ];
+
+    const autresRevenus = autresChampsProfessionnels
+        .map(id => getFieldValue(id))
+        .reduce((sum, value) => sum + value, 0);
+
+    return salaireMadame + salaireMonsieur + autresRevenus;
+}
+
+// CORRECTION 1 - 2026-02-17
+function calculerURSSAF(benefice, ca, statutFiscal, config) {
+    const detail = {
+        indemnites: 0,
+        retraiteBase: 0,
+        retraiteCompl: 0,
+        invalidite: 0,
+        csgCrds: 0,
+        formationPro: 0,
+        allocations: 0,
+        minimumLMPApplique: false,
+        exonereLMNP: false
+    };
+
+    if (benefice > 0) {
+        const urssafConfig = config.URSSAF;
+        detail.indemnites = benefice * urssafConfig.indemnites_journalieres.taux;
+        const revenuPlafonne = Math.min(benefice, urssafConfig.retraite_base.plafond);
+        detail.retraiteBase = revenuPlafonne * urssafConfig.retraite_base.taux;
+        detail.retraiteCompl = benefice * urssafConfig.retraite_complementaire.taux;
+        detail.invalidite = benefice * urssafConfig.invalidite_deces.taux;
+        detail.csgCrds = benefice * urssafConfig.csg_crds.taux;
+        const PASS = config.PASS || 46368; // PASS 2025
+        detail.formationPro = PASS * urssafConfig.formation_pro.taux;
+        // CFP = 0,25% du PASS (~116€ fixe/an), pas du CA — CGI art. 1601 B
+
+        const af = urssafConfig.allocations_familiales;
+        if (benefice > af.seuil_debut) {
+            const baseAF = Math.min(benefice - af.seuil_debut, af.seuil_fin - af.seuil_debut);
+            const tauxAF = (baseAF / (af.seuil_fin - af.seuil_debut)) * af.taux_max;
+            detail.allocations = benefice * tauxAF;
+        }
+    }
+
+    let urssaf = detail.indemnites + detail.retraiteBase + detail.retraiteCompl + detail.invalidite + detail.csgCrds + detail.formationPro + detail.allocations;
+
+    const COTISATIONS_MINIMALES_LMP = config.COTISATIONS_MINIMALES.montant;
+    const SEUIL_EXONERATION_LMNP = 23000;
+
+    if (statutFiscal === 'lmnp' && ca < SEUIL_EXONERATION_LMNP) {
+        urssaf = 0;
+        detail.exonereLMNP = true;
+        detail.indemnites = 0;
+        detail.retraiteBase = 0;
+        detail.retraiteCompl = 0;
+        detail.invalidite = 0;
+        detail.csgCrds = 0;
+        detail.formationPro = 0;
+        detail.allocations = 0;
+    } else if (statutFiscal === 'lmp' && urssaf < COTISATIONS_MINIMALES_LMP) {
+        urssaf = COTISATIONS_MINIMALES_LMP;
+        detail.minimumLMPApplique = true;
+    }
+
+    return { urssaf, detail };
+}
+
 /**
  * Formate un montant en euros
  * @param {number} montant - Montant à formater
@@ -132,9 +207,10 @@ let lastSavedData = null; // Pour éviter les sauvegardes en double
 // ==========================================
 
 const REGLES_AMORTISSEMENT = {
-    // Seuil minimum pour amortir (< 600€ HT = déductible immédiatement)
-    SEUIL_AMORTISSEMENT_HT: 600,
-    SEUIL_AMORTISSEMENT_TTC: 720, // avec TVA 20% (pour information)
+    // Décret n°2022-1609 du 26/12/2022 — applicable depuis le 01/01/2023
+    // Seuil minimum pour amortir (< 500€ HT = déductible immédiatement)
+    SEUIL_AMORTISSEMENT_HT: 500,
+    SEUIL_AMORTISSEMENT_TTC: 600, // avec TVA 20% (pour information)
     
     // Catégories et durées d'amortissement par composants (selon CGI art 39 C)
     categories: [
@@ -469,6 +545,7 @@ function calculerTableauComparatif() {
     const nombreEnfants = parseInt(document.getElementById('nombre_enfants')?.value || 0);
     const nombreParts = 2 + (nombreEnfants * 0.5);
     const revenusSalaries = salaireMadame + salaireMonsieur;
+    const autresRevenusProfessionnels = getAutresRevenusProfessionnelsFoyer();
     
     const bareme = config.BAREME_IR;
     
@@ -497,57 +574,30 @@ function calculerTableauComparatif() {
     const beneficeReel = parseDisplayedAmount('preview-benefice');
     const resteAvantIRReelAffiche = parseDisplayedAmount('preview-reste');
     
-    // 🔧 RECALCULER LES URSSAF POUR LMNP (indépendamment du statut actuel)
-    // Cela évite que les cotisations minimales LMP affectent le calcul LMNP
-    let urssafLMNP = 0;
-    const SEUIL_EXONERATION_LMNP = 23000;
-    
-    if (beneficeReel > 0 && ca >= SEUIL_EXONERATION_LMNP) {
-        // Recalcul URSSAF pour LMNP (même formule que calculerTempsReel mais sans minimum LMP)
-        const urssafConfig = config.URSSAF;
-        const indemnites = beneficeReel * urssafConfig.indemnites_journalieres.taux;
-        const revenuPlafonne = Math.min(beneficeReel, urssafConfig.retraite_base.plafond);
-        const retraiteBase = revenuPlafonne * urssafConfig.retraite_base.taux;
-        const retraiteCompl = beneficeReel * urssafConfig.retraite_complementaire.taux;
-        const invalidite = beneficeReel * urssafConfig.invalidite_deces.taux;
-        const csgCrds = beneficeReel * urssafConfig.csg_crds.taux;
-        const formationPro = ca * urssafConfig.formation_pro.taux;
-        let allocations = 0;
-        const af = urssafConfig.allocations_familiales;
-        if (beneficeReel > af.seuil_debut) {
-            const baseAF = Math.min(beneficeReel - af.seuil_debut, af.seuil_fin - af.seuil_debut);
-            const tauxAF = (baseAF / (af.seuil_fin - af.seuil_debut)) * af.taux_max;
-            allocations = beneficeReel * tauxAF;
-        }
-        urssafLMNP = indemnites + retraiteBase + retraiteCompl + invalidite + csgCrds + formationPro + allocations;
-    }
-    // Si CA < 23k€, urssafLMNP reste à 0 (exonération totale)
+    // CORRECTION 1 - 2026-02-17
+    const urssafLMNP = calculerURSSAF(beneficeReel, ca, 'lmnp', config).urssaf;
     
     const resteAvantIRReel = beneficeReel - urssafLMNP;
+    const revenusGlobauxReel = revenusSalaries + resteAvantIRReel;
     
     // Vérifier le statut actuel pour forcer LMP si nécessaire
     const forceLMP = statutActuelSelect === 'lmp';
     
-    // Critères LMP basés sur le CA et les revenus
-    const revenusGlobauxReel = revenusSalaries + resteAvantIRReel;
-    const partLocative = revenusGlobauxReel > 0 ? (resteAvantIRReel / revenusGlobauxReel) * 100 : 0;
+    // Critères LMP légaux
+    const autresRevenusProFoyer = getAutresRevenusProfessionnelsFoyer();
     const critereCA_LMP = ca > 23000;
-    const criterePart_LMP = partLocative > 50;
+    const critereRecettesSupAutres = ca > autresRevenusProFoyer;
     
-    // LMP disponible si :
-    // - Statut LMP sélectionné OU
-    // - CA > 23k (critère minimum, même si on ne peut pas vérifier la part exacte en Micro-BIC)
-    const peutEtreLMP = forceLMP || critereCA_LMP;
+    // LMP disponible si critères légaux remplis (ou statut forcé manuellement)
+    const peutEtreLMP = forceLMP || (critereCA_LMP && critereRecettesSupAutres);
     
     const options = [];
     
     // ==========================================
     // OPTION 1 : LMNP Réel
     // ==========================================
-    // Vérifier si LMP obligatoire
-    const revenusActiviteGlobaux = revenusSalaries + ca;
-    const partRecettesLocation = revenusActiviteGlobaux > 0 ? (ca / revenusActiviteGlobaux) * 100 : 0;
-    const lmpObligatoire = ca > 23000 && partRecettesLocation > 50;
+    // Vérifier si LMP obligatoire (règle légale)
+    const lmpObligatoire = critereCA_LMP && critereRecettesSupAutres;
     
     const irTotalLMNPReel = calculerIR(revenusGlobauxReel, nombreParts);
     const partLocationLMNPReel = revenusGlobauxReel > 0 ? resteAvantIRReel / revenusGlobauxReel : 0;
@@ -564,13 +614,14 @@ function calculerTableauComparatif() {
     
     // TOUJOURS afficher les conditions
     const caLMNPOk = ca <= 23000;
-    const partLMNPOk = partRecettesLocation <= 50;
+    const partLMNPOk = !critereRecettesSupAutres;
     
     // Message selon situation
     if (lmpObligatoire) {
         // LMP obligatoire : les 2 critères sont dépassés
         conditionsLMNP.innerHTML = `
-            <div style="color: #dc3545; font-weight: 600;">• CA > 23 000€ ET > 50% revenus</div>
+            <div style="color: #dc3545; font-weight: 600;">• CA > 23 000€</div>
+            <div style="color: #dc3545; font-weight: 600;">• Recettes locatives > autres revenus professionnels</div>
             <div style="color: #dc3545; font-weight: 600;">→ LMP obligatoire</div>
         `;
     } else if (ca < 23000) {
@@ -583,7 +634,7 @@ function calculerTableauComparatif() {
         // CA > 23k mais < 50% : URSSAF obligatoire
         conditionsLMNP.innerHTML = `
             <div style="color: #ffc107; font-weight: 600;">• CA > 23 000€</div>
-            <div style="color: #28a745; font-weight: 600;">• Recettes ≤ 50% revenus</div>
+            <div style="color: #28a745; font-weight: 600;">• Recettes locatives ≤ autres revenus professionnels</div>
             <div style="color: #ffc107; font-weight: 600;">→ URSSAF obligatoire (LMNP OK)</div>
         `;
     }
@@ -731,28 +782,47 @@ function calculerTableauComparatif() {
     
     // TOUJOURS afficher les conditions
     const caLMPOk = ca > 23000;
-    const partLMPOk = partRecettesLocation > 50;
+    const partLMPOk = critereRecettesSupAutres;
     conditionsLMP.innerHTML = `
         <div style="color: ${caLMPOk ? '#28a745' : '#dc3545'}; font-weight: 600;">• CA ${caLMPOk ? '>' : '≤'} 23 000€</div>
-        <div style="color: ${partLMPOk ? '#28a745' : '#dc3545'}; font-weight: 600;">• Recettes ${partLMPOk ? '>' : '≤'} 50% revenus</div>
+        <div style="color: ${partLMPOk ? '#28a745' : '#dc3545'}; font-weight: 600;">• Recettes locatives ${partLMPOk ? '>' : '≤'} autres revenus professionnels</div>
     `;
     
     if (peutEtreLMP) {
-        // Pour LMP : même calcul URSSAF que LMNP mais avec cotisations minimales
-        const urssafLMP = Math.max(urssafLMNP, COTISATIONS_MINIMALES_LMP);
+        // CORRECTION 1 - 2026-02-17
+        const urssafLMP = calculerURSSAF(beneficeReel, ca, 'lmp', config).urssaf;
         const resteAvantIRLMP = beneficeReel - urssafLMP;
-        const revenusGlobauxLMP = revenusSalaries + resteAvantIRLMP;
-        const irTotalLMP = calculerIR(revenusGlobauxLMP, nombreParts);
-        const partLocationLMP = revenusGlobauxLMP > 0 ? resteAvantIRLMP / revenusGlobauxLMP : 0;
-        const irPartLMP = irTotalLMP * partLocationLMP;
-        const totalLMP = urssafLMP + irPartLMP;
+
+        // CORRECTION 2 - 2026-02-17
+        // Déficit LMP imputable au revenu global du foyer (plancher à 0)
+        const abat = config.ABATTEMENT_SALAIRE;
+        const abattementSalairesLMP = Math.max(
+            abat.minimum,
+            Math.min(revenusSalaries * abat.taux, abat.maximum)
+        );
+        const baseSalairesImposable = Math.max(0, revenusSalaries - abattementSalairesLMP);
+        const irFoyerSansLMP = calculerIR(baseSalairesImposable, nombreParts);
+        const baseAvecLMP = resteAvantIRLMP < 0
+            ? Math.max(0, baseSalairesImposable + resteAvantIRLMP)
+            : (baseSalairesImposable + resteAvantIRLMP);
+        const irFoyerAvecLMP = calculerIR(baseAvecLMP, nombreParts);
+        let irImpactLMP = irFoyerAvecLMP - irFoyerSansLMP;
+        if (!Number.isFinite(irImpactLMP)) irImpactLMP = 0;
+
+        const totalLMP = urssafLMP + irImpactLMP;
+        const totalLMPSafe = Number.isFinite(totalLMP) ? totalLMP : urssafLMP;
         
         document.getElementById('ssi-lmp-reel').textContent = urssafLMP.toFixed(0) + ' €';
-        document.getElementById('ir-lmp-reel').textContent = irPartLMP.toFixed(0) + ' €';
-        document.getElementById('total-lmp-reel').textContent = totalLMP.toFixed(0) + ' €';
+        document.getElementById('ir-lmp-reel').textContent = `${irImpactLMP > 0 ? '+' : ''}${irImpactLMP.toFixed(0)} €`;
+        document.getElementById('total-lmp-reel').textContent = totalLMPSafe.toFixed(0) + ' €';
+
+        if (resteAvantIRLMP < 0 && irImpactLMP < 0) {
+            conditionsLMP.innerHTML += `<div style="margin-top: 4px; color: #28a745; font-weight: 700;">🟢 Déficit déductible</div>`;
+        }
+
         desactiveLMP.style.display = 'none';
         
-        options.push({ nom: 'LMP Réel', total: totalLMP, id: 'option-lmp-reel', badge: 'badge-lmp-reel' });
+        options.push({ nom: 'LMP Réel', total: totalLMPSafe, id: 'option-lmp-reel', badge: 'badge-lmp-reel' });
     } else {
         desactiveLMP.style.display = 'block';
         document.getElementById('total-lmp-reel').textContent = 'N/A';
@@ -871,7 +941,7 @@ function comparerReelVsMicroBIC() {
     // ==========================================
     const abattementMicro = Math.max(ca * TAUX_ABATTEMENT_MICRO, ABATTEMENT_MIN_MICRO);
     const beneficeMicro = ca - abattementMicro; // Revenu imposable
-    const cotisationsMicro = ca * TAUX_COTIS_MICRO; // 21,2% du CA
+    const cotisationsMicro = ca >= 23000 ? ca * TAUX_COTIS_MICRO : 0;
     const resteAvantIRMicro = beneficeMicro - cotisationsMicro;
     
     // Calculer l'IR avec le micro-BIC
@@ -883,8 +953,9 @@ function comparerReelVsMicroBIC() {
     const nombreParts = 2 + (nombreEnfants * 0.5);
     const quotientFamilialMicro = revenusGlobauxMicro / nombreParts;
     
-    // Utiliser le barème IR de l'année en cours
-    const annee = new Date().getFullYear();
+    // CORRECTION 3 - 2026-02-17
+    // Utiliser le barème IR de l'année simulée
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
     const config = window.TAUX_FISCAUX.getConfig(annee);
     const bareme = config.BAREME_IR;
     
@@ -915,7 +986,9 @@ function comparerReelVsMicroBIC() {
     document.getElementById('comp-reel-ir').textContent = irPartLocationReel.toFixed(2) + ' €';
     document.getElementById('comp-reel-total').textContent = coutTotalReel.toFixed(2) + ' €';
     
-    document.getElementById('comp-micro-cotis').textContent = cotisationsMicro.toFixed(2) + ' €';
+    document.getElementById('comp-micro-cotis').textContent = cotisationsMicro === 0
+        ? '0 € (exonéré CA < 23 000 €)'
+        : cotisationsMicro.toFixed(2) + ' €';
     document.getElementById('comp-micro-ir').textContent = irPartLocationMicro.toFixed(2) + ' €';
     document.getElementById('comp-micro-total').textContent = coutTotalMicro.toFixed(2) + ' €';
     
@@ -987,7 +1060,7 @@ function changerStatutFiscal() {
 
 /**
  * Ajuste automatiquement le statut fiscal selon les critères LMP
- * CRITÈRES LMP : CA > 23k€ ET recettes location > 50% revenus d'activité du foyer
+ * CRITÈRES LMP : recettes locatives > 23k€ ET > autres revenus professionnels du foyer
  * @param {number} ca - Chiffre d'affaires (recettes de location)
  * @param {number} benefice - Bénéfice (pour recalcul URSSAF si changement)
  * @param {number} urssafActuel - URSSAF actuel
@@ -999,18 +1072,13 @@ function ajusterStatutFiscalAutomatique(ca, benefice, urssafActuel) {
     
     const SEUIL_CA_LMNP = 23000;
     
-    // Récupérer les REVENUS D'ACTIVITÉ du foyer fiscal (salaires)
-    const salaireMadame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
-    const salaireMonsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
     const recettesLocation = ca; // CA de la location meublée
-    
-    const revenusSalaries = salaireMadame + salaireMonsieur;
-    const revenusActiviteGlobaux = revenusSalaries + recettesLocation;
-    const partRecettesLocation = revenusActiviteGlobaux > 0 ? (recettesLocation / revenusActiviteGlobaux) * 100 : 0;
-    
-    // CRITÈRES LMP : CA > 23k€ ET recettes location > 50% revenus d'activité
+
+    const autresRevenusProfessionnels = getAutresRevenusProfessionnelsFoyer();
+
+    // CRITÈRES LMP : CA > 23k€ ET recettes location > autres revenus professionnels
     const critereCA = ca > SEUIL_CA_LMNP;
-    const criterePart = partRecettesLocation > 50;
+    const criterePart = recettesLocation > autresRevenusProfessionnels;
     const doitEtreLMP = critereCA && criterePart;
     
     // Si en LMNP mais doit être LMP, forcer le changement
@@ -1025,26 +1093,10 @@ function ajusterStatutFiscalAutomatique(ca, benefice, urssafActuel) {
         }
         
         // Recalculer URSSAF en mode LMP (cotisations minimales 1200€)
-        const annee = new Date().getFullYear();
+        const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
         const config = window.TAUX_FISCAUX.getConfig(annee);
-        
-        let urssafNew = 0;
-        if (benefice > 0) {
-            const indemnites = benefice * config.URSSAF.indemnites_journalieres.taux;
-            const retraiteBase = benefice * config.URSSAF.retraite_base.taux;
-            const retraiteCompl = benefice * config.URSSAF.retraite_complementaire.taux;
-            const invalidite = benefice * config.URSSAF.invalidite_deces.taux;
-            const csgCrds = benefice * config.URSSAF.csg_crds.taux;
-            const formationPro = benefice * config.URSSAF.formation_pro.taux;
-            const allocations = 0; // Calculé séparément avec allocations_familiales
-            
-            urssafNew = indemnites + retraiteBase + retraiteCompl + invalidite + csgCrds + formationPro + allocations;
-        }
-        
-        const COTISATIONS_MINIMALES_LMP = config.COTISATIONS_MINIMALES.montant;
-        if (urssafNew < COTISATIONS_MINIMALES_LMP) {
-            urssafNew = COTISATIONS_MINIMALES_LMP;
-        }
+
+        const { urssaf: urssafNew } = calculerURSSAF(benefice, ca, 'lmp', config);
         
         const resteAvantIRNew = benefice - urssafNew;
         
@@ -1100,23 +1152,21 @@ function verifierSeuilsStatut() {
     const salaireMadame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
     const salaireMonsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
     const revenusSalaries = salaireMadame + salaireMonsieur;
+    const autresRevenusProfessionnels = getAutresRevenusProfessionnelsFoyer();
     
     const beneficeReel = parseFloat(document.getElementById('preview-benefice')?.textContent?.replace(/[€\s]/g, '') || 0);
     const urssafReel = parseFloat(document.getElementById('preview-urssaf')?.textContent?.replace(/[€\s]/g, '') || 0);
     const resteAvantIRReel = parseFloat(document.getElementById('preview-reste')?.textContent?.replace(/[€\s]/g, '') || 0);
     
     // CRITÈRES IDENTIQUES AU TABLEAU COMPARATIF
-    const revenusActiviteGlobaux = revenusSalaries + ca;
-    const partRecettesLocation = revenusActiviteGlobaux > 0 ? (ca / revenusActiviteGlobaux) * 100 : 0;
+    const recettesSupAutresRevenus = ca > autresRevenusProfessionnels;
     
     // LMP OBLIGATOIRE (grise LMNP dans le tableau)
-    const lmpObligatoire = ca > 23000 && partRecettesLocation > 50;
+    const lmpObligatoire = ca > 23000 && recettesSupAutresRevenus;
     
     // PEUT ÊTRE LMP (active LMP dans le tableau)
-    const revenusGlobauxReel = revenusSalaries + resteAvantIRReel;
-    const partLocative = revenusGlobauxReel > 0 ? (resteAvantIRReel / revenusGlobauxReel) * 100 : 0;
     const critereCA_LMP = ca > 23000;
-    const criterePart_LMP = partLocative > 50;
+    const criterePart_LMP = recettesSupAutresRevenus;
     const forceLMP = statut === 'lmp';
     const peutEtreLMP = forceLMP || (critereCA_LMP && criterePart_LMP);
     
@@ -1233,10 +1283,12 @@ function verifierSeuilsStatut() {
         alerteDiv.style.display = 'block';
         alerteDiv.style.background = '#f8d7da';
         alerteDiv.style.borderLeft = '4px solid #dc3545';
+        // CORRECTION 5 - 2026-02-17
         alerteMessage.innerHTML = `⚠️ <strong>Passage automatique en statut LMP</strong><br>
             • CA (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) > 23 000 €<br>
-            • Recettes de location (${partRecettesLocation.toFixed(1)}%) > 50% des revenus d'activité<br>
-            → <strong>Inscription obligatoire au RCS</strong>`;
+            • Recettes locatives (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) > autres revenus professionnels (${autresRevenusProfessionnels.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €)<br>
+            → <strong>Affiliation SSI obligatoire (Sécurité Sociale des Indépendants)</strong>
+            <span title="Depuis la décision du Conseil constitutionnel du 8 octobre 2021, l'inscription au RCS n'est plus une condition du statut LMP." style="margin-left: 6px; cursor: help;">ℹ️</span>`;
     } else if (statut === 'lmnp' && ca < 23000) {
         alerteDiv.style.display = 'block';
         alerteDiv.style.background = '#d4edda';
@@ -1246,12 +1298,12 @@ function verifierSeuilsStatut() {
         alerteDiv.style.display = 'block';
         alerteDiv.style.background = '#d4edda';
         alerteDiv.style.borderLeft = '4px solid #28a745';
-        alerteMessage.innerHTML = `✅ <strong>Statut LMNP maintenu</strong> : Recettes (${partRecettesLocation.toFixed(1)}%) < 50% des revenus d'activité`;
+        alerteMessage.innerHTML = `✅ <strong>Statut LMNP maintenu</strong> : Recettes locatives (${ca.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €) ≤ autres revenus professionnels (${autresRevenusProfessionnels.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €)`;
     } else if (statut === 'lmp' && peutEtreLMP) {
         alerteDiv.style.display = 'block';
         alerteDiv.style.background = '#d4edda';
         alerteDiv.style.borderLeft = '4px solid #28a745';
-        alerteMessage.innerHTML = `✅ <strong>Statut LMP valide</strong> : CA > 23 000 € et recettes > 50% des revenus d'activité`;
+        alerteMessage.innerHTML = `✅ <strong>Statut LMP valide</strong> : CA > 23 000 € et recettes locatives > autres revenus professionnels du foyer`;
     } else {
         alerteDiv.style.display = 'none';
     }
@@ -1331,8 +1383,15 @@ function calculerTempsReel() {
         const chargesResidence = calculerChargesResidence() * ratio;
         const fraisPro = calculerFraisProfessionnels();
         const fraisVehicule = calculerFraisVehicule();
-        
-        const totalCharges = chargesBiens + chargesResidence + fraisPro + fraisVehicule;
+
+        // ⚠️ ALIGNEMENT CALCUL PRINCIPAL:
+        // Bénéfice imposable = CA - (Charges biens + Frais pro + Crédits immobiliers)
+        // Les charges résidence principale et frais véhicule restent affichés à titre indicatif,
+        // mais ne sont pas inclus dans le total déductible fiscal.
+        const creditsListe = getCreditsListe();
+        const totalCredits = creditsListe.reduce((sum, c) => sum + (c.mensualite * 12), 0);
+
+        const totalCharges = chargesBiens + fraisPro + totalCredits;
         const benefice = ca - totalCharges;
         
         // ==========================================
@@ -1341,63 +1400,17 @@ function calculerTempsReel() {
         const annee = new Date().getFullYear();
         const config = window.TAUX_FISCAUX.getConfig(annee);
         
-        // Détail des cotisations URSSAF (calculées UNIQUEMENT si bénéfice > 0)
-        let indemnites = 0;
-        let retraiteBase = 0;
-        let retraiteCompl = 0;
-        let invalidite = 0;
-        let csgCrds = 0;
-        let formationPro = 0;
-        let allocations = 0;
-        
-        // Calculer cotisations uniquement si bénéfice positif
-        if (benefice > 0) {
-            const urssafConfig = config.URSSAF;
-            
-            // Indemnités journalières: 0.85%
-            indemnites = benefice * urssafConfig.indemnites_journalieres.taux;
-            
-            // Retraite de base: 17.75% (plafonné à 1 PASS)
-            const revenuPlafonne = Math.min(benefice, urssafConfig.retraite_base.plafond);
-            retraiteBase = revenuPlafonne * urssafConfig.retraite_base.taux;
-            
-            // Retraite complémentaire: 7%
-            retraiteCompl = benefice * urssafConfig.retraite_complementaire.taux;
-            
-            // Invalidité-Décès: 1.3%
-            invalidite = benefice * urssafConfig.invalidite_deces.taux;
-            
-            // CSG-CRDS: 9.7%
-            csgCrds = benefice * urssafConfig.csg_crds.taux;
-            
-            // Formation professionnelle: 0.25% du CA
-            formationPro = ca * urssafConfig.formation_pro.taux;
-            
-            // Allocations familiales (progressif 110%-140% PASS)
-            const af = urssafConfig.allocations_familiales;
-            if (benefice > af.seuil_debut) {
-                const baseAF = Math.min(benefice - af.seuil_debut, af.seuil_fin - af.seuil_debut);
-                const tauxAF = (baseAF / (af.seuil_fin - af.seuil_debut)) * af.taux_max;
-                allocations = benefice * tauxAF;
-            }
-        }
-        
-        // TOTAL URSSAF = somme des cotisations (0.85% + 17.75% + 7% + 1.3% + 9.7% + 0.25% + AF progressif)
-        let urssaf = indemnites + retraiteBase + retraiteCompl + invalidite + csgCrds + formationPro + allocations;
-        
-        // ⚠️ RÈGLES COTISATIONS selon le statut
         const statutFiscal = document.getElementById('statut_fiscal')?.value || 'lmnp';
-        const COTISATIONS_MINIMALES_LMP = config.COTISATIONS_MINIMALES.montant; // Cotisations SSI minimales pour LMP
-        const SEUIL_EXONERATION_LMNP = 23000; // Seuil d'exonération URSSAF en LMNP
-        
-        if (statutFiscal === 'lmnp' && ca < SEUIL_EXONERATION_LMNP) {
-            // ✅ LMNP : Exonération totale des cotisations sociales si CA < 23 000€
-            urssaf = 0;
-        } else if (statutFiscal === 'lmp' && urssaf < COTISATIONS_MINIMALES_LMP) {
-            // ⚠️ LMP : Cotisations minimales même si bénéfice = 0
-            urssaf = COTISATIONS_MINIMALES_LMP;
-        }
-        // En LMNP avec CA ≥ 23 000€ : cotisations calculées normalement
+        // CORRECTION 1 - 2026-02-17
+        const urssafResult = calculerURSSAF(benefice, ca, statutFiscal, config);
+        const urssaf = urssafResult.urssaf;
+        const indemnites = urssafResult.detail.indemnites;
+        const retraiteBase = urssafResult.detail.retraiteBase;
+        const retraiteCompl = urssafResult.detail.retraiteCompl;
+        const invalidite = urssafResult.detail.invalidite;
+        const csgCrds = urssafResult.detail.csgCrds;
+        const formationPro = urssafResult.detail.formationPro;
+        const allocations = urssafResult.detail.allocations;
         
         const resteAvantIR = benefice - urssaf;
         
@@ -1914,8 +1927,9 @@ function calculerIR() {
     const revenuLMP = parseFloat(document.getElementById('revenu_lmp')?.value || 0);
     const nbEnfants = parseInt(document.getElementById('nombre_enfants')?.value || 0);
     
-    // Récupérer la config fiscale pour l'année en cours
-    const annee = new Date().getFullYear();
+    // CORRECTION 3 - 2026-02-17
+    // Récupérer la config fiscale pour l'année simulée
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
     const config = window.TAUX_FISCAUX.getConfig(annee);
     
     // Récupérer les données de frais individuelles
@@ -1946,8 +1960,12 @@ function calculerIR() {
     const salaireMadame = salaireMadameBrut - abattementMadame;
     const salaireMonsieur = salaireMonsieurBrut - abattementMonsieur;
     
-    // Revenu imposable total (salaires après abattement + LMP)
-    const revenuTotal = salaireMadame + salaireMonsieur + revenuLMP;
+    // CORRECTION 2 - 2026-02-17
+    // Imputation du déficit LMP sur le revenu global (plancher à 0)
+    const salairesImposables = salaireMadame + salaireMonsieur;
+    const revenuTotal = revenuLMP < 0
+        ? Math.max(0, salairesImposables + revenuLMP)
+        : (salairesImposables + revenuLMP);
     
     if (revenuTotal === 0) {
         document.getElementById('resultat-ir').style.display = 'none';
@@ -1980,7 +1998,9 @@ function calculerIR() {
     
     const impotTotal = impotQuotient * parts;
     const resteFinalTotal = revenuTotal - impotTotal; // Reste après IR sur le revenu total
-    const resteFinalLMP = revenuLMP - (impotTotal * (revenuLMP / revenuTotal)); // Part IR du LMP
+    const resteFinalLMP = revenuTotal > 0
+        ? (revenuLMP - (impotTotal * (revenuLMP / revenuTotal)))
+        : revenuLMP;
     
     // Affichage
     document.getElementById('resultat-ir').style.display = 'block';
@@ -2302,7 +2322,8 @@ function toggleVehiculeOption() {
 // ==========================================
 
 function calculerBaremeKilometrique(puissance, km) {
-    const annee = new Date().getFullYear();
+    // CORRECTION 3 - 2026-02-17
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
     const config = window.TAUX_FISCAUX.getConfig(annee);
     const baremes = config.BAREME_KM;
     
@@ -2363,7 +2384,7 @@ function calculerFiscalite(event) {
         getAnnualValue('fournitures', 'fournitures_type');
     
     // CRÉDIT (depuis la liste des crédits)
-    const creditsListe = getCreditsList();
+    const creditsListe = getCreditsListe();
     const totalCredits = creditsListe.reduce((sum, c) => sum + (c.mensualite * 12), 0);
     
     // CALCUL FINAL : Biens + Pro + Crédits
@@ -2398,33 +2419,26 @@ function calculerFiscalite(event) {
     }
     const benefice = ca - totalCharges;
     
-    // COTISATIONS URSSAF
+    // CORRECTION 1 - 2026-02-17
+    const statutFiscal = document.getElementById('statut_fiscal')?.value || 'lmnp';
+    const urssafResult = calculerURSSAF(benefice, ca, statutFiscal, config);
     const cotisations = {
-        indemnites: benefice * config.URSSAF.indemnites_journalieres.taux,
-        retraiteBase: benefice * config.URSSAF.retraite_base.taux,
-        retraiteCompl: benefice * config.URSSAF.retraite_complementaire.taux,
-        invalidite: benefice * config.URSSAF.invalidite_deces.taux,
-        csgCrds: benefice * config.URSSAF.csg_crds.taux,
-        formationPro: ca * config.URSSAF.formation_pro.taux
+        indemnites: urssafResult.detail.indemnites,
+        retraiteBase: urssafResult.detail.retraiteBase,
+        retraiteCompl: urssafResult.detail.retraiteCompl,
+        invalidite: urssafResult.detail.invalidite,
+        csgCrds: urssafResult.detail.csgCrds,
+        formationPro: urssafResult.detail.formationPro,
+        allocations: urssafResult.detail.allocations
     };
-    
-    let totalCotisations = 0;
-    
-    // Calculer cotisations uniquement si bénéfice positif
-    if (benefice > 0) {
-        totalCotisations = Object.values(cotisations).reduce((sum, val) => sum + val, 0);
-    }
-    
-    // ⚠️ MINIMUM URSSAF : cotisations minimales légales obligatoires
-    // Même si bénéfice négatif ou nul, minimum à payer
-    if (totalCotisations < config.COTISATIONS_MINIMALES.montant) {
-        totalCotisations = config.COTISATIONS_MINIMALES.montant;
-    }
+
+    const totalCotisations = urssafResult.urssaf;
     
     const resteAvantIR = benefice - totalCotisations;
     
     // TRIMESTRES RETRAITE (1 trimestre = 600 SMIC horaire)
-    const trimestres = Math.min(4, Math.floor(benefice / (600 * 11.65)));
+    const smicHoraire = config.SMIC_HORAIRE || 11.88;
+    const trimestres = Math.min(4, Math.floor(benefice / (600 * smicHoraire)));
     
     // AFFICHER LES RÉSULTATS
     afficherResultats({
@@ -3249,34 +3263,32 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
         donnees_detaillees: {} // JSONB - VRAIE colonne
     };
     
-    // ✅ CALCULER LE TOTAL DES CHARGES (pour le dashboard)
-    let totalChargesCalcul = 0;
-    
-    // 1. Charges de tous les gîtes
-    if (window.GITES_DATA && window.GITES_DATA.length > 0) {
-        window.GITES_DATA.forEach(gite => {
-            // ⚠️ TOUJOURS recalculer le slug pour cohérence avec les IDs HTML
-            const giteSlug = gite.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            totalChargesCalcul += calculerChargesBien(giteSlug);
-        });
+    // CORRECTION 4 - 2026-02-17
+    // Priorité à la valeur affichée (source unique alignée avec calculerTempsReel)
+    let totalChargesCalcul = parseDisplayedAmount('total-charges-annuelles');
+
+    // Fallback si le DOM n'est pas prêt : recalcul aligné sans charges résidence/véhicule
+    if (!Number.isFinite(totalChargesCalcul) || totalChargesCalcul <= 0) {
+        totalChargesCalcul = 0;
+
+        if (window.GITES_DATA && window.GITES_DATA.length > 0) {
+            window.GITES_DATA.forEach(gite => {
+                const giteSlug = gite.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                totalChargesCalcul += calculerChargesBien(giteSlug);
+            });
+        }
+
+        const chargesImmediates = [
+            ...getTravauxListe().filter(item => !item.type_amortissement || item.type_amortissement === ''),
+            ...getFraisDiversListe().filter(item => !item.type_amortissement || item.type_amortissement === ''),
+            ...getProduitsAccueilListe().filter(item => !item.type_amortissement || item.type_amortissement === '')
+        ].reduce((sum, item) => sum + item.montant, 0);
+
+        const amortissements = calculerAmortissementsAnneeCourante();
+        const totalCredits = getCreditsListe().reduce((sum, c) => sum + (c.mensualite * 12), 0);
+
+        totalChargesCalcul += chargesImmediates + amortissements.montantAnnuel + calculerFraisProfessionnels() + totalCredits;
     }
-    
-    // 2. Charges immédiates
-    const chargesImmediates = [
-        ...getTravauxListe().filter(item => !item.type_amortissement || item.type_amortissement === ''),
-        ...getFraisDiversListe().filter(item => !item.type_amortissement || item.type_amortissement === ''),
-        ...getProduitsAccueilListe().filter(item => !item.type_amortissement || item.type_amortissement === '')
-    ].reduce((sum, item) => sum + item.montant, 0);
-    
-    // 3. Amortissements année en cours
-    const amortissements = calculerAmortissementsAnneeCourante();
-    totalChargesCalcul += chargesImmediates + amortissements.montantAnnuel;
-    
-    // 4. Charges résidence, frais pro, frais véhicule
-    const ratio = calculerRatio();
-    totalChargesCalcul += calculerChargesResidence() * ratio;
-    totalChargesCalcul += calculerFraisProfessionnels();
-    totalChargesCalcul += calculerFraisVehicule();
     
     // console.log('💾 Total charges calculé pour sauvegarde:', totalChargesCalcul.toFixed(2), '€');
     

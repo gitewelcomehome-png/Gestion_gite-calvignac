@@ -104,10 +104,10 @@ window.validateCurrentWeek = async function() {
 // ================================================================
 
 window.switchTab = function(tabName) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+    document.querySelectorAll('.content-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.content-tab-content').forEach(content => content.style.display = 'none');
     
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    document.querySelector(`.content-tab-btn[data-tab="${tabName}"]`).classList.add('active');
     document.getElementById(`tab-${tabName}`).style.display = 'block';
     
     lucide.createIcons();

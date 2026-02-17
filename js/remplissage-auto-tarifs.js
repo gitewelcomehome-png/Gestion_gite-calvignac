@@ -43,27 +43,33 @@
     // Cache des réservations
     let reservationsForGite = [];
 
+    function buildDefaultModalState() {
+        const now = new Date();
+        return {
+            periode: {
+                type: 'mois',
+                annee: now.getFullYear(),
+                mois: now.getMonth(),
+                trimestre: Math.floor(now.getMonth() / 3) + 1,
+                dateDebut: null,
+                dateFin: null
+            },
+            joursSelectionnes: {
+                lundi: true,
+                mardi: true,
+                mercredi: true,
+                jeudi: true,
+                vendredi: true,
+                samedi: true,
+                dimanche: true
+            },
+            tarif: 100,
+            currentGiteId: null
+        };
+    }
+
     // État de la modal
-    let modalState = {
-        periode: {
-            type: 'mois', // 'mois', 'annee', 'trimestre', 'personnalise'
-            annee: 2026,
-            mois: 1,
-            dateDebut: null,
-            dateFin: null
-        },
-        joursSelectionnes: {
-            lundi: true,
-            mardi: true,
-            mercredi: true,
-            jeudi: true,
-            vendredi: true,
-            samedi: true,
-            dimanche: true
-        },
-        tarif: 100,
-        currentGiteId: null
-    };
+    let modalState = buildDefaultModalState();
 
     // ============================================================================
     // UTILITAIRES
@@ -105,7 +111,12 @@
     }
 
     function getDatesInPeriode() {
+        return getDatesByReservationStatus().datesDisponibles;
+    }
+
+    function getDatesByReservationStatus() {
         const dates = [];
+        const datesReservees = [];
         let debut, fin;
 
         switch (modalState.periode.type) {
@@ -139,21 +150,50 @@
             const dateStr = current.toISOString().split('T')[0];
             const jourSemaine = getJourSemaine(dateStr);
             
-            if (modalState.joursSelectionnes[jourSemaine] && !isDateReservee(dateStr)) {
-                dates.push(dateStr);
+            if (modalState.joursSelectionnes[jourSemaine]) {
+                if (isDateReservee(dateStr)) {
+                    datesReservees.push(dateStr);
+                } else {
+                    dates.push(dateStr);
+                }
             }
             
             current.setDate(current.getDate() + 1);
         }
 
-        return dates;
+        return {
+            datesDisponibles: dates,
+            datesReservees
+        };
     }
 
     // ============================================================================
     // INTERFACE MODAL
     // ============================================================================
 
+    function setRemplissageFeedback(message, type = 'success') {
+        const feedback = document.getElementById('remplissage-feedback');
+        if (!feedback) return;
+
+        feedback.textContent = message;
+        feedback.className = `remplissage-feedback ${type}`;
+        feedback.style.display = 'block';
+    }
+
+    function clearRemplissageFeedback() {
+        const feedback = document.getElementById('remplissage-feedback');
+        if (!feedback) return;
+        feedback.textContent = '';
+        feedback.className = 'remplissage-feedback';
+        feedback.style.display = 'none';
+    }
+
     function createModal() {
+        const existingModal = document.getElementById('modal-remplissage-auto');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
         const modal = document.createElement('div');
         modal.id = 'modal-remplissage-auto';
         modal.className = 'modal-overlay';
@@ -263,10 +303,11 @@
 
                 <div class="modal-footer">
                     <button class="btn-secondary" onclick="window.closeModalRemplissageAuto()">Annuler</button>
-                    <button class="btn-primary" onclick="window.appliquerRemplissageAuto()">
+                    <button id="btn-appliquer-remplissage" class="btn-primary" onclick="window.appliquerRemplissageAuto()">
                         ✅ Appliquer les tarifs
                     </button>
                 </div>
+                <div id="remplissage-feedback" class="remplissage-feedback" style="display: none;"></div>
             </div>
         `;
         
@@ -305,24 +346,35 @@
 
     function updatePeriodeDetails() {
         const container = document.getElementById('periode-details');
+        if (!container) return;
+
         const now = new Date();
         const currentYear = now.getFullYear();
         const currentMonth = now.getMonth();
+        const defaultYears = [currentYear, currentYear + 1, currentYear + 2];
+        const years = Array.from(new Set([modalState.periode.annee, ...defaultYears])).sort((a, b) => a - b);
 
         switch (modalState.periode.type) {
             case 'mois':
+                if (!modalState.periode.annee) {
+                    modalState.periode.annee = currentYear;
+                }
+                if (modalState.periode.mois === undefined || modalState.periode.mois === null) {
+                    modalState.periode.mois = currentMonth;
+                }
+
                 container.innerHTML = `
                     <div class="periode-inputs">
                         <select id="select-mois">
                             ${Array.from({ length: 12 }, (_, i) => {
                                 const date = new Date(2026, i, 1);
                                 const nom = date.toLocaleDateString('fr-FR', { month: 'long' });
-                                return `<option value="${i}" ${i === currentMonth ? 'selected' : ''}>${nom}</option>`;
+                                return `<option value="${i}" ${i === modalState.periode.mois ? 'selected' : ''}>${nom}</option>`;
                             }).join('')}
                         </select>
                         <select id="select-annee">
-                            ${[2026, 2027, 2028].map(y => 
-                                `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`
+                            ${years.map(y => 
+                                `<option value="${y}" ${y === modalState.periode.annee ? 'selected' : ''}>${y}</option>`
                             ).join('')}
                         </select>
                     </div>
@@ -339,17 +391,24 @@
                 break;
 
             case 'trimestre':
+                if (!modalState.periode.annee) {
+                    modalState.periode.annee = currentYear;
+                }
+                if (!modalState.periode.trimestre) {
+                    modalState.periode.trimestre = Math.floor(currentMonth / 3) + 1;
+                }
+
                 container.innerHTML = `
                     <div class="periode-inputs">
                         <select id="select-trimestre">
-                            <option value="1">T1 (Jan-Mar)</option>
-                            <option value="2">T2 (Avr-Juin)</option>
-                            <option value="3">T3 (Juil-Sept)</option>
-                            <option value="4">T4 (Oct-Déc)</option>
+                            <option value="1" ${modalState.periode.trimestre === 1 ? 'selected' : ''}>T1 (Jan-Mar)</option>
+                            <option value="2" ${modalState.periode.trimestre === 2 ? 'selected' : ''}>T2 (Avr-Juin)</option>
+                            <option value="3" ${modalState.periode.trimestre === 3 ? 'selected' : ''}>T3 (Juil-Sept)</option>
+                            <option value="4" ${modalState.periode.trimestre === 4 ? 'selected' : ''}>T4 (Oct-Déc)</option>
                         </select>
                         <select id="select-annee">
-                            ${[2026, 2027, 2028].map(y => 
-                                `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`
+                            ${years.map(y => 
+                                `<option value="${y}" ${y === modalState.periode.annee ? 'selected' : ''}>${y}</option>`
                             ).join('')}
                         </select>
                     </div>
@@ -363,15 +422,18 @@
                     modalState.periode.annee = parseInt(this.value);
                     updatePreview();
                 });
-                modalState.periode.trimestre = 1;
                 break;
 
             case 'annee':
+                if (!modalState.periode.annee) {
+                    modalState.periode.annee = currentYear;
+                }
+
                 container.innerHTML = `
                     <div class="periode-inputs">
                         <select id="select-annee">
-                            ${[2026, 2027, 2028].map(y => 
-                                `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`
+                            ${years.map(y => 
+                                `<option value="${y}" ${y === modalState.periode.annee ? 'selected' : ''}>${y}</option>`
                             ).join('')}
                         </select>
                     </div>
@@ -416,6 +478,7 @@
     function updatePreview() {
         const dates = getDatesInPeriode();
         const container = document.getElementById('preview-calendar');
+        if (!container) return;
         
         let countFeries = 0;
         let countVacances = 0;
@@ -536,22 +599,24 @@
 
     async function appliquerRemplissageAuto() {
         if (!modalState.currentGiteId) {
-            alert('❌ Aucun gîte sélectionné');
+            setRemplissageFeedback('❌ Aucun gîte sélectionné', 'error');
             return;
         }
 
         if (modalState.tarif <= 0) {
-            alert('❌ Le tarif doit être supérieur à 0');
+            setRemplissageFeedback('❌ Le tarif doit être supérieur à 0', 'error');
             return;
         }
 
-        const dates = getDatesInPeriode();
-        if (dates.length === 0) {
-            alert('❌ Aucun jour sélectionné');
+        const { datesDisponibles, datesReservees } = getDatesByReservationStatus();
+        if (datesDisponibles.length === 0 && datesReservees.length === 0) {
+            setRemplissageFeedback('❌ Aucun jour sélectionné', 'error');
             return;
         }
 
         try {
+            clearRemplissageFeedback();
+
             // Bloquer le bouton pendant le traitement
             const btnAppliquer = document.getElementById('btn-appliquer-remplissage');
             if (btnAppliquer) {
@@ -578,7 +643,7 @@
             if (Array.isArray(rawData)) {
                 // Format tableau [{date: '2026-01-21', prix_nuit: 300}]
                 rawData.forEach(item => {
-                    if (item.date && item.prix_nuit) {
+                    if (item.date && item.prix_nuit !== undefined && item.prix_nuit !== null) {
                         tarifsExistants[item.date] = item.prix_nuit;
                     }
                 });
@@ -587,9 +652,14 @@
                 tarifsExistants = rawData;
             }
 
-            // Appliquer les tarifs aux dates sélectionnées
-            dates.forEach(date => {
+            // Appliquer les tarifs aux dates disponibles
+            datesDisponibles.forEach(date => {
                 tarifsExistants[date] = modalState.tarif;
+            });
+
+            // Forcer 0 sur les dates réservées sélectionnées
+            datesReservees.forEach(date => {
+                tarifsExistants[date] = 0;
             });
 
             // ✅ NOUVEAU : Sauvegarder en format OBJECT (pas array)
@@ -610,23 +680,34 @@
                 throw updateError;
             }
 
-            // Recharger les tarifs AVANT de fermer
-            if (typeof window.loadTarifsBase === 'function') {
-                await window.loadTarifsBase();
+            const datesImpactees = [...datesDisponibles, ...datesReservees].sort();
+            const premiereDateImpactee = datesImpactees[0] || null;
+
+            if (premiereDateImpactee && typeof window.focusTarifsCalendarOnDate === 'function') {
+                window.focusTarifsCalendarOnDate(premiereDateImpactee);
             }
+            if (premiereDateImpactee && typeof window.focusGDFCalendarOnDate === 'function') {
+                window.focusGDFCalendarOnDate(premiereDateImpactee);
+            }
+
+            // Recharger les tarifs AVANT de fermer
             if (typeof window.loadAllData === 'function') {
                 await window.loadAllData();
+            } else if (typeof window.loadTarifsBase === 'function') {
+                await window.loadTarifsBase();
             }
             if (typeof window.renderCalendrierTarifs === 'function') {
                 window.renderCalendrierTarifs();
             }
 
-            // Fermer le modal après rechargement
-            window.closeModalRemplissageAuto();
+            setRemplissageFeedback(
+                `✅ Modifications appliquées : ${datesDisponibles.length} date(s) mise(s) à jour et ${datesReservees.length} date(s) réservée(s) conservée(s) à 0.`,
+                'success'
+            );
 
         } catch (error) {
             console.error('Erreur application tarifs:', error);
-            alert('❌ Erreur lors de l\'application des tarifs: ' + error.message);
+            setRemplissageFeedback(`❌ Erreur lors de l'application des tarifs: ${error.message}`, 'error');
         } finally {
             // Réactiver le bouton
             const btnAppliquer = document.getElementById('btn-appliquer-remplissage');
@@ -642,6 +723,10 @@
     // ============================================================================
 
     window.openModalRemplissageAuto = async function(giteId) {
+        const stateTemplate = buildDefaultModalState();
+        modalState.periode = stateTemplate.periode;
+        modalState.joursSelectionnes = stateTemplate.joursSelectionnes;
+        modalState.tarif = stateTemplate.tarif;
         modalState.currentGiteId = giteId;
         
         // Charger les réservations pour ce gîte
@@ -660,6 +745,7 @@
         }
         
         createModal();
+        clearRemplissageFeedback();
     };
 
     window.closeModalRemplissageAuto = function() {

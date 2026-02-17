@@ -144,8 +144,23 @@
 
         const message = event.message || '';
         const source = event.filename || '';
+        
+        // Ignorer erreurs sans message ou avec message vide
+        if (!message || message.trim() === '' || message === 'Erreur inconnue') {
+            return;
+        }
+        
+        // Ignorer erreurs provenant d'extensions ou sources externes
+        if (source && (
+            source.startsWith('chrome-extension://') ||
+            source.startsWith('moz-extension://') ||
+            source.startsWith('safari-extension://') ||
+            source.includes('extension')
+        )) {
+            return;
+        }
 
-        // Ignorer Extensions navigateur
+        // Ignorer Extensions navigateur et autres patterns
         if (shouldIgnoreError(message, source)) {
             return;
         }

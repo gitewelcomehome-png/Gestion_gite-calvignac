@@ -28,6 +28,24 @@ let currentYearTarifs = today.getFullYear();
 let currentMonthReservations = today.getMonth();
 let currentYearReservations = today.getFullYear();
 
+function toLocalDateString(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function parseDateOnly(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return null;
+    const [year, month, day] = dateStr.slice(0, 10).split('-').map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+}
+
 // Caches de données
 let tarifsCache = [];
 let reservationsCache = [];
@@ -37,6 +55,7 @@ let isSelecting = false;
 let selectionMode = null;
 let autoSaveTimeout = null;
 let renderCalendarTimeout = null; // Debounce pour le re-render du calendrier
+let isAddingPeriodeDureeMin = false;
 
 // ==========================================
 // INITIALISATION
@@ -417,7 +436,7 @@ function _renderCalendrierTarifsImmediate() {
     
     for (let day = 1; day <= lastDay; day++) {
         const dateObj = new Date(currentYearTarifs, currentMonthTarifs, day);
-        const dateStr = dateObj.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(dateObj);
         
         const tarif = tarifsCache.find(t => t.date === dateStr);
         
@@ -594,6 +613,28 @@ function toggleDateSelection(dateStr) {
     }
 }
 
+function focusTarifsCalendarOnDate(dateStr) {
+    if (!dateStr) return;
+
+    const date = parseDateOnly(dateStr);
+    if (!date) return;
+    if (Number.isNaN(date.getTime())) return;
+
+    currentMonthTarifs = date.getMonth();
+    currentYearTarifs = date.getFullYear();
+}
+
+function focusGDFCalendarOnDate(dateStr) {
+    if (!dateStr) return;
+
+    const date = parseDateOnly(dateStr);
+    if (!date) return;
+    if (Number.isNaN(date.getTime())) return;
+
+    currentMonthGDF = date.getMonth();
+    currentYearGDF = date.getFullYear();
+}
+
 function previousMonthTarifs() {
     currentMonthTarifs--;
     if (currentMonthTarifs < 0) {
@@ -683,9 +724,18 @@ async function saveTarifFromModal() {
         
         // Réinitialiser la sélection
         selectedDates = [];
+
+        // Aligner les vues Tarifs + GDF sur la première date modifiée
+        if (datesToUpdate.length > 0) {
+            focusTarifsCalendarOnDate(datesToUpdate[0]);
+            focusGDFCalendarOnDate(datesToUpdate[0]);
+        }
         
         // Re-render immédiatement pour afficher les prix
         renderCalendrierTarifs();
+
+        // Mettre à jour automatiquement le tableau GDF
+        await generateTableauGDF();
         
     } catch (error) {
         console.error('❌ Erreur sauvegarde tarif:', error);
@@ -850,22 +900,67 @@ function renderPeriodesList() {
     if (!container) return;
     
     const periodes = reglesCache.periodes_duree_min || [];
-    
-    if (periodes.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-secondary);">Aucune période spécifique définie</p>';
-        return;
-    }
-    
-    container.innerHTML = periodes.map((periode, index) => `
+
+    const periodesHtml = periodes.length === 0
+        ? '<p style="color: var(--text-secondary);">Aucune période spécifique définie</p>'
+        : periodes.map((periode, index) => {
+            const dateDebut = parseDateOnly(periode.date_debut);
+            const dateFin = parseDateOnly(periode.date_fin);
+            const dateDebutFr = dateDebut ? dateDebut.toLocaleDateString('fr-FR') : periode.date_debut;
+            const dateFinFr = dateFin ? dateFin.toLocaleDateString('fr-FR') : periode.date_fin;
+
+            return `
         <div class="rules-card" style="display: flex; gap: 10px; align-items: center; padding: 15px;">
             <div style="flex: 1;">
-                <strong>Du ${new Date(periode.date_debut).toLocaleDateString('fr-FR')} 
-                au ${new Date(periode.date_fin).toLocaleDateString('fr-FR')}</strong>
+                <strong>Du ${dateDebutFr} 
+                au ${dateFinFr}</strong>
                 - Minimum ${periode.nuits_min} nuits
             </div>
             <button class="btn-neo btn-delete" onclick="removePeriodeDureeMin(${index})">🗑️</button>
         </div>
-    `).join('');
+    `;
+        }).join('');
+
+    const formHtml = isAddingPeriodeDureeMin ? `
+        <div class="rules-card" style="display: grid; gap: 12px; padding: 15px; margin-top: 10px;">
+            <div style="display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));">
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 6px;">Date début</label>
+                    <input type="date" id="periode-date-debut" class="input-neo" />
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 6px;">Date fin</label>
+                    <input type="date" id="periode-date-fin" class="input-neo" />
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 6px;">Nuits minimum</label>
+                    <input type="number" id="periode-nuits-min" class="input-neo" min="1" step="1" value="2" />
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn-neo" id="cancel-add-periode-btn">Annuler</button>
+                <button class="btn-neo btn-save" id="save-add-periode-btn">Ajouter</button>
+            </div>
+        </div>
+    ` : '';
+
+    container.innerHTML = `${periodesHtml}${formHtml}`;
+
+    if (isAddingPeriodeDureeMin) {
+        const saveBtn = document.getElementById('save-add-periode-btn');
+        const cancelBtn = document.getElementById('cancel-add-periode-btn');
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', savePeriodeDureeMinFromForm);
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                isAddingPeriodeDureeMin = false;
+                renderPeriodesList();
+            });
+        }
+    }
 }
 
 function toggleTarifType() {
@@ -880,28 +975,50 @@ function toggleTarifType() {
 }
 
 function addPeriodeDureeMin() {
-    const dateDebut = prompt('Date de début (YYYY-MM-DD) :');
-    const dateFin = prompt('Date de fin (YYYY-MM-DD) :');
-    const nuitsMin = prompt('Nombre de nuits minimum :');
-    
-    if (!dateDebut || !dateFin || !nuitsMin) return;
-    
+    isAddingPeriodeDureeMin = true;
+    renderPeriodesList();
+
+    const dateDebutInput = document.getElementById('periode-date-debut');
+    if (dateDebutInput) {
+        dateDebutInput.focus();
+    }
+}
+
+function savePeriodeDureeMinFromForm() {
+    const dateDebut = document.getElementById('periode-date-debut')?.value;
+    const dateFin = document.getElementById('periode-date-fin')?.value;
+    const nuitsMinValue = document.getElementById('periode-nuits-min')?.value;
+    const nuitsMin = parseInt(nuitsMinValue, 10);
+
+    if (!dateDebut || !dateFin || !nuitsMin || nuitsMin < 1) {
+        showToast('Veuillez remplir des valeurs valides', 'error');
+        return;
+    }
+
+    if (dateFin < dateDebut) {
+        showToast('La date de fin doit être après la date de début', 'error');
+        return;
+    }
+
     if (!reglesCache.periodes_duree_min) {
         reglesCache.periodes_duree_min = [];
     }
-    
+
     reglesCache.periodes_duree_min.push({
         date_debut: dateDebut,
         date_fin: dateFin,
-        nuits_min: parseInt(nuitsMin)
+        nuits_min: nuitsMin
     });
-    
+
+    isAddingPeriodeDureeMin = false;
+    autoSaveRegles();
     renderPeriodesList();
 }
 
 function removePeriodeDureeMin(index) {
     if (confirm('Supprimer cette période ?')) {
         reglesCache.periodes_duree_min.splice(index, 1);
+        autoSaveRegles();
         renderPeriodesList();
     }
 }
@@ -951,13 +1068,15 @@ async function saveRegles(isAutoSave = false) {
         if (error) throw error;
         
         reglesCache = regles;
+
+        // Recalcul visuel immédiat pour refléter les promotions en cours de saisie
+        renderCalendrierTarifs();
+        await generateTableauGDF();
         
         // Si c'est un auto-save, ne pas afficher de toast ni recharger
         // Le calendrier sera re-rendu uniquement au changement de mois/gîte
         if (!isAutoSave) {
             showToast('✅ Règles tarifaires enregistrées', 'success');
-            // Re-render uniquement sur demande manuelle
-            renderCalendrierTarifs();
         }
         
     } catch (error) {
@@ -976,12 +1095,13 @@ async function loadReservations() {
         
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        const todayStr = toLocalDateString(today);
         
         const { data, error } = await window.supabaseClient
             .from('reservations')
             .select('*')
             .eq('gite_id', currentGiteId)
-            .gte('check_out', today.toISOString().split('T')[0])
+            .gte('check_out', todayStr)
             .order('check_in', { ascending: true });
         
         if (error) throw error;
@@ -1040,7 +1160,7 @@ function renderCalendrierReservations() {
     
     for (let day = 1; day <= lastDay; day++) {
         const dateObj = new Date(currentYearReservations, currentMonthReservations, day);
-        const dateStr = dateObj.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(dateObj);
         
         // Trouver une réservation pour ce jour
         const reservation = reservationsCache.find(r => 
@@ -1203,9 +1323,9 @@ function calculateTarifForDuration(dateDebut, dateFin, nbNuits) {
     
     // Calculer le tarif pour chaque nuit
     for (let i = 0; i < nbNuits; i++) {
-        const date = new Date(dateDebut);
+        const date = parseDateOnly(dateDebut);
         date.setDate(date.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(date);
         
         const tarifBase = tarifsCache.find(t => t.date === dateStr)?.prix_nuit || 0;
         
@@ -1257,9 +1377,9 @@ function calculateTarifSansPromo(dateDebut, dateFin, nbNuits) {
     
     // Calculer le tarif pour chaque nuit
     for (let i = 0; i < nbNuits; i++) {
-        const date = new Date(dateDebut);
+        const date = parseDateOnly(dateDebut);
         date.setDate(date.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(date);
         
         const tarifBase = tarifsCache.find(t => t.date === dateStr)?.prix_nuit || 0;
         
@@ -1382,6 +1502,62 @@ async function toggleTableauGDF() {
     await generateTableauGDF();
 }
 
+function toDateOnlyString(value) {
+    if (!value) return null;
+
+    if (typeof value === 'string') {
+        return value.slice(0, 10);
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return toLocalDateString(date);
+}
+
+function hasReservationConflict(startDateStr, endDateStr) {
+    if (!Array.isArray(reservationsCache) || reservationsCache.length === 0) {
+        return false;
+    }
+
+    return reservationsCache.some(resa => {
+        const checkInStr = toDateOnlyString(resa.date_arrivee || resa.check_in);
+        const checkOutStr = toDateOnlyString(resa.date_depart || resa.check_out);
+
+        if (!checkInStr || !checkOutStr) {
+            return false;
+        }
+
+        return startDateStr < checkOutStr && endDateStr > checkInStr;
+    });
+}
+
+function getDureeMinimaleForDate(dateStr) {
+    const defaultMin = Math.max(1, parseInt(reglesCache?.duree_min_defaut, 10) || 2);
+    const periodes = reglesCache?.periodes_duree_min;
+
+    if (!Array.isArray(periodes) || periodes.length === 0) {
+        return defaultMin;
+    }
+
+    let dureeApplicable = defaultMin;
+
+    periodes.forEach(periode => {
+        const dateDebut = typeof periode?.date_debut === 'string' ? periode.date_debut.slice(0, 10) : null;
+        const dateFin = typeof periode?.date_fin === 'string' ? periode.date_fin.slice(0, 10) : null;
+        const nuitsMin = parseInt(periode?.nuits_min, 10);
+
+        if (!dateDebut || !dateFin || Number.isNaN(nuitsMin) || nuitsMin < 1) {
+            return;
+        }
+
+        if (dateStr >= dateDebut && dateStr <= dateFin) {
+            dureeApplicable = Math.max(dureeApplicable, nuitsMin);
+        }
+    });
+
+    return dureeApplicable;
+}
+
 async function generateTableauGDF() {
     const container = document.getElementById('tableau-gdf-container');
     if (container) {
@@ -1421,43 +1597,32 @@ async function generateTableauGDF() {
     
     for (let day = 1; day <= lastDay; day++) {
         const dateObj = new Date(currentYearGDF, currentMonthGDF, day);
-        const dateStr = dateObj.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(dateObj);
         const dayName = dateObj.toLocaleDateString('fr-FR', { weekday: 'short' });
+        const dureeMinimale = getDureeMinimaleForDate(dateStr);
+        const dureeMinBadge = dureeMinimale !== 2
+            ? `<span class="gdf-min-badge">min ${dureeMinimale} nuits</span>`
+            : '';
         
-        html += `<tr><td style="font-weight: 700; background: rgba(102, 126, 234, 0.08); border: 2px solid #667eea; padding: 12px; text-align: left; color: var(--text);">${dayName} ${dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>`;
-        
-        // Récupérer la durée minimale depuis les règles
-        const dureeMinimale = reglesCache?.duree_min_defaut || 2;
+        html += `<tr><td class="gdf-arrivee-cell" style="font-weight: 700; background: rgba(102, 126, 234, 0.08); border: 2px solid #667eea; padding: 12px; text-align: left; color: var(--text);"><span>${dayName} ${dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>${dureeMinBadge}</td>`;
         
         // Calculer le tarif pour chaque durée
         for (let nights = 1; nights <= 8; nights++) {
             const dateFin = new Date(dateObj);
             dateFin.setDate(dateFin.getDate() + nights);
-            const dateFinStr = dateFin.toISOString().split('T')[0];
+            const dateFinStr = toLocalDateString(dateFin);
             
             // Vérifier la durée minimale
             if (nights < dureeMinimale) {
-                html += `<td class="cell-reserved" style="background: #f8f9fa; color: #95a5a6; border: 2px solid #dfe6e9; padding: 12px; text-align: center; font-weight: 600;">0</td>`;
+                html += `<td class="cell-min-duration" style="padding: 12px; text-align: center; font-weight: 600;">&nbsp;</td>`;
                 continue;
             }
             
             // Vérifier si le séjour chevauche une réservation existante
-            let hasConflict = false;
-            for (const resa of reservationsCache) {
-                const checkIn = new Date(resa.date_arrivee || resa.check_in);
-                const checkOut = new Date(resa.date_depart || resa.check_out);
-                
-                // Le séjour chevauche si :
-                // - L'arrivée est avant la fin de la réservation ET
-                // - Le départ est après le début de la réservation
-                if (dateObj < checkOut && dateFin > checkIn) {
-                    hasConflict = true;
-                    break;
-                }
-            }
+            const hasConflict = hasReservationConflict(dateStr, dateFinStr);
             
             if (hasConflict) {
-                html += `<td class="cell-reserved" style="background: #f8f9fa; color: #95a5a6; border: 2px solid #dfe6e9; padding: 12px; text-align: center; font-weight: 600;">0</td>`;
+                html += `<td class="cell-reserved-impact" style="padding: 12px; text-align: center; font-weight: 700;">&nbsp;</td>`;
             } else {
                 const tarif = calculateTarifForDuration(dateStr, dateFinStr, nights);
                 
@@ -1473,7 +1638,7 @@ async function generateTableauGDF() {
                     cellClass += ' promo-price';
                 }
                 
-                html += `<td class="${cellClass}" style="background: rgba(39, 174, 96, 0.1); color: #27AE60; border: 2px solid #27AE60; padding: 12px; text-align: center; font-weight: 700; font-size: 1rem;">${Math.round(tarif)}</td>`;
+                html += `<td class="${cellClass}" style="padding: 12px; text-align: center; font-weight: 700; font-size: 1rem;">${Math.round(tarif)}</td>`;
             }
         }
         
@@ -1484,23 +1649,49 @@ async function generateTableauGDF() {
     table.innerHTML = html;
 }
 
-function exportTableauGDF() {
+async function copyTableauGDF() {
     try {
         const table = document.getElementById('table-gdf');
-        const ws = XLSX.utils.table_to_sheet(table);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Tarifs GDF');
-        
-        const date = new Date(currentYearGDF, currentMonthGDF);
-        const monthName = date.toLocaleDateString('fr-FR', { month: 'long' });
-        const fileName = `Tarifs_GDF_${monthName}_${currentYearGDF}.xlsx`;
-        
-        XLSX.writeFile(wb, fileName);
-        showToast('✅ Export Excel réussi', 'success');
+        if (!table) {
+            showToast('Tableau GDF introuvable', 'error');
+            return;
+        }
+
+        const bodyRows = Array.from(table.querySelectorAll('tbody tr'));
+
+        if (bodyRows.length === 0) {
+            showToast('Aucune ligne à copier pour le mois sélectionné', 'error');
+            return;
+        }
+
+        const textToCopy = bodyRows
+            .map(row => Array.from(row.querySelectorAll('td')).slice(1).map(td => td.textContent.trim()).join('\t'))
+            .join('\n');
+
+        if (!textToCopy) {
+            showToast('Aucune donnée à copier', 'error');
+            return;
+        }
+
+        if (navigator?.clipboard?.writeText) {
+            await navigator.clipboard.writeText(textToCopy);
+        } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+        }
+
+        showToast('✅ Tableau du mois copié (sans en-têtes)', 'success');
         
     } catch (error) {
-        console.error('❌ Erreur export:', error);
-        showToast('Erreur lors de l\'export', 'error');
+        console.error('❌ Erreur copie tableau:', error);
+        showToast('Erreur lors de la copie du tableau', 'error');
     }
 }
 
@@ -1659,10 +1850,17 @@ async function loadAllData() {
 
 function toggleAccordion(sectionId) {
     const content = document.getElementById(sectionId);
+    if (!content) return;
+
     const header = content.previousElementSibling;
+    const willOpen = !content.classList.contains('active');
     
     content.classList.toggle('active');
     header.classList.toggle('active');
+
+    if (sectionId === 'export-gdf' && willOpen) {
+        generateTableauGDF();
+    }
 }
 
 // ==========================================
@@ -1682,6 +1880,10 @@ function renderCalendrierTarifsTab() {
         console.error('❌ Conteneur tab-calendrier-tarifs introuvable !');
         return;
     }
+
+    const serviceIcons = (typeof window !== 'undefined' && window.SERVICE_ICONS && typeof window.SERVICE_ICONS === 'object')
+        ? window.SERVICE_ICONS
+        : { home: '🏡' };
     // Conteneur trouvé
     
     container.innerHTML = `
@@ -1701,7 +1903,7 @@ function renderCalendrierTarifsTab() {
             <!-- Sélection des gîtes en boutons -->
             <div style="background: var(--card); border: 3px solid #2D3436; padding: 25px; margin-bottom: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
                 <h3 style="margin: 0 0 20px 0; font-size: 1.3rem; color: var(--text); font-weight: 700; display: flex; align-items: center; gap: 10px;">
-                    ${SERVICE_ICONS.home || '🏡'} Sélectionner un gîte
+                    ${serviceIcons.home || '🏡'} Sélectionner un gîte
                 </h3>
                 <div id="gites-buttons-container" style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <!-- Les boutons de gîtes seront ajoutés ici par JavaScript -->
@@ -1776,24 +1978,30 @@ function renderCalendrierTarifsTab() {
                                     <label class="toggle-switch"><input type="checkbox" id="promo-long-sejour"><span class="toggle-slider"></span></label>
                                     <span class="promo-title success">Long Séjour</span>
                                 </div>
-                                <input type="number" id="long-sejour-pct" placeholder="% réduction" class="input-neo" />
-                                <input type="number" id="long-sejour-nuits" placeholder="À partir de X nuits" class="input-neo" />
+                                <label class="promo-input-label" for="long-sejour-pct">Réduction (%)</label>
+                                <input type="number" id="long-sejour-pct" placeholder="Ex: 10" class="input-neo" />
+                                <label class="promo-input-label" for="long-sejour-nuits">À partir de (nuits)</label>
+                                <input type="number" id="long-sejour-nuits" placeholder="Ex: 7" class="input-neo" />
                             </div>
                             <div class="promo-card warning">
                                 <div class="promo-header">
                                     <label class="toggle-switch"><input type="checkbox" id="promo-last-minute"><span class="toggle-slider"></span></label>
                                     <span class="promo-title warning">Last Minute</span>
                                 </div>
-                                <input type="number" id="last-minute-pct" placeholder="% réduction" class="input-neo" />
-                                <input type="number" id="last-minute-jours" placeholder="Jours avant arrivée" class="input-neo" />
+                                <label class="promo-input-label" for="last-minute-pct">Réduction (%)</label>
+                                <input type="number" id="last-minute-pct" placeholder="Ex: 15" class="input-neo" />
+                                <label class="promo-input-label" for="last-minute-jours">Jours avant arrivée</label>
+                                <input type="number" id="last-minute-jours" placeholder="Ex: 7" class="input-neo" />
                             </div>
                             <div class="promo-card primary">
                                 <div class="promo-header">
                                     <label class="toggle-switch"><input type="checkbox" id="promo-early-booking"><span class="toggle-slider"></span></label>
                                     <span class="promo-title primary">Early Booking</span>
                                 </div>
-                                <input type="number" id="early-booking-pct" placeholder="% réduction" class="input-neo" />
-                                <input type="number" id="early-booking-jours" placeholder="Jours d'avance" class="input-neo" />
+                                <label class="promo-input-label" for="early-booking-pct">Réduction (%)</label>
+                                <input type="number" id="early-booking-pct" placeholder="Ex: 10" class="input-neo" />
+                                <label class="promo-input-label" for="early-booking-jours">Jours d'avance</label>
+                                <input type="number" id="early-booking-jours" placeholder="Ex: 60" class="input-neo" />
                             </div>
                         </div>
                     </div>
@@ -1834,7 +2042,7 @@ function renderCalendrierTarifsTab() {
             
             <!-- Section 3 : Export Gîtes de France -->
             <div class="accordion-section" style="background: var(--card); border: 3px solid #2D3436; padding: 25px; margin-top: 25px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
-                <button class="accordion-header" onclick="toggleAccordion('export-gdf')" 
+                <button class="accordion-header active" onclick="toggleAccordion('export-gdf')" 
                         style="background: transparent; border: none; padding: 0; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
                     <span style="display: flex; align-items: center; gap: 12px; font-size: 1.3rem; font-weight: 700; color: var(--text);">
                         <span style="font-size: 1.8rem;">📊</span>
@@ -1842,7 +2050,7 @@ function renderCalendrierTarifsTab() {
                     </span>
                     <span class="accordion-icon" style="font-size: 1.5rem; font-weight: 700; color: #27AE60;">▼</span>
                 </button>
-                <div id="export-gdf" class="accordion-content">
+                <div id="export-gdf" class="accordion-content active">
                     <div id="tableau-gdf-container" style="display: block;">
                         <!-- Navigation mois -->
                         <div class="calendar-controls success">
@@ -1853,7 +2061,7 @@ function renderCalendrierTarifsTab() {
                         <div style="overflow-x: auto; background: var(--card); padding: 15px; border-radius: 10px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436;">
                             <table class="table-gdf" id="table-gdf" class="table-full-width"></table>
                         </div>
-                        <button class="btn-neo btn-save" style="margin-top: 20px;" onclick="exportTableauGDF()">📥 EXPORTER EN EXCEL</button>
+                        <button class="btn-neo btn-save" style="margin-top: 20px;" onclick="copyTableauGDF()">📋 COPIER LE TABLEAU</button>
                     </div>
                 </div>
             </div>
@@ -1938,13 +2146,15 @@ window.addPeriodeDureeMin = addPeriodeDureeMin;
 window.removePeriodeDureeMin = removePeriodeDureeMin;
 window.toggleAccordion = toggleAccordion;
 window.toggleTableauGDF = toggleTableauGDF;
-window.exportTableauGDF = exportTableauGDF;
+window.copyTableauGDF = copyTableauGDF;
 window.previousMonthGDF = previousMonthGDF;
 window.nextMonthGDF = nextMonthGDF;
 window.openRemplissageAutoModal = openRemplissageAutoModal;
 window.loadTarifsBase = loadTarifsBase;
 window.loadAllData = loadAllData;
 window.renderCalendrierTarifs = renderCalendrierTarifs;
+window.focusTarifsCalendarOnDate = focusTarifsCalendarOnDate;
+window.focusGDFCalendarOnDate = focusGDFCalendarOnDate;
 
 // Ne pas lancer automatiquement au chargement de la page
 // L'initialisation se fera via renderCalendrierTarifsTab() quand l'onglet est activé

@@ -4,9 +4,12 @@
 
 /* Support Container */
 .support-container {
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 2rem;
+    margin-left: 285px;
+    position: relative;
+    z-index: 1;
 }
 
 /* ================================================================

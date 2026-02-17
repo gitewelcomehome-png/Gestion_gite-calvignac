@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Content IA - Channel Manager</title>
-    <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/admin-dashboard.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* Onglets */
-        .tab-btn {
+        .content-tab-btn {
             padding: 12px 24px;
             border: none;
             background: transparent;
@@ -23,17 +22,17 @@
             border-bottom: 3px solid transparent;
             transition: all 0.2s;
         }
-        .tab-btn:hover {
+        .content-tab-btn:hover {
             color: #06b6d4;
         }
-        .tab-btn.active {
+        .content-tab-btn.active {
             color: #06b6d4;
             border-bottom-color: #06b6d4;
         }
-        .tab-content {
+        .content-tab-content {
             display: none;
         }
-        .tab-content.active {
+        .content-tab-content.active {
             display: block;
         }
     </style>
@@ -53,31 +52,31 @@
     <section class="tabs-navigation">
         <div class="tabs-sidebar">
             <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
-            <button class="tab-btn" onclick="window.location.href='admin-channel-manager.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-channel-manager.html'">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-clients.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-clients.html'">
                 <i data-lucide="users"></i>
                 <span>Clients</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-support.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-support.html'">
                 <i data-lucide="headphones"></i>
                 <span>Support</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-emails.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-emails.html?build=20260217-4'">
                 <i data-lucide="mail"></i>
                 <span>Messagerie</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-promotions.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-promotions.html'">
                 <i data-lucide="tag"></i>
                 <span>Promotions</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-parrainage.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-parrainage.html'">
                 <i data-lucide="gift"></i>
                 <span>Parrainage</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-finance.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-finance.html'">
                 <i data-lucide="bar-chart-2"></i>
                 <span>Finance & BI</span>
             </button>
@@ -85,11 +84,11 @@
                 <i data-lucide="pen-tool"></i>
                 <span>Content IA</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-communications.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-communications.html'">
                 <i data-lucide="megaphone"></i>
                 <span>Communications</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='admin-monitoring.html'">
+            <button class="tab-btn" onclick="window.location.href='/pages/admin-monitoring.html'">
                 <i data-lucide="activity"></i>
                 <span>Monitoring</span>
             </button>
@@ -100,7 +99,7 @@
         </div>
     </section>
 
-    <div class="admin-wrapper">
+    <main class="admin-container">
         <!-- Header structuré -->
         <header class="page-header">
             <div class="page-header__content">
@@ -115,25 +114,24 @@
         </header>
         
         <!-- Header Internal -->
-        <header style="margin-bottom: 2rem;">
 
         <!-- Onglets Navigation -->
         <div style="border-bottom: 2px solid #E5E7EB; margin-bottom: 2rem;">
             <div style="display: flex; gap: 0; justify-content: space-between; align-items: center;">
                 <div style="display: flex; gap: 0;">
-                    <button class="tab-btn active" onclick="switchTab('strategy')" data-tab="strategy">
+                    <button class="content-tab-btn active" onclick="switchTab('strategy')" data-tab="strategy">
                         <i data-lucide="target"></i>
                         Stratégie IA
                     </button>
-                    <button class="tab-btn" onclick="switchTab('queue')" data-tab="queue">
+                    <button class="content-tab-btn" onclick="switchTab('queue')" data-tab="queue">
                         <i data-lucide="check-circle"></i>
                         Actions Validées
                     </button>
-                    <button class="tab-btn" onclick="switchTab('actions')" data-tab="actions">
+                    <button class="content-tab-btn" onclick="switchTab('actions')" data-tab="actions">
                         <i data-lucide="zap"></i>
                         Actions Proposées
                     </button>
-                    <button class="tab-btn" onclick="switchTab('generation')" data-tab="generation">
+                    <button class="content-tab-btn" onclick="switchTab('generation')" data-tab="generation">
                         <i data-lucide="pen-tool"></i>
                         Génération Manuelle
                     </button>
@@ -146,7 +144,7 @@
         </div>
 
         <!-- TAB 1 : STRATÉGIE IA (ACTIF PAR DÉFAUT) -->
-        <div id="tab-strategy" class="tab-content active">
+        <div id="tab-strategy" class="content-tab-content active">
             <!-- Actions Rapides -->
             <section style="margin-bottom: 2rem;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
@@ -267,7 +265,7 @@
         </div>
 
         <!-- TAB 4 : GÉNÉRATION MANUELLE (FIN) -->
-        <div id="tab-generation" class="tab-content" style="display: none;">
+        <div id="tab-generation" class="content-tab-content" style="display: none;">
             <p style="text-align: center; color: #9CA3AF; padding: 40px;">
                 <i data-lucide="pen-tool" style="width: 48px; height: 48px; margin: 0 auto 10px;"></i><br>
                 Contenu de génération manuelle à définir
@@ -275,7 +273,7 @@
         </div>
 
         <!-- TAB 3 : QUEUE DE PUBLICATIONS -->
-        <div id="tab-queue" class="tab-content" style="display: none;">
+        <div id="tab-queue" class="content-tab-content" style="display: none;">
             <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
@@ -294,7 +292,7 @@
         </div>
 
         <!-- TAB 4 : ACTIONS PROPOSÉES -->
-        <div id="tab-actions" class="tab-content" style="display: none;">
+        <div id="tab-actions" class="content-tab-content" style="display: none;">
             <section style="background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #E5E7EB; margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
@@ -414,7 +412,7 @@
             </div>
         </section>
 
-    </div>
+    </main>
 
     <!-- Modal Génération -->
     <div id="modalGenerate" class="modal" style="display: none;">

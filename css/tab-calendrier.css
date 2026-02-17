@@ -261,6 +261,16 @@ html.style-sidebar #tab-calendrier-tarifs .table-gdf .cell-empty {
     color: #d1d5db;
 }
 
+html.style-sidebar #tab-calendrier-tarifs .table-gdf .cell-min-duration {
+    background: rgba(148, 163, 184, 0.22) !important;
+    border: 2px solid #94a3b8 !important;
+}
+
+html.style-sidebar #tab-calendrier-tarifs .table-gdf .cell-reserved-impact {
+    background: rgba(255, 90, 95, 0.22) !important;
+    border: 2px solid #ff5a5f !important;
+}
+
 html.style-sidebar #tab-calendrier-tarifs .table-gdf tbody td:first-child {
     background: var(--bg-secondary, #f8f9fa);
     font-weight: 700;
@@ -699,6 +709,120 @@ html.theme-dark.style-apple #tab-calendrier-tarifs .input-neo {
     color: #ffffff;
 }
 
+/* =========================================
+   MODAL REMPLISSAGE AUTO TARIFS
+   ========================================= */
+#modal-remplissage-auto.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.48) !important;
+    backdrop-filter: blur(2px);
+}
+
+#modal-remplissage-auto .modal-container-large {
+    width: min(980px, 100%);
+    max-height: calc(100vh - 32px);
+    background: var(--bg-secondary, #ffffff);
+    border: 1px solid var(--border-color, #dfe6e9);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#modal-remplissage-auto .modal-header {
+    padding: 16px 20px;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--border-color, #dfe6e9);
+    background: var(--bg-primary, #ffffff);
+    flex-shrink: 0;
+}
+
+#modal-remplissage-auto .modal-body-remplissage {
+    padding: 16px 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+#modal-remplissage-auto .section-remplissage {
+    background: var(--bg-primary, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+#modal-remplissage-auto .preview-calendar {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+#modal-remplissage-auto .modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-color, #dfe6e9);
+    background: var(--bg-primary, #ffffff);
+    flex-shrink: 0;
+}
+
+#modal-remplissage-auto .modal-footer button {
+    min-height: 42px;
+    min-width: 150px;
+}
+
+#modal-remplissage-auto .remplissage-feedback {
+    margin: 0 20px 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+#modal-remplissage-auto .remplissage-feedback.success {
+    background: rgba(39, 174, 96, 0.15);
+    border-color: rgba(39, 174, 96, 0.45);
+    color: #1f7a44;
+}
+
+#modal-remplissage-auto .remplissage-feedback.error {
+    background: rgba(231, 76, 60, 0.15);
+    border-color: rgba(231, 76, 60, 0.45);
+    color: #b33a2f;
+}
+
+@media (max-width: 768px) {
+    #modal-remplissage-auto.modal-overlay {
+        padding: 8px;
+    }
+
+    #modal-remplissage-auto .modal-container-large {
+        max-height: calc(100vh - 16px);
+        border-radius: 12px;
+    }
+
+    #modal-remplissage-auto .modal-body-remplissage {
+        padding: 12px;
+    }
+
+    #modal-remplissage-auto .modal-footer {
+        padding: 12px;
+    }
+
+    #modal-remplissage-auto .modal-footer button {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
 html.theme-dark.style-apple #tab-calendrier-tarifs .input-neo::placeholder {
     color: rgba(255, 255, 255, 0.4);
 }
@@ -876,6 +1000,14 @@ html.theme-dark.style-apple #tab-calendrier-tarifs .input-neo::placeholder {
     font-size: 1rem;
 }
 
+#tab-calendrier-tarifs .promo-input-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary, var(--text));
+    margin: 8px 0 4px;
+}
+
 #tab-calendrier-tarifs .duree-min-container {
     margin-bottom: 20px;
 }
@@ -884,6 +1016,25 @@ html.theme-dark.style-apple #tab-calendrier-tarifs .input-neo::placeholder {
     display: block;
     font-weight: 600;
     margin-bottom: 8px;
+}
+
+#tab-calendrier-tarifs .gdf-arrivee-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+#tab-calendrier-tarifs .gdf-min-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--bg-secondary, rgba(0, 0, 0, 0.06));
+    border: 1px solid var(--border-color, rgba(0, 0, 0, 0.15));
+    color: var(--text-secondary, var(--text));
 }
 
 #tab-calendrier-tarifs .periodes-subtitle {
@@ -1188,6 +1339,26 @@ html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-reserved {
 html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-empty {
     background: linear-gradient(145deg, #ffffff, #f8f9fa);
     color: #d1d5db;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-min-duration {
+    background: linear-gradient(145deg, rgba(148, 163, 184, 0.2), rgba(100, 116, 139, 0.28)) !important;
+    border: 1px solid rgba(100, 116, 139, 0.55) !important;
+}
+
+html.theme-light.style-apple #tab-calendrier-tarifs .table-gdf .cell-reserved-impact {
+    background: linear-gradient(145deg, rgba(255, 90, 95, 0.2), rgba(220, 38, 38, 0.3)) !important;
+    border: 1px solid rgba(220, 38, 38, 0.6) !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .table-gdf .cell-min-duration {
+    background: linear-gradient(145deg, rgba(148, 163, 184, 0.28), rgba(100, 116, 139, 0.38)) !important;
+    border: 1px solid rgba(148, 163, 184, 0.75) !important;
+}
+
+html.theme-dark.style-apple #tab-calendrier-tarifs .table-gdf .cell-reserved-impact {
+    background: linear-gradient(145deg, rgba(255, 90, 95, 0.32), rgba(220, 38, 38, 0.45)) !important;
+    border: 1px solid rgba(255, 90, 95, 0.9) !important;
 }
 
 /* Première colonne (jours) */

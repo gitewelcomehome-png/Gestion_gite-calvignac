@@ -27,6 +27,14 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-title i,
+.page-title svg {
+    flex-shrink: 0;
 }
 
 .page-subtitle {

@@ -1,0 +1,115 @@
+<div class="tab-container">
+    <!-- Header -->
+    <div class="card card-header-section">
+        <div class="header-content">
+            <div class="header-title-group">
+                <h2 class="page-title"><i data-lucide="shopping-bag"></i> PRESTATIONS & REVENUS</h2>
+                <p class="page-subtitle">Gestion du catalogue et commandes clients</p>
+            </div>
+            <div class="header-actions">
+                <button onclick="refreshPrestationsStats()" class="btn-neo btn-refresh" title="Actualiser">
+                    <i data-lucide="refresh-cw"></i> ACTUALISER
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sélection du gîte -->
+    <div class="card" style="margin-bottom: 25px;">
+        <div style="padding: 20px;">
+            <label for="select-gite-prestations" style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 15px;">
+                <i data-lucide="home" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle;"></i>
+                Sélectionner un gîte :
+            </label>
+            <select id="select-gite-prestations" onchange="onGiteSelected()" style="width: 100%; max-width: 400px; padding: 12px 15px; border: 2px solid var(--stroke); border-radius: 10px; font-size: 15px; background: white; cursor: pointer;">
+                <option value="">-- Choisir un gîte --</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ÉTAPE 1 : Statistiques par période (avant sélection du gîte) -->
+    <div id="prestations-stats-view">
+        
+        <!-- Bouton de gestion du catalogue (visible uniquement après sélection) -->
+        <div id="btn-gestion-catalogue-container" style="display: none; margin-bottom: 25px;">
+            <div class="card">
+                <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">
+                            <i data-lucide="settings" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle;"></i>
+                            Gérer le catalogue de prestations
+                        </h3>
+                        <p style="font-size: 14px; color: var(--text-secondary); margin: 0;">
+                            Créer, modifier ou supprimer les prestations proposées aux clients
+                        </p>
+                    </div>
+                    <button onclick="afficherGestionCatalogue()" class="btn-neo btn-primary" style="padding: 12px 24px; font-size: 15px; font-weight: 600;">
+                        <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
+                        Gérer le catalogue
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 🛒 COMMANDES - SEMAINE -->
+        <div class="card card--spacious mb-lg">
+            <header class="section-header">
+                <h3 class="section-title">
+                    <i data-lucide="calendar-days"></i>
+                    Cette Semaine
+                </h3>
+            </header>
+            <div id="prestations-semaine">
+                <p style="text-align: center; color: var(--text-secondary); padding: 20px;">Sélectionnez un gîte pour voir les statistiques</p>
+            </div>
+        </div>
+
+        <!-- 🛒 COMMANDES - MOIS -->
+        <div class="card card--spacious mb-lg">
+            <header class="section-header">
+                <h3 class="section-title">
+                    <i data-lucide="calendar"></i>
+                    Ce Mois
+                </h3>
+            </header>
+            <div id="prestations-mois">
+                <p style="text-align: center; color: var(--text-secondary); padding: 20px;">Sélectionnez un gîte pour voir les statistiques</p>
+            </div>
+        </div>
+
+        <!-- 🛒 COMMANDES - ANNÉE -->
+        <div class="card card--spacious mb-lg">
+            <header class="section-header">
+                <h3 class="section-title">
+                    <i data-lucide="calendar-range"></i>
+                    Cette Année
+                </h3>
+            </header>
+            <div id="prestations-annee">
+                <p style="text-align: center; color: var(--text-secondary); padding: 20px;">Sélectionnez un gîte pour voir les statistiques</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÉTAPE 2 : Interface de gestion (après sélection du gîte) -->
+    <div id="prestations-management-view" style="display: none;">
+        
+        <!-- Bouton retour aux statistiques (toujours visible en haut) -->
+        <div style="margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;">
+            <button onclick="retourAuxStatistiques()" class="btn-neo btn-secondary" style="padding: 10px 20px; font-size: 14px; font-weight: 600;">
+                <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+                Retour aux statistiques
+            </button>
+        </div>
+        
+        <!-- Contenu de l'interface de gestion sera chargé ici -->
+        <div id="prestations-management-container">
+            <p style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                Chargement de l'interface de gestion...
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<!-- Script charge depuis js/prestations.js -->

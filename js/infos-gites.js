@@ -1049,6 +1049,11 @@ async function generateGitesButtons() {
         // Charger les données du premier gîte
         await chargerDonneesInfos();
         
+        // Charger les photos du premier gîte
+        if (typeof window.loadExistingPhotos === 'function' && currentGiteInfos) {
+            await window.loadExistingPhotos(currentGiteInfos);
+        }
+        
         // Attacher les listeners après le chargement initial
         setTimeout(() => {
             captureFormState();
@@ -1138,6 +1143,11 @@ window.selectGiteFromDropdown = async function(giteName) {
     
     // Charger les données du nouveau gîte (préserve la langue active)
     await chargerDonneesInfos();
+    
+    // Charger les photos du gîte
+    if (typeof window.loadExistingPhotos === 'function') {
+        await window.loadExistingPhotos(giteName);
+    }
     
     // Capturer l'état initial après chargement
     setTimeout(() => {
@@ -1375,7 +1385,17 @@ async function sauvegarderDonneesInfos() {
     }
     
     // Sauvegarder en base de données Supabase uniquement
-    saveInfosGiteToSupabase(currentGiteInfos, formData);
+    await saveInfosGiteToSupabase(currentGiteInfos, formData);
+    
+    // Sauvegarder les photos (après que la ligne infos_gites soit créée)
+    if (typeof window.savePhotosToDatabase === 'function') {
+        try {
+            await window.savePhotosToDatabase(currentGiteInfos);
+        } catch (err) {
+            console.error('Erreur sauvegarde photos (non bloquant):', err);
+            // Ne pas bloquer la sauvegarde des autres données
+        }
+    }
     
     if (typeof updateProgressInfos === 'function') {
         updateProgressInfos();
@@ -2045,11 +2065,12 @@ function applyLanguageDisplay() {
     const allCards = Array.from(document.querySelectorAll('#infosGiteForm .infos-card'));
     const frenchCards = allCards.filter(c => c !== englishCard);
     
+    console.log(`🌍 applyLanguageDisplay: langue="${currentLangInfos}", cards FR trouvées: ${frenchCards.length}`);
+    
     if (currentLangInfos === 'en') {
         // Mode ANGLAIS : afficher la card EN, cacher les cards FR
-        btn.style.background = '#27ae60';
-        btn.style.color = 'white';
-        label.textContent = 'EN';
+        label.src = '../images/flag-en.svg';
+        label.alt = 'EN';
         
         // Afficher la card anglaise globale
         if (englishCard) {
@@ -2061,11 +2082,12 @@ function applyLanguageDisplay() {
             card.style.display = 'none';
         });
         
+        console.log('✅ Mode EN activé - Card EN visible, cards FR cachées');
+        
     } else {
         // Mode FRANÇAIS : cacher la card EN, afficher toutes les cards FR
-        btn.style.background = 'white';
-        btn.style.color = '#2d3748';
-        label.textContent = 'FR';
+        label.src = '../images/flag-fr.svg';
+        label.alt = 'FR';
         
         // Cacher la card anglaise globale
         if (englishCard) {
@@ -2076,6 +2098,8 @@ function applyLanguageDisplay() {
         frenchCards.forEach(card => {
             card.style.display = '';
         });
+        
+        console.log('✅ Mode FR activé - Card EN cachée, cards FR visibles');
     }
 }
 
@@ -2109,15 +2133,16 @@ async function translateText(text, fromLang = 'fr', toLang = 'en') {
 
 // Attacher les listeners de traduction automatique
 function attachAutoTranslation() {
-    // Tous les champs FR (sauf GPS et techniques)
-    const champsFR = document.querySelectorAll('#infosGiteForm input:not([id$="_en"]):not([readonly]), #infosGiteForm textarea:not([id$="_en"]), #infosGiteForm select:not([id$="_en"])');
+    // Tous les champs FR (sauf GPS, techniques et uploads photo)
+    const champsFR = document.querySelectorAll('#infosGiteForm input:not([id$="_en"]):not([readonly]):not([type="file"]), #infosGiteForm textarea:not([id$="_en"]), #infosGiteForm select:not([id$="_en"])');
     
     let champsAvecTraduction = 0;
     let champsSansCorrespondanceEN = [];
     
     champsFR.forEach(champFR => {
         const idFR = champFR.id;
-        if (!idFR || idFR.includes('gps') || idFR.includes('Lat') || idFR.includes('Lon')) return;
+        // Exclure GPS, coordonnées et champs photo
+        if (!idFR || idFR.includes('gps') || idFR.includes('Lat') || idFR.includes('Lon') || idFR.startsWith('upload') || idFR.includes('Photo')) return;
         
         const idEN = idFR + '_en';
         const champEN = document.getElementById(idEN);

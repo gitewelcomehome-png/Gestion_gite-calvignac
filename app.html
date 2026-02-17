@@ -94,7 +94,7 @@
     
     <!-- Scripts modulaires de l'application -->
     <script src="js/shared-config.js"></script>
-    <script src="js/gites-manager.js"></script>
+    <script src="js/gites-manager.js?v=1.1"></script>
     <!-- 🔒 PHASE 1 SÉCURITÉ: Authentification obligatoire -->
     <script src="js/auth.js?v=1.1"></script>
     <!-- 🛡️ PHASE 3 SÉCURITÉ: Protection XSS -->
@@ -113,7 +113,7 @@
     <script src="js/email-sender.js"></script>
     
     <!-- 🔔 Notification System -->
-    <script src="js/notification-system.js?v=2.2"></script>
+    <script src="js/notification-system.js?v=2.3"></script>
     
     <!-- ✨ AI Assistant -->
     <script src="js/ai-assistant.js"></script>
@@ -129,6 +129,8 @@
     <!-- 📊 DASHBOARD utilise les fonctions de fiscalité -->
     <script src="js/dashboard.js?v=12.50"></script>
     <script src="js/dashboard-support-widget.js?v=1.0"></script>
+    <!-- 🎯 KANBAN - Gestion visuelle des tâches -->
+    <script src="js/kanban.js?v=5.0"></script>
     <script src="js/sync-ical-v2.js?v=2.3"></script>
     <script src="js/statistiques.js?v=2.2"></script>
     <script src="js/menage.js?v=1739379600"></script>
@@ -139,14 +141,17 @@
     <script src="js/reservations.js?v=5.1"></script>
     <script src="js/archives.js?v=10.0"></script>
     <script src="js/km-manager.js"></script>
-    <script src="js/infos-gites.js?v=3.5"></script>
+    <script src="js/infos-gites.js?v=4.1"></script>
     <script src="js/fiche-client.js?v=3.0" type="module"></script>
     <script src="js/widget-horaires-clients.js" type="module"></script>
     <script src="js/faq.js?v=3.0"></script>
+    <script src="js/prestations.js?v=1.3"></script>
     <script src="js/fiches-clients.js"></script>
+    <script src="js/gites-photos.js?v=1.0"></script>
+    <script src="js/infos-gites-photos.js?v=1.8"></script>
     <script src="js/checklists.js"></script>
     <script src="js/parrainage.js?v=1.4"></script>
-    <script src="js/draps.js?v=3.0"></script>
+    <script src="js/draps.js?v=3.2"></script>
     <script src="js/platform-icons.js"></script>
     <script src="js/property-icons.js"></script>
     <script src="js/gites-crud.js?v=5.2"></script>
@@ -179,6 +184,487 @@
     <!-- 💳 SYSTÈME D'ABONNEMENTS -->
     <link rel="stylesheet" href="css/subscription-styles.css?v=1.0" />
     <script src="js/subscription-manager.js?v=1.0" defer></script>
+    
+    <!-- 📱 STYLES RESPONSIVE MOBILE -->
+    <style>
+        /* Style par défaut - Cacher le bouton hamburger sur desktop */
+        .mobile-menu-btn {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            /* Bouton hamburger mobile */
+            .mobile-menu-btn {
+                display: flex !important;
+                flex-direction: column;
+                justify-content: space-around;
+                width: 36px;
+                height: 36px;
+                background: transparent;
+                border: 2px solid var(--text);
+                border-radius: 8px;
+                cursor: pointer;
+                padding: 6px;
+                z-index: 1001;
+                transition: all 0.3s ease;
+            }
+            
+            .mobile-menu-btn span {
+                width: 100%;
+                height: 3px;
+                background: var(--text);
+                border-radius: 2px;
+                transition: all 0.3s ease;
+            }
+            
+            .mobile-menu-btn.active span:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+            }
+            
+            .mobile-menu-btn.active span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .mobile-menu-btn.active span:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+            }
+            
+            /* Navigation mobile */
+            .icalou-modern-nav {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 80%;
+                max-width: 320px;
+                height: 100vh;
+                background: var(--card);
+                z-index: 1000;
+                transition: left 0.3s ease;
+                overflow-y: auto;
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+                padding-top: 60px;
+            }
+            
+            .icalou-modern-nav.active {
+                left: 0;
+            }
+            
+            .icalou-modern-nav .nav-container {
+                flex-direction: column !important;
+                gap: 8px;
+                padding: 16px;
+            }
+            
+            .icalou-modern-nav .nav-tab {
+                width: 100% !important;
+                justify-content: flex-start !important;
+                padding: 12px 16px !important;
+            }
+            
+            /* Overlay fond sombre */
+            .mobile-nav-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                display: none;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .mobile-nav-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+            
+            /* Theme controls: masquer tout sauf hamburger et roue admin */
+            .theme-controls .notification-btn,
+            .theme-controls #userDisplayName,
+            .theme-controls #notificationButton,
+            .theme-controls #notificationBtn {
+                display: none !important;
+            }
+
+            .theme-controls #notificationBtn.has-notifications,
+            .theme-controls #notificationButton.has-notifications {
+                display: flex !important;
+            }
+            
+            .theme-controls .ctrl-btn-admin {
+                display: flex !important;
+            }
+            
+            .theme-controls {
+                gap: 12px !important;
+                justify-content: space-between !important;
+            }
+            
+            /* Dashboard demandes clients - Optimisation mobile */
+            #dashboard-demandes-clients {
+                padding: 8px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            #dashboard-demandes-clients h2 {
+                font-size: 0.7rem !important;
+            }
+            
+            #dashboard-demandes-clients #badge-demandes-count {
+                padding: 4px 10px !important;
+                font-size: 0.65rem !important;
+            }
+            
+            /* Cartes de demandes */
+            #liste-demandes-clients > div {
+                padding: 8px !important;
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            #liste-demandes-clients .badge-type {
+                font-size: 0.7rem !important;
+                padding: 2px 8px !important;
+            }
+            
+            #liste-demandes-clients strong {
+                font-size: 0.85rem !important;
+            }
+            
+            #liste-demandes-clients > div > div:first-child {
+                width: 100% !important;
+            }
+            
+            #liste-demandes-clients > div > div:first-child > div:first-child {
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+            }
+            
+            #liste-demandes-clients > div > div:first-child > div:last-child {
+                font-size: 0.75rem !important;
+            }
+            
+            /* Boutons actions */
+            #liste-demandes-clients > div > div:last-child {
+                width: 100% !important;
+                justify-content: stretch !important;
+            }
+            
+            #liste-demandes-clients button {
+                flex: 1 !important;
+                padding: 8px 12px !important;
+                font-size: 0.8rem !important;
+            }
+            
+            /* Adaptation section Demandes & Retours */
+            [id*="demandes-retours"] h2,
+            [id*="demandes-retours-count"],
+            div:has(#badge-demandes-retours-count) h2 {
+                font-size: 0.7rem !important;
+            }
+            
+            #badge-demandes-retours-count {
+                padding: 4px 10px !important;
+                font-size: 0.65rem !important;
+                border-width: 1px !important;
+                box-shadow: 1px 1px 0 #2D3436 !important;
+            }
+            
+            /* En-têtes de sections génériques */
+            .card > div:first-child h2 {
+                font-size: 0.75rem !important;
+                word-break: break-word;
+            }
+            
+            .card > div:first-child span[id*="badge"] {
+                padding: 4px 10px !important;
+                font-size: 0.65rem !important;
+                min-width: 28px;
+                text-align: center;
+            }
+            
+            /* To-Do Lists - Adaptation mobile */
+            div[id*="todo-count-"] {
+                padding: 3px 8px !important;
+                font-size: 0.65rem !important;
+            }
+            
+            [data-todo-category] {
+                padding: 6px 8px !important;
+                font-size: 0.7rem !important;
+                margin-bottom: 6px !important;
+            }
+            
+            .dashboard-todo-item {
+                padding: 6px !important;
+                gap: 6px !important;
+                flex-wrap: nowrap !important;
+            }
+            
+            .dashboard-todo-checkbox {
+                min-width: 18px !important;
+                width: 18px !important;
+                height: 18px !important;
+            }
+            
+            .dashboard-todo-content {
+                flex: 1 !important;
+                min-width: 0 !important;
+            }
+            
+            .dashboard-todo-title {
+                font-size: 0.7rem !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+            }
+            
+            .dashboard-todo-btn {
+                padding: 4px !important;
+                min-width: 32px !important;
+                height: 32px !important;
+            }
+            
+            .dashboard-todo-btn svg {
+                width: 14px !important;
+                height: 14px !important;
+            }
+            
+            div[id^="todo-"] {
+                max-height: 180px !important;
+                font-size: 0.7rem !important;
+            }
+            
+            /* Container des catégories To-Do */
+            div[style*="border: 2px solid"] > div:first-child h3 {
+                font-size: 0.65rem !important;
+            }
+            
+            /* Cards Demandes/Problèmes Clients */
+            div[style*="box-shadow"][style*="border-radius: 10px"] {
+                padding: 10px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            /* En-tête client (nom + gîte) */
+            div[style*="border-bottom: 2px solid"] {
+                gap: 6px !important;
+                margin-bottom: 8px !important;
+                padding-bottom: 8px !important;
+            }
+            
+            div[style*="border-bottom: 2px solid"] span[style*="font-weight: 700"] {
+                font-size: 0.95rem !important;
+            }
+            
+            div[style*="border-bottom: 2px solid"] span[style*="background"] {
+                padding: 2px 8px !important;
+                font-size: 0.7rem !important;
+            }
+            
+            /* Zone de contenu problème */
+            div[style*="justify-content: space-between"] {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            div[style*="justify-content: space-between"] > div:first-child {
+                width: 100% !important;
+            }
+            
+            div[style*="justify-content: space-between"] > div:first-child span[style*="font-weight: 700"] {
+                font-size: 0.95rem !important;
+            }
+            
+            div[style*="justify-content: space-between"] > div:first-child span[style*="background"] {
+                padding: 2px 8px !important;
+                font-size: 0.7rem !important;
+            }
+            
+            div[style*="justify-content: space-between"] > div:first-child p {
+                font-size: 0.8rem !important;
+            }
+            
+            div[style*="justify-content: space-between"] > div:first-child div[style*="gap: 15px"] {
+                gap: 8px !important;
+                font-size: 0.75rem !important;
+                flex-wrap: wrap !important;
+            }
+            
+            /* Boutons d'action */
+            div[style*="flex-shrink: 0"] {
+                width: 100% !important;
+                flex-shrink: 1 !important;
+            }
+            
+            button[data-action="toggle-reponse-whatsapp"],
+            button[data-action="traiter-probleme"],
+            button[data-action="supprimer-probleme"] {
+                flex: 1 !important;
+                padding: 8px 10px !important;
+                font-size: 0.75rem !important;
+                min-width: 0 !important;
+            }
+            
+            button[data-action="supprimer-probleme"] {
+                flex: 0 0 auto !important;
+                min-width: 40px !important;
+            }
+            
+            /* Formulaire de réponse WhatsApp */
+            form[data-form="whatsapp-reponse"] textarea {
+                font-size: 0.85rem !important;
+                padding: 10px !important;
+            }
+            
+            form[data-form="whatsapp-reponse"] button[type="submit"] {
+                padding: 10px 16px !important;
+                font-size: 0.85rem !important;
+            }
+            
+            form[data-form="whatsapp-reponse"] button[type="button"] {
+                padding: 10px 16px !important;
+                font-size: 0.85rem !important;
+            }
+            
+            form[data-form="whatsapp-reponse"] > div {
+                flex-direction: column !important;
+            }
+            
+            form[data-form="whatsapp-reponse"] button {
+                width: 100% !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Encore plus compact pour très petits écrans */
+            #dashboard-demandes-clients {
+                padding: 6px !important;
+            }
+            
+            #dashboard-demandes-clients h2 {
+                font-size: 0.65rem !important;
+            }
+            
+            /* Demandes & Retours ultra-compact */
+            [id*="demandes-retours"] h2,
+            div:has(#badge-demandes-retours-count) h2 {
+                font-size: 0.65rem !important;
+            }
+            
+            #badge-demandes-retours-count {
+                padding: 3px 8px !important;
+                font-size: 0.6rem !important;
+            }
+            
+            .card > div:first-child h2 {
+                font-size: 0.65rem !important;
+            }
+            
+            .card > div:first-child span[id*="badge"] {
+                padding: 3px 8px !important;
+                font-size: 0.6rem !important;
+            }
+            
+            #liste-demandes-clients button {
+                padding: 6px 10px !important;
+                font-size: 0.75rem !important;
+            }
+            
+            /* To-Do Lists ultra-compact */
+            div[id*="todo-count-"] {
+                padding: 2px 6px !important;
+                font-size: 0.6rem !important;
+            }
+            
+            [data-todo-category] {
+                padding: 5px 6px !important;
+                font-size: 0.65rem !important;
+            }
+            
+            .dashboard-todo-item {
+                padding: 5px !important;
+                gap: 4px !important;
+            }
+            
+            .dashboard-todo-checkbox {
+                min-width: 16px !important;
+                width: 16px !important;
+                height: 16px !important;
+            }
+            
+            .dashboard-todo-title {
+                font-size: 0.65rem !important;
+            }
+            
+            .dashboard-todo-btn {
+                padding: 3px !important;
+                min-width: 28px !important;
+                height: 28px !important;
+            }
+            
+            .dashboard-todo-btn svg {
+                width: 12px !important;
+                height: 12px !important;
+            }
+            
+            div[id^="todo-"] {
+                max-height: 150px !important;
+            }
+            
+            div[style*="border: 2px solid"] > div:first-child h3 {
+                font-size: 0.6rem !important;
+            }
+            
+            /* Cards Demandes/Problèmes ultra-compact */
+            div[style*="box-shadow"][style*="border-radius: 10px"] {
+                padding: 8px !important;
+            }
+            
+            div[style*="border-bottom: 2px solid"] span[style*="font-weight: 700"] {
+                font-size: 0.85rem !important;
+            }
+            
+            div[style*="border-bottom: 2px solid"] span[style*="background"] {
+                padding: 2px 6px !important;
+                font-size: 0.65rem !important;
+            }
+            
+            div[style*="justify-content: space-between"] > div:first-child span[style*="font-weight: 700"] {
+                font-size: 0.85rem !important;
+            }
+            
+            div[style*="justify-content: space-between"] > div:first-child p {
+                font-size: 0.75rem !important;
+            }
+            
+            div[style*="justify-content: space-between"] > div:first-child div[style*="gap: 15px"] {
+                font-size: 0.7rem !important;
+            }
+            
+            button[data-action="toggle-reponse-whatsapp"],
+            button[data-action="traiter-probleme"],
+            button[data-action="supprimer-probleme"] {
+                padding: 6px 8px !important;
+                font-size: 0.7rem !important;
+            }
+            
+            button[data-action="supprimer-probleme"] {
+                min-width: 36px !important;
+            }
+            
+            form[data-form="whatsapp-reponse"] textarea {
+                font-size: 0.8rem !important;
+                padding: 8px !important;
+            }
+            
+            form[data-form="whatsapp-reponse"] button {
+                padding: 8px 12px !important;
+                font-size: 0.8rem !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- 🧹 NETTOYAGE IMMÉDIAT DU TITRE - DÉSACTIVÉ POUR DEBUG -->
@@ -209,6 +695,11 @@
     
     <!-- 🎨 CONTRÔLES ADMIN -->
     <div class="theme-controls">
+        <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
         <span id="userDisplayName" class="user-display-name" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.3s;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -445,6 +936,81 @@
         }
         */
         
+        // 📱 GESTION MENU MOBILE
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🍔 Initialisation menu mobile...');
+            const menuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileNav = document.querySelector('.icalou-modern-nav');
+            const mobileOverlay = document.getElementById('mobile-nav-overlay');
+            
+            console.log('🔍 Éléments trouvés:', {
+                menuToggle: !!menuToggle,
+                mobileNav: !!mobileNav,
+                mobileOverlay: !!mobileOverlay
+            });
+            
+            if (menuToggle && mobileNav && mobileOverlay) {
+                console.log('✅ Tous les éléments du menu mobile sont présents');
+                
+                // Ouvrir/Fermer le menu
+                menuToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🍔 Clic sur hamburger');
+                    
+                    const isActive = mobileNav.classList.contains('active');
+                    console.log('État actuel:', isActive ? 'ouvert' : 'fermé');
+                    
+                    if (isActive) {
+                        // Fermer
+                        mobileNav.classList.remove('active');
+                        mobileOverlay.classList.remove('active');
+                        menuToggle.classList.remove('active');
+                        document.body.style.overflow = '';
+                        console.log('➡️ Menu fermé');
+                    } else {
+                        // Ouvrir
+                        mobileNav.classList.add('active');
+                        mobileOverlay.classList.add('active');
+                        menuToggle.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                        console.log('➡️ Menu ouvert');
+                    }
+                });
+                
+                // Fermer au clic sur l'overlay
+                mobileOverlay.addEventListener('click', () => {
+                    console.log('🔘 Clic sur overlay - fermeture');
+                    mobileNav.classList.remove('active');
+                    mobileOverlay.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+                
+                // Fermer au clic sur un onglet
+                const navTabs = mobileNav.querySelectorAll('.nav-tab');
+                console.log(`📑 ${navTabs.length} onglets trouvés`);
+                navTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        // Délai pour permettre la transition de l'onglet
+                        setTimeout(() => {
+                            mobileNav.classList.remove('active');
+                            mobileOverlay.classList.remove('active');
+                            menuToggle.classList.remove('active');
+                            document.body.style.overflow = '';
+                            console.log('📑 Menu fermé après clic onglet');
+                        }, 100);
+                    });
+                });
+            } else {
+                console.error('❌ Éléments manquants pour le menu mobile:', {
+                    menuToggle: menuToggle ? 'OK' : 'MANQUANT',
+                    mobileNav: mobileNav ? 'OK' : 'MANQUANT',
+                    mobileOverlay: mobileOverlay ? 'OK' : 'MANQUANT'
+                });
+            }
+        });
+        
         // Charger au démarrage de la page
         document.addEventListener('DOMContentLoaded', () => {
             // Attendre que Supabase soit initialisé
@@ -501,16 +1067,22 @@
             // Timeout après 5 secondes
             setTimeout(() => clearInterval(waitForSupabase), 5000);
             
-            // Vérifier si on doit ouvrir un onglet spécifique (après retour de la page Options par exemple)
-            const pendingTab = localStorage.getItem('pendingTabSwitch');
+            // Vérifier si on doit ouvrir un onglet spécifique (URL prioritaire puis fallback localStorage)
+            const initialUrlParams = new URLSearchParams(window.location.search);
+            const requestedTab = initialUrlParams.get('tab');
+            const pendingTab = requestedTab || localStorage.getItem('pendingTabSwitch');
+
             if (pendingTab) {
-                localStorage.removeItem('pendingTabSwitch');
-                // Attendre un peu que tout soit chargé
+                if (!requestedTab) {
+                    localStorage.removeItem('pendingTabSwitch');
+                }
+
+                // Ouvrir rapidement l'onglet demandé pour éviter le flash Dashboard
                 setTimeout(() => {
                     if (typeof switchTab === 'function') {
                         switchTab(pendingTab);
                     }
-                }, 500);
+                }, 50);
             }
         });
     </script>
@@ -561,6 +1133,7 @@
             'tab-reservations': 'tabs/tab-reservations.html',
             'tab-archives': 'tabs/tab-archives.html',
             'tab-statistiques': 'tabs/tab-statistiques.html',
+            'tab-prestations': 'tabs/tab-prestations.html' + cacheBuster,
             'tab-charges': 'tabs/tab-fiscalite-v2.html?v=1737243700',
             'tab-menage': 'tabs/tab-menage.html?v=4.1' + cacheBuster,
             'tab-infos-gites': 'tabs/tab-infos-gites.html?v=1737649300' + cacheBuster,
@@ -570,6 +1143,7 @@
             'tab-draps': 'tabs/tab-draps.html',
             'tab-checklists': 'tabs/tab-checklists.html',
             'tab-parrainage': 'tabs/tab-parrainage.html' + cacheBuster,
+            'tab-kanban': 'tabs/tab-kanban.html?v=5.0' + cacheBuster,
         };
         
         // Liste RÉDUITE pour MOBILE (onglets exclus du menu mobile)
@@ -630,6 +1204,16 @@
                     if (tabId === 'tab-draps' && typeof window.initDraps === 'function') {
                         window.initDraps();
                     }
+                    // Initialiser Prestations après chargement du HTML
+                    if (tabId === 'tab-prestations' && typeof window.initPrestations === 'function') {
+                        setTimeout(() => window.initPrestations(), 100);
+                    }
+                    
+                    // Initialiser Kanban après chargement du HTML
+                    if (tabId === 'tab-kanban' && typeof window.initKanban === 'function') {
+                        setTimeout(() => window.initKanban(), 100);
+                    }
+
                 })
                 .catch(err => {
                     if (file.includes('tab-dashboard')) {
@@ -640,13 +1224,15 @@
         
         // Activer le premier onglet (dashboard) après chargement
         setTimeout(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hasRequestedTab = !!urlParams.get('tab');
+
             const dashboardTab = document.getElementById('tab-dashboard');
-            if (dashboardTab) {
+            if (!hasRequestedTab && dashboardTab) {
                 dashboardTab.classList.add('active');
             }
             
             // Vérifier si on doit ouvrir les paramètres de notifications
-            const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('openNotifications') === 'true' && window.notificationSystem) {
                 setTimeout(() => {
                     window.notificationSystem.openNotificationSettings();
@@ -778,6 +1364,9 @@
             </div>
         </div>
         
+        <!-- Overlay mobile pour le menu -->
+        <div id="mobile-nav-overlay" class="mobile-nav-overlay"></div>
+        
         <!-- Navigation iCalou Moderne -->
         <nav class="icalou-modern-nav">
             <div class="nav-container">
@@ -791,9 +1380,19 @@
                     <span class="tab-label">Résa</span>
                 </button>
 
+                <button class="nav-tab" data-tab="kanban" data-theme="blue">
+                    <i data-lucide="trello" class="tab-icon"></i>
+                    <span class="tab-label">Tâches</span>
+                </button>
+
                 <button class="nav-tab" data-tab="statistiques" data-theme="green">
                     <i data-lucide="bar-chart-3" class="tab-icon"></i>
                     <span class="tab-label">Stats</span>
+                </button>
+
+                <button class="nav-tab" data-tab="prestations" data-theme="green">
+                    <i data-lucide="shopping-bag" class="tab-icon"></i>
+                    <span class="tab-label">Prestations</span>
                 </button>
 
                 <button class="nav-tab" data-tab="draps" data-theme="blue">
@@ -826,10 +1425,6 @@
                     <span class="tab-label">Infos</span>
                 </button>
 
-                <button class="nav-tab" data-tab="parrainage" data-theme="purple">
-                    <i data-lucide="users" class="tab-icon"></i>
-                    <span class="tab-label">Parrainage</span>
-                </button>
             </div>
         </nav>
         
@@ -842,6 +1437,7 @@
         <div id="tab-faq" class="tab-content"></div>
         <div id="tab-draps" class="tab-content"></div>
         <div id="tab-statistiques" class="tab-content"></div>
+        <div id="tab-prestations" class="tab-content"></div>
         <div id="tab-charges" class="tab-content"></div>
         <div id="tab-menage" class="tab-content"></div>
         <div id="tab-infos-gites" class="tab-content"></div>
@@ -850,6 +1446,7 @@
         <div id="tab-decouvrir" class="tab-content"></div>
         <div id="tab-calendrier-tarifs" class="tab-content"></div>
         <div id="tab-parrainage" class="tab-content"></div>
+        <div id="tab-kanban" class="tab-content"></div>
     </div>
     
         </div>
@@ -2161,15 +2758,16 @@
                 }
                 
                 const dataToUpdate = {
-                    reservation_id: resaId,
                     gite: reservation.gite,
                     scheduled_date: newDate,
                     time_of_day: newMoment,
                     status: 'pending'
                 };
                 
-                
-                const { data, error } = await supabase.from('cleaning_schedule').upsert(dataToUpdate, { onConflict: 'reservation_id' });
+                const { error } = await supabase
+                    .from('cleaning_schedule')
+                    .update(dataToUpdate)
+                    .eq('reservation_id', resaId);
                 
                 if (error) {
                     console.error('Erreur Supabase:', error);
@@ -2302,8 +2900,8 @@
                     };
                 }
                 
-                // Sauvegarder si pas encore fait ou si status pending
-                if (!validation || validation.status === 'pending') {
+                // Mettre à jour uniquement si l'entrée existe déjà et est en pending
+                if (validation && validation.status === 'pending') {
                     const nextRes = reservations
                         .filter(next => next.gite === r.gite && parseLocalDate(next.dateFin || next.date_fin) > dateFin)
                         .sort((a, b) => parseLocalDate(a.dateDebut || a.date_debut) - parseLocalDate(b.dateDebut || b.date_debut))[0];
@@ -2317,16 +2915,18 @@
                             nextResStartStr = `${nextResStart.getFullYear()}-${String(nextResStart.getMonth() + 1).padStart(2, '0')}-${String(nextResStart.getDate()).padStart(2, '0')}`;
                         }
                         
-                        await supabase.from('cleaning_schedule').upsert({
-                            reservation_id: r.id,
-                            gite: r.gite,
-                            scheduled_date: scheduledDateStr,
-                            time_of_day: calculatedTimeOfDay,
-                            status: 'pending',
-                            validated_by_company: false,
-                            reservation_end: dateFinStr,
-                            reservation_start_after: nextResStartStr
-                        }, { onConflict: 'reservation_id' });
+                        await supabase
+                            .from('cleaning_schedule')
+                            .update({
+                                gite: r.gite,
+                                scheduled_date: scheduledDateStr,
+                                time_of_day: calculatedTimeOfDay,
+                                status: 'pending',
+                                validated_by_company: false,
+                                reservation_end: dateFinStr,
+                                reservation_start_after: nextResStartStr
+                            })
+                            .eq('reservation_id', r.id);
                     } catch (err) {
                         console.error('Erreur upsert:', err);
                     }
@@ -2498,8 +3098,7 @@
             // Sauvegarder dans cleaning_schedule avec le moment
             const { error } = await supabase
                 .from('cleaning_schedule')
-                .upsert({
-                    reservation_id: reservationId,
+                .update({
                     gite: reservation.gite,
                     scheduled_date: newDate,
                     time_of_day: timeOfDay,
@@ -2507,7 +3106,8 @@
                     validated_by_company: false,
                     reservation_end: reservation.dateFin,
                     updated_at: new Date().toISOString()
-                }, { onConflict: 'reservation_id' });
+                })
+                .eq('reservation_id', reservationId);
             
             if (error) {
                 showToast('Erreur: ' + error.message, 'error');

@@ -78,7 +78,7 @@
         <div class="header-right">
             <!-- Liste des démos/tests -->
             <div style="display: flex; gap: 10px; margin-right: 15px;">
-                <button onclick="window.location.href='admin-clients-ameliorations-demo.html'" 
+                <button onclick="window.location.href='/pages/admin-clients-ameliorations-demo.html'" 
                         style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); 
                                color: white; 
                                border: none; 
@@ -98,45 +98,6 @@
                     Améliorations Admin
                 </button>
                 
-                <button onclick="window.location.href='fiche-client-ameliorations-demo.html'" 
-                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-                               color: white; 
-                               border: none; 
-                               padding: 12px 20px; 
-                               border-radius: 8px; 
-                               font-weight: 600; 
-                               cursor: pointer; 
-                               display: flex; 
-                               align-items: center; 
-                               gap: 8px;
-                               font-size: 13px;
-                               transition: transform 0.2s, box-shadow 0.2s;"
-                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'"
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
-                        title="Voir les améliorations proposées pour la Fiche Client (interface locataires)">
-                    <i data-lucide="smartphone" style="width: 16px; height: 16px;"></i>
-                    Améliorations Fiche
-                </button>
-                
-                <button onclick="window.location.href='onboarding-demo.html'" 
-                        style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
-                               color: white; 
-                               border: none; 
-                               padding: 12px 20px; 
-                               border-radius: 8px; 
-                               font-weight: 600; 
-                               cursor: pointer; 
-                               display: flex; 
-                               align-items: center; 
-                               gap: 8px;
-                               font-size: 13px;
-                               transition: transform 0.2s, box-shadow 0.2s;"
-                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.4)'"
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
-                        title="Voir le formulaire d'inscription complet en 4 étapes">
-                    <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i>
-                    Démo Inscription
-                </button>
             </div>
             
             <span class="user-email" id="userEmail">stephanecalvignac@hotmail.fr</span>
@@ -396,40 +357,44 @@
                     <i data-lucide="layout-dashboard"></i>
                     <span>Dashboard</span>
                 </button>
-                <button class="tab-btn" data-tab="clients" onclick="window.location.href='admin-clients.html'">
+                <button class="tab-btn" data-tab="clients" onclick="window.location.href='/pages/admin-clients.html'">
                     <i data-lucide="users"></i>
                     <span>Clients</span>
                 </button>
-                <button class="tab-btn" data-tab="support" onclick="window.location.href='admin-support.html'" style="position: relative;">
+                <button class="tab-btn" data-tab="support" onclick="window.location.href='/pages/admin-support.html'" style="position: relative;">
                     <i data-lucide="headphones"></i>
                     <span>Support</span>
                     <span id="badge-support-nouveaux" style="display: none; position: absolute; top: 10px; right: 15px; background: #e91e63; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center;">0</span>
                 </button>
-                <button class="tab-btn" data-tab="emails" onclick="window.location.href='admin-emails.html'">
+                <button class="tab-btn" data-tab="emails" onclick="window.location.href='/pages/admin-emails.html?build=20260217-4'">
                     <i data-lucide="mail"></i>
                     <span>Messagerie</span>
                 </button>
-                <button class="tab-btn" data-tab="promotions" onclick="window.location.href='admin-promotions.html'">
+                <button class="tab-btn" data-tab="promotions" onclick="window.location.href='/pages/admin-promotions.html'">
                     <i data-lucide="tag"></i>
                     <span>Promotions</span>
                 </button>
-                <button class="tab-btn" data-tab="parrainage" onclick="window.location.href='admin-parrainage.html'">
+                <button class="tab-btn" data-tab="parrainage" onclick="window.location.href='/pages/admin-parrainage.html'">
                     <i data-lucide="gift"></i>
                     <span>Parrainage</span>
                 </button>
-                <button class="tab-btn" data-tab="finance" onclick="window.location.href='admin-finance.html'">
+                <button class="tab-btn" data-tab="finance" onclick="window.location.href='/pages/admin-finance.html'">
                     <i data-lucide="bar-chart-2"></i>
                     <span>Finance & BI</span>
                 </button>
-                <button class="tab-btn" data-tab="content" onclick="window.location.href='admin-content.html'">
+                <button class="tab-btn" data-tab="prestations" onclick="window.location.href='/pages/admin-prestations-stats.html'">
+                    <i data-lucide="shopping-bag"></i>
+                    <span>Prestations</span>
+                </button>
+                <button class="tab-btn" data-tab="content" onclick="window.location.href='/pages/admin-content.html'">
                     <i data-lucide="pen-tool"></i>
                     <span>Content IA</span>
                 </button>
-                <button class="tab-btn" data-tab="communications" onclick="window.location.href='admin-communications.html'">
+                <button class="tab-btn" data-tab="communications" onclick="window.location.href='/pages/admin-communications.html'">
                     <i data-lucide="megaphone"></i>
                     <span>Communications</span>
                 </button>
-                <button class="tab-btn" data-tab="monitoring" onclick="window.location.href='admin-monitoring.html'">
+                <button class="tab-btn" data-tab="monitoring" onclick="window.location.href='/pages/admin-monitoring.html'">
                     <i data-lucide="activity"></i>
                     <span>Monitoring</span>
                 </button>

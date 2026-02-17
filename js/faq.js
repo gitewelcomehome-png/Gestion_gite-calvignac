@@ -53,7 +53,16 @@ async function chargerGitesOptions() {
     if (!select) return;
     
     try {
-        const gites = await window.gitesManager.getVisibleGites();
+        let gites = [];
+
+        if (window.gitesManager) {
+            // En mode Options, subscriptionManager peut être absent → éviter l'attente longue
+            if (window.subscriptionManager?.currentSubscription && typeof window.gitesManager.getVisibleGites === 'function') {
+                gites = await window.gitesManager.getVisibleGites();
+            } else if (typeof window.gitesManager.getAll === 'function') {
+                gites = await window.gitesManager.getAll();
+            }
+        }
         
         // Garder l'option "Tous"
         select.innerHTML = '<option value="tous">📍 Tous les gîtes</option>';
@@ -454,144 +463,6 @@ window.supprimerQuestion = async function(id) {
         console.error('Erreur suppression FAQ:', error);
         alert('Erreur lors de la suppression');
     }
-};
-
-// ================================================================
-// EXPORT HTML POUR FICHE CLIENT
-// ================================================================
-
-window.exporterFAQHTML = function() {
-    const faqVisibles = faqData.filter(q => q.visible);
-    
-    if (faqVisibles.length === 0) {
-        alert('Aucune question visible à exporter');
-        return;
-    }
-
-    // Grouper par catégorie
-    const parCategorie = {};
-    faqVisibles.forEach(q => {
-        if (!parCategorie[q.category]) {
-            parCategorie[q.category] = [];
-        }
-        parCategorie[q.category].push(q);
-    });
-
-    let html = `
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ - Welcome Home</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        .header {
-            text-align: center;
-            padding: 30px 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            margin: 0 0 10px 0;
-        }
-        .categorie {
-            background: var(--card);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .categorie-titre {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-        .faq-item {
-            margin-bottom: 20px;
-        }
-        .question {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-        }
-        .reponse {
-            color: #555;
-            padding-left: 20px;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #ddd;
-            color: #777;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>❓ Questions Fréquentes</h1>
-        <p>Welcome Home - Gîtes Trevoux & Calvignac</p>
-    </div>
-`;
-
-    const categoriesOrdre = ['arrivee', 'depart', 'equipements', 'localisation', 'tarifs', 'reglement', 'autre'];
-    const categoriesTitres = {
-        arrivee: '🔑 Arrivée',
-        depart: '🚪 Départ',
-        equipements: '🏠 Équipements',
-        localisation: '📍 Localisation',
-        tarifs: '💰 Tarifs',
-        reglement: '📋 Règlement',
-        autre: 'ℹ️ Informations Générales'
-    };
-
-    categoriesOrdre.forEach(cat => {
-        if (parCategorie[cat] && parCategorie[cat].length > 0) {
-            html += `
-    <div class="categorie">
-        <div class="categorie-titre">${categoriesTitres[cat]}</div>
-`;
-            parCategorie[cat].forEach(q => {
-                html += `
-        <div class="faq-item">
-            <div class="question">❔ ${q.question}</div>
-            <div class="reponse">${q.answer}</div>
-        </div>
-`;
-            });
-            html += `    </div>\n`;
-        }
-    });
-
-    html += `
-    <div class="footer">
-        <p>Pour toute autre question, n'hésitez pas à nous contacter !</p>
-        <p><strong>Welcome Home</strong> - Votre séjour en toute sérénité</p>
-    </div>
-</body>
-</html>
-`;
-
-    // Télécharger le fichier
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'faq-welcome-home.html';
-    a.click();
-    URL.revokeObjectURL(url);
 };
 
 // ================================================================

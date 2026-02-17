@@ -303,8 +303,16 @@ function switchTab(tabName) {
                 setTimeout(checkParrainageReady, 50);
             }
         };
-        checkParrainageReady();
-    } else if (tabName === 'decouvrir') {
+        checkParrainageReady();    } else if (tabName === 'kanban' && typeof initKanban === 'function') {
+        // Initialiser le Kanban quand l'onglet est activé
+        const checkKanbanReady = () => {
+            if (document.querySelector('.kanban-board')) {
+                initKanban();
+            } else {
+                setTimeout(checkKanbanReady, 50);
+            }
+        };
+        checkKanbanReady();    } else if (tabName === 'decouvrir') {
         if (typeof window.initModuleDecouvrir === 'function') {
             window.initModuleDecouvrir();
         }

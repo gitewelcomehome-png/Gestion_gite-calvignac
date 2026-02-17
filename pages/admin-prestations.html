@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Prestations Supplémentaires - Admin</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: #2d6b3d;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: black;
+        }
+        
+        /* Sélecteur de gîte */
+        .gite-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .gite-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .gite-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        /* Onglets */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: #2d6b3d;
+            color: white;
+            border-color: #2d6b3d;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Grille prestations */
+        .prestations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .prestation-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .prestation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .prestation-header {
+            display: flex;
+            align-items: start;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .icone {
+            font-size: 40px;
+        }
+        
+        .prestation-info {
+            flex: 1;
+        }
+        
+        .prestation-nom {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        
+        .prestation-prix {
+            font-size: 20px;
+            color: #2d6b3d;
+            font-weight: 700;
+        }
+        
+        .prestation-description {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+            line-height: 1.4;
+        }
+        
+        .prestation-meta {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .prestation-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            flex: 1;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #2d6b3d;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2d6b3d;
+        }
+        
+        .stat-secondary {
+            color: #999;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        /* Table commandes */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f8f9fa;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 Gestion Prestations Supplémentaires</h1>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="openConfigModal()">⚙️ Configuration</button>
+                <button class="btn btn-primary" onclick="openModal('add')">+ Nouvelle Prestation</button>
+            </div>
+        </header>
+        
+        <!-- Sélecteur de gîte -->
+        <div class="gite-selector">
+            <label>Sélectionner un gîte :</label>
+            <select id="giteSelect" onchange="loadPrestations()">
+                <option value="">Chargement...</option>
+            </select>
+        </div>
+        
+        <!-- Onglets -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('catalogue')">📋 Catalogue</div>
+            <div class="tab" onclick="switchTab('commandes')">🛒 Commandes</div>
+            <div class="tab" onclick="switchTab('stats')">📊 Statistiques</div>
+        </div>
+        
+        <!-- ONGLET CATALOGUE -->
+        <div id="tab-catalogue" class="tab-content active">
+            <div id="prestationsGrid" class="prestations-grid">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <p>Aucune prestation créée pour ce gîte</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ONGLET COMMANDES -->
+        <div id="tab-commandes" class="tab-content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>N° Commande</th>
+                            <th>Date</th>
+                            <th>Client</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="commandesTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">Aucune commande</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- ONGLET STATS -->
+        <div id="tab-stats" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">CA Brut Total</div>
+                    <div class="stat-value" id="stat-ca-brut">0 €</div>
+                    <div class="stat-secondary">Avant commission</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">CA Net (Après 5%)</div>
+                    <div class="stat-value" id="stat-ca-net">0 €</div>
+                    <div class="stat-secondary">Montant perçu</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Commissions</div>
+                    <div class="stat-value" id="stat-commissions">0 €</div>
+                    <div class="stat-secondary">Versées à la plateforme</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Nb Commandes</div>
+                    <div class="stat-value" id="stat-nb-commandes">0</div>
+                    <div class="stat-secondary">Commandes validées</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL PRESTATION -->
+    <div id="modalPrestation" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nouvelle Prestation</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="prestationForm" onsubmit="savePrestation(event)">
+                <input type="hidden" id="prestationId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nom (FR) *</label>
+                        <input type="text" id="nom" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nom (EN)</label>
+                        <input type="text" id="nom_en">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description (FR)</label>
+                    <textarea id="description"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description (EN)</label>
+                    <textarea id="description_en"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Prix (€) *</label>
+                        <input type="number" id="prix" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Catégorie *</label>
+                        <select id="categorie" required>
+                            <option value="repas">🍽️ Repas</option>
+                            <option value="activite">🎯 Activité</option>
+                            <option value="menage">🧹 Ménage</option>
+                            <option value="location">🚴 Location</option>
+                            <option value="autre">📦 Autre</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Icône</label>
+                        <input type="text" id="icone" placeholder="📦">
+                    </div>
+                    <div class="form-group">
+                        <label>Statut</label>
+                        <select id="is_active">
+                            <option value="true">✅ Active</option>
+                            <option value="false">❌ Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- MODAL CONFIGURATION -->
+    <div id="configModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>⚙️ Configuration Commission</h2>
+                <button class="close-btn" onclick="closeConfigModal()">&times;</button>
+            </div>
+            <form id="configForm" onsubmit="saveConfig(event)">
+                <div class="form-group">
+                    <label>Pourcentage de commission (%)</label>
+                    <input type="number" id="commission_percent" min="0" max="100" step="0.1" required>
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Commission prélevée sur chaque commande de prestation
+                    </small>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeConfigModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/admin-prestations.js"></script>
+</body>
+</html>

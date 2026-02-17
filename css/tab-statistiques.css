@@ -30,8 +30,15 @@
     background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%);
     padding: 12px 20px;
     border-radius: 8px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.stats-header-title i,
+.stats-header-title svg {
+    flex-shrink: 0;
 }
 
 .stats-header-subtitle {
@@ -109,7 +116,15 @@
     background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%);
     padding: 12px 20px;
     border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.stats-card-title i,
+.stats-card-title svg {
+    flex-shrink: 0;
 }
 
 /* ═══ GRILLES STATISTIQUES ═══ */

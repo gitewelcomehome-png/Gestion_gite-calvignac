@@ -1,0 +1,398 @@
+<div class="tab-container kanban-container">
+    <!-- En-tête -->
+    <header class="page-header">
+        <div class="page-header__content">
+            <h1 class="page-title"><i data-lucide="trello"></i> Tableau Kanban</h1>
+            <p class="page-subtitle">Gestion visuelle de vos tâches</p>
+        </div>
+        <div class="page-header__actions">
+            <button onclick="showAddTaskMenu()" class="btn btn--primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-right: 10px;">
+                <i data-lucide="plus"></i> Nouvelle tâche
+            </button>
+            <button onclick="refreshKanban()" class="btn btn--refresh">
+                <i data-lucide="refresh-cw"></i> Actualiser
+            </button>
+        </div>
+    </header>
+
+    <!-- Filtres de catégories -->
+    <div class="kanban-filters">
+        <div class="filter-group">
+            <button class="filter-btn active" data-category="all" onclick="filterKanban('all')">
+                <i data-lucide="layers"></i> Toutes les catégories
+            </button>
+            <button class="filter-btn" data-category="reservations" onclick="filterKanban('reservations')">
+                <i data-lucide="calendar"></i> Actions Réservations
+            </button>
+            <button class="filter-btn" data-category="achats" onclick="filterKanban('achats')">
+                <i data-lucide="shopping-cart"></i> Achats & Courses
+            </button>
+            <button class="filter-btn" data-category="travaux" onclick="filterKanban('travaux')">
+                <i data-lucide="wrench"></i> Travaux & Maintenance
+            </button>
+        </div>
+        
+        <!-- Menu rapide de création -->
+        <div class="quick-add-menu" id="quickAddMenu" style="display: none;">
+            <p style="margin: 0 0 10px 0; font-weight: 600; color: #2c3e50;">Créer une tâche dans :</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="addKanbanTask('reservations')" class="btn-quick-add" style="background: #3498db;">
+                    <i data-lucide="calendar"></i> Réservations
+                </button>
+                <button onclick="addKanbanTask('achats')" class="btn-quick-add" style="background: #e67e22;">
+                    <i data-lucide="shopping-cart"></i> Achats
+                </button>
+                <button onclick="addKanbanTask('travaux')" class="btn-quick-add" style="background: #e74c3c;">
+                    <i data-lucide="wrench"></i> Travaux
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Colonnes Kanban -->
+    <div class="kanban-board">
+        <!-- Colonne: À faire -->
+        <div class="kanban-column" data-status="todo">
+            <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                    <i data-lucide="circle"></i>
+                    <span>À faire</span>
+                </div>
+                <span class="kanban-column-count" id="count-todo">0</span>
+            </div>
+            <div class="kanban-column-content" id="column-todo">
+                <!-- Les cartes seront injectées ici -->
+            </div>
+        </div>
+
+        <!-- Colonne: En cours -->
+        <div class="kanban-column" data-status="in_progress">
+            <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                    <i data-lucide="play-circle"></i>
+                    <span>En cours</span>
+                </div>
+                <span class="kanban-column-count" id="count-in_progress">0</span>
+            </div>
+            <div class="kanban-column-content" id="column-in_progress">
+                <!-- Les cartes seront injectées ici -->
+            </div>
+        </div>
+
+        <!-- Colonne: Terminé -->
+        <div class="kanban-column" data-status="done">
+            <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                    <i data-lucide="check-circle"></i>
+                    <span>Terminé</span>
+                </div>
+                <span class="kanban-column-count" id="count-done">0</span>
+            </div>
+            <div class="kanban-column-content" id="column-done">
+                <!-- Les cartes seront injectées ici -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de détails (similaire au dashboard) -->
+    <div id="kanban-todo-detail-modal" class="modal" style="display: none;"></div>
+</div>
+
+<style>
+/* Styles spécifiques Kanban */
+.kanban-container {
+    padding: 20px;
+}
+
+.kanban-filters {
+    margin-bottom: 30px;
+    background: var(--card, #fff);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.filter-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.quick-add-menu {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid var(--stroke, #e0e0e0);
+}
+
+.btn-quick-add {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.btn-quick-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-quick-add i {
+    width: 18px;
+    height: 18px;
+}
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-secondary, #f5f7fa);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-secondary, #6c757d);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    background: var(--bg-hover, #e9ecef);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.filter-btn i {
+    width: 18px;
+    height: 18px;
+}
+
+.kanban-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.kanban-column {
+    background: var(--bg-secondary, #f8f9fa);
+    border-radius: 12px;
+    padding: 16px;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--stroke, #e0e0e0);
+}
+
+.kanban-column-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary, #2c3e50);
+}
+
+.kanban-column-title i {
+    width: 20px;
+    height: 20px;
+}
+
+.kanban-column-count {
+    background: var(--electric, #667eea);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.kanban-column[data-status="todo"] .kanban-column-count {
+    background: #95a5a6;
+}
+
+.kanban-column[data-status="in_progress"] .kanban-column-count {
+    background: #3498db;
+}
+
+.kanban-column[data-status="done"] .kanban-column-count {
+    background: #27ae60;
+}
+
+.kanban-column-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+/* ============================================
+   CARTES POST-IT - DESIGN ULTRA SIMPLE
+   ============================================ */
+
+/* Base Post-it */
+.kanban-card {
+    position: relative;
+    padding: 16px;
+    border-radius: 3px;
+    cursor: grab;
+    transition: all 0.25s ease;
+    box-shadow: 
+        0 2px 4px rgba(0,0,0,0.12),
+        0 4px 10px rgba(0,0,0,0.08);
+    min-height: 110px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.kanban-card.is-dragging {
+    opacity: 0.6;
+    transform: scale(0.98);
+    cursor: grabbing;
+}
+
+.kanban-column-content.is-drop-target {
+    border: 2px dashed rgba(52, 152, 219, 0.55);
+    border-radius: 8px;
+    background: rgba(52, 152, 219, 0.06);
+}
+
+.kanban-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 4px 12px rgba(0,0,0,0.16),
+        0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* Carte : labels et contenu */
+.kanban-card p {
+    margin: 10px 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #1a1a1a;
+    background: transparent !important;
+    border: none !important;
+}
+
+.kanban-card .card-title-line {
+    font-size: 1.15rem;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border: none !important;
+    border-bottom: 0.5px solid rgba(0,0,0,0.25) !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+
+
+.kanban-card .label-bold-underline {
+    font-weight: 700;
+    text-decoration: underline;
+    color: #000;
+}
+
+/* Couleurs POST-IT par catégorie */
+.kanban-card[data-category="reservations"] {
+    background: #a4c2f4 !important;
+    border-bottom: 4px solid #6d9eeb !important;
+}
+
+.kanban-card[data-category="achats"] {
+    background: #ffd966 !important;
+    border-bottom: 4px solid #f1c232 !important;
+}
+
+.kanban-card[data-category="travaux"] {
+    background: #ff9999 !important;
+    border-bottom: 4px solid #e06666 !important;
+}
+
+/* Couleur des boutons pilotée directement depuis le rendu JS */
+
+.kanban-card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-right: 6px;
+    margin-top: 4px;
+}
+
+.kanban-card-btn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.kanban-card-btn i {
+    width: 14px;
+    height: 14px;
+}
+
+
+
+.kanban-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary, #95a5a6);
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .kanban-board {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .kanban-column {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .filter-group {
+        flex-direction: column;
+    }
+    
+    .filter-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>

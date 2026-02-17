@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <!-- Fond blanc -->
+  <rect width="800" height="800" fill="white"/>
+  
+  <!-- Arc vert supérieur (signature GdF) -->
+  <path d="M150 380 Q150 180, 400 180 Q650 180, 650 380" 
+        fill="none" 
+        stroke="#006838" 
+        stroke-width="60" 
+        stroke-linecap="round"/>
+  
+  <!-- Carte de France jaune -->
+  <path d="M380 340 L420 320 L460 340 L480 360 L500 400 L490 440 L460 460 L420 470 L380 460 L340 470 L310 460 L280 440 L270 400 L280 360 L310 340 L340 330 Z" 
+        fill="#FFD84A"/>
+  
+  <!-- Toit rouge (maison) -->
+  <path d="M230 280 L400 170 L570 280" 
+        fill="none" 
+        stroke="#E30613" 
+        stroke-width="45" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+  
+  <!-- Cheminée rouge -->
+  <rect x="470" y="200" width="35" height="60" fill="#E30613" rx="3"/>
+  
+  <!-- Personnage vert stylisé (bras levés) -->
+  <g fill="#006838">
+    <!-- Tête -->
+    <circle cx="400" cy="340" r="35"/>
+    
+    <!-- Corps -->
+    <ellipse cx="400" cy="430" rx="45" ry="65"/>
+    
+    <!-- Bras gauche levé -->
+    <path d="M375 380 Q330 350, 300 330" 
+          stroke="#006838" 
+          stroke-width="30" 
+          fill="none" 
+          stroke-linecap="round"/>
+    
+    <!-- Bras droit levé -->
+    <path d="M425 380 Q470 350, 500 330" 
+          stroke="#006838" 
+          stroke-width="30" 
+          fill="none" 
+          stroke-linecap="round"/>
+    
+    <!-- Jambe gauche -->
+    <path d="M380 485 L360 560" 
+          stroke="#006838" 
+          stroke-width="28" 
+          fill="none" 
+          stroke-linecap="round"/>
+    
+    <!-- Jambe droite -->
+    <path d="M420 485 L440 560" 
+          stroke="#006838" 
+          stroke-width="28" 
+          fill="none" 
+          stroke-linecap="round"/>
+  </g>
+  
+  <!-- Texte "GÎTES DE FRANCE" en arc de cercle -->
+  <defs>
+    <path id="textPath" d="M120 640 Q400 720, 680 640"/>
+  </defs>
+  
+  <text fill="#006838" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="72" 
+        font-weight="bold" 
+        letter-spacing="3">
+    <textPath href="#textPath" startOffset="50%" text-anchor="middle">
+      GÎTES DE FRANCE
+    </textPath>
+  </text>
+</svg>
