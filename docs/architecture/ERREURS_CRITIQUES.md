@@ -55,7 +55,7 @@ Le support IA était sécurisé côté serveur, mais le dashboard admin ne remon
 - Persist logs de succès/échec (incluant erreurs amont et rate limit)
 - Hash IP côté serveur (pas d'IP brute stockée)
 
-✅ Ajout de `api/support-ai-metrics.js`
+✅ Ajout de l'agrégation métriques dans `api/ai-health.js` (section support)
 - KPI 24h/1h + seuils configurables via variables d'environnement
 - Alertes critiques/avertissements exploitées par le dashboard
 
@@ -70,7 +70,7 @@ Le support IA était sécurisé côté serveur, mais le dashboard admin ne remon
 
 **Fichiers concernés:**
 - `api/support-ai.js`
-- `api/support-ai-metrics.js`
+- `api/ai-health.js`
 - `js/admin-dashboard.js`
 - `pages/admin-channel-manager.html`
 - `sql/migrations/CREATE_SUPPORT_AI_USAGE_LOGS.sql`

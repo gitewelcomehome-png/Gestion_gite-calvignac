@@ -578,7 +578,7 @@ SUPABASE_SERVICE_ROLE_KEY=...
 
 - `/api/openai` : Proxy IA pour génération de contenu éditorial (modules contenu)
 - `/api/support-ai` : Proxy IA dédié support client/admin (analyse ticket, JSON strict)
-- `/api/support-ai-metrics` : KPI/alertes monitoring support IA pour dashboard admin
+- `/api/ai-health?section=support` : KPI/alertes monitoring support IA pour dashboard admin
 - ✅ Clé OpenAI stockée uniquement côté serveur (`OPENAI_API_KEY`)
 - ⛔ Interdiction d'exposer une clé IA dans les scripts frontend
 
@@ -606,7 +606,7 @@ cm_support_ai_usage_logs
 
 - Migration: `/sql/migrations/CREATE_SUPPORT_AI_USAGE_LOGS.sql`
 - Écriture: `api/support-ai.js`
-- Lecture agrégée + alertes: `api/support-ai-metrics.js`
+- Lecture agrégée + alertes: `api/ai-health.js` (section support)
 
 ### Commandes Déploiement
 
@@ -804,7 +804,7 @@ psql $DATABASE_URL < backup_20260215.sql
 ### v2.13.5 - 18 février 2026 📊
 - ✅ Monitoring complet IA support sur dashboard admin (`pages/admin-channel-manager.html`, `js/admin-dashboard.js`)
 - ✅ Journalisation serveur des appels IA (tokens, coût estimé, latence, status) dans `cm_support_ai_usage_logs`
-- ✅ Endpoint métriques/alertes `api/support-ai-metrics.js` (taux d'erreur, latence, coût, incidents)
+- ✅ Endpoint métriques/alertes intégré à `api/ai-health.js` (section support: taux d'erreur, latence, coût, incidents)
 - ✅ Alertes IA injectées dans le bloc Alertes du dashboard pour prévention proactive
 
 ### v2.13.4 - 18 février 2026 🛡️

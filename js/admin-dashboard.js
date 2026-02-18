@@ -245,7 +245,7 @@ async function loadAIStatusKPI() {
             globalEl.textContent = 'Vérification...';
         }
 
-        const response = await fetch('/api/ai-health', {
+            const response = await fetch('/api/ai-health', {
             method: 'GET',
             cache: 'no-store'
         });
@@ -324,7 +324,7 @@ async function fetchSupportAiMetrics(forceRefresh = false) {
         return supportAiMetricsCache;
     }
 
-    const response = await fetch('/api/support-ai-metrics', {
+    const response = await fetch('/api/ai-health?section=support', {
         method: 'GET',
         cache: 'no-store'
     });
