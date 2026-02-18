@@ -38,6 +38,16 @@ function getAllowedOrigins() {
     );
 }
 
+function getCurrentRequestOrigin(req) {
+    const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').trim();
+    if (!host) {
+        return null;
+    }
+
+    const protocol = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim() || 'https';
+    return `${protocol}://${host}`;
+}
+
 function setCorsHeaders(req, res, allowedOrigin) {
     const requestOrigin = getOriginFromRequest(req);
     const originToSet = requestOrigin && allowedOrigin && requestOrigin === allowedOrigin
@@ -203,6 +213,10 @@ function buildSupportAlerts(metrics, supportAiReady) {
 
 export default async function handler(req, res) {
     const allowedOrigins = getAllowedOrigins();
+    const currentRequestOrigin = getCurrentRequestOrigin(req);
+    if (currentRequestOrigin) {
+        allowedOrigins.add(currentRequestOrigin);
+    }
     const requestOrigin = getOriginFromRequest(req);
     const isAllowed = requestOrigin ? allowedOrigins.has(requestOrigin) : false;
 

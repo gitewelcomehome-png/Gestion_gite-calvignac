@@ -80,6 +80,14 @@ class SubscriptionManager {
    */
   async checkGitesLimit() {
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return {
+        current: 0,
+        max: this.currentSubscription?.plan?.max_gites || 1,
+        canAdd: false
+      };
+    }
+
     const { data: gites } = await supabase
       .from('gites')
       .select('id')
@@ -196,7 +204,14 @@ function controlGDFTable() {
  */
 async function controlGitesLimit() {
   const addGiteButtons = document.querySelectorAll('[data-action="add-gite"]');
-  const limits = await subscriptionManager.checkGitesLimit();
+  let limits;
+
+  try {
+    limits = await subscriptionManager.checkGitesLimit();
+  } catch (error) {
+    console.error('Erreur contrôle limite gîtes:', error);
+    return;
+  }
   
   addGiteButtons.forEach(btn => {
     if (!limits.canAdd) {

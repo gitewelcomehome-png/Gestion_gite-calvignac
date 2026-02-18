@@ -963,9 +963,15 @@ window.sauvegarderStocks = sauvegarderStocks;
 
 async function analyserReservations() {
     try {
+        if (!window.supabaseClient || !window.supabaseClient.auth) {
+            return;
+        }
+
         // Récupérer l'utilisateur connecté
         const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) throw new Error('Utilisateur non connecté');
+        if (!user) {
+            return;
+        }
 
         // Récupérer les réservations futures avec filtre RLS
         const today = new Date().toISOString().split('T')[0];
@@ -999,6 +1005,9 @@ async function analyserReservations() {
         // Créer tâche automatique si besoin
         await creerTacheStockSiNecessaire(resaParGite, infosCouverture, gitesVisibles);
     } catch (error) {
+        if (error?.message === 'Utilisateur non connecté') {
+            return;
+        }
         console.error('Erreur analyse réservations:', error);
         // Ne pas afficher d'alert ici pour ne pas gêner l'utilisateur au chargement
     }
