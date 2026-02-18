@@ -67,6 +67,10 @@ function clampNumber(value, min, max, fallback) {
     return Math.min(max, Math.max(min, parsed));
 }
 
+function isSupportAiEnabled() {
+    return String(process.env.SUPPORT_AI_ENABLED ?? 'true').trim().toLowerCase() === 'true';
+}
+
 function createSupabaseAdminClient() {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -267,7 +271,7 @@ export default async function handler(req, res) {
             }
 
             const metrics = summarizeSupportMetrics(Array.isArray(rows) ? rows : []);
-            const supportAiReady = String(process.env.SUPPORT_AI_ENABLED || 'true').toLowerCase() === 'true' && Boolean(process.env.OPENAI_API_KEY);
+            const supportAiReady = isSupportAiEnabled() && Boolean(process.env.OPENAI_API_KEY);
             const { alerts, thresholds } = buildSupportAlerts(metrics, supportAiReady);
 
             return res.status(200).json({

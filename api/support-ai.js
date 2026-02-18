@@ -117,6 +117,10 @@ function clampNumber(value, min, max, fallback) {
     return Math.min(max, Math.max(min, parsed));
 }
 
+function isSupportAiEnabled() {
+    return String(process.env.SUPPORT_AI_ENABLED ?? 'true').trim().toLowerCase() === 'true';
+}
+
 function sanitizeText(value, maxChars, fallback = '') {
     if (typeof value !== 'string') return fallback;
     return value.trim().slice(0, maxChars);
@@ -211,7 +215,7 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: 'Origin non autorisée', code: 'ORIGIN_NOT_ALLOWED' });
     }
 
-    if (String(process.env.SUPPORT_AI_ENABLED || 'true').toLowerCase() !== 'true') {
+    if (!isSupportAiEnabled()) {
         return res.status(503).json({ error: 'Support IA désactivé', code: 'SUPPORT_AI_DISABLED' });
     }
 
