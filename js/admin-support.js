@@ -19,6 +19,7 @@ const SUPPORT_AI_ENDPOINT = '/api/support-ai';
 const SUPPORT_COPILOT_URGENCY_LEVELS = ['basse', 'normale', 'haute', 'critique'];
 const supportCopilotCache = new Map();
 const SUPPORT_REPLY_TEMPLATES_STORAGE_KEY = 'support_reply_templates_v1';
+const ACTIVE_SUPPORT_STATUSES = ['ouvert', 'en_cours', 'en_attente_client', 'en_attente'];
 
 // ================================================================
 // 🔐 INITIALISATION
@@ -28,6 +29,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Vérifier auth
     await checkAuth();
+
+    // Purge automatique des tickets clôturés depuis >7 jours
+    await cleanupOldClosedTickets();
     
     // Charger données
     await loadStats();
@@ -44,6 +48,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialiser icônes
     lucide.createIcons();
 });
+
+async function cleanupOldClosedTickets() {
+    try {
+        if (!window.supabaseClient || !currentUser) {
+            return;
+        }
+
+        const oneWeekAgoIso = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString();
+
+        const { error } = await window.supabaseClient
+            .from('cm_support_tickets')
+            .delete()
+            .in('statut', ['résolu', 'ferme'])
+            .lt('updated_at', oneWeekAgoIso);
+
+        if (error) {
+            console.warn('⚠️ Purge tickets clôturés impossible:', error.message || error);
+        }
+    } catch (error) {
+        console.warn('⚠️ Purge tickets clôturés impossible:', error.message || error);
+    }
+}
 
 // ================================================================
 // 🔐 AUTHENTIFICATION
@@ -154,6 +180,8 @@ async function loadTickets() {
         }
         if (currentFilters.status) {
             query = query.eq('statut', currentFilters.status);
+        } else {
+            query = query.in('statut', ACTIVE_SUPPORT_STATUSES);
         }
         if (currentFilters.priority) {
             query = query.eq('priorite', currentFilters.priority);
