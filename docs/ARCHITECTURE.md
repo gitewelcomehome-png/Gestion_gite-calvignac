@@ -1,7 +1,7 @@
 # 🏗️ Architecture - Gestion Gîte Calvignac
 
-**Version :** 2.13.0  
-**Dernière MAJ :** 15 février 2026  
+**Version :** 2.13.5  
+**Dernière MAJ :** 18 février 2026  
 **Environnement :** Production (Supabase + Vercel)
 
 ---
@@ -556,7 +556,57 @@ VITE_SUPABASE_URL=https://xxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 VITE_APP_VERSION=2.12.0
 VITE_ENABLE_DEBUG_LOGS=false
+OPENAI_API_KEY=sk-...
+SUPPORT_AI_ENABLED=true
+SUPPORT_AI_ALLOWED_ORIGINS=https://liveownerunit.fr,https://www.liveownerunit.fr
+SUPPORT_AI_RATE_LIMIT_MAX=25
+SUPPORT_AI_RATE_LIMIT_WINDOW_MS=600000
+SUPPORT_AI_IP_HASH_SALT=change-me
+SUPPORT_AI_ALERT_ERROR_RATE_1H_PCT=8
+SUPPORT_AI_ALERT_COST_24H_EUR=12
+SUPPORT_AI_ALERT_LATENCY_1H_MS=5000
+SUPPORT_AI_ALERT_CONSECUTIVE_ERRORS_1H=5
+SUPPORT_AI_EUR_PER_USD=0.92
+SUPPORT_AI_PRICE_INPUT_USD_PER_1M_GPT_4O_MINI=0.15
+SUPPORT_AI_PRICE_OUTPUT_USD_PER_1M_GPT_4O_MINI=0.6
+SUPPORT_AI_PRICE_INPUT_USD_PER_1M_GPT_4_1_MINI=0.4
+SUPPORT_AI_PRICE_OUTPUT_USD_PER_1M_GPT_4_1_MINI=1.6
+SUPABASE_SERVICE_ROLE_KEY=...
 ```
+
+### API Serverless IA
+
+- `/api/openai` : Proxy IA pour génération de contenu éditorial (modules contenu)
+- `/api/support-ai` : Proxy IA dédié support client/admin (analyse ticket, JSON strict)
+- `/api/support-ai-metrics` : KPI/alertes monitoring support IA pour dashboard admin
+- ✅ Clé OpenAI stockée uniquement côté serveur (`OPENAI_API_KEY`)
+- ⛔ Interdiction d'exposer une clé IA dans les scripts frontend
+
+### Table Monitoring IA
+
+```sql
+cm_support_ai_usage_logs
+    id UUID PK
+    endpoint TEXT
+    request_source TEXT
+    origin TEXT
+    client_ip_hash TEXT
+    model TEXT
+    prompt_chars INTEGER
+    prompt_tokens INTEGER
+    completion_tokens INTEGER
+    total_tokens INTEGER
+    estimated_cost_eur NUMERIC(12,6)
+    latency_ms INTEGER
+    status_code INTEGER
+    success BOOLEAN
+    error_code TEXT
+    created_at TIMESTAMPTZ
+```
+
+- Migration: `/sql/migrations/CREATE_SUPPORT_AI_USAGE_LOGS.sql`
+- Écriture: `api/support-ai.js`
+- Lecture agrégée + alertes: `api/support-ai-metrics.js`
 
 ### Commandes Déploiement
 
@@ -750,6 +800,27 @@ psql $DATABASE_URL < backup_20260215.sql
 ---
 
 ## 🔄 Changelog
+
+### v2.13.5 - 18 février 2026 📊
+- ✅ Monitoring complet IA support sur dashboard admin (`pages/admin-channel-manager.html`, `js/admin-dashboard.js`)
+- ✅ Journalisation serveur des appels IA (tokens, coût estimé, latence, status) dans `cm_support_ai_usage_logs`
+- ✅ Endpoint métriques/alertes `api/support-ai-metrics.js` (taux d'erreur, latence, coût, incidents)
+- ✅ Alertes IA injectées dans le bloc Alertes du dashboard pour prévention proactive
+
+### v2.13.4 - 18 février 2026 🛡️
+- ✅ Durcissement endpoint `api/support-ai.js` pour test prod sécurisé
+- ✅ Contrôle d'origin (allowlist), feature flag (`SUPPORT_AI_ENABLED`) et rate limiting
+- ✅ Validation stricte des inputs (taille prompt/system prompt, modèle autorisé, tokens/temperature clampés)
+
+### v2.13.3 - 18 février 2026 🤝
+- ✅ Support Admin: copilote IA niveau 1 dans `pages/admin-support.html` / `js/admin-support.js`
+- ✅ Sorties copilote: suggestions de réponse, classement d'urgence, prochain pas opérationnel
+- ✅ Appel IA 100% serveur via `/api/support-ai` (aucune clé côté frontend)
+
+### v2.13.2 - 18 février 2026 🔐
+- ✅ Sécurisation IA support : suppression clé OpenAI côté frontend (`js/support-ai.js`)
+- ✅ Ajout endpoint serveur dédié support (`api/support-ai.js`)
+- ✅ Flux support IA basculé en appel proxy interne (`/api/support-ai`)
 
 ### v2.13.1 - 17 février 2026 🧩
 - ✅ Kanban : Drag & Drop des cartes entre colonnes (`todo` ↔ `in_progress` ↔ `done`)

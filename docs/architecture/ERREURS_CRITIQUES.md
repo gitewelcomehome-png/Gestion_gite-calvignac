@@ -31,6 +31,134 @@ Ce qu'il faut faire pour éviter que ça se reproduise
 
 ## 🔴 Erreurs Référencées
 
+### [18 Février 2026] - Absence de monitoring temps réel des incidents/coûts IA support
+
+**Contexte:**
+Le support IA était sécurisé côté serveur, mais le dashboard admin ne remontait pas la consommation tokens/coût ni les signaux d'incident (taux d'erreur, latence, indisponibilité).
+
+**Erreur:**
+- Pas de visibilité consolidée sur les appels `/api/support-ai`
+- Pas d'alerte proactive en cas de dérive (coût, erreurs, panne)
+- Risque de détection tardive d'un incident en production
+
+**Cause:**
+1. Aucune table dédiée pour la télémétrie support IA
+2. Dashboard admin sans widget spécifique monitoring IA support
+3. Absence d'endpoint d'agrégation des KPI/alertes
+
+**Solution:**
+✅ Ajout de la migration `sql/migrations/CREATE_SUPPORT_AI_USAGE_LOGS.sql`
+- Table `cm_support_ai_usage_logs` (tokens, coût estimé, latence, status, erreur)
+- Index pour agrégations rapides dashboard
+
+✅ Extension de `api/support-ai.js`
+- Persist logs de succès/échec (incluant erreurs amont et rate limit)
+- Hash IP côté serveur (pas d'IP brute stockée)
+
+✅ Ajout de `api/support-ai-metrics.js`
+- KPI 24h/1h + seuils configurables via variables d'environnement
+- Alertes critiques/avertissements exploitées par le dashboard
+
+✅ Mise à jour dashboard admin
+- Carte "Monitoring IA Support" + états opérationnels
+- Injection des alertes IA dans la liste d'alertes existante
+
+**Prévention:**
+1. Ne jamais déployer une feature IA sans télémétrie minimale (usage/coût/erreurs)
+2. Maintenir des seuils d'alertes configurables en variables d'environnement
+3. Vérifier à chaque release dashboard que les alertes critiques remontent bien
+
+**Fichiers concernés:**
+- `api/support-ai.js`
+- `api/support-ai-metrics.js`
+- `js/admin-dashboard.js`
+- `pages/admin-channel-manager.html`
+- `sql/migrations/CREATE_SUPPORT_AI_USAGE_LOGS.sql`
+- `docs/ARCHITECTURE.md`
+
+---
+
+### [18 Février 2026] - Exposition potentielle de clé OpenAI dans le frontend support
+
+**Contexte:**
+Le module `js/support-ai.js` contenait une constante de clé OpenAI et effectuait un appel direct à `https://api.openai.com/v1/chat/completions`, chargé par `pages/client-support.html`.
+
+**Erreur:**
+- Risque d'exposition de secret côté navigateur
+- Surface d'attaque accrue (clé récupérable via DevTools/source)
+- Architecture non conforme au principe "secret côté serveur uniquement"
+
+**Cause:**
+1. Implémentation initiale IA support en mode frontend direct
+2. Absence d'endpoint serveur dédié au support IA
+
+**Solution:**
+✅ Création d'un endpoint serverless dédié : `api/support-ai.js`
+- Appel OpenAI centralisé côté serveur
+- Validation des entrées (`prompt` requis)
+- Endpoint de santé (`GET`) pour supervision disponibilité
+
+✅ Migration du module client : `js/support-ai.js`
+- Suppression de toute clé OpenAI côté frontend
+- Remplacement des appels directs OpenAI par `fetch('/api/support-ai')`
+- Parsing JSON robuste avec fallback sur contenu encapsulé (code fences)
+
+**Prévention:**
+1. ⛔ Ne jamais stocker de secrets API dans le frontend
+2. ✅ Imposer un proxy serveur unique pour tous les appels IA
+3. ✅ Vérifier avant merge qu'aucune occurrence `sk-` n'existe dans `js/` et `pages/`
+4. ✅ Documenter les endpoints IA et variables d'environnement dans `ARCHITECTURE.md`
+
+**Fichiers concernés:**
+- `js/support-ai.js`
+- `api/support-ai.js`
+- `docs/ARCHITECTURE.md`
+
+---
+
+### [18 Février 2026] - Checklist: modification qui créait un nouvel item au lieu d'une mise à jour
+
+**Contexte:**
+Dans l'onglet checklists, l'action de modification d'un item pouvait aboutir à une création supplémentaire au lieu d'un update sur l'item ciblé.
+
+**Erreur:**
+- En modifiant un item, un nouvel item apparaissait
+- Flux perçu comme instable par l'utilisateur
+
+**Cause:**
+1. L'état d'édition n'était pas suffisamment fiabilisé entre ouverture/fermeture de la modale et sauvegarde
+2. Le routage final sauvegarde pouvait retomber sur le flux création selon l'état courant
+
+**Solution:**
+✅ Consolidation du mode édition dans `js/checklists.js` :
+- Gestion explicite du mode submit (`create` / `edit`) avec `data-editing-id`
+- Sauvegarde qui priorise l'ID d'édition du bouton avant de décider `update` vs `insert`
+- Réinitialisation centralisée du formulaire et du mode
+
+✅ Suppression des validations bloquantes navigateur sur checklist :
+- Retrait de la confirmation de suppression (`confirm`)
+- Remplacement des `alert` par notifications non modales
+
+✅ Ajout fonctionnel :
+- Duplication des items checklist d'un gîte vers un autre (même type entrée/sortie), avec filtrage des doublons exacts
+
+✅ Alignement module historique :
+- Application du même correctif sur `js/fiches-clients.js` (table `checklists`) avec formulaire inline (création/édition), suppression sans `confirm`, et duplication vers autre gîte
+
+**Prévention:**
+- Toujours stocker explicitement l'identifiant d'entité en mode édition dans l'UI
+- Éviter les dépendances implicites entre état global et action de sauvegarde
+- Préférer des notifications non bloquantes (`showNotification`) aux popups navigateur
+
+**Fichiers concernés:**
+- `js/checklists.js`
+- `tabs/tab-checklists.html`
+- `js/fiches-clients.js`
+- `tabs/tab-fiches-clients.html`
+- `docs/architecture/ARCHITECTURE.md`
+
+---
+
 ### [28 Janvier 2026 - V2.0] - ⚡ COLONNES ID MANQUANTES AVEC GÉNÉRATION UUID
 
 **Contexte:**

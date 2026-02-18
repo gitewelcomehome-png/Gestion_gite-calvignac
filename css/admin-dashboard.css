@@ -389,6 +389,43 @@ body {
     border-left-color: var(--warning);
 }
 
+.alert-item.critical {
+    border-left-color: var(--danger);
+    background: var(--bg-tertiary);
+}
+
+.support-ai-health {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.support-ai-health-ok {
+    background: var(--bg-tertiary);
+    color: var(--success);
+}
+
+.support-ai-health-warning {
+    background: var(--bg-tertiary);
+    color: var(--warning);
+}
+
+.support-ai-health-critical {
+    background: var(--bg-tertiary);
+    color: var(--danger);
+}
+
+.health-kpi-alert-value.warning {
+    color: var(--warning);
+}
+
+.health-kpi-alert-value.danger {
+    color: var(--danger);
+}
+
 .opportunity-item {
     border-left-color: var(--success);
 }

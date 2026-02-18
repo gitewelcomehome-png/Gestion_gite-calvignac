@@ -14,6 +14,9 @@ let currentFilters = {
 let currentSort = 'created_at_desc';
 let selectedTicketId = null;
 let currentUser = null; // Utilisateur authentifié
+const SUPPORT_AI_ENDPOINT = '/api/support-ai';
+const SUPPORT_COPILOT_URGENCY_LEVELS = ['basse', 'normale', 'haute', 'critique'];
+const supportCopilotCache = new Map();
 
 // ================================================================
 // 🔐 INITIALISATION
@@ -289,7 +292,8 @@ async function selectTicket(ticketId) {
         lucide.createIcons();
         
         // Setup événements détail
-        setupTicketDetailEvents(ticket);
+        setupTicketDetailEvents(ticket, comments || []);
+        loadSupportCopilotForTicket(ticket, comments || []);
         
     } catch (error) {
         console.error('❌ Erreur sélection ticket:', error);
@@ -298,7 +302,8 @@ async function selectTicket(ticketId) {
 
 function renderTicketDetail(ticket, comments = []) {
     const sentiment = analyzeSentiment(ticket.description);
-    const aiSuggestions = generateAISuggestions(ticket);
+    const localCopilot = getFallbackSupportCopilot(ticket, comments);
+    const aiSuggestions = localCopilot.suggestions;
     
     return `
         <div class="ticket-detail-header">
@@ -377,19 +382,20 @@ function renderTicketDetail(ticket, comments = []) {
             }).join('')}
         </div>
         
-        ${aiSuggestions.length > 0 ? `
-            <div class="ai-suggestions">
-                <div class="ai-suggestions-header">
-                    <i data-lucide="sparkles"></i>
-                    <h4>💡 Réponses IA Suggérées</h4>
-                </div>
-                ${aiSuggestions.map((suggestion, i) => `
-                    <div class="suggestion-item" onclick="useSuggestion(${i})">
-                        ${suggestion}
-                    </div>
-                `).join('')}
+        <div class="ai-suggestions" id="supportCopilotPanel">
+            <div class="ai-suggestions-header">
+                <i data-lucide="sparkles"></i>
+                <h4>💡 Copilote Support (Niveau 1)</h4>
             </div>
-        ` : ''}
+            <div class="copilot-meta" id="copilotMeta">
+                <span class="copilot-chip urgency-${localCopilot.urgence}" id="copilotUrgencyChip">Urgence: ${localCopilot.urgence}</span>
+                <span class="copilot-next-step" id="copilotNextStep">Prochain pas: ${escapeHtml(localCopilot.prochain_pas)}</span>
+            </div>
+            <div class="copilot-loading" id="copilotLoadingState">Analyse IA serveur en cours...</div>
+            <div id="copilotSuggestionsList">
+                ${renderSupportSuggestions(aiSuggestions)}
+            </div>
+        </div>
         
         <div class="reply-form">
             <textarea id="replyText" placeholder="Écrivez votre réponse..."></textarea>
@@ -419,9 +425,200 @@ function renderTicketDetail(ticket, comments = []) {
     `;
 }
 
-function setupTicketDetailEvents(ticket) {
-    // Stocker suggestions globalement pour useSuggestion()
-    window.currentSuggestions = generateAISuggestions(ticket);
+function setupTicketDetailEvents(ticket, comments = []) {
+    const cached = supportCopilotCache.get(ticket.id);
+    const fallback = getFallbackSupportCopilot(ticket, comments);
+    const initial = cached || fallback;
+    window.currentSuggestions = initial.suggestions;
+}
+
+function renderSupportSuggestions(suggestions = []) {
+    if (!Array.isArray(suggestions) || suggestions.length === 0) {
+        return '<div class="suggestion-item">Aucune suggestion disponible pour le moment.</div>';
+    }
+
+    return suggestions.map((suggestion, i) => `
+        <div class="suggestion-item" onclick="useSuggestion(${i})">
+            ${escapeHtml(suggestion)}
+        </div>
+    `).join('');
+}
+
+async function requestSupportCopilot(prompt, systemPrompt) {
+    const response = await fetch(SUPPORT_AI_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            prompt,
+            systemPrompt,
+            model: 'gpt-4o-mini',
+            maxTokens: 800,
+            temperature: 0.2,
+            source: 'admin-support-copilot'
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erreur copilote (${response.status})`);
+    }
+
+    const data = await response.json();
+    return data?.content || '';
+}
+
+function parseSupportCopilotJson(rawContent) {
+    let content = String(rawContent || '').trim();
+
+    if (content.startsWith('```json')) {
+        content = content.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
+    } else if (content.startsWith('```')) {
+        content = content.replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+    }
+
+    try {
+        return JSON.parse(content);
+    } catch {
+        const match = content.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error('Réponse copilote non parseable');
+        return JSON.parse(match[0]);
+    }
+}
+
+function normalizeSupportCopilot(copilot, fallback) {
+    const safeUrgence = SUPPORT_COPILOT_URGENCY_LEVELS.includes(copilot?.urgence)
+        ? copilot.urgence
+        : fallback.urgence;
+
+    const safeNextStep = String(copilot?.prochain_pas || fallback.prochain_pas || '').trim() || fallback.prochain_pas;
+
+    const safeSuggestions = Array.isArray(copilot?.suggestions_reponse)
+        ? copilot.suggestions_reponse.map((value) => String(value || '').trim()).filter(Boolean).slice(0, 3)
+        : [];
+
+    return {
+        urgence: safeUrgence,
+        prochain_pas: safeNextStep,
+        suggestions: safeSuggestions.length > 0 ? safeSuggestions : fallback.suggestions
+    };
+}
+
+function getFallbackSupportCopilot(ticket, comments = []) {
+    const fallbackSuggestions = generateAISuggestions(ticket);
+    const text = `${ticket.sujet || ''} ${ticket.description || ''}`.toLowerCase();
+    const unresolvedClientReplies = (comments || []).filter((comment) => comment.author_role === 'client').length;
+
+    let urgence = 'normale';
+    if (ticket.priorite === 'critique' || text.includes('bloqué') || text.includes('impossible') || text.includes('urgent')) {
+        urgence = 'critique';
+    } else if (ticket.priorite === 'haute' || text.includes('erreur') || text.includes('bug')) {
+        urgence = 'haute';
+    } else if (ticket.priorite === 'basse') {
+        urgence = 'basse';
+    }
+
+    const prochainPas = unresolvedClientReplies > 0
+        ? 'Confirmer la reproduction du problème et proposer une action concrète sous 30 minutes.'
+        : 'Demander un contexte ciblé (étapes, navigateur, heure, capture) puis proposer un correctif immédiat.';
+
+    return {
+        urgence,
+        prochain_pas: prochainPas,
+        suggestions: fallbackSuggestions
+    };
+}
+
+function buildSupportCopilotPrompt(ticket, comments = []) {
+    const lastMessages = (comments || []).slice(-5).map((comment) => ({
+        role: comment.author_role || 'unknown',
+        content: comment.content,
+        created_at: comment.created_at
+    }));
+
+    return `Analyse ce ticket support SaaS et renvoie un JSON strict.
+
+Ticket:
+- id: ${ticket.id}
+- sujet: ${ticket.sujet || ''}
+- description: ${ticket.description || ''}
+- categorie: ${ticket.categorie || ''}
+- priorite: ${ticket.priorite || ''}
+- statut: ${ticket.statut || ''}
+
+Derniers messages:
+${JSON.stringify(lastMessages, null, 2)}
+
+Réponds UNIQUEMENT en JSON valide avec ce format:
+{
+  "urgence": "basse|normale|haute|critique",
+  "prochain_pas": "phrase actionnable en français",
+  "suggestions_reponse": [
+    "réponse prête à envoyer 1",
+    "réponse prête à envoyer 2",
+    "réponse prête à envoyer 3"
+  ]
+}
+
+Contraintes:
+- Français professionnel, clair et empathique
+- Pas de markdown
+- Pas d'invention de faits
+- 3 suggestions maximum`; 
+}
+
+function applySupportCopilotToUI(ticketId, copilot) {
+    if (selectedTicketId !== ticketId) return;
+
+    const chip = document.getElementById('copilotUrgencyChip');
+    const nextStep = document.getElementById('copilotNextStep');
+    const suggestions = document.getElementById('copilotSuggestionsList');
+    const loading = document.getElementById('copilotLoadingState');
+
+    if (chip) {
+        chip.className = `copilot-chip urgency-${copilot.urgence}`;
+        chip.textContent = `Urgence: ${copilot.urgence}`;
+    }
+
+    if (nextStep) {
+        nextStep.textContent = `Prochain pas: ${copilot.prochain_pas}`;
+    }
+
+    if (suggestions) {
+        suggestions.innerHTML = renderSupportSuggestions(copilot.suggestions);
+    }
+
+    if (loading) {
+        loading.style.display = 'none';
+    }
+
+    window.currentSuggestions = copilot.suggestions;
+    lucide.createIcons();
+}
+
+async function loadSupportCopilotForTicket(ticket, comments = []) {
+    const fallback = getFallbackSupportCopilot(ticket, comments);
+    applySupportCopilotToUI(ticket.id, fallback);
+
+    try {
+        const prompt = buildSupportCopilotPrompt(ticket, comments);
+        const raw = await requestSupportCopilot(
+            prompt,
+            'Tu es un agent support de niveau 1 pour un SaaS de gestion de gîtes. Tu fournis des réponses opérationnelles, concises et sûres. Tu réponds uniquement en JSON valide.'
+        );
+
+        const parsed = parseSupportCopilotJson(raw);
+        const normalized = normalizeSupportCopilot(parsed, fallback);
+        supportCopilotCache.set(ticket.id, normalized);
+        applySupportCopilotToUI(ticket.id, normalized);
+    } catch (error) {
+        const loading = document.getElementById('copilotLoadingState');
+        if (loading && selectedTicketId === ticket.id) {
+            loading.textContent = `Copilote indisponible (${error.message}) - fallback local actif`;
+        }
+        console.warn('⚠️ Copilote support indisponible:', error.message || error);
+    }
 }
 
 // ================================================================

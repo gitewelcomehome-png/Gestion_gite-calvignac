@@ -65,6 +65,169 @@
     
     <!-- CSS Admin -->
     <link rel="stylesheet" href="../css/admin-dashboard.css">
+
+    <style>
+        .system-health-section {
+            margin-bottom: 24px;
+        }
+
+        .system-health-header {
+            margin: 0 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 28px;
+            color: #0f172a;
+            font-weight: 800;
+        }
+
+        .system-health-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .system-health-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+        }
+
+        .system-health-card h3 {
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 20px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .service-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+
+        .service-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #10b981;
+            display: inline-block;
+        }
+
+        .service-dot.down {
+            background: #ef4444;
+        }
+
+        .perf-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .perf-label {
+            color: #64748b;
+        }
+
+        .perf-value {
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .uptime-value {
+            font-size: 42px;
+            line-height: 1;
+            color: #10b981;
+            font-weight: 800;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .uptime-sub {
+            text-align: center;
+            color: #64748b;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .system-health-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+            margin-top: 4px;
+        }
+
+        .system-health-metric {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #0f172a;
+            font-size: 14px;
+            min-width: 84px;
+        }
+
+        .system-health-metric strong {
+            font-size: 16px;
+        }
+
+        .health-kpi-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .health-kpi-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #1e293b;
+            padding: 4px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .health-kpi-item:last-child {
+            border-bottom: none;
+        }
+
+        .health-kpi-item strong {
+            font-size: 16px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .kpis-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        @media (max-width: 1400px) {
+            .system-health-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .kpis-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 860px) {
+            .system-health-grid,
+            .kpis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -109,7 +272,119 @@
 
     <!-- Main Container -->
     <main class="admin-container">
-        
+
+        <section class="system-health-section">
+            <h2 class="system-health-header">
+                <i data-lucide="heart-pulse"></i>
+                Santé du Système
+            </h2>
+            <div class="system-health-grid">
+                <div class="system-health-card">
+                    <h3><i data-lucide="server"></i> Services</h3>
+                    <div class="service-line">
+                        <span>Supabase Database</span>
+                        <span class="service-dot" id="dashSvcSupabase"></span>
+                    </div>
+                    <div class="service-line">
+                        <span>API Functions</span>
+                        <span class="service-dot" id="dashSvcApi"></span>
+                    </div>
+                    <div class="service-line" style="margin-bottom: 0;">
+                        <span>Vercel Hosting</span>
+                        <span class="service-dot" id="dashSvcVercel"></span>
+                    </div>
+                </div>
+
+                <div class="system-health-card">
+                    <h3><i data-lucide="zap"></i> Performance</h3>
+                    <div class="perf-line">
+                        <span class="perf-label">Latence moyenne</span>
+                        <strong class="perf-value" id="dashAvgLatency">~</strong>
+                    </div>
+                    <div class="perf-line">
+                        <span class="perf-label">Requêtes/min</span>
+                        <strong class="perf-value" id="dashRequestsPerMin">~</strong>
+                    </div>
+                    <div class="perf-line" style="margin-bottom: 0;">
+                        <span class="perf-label">Taux d'erreur</span>
+                        <strong class="perf-value" id="dashErrorRate">~</strong>
+                    </div>
+                </div>
+
+                <div class="system-health-card">
+                    <h3><i data-lucide="clock"></i> Uptime</h3>
+                    <div class="uptime-value" id="dashUptime30d">99.9%</div>
+                    <div class="uptime-sub">Derniers 30 jours</div>
+                    <div class="uptime-sub" style="margin-top: 12px;">
+                        Dernier incident: <strong id="dashLastIncident">Aucun</strong>
+                    </div>
+                </div>
+
+                <div class="system-health-card">
+                    <h3><i data-lucide="bot"></i> État des IA</h3>
+                    <div class="service-line" style="margin-bottom: 8px;">
+                        <span style="font-weight: 600; color: #1e293b;" id="dashAIGlobal">Chargement...</span>
+                        <button id="btnRefreshAIStatus" class="btn-icon" title="Rafraîchir statut IA" style="width: 26px; height: 26px;">
+                            <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </div>
+                    <div class="service-line">
+                        <span>OpenAI</span>
+                        <span class="service-dot" id="dashAIOpenAIDot"></span>
+                    </div>
+                    <div class="service-line">
+                        <span>Anthropic</span>
+                        <span class="service-dot" id="dashAIAnthropicDot"></span>
+                    </div>
+                    <div class="service-line">
+                        <span>Gemini</span>
+                        <span class="service-dot" id="dashAIGeminiDot"></span>
+                    </div>
+                    <div class="service-line" style="margin-bottom: 10px;">
+                        <span>Stability</span>
+                        <span class="service-dot" id="dashAIStabilityDot"></span>
+                    </div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 6px;" id="dashAIUpdatedAt">Dernière vérification: -</div>
+                </div>
+
+                <div class="system-health-card">
+                    <h3><i data-lucide="activity"></i> Monitoring IA Support</h3>
+                    <div class="service-line" style="margin-bottom: 12px;">
+                        <span style="font-weight: 600; color: #1e293b;" id="dashSupportAiHealth">Chargement...</span>
+                    </div>
+                    <div class="health-kpi-list">
+                        <div class="health-kpi-item"><span>Requêtes (24h)</span><strong id="kpiSupportAiRequests24h">-</strong></div>
+                        <div class="health-kpi-item"><span>Coût estimé (24h)</span><strong id="kpiSupportAiCost24h">-</strong></div>
+                        <div class="health-kpi-item"><span>Taux d'erreur (1h)</span><strong id="kpiSupportAiErrorRate1h">-</strong></div>
+                        <div class="health-kpi-item"><span>Latence moyenne (1h)</span><strong id="kpiSupportAiLatency1h">-</strong></div>
+                    </div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 8px;" id="dashSupportAiUpdatedAt">Dernière MAJ: -</div>
+                </div>
+
+                <div class="system-health-card">
+                    <h3><i data-lucide="headphones"></i> Support Tickets</h3>
+                    <div class="health-kpi-list">
+                        <div class="health-kpi-item"><span>Tickets ouverts</span><strong id="kpiTicketsOuvert">0</strong></div>
+                        <div class="health-kpi-item"><span>Tickets en cours</span><strong id="kpiTicketsEnCours">0</strong></div>
+                        <div class="health-kpi-item"><span>Tickets en attente</span><strong id="kpiTicketsEnAttente">0</strong></div>
+                        <div class="health-kpi-item"><span>Priorité critique</span><strong id="kpiTicketsCritique">0</strong></div>
+                        <div class="health-kpi-item"><span>Priorité haute</span><strong id="kpiTicketsHaute">0</strong></div>
+                        <div class="health-kpi-item"><span>Priorité normale</span><strong id="kpiTicketsNormale">0</strong></div>
+                        <div class="health-kpi-item"><span>Priorité basse</span><strong id="kpiTicketsBasse">0</strong></div>
+                    </div>
+                </div>
+
+                <div class="system-health-card">
+                    <h3><i data-lucide="tag"></i> Promotions Actives</h3>
+                    <div class="health-kpi-list">
+                        <div class="health-kpi-item"><span>Promotions actives</span><strong id="kpiPromosActives">0</strong></div>
+                        <div class="health-kpi-item"><span>Nombre d’utilisations</span><strong id="kpiPromosUtilisations">0</strong></div>
+                        <div class="health-kpi-item"><span>ROI moyen</span><strong id="kpiPromosROI">0%</strong></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- KPIs Section -->
         <section class="kpis-grid">
             <div class="kpi-card">
@@ -172,112 +447,7 @@
                 </div>
             </div>
 
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: #fee2e2;">
-                    <i data-lucide="alert-octagon" style="color: #dc2626;"></i>
-                </div>
-                <div class="kpi-content">
-                    <div class="kpi-label">Erreurs Critiques</div>
-                    <div class="kpi-value" style="display: flex; flex-direction: column; gap: 8px; font-size: 18px; margin-top: 8px;">
-                        <!-- Ligne 1: Par type -->
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span title="Critiques" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="alert-octagon" style="width: 18px; height: 18px; color: #dc2626;"></i>
-                                <strong id="kpiErrorsCritical" style="color: #dc2626; font-size: 18px;">0</strong>
-                            </span>
-                            <span title="Warnings" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="alert-triangle" style="width: 18px; height: 18px; color: #f59e0b;"></i>
-                                <strong id="kpiErrorsWarning" style="color: #f59e0b; font-size: 18px;">0</strong>
-                            </span>
-                        </div>
-                        <!-- Ligne 2: Total 24h -->
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span title="Dernières 24h" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="clock" style="width: 18px; height: 18px; color: #64748b;"></i>
-                                <strong id="kpiErrors24h" style="color: #64748b; font-size: 18px;">0</strong>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: #e3f2fd;">
-                    <i data-lucide="headphones" style="color: #2196f3;"></i>
-                </div>
-                <div class="kpi-content">
-                    <div class="kpi-label">Support Tickets</div>
-                    <div class="kpi-value" style="display: flex; flex-direction: column; gap: 8px; font-size: 18px; margin-top: 8px;">
-                        <!-- Ligne 1: Statuts -->
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span title="Ouvert" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="inbox" style="width: 18px; height: 18px; color: #9c27b0;"></i>
-                                <strong id="kpiTicketsOuvert" style="color: #9c27b0; font-size: 18px;">0</strong>
-                            </span>
-                            <span title="En cours" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="play-circle" style="width: 18px; height: 18px; color: #2196f3;"></i>
-                                <strong id="kpiTicketsEnCours" style="color: #2196f3; font-size: 18px;">0</strong>
-                            </span>
-                            <span title="En attente" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="clock" style="width: 18px; height: 18px; color: #ff9800;"></i>
-                                <strong id="kpiTicketsEnAttente" style="color: #ff9800; font-size: 18px;">0</strong>
-                            </span>
-                        </div>
-                        <!-- Ligne 2: Priorités -->
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span title="Critique" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="alert-octagon" style="width: 18px; height: 18px; color: #d32f2f;"></i>
-                                <strong id="kpiTicketsCritique" style="color: #d32f2f; font-size: 18px;">0</strong>
-                            </span>
-                            <span title="Haute" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="alert-circle" style="width: 18px; height: 18px; color: #e91e63;"></i>
-                                <strong id="kpiTicketsHaute" style="color: #e91e63; font-size: 18px;">0</strong>
-                            </span>
-                            <span title="Normale" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="circle" style="width: 18px; height: 18px; color: #9e9e9e;"></i>
-                                <strong id="kpiTicketsNormale" style="color: #9e9e9e; font-size: 18px;">0</strong>
-                            </span>
-                            <span title="Basse" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="chevron-down" style="width: 18px; height: 18px; color: #4caf50;"></i>
-                                <strong id="kpiTicketsBasse" style="color: #4caf50; font-size: 18px;">0</strong>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: #f3e5f5;">
-                    <i data-lucide="tag" style="color: #9c27b0;"></i>
-                </div>
-                <div class="kpi-content">
-                    <div class="kpi-label">Promotions Actives</div>
-                    <div class="kpi-value" style="display: flex; flex-direction: column; gap: 8px; font-size: 18px; margin-top: 8px;">
-                        <!-- Ligne 1: Stats -->
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span title="Actives" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="check-circle" style="width: 18px; height: 18px; color: #4caf50;"></i>
-                                <strong id="kpiPromosActives" style="color: #4caf50; font-size: 18px;">0</strong>
-                            </span>
-                            <span title="Utilisations" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="users" style="width: 18px; height: 18px; color: #2196f3;"></i>
-                                <strong id="kpiPromosUtilisations" style="color: #2196f3; font-size: 18px;">0</strong>
-                            </span>
-                        </div>
-                        <!-- Ligne 2: ROI -->
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span title="ROI Moyen" style="display: flex; align-items: center; gap: 5px;">
-                                <i data-lucide="trending-up" style="width: 18px; height: 18px; color: #9c27b0;"></i>
-                                <strong id="kpiPromosROI" style="color: #9c27b0; font-size: 18px;">0%</strong>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </section>
-
-        <!-- 🔴 WIDGET ERREURS CRITIQUES -->
-        <div id="errorsWidget"></div>
 
         <!-- Chart MRR 12 mois -->
         <section class="chart-section">
@@ -413,24 +583,7 @@
     <script src="../js/admin-dashboard.js"></script>
     <script src="../js/dashboard-support-widget.js?v=1.0"></script>
     <script src="../js/dashboard-promotions-widget.js?v=1.0"></script>
-    <script src="../js/widget-errors.js?v=1.0"></script>
-    
-    <script>
-        // Initialiser widget erreurs au chargement
-        document.addEventListener('DOMContentLoaded', () => {
-            const errorsContainer = document.getElementById('errorsWidget');
-            if (errorsContainer && window.initErrorsWidget) {
-                errorsContainer.innerHTML = window.initErrorsWidget();
-                
-                // Charger les erreurs
-                setTimeout(() => {
-                    if (window.refreshErrorsWidget) {
-                        window.refreshErrorsWidget();
-                    }
-                }, 1000);
-            }
-        });
-    </script>
+
     <script>
         // Initialiser Lucide Icons
         lucide.createIcons();

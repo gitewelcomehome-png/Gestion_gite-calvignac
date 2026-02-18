@@ -2,7 +2,54 @@
 // 🤖 MODULE IA SUPPORT - Analyse & Résolution Automatique
 // ================================================================
 
-const OPENAI_API_KEY = 'sk-proj-YOUR_KEY'; // À configurer
+const SUPPORT_AI_ENDPOINT = '/api/support-ai';
+
+async function requestSupportAI({ prompt, systemPrompt, model = 'gpt-4o-mini', maxTokens = 500, temperature = 0.3 }) {
+    const response = await fetch(SUPPORT_AI_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            prompt,
+            systemPrompt,
+            model,
+            maxTokens,
+            temperature,
+            source: 'client-support'
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Erreur API Support IA');
+    }
+
+    const data = await response.json();
+    if (!data?.content) {
+        throw new Error('Réponse IA vide');
+    }
+
+    return data.content;
+}
+
+function parseJsonFromAiResponse(rawContent) {
+    let content = String(rawContent || '').trim();
+
+    if (content.startsWith('```json')) {
+        content = content.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
+    } else if (content.startsWith('```')) {
+        content = content.replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+    }
+
+    try {
+        return JSON.parse(content);
+    } catch {
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error('JSON IA invalide');
+        return JSON.parse(jsonMatch[0]);
+    }
+}
 
 // ================================================================
 // 🔍 ANALYSE TICKET & MATCHING SOLUTION
@@ -102,33 +149,14 @@ Réponds UNIQUEMENT en JSON avec cette structure:
   "reasoning": "<explication>"
 }`;
 
-        // Appel OpenAI
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'gpt-4',
-                messages: [{
-                    role: 'system',
-                    content: 'Tu es un expert en analyse de tickets support. Réponds uniquement en JSON valide.'
-                }, {
-                    role: 'user',
-                    content: prompt
-                }],
-                temperature: 0.3,
-                max_tokens: 500
-            })
+        const aiContent = await requestSupportAI({
+            prompt,
+            systemPrompt: 'Tu es un expert en analyse de tickets support. Réponds uniquement en JSON valide.',
+            model: 'gpt-4o-mini',
+            temperature: 0.3,
+            maxTokens: 500
         });
-        
-        if (!response.ok) {
-            throw new Error('Erreur API OpenAI');
-        }
-        
-        const data = await response.json();
-        const result = JSON.parse(data.choices[0].message.content);
+        const result = parseJsonFromAiResponse(aiContent);
         
         // console.log('🎯 Matching result:', result);
         
