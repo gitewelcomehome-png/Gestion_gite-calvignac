@@ -31,6 +31,40 @@ Ce qu'il faut faire pour éviter que ça se reproduise
 
 ## 🔴 Erreurs Référencées
 
+### [18 Février 2026] - Réponses copilote N1 trop génériques pour support métier gîtes
+
+**Contexte:**
+Le copilote support niveau 1 répondait parfois avec des formulations trop techniques ou non actionnables pour des gestionnaires de gîtes (public non technique).
+
+**Erreur:**
+- Réponses perçues comme "blabla" et peu opérationnelles
+- Faible réutilisation des meilleures réponses déjà validées par l'équipe support
+
+**Cause:**
+1. Prompt copilote insuffisamment contraint sur les actions vérifiables
+2. Absence d'apprentissage progressif des réponses type validées
+
+**Solution:**
+✅ Renforcement `js/admin-support.js`
+- Playbook incident explicite pour cas critiques support IA
+- Contraintes anti-réponses vagues dans le prompt serveur
+
+✅ Apprentissage progressif des réponses type
+- Enregistrement depuis l'interface admin (bouton "Enregistrer réponse type")
+- Sauvegarde prioritaire en BDD `cm_support_solutions` + fallback local sécurisé
+- Réutilisation automatique des réponses type dans les suggestions du copilote
+
+**Prévention:**
+1. Toujours exiger un format N1 orienté action (prochain pas vérifiable)
+2. Capitaliser les réponses support validées pour réduire la variabilité
+
+**Fichiers concernés:**
+- `js/admin-support.js`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
 ### [18 Février 2026] - Absence de monitoring temps réel des incidents/coûts IA support
 
 **Contexte:**

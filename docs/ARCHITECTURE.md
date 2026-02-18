@@ -804,6 +804,11 @@ psql $DATABASE_URL < backup_20260215.sql
 
 ## 🔄 Changelog
 
+### v2.13.6 - 18 février 2026 🧠
+- ✅ Copilote support N1 renforcé pour incidents (réponses opérationnelles non vagues)
+- ✅ Enregistrement progressif des réponses type depuis `pages/admin-support.html` (bouton "Enregistrer réponse type")
+- ✅ Réutilisation prioritaire des réponses type dans les suggestions copilote (BDD `cm_support_solutions` + fallback local)
+
 ### v2.13.5 - 18 février 2026 📊
 - ✅ Monitoring complet IA support sur dashboard admin (`pages/admin-channel-manager.html`, `js/admin-dashboard.js`)
 - ✅ Journalisation serveur des appels IA (tokens, coût estimé, latence, status) dans `cm_support_ai_usage_logs`

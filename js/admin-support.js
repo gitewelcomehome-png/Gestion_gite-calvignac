@@ -13,10 +13,12 @@ let currentFilters = {
 };
 let currentSort = 'created_at_desc';
 let selectedTicketId = null;
+let selectedTicketData = null;
 let currentUser = null; // Utilisateur authentifié
 const SUPPORT_AI_ENDPOINT = '/api/support-ai';
 const SUPPORT_COPILOT_URGENCY_LEVELS = ['basse', 'normale', 'haute', 'critique'];
 const supportCopilotCache = new Map();
+const SUPPORT_REPLY_TEMPLATES_STORAGE_KEY = 'support_reply_templates_v1';
 
 // ================================================================
 // 🔐 INITIALISATION
@@ -274,6 +276,7 @@ async function selectTicket(ticketId) {
             .single();
         
         if (error) throw error;
+        selectedTicketData = ticket;
         
         // Charger commentaires/messages
         const { data: comments, error: commentsError } = await window.supabaseClient
@@ -420,6 +423,10 @@ function renderTicketDetail(ticket, comments = []) {
                     <i data-lucide="send"></i>
                     Envoyer
                 </button>
+                <button class="btn-reply-option" onclick="saveCurrentReplyAsTemplate('${ticket.id}')">
+                    <i data-lucide="bookmark-plus"></i>
+                    Enregistrer réponse type
+                </button>
             </div>
         </div>
     `;
@@ -442,6 +449,98 @@ function renderSupportSuggestions(suggestions = []) {
             ${escapeHtml(suggestion)}
         </div>
     `).join('');
+}
+
+function uniqueSuggestions(values = []) {
+    const normalized = new Set();
+    const results = [];
+
+    for (const value of values) {
+        const clean = String(value || '').trim();
+        if (!clean) continue;
+
+        const key = clean.toLowerCase();
+        if (normalized.has(key)) continue;
+
+        normalized.add(key);
+        results.push(clean);
+    }
+
+    return results;
+}
+
+function readLocalReplyTemplates() {
+    try {
+        const raw = localStorage.getItem(SUPPORT_REPLY_TEMPLATES_STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+function writeLocalReplyTemplates(templates = []) {
+    try {
+        localStorage.setItem(SUPPORT_REPLY_TEMPLATES_STORAGE_KEY, JSON.stringify(templates.slice(0, 300)));
+    } catch (error) {
+        console.warn('⚠️ Impossible de sauvegarder le template localement:', error.message || error);
+    }
+}
+
+function extractSupportTags(ticket, replyText) {
+    const source = `${ticket?.sujet || ''} ${ticket?.description || ''} ${replyText || ''}`.toLowerCase();
+    const dictionary = ['ical', 'synchronisation', 'calendrier', 'facturation', 'paiement', 'notification', 'reservation', 'réservation', 'bug', 'planning', 'tarif', 'prix', 'import', 'export', 'airbnb', 'booking'];
+    return dictionary.filter((word) => source.includes(word)).slice(0, 8);
+}
+
+function extractSupportSymptoms(ticket) {
+    const source = `${ticket?.sujet || ''} ${ticket?.description || ''}`.toLowerCase();
+    return source
+        .split(/[^a-zàâçéèêëîïôûùüÿñæœ0-9]+/i)
+        .filter((word) => word.length >= 4)
+        .slice(0, 12);
+}
+
+function normalizeSolutionCategory(category) {
+    const value = String(category || '').trim().toLowerCase();
+    if (value === 'fonctionnalite') return 'fonctionnalité';
+    if (['technique', 'facturation', 'fonctionnalité', 'bug', 'question', 'autre'].includes(value)) {
+        return value;
+    }
+    return 'autre';
+}
+
+async function loadLearnedSuggestionsForTicket(ticket) {
+    const category = normalizeSolutionCategory(ticket?.categorie || null);
+    const localTemplates = readLocalReplyTemplates();
+    const localSuggestions = localTemplates
+        .filter((item) => !category || normalizeSolutionCategory(item.categorie) === category)
+        .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+        .map((item) => item.solution)
+        .slice(0, 5);
+
+    try {
+        const query = window.supabaseClient
+            .from('cm_support_solutions')
+            .select('solution, categorie, efficacite_score, nb_utilisations, updated_at')
+            .order('efficacite_score', { ascending: false })
+            .order('nb_utilisations', { ascending: false })
+            .limit(20);
+
+        const { data, error } = category
+            ? await query.eq('categorie', category)
+            : await query;
+
+        if (error) {
+            return uniqueSuggestions(localSuggestions);
+        }
+
+        const dbSuggestions = (data || []).map((item) => item.solution);
+        return uniqueSuggestions([...dbSuggestions, ...localSuggestions]).slice(0, 5);
+    } catch {
+        return uniqueSuggestions(localSuggestions).slice(0, 5);
+    }
 }
 
 async function requestSupportCopilot(prompt, systemPrompt) {
@@ -487,7 +586,7 @@ function parseSupportCopilotJson(rawContent) {
     }
 }
 
-function normalizeSupportCopilot(copilot, fallback) {
+function normalizeSupportCopilot(copilot, fallback, learnedSuggestions = []) {
     const incidentPlaybook = getIncidentPlaybook(fallback.ticket, fallback.comments);
     if (incidentPlaybook) {
         return incidentPlaybook;
@@ -506,7 +605,10 @@ function normalizeSupportCopilot(copilot, fallback) {
     return {
         urgence: safeUrgence,
         prochain_pas: safeNextStep,
-        suggestions: safeSuggestions.length > 0 ? safeSuggestions : fallback.suggestions
+        suggestions: uniqueSuggestions([
+            ...learnedSuggestions,
+            ...(safeSuggestions.length > 0 ? safeSuggestions : fallback.suggestions)
+        ]).slice(0, 3)
     };
 }
 
@@ -634,7 +736,13 @@ function applySupportCopilotToUI(ticketId, copilot) {
 }
 
 async function loadSupportCopilotForTicket(ticket, comments = []) {
-    const fallback = getFallbackSupportCopilot(ticket, comments);
+    const fallbackBase = getFallbackSupportCopilot(ticket, comments);
+    const learnedSuggestions = await loadLearnedSuggestionsForTicket(ticket);
+    const fallback = {
+        ...fallbackBase,
+        suggestions: uniqueSuggestions([...learnedSuggestions, ...fallbackBase.suggestions]).slice(0, 3)
+    };
+
     applySupportCopilotToUI(ticket.id, fallback);
 
     try {
@@ -645,7 +753,7 @@ async function loadSupportCopilotForTicket(ticket, comments = []) {
         );
 
         const parsed = parseSupportCopilotJson(raw);
-        const normalized = normalizeSupportCopilot(parsed, fallback);
+        const normalized = normalizeSupportCopilot(parsed, fallback, learnedSuggestions);
         supportCopilotCache.set(ticket.id, normalized);
         applySupportCopilotToUI(ticket.id, normalized);
     } catch (error) {
@@ -717,6 +825,75 @@ window.useSuggestion = function(index) {
     if (textarea && window.currentSuggestions) {
         textarea.value = window.currentSuggestions[index];
     }
+};
+
+async function persistReplyTemplate(ticket, replyText) {
+    const payload = {
+        titre: `Réponse type - ${ticket?.categorie || 'autre'} - ${new Date().toLocaleDateString('fr-FR')}`,
+        description_probleme: `${ticket?.sujet || ''}\n${ticket?.description || ''}`.trim() || 'Cas support général',
+        symptomes: extractSupportSymptoms(ticket),
+        tags: extractSupportTags(ticket, replyText),
+        categorie: normalizeSolutionCategory(ticket?.categorie),
+        solution: String(replyText || '').trim(),
+        prevention: null,
+        niveau_difficulte: 'facile',
+        temps_resolution_estime: 15,
+        created_by: currentUser?.id || null
+    };
+
+    const localTemplates = readLocalReplyTemplates();
+    const alreadyLocal = localTemplates.some((item) =>
+        normalizeSolutionCategory(item.categorie) === payload.categorie
+        && String(item.solution || '').trim().toLowerCase() === payload.solution.toLowerCase()
+    );
+
+    if (!alreadyLocal) {
+        localTemplates.unshift({
+            ...payload,
+            id: `local-${Date.now()}`,
+            created_at: new Date().toISOString()
+        });
+    }
+    writeLocalReplyTemplates(localTemplates);
+
+    try {
+        const { data: existing, error: existingError } = await window.supabaseClient
+            .from('cm_support_solutions')
+            .select('id')
+            .eq('categorie', payload.categorie)
+            .eq('solution', payload.solution)
+            .limit(1);
+
+        if (!existingError && Array.isArray(existing) && existing.length > 0) {
+            return { savedInDb: true, message: 'Réponse type déjà existante (réutilisée) ✅' };
+        }
+
+        const { error } = await window.supabaseClient
+            .from('cm_support_solutions')
+            .insert([payload]);
+
+        if (error) {
+            return { savedInDb: false, message: 'Réponse type sauvegardée localement (BDD non disponible)' };
+        }
+
+        return { savedInDb: true, message: 'Réponse type sauvegardée en base ✅' };
+    } catch {
+        return { savedInDb: false, message: 'Réponse type sauvegardée localement (fallback)' };
+    }
+}
+
+window.saveCurrentReplyAsTemplate = async function(ticketId) {
+    const textarea = document.getElementById('replyText');
+    const reply = String(textarea?.value || '').trim();
+
+    if (!reply) {
+        alert('⚠️ Écrivez d\'abord une réponse avant de l\'enregistrer en modèle.');
+        return;
+    }
+
+    const ticket = selectedTicketData?.id === ticketId ? selectedTicketData : { id: ticketId, categorie: 'autre', sujet: '', description: '' };
+    const result = await persistReplyTemplate(ticket, reply);
+    alert(result.message);
 };
 
 window.insertTemplate = function(type) {
@@ -806,6 +983,8 @@ window.sendReply = async function(ticketId) {
             .eq('id', ticketId);
         
         if (ticketError) throw ticketError;
+
+        await persistReplyTemplate(selectedTicketData || { id: ticketId, categorie: 'autre', sujet: '', description: '' }, reply);
         
         alert('✅ Réponse envoyée !');
         textarea.value = '';
