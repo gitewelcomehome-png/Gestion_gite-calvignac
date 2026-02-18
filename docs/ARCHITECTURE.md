@@ -808,7 +808,7 @@ psql $DATABASE_URL < backup_20260215.sql
 - ✅ Copilote support N1 renforcé pour incidents (réponses opérationnelles non vagues)
 - ✅ Enregistrement progressif des réponses type depuis `pages/admin-support.html` (bouton "Enregistrer réponse type")
 - ✅ Réutilisation prioritaire des réponses type dans les suggestions copilote (BDD `cm_support_solutions` + fallback local)
-- ✅ Tickets support clôturés masqués de la liste active et purge automatique après 7 jours (`js/admin-support.js`)
+- ✅ Tickets support clôturés masqués de la liste active, avec historique conservé et réouverture possible côté client (`js/admin-support.js`, `js/client-support.js`)
 
 ### v2.13.5 - 18 février 2026 📊
 - ✅ Monitoring complet IA support sur dashboard admin (`pages/admin-channel-manager.html`, `js/admin-dashboard.js`)

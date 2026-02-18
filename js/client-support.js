@@ -324,8 +324,9 @@ async function openTicketDetail(ticketId) {
             autre: '❓ Autre'
         };
         
+        const isClosedTicket = ticket.statut === 'résolu' || ticket.statut === 'ferme';
         const canRate = ticket.statut === 'résolu' && !ticket.csat_score;
-        const hasNewResponse = comments && comments.length > 0 && ticket.statut !== 'résolu';
+        const hasNewResponse = comments && comments.length > 0 && !isClosedTicket;
         
         const content = `
             <div class="ticket-detail-header">
@@ -385,7 +386,7 @@ async function openTicketDetail(ticketId) {
                 `}
             </div>
             
-            ${ticket.statut !== 'résolu' ? `
+            ${!isClosedTicket ? `
                 <div class="reply-section">
                     <h4 style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #1e293b;">
                         <i data-lucide="message-circle"></i>

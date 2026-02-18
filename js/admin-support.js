@@ -29,9 +29,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Vérifier auth
     await checkAuth();
-
-    // Purge automatique des tickets clôturés depuis >7 jours
-    await cleanupOldClosedTickets();
     
     // Charger données
     await loadStats();
@@ -48,28 +45,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialiser icônes
     lucide.createIcons();
 });
-
-async function cleanupOldClosedTickets() {
-    try {
-        if (!window.supabaseClient || !currentUser) {
-            return;
-        }
-
-        const oneWeekAgoIso = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString();
-
-        const { error } = await window.supabaseClient
-            .from('cm_support_tickets')
-            .delete()
-            .in('statut', ['résolu', 'ferme'])
-            .lt('updated_at', oneWeekAgoIso);
-
-        if (error) {
-            console.warn('⚠️ Purge tickets clôturés impossible:', error.message || error);
-        }
-    } catch (error) {
-        console.warn('⚠️ Purge tickets clôturés impossible:', error.message || error);
-    }
-}
 
 // ================================================================
 // 🔐 AUTHENTIFICATION
