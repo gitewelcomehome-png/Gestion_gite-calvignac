@@ -572,6 +572,9 @@ SUPPORT_AI_PRICE_OUTPUT_USD_PER_1M_GPT_4O_MINI=0.6
 SUPPORT_AI_PRICE_INPUT_USD_PER_1M_GPT_4_1_MINI=0.4
 SUPPORT_AI_PRICE_OUTPUT_USD_PER_1M_GPT_4_1_MINI=1.6
 SUPABASE_SERVICE_ROLE_KEY=...
+
+# Paramètre PostgreSQL (RLS logs support IA)
+# ALTER DATABASE postgres SET app.support_ai_admin_emails = 'admin1@domaine.tld,admin2@domaine.tld';
 ```
 
 ### API Serverless IA

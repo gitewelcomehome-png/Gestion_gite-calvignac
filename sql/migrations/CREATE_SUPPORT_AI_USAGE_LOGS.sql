@@ -46,15 +46,34 @@ CREATE INDEX IF NOT EXISTS idx_cm_support_ai_usage_logs_error_code
 
 ALTER TABLE public.cm_support_ai_usage_logs ENABLE ROW LEVEL SECURITY;
 
+-- Helper admin dédié aux logs support IA (sans email hardcodé)
+-- Configuration attendue côté BDD:
+-- ALTER DATABASE postgres SET app.support_ai_admin_emails = 'admin1@domaine.tld,admin2@domaine.tld';
+CREATE OR REPLACE FUNCTION public.is_support_ai_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    WITH cfg AS (
+        SELECT regexp_split_to_array(
+            lower(COALESCE(NULLIF(current_setting('app.support_ai_admin_emails', true), ''), '')),
+            '\\s*,\\s*'
+        ) AS emails
+    )
+    SELECT EXISTS (
+        SELECT 1
+        FROM cfg, unnest(cfg.emails) AS email
+        WHERE email <> ''
+          AND email = lower(COALESCE(auth.jwt()->>'email', ''))
+    );
+$$;
+
+COMMENT ON FUNCTION public.is_support_ai_admin() IS 'Retourne true si le JWT courant appartient à un email listé dans app.support_ai_admin_emails';
+
 DROP POLICY IF EXISTS "Admin read support ai usage logs" ON public.cm_support_ai_usage_logs;
 CREATE POLICY "Admin read support ai usage logs"
     ON public.cm_support_ai_usage_logs
     FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1
-            FROM auth.users
-            WHERE auth.uid() = id
-            AND email = 'stephanecalvignac@hotmail.fr'
-        )
-    );
+    USING (public.is_support_ai_admin());
