@@ -488,6 +488,11 @@ function parseSupportCopilotJson(rawContent) {
 }
 
 function normalizeSupportCopilot(copilot, fallback) {
+    const incidentPlaybook = getIncidentPlaybook(fallback.ticket, fallback.comments);
+    if (incidentPlaybook) {
+        return incidentPlaybook;
+    }
+
     const safeUrgence = SUPPORT_COPILOT_URGENCY_LEVELS.includes(copilot?.urgence)
         ? copilot.urgence
         : fallback.urgence;
@@ -502,6 +507,33 @@ function normalizeSupportCopilot(copilot, fallback) {
         urgence: safeUrgence,
         prochain_pas: safeNextStep,
         suggestions: safeSuggestions.length > 0 ? safeSuggestions : fallback.suggestions
+    };
+}
+
+function getIncidentPlaybook(ticket, comments = []) {
+    const sourceText = [
+        ticket?.sujet || '',
+        ticket?.description || '',
+        ...(comments || []).map((comment) => comment?.content || '')
+    ].join(' ').toLowerCase();
+
+    const isSupportAiIncident = sourceText.includes('support ia indisponible')
+        || sourceText.includes('ai-health')
+        || sourceText.includes('openai')
+        || sourceText.includes('copilote indisponible');
+
+    if (!isSupportAiIncident) {
+        return null;
+    }
+
+    return {
+        urgence: 'haute',
+        prochain_pas: 'Vérifier immédiatement /api/ai-health?section=support (supportAiReady), confirmer SUPPORT_AI_ENABLED=true et OPENAI_API_KEY côté runtime, puis valider un prompt test sur la console admin support.',
+        suggestions: [
+            'Merci pour votre signalement. Nous confirmons qu\'un incident de disponibilité du support IA a été détecté et pris en charge immédiatement.',
+            'Nous procédons à une vérification complète: état runtime (feature flag + clé OpenAI), endpoint /api/ai-health?section=support et test réel sur l\'interface admin-support.',
+            'Dès validation, nous vous confirmons la remise en service. Si besoin, nous joignons l\'heure du correctif et le résultat du test fonctionnel.'
+        ]
     };
 }
 
@@ -526,7 +558,9 @@ function getFallbackSupportCopilot(ticket, comments = []) {
     return {
         urgence,
         prochain_pas: prochainPas,
-        suggestions: fallbackSuggestions
+        suggestions: fallbackSuggestions,
+        ticket,
+        comments
     };
 }
 
@@ -565,6 +599,8 @@ Contraintes:
 - Français professionnel, clair et empathique
 - Pas de markdown
 - Pas d'invention de faits
+- Pas de conseils vagues (ex: "vérifiez la clé" sans action précise)
+- Donner une action vérifiable immédiatement (endpoint, valeur, test)
 - 3 suggestions maximum`; 
 }
 
