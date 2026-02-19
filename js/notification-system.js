@@ -27,6 +27,7 @@ class NotificationSystem {
         this.CHECK_FREQUENCY = 30000; // Vérifier toutes les 30 secondes
         this.userPreferences = null; // Préférences email de l'utilisateur
         this.notificationButtonBound = false;
+        this.panelEventsBound = false;
     }
 
     buildDefaultPreferences(email = '') {
@@ -352,7 +353,7 @@ class NotificationSystem {
         );
 
         if (!exists) {
-            notif.id = Date.now() + Math.random();
+            notif.id = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
             notif.read = false;
             this.notifications.unshift(notif);
             
@@ -508,11 +509,14 @@ class NotificationSystem {
      * Marquer une notification comme lue
      */
     markAsRead(notifId) {
-        const notif = this.notifications.find(n => n.id === notifId);
+        const notif = this.notifications.find(n => String(n.id) === String(notifId));
         if (notif) {
             notif.read = true;
             this.saveNotifications();
             this.updateBadge();
+            if (document.getElementById('notificationPanel')?.style.display === 'block') {
+                this.renderNotifications();
+            }
         }
     }
 
@@ -523,15 +527,17 @@ class NotificationSystem {
         this.notifications.forEach(n => n.read = true);
         this.saveNotifications();
         this.updateBadge();
+        this.renderNotifications();
     }
 
     /**
      * Supprimer une notification
      */
     deleteNotification(notifId) {
-        this.notifications = this.notifications.filter(n => n.id !== notifId);
+        this.notifications = this.notifications.filter(n => String(n.id) !== String(notifId));
         this.saveNotifications();
         this.updateBadge();
+        this.renderNotifications();
     }
 
     /**
@@ -556,7 +562,16 @@ class NotificationSystem {
         const stored = localStorage.getItem('notifications');
         if (stored) {
             try {
-                this.notifications = JSON.parse(stored);
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed)) {
+                    this.notifications = parsed.map((notif, index) => ({
+                        ...notif,
+                        id: notif?.id ? String(notif.id) : `legacy_${index}_${Date.now()}`,
+                        read: !!notif?.read
+                    }));
+                } else {
+                    this.notifications = [];
+                }
             } catch (e) {
                 console.error('Erreur chargement notifications:', e);
             }
@@ -690,6 +705,37 @@ class NotificationSystem {
      * Créer le panel de notifications
      */
     createNotificationPanel() {
+        const existingPanel = document.getElementById('notificationPanel');
+        if (existingPanel) {
+            existingPanel.innerHTML = `
+                <div class="notification-panel-header">
+                    <h3>🔔 Notifications</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="window.notificationSystem.openNotificationSettings()" class="btn-settings" title="Configurer">
+                            <i data-lucide="settings" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <button onclick="window.notificationSystem.markAllAsRead()" class="btn-mark-all-read">
+                            Tout marquer comme lu
+                        </button>
+                        <button onclick="window.notificationSystem.closeNotificationPanel()" class="btn-settings" title="Fermer">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+                <div id="notificationList" class="notification-list">
+                    <p style="text-align: center; color: #999; padding: 20px;">Aucune notification</p>
+                </div>
+            `;
+
+            this.bindPanelEvents();
+
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+
+            return;
+        }
+
         const panel = document.createElement('div');
         panel.id = 'notificationPanel';
         panel.className = 'notification-panel';
@@ -704,6 +750,9 @@ class NotificationSystem {
                     <button onclick="window.notificationSystem.markAllAsRead()" class="btn-mark-all-read">
                         Tout marquer comme lu
                     </button>
+                    <button onclick="window.notificationSystem.closeNotificationPanel()" class="btn-settings" title="Fermer">
+                        ✕
+                    </button>
                 </div>
             </div>
             <div id="notificationList" class="notification-list">
@@ -712,6 +761,7 @@ class NotificationSystem {
         `;
 
         document.body.appendChild(panel);
+        this.bindPanelEvents();
         
         // Réinitialiser les icônes Lucide
         if (window.lucide) {
@@ -875,6 +925,39 @@ class NotificationSystem {
         }
     }
 
+    closeNotificationPanel() {
+        const panel = document.getElementById('notificationPanel');
+        if (panel) {
+            panel.style.display = 'none';
+        }
+    }
+
+    bindPanelEvents() {
+        if (this.panelEventsBound) return;
+
+        document.addEventListener('click', (event) => {
+            const panel = document.getElementById('notificationPanel');
+            if (!panel || panel.style.display !== 'block') return;
+
+            const isInsidePanel = panel.contains(event.target);
+            const notifBtn = document.getElementById('notificationBtn');
+            const notifBtnDyn = document.getElementById('notificationButton');
+            const isNotifButton = notifBtn?.contains(event.target) || notifBtnDyn?.contains(event.target);
+
+            if (!isInsidePanel && !isNotifButton) {
+                this.closeNotificationPanel();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                this.closeNotificationPanel();
+            }
+        });
+
+        this.panelEventsBound = true;
+    }
+
     /**
      * Rendre les notifications
      */
@@ -888,13 +971,13 @@ class NotificationSystem {
         }
 
         list.innerHTML = this.notifications.map(n => `
-            <div class="notification-item ${n.read ? 'read' : 'unread'}" onclick="window.notificationSystem.handleNotificationClick(${n.id})">
+            <div class="notification-item ${n.read ? 'read' : 'unread'}" onclick="window.notificationSystem.handleNotificationClick('${String(n.id).replace(/'/g, "\\'")}')">
                 <div class="notification-content">
                     <strong>${n.title}</strong>
                     <p>${n.message}</p>
                     <small>${this.formatDate(n.timestamp)}</small>
                 </div>
-                <button onclick="event.stopPropagation(); window.notificationSystem.deleteNotification(${n.id})" class="btn-delete-notif">
+                <button onclick="event.stopPropagation(); window.notificationSystem.deleteNotification('${String(n.id).replace(/'/g, "\\'")}')" class="btn-delete-notif">
                     ×
                 </button>
             </div>
@@ -902,8 +985,15 @@ class NotificationSystem {
     }
 
     handleNotificationClick(notifId) {
-        const notif = this.notifications.find(n => n.id === notifId);
+        const notif = this.notifications.find(n => String(n.id) === String(notifId));
         if (!notif) return;
+
+        if (!notif.read) {
+            notif.read = true;
+            this.saveNotifications();
+            this.updateBadge();
+            this.renderNotifications();
+        }
 
         if (notif.type === 'reservation' && notif.data?.id) {
             this.openReservationEditFromNotification(notif.data.id);
