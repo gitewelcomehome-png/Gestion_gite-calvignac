@@ -1,5 +1,5 @@
 // ==========================================
-// 💰 MODULE CALENDRIER & TARIFS - v4.4
+// 💰 MODULE CALENDRIER & TARIFS - v4.15
 // ==========================================
 // Gestion complète du calendrier avec tarification dynamique
 // Date : 19 janvier 2026 - Optimisations performances
@@ -56,6 +56,15 @@ let selectionMode = null;
 let autoSaveTimeout = null;
 let renderCalendarTimeout = null; // Debounce pour le re-render du calendrier
 let isAddingPeriodeDureeMin = false;
+
+// ==========================================
+// VARIABLES IA CALENDRIER TARIFS
+// ==========================================
+let aiModeActifTarifs = null; // 'demande' | 'prix' | null
+let aiDemandeCacheTarifs = {}; // { 'YYYY-MM-DD': 'haute'|'standard'|'faible' }
+let aiSuggestionsCacheTarifs = {};
+let currentGiteAdresseTarifs = '';
+let currentGiteNameTarifs = '';
 
 // ==========================================
 // INITIALISATION
@@ -195,6 +204,7 @@ async function loadGitesSelector() {
             
             if (gite) {
                 currentGiteId = gite.id;
+                currentGiteNameTarifs = gite.name || '';
                 
                 // Appliquer la couleur du gîte au select
                 const giteColor = gite.color || '#667eea';
@@ -213,6 +223,7 @@ async function loadGitesSelector() {
         // Sélectionner le premier gîte par défaut
         if (gites.length > 0 && !currentGiteId) {
             currentGiteId = gites[0].id;
+            currentGiteNameTarifs = gites[0].name || '';
             select.value = currentGiteId;
             
             // Appliquer la couleur du premier gîte
@@ -539,10 +550,43 @@ function _renderCalendrierTarifsImmediate() {
                 `;
             }
         } else {
-            dayCard.innerHTML = `
-                <div class="day-number">${day}</div>
-                ${prixDisplay}
-            `;
+            // Mode IA actif : colorer + afficher suggestion prix sur la case
+            if (aiModeActifTarifs === 'demande' || aiModeActifTarifs === 'prix') {
+                const niv = aiDemandeCacheTarifs[dateStr] || 'standard';
+                if (niv === 'haute') dayCard.classList.add('ai-demande-haute');
+                else if (niv === 'faible') dayCard.classList.add('ai-demande-faible');
+                else if (niv === 'evenement') dayCard.classList.add('ai-demande-evenement');
+            }
+            
+            // Mode prix : afficher la suggestion directement sur la case
+            if (aiModeActifTarifs === 'prix' && aiSuggestionsCacheTarifs[dateStr] !== undefined) {
+                const prixSuggere = aiSuggestionsCacheTarifs[dateStr];
+                const niv = aiDemandeCacheTarifs[dateStr] || 'standard';
+                const icon = niv === 'haute' ? '🔥' : niv === 'faible' ? '💤' : niv === 'evenement' ? '🎉' : '•';
+                // Chercher si un événement IA est attaché à cette date
+                const ev = (window._aiEvenementsCache || []).find(e => e.date === dateStr);
+                const tooltip = ev ? ` title="${ev.nom}"` : '';
+                dayCard.classList.add('ai-suggestion-active');
+                dayCard.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    <div class="ai-prix-sur-case"${tooltip}>
+                        <span class="ai-prix-sur-case-montant">${prixSuggere}€</span>
+                        <span class="ai-prix-sur-case-icon">${icon}${ev ? ' <span class="ai-ev-badge" title="' + ev.nom + '">📌</span>' : ''}</span>
+                    </div>
+                    <button class="ai-prix-accept-btn" onclick="event.stopPropagation();accepterSuggestionJourTarifs('${dateStr}', ${prixSuggere})" title="Appliquer ${prixSuggere}€">✅</button>
+                `;
+            } else {
+                const demandeIcon = aiModeActifTarifs
+                    ? (aiDemandeCacheTarifs[dateStr] === 'haute' ? '<div class="ai-demande-icon">🔥</div>'
+                        : aiDemandeCacheTarifs[dateStr] === 'faible' ? '<div class="ai-demande-icon">💤</div>'
+                        : aiDemandeCacheTarifs[dateStr] === 'evenement' ? '<div class="ai-demande-icon">🎉</div>' : '')
+                    : '';
+                dayCard.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    ${prixDisplay}
+                    ${demandeIcon}
+                `;
+            }
         }
         
         if (tarif && !isReserved) {
@@ -635,13 +679,33 @@ function focusGDFCalendarOnDate(dateStr) {
     currentYearGDF = date.getFullYear();
 }
 
+async function exportMoisTableauGDFDepuisTarifs() {
+    try {
+        // Exporter le même mois que celui affiché dans le calendrier tarifs
+        currentMonthGDF = currentMonthTarifs;
+        currentYearGDF = currentYearTarifs;
+
+        await generateTableauGDF();
+        await copyTableauGDF();
+    } catch (error) {
+        console.error('❌ Erreur export mois GDF depuis calendrier tarifs:', error);
+        showToast('Erreur lors de l\'export du mois Gîtes de France', 'error');
+    }
+}
+
 function previousMonthTarifs() {
     currentMonthTarifs--;
     if (currentMonthTarifs < 0) {
         currentMonthTarifs = 11;
         currentYearTarifs--;
     }
+
+    // Synchroniser systématiquement le tableau GDF sur le même mois
+    currentMonthGDF = currentMonthTarifs;
+    currentYearGDF = currentYearTarifs;
+
     renderCalendrierTarifs();
+    generateTableauGDF();
 }
 
 function nextMonthTarifs() {
@@ -650,7 +714,13 @@ function nextMonthTarifs() {
         currentMonthTarifs = 0;
         currentYearTarifs++;
     }
+
+    // Synchroniser systématiquement le tableau GDF sur le même mois
+    currentMonthGDF = currentMonthTarifs;
+    currentYearGDF = currentYearTarifs;
+
     renderCalendrierTarifs();
+    generateTableauGDF();
 }
 
 function openTarifModal(dateStr) {
@@ -785,6 +855,11 @@ function createDefaultRegles() {
             last_minute: { actif: false, pourcentage: 15, jours_avant: 7 },
             early_booking: { actif: false, pourcentage: 10, jours_avant: 60 }
         },
+        configuration_gite: {
+            tarif_nuit_base: 0,
+            frais_menage: 0,
+            frais_draps: 0
+        },
         duree_min_defaut: 2,
         periodes_duree_min: []
     };
@@ -797,6 +872,28 @@ function renderReglesForm() {
     }
     
     
+    // Promotions
+    // Configuration gîte (base IA/pricing)
+    const configGite = reglesCache.configuration_gite || {};
+    const tarifNuitBaseInput = document.getElementById('config-tarif-nuit-base');
+    const fraisMenageInput = document.getElementById('config-frais-menage');
+    const fraisDrapsInput = document.getElementById('config-frais-draps');
+    
+    if (tarifNuitBaseInput) {
+        tarifNuitBaseInput.value = parseFloat(configGite.tarif_nuit_base || 0) || '';
+        tarifNuitBaseInput.addEventListener('input', () => autoSaveRegles());
+    }
+    
+    if (fraisMenageInput) {
+        fraisMenageInput.value = parseFloat(configGite.frais_menage || 0) || '';
+        fraisMenageInput.addEventListener('input', () => autoSaveRegles());
+    }
+    
+    if (fraisDrapsInput) {
+        fraisDrapsInput.value = parseFloat(configGite.frais_draps || 0) || '';
+        fraisDrapsInput.addEventListener('input', () => autoSaveRegles());
+    }
+
     // Promotions
     const promos = reglesCache.promotions || {};
     
@@ -1052,9 +1149,15 @@ async function saveRegles(isAutoSave = false) {
         
         
         const dureeMinDefaut = parseInt(document.getElementById('duree-min-defaut')?.value) || 2;
+        const configurationGite = {
+            tarif_nuit_base: parseFloat(document.getElementById('config-tarif-nuit-base')?.value) || 0,
+            frais_menage: parseFloat(document.getElementById('config-frais-menage')?.value) || 0,
+            frais_draps: parseFloat(document.getElementById('config-frais-draps')?.value) || 0
+        };
         
         const regles = {
             promotions: promotions,
+            configuration_gite: configurationGite,
             duree_min_defaut: dureeMinDefaut,
             periodes_duree_min: reglesCache.periodes_duree_min || []
         };
@@ -1486,6 +1589,12 @@ function previousMonthGDF() {
         currentMonthGDF = 11;
         currentYearGDF--;
     }
+
+    // Synchroniser systématiquement le calendrier tarifs sur le même mois
+    currentMonthTarifs = currentMonthGDF;
+    currentYearTarifs = currentYearGDF;
+
+    renderCalendrierTarifs();
     generateTableauGDF();
 }
 
@@ -1495,6 +1604,12 @@ function nextMonthGDF() {
         currentMonthGDF = 0;
         currentYearGDF++;
     }
+
+    // Synchroniser systématiquement le calendrier tarifs sur le même mois
+    currentMonthTarifs = currentMonthGDF;
+    currentYearTarifs = currentYearGDF;
+
+    renderCalendrierTarifs();
     generateTableauGDF();
 }
 
@@ -1916,10 +2031,29 @@ function renderCalendrierTarifsTab() {
                     <div class="calendar-controls">
                         <button class="btn-neo btn-nav" onclick="previousMonthTarifs()">◀ Précédent</button>
                         <h3 id="current-month-tarifs" class="calendar-month-title">Janvier 2026</h3>
+                        <button class="btn-neo btn-nav" onclick="exportMoisTableauGDFDepuisTarifs()" title="Exporter le mois du tableau Gîtes de France" style="padding: 10px 14px; white-space: nowrap; min-width: auto; width: auto;">📋 Export GDF</button>
                         <button class="btn-neo btn-nav" onclick="nextMonthTarifs()">Suivant ▶</button>
                     </div>
                     
                     <div id="calendar-grid-tarifs" class="calendar-grid-tarifs"></div>
+                    
+                    <!-- 🤖 Boutons IA demande / prix -->
+                    <div class="ai-cal-buttons-row" id="ai-cal-buttons-row">
+                        <button id="btnAIVoirDemandeTarifs" class="btn-ai-cal" onclick="voirDemandeTarifs()">🔍 Voir la demande</button>
+                        <button id="btnAIProposerPrixTarifs" class="btn-ai-cal btn-ai-cal-green" onclick="proposerPrixIATarifs()">💰 Proposer des prix</button>
+                    </div>
+                    <input type="hidden" id="ai-region-tarifs" value="" />
+                    
+                    <!-- Légende IA demande -->
+                    <div id="ai-demande-legende-tarifs" class="ai-demande-legende-tarifs" style="display:none;">
+                        <span class="ai-demande-item-tarifs haute">🔥 Forte demande</span>
+                        <span class="ai-demande-item-tarifs standard">• Standard</span>
+                        <span class="ai-demande-item-tarifs faible">💤 Faible demande</span>
+                        <span class="ai-demande-item-tarifs evenement">🎉 Événement local</span>
+                        <button id="btnAIToutAccepter" onclick="appliquerSuggestionsIATarifs()" class="btn-ai-cal btn-ai-cal-green" style="display:none;padding:4px 12px;font-size:0.85rem;">✅ Tout accepter</button>
+                        <button onclick="quitterModeIATarifs()" class="btn-ai-quit-tarifs">✕ Quitter</button>
+                    </div>
+                    <div id="ai-conseil-inline" class="ai-conseil-inline" style="display:none;"></div>
                     
                     <div class="tarifs-legend">
                         <div class="legend-item">
@@ -1968,6 +2102,30 @@ function renderCalendrierTarifsTab() {
                 <div id="regles-tarifaires" class="accordion-content active">
                     
                     <!-- Promotions Automatiques -->
+                    <div class="rules-card" style="margin-bottom: 20px; border: 2px solid #2D3436; background: var(--card);">
+                        <h4 class="rules-card-title" style="margin-bottom: 14px;">
+                            🏡 Configuration gîte (base de calcul IA)
+                        </h4>
+                        <div style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+                            <div>
+                                <label class="promo-input-label" for="config-tarif-nuit-base">Tarif nuit de base (€)</label>
+                                <input type="number" id="config-tarif-nuit-base" class="input-neo" min="0" step="0.01" placeholder="Ex: 120" />
+                            </div>
+                            <div>
+                                <label class="promo-input-label" for="config-frais-menage">Frais ménage (€ / séjour)</label>
+                                <input type="number" id="config-frais-menage" class="input-neo" min="0" step="0.01" placeholder="Ex: 45" />
+                            </div>
+                            <div>
+                                <label class="promo-input-label" for="config-frais-draps">Frais draps (€ / séjour)</label>
+                                <input type="number" id="config-frais-draps" class="input-neo" min="0" step="0.01" placeholder="Ex: 20" />
+                            </div>
+                        </div>
+                        <div style="margin-top:10px;font-size:0.88rem;color:var(--text-secondary);">
+                            Ces montants sont sauvegardés avec les règles du gîte et utilisés par l'IA pour proposer des prix cohérents.<br>
+                            L'IA part du tarif nuit de base saisi ici (elle n'utilise pas les prix déjà validés dans le calendrier).
+                        </div>
+                    </div>
+
                     <div class="rules-card primary">
                         <h4 class="rules-card-title primary">
                             🎁 Promotions Automatiques
@@ -2117,6 +2275,430 @@ function renderCalendrierTarifsTab() {
 }
 
 // ==========================================
+// FONCTIONS IA - DEMANDE & SUGGESTIONS PRIX
+// ==========================================
+
+function getPaquesTarifs(year) {
+    // Algorithme de Meeus/Jones/Butcher
+    const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+    const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31);
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month - 1, day);
+}
+
+function getFeriesNationauxTarifs(year) {
+    const paques = getPaquesTarifs(year);
+    const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+    const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return new Set([
+        `${year}-01-01`, `${year}-05-01`, `${year}-05-08`,
+        `${year}-07-14`, `${year}-08-15`, `${year}-11-01`, `${year}-11-11`, `${year}-12-25`,
+        fmt(addDays(paques, 1)), fmt(addDays(paques, 39)), fmt(addDays(paques, 50)),
+    ]);
+}
+
+function getVacancesScolairesZoneTarifs(zone) {
+    // Zone B par défaut (couvre la majorité du territoire Lot/Occitanie)
+    const vacances = {
+        'A': [
+            { debut: '2025-02-08', fin: '2025-02-24' }, { debut: '2025-04-19', fin: '2025-05-05' },
+            { debut: '2025-07-05', fin: '2025-09-01' }, { debut: '2025-10-18', fin: '2025-11-03' },
+            { debut: '2025-12-20', fin: '2026-01-05' }, { debut: '2026-02-14', fin: '2026-03-02' },
+            { debut: '2026-04-18', fin: '2026-05-04' },
+        ],
+        'B': [
+            { debut: '2025-02-22', fin: '2025-03-10' }, { debut: '2025-04-19', fin: '2025-05-05' },
+            { debut: '2025-07-05', fin: '2025-09-01' }, { debut: '2025-10-25', fin: '2025-11-10' },
+            { debut: '2025-12-20', fin: '2026-01-05' }, { debut: '2026-02-28', fin: '2026-03-16' },
+            { debut: '2026-04-18', fin: '2026-05-04' },
+        ],
+        'C': [
+            { debut: '2025-02-15', fin: '2025-03-03' }, { debut: '2025-04-19', fin: '2025-05-05' },
+            { debut: '2025-07-05', fin: '2025-09-01' }, { debut: '2025-10-18', fin: '2025-11-03' },
+            { debut: '2025-12-20', fin: '2026-01-05' }, { debut: '2026-02-21', fin: '2026-03-09' },
+            { debut: '2026-04-18', fin: '2026-05-04' },
+        ],
+    };
+    return vacances[zone] || vacances['B'];
+}
+
+function getDemandePourDateTarifs(dateStr) {
+    const d = new Date(dateStr);
+    const year = d.getFullYear();
+    const month = d.getMonth(); // 0-based
+    const dow = d.getDay(); // 0=dim, 6=sam
+    const feries = getFeriesNationauxTarifs(year);
+
+    // Dates exceptionnelles (Noël / Jour de l'An et veilles)
+    const datesExceptionnelles = new Set([
+        `${year}-12-24`,
+        `${year}-12-25`,
+        `${year}-12-31`,
+        `${year}-01-01`
+    ]);
+    if (datesExceptionnelles.has(dateStr)) return 'evenement';
+
+    if (isPontDateTarifs(dateStr)) return 'evenement';
+    if (isWeekendPontOrHolidayTarifs(dateStr)) return 'haute';
+    
+    // Fériés → haute demande
+    if (feries.has(dateStr)) return 'haute';
+    
+    // Vacances scolaires → haute demande
+    const vacances = getVacancesScolairesZoneTarifs('B');
+    for (const v of vacances) {
+        if (dateStr >= v.debut && dateStr <= v.fin) return 'haute';
+    }
+    
+    // Juillet-Août → haute demande
+    if (month === 6 || month === 7) return 'haute';
+    
+    // Week-ends mai/juin/septembre → forte demande
+    if ((month === 4 || month === 5 || month === 8) && (dow === 5 || dow === 6 || dow === 0)) return 'haute';
+    
+    // Novembre, Janvier, Février hors vacances → faible
+    if (month === 10 || month === 0 || month === 1) return 'faible';
+    
+    // Week-ends Oct/Nov/Jan/Fév hors vacances → standard
+    return 'standard';
+}
+
+function getWeekendAdjustmentTarifs(dateStr) {
+    const d = new Date(`${dateStr}T00:00:00`);
+    const day = d.getDay();
+    // 0=dimanche, 6=samedi
+    if (day === 6) return 1.15; // samedi
+    if (day === 0) return 1.10; // dimanche
+    if (day === 5) return 1.05; // vendredi
+    return 0.95; // semaine un peu plus bas
+}
+
+function addDaysToDateStrTarifs(dateStr, days) {
+    const date = new Date(`${dateStr}T00:00:00`);
+    date.setDate(date.getDate() + days);
+    return toLocalDateString(date);
+}
+
+function isHolidayTarifs(dateStr) {
+    const date = new Date(`${dateStr}T00:00:00`);
+    const year = date.getFullYear();
+    const feries = getFeriesNationauxTarifs(year);
+    return feries.has(dateStr);
+}
+
+function isPontDateTarifs(dateStr) {
+    const date = new Date(`${dateStr}T00:00:00`);
+    const day = date.getDay();
+    const prev = addDaysToDateStrTarifs(dateStr, -1);
+    const next = addDaysToDateStrTarifs(dateStr, 1);
+
+    // Pont classique: lundi avant un mardi férié, vendredi après un jeudi férié
+    if (day === 1 && isHolidayTarifs(next)) return true;
+    if (day === 5 && isHolidayTarifs(prev)) return true;
+
+    return false;
+}
+
+function isWeekendPontOrHolidayTarifs(dateStr) {
+    const date = new Date(`${dateStr}T00:00:00`);
+    const day = date.getDay();
+    const isWeekend = (day === 5 || day === 6 || day === 0);
+    if (!isWeekend) return false;
+
+    // Fenêtre ±2 jours autour du week-end
+    for (let i = -2; i <= 2; i++) {
+        const candidate = addDaysToDateStrTarifs(dateStr, i);
+        if (isHolidayTarifs(candidate) || isPontDateTarifs(candidate)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function getHolidayPontAdjustmentTarifs(dateStr) {
+    if (isHolidayTarifs(dateStr)) return 1.25;
+    if (isPontDateTarifs(dateStr)) return 1.20;
+    if (isWeekendPontOrHolidayTarifs(dateStr)) return 1.15;
+    return 1;
+}
+
+function voirDemandeTarifs() {
+    // Calculer la demande pour tout le mois affiché
+    aiModeActifTarifs = 'demande';
+    aiDemandeCacheTarifs = {};
+    aiSuggestionsCacheTarifs = {};
+    
+    const lastDay = new Date(currentYearTarifs, currentMonthTarifs + 1, 0).getDate();
+    for (let d = 1; d <= lastDay; d++) {
+        const dateObj = new Date(currentYearTarifs, currentMonthTarifs, d);
+        const dateStr = toLocalDateString(dateObj);
+        aiDemandeCacheTarifs[dateStr] = getDemandePourDateTarifs(dateStr);
+    }
+    
+    // Ré-rendre le calendrier avec les couleurs
+    _renderCalendrierTarifsImmediate();
+    
+    // Afficher la légende
+    const legende = document.getElementById('ai-demande-legende-tarifs');
+    const btnTout = document.getElementById('btnAIToutAccepter');
+    if (legende) legende.style.display = 'flex';
+    if (btnTout) btnTout.style.display = 'none';
+    
+    // Bouton actif
+    const btnD = document.getElementById('btnAIVoirDemandeTarifs');
+    const btnP = document.getElementById('btnAIProposerPrixTarifs');
+    if (btnD) btnD.classList.add('active');
+    if (btnP) btnP.classList.remove('active');
+}
+
+async function proposerPrixIATarifs() {
+    if (!currentGiteId) { alert('⚠️ Sélectionnez d\'abord un gîte'); return; }
+    
+    const btnP = document.getElementById('btnAIProposerPrixTarifs');
+    const btnD = document.getElementById('btnAIVoirDemandeTarifs');
+    if (btnP) { btnP.textContent = '⏳ Analyse IA...'; btnP.disabled = true; }
+    if (btnD) btnD.classList.remove('active');
+    
+    // Pré-calculer la demande locale pendant que l'IA répond
+    aiModeActifTarifs = 'prix';
+    aiDemandeCacheTarifs = {};
+    aiSuggestionsCacheTarifs = {};
+    
+    const lastDay = new Date(currentYearTarifs, currentMonthTarifs + 1, 0).getDate();
+    const joursLibres = [];
+    
+    for (let d = 1; d <= lastDay; d++) {
+        const dto = new Date(currentYearTarifs, currentMonthTarifs, d);
+        const dateStr = toLocalDateString(dto);
+        const isResa = reservationsCache.some(r => {
+            const ci = new Date(r.date_arrivee || r.check_in);
+            const co = new Date(r.date_depart || r.check_out);
+            return dto >= ci && dto < co;
+        });
+        if (!isResa) {
+            aiDemandeCacheTarifs[dateStr] = getDemandePourDateTarifs(dateStr);
+            joursLibres.push(dateStr);
+        }
+    }
+    
+    // Récupérer l'adresse réelle du gîte depuis infos_gites
+    let localisation = '';
+    try {
+        const { data: infos } = await window.supabaseClient
+            .from('infos_gites')
+            .select('adresse')
+            .eq('gite', currentGiteNameTarifs.toLowerCase())
+            .maybeSingle();
+        if (infos?.adresse) localisation = infos.adresse;
+    } catch (e) { /* pas bloquant */ }
+    if (!localisation) {
+        // Fallback : nom du gîte tel qu'affiché dans le sélecteur
+        localisation = currentGiteNameTarifs || '';
+    }
+
+    const moisNom = new Date(currentYearTarifs, currentMonthTarifs, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    const feries = getFeriesNationauxTarifs(currentYearTarifs);
+    const joursFeries = joursLibres.filter(d => feries.has(d));
+    const joursVacances = joursLibres.filter(d => {
+        const v = getVacancesScolairesZoneTarifs('B');
+        return v.some(p => d >= p.debut && d <= p.fin);
+    });
+    const configGite = reglesCache?.configuration_gite || {};
+    const prixBaseConfig = parseFloat(configGite.tarif_nuit_base || 0);
+    const fraisMenage = parseFloat(configGite.frais_menage || 0);
+    const fraisDraps = parseFloat(configGite.frais_draps || 0);
+
+    // Règle métier: l'IA part UNIQUEMENT du tarif de base configuré pour ce gîte
+    if (!(prixBaseConfig > 0)) {
+        if (btnP) { btnP.textContent = '💰 Proposer des prix'; btnP.disabled = false; }
+        showToast('⚠️ Renseignez d\'abord le "Tarif nuit de base" dans Configuration gîte', 'error');
+        return;
+    }
+
+    const prixBase = Math.round(prixBaseConfig);
+    const prixMin = Math.round(prixBase * 0.60);
+    const prixMax = Math.round(prixBase * 1.60);
+
+    const prompt = `Tu es un expert en revenue management pour les hébergements touristiques en France.
+
+Gîte : "${localisation || 'France'}".
+Période analysée : ${moisNom}. Jours libres à tarifer : ${joursLibres.length}.
+Tarif de base actuel : ${prixBase}€/nuit. Fourchette acceptable : ${prixMin}€–${prixMax}€.
+Frais ménage (séjour) : ${fraisMenage}€. Frais draps (séjour) : ${fraisDraps}€.
+Jours fériés ce mois : ${joursFeries.length > 0 ? joursFeries.join(', ') : 'aucun'}.
+Jours vacances scolaires zone B : ${joursVacances.length}.
+
+Ton rôle :
+1. Propose 3 niveaux de prix optimisés (haute/standard/faible demande) adaptés au marché local autour de "${localisation || 'France'}" et à la concurrence des hébergements similaires dans cette zone.
+    Prends explicitement en compte le tarif nuit de base + les frais ménage/draps pour préserver la rentabilité.
+    IMPORTANT: le prix week-end doit être plus élevé que le prix semaine à niveau de demande équivalent.
+2. Identifie les événements locaux, festivals, marchés, fêtes ou week-ends thématiques importants ce mois dans la région proche de "${localisation || 'France'}" et propose un prix spécifique pour ces dates.
+3. Donne un conseil stratégique court et actionnable pour ce mois dans cette région.
+
+Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
+{"haute":${Math.round(prixBase*1.35)},"standard":${prixBase},"faible":${Math.round(prixBase*0.78)},"conseil":"...","evenements":[{"date":"YYYY-MM-DD","nom":"...","prix":0}]}`;
+    
+    try {
+        const response = await fetch('/api/openai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, maxTokens: 600, model: 'gpt-4o-mini' })
+        });
+        if (!response.ok) throw new Error(`Erreur API ${response.status}`);
+        const data = await response.json();
+        
+        let ai = null;
+        try {
+            const raw = (data.result || '').trim();
+            const jsonStr = raw.startsWith('{') ? raw : (raw.match(/\{[\s\S]*\}/)?.[0] || '{}');
+            ai = JSON.parse(jsonStr);
+        } catch(e) { throw new Error('Réponse IA non parseable'); }
+        
+        if (!ai.haute || !ai.standard || !ai.faible) throw new Error('Réponse incomplète');
+        
+        // Construire les suggestions jour par jour en se basant sur le niveau de demande
+        for (const dateStr of joursLibres) {
+            const niv = aiDemandeCacheTarifs[dateStr] || 'standard';
+            const prixNiveau = Math.round(parseFloat(ai[niv]));
+            const ajustementWeekend = getWeekendAdjustmentTarifs(dateStr);
+            const ajustementPontFerie = getHolidayPontAdjustmentTarifs(dateStr);
+            aiSuggestionsCacheTarifs[dateStr] = Math.round(prixNiveau * ajustementWeekend * ajustementPontFerie);
+        }
+        
+        // Appliquer les surcharges pour événements spécifiques détectés par l'IA
+        if (Array.isArray(ai.evenements)) {
+            for (const ev of ai.evenements) {
+                if (ev.date && ev.prix && aiSuggestionsCacheTarifs[ev.date] !== undefined) {
+                    aiSuggestionsCacheTarifs[ev.date] = Math.round(parseFloat(ev.prix));
+                    aiDemandeCacheTarifs[ev.date] = 'evenement';
+                }
+            }
+        }
+        
+        // Stocker les événements pour tooltip
+        window._aiEvenementsCache = ai.evenements || [];
+        
+        // Afficher le conseil IA dans la légende si présent
+        const conseilEl = document.getElementById('ai-conseil-inline');
+        if (conseilEl && ai.conseil) {
+            conseilEl.textContent = '💡 ' + ai.conseil;
+            conseilEl.style.display = 'block';
+        }
+        
+        if (btnP) { btnP.textContent = '💰 Proposer des prix'; btnP.disabled = false; btnP.classList.add('active'); }
+        const legende = document.getElementById('ai-demande-legende-tarifs');
+        const btnTout = document.getElementById('btnAIToutAccepter');
+        if (legende) legende.style.display = 'flex';
+        if (btnTout) btnTout.style.display = 'inline-flex';
+        
+        _renderCalendrierTarifsImmediate();
+        
+    } catch (err) {
+        if (btnP) { btnP.textContent = '💰 Proposer des prix'; btnP.disabled = false; }
+        // Fallback local si API indisponible
+        const mult = { haute: 1.30, standard: 1.00, faible: 0.75, evenement: 1.50 };
+        for (const dateStr of joursLibres) {
+            const niv = aiDemandeCacheTarifs[dateStr] || 'standard';
+            const ajustementWeekend = getWeekendAdjustmentTarifs(dateStr);
+            const ajustementPontFerie = getHolidayPontAdjustmentTarifs(dateStr);
+            aiSuggestionsCacheTarifs[dateStr] = Math.round(prixBase * (mult[niv] || 1) * ajustementWeekend * ajustementPontFerie);
+        }
+        const legende = document.getElementById('ai-demande-legende-tarifs');
+        const btnTout = document.getElementById('btnAIToutAccepter');
+        if (legende) legende.style.display = 'flex';
+        if (btnTout) btnTout.style.display = 'inline-flex';
+        _renderCalendrierTarifsImmediate();
+        console.warn('⚠️ IA indisponible, analyse locale utilisée :', err.message);
+    }
+}
+
+async function appliquerSuggestionsIATarifs() {
+    const entries = Object.entries(aiSuggestionsCacheTarifs || {});
+    if (!entries.length || !currentGiteId) { alert('Aucune suggestion disponible'); return; }
+    if (!confirm(`Appliquer les ${entries.length} prix suggérés sur ce mois ?`)) return;
+    
+    try {
+        for (const [date, prix_nuit] of entries) {
+            const idx = tarifsCache.findIndex(t => t.date === date);
+            if (idx >= 0) {
+                tarifsCache[idx].prix_nuit = prix_nuit;
+            } else {
+                tarifsCache.push({ date, prix_nuit });
+            }
+        }
+
+        const { error } = await window.supabaseClient
+            .from('gites')
+            .update({ tarifs_calendrier: tarifsCache })
+            .eq('id', currentGiteId);
+
+        if (error) throw error;
+
+        aiSuggestionsCacheTarifs = {};
+        await loadTarifsBase();
+        quitterModeIATarifs();
+    } catch (err) {
+        alert('❌ Erreur : ' + err.message);
+    }
+}
+
+async function accepterSuggestionJourTarifs(dateStr, prix) {
+    if (!currentGiteId) return;
+    try {
+        const idx = tarifsCache.findIndex(t => t.date === dateStr);
+        if (idx >= 0) {
+            tarifsCache[idx].prix_nuit = prix;
+        } else {
+            tarifsCache.push({ date: dateStr, prix_nuit: prix });
+        }
+
+        const { error } = await window.supabaseClient
+            .from('gites')
+            .update({ tarifs_calendrier: tarifsCache })
+            .eq('id', currentGiteId);
+
+        if (error) throw error;
+
+        // Mettre à jour le cache local
+        delete aiSuggestionsCacheTarifs[dateStr];
+        // Si plus aucune suggestion restante, quitter le mode
+        if (Object.keys(aiSuggestionsCacheTarifs).length === 0) {
+            quitterModeIATarifs();
+        } else {
+            _renderCalendrierTarifsImmediate();
+        }
+    } catch (err) {
+        console.error('❌ Erreur sauvegarde tarif:', err);
+    }
+}
+
+function quitterModeIATarifs() {
+    aiModeActifTarifs = null;
+    aiDemandeCacheTarifs = {};
+    aiSuggestionsCacheTarifs = {};
+    window._aiEvenementsCache = [];
+    
+    const legende = document.getElementById('ai-demande-legende-tarifs');
+    const btnTout = document.getElementById('btnAIToutAccepter');
+    const conseil = document.getElementById('ai-conseil-inline');
+    if (legende) legende.style.display = 'none';
+    if (btnTout) btnTout.style.display = 'none';
+    if (conseil) { conseil.style.display = 'none'; conseil.textContent = ''; }
+    
+    const btnD = document.getElementById('btnAIVoirDemandeTarifs');
+    const btnP = document.getElementById('btnAIProposerPrixTarifs');
+    if (btnD) btnD.classList.remove('active');
+    if (btnP) btnP.classList.remove('active');
+    
+    _renderCalendrierTarifsImmediate();
+}
+
+// ==========================================
 // LANCEMENT
 // ==========================================
 
@@ -2155,6 +2737,12 @@ window.loadAllData = loadAllData;
 window.renderCalendrierTarifs = renderCalendrierTarifs;
 window.focusTarifsCalendarOnDate = focusTarifsCalendarOnDate;
 window.focusGDFCalendarOnDate = focusGDFCalendarOnDate;
+window.exportMoisTableauGDFDepuisTarifs = exportMoisTableauGDFDepuisTarifs;
+window.voirDemandeTarifs = voirDemandeTarifs;
+window.proposerPrixIATarifs = proposerPrixIATarifs;
+window.quitterModeIATarifs = quitterModeIATarifs;
+window.appliquerSuggestionsIATarifs = appliquerSuggestionsIATarifs;
+window.accepterSuggestionJourTarifs = accepterSuggestionJourTarifs;
 
 // Ne pas lancer automatiquement au chargement de la page
 // L'initialisation se fera via renderCalendrierTarifsTab() quand l'onglet est activé

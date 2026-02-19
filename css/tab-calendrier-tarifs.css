@@ -1037,3 +1037,848 @@ html.theme-dark .preview-day.reservee {
 html.theme-dark .no-dates {
     color: #9ca3af;
 }
+
+/* ==========================================
+   🤖 SECTION SUGGESTIONS IA TARIFS
+   ========================================== */
+
+/* Toggle header */
+.ai-toggle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* Toggle switch */
+.ai-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.ai-toggle-label input[type="checkbox"] {
+    display: none;
+}
+
+.ai-toggle-track {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    background: #cdd0d5;
+    border-radius: 12px;
+    transition: background 0.25s;
+}
+
+.ai-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.25s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.ai-toggle-label input:checked + .ai-toggle-track {
+    background: var(--primary, #6C63FF);
+}
+
+.ai-toggle-label input:checked + .ai-toggle-track .ai-toggle-thumb {
+    left: 21px;
+}
+
+.ai-toggle-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Intro text */
+.ai-intro-text {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 4px;
+    background: rgba(108, 99, 255, 0.06);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary, #6C63FF);
+}
+
+/* Multiplicateurs */
+.ai-multiplicateurs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.ai-mult-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card, #f8f9fa);
+    border-radius: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.ai-mult-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.ai-mult-label {
+    flex: 1;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.form-input-sm {
+    width: 60px;
+    text-align: center;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-input, #fff);
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.ai-mult-unit {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* Boutons IA */
+.ai-buttons-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.btn-ai-secondary {
+    flex: 1;
+    background: rgba(108, 99, 255, 0.1);
+    color: var(--primary, #6C63FF);
+    border: 1px solid var(--primary, #6C63FF);
+}
+
+.btn-ai-primary {
+    flex: 1;
+    background: var(--primary, #6C63FF);
+    color: white;
+}
+
+/* Résultats suggestions */
+.ai-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.ai-results-count {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.btn-ai-apply-all {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: none;
+    background: #10b981;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Carte de suggestion individuelle */
+.ai-suggestion-card {
+    background: var(--bg-card, #f8f9fa);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-suggestion-card.applied {
+    opacity: 0.5;
+    border-color: #10b981;
+}
+
+.ai-suggestion-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.ai-suggestion-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ai-suggestion-date {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ai-suggestion-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ai-suggestion-price {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.ai-suggestion-price-amount {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--primary, #6C63FF);
+    display: block;
+}
+
+.ai-suggestion-price-base {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-decoration: line-through;
+}
+
+.btn-ai-apply {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: none;
+    background: #10b981;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.btn-ai-applied {
+    background: #6b7280;
+    cursor: default;
+}
+
+/* Badge IA sur les cellules du calendrier */
+.day-card-mobile .ai-badge {
+    font-size: 0.5rem;
+    line-height: 1;
+    display: block;
+    margin-top: 1px;
+}
+
+.day-card-mobile.ai-event {
+    border-top: 2px solid var(--primary, #6C63FF) !important;
+}
+
+.day-card-mobile.ai-ferie {
+    border-top: 2px solid #ef4444 !important;
+}
+
+.day-card-mobile.ai-vacances {
+    border-top: 2px solid #f97316 !important;
+}
+
+/* Spinner IA */
+.ai-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border-color, #e2e8f0);
+    border-top-color: var(--primary, #6C63FF);
+    border-radius: 50%;
+    animation: ai-spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes ai-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Dark mode adaptations */
+html.theme-dark .ai-intro-text {
+    background: rgba(108, 99, 255, 0.1);
+}
+
+html.theme-dark .ai-mult-row {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+}
+
+html.theme-dark .ai-suggestion-card {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.1);
+}
+
+html.theme-dark .form-input-sm {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+    color: var(--text-primary);
+}
+
+html.theme-dark .ai-toggle-track {
+    background: rgba(255,255,255,0.2);
+}
+
+/* ==========================================
+   🔍 BOUTONS IA SOUS LE CALENDRIER
+   ========================================== */
+
+.ai-cal-actions {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0 6px;
+}
+
+.btn-ai-cal {
+    flex: 1;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 2px solid var(--border-color, #e2e8f0);
+    background: var(--bg-card, #f8f9fa);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.btn-ai-cal:hover {
+    border-color: var(--primary, #6C63FF);
+    color: var(--primary, #6C63FF);
+}
+
+.btn-ai-cal.btn-ai-cal-green {
+    border-color: #10b981;
+    color: #10b981;
+}
+
+.btn-ai-cal.btn-ai-cal-green:hover,
+.btn-ai-cal.btn-ai-cal-green.actif {
+    background: #10b981;
+    color: white;
+}
+
+.btn-ai-cal.actif {
+    background: var(--primary, #6C63FF);
+    color: white;
+    border-color: var(--primary, #6C63FF);
+}
+
+/* ==========================================
+   📊 LÉGENDE DEMANDE
+   ========================================== */
+
+.ai-demande-legende {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    background: var(--bg-card, #f8f9fa);
+    border-radius: 10px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+}
+
+.ai-leg-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.ai-leg-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.ai-leg-dot.haute {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+}
+
+.ai-leg-dot.normale {
+    background: var(--border-color, #e2e8f0);
+}
+
+.ai-leg-dot.faible {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+}
+
+.btn-ai-quitter {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.btn-ai-quitter:hover {
+    background: rgba(0,0,0,0.08);
+}
+
+/* ==========================================
+   🌡️ COULEURS DEMANDE SUR LES CASES
+   ========================================== */
+
+.day-card-mobile.ai-demande-haute {
+    background: linear-gradient(135deg, rgba(239,68,68,0.18), rgba(249,115,22,0.12)) !important;
+    border-color: rgba(239,68,68,0.5) !important;
+}
+
+.day-card-mobile.ai-demande-haute .day-number-mobile {
+    color: #dc2626;
+}
+
+.day-card-mobile.ai-demande-faible {
+    background: linear-gradient(135deg, rgba(96,165,250,0.15), rgba(167,139,250,0.1)) !important;
+    border-color: rgba(96,165,250,0.4) !important;
+}
+
+.day-card-mobile.ai-demande-faible .day-number-mobile {
+    color: #7c91c0;
+}
+
+/* ==========================================
+   💰 PANNEAU PROPOSITIONS PRIX
+   ========================================== */
+
+.ai-prix-panel {
+    background: var(--bg-card, #f8f9fa);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 12px;
+}
+
+.ai-prix-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.ai-prix-panel-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ai-prix-settings {
+    background: var(--bg-input, rgba(0,0,0,0.03));
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.ai-settings-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.ai-settings-row label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+/* Dark mode */
+html.theme-dark .btn-ai-cal {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.15);
+}
+
+html.theme-dark .ai-demande-legende {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.1);
+}
+
+html.theme-dark .ai-prix-panel {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.1);
+}
+
+html.theme-dark .ai-prix-settings {
+    background: rgba(0,0,0,0.2);
+    border-color: rgba(255,255,255,0.08);
+}
+
+html.theme-dark .day-card-mobile.ai-demande-haute {
+    background: linear-gradient(135deg, rgba(239,68,68,0.25), rgba(249,115,22,0.18)) !important;
+}
+
+html.theme-dark .day-card-mobile.ai-demande-faible {
+    background: linear-gradient(135deg, rgba(96,165,250,0.2), rgba(167,139,250,0.15)) !important;
+}
+
+/* ============================================
+   IA CALENDRIER TARIFS - DESKTOP
+   ============================================ */
+
+/* Ligne de boutons IA sous le calendrier */
+.ai-cal-buttons-row {
+    display: flex;
+    gap: 12px;
+    margin: 18px 0 8px;
+    flex-wrap: wrap;
+}
+
+.btn-ai-cal {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 10px;
+    border: 2px solid #667eea;
+    background: var(--card);
+    color: #667eea;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 2px 2px 0 #2D3436;
+}
+
+.btn-ai-cal:hover,
+.btn-ai-cal.active {
+    background: #667eea;
+    color: #fff;
+    box-shadow: 3px 3px 0 #2D3436;
+    transform: translateY(-1px);
+}
+
+.btn-ai-cal-green {
+    border-color: #27ae60;
+    color: #27ae60;
+}
+
+.btn-ai-cal-green:hover,
+.btn-ai-cal-green.active {
+    background: #27ae60;
+    color: #fff;
+    box-shadow: 3px 3px 0 #2D3436;
+}
+
+/* Légende IA demande (desktop) */
+.ai-demande-legende-tarifs {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    padding: 12px 18px;
+    background: var(--card);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.ai-demande-item-tarifs {
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.ai-demande-item-tarifs.haute {
+    background: rgba(239,68,68,0.15);
+    color: #dc2626;
+}
+
+.ai-demande-item-tarifs.standard {
+    background: rgba(100,116,139,0.1);
+    color: var(--text-secondary);
+}
+
+.ai-demande-item-tarifs.faible {
+    background: rgba(59,130,246,0.12);
+    color: #2563eb;
+}
+
+.ai-demande-item-tarifs.evenement {
+    background: rgba(168,85,247,0.12);
+    color: #7c3aed;
+}
+
+/* Conseil IA inline sous la légende */
+.ai-conseil-inline {
+    background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(139,92,246,0.07));
+    border-left: 4px solid #667eea;
+    border-radius: 0 10px 10px 0;
+    padding: 12px 18px;
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.55;
+    margin-bottom: 8px;
+    font-style: italic;
+}
+
+.btn-ai-quit-tarifs {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-ai-quit-tarifs:hover {
+    background: #e74c3c;
+    color: #fff;
+    border-color: #e74c3c;
+}
+
+/* Couleurs demande sur .day-card (desktop) */
+.day-card.ai-demande-haute {
+    background: linear-gradient(135deg, rgba(239,68,68,0.18), rgba(249,115,22,0.12)) !important;
+    border-color: rgba(239,68,68,0.5) !important;
+}
+
+.day-card.ai-demande-faible {
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1)) !important;
+    border-color: rgba(59,130,246,0.4) !important;
+}
+
+/* Événements locaux IA (violet) */
+.day-card.ai-demande-evenement {
+    background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(236,72,153,0.12)) !important;
+    border-color: rgba(168,85,247,0.55) !important;
+}
+
+/* Badge épingle sur les événements */
+.ai-ev-badge {
+    font-size: 0.75rem;
+    cursor: help;
+}
+
+.ai-demande-icon {
+    font-size: 1.1rem;
+    text-align: center;
+    margin-top: 4px;
+    opacity: 0.85;
+}
+
+/* Panel prix IA (desktop) */
+.ai-prix-panel-tarifs {
+    background: var(--card);
+    border: 3px solid #667eea;
+    border-radius: 14px;
+    margin: 12px 0;
+    overflow: hidden;
+    box-shadow: 4px 4px 0 #2D3436;
+}
+
+.ai-prix-header-tarifs {
+    background: linear-gradient(135deg, #667eea, #8b5cf6);
+    color: #fff;
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ai-prix-content-tarifs {
+    padding: 20px;
+}
+
+.ai-prix-cards-tarifs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.ai-prix-card-tarifs {
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    border: 2px solid transparent;
+}
+
+.ai-prix-card-tarifs.haute {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.35);
+}
+
+.ai-prix-card-tarifs.standard {
+    background: rgba(100,116,139,0.08);
+    border-color: rgba(100,116,139,0.25);
+}
+
+.ai-prix-card-tarifs.faible {
+    background: rgba(59,130,246,0.09);
+    border-color: rgba(59,130,246,0.3);
+}
+
+.ai-prix-card-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.ai-prix-card-prix {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+}
+
+.ai-prix-card-base {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.ai-conseil-tarifs {
+    background: rgba(102,126,234,0.1);
+    border-left: 4px solid #667eea;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+/* Spinner IA */
+.ai-spinner-tarifs {
+    width: 36px;
+    height: 36px;
+    border: 4px solid rgba(102,126,234,0.2);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spinTarifs 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spinTarifs {
+    to { transform: rotate(360deg); }
+}
+
+/* Dark mode */
+html.theme-dark .day-card.ai-demande-haute {
+    background: linear-gradient(135deg, rgba(239,68,68,0.25), rgba(249,115,22,0.18)) !important;
+}
+
+html.theme-dark .day-card.ai-demande-faible {
+    background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15)) !important;
+}
+
+html.theme-dark .day-card.ai-demande-evenement {
+    background: linear-gradient(135deg, rgba(168,85,247,0.28), rgba(236,72,153,0.18)) !important;
+}
+/* ============================================
+   SUGGESTION PRIX SUR CASE CALENDRIER (desktop)
+   ============================================ */
+
+/* Case avec suggestion de prix active */
+.day-card.ai-suggestion-active {
+    position: relative;
+    cursor: default !important;
+}
+
+/* Bloc prix suggéré au centre de la case */
+.ai-prix-sur-case {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin: 6px 0 4px;
+    flex: 1;
+    justify-content: center;
+}
+
+.ai-prix-sur-case-montant {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+}
+
+.ai-prix-sur-case-icon {
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
+
+/* Bouton ✅ en bas de la case */
+.ai-prix-accept-btn {
+    display: block;
+    width: calc(100% - 8px);
+    margin: 0 4px 4px;
+    padding: 3px 0;
+    background: rgba(39,174,96,0.15);
+    border: 1.5px solid rgba(39,174,96,0.5);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: center;
+}
+
+.ai-prix-accept-btn:hover {
+    background: rgba(39,174,96,0.9);
+    border-color: #27ae60;
+    color: #fff;
+}
+
+/* Teinte de la case selon le niveau + suggestion active */
+.day-card.ai-suggestion-active.ai-demande-haute .ai-prix-sur-case-montant {
+    color: #dc2626;
+}
+
+.day-card.ai-suggestion-active.ai-demande-faible .ai-prix-sur-case-montant {
+    color: #2563eb;
+}
+
+html.theme-dark .day-card.ai-suggestion-active.ai-demande-haute .ai-prix-sur-case-montant {
+    color: #f87171;
+}
+
+html.theme-dark .day-card.ai-suggestion-active.ai-demande-faible .ai-prix-sur-case-montant {
+    color: #60a5fa;
+}
+
+.day-card.ai-suggestion-active.ai-demande-evenement .ai-prix-sur-case-montant {
+    color: #7c3aed;
+}
+
+html.theme-dark .day-card.ai-suggestion-active.ai-demande-evenement .ai-prix-sur-case-montant {
+    color: #c084fc;
+}
