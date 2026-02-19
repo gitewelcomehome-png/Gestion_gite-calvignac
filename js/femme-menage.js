@@ -178,6 +178,9 @@ async function chargerInterventions() {
 
         // Générer le HTML avec colonnes par gîte
         let html = '';
+        const visibleGites = await window.gitesManager.getVisibleGites();
+        const visibleGiteIds = visibleGites.map(g => g.id);
+
         Object.keys(semaines).sort().forEach(weekKey => {
             const semaine = semaines[weekKey];
             const weekEnd = new Date(semaine.debut);
@@ -189,8 +192,6 @@ async function chargerInterventions() {
             
             // Colonnes par gîte avec gitesManager - Filtrer selon abonnement
             const allGiteIds = Object.keys(semaine.gites).sort();
-            const visibleGites = await window.gitesManager.getVisibleGites();
-            const visibleGiteIds = visibleGites.map(g => g.id);
             
             // Ne garder que les gîtes visibles selon l'abonnement
             const giteIds = allGiteIds.filter(id => visibleGiteIds.includes(id));

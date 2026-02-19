@@ -1741,19 +1741,37 @@ async function generateTableauGDF() {
             } else {
                 const tarif = calculateTarifForDuration(dateStr, dateFinStr, nights);
                 
+                // Pour la nuit supp (nights=8) : afficher le prix d'UNE nuit seule (tarif8 - tarif7)
+                let tarifAffiche = tarif;
+                if (nights === 8) {
+                    const dateFin7 = new Date(dateObj);
+                    dateFin7.setDate(dateFin7.getDate() + 7);
+                    const dateFin7Str = toLocalDateString(dateFin7);
+                    const tarif7 = calculateTarifForDuration(dateStr, dateFin7Str, 7);
+                    tarifAffiche = tarif - tarif7;
+                }
+                
                 // Déterminer la classe CSS selon le tarif
                 let cellClass = 'cell-available';
-                if (tarif > 1000) {
+                if (tarifAffiche > 1000) {
                     cellClass += ' high-price';
                 }
                 
                 // Vérifier si promo appliquée (comparaison avec tarif de base)
                 const tarifBase = calculateTarifSansPromo(dateStr, dateFinStr, nights);
-                if (tarif < tarifBase) {
+                let tarifBaseAffiche = tarifBase;
+                if (nights === 8) {
+                    const dateFin7 = new Date(dateObj);
+                    dateFin7.setDate(dateFin7.getDate() + 7);
+                    const dateFin7Str = toLocalDateString(dateFin7);
+                    const tarif7Base = calculateTarifSansPromo(dateStr, dateFin7Str, 7);
+                    tarifBaseAffiche = tarifBase - tarif7Base;
+                }
+                if (tarifAffiche < tarifBaseAffiche) {
                     cellClass += ' promo-price';
                 }
                 
-                html += `<td class="${cellClass}" style="padding: 12px; text-align: center; font-weight: 700; font-size: 1rem;">${Math.round(tarif)}</td>`;
+                html += `<td class="${cellClass}" style="padding: 12px; text-align: center; font-weight: 700; font-size: 1rem;">${Math.round(tarifAffiche)}</td>`;
             }
         }
         
