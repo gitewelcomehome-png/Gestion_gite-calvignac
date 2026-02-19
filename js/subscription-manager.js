@@ -22,6 +22,8 @@ class SubscriptionManager {
     this.currentSubscription = null;
     this.features = null;
     this.level = null;
+    // Promise résolue quand l'abonnement est chargé
+    this._readyPromise = new Promise(resolve => { this._resolveReady = resolve; });
   }
 
   /**
@@ -30,7 +32,10 @@ class SubscriptionManager {
    */
   async loadUserSubscription() {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    if (!user) {
+      this._resolveReady(null);
+      return null;
+    }
 
     const { data, error } = await supabase
       .from('user_subscriptions')
@@ -44,12 +49,14 @@ class SubscriptionManager {
 
     if (error || !data) {
       console.error('Erreur chargement abonnement:', error);
+      this._resolveReady(null);
       return null;
     }
 
     this.currentSubscription = data;
     this.features = data.plan.features;
     this.level = data.plan.level;
+    this._resolveReady(data);
     
     return data;
   }

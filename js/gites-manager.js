@@ -111,11 +111,10 @@ class GitesManager {
             await this.loadGites();
         }
         
-        // Attendre que le subscription manager soit initialisé ET que l'abonnement soit chargé
-        let retries = 0;
-        while ((!window.subscriptionManager || !window.subscriptionManager.currentSubscription) && retries < 50) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            retries++;
+        // Attendre que le subscription manager soit prêt (avec timeout 3s)
+        if (window.subscriptionManager?._readyPromise) {
+            const timeout = new Promise(resolve => setTimeout(resolve, 3000));
+            await Promise.race([window.subscriptionManager._readyPromise, timeout]);
         }
         
         // Filtrer selon la limite du plan d'abonnement
