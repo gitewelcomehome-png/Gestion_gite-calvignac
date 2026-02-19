@@ -9,6 +9,11 @@ let derniereSimulation = null; // Stocke les résultats de la dernière simulati
 let gites = []; // Cache des gîtes
 let besoinsCache = {}; // Cache des besoins par gite_id (quantités)
 let besoinsMetaCache = {}; // Cache des besoins par gite_id (liste complète)
+const DEFAULT_DRAPS_ALERT_SETTINGS = {
+    weekday: 'all',
+    daysBefore: 7
+};
+let drapsAlertSettingsCache = { ...DEFAULT_DRAPS_ALERT_SETTINGS };
 
 function getBesoinKeys(giteId) {
     return (besoinsMetaCache[giteId] || []).map(b => b.item_key);
@@ -30,6 +35,169 @@ function getAllBesoinKeys() {
         (list || []).forEach(b => set.add(b.item_key));
     });
     return Array.from(set);
+}
+
+function normalizeAlertWeekday(value) {
+    if (value === 'all') return 'all';
+    const allowed = ['0', '1', '2', '3', '4', '5', '6'];
+    return allowed.includes(String(value)) ? String(value) : 'all';
+}
+
+function normalizeDaysBefore(value) {
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isFinite(parsed)) return DEFAULT_DRAPS_ALERT_SETTINGS.daysBefore;
+    return Math.min(30, Math.max(0, parsed));
+}
+
+function getWeekdayLabel(value) {
+    const labels = {
+        all: 'Tous les jours',
+        '1': 'Lundi',
+        '2': 'Mardi',
+        '3': 'Mercredi',
+        '4': 'Jeudi',
+        '5': 'Vendredi',
+        '6': 'Samedi',
+        '0': 'Dimanche'
+    };
+    return labels[String(value)] || 'Tous les jours';
+}
+
+async function chargerParametresAlerteDraps() {
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user?.id) {
+            drapsAlertSettingsCache = { ...DEFAULT_DRAPS_ALERT_SETTINGS };
+            return drapsAlertSettingsCache;
+        }
+
+        const { data: settings, error } = await window.supabaseClient
+            .from('user_settings')
+            .select('draps_alert_weekday, draps_alert_days_before')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        if (error) {
+            console.warn('⚠️ Impossible de lire la config alerte draps en base:', error.message);
+            drapsAlertSettingsCache = { ...DEFAULT_DRAPS_ALERT_SETTINGS };
+            return drapsAlertSettingsCache;
+        }
+
+        drapsAlertSettingsCache = {
+            weekday: normalizeAlertWeekday(settings?.draps_alert_weekday),
+            daysBefore: normalizeDaysBefore(settings?.draps_alert_days_before)
+        };
+
+        return drapsAlertSettingsCache;
+    } catch (error) {
+        console.warn('⚠️ Erreur chargement config alerte draps:', error?.message || error);
+        drapsAlertSettingsCache = { ...DEFAULT_DRAPS_ALERT_SETTINGS };
+        return drapsAlertSettingsCache;
+    }
+}
+
+async function sauvegarderParametresAlerteDrapsInternes(settings) {
+    const normalized = {
+        weekday: normalizeAlertWeekday(settings?.weekday),
+        daysBefore: normalizeDaysBefore(settings?.daysBefore)
+    };
+
+    drapsAlertSettingsCache = normalized;
+
+    const { data: { user } } = await window.supabaseClient.auth.getUser();
+    if (!user?.id) {
+        throw new Error('Utilisateur non connecté');
+    }
+
+    const payload = {
+        user_id: user.id,
+        draps_alert_weekday: normalized.weekday,
+        draps_alert_days_before: normalized.daysBefore,
+        updated_at: new Date().toISOString()
+    };
+
+    const { error } = await window.supabaseClient
+        .from('user_settings')
+        .upsert(payload, { onConflict: 'user_id' });
+
+    if (error) {
+        throw new Error(error.message || 'Erreur sauvegarde config alerte draps');
+    }
+
+    return normalized;
+}
+
+function renderDrapsAlertConfigSummary() {
+    const summaryEl = document.getElementById('draps-alert-config-summary');
+    if (!summaryEl) return;
+
+    const dayLabel = getWeekdayLabel(drapsAlertSettingsCache.weekday);
+    const daysBefore = drapsAlertSettingsCache.daysBefore;
+    summaryEl.textContent = `Alerte manque: ${dayLabel} • ${daysBefore} jour${daysBefore > 1 ? 's' : ''} avant la rupture estimée.`;
+}
+
+function ouvrirModalAlerteDraps() {
+    const modal = document.getElementById('draps-alert-modal');
+    const weekdayInput = document.getElementById('draps-alert-weekday');
+    const daysBeforeInput = document.getElementById('draps-alert-days-before');
+    if (!modal || !weekdayInput || !daysBeforeInput) return;
+
+    weekdayInput.value = drapsAlertSettingsCache.weekday;
+    daysBeforeInput.value = String(drapsAlertSettingsCache.daysBefore);
+    modal.style.display = 'flex';
+}
+
+function fermerModalAlerteDraps() {
+    const modal = document.getElementById('draps-alert-modal');
+    if (!modal) return;
+    modal.style.display = 'none';
+}
+
+async function enregistrerParametresAlerteDraps() {
+    try {
+        const weekdayInput = document.getElementById('draps-alert-weekday');
+        const daysBeforeInput = document.getElementById('draps-alert-days-before');
+        if (!weekdayInput || !daysBeforeInput) return;
+
+        await sauvegarderParametresAlerteDrapsInternes({
+            weekday: weekdayInput.value,
+            daysBefore: daysBeforeInput.value
+        });
+
+        renderDrapsAlertConfigSummary();
+        fermerModalAlerteDraps();
+
+        await analyserReservations();
+
+        if (typeof window.showNotification === 'function') {
+            window.showNotification('✅ Configuration d\'alerte draps enregistrée', 'success');
+        }
+    } catch {
+        if (typeof window.showNotification === 'function') {
+            window.showNotification('❌ Erreur lors de l\'enregistrement de la configuration', 'error');
+        }
+    }
+}
+
+function shouldCreateTaskForDateLimite(dateLimite, today, alertSettings) {
+    if (!dateLimite) return false;
+
+    const ruptureDate = new Date(dateLimite);
+    if (Number.isNaN(ruptureDate.getTime())) return false;
+
+    const triggerDate = new Date(ruptureDate);
+    triggerDate.setDate(triggerDate.getDate() - normalizeDaysBefore(alertSettings?.daysBefore));
+
+    if (today < triggerDate) {
+        return false;
+    }
+
+    const weekday = normalizeAlertWeekday(alertSettings?.weekday);
+    if (weekday !== 'all' && today.getDay() !== Number.parseInt(weekday, 10)) {
+        return false;
+    }
+
+    return true;
 }
 
 // ================================================================
@@ -819,6 +987,19 @@ async function initDraps() {
     await chargerStocks();
     
     await analyserReservations();
+
+    await chargerParametresAlerteDraps();
+    renderDrapsAlertConfigSummary();
+
+    const alertModal = document.getElementById('draps-alert-modal');
+    if (alertModal && alertModal.dataset.boundClose !== '1') {
+        alertModal.addEventListener('click', (event) => {
+            if (event.target === alertModal) {
+                fermerModalAlerteDraps();
+            }
+        });
+        alertModal.dataset.boundClose = '1';
+    }
     
     // Initialiser le select des gîtes pour "À emmener"
     await initialiserSelectGites();
@@ -836,6 +1017,9 @@ async function initDraps() {
 }
 
 window.initDraps = initDraps;
+window.ouvrirModalAlerteDraps = ouvrirModalAlerteDraps;
+window.fermerModalAlerteDraps = fermerModalAlerteDraps;
+window.enregistrerParametresAlerteDraps = enregistrerParametresAlerteDraps;
 
 // ================================================================
 // CHARGEMENT DES STOCKS
@@ -1367,8 +1551,7 @@ window.initialiserSelectGites = initialiserSelectGites;
 async function creerTacheStockSiNecessaire(resaParGite, infosCouverture, gitesVisibles) {
     try {
         const today = new Date();
-        const uneSemaneFuture = new Date(today);
-        uneSemaneFuture.setDate(uneSemaneFuture.getDate() + 7);
+        const alertSettings = await chargerParametresAlerteDraps();
         
         const troisSemainesFuture = new Date(today);
         troisSemainesFuture.setDate(troisSemainesFuture.getDate() + 21);
@@ -1377,8 +1560,8 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture, gitesVi
         for (const gite of gitesVisibles) {
             const infos = infosCouverture[gite.id];
             
-            // Vérifier si on va manquer de stock dans une semaine
-            if (infos && infos.dateLimite && infos.dateLimite <= uneSemaneFuture) {
+            // Vérifier si les conditions d'alerte paramétrées sont atteintes
+            if (infos && infos.dateLimite && shouldCreateTaskForDateLimite(infos.dateLimite, today, alertSettings)) {
                 // Calculer les besoins pour les 3 prochaines semaines
                 const reservations3Semaines = resaParGite[gite.id]?.filter(r => {
                     const dateDebut = new Date(r.check_in);
@@ -1460,6 +1643,7 @@ async function creerTacheStockSiNecessaire(resaParGite, infosCouverture, gitesVi
                                 console.warn('⚠️ Erreur insertion todo (table peut-être inexistante)');
                             }
                         }
+
                     }
                 }
             }

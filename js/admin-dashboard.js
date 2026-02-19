@@ -324,7 +324,7 @@ async function fetchSupportAiMetrics(forceRefresh = false) {
         return supportAiMetricsCache;
     }
 
-    const response = await fetch('/api/ai-health?section=support', {
+    const response = await fetch('/api/ai-health?section=support&autoTicket=1', {
         method: 'GET',
         cache: 'no-store'
     });

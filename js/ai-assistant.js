@@ -15,6 +15,16 @@ class AIAssistant {
         this.apiEndpoint = '/api/openai';
         this.model = 'gpt-4o-mini'; // Modèle économique et rapide
         this.isGenerating = false;
+        this.apiAvailable = null;
+        this.apiUnavailableReason = '';
+        this.lastAvailabilityCheckAt = 0;
+        this.maxFieldsPerBatch = 6;
+        this.maxCharsPerField = 1800;
+        this.stylePresets = {
+            utility: 'Priorité utilité immédiate: infos actionnables, phrases claires, zéro blabla.',
+            premium: 'Priorité expérience premium: ton haut de gamme, fluide, accueillant et rassurant.',
+            ultra_clear: 'Priorité ultra clarté: phrases courtes, structure explicite, lecture très rapide.'
+        };
         this.tones = {
             professional: 'professionnel et formel',
             warm: 'chaleureux et accueillant',
@@ -29,6 +39,142 @@ class AIAssistant {
      */
     hasApiKey() {
         return true;
+    }
+
+    async checkApiAvailability(force = false) {
+        const now = Date.now();
+        if (!force && this.apiAvailable !== null && (now - this.lastAvailabilityCheckAt) < 60000) {
+            return this.apiAvailable;
+        }
+
+        try {
+            const response = await fetch(`${this.apiEndpoint}?health=1`, {
+                method: 'GET',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                this.apiAvailable = false;
+                this.apiUnavailableReason = 'Service IA temporairement indisponible';
+                this.lastAvailabilityCheckAt = now;
+                return false;
+            }
+
+            const data = await response.json().catch(() => ({}));
+            this.apiAvailable = Boolean(data.available);
+            this.apiUnavailableReason = this.apiAvailable
+                ? ''
+                : 'API OpenAI non configurée. Ajoute OPENAI_API_KEY sur Vercel.';
+            this.lastAvailabilityCheckAt = now;
+            return this.apiAvailable;
+        } catch (error) {
+            this.apiAvailable = false;
+            this.apiUnavailableReason = 'Impossible de joindre le service IA';
+            this.lastAvailabilityCheckAt = now;
+            return false;
+        }
+    }
+
+    getAvailabilityMessage() {
+        return this.apiUnavailableReason || 'Service IA indisponible';
+    }
+
+    sanitizeFieldContent(content) {
+        const normalized = String(content || '')
+            .replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n')
+            .replace(/\t/g, ' ')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+
+        if (normalized.length <= this.maxCharsPerField) {
+            return normalized;
+        }
+
+        return `${normalized.slice(0, this.maxCharsPerField)}…`;
+    }
+
+    getFieldHint(field) {
+        const key = `${field.id} ${field.label}`.toLowerCase();
+
+        if (key.includes('cle') || key.includes('badge') || key.includes('code')) {
+            return 'Rédige des étapes claires et actionnables, sans perdre les codes ni l’ordre des actions.';
+        }
+        if (key.includes('linge') || key.includes('drap') || key.includes('serviette')) {
+            return 'Structure en paragraphe pratique: ce qui est fourni, quantité/qualité, et ce que le client doit prévoir.';
+        }
+        if (key.includes('equip') || key.includes('cuisine') || key.includes('materiel')) {
+            return 'Valorise les équipements avec phrases complètes et utiles pour le séjour.';
+        }
+        if (key.includes('parking') || key.includes('arrivee') || key.includes('depart')) {
+            return 'Donne des consignes logistiques très claires (où aller, quoi faire, dans quel ordre).';
+        }
+
+        return 'Améliore la clarté, la fluidité et le ton, sans ajouter d’informations inventées.';
+    }
+
+    getStylePresetInstruction(stylePreset) {
+        return this.stylePresets[stylePreset] || this.stylePresets.utility;
+    }
+
+    buildBatchPrompt(fields, tone, stylePreset = 'utility') {
+        const toneDescriptions = {
+            professional: 'un ton professionnel et formel',
+            warm: 'un ton chaleureux et accueillant',
+            concise: 'un style concis et direct',
+            descriptive: 'un style détaillé et descriptif'
+        };
+
+        const fieldsList = fields.map((f, i) => {
+            const safeContent = this.sanitizeFieldContent(f.content)
+                .replace(/\\/g, '\\\\')
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, ' ');
+
+            return `${i + 1}. [id=${f.id}] [label=${f.label}] [hint=${this.getFieldHint(f)}]\nTexte: "${safeContent}"`;
+        }).join('\n\n');
+
+        return `Tu dois reformuler les textes suivants avec ${toneDescriptions[tone] || toneDescriptions.warm}.
+    Style cible : ${this.getStylePresetInstruction(stylePreset)}
+
+RÈGLES STRICTES :
+- Ne jamais inventer d'informations
+- Conserver tous les faits (codes, horaires, noms, adresses, chiffres)
+- Corriger orthographe/grammaire
+- Rendre le texte clair, utile et agréable à lire
+- Pour les consignes, privilégier des phrases actionnables et ordonnées
+
+TEXTES :
+${fieldsList}
+
+Réponds UNIQUEMENT en JSON valide au format :
+{
+  "fields": [
+    { "index": 1, "improved": "texte reformulé" }
+  ]
+}`;
+    }
+
+    parseImprovementResponse(response) {
+        let cleanResponse = String(response || '').trim();
+
+        if (cleanResponse.startsWith('```json')) {
+            cleanResponse = cleanResponse.replace(/```json\n?/g, '').replace(/```\n?$/g, '');
+        } else if (cleanResponse.startsWith('```')) {
+            cleanResponse = cleanResponse.replace(/```\n?/g, '').replace(/```\n?$/g, '');
+        }
+
+        const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            cleanResponse = jsonMatch[0];
+        }
+
+        const parsed = JSON.parse(cleanResponse);
+        if (!parsed.fields || !Array.isArray(parsed.fields)) {
+            throw new Error('La propriété "fields" est manquante ou invalide');
+        }
+
+        return parsed.fields;
     }
 
     /**
@@ -104,6 +250,11 @@ class AIAssistant {
             throw new Error('Une génération est déjà en cours...');
         }
 
+        const available = await this.checkApiAvailability();
+        if (!available) {
+            throw new Error(this.getAvailabilityMessage());
+        }
+
         this.isGenerating = true;
 
         try {
@@ -120,7 +271,11 @@ class AIAssistant {
             });
 
             if (!response.ok) {
-                const error = await response.json();
+                const error = await response.json().catch(() => ({}));
+                if (error.code === 'OPENAI_NOT_CONFIGURED') {
+                    this.apiAvailable = false;
+                    this.apiUnavailableReason = 'API OpenAI non configurée. Ajoute OPENAI_API_KEY sur Vercel.';
+                }
                 throw new Error(error.error || 'Erreur lors de l\'appel à l\'API');
             }
 
@@ -134,7 +289,11 @@ class AIAssistant {
             return content;
 
         } catch (error) {
-            console.error('❌ Erreur génération IA:', error);
+            if ((error?.message || '').includes('non configurée')) {
+                console.warn('⚠️ IA indisponible: configuration OpenAI manquante');
+            } else {
+                console.error('❌ Erreur génération IA:', error);
+            }
             throw error;
         } finally {
             this.isGenerating = false;
@@ -194,6 +353,11 @@ Ton professionnel mais accueillant.`;
 
         return await this.generateContent(prompt, 300);
     }
+}
+
+function isAIConfigMissingError(error) {
+    const message = String(error?.message || '').toLowerCase();
+    return message.includes('openai') && (message.includes('non configurée') || message.includes('not configured'));
 }
 
 /**
@@ -257,6 +421,15 @@ function showAIAssistantModal(targetFieldId, fieldType = 'general') {
                     💡 Entrez quelques mots-clés, l'IA va générer un texte complet
                 </small>
             </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">Mode de rendu</label>
+                <select id="aiSingleStylePreset" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;">
+                    <option value="utility" selected>⚡ Ultra utile (recommandé)</option>
+                    <option value="premium">✨ Premium hospitalité</option>
+                    <option value="ultra_clear">🧼 Ultra clair et direct</option>
+                </select>
+            </div>
             
             <div style="display: flex; gap: 10px;">
                 <button id="btnGenerateAI" 
@@ -276,6 +449,7 @@ function showAIAssistantModal(targetFieldId, fieldType = 'general') {
     // Événements
     document.getElementById('btnGenerateAI').onclick = async () => {
         const keywords = document.getElementById('aiKeywordsInput').value.trim();
+        const stylePreset = document.getElementById('aiSingleStylePreset')?.value || 'utility';
         if (!keywords) {
             alert('❌ Veuillez entrer des mots-clés');
             return;
@@ -287,23 +461,28 @@ function showAIAssistantModal(targetFieldId, fieldType = 'general') {
         btn.innerHTML = '<span style="font-size: 1.2rem;">⏳</span> Génération...';
 
         try {
+            const apiReady = await assistant.checkApiAvailability();
+            if (!apiReady) {
+                throw new Error(assistant.getAvailabilityMessage());
+            }
+
             let generatedText;
 
             switch (fieldType) {
                 case 'keys':
-                    generatedText = await assistant.generateKeyInstructions(keywords);
+                    generatedText = await assistant.generateKeyInstructions(`${keywords}\n\nStyle souhaité: ${assistant.getStylePresetInstruction(stylePreset)}`);
                     break;
                 case 'linen':
-                    generatedText = await assistant.generateLinenDescription(keywords);
+                    generatedText = await assistant.generateLinenDescription(`${keywords}\n\nStyle souhaité: ${assistant.getStylePresetInstruction(stylePreset)}`);
                     break;
                 case 'equipment':
-                    generatedText = await assistant.generateEquipmentDescription(keywords);
+                    generatedText = await assistant.generateEquipmentDescription(`${keywords}\n\nStyle souhaité: ${assistant.getStylePresetInstruction(stylePreset)}`);
                     break;
                 case 'instructions':
-                    generatedText = await assistant.generateInstructions(keywords);
+                    generatedText = await assistant.generateInstructions(`${keywords}\n\nStyle souhaité: ${assistant.getStylePresetInstruction(stylePreset)}`);
                     break;
                 default:
-                    generatedText = await assistant.generateContent(`Génère un texte professionnel pour un gîte à partir de : "${keywords}".`);
+                    generatedText = await assistant.generateContent(`Génère un texte professionnel pour un gîte à partir de : "${keywords}".\n\nStyle souhaité: ${assistant.getStylePresetInstruction(stylePreset)}`);
             }
 
             // Remplir le champ cible
@@ -321,7 +500,14 @@ function showAIAssistantModal(targetFieldId, fieldType = 'general') {
             modal.remove();
 
         } catch (error) {
-            console.error('❌ Erreur génération:', error);
+            if (isAIConfigMissingError(error)) {
+                console.warn('⚠️ IA indisponible: OPENAI_API_KEY manquante sur Vercel');
+                if (window.showNotification) {
+                    window.showNotification('⚠️ IA indisponible : ajoute OPENAI_API_KEY sur Vercel', 'warning');
+                }
+            } else {
+                console.error('❌ Erreur génération:', error);
+            }
             alert('❌ Erreur : ' + error.message);
             btn.disabled = false;
             btn.innerHTML = originalText;
@@ -449,6 +635,24 @@ function showImprovementModal(fields, defaultTone, giteName) {
                 </select>
             </div>
 
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #34495e;">
+                    Mode IA :
+                </label>
+                <select id="stylePresetSelector" style="
+                    width: 100%;
+                    padding: 12px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                ">
+                    <option value="utility" selected>⚡ Ultra utile (terrain)</option>
+                    <option value="premium">✨ Premium hospitalité</option>
+                    <option value="ultra_clear">🧼 Ultra clair (lecture rapide)</option>
+                </select>
+            </div>
+
             <div id="progressContainer" style="display: none; margin: 20px 0;">
                 <div style="
                     background: #ecf0f1;
@@ -495,6 +699,10 @@ function showImprovementModal(fields, defaultTone, giteName) {
                     Annuler
                 </button>
             </div>
+
+            <div style="margin-top: 14px; font-size: 0.85rem; color: #7f8c8d;">
+                💡 Après amélioration, un bouton permettra de restaurer la version précédente.
+            </div>
         </div>
     `;
 
@@ -503,7 +711,8 @@ function showImprovementModal(fields, defaultTone, giteName) {
     // Gestion des événements
     document.getElementById('btnStartImprovement').onclick = async () => {
         const selectedTone = document.getElementById('toneSelector').value;
-        await processAllFields(fields, selectedTone, modal);
+        const selectedStylePreset = document.getElementById('stylePresetSelector')?.value || 'utility';
+        await processAllFields(fields, selectedTone, modal, selectedStylePreset);
     };
 
     document.getElementById('btnCancelImprovement').onclick = () => modal.remove();
@@ -512,7 +721,7 @@ function showImprovementModal(fields, defaultTone, giteName) {
 /**
  * Traiter tous les champs en un seul appel API
  */
-async function processAllFields(fields, tone, modal) {
+async function processAllFields(fields, tone, modal, stylePreset = 'utility') {
     const assistant = window.aiAssistant;
     const progressContainer = document.getElementById('progressContainer');
     const progressBar = document.getElementById('progressBar');
@@ -527,141 +736,142 @@ async function processAllFields(fields, tone, modal) {
     progressBar.style.width = '30%';
 
     try {
-        // Préparer le prompt avec tous les champs (échapper les guillemets)
-        const fieldsList = fields.map((f, i) => {
-            // Échapper les caractères spéciaux pour éviter les erreurs JSON
-            const escapedContent = f.content
-                .replace(/\\/g, '\\\\')  // Échapper les backslashes
-                .replace(/"/g, '\\"')      // Échapper les guillemets
-                .replace(/\n/g, ' ')        // Remplacer retours à la ligne par espaces
-                .replace(/\r/g, ' ')        // Remplacer carriage returns
-                .replace(/\t/g, ' ');       // Remplacer tabs
-            
-            return `${i + 1}. **${f.label}** : ${escapedContent}`;
-        }).join('\n\n');
+        const apiReady = await assistant.checkApiAvailability();
+        if (!apiReady) {
+            throw new Error(assistant.getAvailabilityMessage());
+        }
 
-        const toneDescriptions = {
-            professional: 'un ton professionnel et formel',
-            warm: 'un ton chaleureux et accueillant',
-            concise: 'un style concis et direct',
-            descriptive: 'un style détaillé et descriptif'
-        };
+        const totalBatches = Math.ceil(fields.length / assistant.maxFieldsPerBatch);
+        let processedBatches = 0;
+        let failedBatches = 0;
+        const allImprovements = [];
 
-        const prompt = `Tu dois reformuler les textes suivants avec ${toneDescriptions[tone]}.
+        for (let batchIndex = 0; batchIndex < totalBatches; batchIndex += 1) {
+            const start = batchIndex * assistant.maxFieldsPerBatch;
+            const batch = fields.slice(start, start + assistant.maxFieldsPerBatch);
 
-RÈGLES IMPORTANTES :
-- NE PAS inventer d'informations
-- SEULEMENT reformuler ce qui est écrit
-- Garder TOUS les détails (codes, horaires, noms, etc.)
-- Améliorer la clarté et la structure
-- Corriger l'orthographe et la grammaire
-- Rester fidèle au contenu original
+            progressText.textContent = `Génération IA lot ${batchIndex + 1}/${totalBatches}...`;
+            progressBar.style.width = `${30 + Math.round((batchIndex / Math.max(totalBatches, 1)) * 50)}%`;
 
-TEXTES À REFORMULER :
+            try {
+                const prompt = assistant.buildBatchPrompt(batch, tone, stylePreset);
+                const estimatedTokens = Math.max(1200, batch.length * 220);
+                const response = await assistant.generateContent(prompt, estimatedTokens);
+                const improvedFields = assistant.parseImprovementResponse(response);
 
-${fieldsList}
+                improvedFields.forEach((improved) => {
+                    const localField = batch[Number(improved.index) - 1];
+                    if (!localField || !improved?.improved) return;
+                    allImprovements.push({
+                        id: localField.id,
+                        improved: String(improved.improved).trim()
+                    });
+                });
 
-Réponds UNIQUEMENT en JSON avec ce format exact :
-{
-  "fields": [
-    { "index": 1, "improved": "texte reformulé" },
-    { "index": 2, "improved": "texte reformulé" }
-  ]
-}`;
+                processedBatches += 1;
+            } catch (batchError) {
+                failedBatches += 1;
+                console.warn(`⚠️ Lot IA ${batchIndex + 1} non traité:`, batchError?.message || batchError);
+            }
+        }
 
-        progressText.textContent = 'Génération des textes améliorés...';
-        progressBar.style.width = '60%';
+        if (allImprovements.length === 0) {
+            throw new Error('Aucun lot IA n\'a pu être traité. Réessaie dans quelques secondes.');
+        }
 
-        // Calculer tokens nécessaires (environ 3 tokens par mot)
-        const estimatedTokens = Math.max(3000, fields.length * 150 + 1000);
-
-        // Appel API avec limite adaptée
-        const response = await assistant.generateContent(prompt, estimatedTokens);
-        
         progressText.textContent = 'Application des modifications...';
         progressBar.style.width = '90%';
 
-        // console.log('🤖 RETOUR IA:', response);
-
-        // Parser la réponse JSON
-        let improvedFields;
-        try {
-            // Nettoyer la réponse
-            let cleanResponse = response.trim();
-            
-            // Enlever les balises markdown si présentes
-            if (cleanResponse.startsWith('```json')) {
-                cleanResponse = cleanResponse.replace(/```json\n?/g, '').replace(/```\n?$/g, '');
-            } else if (cleanResponse.startsWith('```')) {
-                cleanResponse = cleanResponse.replace(/```\n?/g, '').replace(/```\n?$/g, '');
-            }
-            
-            // Trouver le JSON entre accolades si le texte contient autre chose
-            const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                cleanResponse = jsonMatch[0];
-            }
-            
-            const parsed = JSON.parse(cleanResponse);
-            improvedFields = parsed.fields;
-            
-            if (!improvedFields || !Array.isArray(improvedFields)) {
-                throw new Error('La propriété "fields" est manquante ou invalide');
-            }
-        } catch (e) {
-            console.error('❌ Erreur parsing JSON:', e);
-            console.error('📄 Réponse complète:', response);
-            throw new Error(`Format de réponse invalide de l'IA: ${e.message}`);
-        }
-
-        // Appliquer les textes améliorés aux champs
+        const backup = [];
         let updatedCount = 0;
-        improvedFields.forEach((improved, idx) => {
-            const field = fields[improved.index - 1];
-            if (field && improved.improved) {
-                const element = document.getElementById(field.id);
-                if (element) {
-                    element.value = improved.improved;
-                    
-                    // FOND ROUGE jusqu'au clic
-                    element.style.transition = 'background-color 0.3s';
-                    element.style.backgroundColor = '#ffebee'; // Rouge clair
-                    element.style.borderColor = '#e74c3c'; // Bordure rouge
-                    
-                    // Enlever le fond rouge au clic dans le champ
-                    const removeRedBackground = () => {
-                        element.style.backgroundColor = '';
-                        element.style.borderColor = '';
-                        element.removeEventListener('focus', removeRedBackground);
-                        element.removeEventListener('click', removeRedBackground);
-                    };
-                    
-                    element.addEventListener('focus', removeRedBackground);
-                    element.addEventListener('click', removeRedBackground);
-                    
-                    updatedCount++;
-                }
-            }
+
+        allImprovements.forEach((item) => {
+            const element = document.getElementById(item.id);
+            if (!element) return;
+
+            backup.push({ id: item.id, value: element.value });
+            element.value = item.improved;
+
+            element.style.transition = 'background-color 0.3s';
+            element.style.backgroundColor = '#ffebee';
+            element.style.borderColor = '#e74c3c';
+
+            const removeRedBackground = () => {
+                element.style.backgroundColor = '';
+                element.style.borderColor = '';
+                element.removeEventListener('focus', removeRedBackground);
+                element.removeEventListener('click', removeRedBackground);
+            };
+
+            element.addEventListener('focus', removeRedBackground);
+            element.addEventListener('click', removeRedBackground);
+
+            updatedCount += 1;
         });
 
+        window.__aiLastImprovementBackup = backup;
+
         progressBar.style.width = '100%';
-        progressText.textContent = `✅ ${updatedCount} champ(s) amélioré(s) avec succès !`;
+        progressText.textContent = `✅ ${updatedCount} champ(s) amélioré(s) (${processedBatches} lot(s) OK${failedBatches > 0 ? `, ${failedBatches} lot(s) en échec` : ''})`;
         progressText.style.color = '#27ae60';
         progressText.style.fontWeight = '600';
 
-        // Fermer après 2 secondes
-        setTimeout(() => {
+        if (window.showNotification) {
+            window.showNotification('✅ IA appliquée. Vous pouvez annuler via restoreLastAIImprovement()', 'success');
+        }
+
+        const btnCancel = document.getElementById('btnCancelImprovement');
+        if (btnCancel) {
+            btnCancel.textContent = 'Fermer';
+        }
+
+        btnStart.disabled = false;
+        btnStart.style.opacity = '1';
+        btnStart.textContent = '↩️ Restaurer la version précédente';
+        btnStart.onclick = () => {
+            window.restoreLastAIImprovement();
             modal.remove();
-        }, 2000);
+        };
 
     } catch (error) {
-        console.error('❌ Erreur amélioration:', error);
+        if (isAIConfigMissingError(error)) {
+            console.warn('⚠️ IA indisponible: OPENAI_API_KEY manquante sur Vercel');
+            if (window.showNotification) {
+                window.showNotification('⚠️ IA indisponible : ajoute OPENAI_API_KEY sur Vercel', 'warning');
+            }
+        } else {
+            console.error('❌ Erreur amélioration:', error);
+        }
         progressText.textContent = `❌ Erreur : ${error.message}`;
         progressText.style.color = '#e74c3c';
         btnStart.disabled = false;
         btnStart.style.opacity = '1';
     }
 }
+
+window.restoreLastAIImprovement = function() {
+    const backup = window.__aiLastImprovementBackup;
+    if (!Array.isArray(backup) || backup.length === 0) {
+        if (window.showNotification) {
+            window.showNotification('ℹ️ Aucune amélioration IA à restaurer', 'info');
+        }
+        return;
+    }
+
+    backup.forEach((item) => {
+        const element = document.getElementById(item.id);
+        if (element) {
+            element.value = item.value;
+            element.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    });
+
+    if (window.showNotification) {
+        window.showNotification(`↩️ ${backup.length} champ(s) restauré(s)`, 'success');
+    }
+
+    window.__aiLastImprovementBackup = [];
+};
 
 // ==========================================
 // 🌐 EXPORTS GLOBAUX

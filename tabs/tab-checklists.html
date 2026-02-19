@@ -2,7 +2,19 @@
     .checklist-toolbar {
         display: flex;
         justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
         margin-bottom: 12px;
+    }
+
+    .checklist-toolbar-select {
+        min-width: 210px;
+        border: 1px solid var(--border-color, #d1d5db);
+        border-radius: 10px;
+        padding: 9px 12px;
+        background: var(--card-bg, #fff);
+        color: var(--text-color, #111827);
+        font-weight: 500;
     }
 
     .checklist-form-buttons {
@@ -263,6 +275,15 @@
         <!-- Liste des items existants -->
         <div class="checklist-items-section">
             <div class="checklist-toolbar">
+                <button type="button" id="btn-checklist-backfill-translation" class="checklist-btn-clear">
+                    🌍 Rétro-traduire FR→EN
+                </button>
+                <select id="checklist-duplicate-target-select" class="checklist-toolbar-select">
+                    <option value="__none__">Aucun autre gîte</option>
+                </select>
+                <button type="button" id="btn-checklist-duplicate-all" class="checklist-btn-clear">
+                    📄 Dupliquer vers ce gîte
+                </button>
                 <button type="button" class="checklist-btn-create" onclick="openChecklistCreateModal()">
                     ➕ Créer
                 </button>

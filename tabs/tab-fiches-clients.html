@@ -109,25 +109,66 @@
     <div class="sub-tab-content" id="subtab-config-checklists">
         <div style="margin-bottom: 20px;">
             <label style="font-weight: 600; margin-bottom: 10px; display: block;">Gîte :</label>
-            <select id="selectGiteChecklist" class="input" style="max-width: 200px;" onchange="loadChecklistsConfig()">
+            <select id="selectGiteChecklist" class="input" style="max-width: 240px;" onchange="loadChecklistsConfig()">
                 <option value="Trevoux">Trevoux</option>
                 <option value="Couzon">Couzon</option>
             </select>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; align-items: center;">
+                <select id="selectGiteChecklistDuplicateTarget" class="input" style="max-width: 240px;">
+                    <option value="">Gîte cible (duplication)</option>
+                </select>
+                <button class="btn btn-secondary" onclick="duplicateChecklistConfigToOtherGite('entree')">
+                    <i data-lucide="copy"></i> Dupliquer Entrée
+                </button>
+                <button class="btn btn-secondary" onclick="duplicateChecklistConfigToOtherGite('sortie')">
+                    <i data-lucide="copy"></i> Dupliquer Sortie
+                </button>
+            </div>
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div>
                 <h3 style="margin-bottom: 15px;"><i data-lucide="check-square" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Checklist Entrée</h3>
-                <button class="btn btn-success" onclick="addChecklistItem('entree')" style="margin-bottom: 10px;">
-                    <i data-lucide="plus"></i> Ajouter un item
+                <button class="btn btn-secondary" onclick="backfillChecklistConfigTranslations('entree')" style="margin-bottom: 10px;">
+                    <i data-lucide="languages"></i> Rétro-traduire Entrée
                 </button>
+                <div style="display: grid; gap: 8px; margin-bottom: 10px;">
+                    <input type="text" id="checklistEntreeItemFr" class="input" placeholder="Texte FR">
+                    <input type="text" id="checklistEntreeItemEn" class="input" placeholder="Texte EN (optionnel, auto)">
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+                        <input type="checkbox" id="checklistEntreeObligatoire"> Item obligatoire
+                    </label>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button id="btnChecklistEntreeSave" class="btn btn-success" onclick="saveChecklistItemConfig('entree')">
+                            <i data-lucide="plus"></i> Ajouter
+                        </button>
+                        <button id="btnChecklistEntreeCancel" class="btn btn-secondary" onclick="cancelChecklistEditConfig('entree')" style="display: none;">
+                            Annuler
+                        </button>
+                    </div>
+                </div>
                 <div id="checklistEntreeConfig"></div>
             </div>
             <div>
                 <h3 style="margin-bottom: 15px;"><i data-lucide="check-square" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Checklist Sortie</h3>
-                <button class="btn btn-success" onclick="addChecklistItem('sortie')" style="margin-bottom: 10px;">
-                    <i data-lucide="plus"></i> Ajouter un item
+                <button class="btn btn-secondary" onclick="backfillChecklistConfigTranslations('sortie')" style="margin-bottom: 10px;">
+                    <i data-lucide="languages"></i> Rétro-traduire Sortie
                 </button>
+                <div style="display: grid; gap: 8px; margin-bottom: 10px;">
+                    <input type="text" id="checklistSortieItemFr" class="input" placeholder="Texte FR">
+                    <input type="text" id="checklistSortieItemEn" class="input" placeholder="Texte EN (optionnel, auto)">
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+                        <input type="checkbox" id="checklistSortieObligatoire"> Item obligatoire
+                    </label>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button id="btnChecklistSortieSave" class="btn btn-success" onclick="saveChecklistItemConfig('sortie')">
+                            <i data-lucide="plus"></i> Ajouter
+                        </button>
+                        <button id="btnChecklistSortieCancel" class="btn btn-secondary" onclick="cancelChecklistEditConfig('sortie')" style="display: none;">
+                            Annuler
+                        </button>
+                    </div>
+                </div>
                 <div id="checklistSortieConfig"></div>
             </div>
         </div>

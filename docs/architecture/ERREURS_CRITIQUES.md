@@ -31,6 +31,53 @@ Ce qu'il faut faire pour éviter que ça se reproduise
 
 ## 🔴 Erreurs Référencées
 
+### [18 Février 2026] - Alertes critiques monitoring sans ticket client proactif
+
+**Contexte:**
+Le monitoring IA support remontait correctement des alertes critiques, mais le client impacté n'était pas systématiquement prévenu automatiquement via un ticket dédié.
+
+**Erreur:**
+- Incident visible côté admin, mais pas de ticket client auto
+- Détection proactive incomplète côté expérience client
+- Risque de délai de communication quand plusieurs incidents surviennent
+
+**Cause:**
+1. Les logs IA ne portaient pas suffisamment le contexte client/ticket (`requester_client_id`, etc.)
+2. Aucun workflow serveur de création automatique de ticket sur incident critique
+3. Clôture manuelle non standardisée pour "corrigé + message client"
+
+**Solution:**
+✅ Extension télémétrie IA (`sql/migrations/CREATE_SUPPORT_AI_USAGE_LOGS.sql`)
+- Ajout des colonnes de corrélation client/ticket et suivi auto-ticket
+
+✅ Extension `api/support-ai.js`
+- Enregistrement du contexte client transmis (`clientContext`) dans les logs serveur
+- Signature incident stable pour anti-doublons
+
+✅ Extension `api/ai-health.js`
+- Traitement auto-ticket activable via `autoTicket=1`
+- Création/liaison ticket client sur incidents critiques détectés
+- Pré-analyse incluse dans le ticket pour expliquer ce que le client a pu voir
+
+✅ Extension `js/admin-support.js`
+- Action "Corrigé + notifier + clôturer" pour envoyer le message de résolution puis clore
+
+**Prévention:**
+1. Toujours tracer l'identité client/ticket dans les logs incidents exploitables
+2. Garder l'auto-ticketing activé (`SUPPORT_AI_AUTO_TICKET_ENABLED=true`)
+3. Clore uniquement avec message de résolution explicite au client
+
+**Fichiers concernés:**
+- `sql/migrations/CREATE_SUPPORT_AI_USAGE_LOGS.sql`
+- `api/support-ai.js`
+- `api/ai-health.js`
+- `js/admin-dashboard.js`
+- `js/admin-support.js`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
 ### [18 Février 2026] - Réponses copilote N1 trop génériques pour support métier gîtes
 
 **Contexte:**

@@ -4,6 +4,10 @@
 
 let currentGiteFilter = null; // UUID du gîte, sera initialisé dynamiquement
 let currentTypeFilter = 'entree';
+const checklistDuplicatePlaceholderValue = '__none__';
+let checklistBackfillInProgress = false;
+let checklistTranslationWarningShown = false;
+let checklistTranslationRateLimitedShown = false;
 
 // =============================================
 // TRADUCTION AUTOMATIQUE
@@ -14,25 +18,171 @@ let currentTypeFilter = 'entree';
  * @param {string} text - Texte français à traduire
  * @returns {Promise<string>} - Texte traduit en anglais
  */
-async function translateToEnglish(text) {
+function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function splitTranslationText(text, maxLength = 180, maxEncodedLength = 480) {
+    const source = String(text || '').trim();
+    if (!source) return [];
+    if (source.length <= maxLength && encodeURIComponent(source).length <= maxEncodedLength) return [source];
+
+    const chunks = [];
+    const paragraphs = source.split(/\n+/).map((part) => part.trim()).filter(Boolean);
+
+    for (const paragraph of paragraphs) {
+        if (paragraph.length <= maxLength) {
+            chunks.push(paragraph);
+            continue;
+        }
+
+        const sentences = paragraph
+            .split(/(?<=[.!?;:])\s+/)
+            .map((part) => part.trim())
+            .filter(Boolean);
+
+        let buffer = '';
+
+        for (const sentence of sentences) {
+            if (sentence.length > maxLength) {
+                if (buffer) {
+                    chunks.push(buffer);
+                    buffer = '';
+                }
+
+                for (let i = 0; i < sentence.length; i += maxLength) {
+                    chunks.push(sentence.slice(i, i + maxLength));
+                }
+                continue;
+            }
+
+            const candidate = buffer ? `${buffer} ${sentence}` : sentence;
+            if (candidate.length <= maxLength) {
+                buffer = candidate;
+            } else {
+                if (buffer) chunks.push(buffer);
+                buffer = sentence;
+            }
+        }
+
+        if (buffer) chunks.push(buffer);
+    }
+
+    const safeChunks = [];
+
+    for (const chunk of chunks) {
+        if (encodeURIComponent(chunk).length <= maxEncodedLength) {
+            safeChunks.push(chunk);
+            continue;
+        }
+
+        let start = 0;
+        while (start < chunk.length) {
+            let end = Math.min(start + maxLength, chunk.length);
+            let candidate = chunk.slice(start, end);
+
+            while (candidate && encodeURIComponent(candidate).length > maxEncodedLength) {
+                end -= 10;
+                if (end <= start) {
+                    end = start + 1;
+                    break;
+                }
+                candidate = chunk.slice(start, end);
+            }
+
+            safeChunks.push(candidate);
+            start = end;
+        }
+    }
+
+    return safeChunks.filter(Boolean);
+}
+
+async function translateChecklistToEnglish(text) {
     if (!text || text.trim() === '') return '';
     
     try {
-        const response = await Promise.race([
-            fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Translation timeout')), 2000))
-        ]);
-        const data = await response.json();
-        
-        if (data.responseStatus === 200 && data.responseData) {
-            return data.responseData.translatedText;
+        const attemptTranslation = async (sourceText) => {
+            let lastError = null;
+
+            for (let attempt = 0; attempt < 3; attempt += 1) {
+                if (attempt > 0) {
+                    await wait(700 * attempt);
+                }
+
+                let response;
+                try {
+                    response = await Promise.race([
+                        fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(sourceText)}&langpair=fr|en`),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Translation timeout')), 6000))
+                    ]);
+                } catch (networkError) {
+                    lastError = networkError;
+                    continue;
+                }
+
+                if (response.status === 429) {
+                    if (!checklistTranslationRateLimitedShown) {
+                        notifyChecklist('⚠️ API de traduction temporairement limitée, on conserve le texte FR pour certains items', 'warning');
+                        checklistTranslationRateLimitedShown = true;
+                    }
+                    lastError = new Error('Rate limited');
+                    await wait(1200 * (attempt + 1));
+                    continue;
+                }
+
+                const data = await response.json();
+
+                if (data.responseStatus === 200 && data.responseData?.translatedText) {
+                    return data.responseData.translatedText;
+                }
+
+                const details = String(data.responseDetails || '').toLowerCase();
+                if (details.includes('query length limit exceeded')) {
+                    throw new Error('Query length limit exceeded');
+                }
+
+                lastError = new Error(data.responseDetails || 'Translation unavailable');
+            }
+
+            throw lastError || new Error('Translation unavailable');
+        };
+
+        const chunks = splitTranslationText(text, 180, 480);
+        const translatedChunks = [];
+
+        for (const chunk of chunks) {
+            let translated = await attemptTranslation(chunk);
+            if (!translated || translated.trim() === '') {
+                translated = await attemptTranslation(chunk);
+            }
+
+            await wait(250);
+
+            if (!translated || translated.trim() === '') {
+                translatedChunks.push(chunk);
+            } else {
+                translatedChunks.push(translated);
+            }
         }
-        
-        console.warn('⚠️ Traduction non disponible, texte original conservé');
-        return text;
+
+        const translated = translatedChunks.join(' ').trim();
+
+        if (!translated || translated.trim() === '') {
+            if (!checklistTranslationWarningShown) {
+                notifyChecklist('⚠️ Traduction indisponible pour certains contenus, texte FR conservé', 'warning');
+                checklistTranslationWarningShown = true;
+            }
+            return text;
+        }
+
+        return translated;
         
     } catch (error) {
-        console.error('❌ Erreur traduction:', error);
+        if (!checklistTranslationWarningShown) {
+            notifyChecklist('⚠️ Traduction indisponible pour certains contenus, texte FR conservé', 'warning');
+            checklistTranslationWarningShown = true;
+        }
         return text; // Fallback sur texte original
     }
 }
@@ -67,6 +217,7 @@ async function initChecklistsTab() {
         gites = [];
     }
     const giteSelect = document.getElementById('checklist-gite-select');
+    const duplicateTargetSelect = document.getElementById('checklist-duplicate-target-select');
     
     if (giteSelect && gites && gites.length > 0) {
         // Vider et remplir le select avec les gîtes dynamiques
@@ -89,10 +240,15 @@ async function initChecklistsTab() {
         if (!giteSelect.dataset.checklistBound) {
             giteSelect.addEventListener('change', (e) => {
                 currentGiteFilter = e.target.value;
+                populateChecklistDuplicateTargetOptions(gites);
                 loadChecklistItems();
             });
             giteSelect.dataset.checklistBound = 'true';
         }
+
+        populateChecklistDuplicateTargetOptions(gites);
+    } else if (duplicateTargetSelect) {
+        populateChecklistDuplicateTargetOptions([]);
     }
     
     // Listener pour changement de type
@@ -114,6 +270,7 @@ async function initChecklistsTab() {
             if (filter.giteId && giteSelect) {
                 currentGiteFilter = filter.giteId;
                 giteSelect.value = filter.giteId;
+                populateChecklistDuplicateTargetOptions(gites);
             }
             // Appliquer le type (entree/sortie)
             if (filter.type && typeSelect) {
@@ -128,11 +285,51 @@ async function initChecklistsTab() {
             localStorage.removeItem('checklistFilter');
         }
     }
+
+    const duplicateBtn = document.getElementById('btn-checklist-duplicate-all');
+    if (duplicateBtn && !duplicateBtn.dataset.checklistBound) {
+        duplicateBtn.addEventListener('click', duplicateChecklistToOtherGite);
+        duplicateBtn.dataset.checklistBound = 'true';
+    }
+
+    const backfillBtn = document.getElementById('btn-checklist-backfill-translation');
+    if (backfillBtn && !backfillBtn.dataset.checklistBound) {
+        backfillBtn.addEventListener('click', backfillChecklistTemplateTranslations);
+        backfillBtn.dataset.checklistBound = 'true';
+    }
     
     // Chargement initial
     await loadChecklistItems();
     // NE PAS charger loadReservationsProgress() - géré par dashboard.js / loadChecklistsTab()
     // await loadReservationsProgress();
+}
+
+function populateChecklistDuplicateTargetOptions(gites) {
+    const duplicateTargetSelect = document.getElementById('checklist-duplicate-target-select');
+    if (!duplicateTargetSelect) return;
+
+    const safeGites = Array.isArray(gites) ? gites : [];
+    const availableTargets = safeGites.filter((gite) => gite.id !== currentGiteFilter);
+
+    duplicateTargetSelect.innerHTML = '';
+
+    if (!currentGiteFilter || availableTargets.length === 0) {
+        const placeholder = document.createElement('option');
+        placeholder.value = checklistDuplicatePlaceholderValue;
+        placeholder.textContent = 'Aucun autre gîte';
+        duplicateTargetSelect.appendChild(placeholder);
+        duplicateTargetSelect.value = checklistDuplicatePlaceholderValue;
+        duplicateTargetSelect.disabled = true;
+        return;
+    }
+
+    duplicateTargetSelect.disabled = false;
+    availableTargets.forEach((gite, index) => {
+        const option = document.createElement('option');
+        option.value = gite.id;
+        option.textContent = index === 0 ? `${gite.name} (recommandé)` : gite.name;
+        duplicateTargetSelect.appendChild(option);
+    });
 }
 
 // =============================================
@@ -370,7 +567,7 @@ async function addChecklistItem() {
     
     const texte = texteInput.value.trim();
     if (!texte) {
-        alert('⚠️ Veuillez saisir le texte de l\'item');
+        notifyChecklist('⚠️ Veuillez saisir le texte de l\'item', 'warning');
         return false;
     }
 
@@ -407,8 +604,8 @@ async function addChecklistItem() {
         const description = descriptionInput.value.trim() || null;
         
         const [texteEn, descriptionEn] = await Promise.all([
-            translateToEnglish(texte),
-            description ? translateToEnglish(description) : Promise.resolve(null)
+            translateChecklistToEnglish(texte),
+            description ? translateChecklistToEnglish(description) : Promise.resolve(null)
         ]);
         
         // Insertion
@@ -441,7 +638,7 @@ async function addChecklistItem() {
         
     } catch (error) {
         console.error('❌ Erreur ajout item:', error);
-        alert(`Erreur lors de l'ajout: ${error.message}`);
+        notifyChecklist(`❌ Erreur lors de l'ajout: ${error.message}`, 'error');
         return false;
     }
 }
@@ -472,14 +669,7 @@ function editChecklistItem(itemId) {
     currentChecklistEditingId = itemId;
     openChecklistCreateModal('edit');
 
-    const btnSubmit = document.getElementById('btn-checklist-submit');
-    if (btnSubmit) {
-        btnSubmit.textContent = '💾 Fermer et modifier';
-        btnSubmit.classList.add('is-editing');
-        btnSubmit.setAttribute('data-editing-id', itemId);
-    } else {
-        console.error('❌ Bouton submit non trouvé');
-    }
+    setChecklistSubmitMode('edit', itemId);
     
 }
 
@@ -491,7 +681,7 @@ async function updateChecklistItem(itemId) {
     
     const texte = texteInput.value.trim();
     if (!texte) {
-        alert('⚠️ Veuillez saisir le texte de l\'item');
+        notifyChecklist('⚠️ Veuillez saisir le texte de l\'item', 'warning');
         return false;
     }
     
@@ -501,8 +691,8 @@ async function updateChecklistItem(itemId) {
         // 🌍 TRADUCTION AUTOMATIQUE
         // console.log('🌍 Traduction automatique en cours...');
         const [texteEn, descriptionEn] = await Promise.all([
-            translateToEnglish(texte),
-            description ? translateToEnglish(description) : Promise.resolve(null)
+            translateChecklistToEnglish(texte),
+            description ? translateChecklistToEnglish(description) : Promise.resolve(null)
         ]);
         
         // console.log('✅ Traduction terminée:', { texteEn, descriptionEn });
@@ -529,22 +719,15 @@ async function updateChecklistItem(itemId) {
         // Réinitialiser le formulaire
         clearChecklistForm();
         currentChecklistEditingId = null;
-        
-        // Réinitialiser le bouton
-        const btnSubmit = document.getElementById('btn-checklist-submit');
-        if (btnSubmit) {
-            btnSubmit.textContent = '➕ Créer l\'item';
-            btnSubmit.classList.remove('is-editing');
-            btnSubmit.onclick = addChecklistItem;
-            btnSubmit.removeAttribute('data-editing-id');
-        }
+
+        setChecklistSubmitMode('create');
         
         notifyChecklist('✅ Item modifié avec succès', 'success');
         return true;
         
     } catch (error) {
         console.error('❌ Erreur modification item:', error);
-        alert(`Erreur lors de la modification: ${error.message}`);
+        notifyChecklist(`❌ Erreur lors de la modification: ${error.message}`, 'error');
         return false;
     }
 }
@@ -554,8 +737,6 @@ async function updateChecklistItem(itemId) {
 // =============================================
 
 async function deleteChecklistItem(itemId) {
-    if (!confirm('❌ Supprimer cet item ?')) return;
-    
     try {
         const { error } = await supabaseClient
             .from('checklist_templates')
@@ -572,7 +753,7 @@ async function deleteChecklistItem(itemId) {
         
     } catch (error) {
         console.error('❌ Erreur suppression:', error);
-        alert(`Erreur: ${error.message}`);
+        notifyChecklist(`❌ Erreur suppression: ${error.message}`, 'error');
     }
 }
 
@@ -627,7 +808,7 @@ async function moveChecklistItem(itemId, direction) {
         
     } catch (error) {
         console.error('❌ Erreur déplacement:', error);
-        alert(`Erreur: ${error.message}`);
+        notifyChecklist(`❌ Erreur déplacement: ${error.message}`, 'error');
     }
 }
 
@@ -642,33 +823,39 @@ function clearChecklistForm() {
     if (texteInput) texteInput.value = '';
     if (descriptionInput) descriptionInput.value = '';
     
-    // Réinitialiser le bouton s'il était en mode "Mise à jour"
-    const btnSubmit = document.getElementById('btn-checklist-submit');
-    if (btnSubmit) {
-        btnSubmit.textContent = '➕ Créer l\'item';
-        btnSubmit.classList.remove('is-editing');
-        btnSubmit.onclick = addChecklistItem;
-        btnSubmit.removeAttribute('data-editing-id');
-    }
+    setChecklistSubmitMode('create');
 
     currentChecklistEditingId = null;
+}
+
+function setChecklistSubmitMode(mode = 'create', itemId = null) {
+    const btnSubmit = document.getElementById('btn-checklist-submit');
+    if (!btnSubmit) return;
+
+    if (mode === 'edit' && itemId) {
+        btnSubmit.textContent = '💾 Fermer et modifier';
+        btnSubmit.classList.add('is-editing');
+        btnSubmit.setAttribute('data-editing-id', itemId);
+        return;
+    }
+
+    btnSubmit.textContent = '✅ Fermer et sauvegarder';
+    btnSubmit.classList.remove('is-editing');
+    btnSubmit.removeAttribute('data-editing-id');
 }
 
 function openChecklistCreateModal(mode = 'create') {
     const modal = document.getElementById('checklistCreateModal');
     const title = document.getElementById('checklist-modal-title');
-    const btnSubmit = document.getElementById('btn-checklist-submit');
     if (!modal) return;
 
     if (mode === 'create') {
         clearChecklistForm();
         if (title) title.textContent = 'Créer un item';
-        if (btnSubmit) {
-            btnSubmit.textContent = '✅ Fermer et sauvegarder';
-            btnSubmit.classList.remove('is-editing');
-        }
+        setChecklistSubmitMode('create');
     } else {
         if (title) title.textContent = 'Modifier un item';
+        setChecklistSubmitMode('edit', currentChecklistEditingId);
     }
 
     modal.hidden = false;
@@ -685,12 +872,14 @@ function openChecklistCreateModal(mode = 'create') {
 
 async function closeChecklistCreateModal(save = true) {
     const modal = document.getElementById('checklistCreateModal');
+    const btnSubmit = document.getElementById('btn-checklist-submit');
     if (!modal) return;
 
     if (save) {
         let success = false;
-        if (currentChecklistEditingId) {
-            success = await updateChecklistItem(currentChecklistEditingId);
+        const editingId = btnSubmit?.getAttribute('data-editing-id') || currentChecklistEditingId;
+        if (editingId) {
+            success = await updateChecklistItem(editingId);
         } else {
             success = await addChecklistItem();
         }
@@ -701,6 +890,223 @@ async function closeChecklistCreateModal(save = true) {
     }
 
     modal.hidden = true;
+}
+
+function normalizeChecklistValue(value) {
+    return String(value || '').trim().toLowerCase();
+}
+
+function buildChecklistSignature(texte, description) {
+    return `${normalizeChecklistValue(texte)}||${normalizeChecklistValue(description)}`;
+}
+
+async function duplicateChecklistToOtherGite() {
+    const duplicateTargetSelect = document.getElementById('checklist-duplicate-target-select');
+
+    if (!currentGiteFilter) {
+        notifyChecklist('⚠️ Aucun gîte source sélectionné', 'warning');
+        return;
+    }
+
+    if (!duplicateTargetSelect || duplicateTargetSelect.disabled) {
+        notifyChecklist('⚠️ Aucun gîte cible disponible', 'warning');
+        return;
+    }
+
+    const targetGiteId = duplicateTargetSelect.value;
+    if (!targetGiteId || targetGiteId === checklistDuplicatePlaceholderValue) {
+        notifyChecklist('⚠️ Sélectionnez un gîte cible', 'warning');
+        return;
+    }
+
+    if (targetGiteId === currentGiteFilter) {
+        notifyChecklist('⚠️ Le gîte cible doit être différent du gîte source', 'warning');
+        return;
+    }
+
+    try {
+        const { data: sourceItems, error: sourceError } = await supabaseClient
+            .from('checklist_templates')
+            .select('texte, texte_en, description, description_en, ordre')
+            .eq('gite_id', currentGiteFilter)
+            .eq('type', currentTypeFilter)
+            .eq('actif', true)
+            .order('ordre', { ascending: true });
+
+        if (sourceError) {
+            if (isTableNotFound(sourceError) || sourceError.code === '42703' || sourceError.code === '42P01') {
+                notifyChecklist('⚠️ Table checklist_templates non disponible', 'warning');
+                return;
+            }
+            throw sourceError;
+        }
+
+        if (!sourceItems || sourceItems.length === 0) {
+            notifyChecklist('ℹ️ Aucun item à dupliquer pour ce gîte/type', 'info');
+            return;
+        }
+
+        const { data: existingItems, error: existingError } = await supabaseClient
+            .from('checklist_templates')
+            .select('texte, description')
+            .eq('gite_id', targetGiteId)
+            .eq('type', currentTypeFilter)
+            .eq('actif', true);
+
+        if (existingError) {
+            if (isTableNotFound(existingError) || existingError.code === '42703' || existingError.code === '42P01') {
+                notifyChecklist('⚠️ Table checklist_templates non disponible', 'warning');
+                return;
+            }
+            throw existingError;
+        }
+
+        const existingSignatures = new Set(
+            (existingItems || []).map((item) => buildChecklistSignature(item.texte, item.description))
+        );
+
+        const itemsToInsert = sourceItems.filter((item) => {
+            const signature = buildChecklistSignature(item.texte, item.description);
+            return !existingSignatures.has(signature);
+        });
+
+        if (itemsToInsert.length === 0) {
+            notifyChecklist('ℹ️ Tous les items existent déjà sur le gîte cible', 'info');
+            return;
+        }
+
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) {
+            throw new Error('Utilisateur non authentifié');
+        }
+
+        const { data: maxData, error: maxError } = await supabaseClient
+            .from('checklist_templates')
+            .select('ordre')
+            .eq('gite_id', targetGiteId)
+            .eq('type', currentTypeFilter)
+            .eq('actif', true)
+            .order('ordre', { ascending: false })
+            .limit(1);
+
+        if (maxError) {
+            if (isTableNotFound(maxError) || maxError.code === '42703' || maxError.code === '42P01') {
+                notifyChecklist('⚠️ Table checklist_templates non disponible', 'warning');
+                return;
+            }
+            throw maxError;
+        }
+
+        const startOrder = (maxData && maxData.length > 0) ? Number(maxData[0].ordre || 0) + 1 : 1;
+        const payload = itemsToInsert.map((item, index) => ({
+            owner_user_id: user.id,
+            gite_id: targetGiteId,
+            type: currentTypeFilter,
+            ordre: startOrder + index,
+            texte: item.texte,
+            texte_en: item.texte_en || null,
+            description: item.description || null,
+            description_en: item.description_en || null,
+            actif: true
+        }));
+
+        const { error: insertError } = await supabaseClient
+            .from('checklist_templates')
+            .insert(payload);
+
+        if (insertError) {
+            if (isTableNotFound(insertError) || insertError.code === '42703' || insertError.code === '42P01') {
+                notifyChecklist('⚠️ Table checklist_templates non disponible', 'warning');
+                return;
+            }
+            throw insertError;
+        }
+
+        const skippedCount = sourceItems.length - itemsToInsert.length;
+        notifyChecklist(`✅ Duplication terminée (${itemsToInsert.length} ajouté(s), ${skippedCount} ignoré(s))`, 'success');
+    } catch (error) {
+        console.error('❌ Erreur duplication checklist:', error);
+        notifyChecklist(`❌ Erreur duplication: ${error.message}`, 'error');
+    }
+}
+
+async function backfillChecklistTemplateTranslations() {
+    if (checklistBackfillInProgress) {
+        notifyChecklist('⏳ Rétro-traduction déjà en cours', 'warning');
+        return;
+    }
+
+    if (!currentGiteFilter || !currentTypeFilter) {
+        notifyChecklist('⚠️ Sélectionnez un gîte et un type', 'warning');
+        return;
+    }
+
+    checklistBackfillInProgress = true;
+    notifyChecklist('🌍 Rétro-traduction des checklists en cours...', 'info');
+
+    let updated = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    try {
+        const { data: rows, error } = await supabaseClient
+            .from('checklist_templates')
+            .select('id, texte, texte_en, description, description_en')
+            .eq('gite_id', currentGiteFilter)
+            .eq('type', currentTypeFilter)
+            .eq('actif', true)
+            .order('ordre', { ascending: true });
+
+        if (error) throw error;
+
+        for (const row of (rows || [])) {
+            try {
+                const needsText = !row.texte_en || row.texte_en.trim().toLowerCase() === (row.texte || '').trim().toLowerCase();
+                const needsDesc = row.description && (!row.description_en || row.description_en.trim().toLowerCase() === (row.description || '').trim().toLowerCase());
+
+                if (!needsText && !needsDesc) {
+                    skipped += 1;
+                    continue;
+                }
+
+                const payload = {};
+                if (needsText && row.texte) {
+                    payload.texte_en = await translateChecklistToEnglish(row.texte);
+                }
+                if (needsDesc && row.description) {
+                    payload.description_en = await translateChecklistToEnglish(row.description);
+                }
+
+                if (Object.keys(payload).length === 0) {
+                    skipped += 1;
+                    continue;
+                }
+
+                const { error: updateError } = await supabaseClient
+                    .from('checklist_templates')
+                    .update(payload)
+                    .eq('id', row.id);
+
+                if (updateError) {
+                    failed += 1;
+                    continue;
+                }
+
+                updated += 1;
+            } catch (innerError) {
+                console.error('❌ Erreur rétro-traduction checklist_templates:', innerError);
+                failed += 1;
+            }
+        }
+
+        await loadChecklistItems();
+        notifyChecklist(`✅ Rétro-traduction terminée: ${updated} maj, ${skipped} inchangé(s), ${failed} échec(s)`, failed > 0 ? 'warning' : 'success');
+    } catch (error) {
+        console.error('❌ Erreur rétro-traduction checklist_templates:', error);
+        notifyChecklist('❌ Erreur rétro-traduction checklist_templates', 'error');
+    } finally {
+        checklistBackfillInProgress = false;
+    }
 }
 
 // =============================================
@@ -977,7 +1383,55 @@ function notifyChecklist(message, type = 'info') {
         globalNotifier(message, type);
         return;
     }
-    alert(message);
+
+    const containerId = 'checklist-local-toast-container';
+    let container = document.getElementById(containerId);
+
+    if (!container) {
+        container = document.createElement('div');
+        container.id = containerId;
+        container.style.position = 'fixed';
+        container.style.top = '16px';
+        container.style.right = '16px';
+        container.style.zIndex = '10001';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.gap = '8px';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.padding = '10px 12px';
+    toast.style.borderRadius = '8px';
+    toast.style.color = '#fff';
+    toast.style.fontWeight = '600';
+    toast.style.fontSize = '0.85rem';
+    toast.style.boxShadow = '0 8px 20px rgba(15, 23, 42, 0.25)';
+
+    switch (type) {
+        case 'success':
+            toast.style.background = '#16a34a';
+            break;
+        case 'warning':
+            toast.style.background = '#f59e0b';
+            break;
+        case 'error':
+            toast.style.background = '#dc2626';
+            break;
+        default:
+            toast.style.background = '#2563eb';
+            break;
+    }
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+        if (container && container.childElementCount === 0) {
+            container.remove();
+        }
+    }, 3500);
 }
 
 // =============================================
@@ -1116,5 +1570,6 @@ window.initChecklistsTab = initChecklistsTab;
 window.loadChecklistsTab = loadChecklistsTab;
 window.openChecklistCreateModal = openChecklistCreateModal;
 window.closeChecklistCreateModal = closeChecklistCreateModal;
+window.duplicateChecklistToOtherGite = duplicateChecklistToOtherGite;
 
 // console.log('✅ checklists.js chargé');

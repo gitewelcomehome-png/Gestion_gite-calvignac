@@ -642,117 +642,176 @@ function clearAllData() {
 // 🎯 GESTION INFOS PRATIQUES (SUPABASE)
 // ==========================================
 
+async function translateInfosGiteTextToEnglish(text) {
+    if (!text || text.trim() === '') return '';
+
+    try {
+        const attemptTranslation = async () => {
+            const response = await Promise.race([
+                fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Translation timeout')), 6000))
+            ]);
+
+            const data = await response.json();
+            if (data.responseStatus === 200 && data.responseData?.translatedText) {
+                return data.responseData.translatedText;
+            }
+
+            throw new Error(data.responseDetails || 'Translation unavailable');
+        };
+
+        let translated = await attemptTranslation();
+        if (!translated || translated.trim() === '') {
+            translated = await attemptTranslation();
+        }
+
+        return translated || text;
+    } catch (error) {
+        console.error('❌ Erreur traduction infos gîte:', error);
+        return text;
+    }
+}
+
+async function enrichInfosGiteFormDataWithAutoEnglish(formData) {
+    if (!formData || typeof formData !== 'object') return formData;
+
+    const data = { ...formData };
+    const enKeys = Object.keys(data).filter((key) => key.endsWith('_en'));
+
+    for (const enKey of enKeys) {
+        const frKey = enKey.slice(0, -3);
+        const frValue = data[frKey];
+        const enValue = data[enKey];
+
+        if (typeof frValue !== 'string' || frValue.trim() === '') continue;
+        if (typeof enValue === 'string' && enValue.trim() !== '') continue;
+
+        const translated = await translateInfosGiteTextToEnglish(frValue);
+        data[enKey] = translated;
+
+        const inputId = `infos_${enKey}`;
+        const input = document.getElementById(inputId);
+        if (input && typeof input.value === 'string' && input.value.trim() === '') {
+            input.value = translated;
+        }
+    }
+
+    return data;
+}
+
 async function saveInfosGiteToSupabase(giteName, formData) {
     try {
+        const normalizedFormData = await enrichInfosGiteFormDataWithAutoEnglish(formData);
+
         const dataToSave = {
             gite: giteName.toLowerCase(),
             owner_user_id: (await window.supabaseClient.auth.getUser()).data.user?.id,
             // Section 1: Base
-            adresse: formData.adresse || null,
-            telephone: formData.telephone || null,
-            gps_lat: formData.gpsLat || null,
-            gps_lon: formData.gpsLon || null,
-            email: formData.email || null,
-            adresse_en: formData.adresse_en || null,
-            telephone_en: formData.telephone_en || null,
-            email_en: formData.email_en || null,
+            adresse: normalizedFormData.adresse || null,
+            telephone: normalizedFormData.telephone || null,
+            gps_lat: normalizedFormData.gpsLat || null,
+            gps_lon: normalizedFormData.gpsLon || null,
+            email: normalizedFormData.email || null,
+            adresse_en: normalizedFormData.adresse_en || null,
+            telephone_en: normalizedFormData.telephone_en || null,
+            email_en: normalizedFormData.email_en || null,
             // Section 2: WiFi
-            wifi_ssid: formData.wifiSSID || null,
-            wifi_password: formData.wifiPassword || null,
-            wifi_debit: formData.wifiDebit || null,
-            wifi_localisation: formData.wifiLocalisation || null,
-            wifi_zones: formData.wifiZones || null,
-            wifi_ssid_en: formData.wifiSSID_en || null,
-            wifi_password_en: formData.wifiPassword_en || null,
-            wifi_debit_en: formData.wifiDebit_en || null,
-            wifi_localisation_en: formData.wifiLocalisation_en || null,
-            wifi_zones_en: formData.wifiZones_en || null,
+            wifi_ssid: normalizedFormData.wifiSSID || null,
+            wifi_password: normalizedFormData.wifiPassword || null,
+            wifi_debit: normalizedFormData.wifiDebit || null,
+            wifi_localisation: normalizedFormData.wifiLocalisation || null,
+            wifi_zones: normalizedFormData.wifiZones || null,
+            wifi_ssid_en: normalizedFormData.wifiSSID_en || null,
+            wifi_password_en: normalizedFormData.wifiPassword_en || null,
+            wifi_debit_en: normalizedFormData.wifiDebit_en || null,
+            wifi_localisation_en: normalizedFormData.wifiLocalisation_en || null,
+            wifi_zones_en: normalizedFormData.wifiZones_en || null,
             // Section 3: Arrivée
-            heure_arrivee: formData.heureArrivee || null,
-            arrivee_tardive: formData.arriveeTardive || null,
-            parking_dispo: formData.parkingDispo || null,
-            parking_places: formData.parkingPlaces || null,
-            parking_details: formData.parkingDetails || null,
-            type_acces: formData.typeAcces || null,
-            code_acces: formData.codeAcces || null,
-            instructions_cles: formData.instructionsCles || null,
-            etage: formData.etage || null,
-            ascenseur: formData.ascenseur || null,
-            itineraire_logement: formData.itineraireLogement || null,
-            premiere_visite: formData.premiereVisite || null,
-            heure_arrivee_en: formData.heureArrivee_en || null,
-            arrivee_tardive_en: formData.arriveeTardive_en || null,
-            parking_dispo_en: formData.parkingDispo_en || null,
-            parking_places_en: formData.parkingPlaces_en || null,
-            parking_details_en: formData.parkingDetails_en || null,
-            type_acces_en: formData.typeAcces_en || null,
-            code_acces_en: formData.codeAcces_en || null,
-            instructions_cles_en: formData.instructionsCles_en || null,
-            etage_en: formData.etage_en || null,
-            ascenseur_en: formData.ascenseur_en || null,
-            itineraire_logement_en: formData.itineraireLogement_en || null,
-            premiere_visite_en: formData.premiereVisite_en || null,
+            heure_arrivee: normalizedFormData.heureArrivee || null,
+            arrivee_tardive: normalizedFormData.arriveeTardive || null,
+            parking_dispo: normalizedFormData.parkingDispo || null,
+            parking_places: normalizedFormData.parkingPlaces || null,
+            parking_details: normalizedFormData.parkingDetails || null,
+            type_acces: normalizedFormData.typeAcces || null,
+            code_acces: normalizedFormData.codeAcces || null,
+            instructions_cles: normalizedFormData.instructionsCles || null,
+            etage: normalizedFormData.etage || null,
+            ascenseur: normalizedFormData.ascenseur || null,
+            itineraire_logement: normalizedFormData.itineraireLogement || null,
+            premiere_visite: normalizedFormData.premiereVisite || null,
+            heure_arrivee_en: normalizedFormData.heureArrivee_en || null,
+            arrivee_tardive_en: normalizedFormData.arriveeTardive_en || null,
+            parking_dispo_en: normalizedFormData.parkingDispo_en || null,
+            parking_places_en: normalizedFormData.parkingPlaces_en || null,
+            parking_details_en: normalizedFormData.parkingDetails_en || null,
+            type_acces_en: normalizedFormData.typeAcces_en || null,
+            code_acces_en: normalizedFormData.codeAcces_en || null,
+            instructions_cles_en: normalizedFormData.instructionsCles_en || null,
+            etage_en: normalizedFormData.etage_en || null,
+            ascenseur_en: normalizedFormData.ascenseur_en || null,
+            itineraire_logement_en: normalizedFormData.itineraireLogement_en || null,
+            premiere_visite_en: normalizedFormData.premiereVisite_en || null,
             // Section 4: Logement
-            type_chauffage: formData.typeChauffage || null,
-            climatisation: formData.climatisation || null,
-            instructions_chauffage: formData.instructionsChauffage || null,
-            equipements_cuisine: formData.equipementsCuisine || null,
-            instructions_four: formData.instructionsFour || null,
-            instructions_plaques: formData.instructionsPlaques || null,
-            instructions_lave_vaisselle: formData.instructionsLaveVaisselle || null,
-            instructions_lave_linge: formData.instructionsLaveLinge || null,
-            seche_linge: formData.secheLinge || null,
-            fer_repasser: formData.ferRepasser || null,
-            linge_fourni: formData.lingeFourni || null,
-            configuration_chambres: formData.configurationChambres || null,
-            type_chauffage_en: formData.typeChauffage_en || null,
-            climatisation_en: formData.climatisation_en || null,
-            instructions_chauffage_en: formData.instructionsChauffage_en || null,
-            equipements_cuisine_en: formData.equipementsCuisine_en || null,
-            instructions_four_en: formData.instructionsFour_en || null,
-            instructions_plaques_en: formData.instructionsPlaques_en || null,
-            instructions_lave_vaisselle_en: formData.instructionsLaveVaisselle_en || null,
-            instructions_lave_linge_en: formData.instructionsLaveLinge_en || null,
-            seche_linge_en: formData.secheLinge_en || null,
-            fer_repasser_en: formData.ferRepasser_en || null,
-            linge_fourni_en: formData.lingeFourni_en || null,
-            configuration_chambres_en: formData.configurationChambres_en || null,
+            type_chauffage: normalizedFormData.typeChauffage || null,
+            climatisation: normalizedFormData.climatisation || null,
+            instructions_chauffage: normalizedFormData.instructionsChauffage || null,
+            equipements_cuisine: normalizedFormData.equipementsCuisine || null,
+            instructions_four: normalizedFormData.instructionsFour || null,
+            instructions_plaques: normalizedFormData.instructionsPlaques || null,
+            instructions_lave_vaisselle: normalizedFormData.instructionsLaveVaisselle || null,
+            instructions_lave_linge: normalizedFormData.instructionsLaveLinge || null,
+            seche_linge: normalizedFormData.secheLinge || null,
+            fer_repasser: normalizedFormData.ferRepasser || null,
+            linge_fourni: normalizedFormData.lingeFourni || null,
+            configuration_chambres: normalizedFormData.configurationChambres || null,
+            type_chauffage_en: normalizedFormData.typeChauffage_en || null,
+            climatisation_en: normalizedFormData.climatisation_en || null,
+            instructions_chauffage_en: normalizedFormData.instructionsChauffage_en || null,
+            equipements_cuisine_en: normalizedFormData.equipementsCuisine_en || null,
+            instructions_four_en: normalizedFormData.instructionsFour_en || null,
+            instructions_plaques_en: normalizedFormData.instructionsPlaques_en || null,
+            instructions_lave_vaisselle_en: normalizedFormData.instructionsLaveVaisselle_en || null,
+            instructions_lave_linge_en: normalizedFormData.instructionsLaveLinge_en || null,
+            seche_linge_en: normalizedFormData.secheLinge_en || null,
+            fer_repasser_en: normalizedFormData.ferRepasser_en || null,
+            linge_fourni_en: normalizedFormData.lingeFourni_en || null,
+            configuration_chambres_en: normalizedFormData.configurationChambres_en || null,
             // Section 5: Déchets
-            instructions_tri: formData.instructionsTri || null,
-            jours_collecte: formData.joursCollecte || null,
-            decheterie: formData.decheterie || null,
-            instructions_tri_en: formData.instructionsTri_en || null,
-            jours_collecte_en: formData.joursCollecte_en || null,
-            decheterie_en: formData.decheterie_en || null,
+            instructions_tri: normalizedFormData.instructionsTri || null,
+            jours_collecte: normalizedFormData.joursCollecte || null,
+            decheterie: normalizedFormData.decheterie || null,
+            instructions_tri_en: normalizedFormData.instructionsTri_en || null,
+            jours_collecte_en: normalizedFormData.joursCollecte_en || null,
+            decheterie_en: normalizedFormData.decheterie_en || null,
             // Section 6: Sécurité
-            detecteur_fumee: formData.detecteurFumee || null,
-            extincteur: formData.extincteur || null,
-            coupure_eau: formData.coupureEau || null,
-            disjoncteur: formData.disjoncteur || null,
-            consignes_urgence: formData.consignesUrgence || null,
-            detecteur_fumee_en: formData.detecteurFumee_en || null,
-            extincteur_en: formData.extincteur_en || null,
-            coupure_eau_en: formData.coupureEau_en || null,
-            disjoncteur_en: formData.disjoncteur_en || null,
-            consignes_urgence_en: formData.consignesUrgence_en || null,
+            detecteur_fumee: normalizedFormData.detecteurFumee || null,
+            extincteur: normalizedFormData.extincteur || null,
+            coupure_eau: normalizedFormData.coupureEau || null,
+            disjoncteur: normalizedFormData.disjoncteur || null,
+            consignes_urgence: normalizedFormData.consignesUrgence || null,
+            detecteur_fumee_en: normalizedFormData.detecteurFumee_en || null,
+            extincteur_en: normalizedFormData.extincteur_en || null,
+            coupure_eau_en: normalizedFormData.coupureEau_en || null,
+            disjoncteur_en: normalizedFormData.disjoncteur_en || null,
+            consignes_urgence_en: normalizedFormData.consignesUrgence_en || null,
             // Section 7: Départ
-            heure_depart: formData.heureDepart || null,
-            depart_tardif: formData.departTardif || null,
-            checklist_depart: formData.checklistDepart || null,
-            restitution_cles: formData.restitutionCles || null,
-            heure_depart_en: formData.heureDepart_en || null,
-            depart_tardif_en: formData.departTardif_en || null,
-            checklist_depart_en: formData.checklistDepart_en || null,
-            restitution_cles_en: formData.restitutionCles_en || null,
+            heure_depart: normalizedFormData.heureDepart || null,
+            depart_tardif: normalizedFormData.departTardif || null,
+            checklist_depart: normalizedFormData.checklistDepart || null,
+            restitution_cles: normalizedFormData.restitutionCles || null,
+            heure_depart_en: normalizedFormData.heureDepart_en || null,
+            depart_tardif_en: normalizedFormData.departTardif_en || null,
+            checklist_depart_en: normalizedFormData.checklistDepart_en || null,
+            restitution_cles_en: normalizedFormData.restitutionCles_en || null,
             // Section 8: Règlement
-            tabac: formData.tabac || null,
-            animaux: formData.animaux || null,
-            nb_max_personnes: formData.nbMaxPersonnes || null,
-            caution: formData.caution || null,
-            tabac_en: formData.tabac_en || null,
-            animaux_en: formData.animaux_en || null,
-            nb_max_personnes_en: formData.nbMaxPersonnes_en || null,
-            caution_en: formData.caution_en || null,
+            tabac: normalizedFormData.tabac || null,
+            animaux: normalizedFormData.animaux || null,
+            nb_max_personnes: normalizedFormData.nbMaxPersonnes || null,
+            caution: normalizedFormData.caution || null,
+            tabac_en: normalizedFormData.tabac_en || null,
+            animaux_en: normalizedFormData.animaux_en || null,
+            nb_max_personnes_en: normalizedFormData.nbMaxPersonnes_en || null,
+            caution_en: normalizedFormData.caution_en || null,
             date_modification: new Date().toISOString()
         };
         

@@ -11,14 +11,27 @@ console.info('[MAIL-VERSION]', {
 function resolveZohoRedirectUri() {
     const manualRedirect = localStorage.getItem('zoho_redirect_uri');
     if (manualRedirect) {
-        return manualRedirect;
+        try {
+            const parsed = new URL(manualRedirect);
+            if (parsed.hostname === 'www.liveownerunit.fr') {
+                parsed.hostname = 'liveownerunit.fr';
+            }
+            if (parsed.hostname === 'liveownerunit.fr') {
+                parsed.pathname = '/pages/admin-emails.html';
+                parsed.search = '';
+                parsed.hash = '';
+            }
+            return parsed.toString();
+        } catch (err) {
+            return manualRedirect;
+        }
     }
 
     const hostname = window.location.hostname;
     const origin = window.location.origin;
 
     if (hostname === 'liveownerunit.fr' || hostname === 'www.liveownerunit.fr') {
-        return `${origin}/pages/admin-emails.html`;
+        return 'https://liveownerunit.fr/pages/admin-emails.html';
     }
 
     if (hostname === 'localhost' || hostname === '127.0.0.1') {

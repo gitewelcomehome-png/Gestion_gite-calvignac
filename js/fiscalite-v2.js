@@ -210,7 +210,8 @@ const REGLES_AMORTISSEMENT = {
     // Décret n°2022-1609 du 26/12/2022 — applicable depuis le 01/01/2023
     // Seuil minimum pour amortir (< 500€ HT = déductible immédiatement)
     SEUIL_AMORTISSEMENT_HT: 500,
-    SEUIL_AMORTISSEMENT_TTC: 600, // avec TVA 20% (pour information)
+    // Seuil 500€ TTC — LMNP/LMP exonérés TVA (CGI art. 261 D) donc TTC=HT
+    SEUIL_AMORTISSEMENT_TTC: 500,
     
     // Catégories et durées d'amortissement par composants (selon CGI art 39 C)
     categories: [
@@ -343,9 +344,7 @@ function genererOptionsTypeAmortissement() {
  * @returns {Object|null} - {duree, label, anneeFin} ou null si pas d'amortissement
  */
 function detecterAmortissement(description, montant, typeChoisi = null) {
-    // Vérifier le seuil (600€ HT, soit 720€ TTC avec TVA 20%)
-    // On utilise le seuil HT comme référence légale
-    if (montant < REGLES_AMORTISSEMENT.SEUIL_AMORTISSEMENT_HT) {
+    if (montant < REGLES_AMORTISSEMENT.SEUIL_AMORTISSEMENT_TTC) {
         return null;
     }
     
@@ -577,8 +576,11 @@ function calculerTableauComparatif() {
     // CORRECTION 1 - 2026-02-17
     const urssafLMNP = calculerURSSAF(beneficeReel, ca, 'lmnp', config).urssaf;
     
+    const beneficeLMNP = beneficeReel;
+    const revenuLMNPRetenuIR = Math.max(0, beneficeLMNP);
+    const deficitLMNPReportable = beneficeLMNP < 0 ? Math.abs(beneficeLMNP) : 0;
     const resteAvantIRReel = beneficeReel - urssafLMNP;
-    const revenusGlobauxReel = revenusSalaries + resteAvantIRReel;
+    const revenusGlobauxReel = revenusSalaries + revenuLMNPRetenuIR;
     
     // Vérifier le statut actuel pour forcer LMP si nécessaire
     const forceLMP = statutActuelSelect === 'lmp';
@@ -600,8 +602,9 @@ function calculerTableauComparatif() {
     const lmpObligatoire = critereCA_LMP && critereRecettesSupAutres;
     
     const irTotalLMNPReel = calculerIR(revenusGlobauxReel, nombreParts);
-    const partLocationLMNPReel = revenusGlobauxReel > 0 ? resteAvantIRReel / revenusGlobauxReel : 0;
-    const irPartLMNPReel = irTotalLMNPReel * partLocationLMNPReel;
+    const partLocationLMNPReel = revenusGlobauxReel > 0 ? revenuLMNPRetenuIR / revenusGlobauxReel : 0;
+    const irImpactLocation = irTotalLMNPReel * partLocationLMNPReel;
+    const irPartLMNPReel = Math.max(0, irImpactLocation);
     const totalLMNPReel = urssafLMNP + irPartLMNPReel;
     
     document.getElementById('urssaf-lmnp-reel').textContent = urssafLMNP.toFixed(0) + ' €';
@@ -637,6 +640,10 @@ function calculerTableauComparatif() {
             <div style="color: #28a745; font-weight: 600;">• Recettes locatives ≤ autres revenus professionnels</div>
             <div style="color: #ffc107; font-weight: 600;">→ URSSAF obligatoire (LMNP OK)</div>
         `;
+    }
+
+    if (deficitLMNPReportable > 0) {
+        conditionsLMNP.innerHTML += `<div style="margin-top: 4px; color: #fd7e14; font-weight: 700;">Déficit LMNP reportable (CGI art. 156 I) : ${deficitLMNPReportable.toFixed(0)} € — imputable sur bénéfices LMNP sur 10 ans</div>`;
     }
     
     if (lmpObligatoire) {

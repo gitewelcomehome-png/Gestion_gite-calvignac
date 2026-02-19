@@ -419,13 +419,24 @@ async function syncCalendar(giteId, platform, url) {
         for (const [dateKey, reservations] of Object.entries(bddByDates)) {
             const [checkIn, checkOut] = dateKey.split('|');
             
-            // ✅ DATES EN BDD mais PAS DANS iCAL → ANNULATION
+            // ✅ DATES EN BDD mais PAS DANS iCAL → ANNULATION POTENTIELLE
             if (!icalDates.has(dateKey)) {
                 // Filtrer : ne proposer l'annulation que pour les réservations actives
-                const reservationsActives = reservations.filter(r => 
-                    r.status !== 'cancelled' && // Déjà annulée
-                    !r.manual_override           // Protected manuellement
-                );
+                const reservationsActives = reservations.filter(r => {
+                    if (r.status === 'cancelled') return false;  // Déjà annulée
+                    if (r.manual_override) return false;         // Protégée manuellement
+                    if (!r.ical_uid) return false;               // Créée manuellement dans l'app (pas d'ical_uid)
+
+                    // Délai de grâce 48h : les flux GdF peuvent être en cache
+                    // Si la réservation était encore présente dans le flux il y a moins de 48h,
+                    // ne pas la flagguer comme annulée (temporairement absente du flux)
+                    if (r.last_seen_in_ical) {
+                        const heuresDepuisDerniereSeen = (Date.now() - new Date(r.last_seen_in_ical).getTime()) / (1000 * 3600);
+                        if (heuresDepuisDerniereSeen < 48) return false; // Grâce 48h
+                    }
+
+                    return true;
+                });
                 
                 if (reservationsActives.length > 0) {
                     // console.log(`    🗑️ ANNULATION: ${checkIn} → ${checkOut} (${reservationsActives.length} réservation(s))`);

@@ -17,6 +17,7 @@ const TAUX_FISCAUX = {
     // TAUX PAR ANNÉE
     // ==========================================
     TAUX_ANNEES: {
+        // ⚠️ À mettre à jour chaque année en février : PASS, BAREME_IR, SMIC
         2024: {
             // PASS (Plafond Annuel Sécurité Sociale)
             PASS: 46368,
@@ -159,6 +160,7 @@ const TAUX_FISCAUX = {
             }
         },
         
+        // ⚠️ À mettre à jour chaque année en février : PASS, BAREME_IR, SMIC
         2025: {
             // PASS 2025 (identique 2024)
             PASS: 46368,
@@ -239,12 +241,12 @@ const TAUX_FISCAUX = {
                 trimestre_4: 11.88 * 600 * 4   // 28 512 €
             },
             
-            // BARÈME IR 2025 (identique 2024)
+            // BARÈME IR 2025 (LFI 2025, +1,8%)
             BAREME_IR: [
-                { max: 11294, taux: 0 },
-                { max: 28797, taux: 0.11 },
-                { max: 82341, taux: 0.30 },
-                { max: 177106, taux: 0.41 },
+                { max: 11497, taux: 0 },
+                { max: 29315, taux: 0.11 },
+                { max: 83823, taux: 0.30 },
+                { max: 180294, taux: 0.41 },
                 { max: Infinity, taux: 0.45 }
             ],
             
@@ -254,40 +256,22 @@ const TAUX_FISCAUX = {
                 maximum: 13522
             },
             
-            // BARÈME KM 2025 (à vérifier février 2025)
-            BAREME_KM: {
-                3: [
-                    { max: 5000, formule: (d) => d * 0.545 },
-                    { max: 20000, formule: (d) => d * 0.326 + 1095 },
-                    { max: Infinity, formule: (d) => d * 0.381 }
-                ],
-                4: [
-                    { max: 5000, formule: (d) => d * 0.624 },
-                    { max: 20000, formule: (d) => d * 0.351 + 1365 },
-                    { max: Infinity, formule: (d) => d * 0.419 }
-                ],
-                5: [
-                    { max: 5000, formule: (d) => d * 0.655 },
-                    { max: 20000, formule: (d) => d * 0.368 + 1435 },
-                    { max: Infinity, formule: (d) => d * 0.440 }
-                ],
-                6: [
-                    { max: 5000, formule: (d) => d * 0.685 },
-                    { max: 20000, formule: (d) => d * 0.385 + 1500 },
-                    { max: Infinity, formule: (d) => d * 0.460 }
-                ],
-                7: [
-                    { max: 5000, formule: (d) => d * 0.718 },
-                    { max: 20000, formule: (d) => d * 0.406 + 1560 },
-                    { max: Infinity, formule: (d) => d * 0.484 }
-                ]
-            }
+
         },
 
+        // ⚠️ À mettre à jour chaque année en février : PASS, BAREME_IR, SMIC
         2026: {
-            // PASS 2026 (provisoire, aligné 2025)
-            PASS: 46368,
-            SMIC_HORAIRE: 11.88 // à mettre à jour selon revalorisation janvier 2026
+            // PASS 2026 = 48 060 € — décret du 20 décembre 2025
+            PASS: 48060,
+            SMIC_HORAIRE: 11.88, // à mettre à jour selon revalorisation janvier 2026
+            // Source: LFI 2026, revalorisation +0,9%, adoptée par 49-3 le 21 janvier 2026
+            BAREME_IR: [
+                { max: 11600, taux: 0 },
+                { max: 29579, taux: 0.11 },
+                { max: 84577, taux: 0.30 },
+                { max: 181917, taux: 0.41 },
+                { max: Infinity, taux: 0.45 }
+            ]
         }
     },
     
@@ -327,7 +311,9 @@ const TAUX_FISCAUX = {
                 ...(overrideConfig.ABATTEMENT_SALAIRE || {})
             },
             BAREME_IR: overrideConfig.BAREME_IR || baseConfig.BAREME_IR,
-            BAREME_KM: overrideConfig.BAREME_KM || baseConfig.BAREME_KM
+            // Le barème KM 2025 est identique à 2024 (décret BOFiP du 3 avril 2025).
+            // Si le barème change une année donnée, l'ajouter explicitement dans TAUX_ANNEES[année].BAREME_KM.
+            BAREME_KM: overrideConfig.BAREME_KM || baseConfig.BAREME_KM || this.TAUX_ANNEES[2024]?.BAREME_KM
         });
 
         let config;

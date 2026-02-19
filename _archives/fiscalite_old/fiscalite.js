@@ -260,7 +260,7 @@ function afficherResultats(data) {
                 <span>${data.cotisations.csgCrds.toFixed(2)} €</span>
             </div>
             <div class="resultat-ligne">
-                <span>• Formation pro (0,25% du CA) :</span>
+                <span>• Formation pro (0,25% du PASS) :</span>
                 <span>${data.cotisations.formationPro.toFixed(2)} €</span>
             </div>
             <div class="resultat-ligne total">

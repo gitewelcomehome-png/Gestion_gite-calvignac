@@ -29,6 +29,24 @@
         <!-- Généré dynamiquement -->
     </div>
 
+    <!-- Boutons analyse IA (toujours visibles) -->
+    <div class="ai-cal-actions" id="ai-cal-actions">
+        <button id="btnAIVoirDemande" class="btn-ai-cal">
+            🔍 Voir la demande
+        </button>
+        <button id="btnAIProposerPrix" class="btn-ai-cal btn-ai-cal-green">
+            💰 Proposer des prix
+        </button>
+    </div>
+
+    <!-- Légende IA demande (affichée après analyse) -->
+    <div id="ai-demande-legende" class="ai-demande-legende" style="display:none;">
+        <div class="ai-leg-item"><span class="ai-leg-dot haute"></span>Forte demande</div>
+        <div class="ai-leg-item"><span class="ai-leg-dot normale"></span>Période normale</div>
+        <div class="ai-leg-item"><span class="ai-leg-dot faible"></span>Faible demande</div>
+        <button id="btnAIQuitterAnalyse" class="btn-ai-quitter">✕ Quitter</button>
+    </div>
+
     <!-- Légende plateformes -->
     <div id="legendePlatformes" class="cal-legend">
         <div class="legend-item">
@@ -136,6 +154,72 @@
             🚀 Remplir automatiquement
         </button>
     </div>
+
+    <!-- Panneau propositions de prix IA -->
+    <div id="ai-prix-panel" class="ai-prix-panel" style="display:none;">
+        <div class="ai-prix-panel-header">
+            <span class="ai-prix-panel-title">💰 Propositions de prix IA</span>
+            <button id="btnAIFermerPrix" class="btn-ai-quitter">✕</button>
+        </div>
+
+        <!-- Paramètres compacts -->
+        <div class="ai-prix-settings">
+            <div class="ai-settings-row">
+                <label>🏫 Zone</label>
+                <select id="aiZoneScolaire" class="form-input-sm" style="width:auto; flex:1;">
+                    <option value="B" selected>B</option>
+                    <option value="A">A</option>
+                    <option value="C">C</option>
+                </select>
+                <label>💰 Base</label>
+                <input type="number" id="aiPrixBase" class="form-input-sm" placeholder="€/nuit" min="0" step="1" style="width:70px;">
+            </div>
+            <div class="ai-settings-row" style="margin-top:6px;">
+                <label>🎉 Fériés</label>
+                <input type="number" id="multFeries" class="form-input-sm" value="1.5" step="0.1" min="1" max="5" style="width:55px;">
+                <span class="ai-mult-unit">×</span>
+                <label>🏫 Vac.</label>
+                <input type="number" id="multVacances" class="form-input-sm" value="1.3" step="0.1" min="1" max="5" style="width:55px;">
+                <span class="ai-mult-unit">×</span>
+                <label>⭐ Evt</label>
+                <input type="number" id="multEvents" class="form-input-sm" value="1.2" step="0.1" min="1" max="5" style="width:55px;">
+                <span class="ai-mult-unit">×</span>
+            </div>
+            <div class="ai-settings-row" style="margin-top:6px;">
+                <label>📍 Région</label>
+                <input type="text" id="aiRegionInput" class="form-input" placeholder="Lot (46), Quercy…" value="Lot (46), Quercy" style="flex:1;">
+            </div>
+        </div>
+
+        <!-- Boutons générer -->
+        <div class="ai-buttons-row" style="margin-top:10px;">
+            <button id="btnAIAnalyseHolidays" class="btn-save btn-ai-secondary">
+                📅 Fériés &amp; vacances
+            </button>
+            <button id="btnAIAnalyseEvents" class="btn-save btn-ai-primary">
+                ✨ + Événements IA
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div id="ai-loading" style="display:none; text-align:center; padding:16px;">
+            <div class="ai-spinner"></div>
+            <p style="color:var(--text-secondary); font-size:0.8rem; margin-top:8px;">Analyse en cours…</p>
+        </div>
+
+        <!-- Résultats -->
+        <div id="ai-suggestions-container" style="display:none; margin-top:12px;">
+            <div class="ai-results-header">
+                <span id="ai-suggestions-count" class="ai-results-count"></span>
+                <button id="btnAIAppliquerTout" class="btn-ai-apply-all">✅ Tout appliquer</button>
+            </div>
+            <div id="ai-suggestions-list"></div>
+        </div>
+    </div>
+
+    <!-- Champs cachés (zone scolaire pour analyse demande) -->
+    <input type="hidden" id="aiDateDebutAnalyse">
+    <input type="hidden" id="aiDateFinAnalyse">
 </div>
 
 <!-- Modal pour éditer un tarif -->
@@ -250,7 +334,7 @@ async function loadTarifsMobile() {
         // Charger les tarifs depuis le champ JSON tarifs_calendrier de la table gites
         const { data: giteData, error: errorTarifs } = await window.supabaseClient
             .from('gites')
-            .select('tarifs_calendrier, regles_tarifs')
+            .select('tarifs_calendrier, regles_tarifs, adresse, name')
             .eq('id', currentGiteIdMobile)
             .single();
         
@@ -289,6 +373,23 @@ async function loadTarifsMobile() {
         if (giteData?.regles_tarifs) {
             reglesCacheMobile = giteData.regles_tarifs;
             loadReglesIntoFormMobile();
+        }
+
+        // Pré-remplir la région IA depuis l'adresse du gîte
+        if (giteData?.adresse) {
+            const regionField = document.getElementById('aiRegionInput');
+            if (regionField) {
+                // Extraire code postal et ville de l'adresse (ex: "lieu-dit, 46300 Calvignac")
+                const matchCP = giteData.adresse.match(/(\d{5})\s+([\w\s-]+)/i);
+                if (matchCP) {
+                    const dept = matchCP[1].substring(0, 2);
+                    const ville = matchCP[2].trim();
+                    // Construire un label utile pour l'IA (dept + ville + nom du gîte si disponible)
+                    regionField.value = `${ville} (${dept})`;
+                } else {
+                    regionField.value = giteData.adresse;
+                }
+            }
         }
         
         // console.log('✅ Render du calendrier...');
@@ -395,7 +496,7 @@ function renderCalendrierMobile() {
         const dayCard = document.createElement('div');
         dayCard.className = 'day-card-mobile';
         dayCard.dataset.date = dateStr;
-        
+
         if (isReserved) {
             dayCard.classList.add('reserved');
             // Remplir toute la case avec la couleur de plateforme
@@ -405,12 +506,28 @@ function renderCalendrierMobile() {
         } else if (tarif) {
             dayCard.classList.add('has-tarif');
         }
-        
+
+        // Mode demande : colorer les cases selon le niveau de demande
+        if (aiModeActif === 'demande' && !isReserved && aiDemandeCache[dateStr]) {
+            dayCard.classList.add(`ai-demande-${aiDemandeCache[dateStr]}`);
+        }
+
+        // Badge IA : vérifier si la date a une suggestion
+        const aiSugg = aiSuggestionsCache.find(s => s.date === dateStr);
+        if (aiSugg && !isReserved) {
+            dayCard.classList.add(`ai-${aiSugg.type}`);
+            dayCard.title = aiSugg.label;
+        }
+
+        const demandeLabel = (aiModeActif === 'demande' && aiDemandeCache[dateStr] === 'haute') ? '🔥' :
+                             (aiModeActif === 'demande' && aiDemandeCache[dateStr] === 'faible') ? '💤' : '';
+
         dayCard.innerHTML = `
             <div class="day-number-mobile" style="${isReserved ? 'color: white; font-weight: 700;' : ''}">${day}</div>
             ${isReserved ? `<div style="font-size: 0.55rem; color: rgba(255,255,255,0.9); font-weight: 600;">🔒</div>` : 
               tarif ? `<div class="day-price-mobile">${tarif.prix_nuit}€</div>` : 
               '<div style="font-size: 0.65rem; color: var(--text-secondary);">—</div>'}
+            ${demandeLabel ? `<span class="ai-badge">${demandeLabel}</span>` : (aiSugg && !isReserved ? `<span class="ai-badge">${aiSugg.icon}</span>` : '')}
         `;
         
         if (!isReserved) {
@@ -615,6 +732,486 @@ async function remplirAutoMobile() {
     }
 }
 
+// ==========================================
+// 🤖 SUGGESTIONS INTELLIGENTES IA TARIFS
+// ==========================================
+
+// Cache des suggestions IA pour les badges calendrier
+let aiSuggestionsCache = [];
+// Mode actif : null | 'demande'
+let aiModeActif = null;
+// Cache des niveaux de demande par date : { 'YYYY-MM-DD': 'haute'|'normale'|'faible', ... }
+let aiDemandeCache = {};
+
+/**
+ * Retourne le niveau de demande d'une date : 'haute', 'normale', ou 'faible'
+ */
+function getDemandePourDate(dateStr, zone) {
+    const annee = new Date(dateStr).getFullYear();
+    const feriesByDate = {};
+    getFeriesNationaux(annee).forEach(f => { feriesByDate[f.date] = true; });
+
+    // Férié → haute demande
+    if (feriesByDate[dateStr]) return 'haute';
+
+    // Vacances scolaires → haute demande
+    const vacances = getVacancesScolaires(zone || 'B');
+    if (getVacanceForDate(dateStr, vacances)) return 'haute';
+
+    // Juillet et août → haute demande
+    const mois = new Date(dateStr).getMonth(); // 0-indexed
+    if (mois === 6 || mois === 7) return 'haute';
+
+    // Weekends en juin / septembre → normale
+    const jourSemaine = new Date(dateStr).getDay();
+    if ((mois === 5 || mois === 8) && (jourSemaine === 0 || jourSemaine === 6)) return 'haute';
+
+    // Novembre, janvier, février, décembre (hors fêtes) → faible
+    if ([0, 1, 10].includes(mois)) return 'faible';
+
+    return 'normale';
+}
+
+/**
+ * Analyse le mois affiché et colorie le calendrier selon la demande
+ */
+function voirDemandeMois() {
+    const zone = document.getElementById('aiZoneScolaire')?.value || 'B';
+    aiDemandeCache = {};
+
+    const lastDay = new Date(currentYearMobile, currentMonthMobile + 1, 0).getDate();
+    for (let day = 1; day <= lastDay; day++) {
+        const dateObj = new Date(currentYearMobile, currentMonthMobile, day);
+        const dateStr = dateObj.toISOString().split('T')[0];
+        aiDemandeCache[dateStr] = getDemandePourDate(dateStr, zone);
+    }
+
+    aiModeActif = 'demande';
+    document.getElementById('ai-demande-legende').style.display = 'flex';
+    document.getElementById('btnAIVoirDemande').classList.add('actif');
+    renderCalendrierMobile();
+}
+
+/**
+ * Quitte le mode analyse demande
+ */
+function quitterModeIA() {
+    aiModeActif = null;
+    aiDemandeCache = {};
+    document.getElementById('ai-demande-legende').style.display = 'none';
+    document.getElementById('btnAIVoirDemande').classList.remove('actif');
+    renderCalendrierMobile();
+}
+
+/**
+ * Calcule le dimanche de Pâques (algorithme de Oudin/Tondering)
+ */
+function getPaques(year) {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month, day);
+}
+
+/**
+ * Retourne tous les jours fériés nationaux en France pour une année donnée
+ */
+function getFeriesNationaux(year) {
+    const paques = getPaques(year);
+    const addDays = (date, n) => {
+        const d = new Date(date);
+        d.setDate(d.getDate() + n);
+        return d;
+    };
+    const fmt = (d) => d.toISOString().split('T')[0];
+
+    return [
+        { date: fmt(new Date(year, 0, 1)),  label: "Jour de l'An" },
+        { date: fmt(addDays(paques, 1)),     label: "Lundi de Pâques" },
+        { date: fmt(new Date(year, 4, 1)),   label: "Fête du Travail" },
+        { date: fmt(new Date(year, 4, 8)),   label: "Victoire 1945" },
+        { date: fmt(addDays(paques, 39)),    label: "Ascension" },
+        { date: fmt(addDays(paques, 50)),    label: "Lundi de Pentecôte" },
+        { date: fmt(new Date(year, 6, 14)),  label: "Fête Nationale" },
+        { date: fmt(new Date(year, 7, 15)),  label: "Assomption" },
+        { date: fmt(new Date(year, 10, 1)),  label: "Toussaint" },
+        { date: fmt(new Date(year, 10, 11)), label: "Armistice" },
+        { date: fmt(new Date(year, 11, 25)), label: "Noël" }
+    ];
+}
+
+/**
+ * Retourne les périodes de vacances scolaires par zone (2025-2027)
+ * Source: calendrier Éducation Nationale
+ */
+function getVacancesScolaires(zone) {
+    const periodes = {
+        A: [
+            // 2025-2026
+            { debut: '2025-10-18', fin: '2025-11-03', label: 'Toussaint 25' },
+            { debut: '2025-12-20', fin: '2026-01-05', label: 'Noël 25-26' },
+            { debut: '2026-02-14', fin: '2026-03-02', label: 'Hiver 26' },
+            { debut: '2026-04-18', fin: '2026-05-04', label: 'Printemps 26' },
+            { debut: '2026-07-05', fin: '2026-09-01', label: 'Été 26' },
+            // 2026-2027
+            { debut: '2026-10-17', fin: '2026-11-02', label: 'Toussaint 26' },
+            { debut: '2026-12-19', fin: '2027-01-04', label: 'Noël 26-27' },
+            { debut: '2027-02-13', fin: '2027-03-01', label: 'Hiver 27' },
+            { debut: '2027-04-10', fin: '2027-04-26', label: 'Printemps 27' },
+            { debut: '2027-07-03', fin: '2027-09-01', label: 'Été 27' }
+        ],
+        B: [
+            // 2025-2026
+            { debut: '2025-10-18', fin: '2025-11-03', label: 'Toussaint 25' },
+            { debut: '2025-12-20', fin: '2026-01-05', label: 'Noël 25-26' },
+            { debut: '2026-02-07', fin: '2026-02-23', label: 'Hiver 26' },
+            { debut: '2026-04-11', fin: '2026-04-27', label: 'Printemps 26' },
+            { debut: '2026-07-05', fin: '2026-09-01', label: 'Été 26' },
+            // 2026-2027
+            { debut: '2026-10-17', fin: '2026-11-02', label: 'Toussaint 26' },
+            { debut: '2026-12-19', fin: '2027-01-04', label: 'Noël 26-27' },
+            { debut: '2027-02-06', fin: '2027-02-22', label: 'Hiver 27' },
+            { debut: '2027-04-03', fin: '2027-04-19', label: 'Printemps 27' },
+            { debut: '2027-07-03', fin: '2027-09-01', label: 'Été 27' }
+        ],
+        C: [
+            // 2025-2026
+            { debut: '2025-10-18', fin: '2025-11-03', label: 'Toussaint 25' },
+            { debut: '2025-12-20', fin: '2026-01-05', label: 'Noël 25-26' },
+            { debut: '2026-02-21', fin: '2026-03-09', label: 'Hiver 26' },
+            { debut: '2026-04-25', fin: '2026-05-11', label: 'Printemps 26' },
+            { debut: '2026-07-05', fin: '2026-09-01', label: 'Été 26' },
+            // 2026-2027
+            { debut: '2026-10-17', fin: '2026-11-02', label: 'Toussaint 26' },
+            { debut: '2026-12-19', fin: '2027-01-04', label: 'Noël 26-27' },
+            { debut: '2027-02-20', fin: '2027-03-08', label: 'Hiver 27' },
+            { debut: '2027-04-17', fin: '2027-05-03', label: 'Printemps 27' },
+            { debut: '2027-07-03', fin: '2027-09-01', label: 'Été 27' }
+        ]
+    };
+    return periodes[zone] || periodes['B'];
+}
+
+/**
+ * Vérifie si une date tombe dans une période de vacances scolaires
+ */
+function getVacanceForDate(dateStr, vacances) {
+    for (const v of vacances) {
+        if (dateStr >= v.debut && dateStr < v.fin) {
+            return v.label;
+        }
+    }
+    return null;
+}
+
+/**
+ * Analyse les dates de la période sélectionnée et génère des suggestions
+ * @param {boolean} withAI - inclure les événements locaux via OpenAI
+ */
+async function analyserDatesIA(withAI = false) {
+    // Utiliser le mois affiché si aucune date n'est fournie
+    const premierJourMois = new Date(currentYearMobile, currentMonthMobile, 1).toISOString().split('T')[0];
+    const dernierJourMois = new Date(currentYearMobile, currentMonthMobile + 1, 0).toISOString().split('T')[0];
+    const dateDebut = premierJourMois;
+    const dateFin = dernierJourMois;
+    const prixBase = parseFloat(document.getElementById('aiPrixBase').value);
+    const zone = document.getElementById('aiZoneScolaire').value;
+    const region = document.getElementById('aiRegionInput').value.trim();
+        showToast('Veuillez saisir un prix de base', 'error');
+        return;
+    }
+
+    const multFeries = parseFloat(document.getElementById('multFeries').value) || 1.5;
+    const multVacances = parseFloat(document.getElementById('multVacances').value) || 1.3;
+    const multEvents = parseFloat(document.getElementById('multEvents').value) || 1.2;
+
+    // Afficher le spinner
+    const loadingEl = document.getElementById('ai-loading');
+    const container = document.getElementById('ai-suggestions-container');
+    loadingEl.style.display = 'block';
+    container.style.display = 'none';
+
+    try {
+        // 1. Collecter les fériés et vacances
+        const suggestions = [];
+        const anneeDebut = new Date(dateDebut).getFullYear();
+        const anneeFin = new Date(dateFin).getFullYear();
+
+        // Construire la liste des fériés pour toutes les années concernées
+        const feriesByDate = {};
+        for (let y = anneeDebut; y <= anneeFin; y++) {
+            getFeriesNationaux(y).forEach(f => {
+                feriesByDate[f.date] = f.label;
+            });
+        }
+
+        // Périodes de vacances pour la zone
+        const vacances = getVacancesScolaires(zone);
+
+        // Parcourir chaque date de la période
+        const current = new Date(dateDebut);
+        const end = new Date(dateFin);
+
+        while (current <= end) {
+            const dateStr = current.toISOString().split('T')[0];
+
+            // Vérifier si férié
+            if (feriesByDate[dateStr]) {
+                const prixSuggere = Math.round(prixBase * multFeries);
+                suggestions.push({
+                    date: dateStr,
+                    label: feriesByDate[dateStr],
+                    type: 'ferie',
+                    icon: '🎉',
+                    prixBase,
+                    prixSuggere,
+                    multiplicateur: multFeries
+                });
+            } else {
+                // Vérifier si vacances scolaires
+                const vacLabel = getVacanceForDate(dateStr, vacances);
+                if (vacLabel) {
+                    const prixSuggere = Math.round(prixBase * multVacances);
+                    suggestions.push({
+                        date: dateStr,
+                        label: `Vacances — ${vacLabel} (Zone ${zone})`,
+                        type: 'vacances',
+                        icon: '🏫',
+                        prixBase,
+                        prixSuggere,
+                        multiplicateur: multVacances
+                    });
+                }
+            }
+
+            current.setDate(current.getDate() + 1);
+        }
+
+        // 2. Si withAI → appeler OpenAI pour les événements locaux
+        if (withAI && region) {
+            const eventsIA = await fetchEvenementsIA(region, dateDebut, dateFin);
+            eventsIA.forEach(ev => {
+                // Éviter les doublons avec les fériés/vacances déjà détectés
+                const existeDeja = suggestions.find(s => s.date === ev.date);
+                if (!existeDeja) {
+                    const prixSuggere = Math.round(prixBase * multEvents);
+                    suggestions.push({
+                        date: ev.date,
+                        label: ev.label,
+                        type: 'event',
+                        icon: '⭐',
+                        prixBase,
+                        prixSuggere,
+                        multiplicateur: multEvents
+                    });
+                }
+            });
+        }
+
+        // Trier par date
+        suggestions.sort((a, b) => a.date.localeCompare(b.date));
+
+        // Filtrer uniquement les dates non encore tarifées ou avec un tarif inférieur
+        const suggestionsUtiles = suggestions.filter(s => {
+            const tarifExistant = tarifsCacheMobile.find(t => t.date === s.date);
+            return !tarifExistant || tarifExistant.prix_nuit < s.prixSuggere;
+        });
+
+        // Mettre en cache pour les badges du calendrier
+        aiSuggestionsCache = suggestions;
+        renderCalendrierMobile(); // Rafraîchir pour afficher les badges
+
+        afficherSuggestionsIA(suggestionsUtiles);
+
+    } catch (err) {
+        console.error('Erreur analyse IA:', err);
+        showToast('Erreur lors de l\'analyse', 'error');
+    } finally {
+        loadingEl.style.display = 'none';
+    }
+}
+
+/**
+ * Appelle l'API OpenAI pour obtenir les événements locaux/touristiques
+ */
+async function fetchEvenementsIA(region, dateDebut, dateFin) {
+    try {
+        const prompt = `Tu es un expert du tourisme rural en France. Le gîte se situe à "${region}". Liste les principaux événements touristiques, festivals, marchés importants et périodes de forte affluence dans ce secteur entre le ${dateDebut} et le ${dateFin}. 
+Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou après. Format: [{"date":"YYYY-MM-DD","label":"Nom de l'événement"},...] 
+Si un événement dure plusieurs jours, liste chaque jour séparément. Maximum 30 entrées. Si tu n'es pas sûr d'une date exacte, n'inclus pas l'événement. Réponds uniquement en JSON.`;
+
+        const response = await fetch('/api/openai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, maxTokens: 800, model: 'gpt-4o-mini' })
+        });
+
+        if (!response.ok) {
+            console.warn('⚠️ OpenAI API non disponible, événements locaux ignorés');
+            return [];
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content || '';
+
+        // Extraire le JSON de la réponse
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) return [];
+
+        const events = JSON.parse(jsonMatch[0]);
+        if (!Array.isArray(events)) return [];
+
+        // Valider le format de chaque événement
+        return events.filter(e => e.date && e.label && /^\d{4}-\d{2}-\d{2}$/.test(e.date));
+
+    } catch (err) {
+        console.warn('⚠️ Erreur récupération événements IA:', err.message);
+        return [];
+    }
+}
+
+/**
+ * Affiche la liste des suggestions IA dans l'interface
+ */
+function afficherSuggestionsIA(suggestions) {
+    const container = document.getElementById('ai-suggestions-container');
+    const list = document.getElementById('ai-suggestions-list');
+    const countEl = document.getElementById('ai-suggestions-count');
+
+    if (suggestions.length === 0) {
+        countEl.textContent = 'Aucune suggestion — les tarifs sont déjà optimaux pour cette période.';
+        list.innerHTML = '';
+        container.style.display = 'block';
+        return;
+    }
+
+    countEl.textContent = `${suggestions.length} suggestion${suggestions.length > 1 ? 's' : ''} de tarifs`;
+
+    list.innerHTML = suggestions.map((s, idx) => {
+        const dateObj = new Date(s.date + 'T12:00:00');
+        const dateFr = dateObj.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+        return `
+        <div class="ai-suggestion-card" id="ai-card-${idx}" data-date="${s.date}" data-prix="${s.prixSuggere}">
+            <span class="ai-suggestion-icon">${s.icon}</span>
+            <div class="ai-suggestion-info">
+                <div class="ai-suggestion-date">${dateFr}</div>
+                <div class="ai-suggestion-label">${s.label}</div>
+            </div>
+            <div class="ai-suggestion-price">
+                <span class="ai-suggestion-price-amount">${s.prixSuggere}€</span>
+                <span class="ai-suggestion-price-base">${s.prixBase}€</span>
+            </div>
+            <button class="btn-ai-apply" onclick="accepterSuggestionIA('${s.date}', ${s.prixSuggere}, 'ai-card-${idx}')">
+                ✓
+            </button>
+        </div>`;
+    }).join('');
+
+    container.style.display = 'block';
+}
+
+/**
+ * Applique une suggestion IA au cache des tarifs et sauvegarde
+ */
+async function accepterSuggestionIA(dateStr, prixSuggere, cardId) {
+    if (!currentGiteIdMobile) return;
+
+    try {
+        // Mettre à jour le cache local
+        const existingIndex = tarifsCacheMobile.findIndex(t => t.date === dateStr);
+        if (existingIndex > -1) {
+            tarifsCacheMobile[existingIndex].prix_nuit = prixSuggere;
+        } else {
+            tarifsCacheMobile.push({ date: dateStr, prix_nuit: prixSuggere });
+        }
+
+        // Sauvegarder en base
+        const { error } = await window.supabaseClient
+            .from('gites')
+            .update({ tarifs_calendrier: tarifsCacheMobile })
+            .eq('id', currentGiteIdMobile);
+
+        if (error) throw error;
+
+        // Marquer la carte comme appliquée
+        const card = document.getElementById(cardId);
+        if (card) {
+            card.classList.add('applied');
+            const btn = card.querySelector('.btn-ai-apply');
+            if (btn) {
+                btn.textContent = '✓';
+                btn.classList.add('btn-ai-applied');
+                btn.disabled = true;
+            }
+        }
+
+        renderCalendrierMobile();
+    } catch (err) {
+        console.error('Erreur application suggestion:', err);
+        showToast('Erreur lors de l\'application', 'error');
+    }
+}
+
+/**
+ * Applique toutes les suggestions d'un coup
+ */
+async function appliquerToutesSuggestions() {
+    const cards = document.querySelectorAll('.ai-suggestion-card:not(.applied)');
+    if (cards.length === 0) return;
+
+    const btn = document.getElementById('btnAIAppliquerTout');
+    if (btn) btn.disabled = true;
+
+    let count = 0;
+    for (const card of cards) {
+        const dateStr = card.dataset.date;
+        const prix = parseFloat(card.dataset.prix);
+        if (dateStr && prix) {
+            const existingIndex = tarifsCacheMobile.findIndex(t => t.date === dateStr);
+            if (existingIndex > -1) {
+                tarifsCacheMobile[existingIndex].prix_nuit = prix;
+            } else {
+                tarifsCacheMobile.push({ date: dateStr, prix_nuit: prix });
+            }
+            card.classList.add('applied');
+            const applyBtn = card.querySelector('.btn-ai-apply');
+            if (applyBtn) {
+                applyBtn.textContent = '✓';
+                applyBtn.classList.add('btn-ai-applied');
+                applyBtn.disabled = true;
+            }
+            count++;
+        }
+    }
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('gites')
+            .update({ tarifs_calendrier: tarifsCacheMobile })
+            .eq('id', currentGiteIdMobile);
+
+        if (error) throw error;
+
+        showToast(`✅ ${count} tarif${count > 1 ? 's' : ''} appliqué${count > 1 ? 's' : ''}`, 'success');
+        renderCalendrierMobile();
+    } catch (err) {
+        console.error('Erreur application groupée:', err);
+        showToast('Erreur lors de l\'application', 'error');
+        if (btn) btn.disabled = false;
+    }
+}
+
 // Event listeners
 setTimeout(() => {
     loadGitesSelectorMobile();
@@ -634,8 +1231,9 @@ setTimeout(() => {
             currentMonthMobile--;
         }
         renderCalendrierMobile();
+        if (aiModeActif === 'demande') voirDemandeMois();
     });
-    
+
     document.getElementById('nextMonthTarifs')?.addEventListener('click', () => {
         if (currentMonthMobile === 11) {
             currentMonthMobile = 0;
@@ -644,13 +1242,31 @@ setTimeout(() => {
             currentMonthMobile++;
         }
         renderCalendrierMobile();
+        if (aiModeActif === 'demande') voirDemandeMois();
+    // ---- Boutons IA calendrier ----
+    document.getElementById('btnAIVoirDemande')?.addEventListener('click', voirDemandeMois);
+    document.getElementById('btnAIQuitterAnalyse')?.addEventListener('click', quitterModeIA);
+
+    document.getElementById('btnAIProposerPrix')?.addEventListener('click', () => {
+        const panel = document.getElementById('ai-prix-panel');
+        const estOuvert = panel.style.display !== 'none';
+        panel.style.display = estOuvert ? 'none' : 'block';
+        document.getElementById('btnAIProposerPrix').classList.toggle('actif', !estOuvert);
+        // Pré-remplir le prix de base depuis le champ remplissage auto si vide
+        if (!estOuvert && !document.getElementById('aiPrixBase').value) {
+            const prixAutoVal = document.getElementById('prixAutoMobile')?.value;
+            if (prixAutoVal) document.getElementById('aiPrixBase').value = prixAutoVal;
+        }
     });
-    
-    document.getElementById('closeModalTarifMobile')?.addEventListener('click', closeModalTarifMobile);
-    document.getElementById('btnSaveTarifModal')?.addEventListener('click', saveTarifModalMobile);
-    document.getElementById('btnDeleteTarifModal')?.addEventListener('click', deleteTarifModalMobile);
-    document.getElementById('btnSaveReglesMobile')?.addEventListener('click', saveReglesMobile);
-    document.getElementById('btnRemplirAutoMobile')?.addEventListener('click', remplirAutoMobile);
+
+    document.getElementById('btnAIFermerPrix')?.addEventListener('click', () => {
+        document.getElementById('ai-prix-panel').style.display = 'none';
+        document.getElementById('btnAIProposerPrix').classList.remove('actif');
+    });
+
+    document.getElementById('btnAIAnalyseHolidays')?.addEventListener('click', () => analyserDatesIA(false));
+    document.getElementById('btnAIAnalyseEvents')?.addEventListener('click', () => analyserDatesIA(true));
+    document.getElementById('btnAIAppliquerTout')?.addEventListener('click', appliquerToutesSuggestions);
     
     // Fermer modal en cliquant sur le fond
     document.getElementById('modalTarifMobile')?.addEventListener('click', (e) => {

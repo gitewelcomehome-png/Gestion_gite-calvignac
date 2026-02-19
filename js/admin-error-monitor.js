@@ -33,7 +33,17 @@ class AdminErrorMonitor {
         await this.loadRecentErrors();
         await this.loadStats();
         this.setupRealtimeListener();
+        this.setupStorageSync();
         this.renderDashboard();
+        this.checkBurstErrors();
+    }
+
+    async refreshFromDatabase() {
+        await Promise.all([
+            this.loadRecentErrors(),
+            this.loadStats()
+        ]);
+        this.updateDashboard();
         this.checkBurstErrors();
     }
 
@@ -47,6 +57,7 @@ class AdminErrorMonitor {
             const { data, error } = await window.supabaseClient
                 .from('cm_error_logs')
                 .select('*')
+                .eq('resolved', false)
                 .gte('timestamp', yesterday)
                 .order('timestamp', { ascending: false })
                 .limit(100);
@@ -71,7 +82,8 @@ class AdminErrorMonitor {
             // Total et par type
             const { data: all, error: errorAll } = await window.supabaseClient
                 .from('cm_error_logs')
-                .select('error_type', { count: 'exact' });
+                .select('error_type')
+                .eq('resolved', false);
 
             if (errorAll) throw errorAll;
 
@@ -83,6 +95,7 @@ class AdminErrorMonitor {
             const { count: todayCount, error: errorToday } = await window.supabaseClient
                 .from('cm_error_logs')
                 .select('*', { count: 'exact', head: true })
+                .eq('resolved', false)
                 .gte('timestamp', todayISO);
 
             if (!errorToday) {
@@ -103,17 +116,27 @@ class AdminErrorMonitor {
         this.realtimeSubscription = window.supabaseClient
             .channel('error-logs-admin')
             .on('postgres_changes', {
-                event: 'INSERT',
+                event: '*',
                 schema: 'public',
                 table: 'cm_error_logs'
             }, (payload) => {
-                this.handleNewError(payload.new);
+                if (payload?.eventType === 'INSERT' && payload?.new?.error_type === 'critical') {
+                    this.showCriticalAlert(payload.new);
+                }
+                this.refreshFromDatabase();
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
                     // OK
                 }
             });
+    }
+
+    setupStorageSync() {
+        window.addEventListener('storage', (event) => {
+            if (event.key !== 'cm_monitoring_errors_changed_at') return;
+            this.refreshFromDatabase();
+        });
     }
 
     /**
@@ -525,9 +548,13 @@ class AdminErrorMonitor {
 
             if (error) throw error;
 
-            // Retirer de la liste affichée
-            this.errors = this.errors.filter(e => e.id !== errorId);
-            this.updateDashboard();
+            await this.refreshFromDatabase();
+
+            try {
+                localStorage.setItem('cm_monitoring_errors_changed_at', String(Date.now()));
+            } catch (storageError) {
+                // ignore
+            }
 
             this.showToast({
                 type: 'success',
@@ -553,8 +580,7 @@ class AdminErrorMonitor {
 
             if (error) throw error;
 
-            await this.loadRecentErrors();
-            this.updateDashboard();
+            await this.refreshFromDatabase();
 
             this.showToast({
                 type: 'success',
@@ -661,7 +687,7 @@ class AdminErrorMonitor {
                 justify-content: space-between;
                 align-items: center;
                 padding: 15px 20px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
                 color: white;
             }
 

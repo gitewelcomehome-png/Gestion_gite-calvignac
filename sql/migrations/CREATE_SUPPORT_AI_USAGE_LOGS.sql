@@ -31,6 +31,25 @@ COMMENT ON TABLE public.cm_support_ai_usage_logs IS 'Journal des appels IA suppo
 COMMENT ON COLUMN public.cm_support_ai_usage_logs.request_source IS 'Origine fonctionnelle: client-support, admin-support-copilot, etc.';
 COMMENT ON COLUMN public.cm_support_ai_usage_logs.client_ip_hash IS 'Hash SHA-256 de l IP client salé (aucune IP brute stockée)';
 
+ALTER TABLE public.cm_support_ai_usage_logs
+    ADD COLUMN IF NOT EXISTS requester_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS requester_client_id UUID REFERENCES public.cm_clients(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS requester_ticket_id UUID REFERENCES public.cm_support_tickets(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS error_signature TEXT,
+    ADD COLUMN IF NOT EXISTS auto_ticket_id UUID REFERENCES public.cm_support_tickets(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS auto_ticket_status TEXT,
+    ADD COLUMN IF NOT EXISTS auto_ticket_note TEXT,
+    ADD COLUMN IF NOT EXISTS auto_ticket_processed_at TIMESTAMPTZ;
+
+COMMENT ON COLUMN public.cm_support_ai_usage_logs.requester_user_id IS 'auth.users.id ayant déclenché l appel IA si disponible';
+COMMENT ON COLUMN public.cm_support_ai_usage_logs.requester_client_id IS 'cm_clients.id du client concerné si disponible';
+COMMENT ON COLUMN public.cm_support_ai_usage_logs.requester_ticket_id IS 'Ticket support source si l appel provient d un ticket existant';
+COMMENT ON COLUMN public.cm_support_ai_usage_logs.error_signature IS 'Signature stable de l incident pour anti-doublon de tickets auto';
+COMMENT ON COLUMN public.cm_support_ai_usage_logs.auto_ticket_id IS 'Ticket auto créé/lié pour cet incident';
+COMMENT ON COLUMN public.cm_support_ai_usage_logs.auto_ticket_status IS 'Etat du workflow auto-ticket (created, linked, ignored)';
+COMMENT ON COLUMN public.cm_support_ai_usage_logs.auto_ticket_note IS 'Note technique associée au traitement auto-ticket';
+COMMENT ON COLUMN public.cm_support_ai_usage_logs.auto_ticket_processed_at IS 'Horodatage de traitement du log par l auto-ticketing';
+
 CREATE INDEX IF NOT EXISTS idx_cm_support_ai_usage_logs_created_at
     ON public.cm_support_ai_usage_logs (created_at DESC);
 
@@ -43,6 +62,16 @@ CREATE INDEX IF NOT EXISTS idx_cm_support_ai_usage_logs_success_created
 CREATE INDEX IF NOT EXISTS idx_cm_support_ai_usage_logs_error_code
     ON public.cm_support_ai_usage_logs (error_code)
     WHERE error_code IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_cm_support_ai_usage_logs_requester_client_created
+    ON public.cm_support_ai_usage_logs (requester_client_id, created_at DESC)
+    WHERE requester_client_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_cm_support_ai_usage_logs_auto_ticket_pending
+    ON public.cm_support_ai_usage_logs (created_at DESC)
+    WHERE auto_ticket_processed_at IS NULL
+      AND requester_client_id IS NOT NULL
+      AND success = false;
 
 ALTER TABLE public.cm_support_ai_usage_logs ENABLE ROW LEVEL SECURITY;
 

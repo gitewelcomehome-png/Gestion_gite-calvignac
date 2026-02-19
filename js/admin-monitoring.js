@@ -3,6 +3,7 @@
 // ================================================================
 
 let currentUser = null;
+let unresolvedGroupedErrors = [];
 
 // ================================================================
 // INITIALISATION
@@ -69,9 +70,87 @@ async function loadMonitoringData() {
     await Promise.all([
         loadErrorsData(),
         loadPerformanceMetrics(),
+        loadAIHealthStatus(),
         loadTestCorrections()
     ]);
 }
+
+function notifyErrorStateChanged() {
+    try {
+        localStorage.setItem('cm_monitoring_errors_changed_at', String(Date.now()));
+    } catch (err) {
+        // ignore
+    }
+}
+
+function updateMonitoringAIProviderDot(dotId, configured) {
+    const dot = document.getElementById(dotId);
+    if (!dot) return;
+
+    dot.className = 'status-dot';
+    if (configured === true) {
+        dot.classList.add('up');
+        return;
+    }
+
+    if (configured === false) {
+        dot.classList.add('down');
+        return;
+    }
+
+    dot.classList.add('degraded');
+}
+
+async function loadAIHealthStatus() {
+    const globalEl = document.getElementById('monitorAIGlobal');
+    const updatedEl = document.getElementById('monitorAIUpdatedAt');
+
+    if (!globalEl) return;
+
+    try {
+        globalEl.textContent = 'Vérification...';
+
+        const response = await fetch('/api/ai-health', {
+            method: 'GET',
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const providers = data.providers || {};
+        const configuredCount = Number(data.configuredCount || 0);
+        const totalCount = Number(data.totalCount || 0);
+
+        updateMonitoringAIProviderDot('monitorAIOpenAIDot', providers.openai?.configured);
+        updateMonitoringAIProviderDot('monitorAIAnthropicDot', providers.anthropic?.configured);
+        updateMonitoringAIProviderDot('monitorAIGeminiDot', providers.gemini?.configured);
+        updateMonitoringAIProviderDot('monitorAIStabilityDot', providers.stability?.configured);
+
+        globalEl.textContent = `${configuredCount}/${totalCount} provider(s) actif(s)`;
+
+        if (updatedEl) {
+            const date = data.checkedAt ? new Date(data.checkedAt) : new Date();
+            updatedEl.textContent = `Dernière vérification: ${date.toLocaleTimeString('fr-FR')}`;
+        }
+    } catch (error) {
+        updateMonitoringAIProviderDot('monitorAIOpenAIDot', null);
+        updateMonitoringAIProviderDot('monitorAIAnthropicDot', null);
+        updateMonitoringAIProviderDot('monitorAIGeminiDot', null);
+        updateMonitoringAIProviderDot('monitorAIStabilityDot', null);
+
+        globalEl.textContent = 'Indisponible';
+        if (updatedEl) {
+            updatedEl.textContent = 'Dernière vérification: erreur';
+        }
+    }
+}
+
+window.refreshAIHealthStatus = function() {
+    loadAIHealthStatus();
+};
 
 async function loadErrorsData() {
     try {
@@ -144,15 +223,13 @@ async function loadErrorsData() {
             }
         });
         
-        // Convertir en tableau et trier par dernière occurrence
-        const groupedArray = Object.values(grouped).sort((a, b) => 
+        // Convertir en tableau, dédupliquer une seconde fois par sécurité, puis trier
+        const groupedArray = Array.from(new Map(Object.values(grouped).map(err => [err.signature, err])).values()).sort((a, b) => 
             new Date(b.last_occurrence) - new Date(a.last_occurrence)
         );
-        
-        // Limiter à 20 groupes d'erreurs uniques
-        const limitedErrors = groupedArray.slice(0, 20);
-        
-        displayErrors(limitedErrors);
+
+        unresolvedGroupedErrors = groupedArray;
+        renderFilteredErrors();
         
     } catch (error) {
         console.error('❌ Erreur chargement erreurs:', error);
@@ -172,13 +249,27 @@ function generateErrorSignature(error) {
     
     // Retirer les nombres
     normalizedMessage = normalizedMessage.replace(/\b\d+\b/g, 'N');
+    normalizedMessage = normalizedMessage.replace(/\s+/g, ' ').trim().toLowerCase();
     
     // Normaliser la source (retirer les query params et hashes)
     let normalizedSource = error.source || '';
     normalizedSource = normalizedSource.split('?')[0].split('#')[0];
+    normalizedSource = normalizedSource.replace(/\/\d+(?=\/|$)/g, '/N').replace(/\s+/g, ' ').trim().toLowerCase();
     
     // Créer signature unique
-    return `${error.error_type}|${normalizedSource}|${normalizedMessage}`;
+    return `${(error.error_type || 'unknown').toLowerCase()}|${normalizedSource}|${normalizedMessage}`;
+}
+
+function renderFilteredErrors() {
+    const selectedType = document.getElementById('unresolvedErrorTypeFilter')?.value || '';
+
+    let filtered = unresolvedGroupedErrors;
+    if (selectedType) {
+        filtered = unresolvedGroupedErrors.filter(err => err.error_type === selectedType);
+    }
+
+    // Limiter à 20 groupes d'erreurs uniques après filtre
+    displayErrors(filtered.slice(0, 20));
 }
 
 function displayErrors(errors) {
@@ -481,6 +572,7 @@ window.markErrorResolved = async function(errorType, source, message) {
         if (error) throw error;
         
         alert('✅ Erreur marquée comme résolue');
+        notifyErrorStateChanged();
         await loadErrorsData();
         
     } catch (error) {
@@ -495,6 +587,7 @@ async function loadPerformanceMetrics() {
         const { data: errors24h, error } = await window.supabaseClient
             .from('cm_error_logs')
             .select('id, timestamp')
+            .eq('resolved', false)
             .gte('timestamp', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
         
         if (!error && errors24h) {
@@ -653,6 +746,41 @@ window.clearFilters = function() {
 
 window.refreshErrors = function() {
     loadErrorsData();
+};
+
+window.deleteAllErrors = async function() {
+    const total = unresolvedGroupedErrors.reduce((sum, err) => sum + (err.occurrences || 1), 0);
+
+    if (total === 0) {
+        alert('ℹ️ Aucune erreur non résolue à supprimer');
+        return;
+    }
+
+    const firstConfirm = confirm(`Voulez-vous vraiment supprimer ${total} erreur(s) non résolue(s) ?`);
+    if (!firstConfirm) return;
+
+    const secondConfirm = confirm('Confirmation finale : cette suppression est irréversible. Continuer ?');
+    if (!secondConfirm) return;
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('cm_error_logs')
+            .delete()
+            .eq('resolved', false);
+
+        if (error) throw error;
+
+        unresolvedGroupedErrors = [];
+        alert(`✅ ${total} erreur(s) non résolue(s) supprimée(s)`);
+        notifyErrorStateChanged();
+        await Promise.all([
+            loadErrorsData(),
+            loadPerformanceMetrics()
+        ]);
+    } catch (err) {
+        console.error('❌ Erreur suppression globale:', err);
+        alert('❌ Erreur lors de la suppression globale');
+    }
 };
 
 // ================================================================
@@ -1319,19 +1447,40 @@ window.validateTestCorrection = async function(correctionId, filePath) {
         
         // Marquer l'erreur correspondante comme résolue dans la BDD
         if (filePath.includes('menage')) {
-            const { error: updateError } = await window.supabaseClient
+            const fileName = (filePath.split('/').pop() || filePath).trim();
+
+            const { data: updatedBySource, error: updateBySourceError } = await window.supabaseClient
                 .from('cm_error_logs')
-                .update({ 
+                .update({
                     resolved: true,
-                    resolved_at: new Date().toISOString()
+                    resolved_at: new Date().toISOString(),
+                    resolved_by: currentUser?.email || 'admin'
                 })
-                .like('message', '%escapeHTML%')
-                .eq('resolved', false);
-            
-            if (!updateError) {
-                // Recharger la liste des erreurs pour mettre à jour l'affichage
-                setTimeout(() => loadErrorsData(), 500);
+                .eq('resolved', false)
+                .ilike('source', `%${fileName}%`)
+                .select('id');
+
+            if (updateBySourceError) throw updateBySourceError;
+
+            if (!updatedBySource || updatedBySource.length === 0) {
+                const { error: updateFallbackError } = await window.supabaseClient
+                    .from('cm_error_logs')
+                    .update({
+                        resolved: true,
+                        resolved_at: new Date().toISOString(),
+                        resolved_by: currentUser?.email || 'admin'
+                    })
+                    .eq('resolved', false)
+                    .ilike('message', '%escapeHTML%');
+
+                if (updateFallbackError) throw updateFallbackError;
             }
+
+            notifyErrorStateChanged();
+            await Promise.all([
+                loadErrorsData(),
+                loadPerformanceMetrics()
+            ]);
         }
         
         // Afficher succès
@@ -1413,6 +1562,7 @@ window.validateCorrection = async function(correctionId, errorId) {
             .update({
                 resolved: true,
                 resolved_at: new Date().toISOString(),
+                resolved_by: currentUser?.email || 'admin',
                 resolution_note: `Correction validée le ${new Date().toLocaleString('fr-FR')}`
             })
             .eq('id', errorId);
@@ -1429,8 +1579,10 @@ window.validateCorrection = async function(correctionId, errorId) {
         
         // Recharger les données après 2 secondes
         setTimeout(() => {
+            notifyErrorStateChanged();
             loadTestCorrections();
             loadErrorsData();
+            loadPerformanceMetrics();
         }, 2000);
         
     } catch (err) {
@@ -1458,5 +1610,9 @@ function initEventListeners() {
     document.getElementById('btnLogout')?.addEventListener('click', async () => {
         await window.supabaseClient.auth.signOut();
         window.location.href = '../index.html';
+    });
+
+    document.getElementById('unresolvedErrorTypeFilter')?.addEventListener('change', () => {
+        renderFilteredErrors();
     });
 }

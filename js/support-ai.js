@@ -4,7 +4,21 @@
 
 const SUPPORT_AI_ENDPOINT = '/api/support-ai';
 
-async function requestSupportAI({ prompt, systemPrompt, model = 'gpt-4o-mini', maxTokens = 500, temperature = 0.3 }) {
+function buildSupportAiClientContext(explicitContext = {}) {
+    const safeContext = (explicitContext && typeof explicitContext === 'object') ? explicitContext : {};
+
+    const userId = safeContext.userId || window.currentUser?.id || null;
+    const clientId = safeContext.clientId || window.currentClient?.id || null;
+    const ticketId = safeContext.ticketId || null;
+
+    return {
+        userId,
+        clientId,
+        ticketId
+    };
+}
+
+async function requestSupportAI({ prompt, systemPrompt, model = 'gpt-4o-mini', maxTokens = 500, temperature = 0.3, clientContext = {} }) {
     const response = await fetch(SUPPORT_AI_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -16,7 +30,8 @@ async function requestSupportAI({ prompt, systemPrompt, model = 'gpt-4o-mini', m
             model,
             maxTokens,
             temperature,
-            source: 'client-support'
+            source: 'client-support',
+            clientContext: buildSupportAiClientContext(clientContext)
         })
     });
 

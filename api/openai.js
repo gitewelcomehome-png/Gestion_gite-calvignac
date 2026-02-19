@@ -18,6 +18,17 @@ export default async function handler(req, res) {
         return;
     }
 
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    // Endpoint de santé pour le frontend (évite les 500 côté UI)
+    if (req.method === 'GET') {
+        return res.status(200).json({
+            ok: true,
+            available: Boolean(apiKey),
+            code: apiKey ? 'OPENAI_READY' : 'OPENAI_NOT_CONFIGURED'
+        });
+    }
+
     // Accepter uniquement POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -31,13 +42,10 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Prompt requis' });
         }
 
-        // Récupérer l'API key depuis les variables d'environnement
-        const apiKey = process.env.OPENAI_API_KEY;
-        
         if (!apiKey) {
-            console.error('❌ OPENAI_API_KEY non configurée dans Vercel');
-            return res.status(500).json({ 
-                error: 'API OpenAI non configurée. Veuillez ajouter OPENAI_API_KEY dans les variables d\'environnement Vercel.' 
+            return res.status(503).json({
+                error: 'API OpenAI non configurée. Veuillez ajouter OPENAI_API_KEY dans les variables d\'environnement Vercel.',
+                code: 'OPENAI_NOT_CONFIGURED'
             });
         }
 
@@ -68,8 +76,9 @@ export default async function handler(req, res) {
         if (!openaiResponse.ok) {
             const errorData = await openaiResponse.json().catch(() => ({}));
             console.error('❌ Erreur OpenAI:', errorData);
-            return res.status(openaiResponse.status).json({ 
-                error: errorData.error?.message || 'Erreur lors de l\'appel à OpenAI' 
+            return res.status(openaiResponse.status).json({
+                error: errorData.error?.message || 'Erreur lors de l\'appel à OpenAI',
+                code: 'OPENAI_UPSTREAM_ERROR'
             });
         }
 
@@ -90,6 +99,7 @@ export default async function handler(req, res) {
         console.error('❌ Erreur serveur:', error);
         return res.status(500).json({ 
             error: 'Erreur interne du serveur',
+            code: 'OPENAI_SERVER_ERROR',
             details: error.message 
         });
     }

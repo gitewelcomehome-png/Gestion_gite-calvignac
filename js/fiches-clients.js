@@ -831,11 +831,116 @@ async function saveGiteInfo(event) {
 }
 
 // ==================== CONFIGURATION CHECKLISTS ====================
+const checklistConfigEditingState = {
+    entree: null,
+    sortie: null
+};
+
+async function translateChecklistConfigToEnglish(text) {
+    if (!text || text.trim() === '') return '';
+
+    try {
+        const attemptTranslation = async () => {
+            const response = await Promise.race([
+                fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Translation timeout')), 6000))
+            ]);
+
+            const data = await response.json();
+            if (data.responseStatus === 200 && data.responseData?.translatedText) {
+                return data.responseData.translatedText;
+            }
+
+            throw new Error(data.responseDetails || 'Translation unavailable');
+        };
+
+        let translated = await attemptTranslation();
+        if (!translated || translated.trim() === '') {
+            translated = await attemptTranslation();
+        }
+
+        return translated || text;
+    } catch (error) {
+        console.error('❌ Erreur traduction checklist config:', error);
+        return text;
+    }
+}
+
 async function loadChecklistsConfig() {
-    const gite = document.getElementById('selectGiteChecklist').value;
+    const giteSelect = document.getElementById('selectGiteChecklist');
+    if (!giteSelect) return;
+    const gite = giteSelect.value;
+
+    populateChecklistDuplicateTargetsConfig();
     
     await loadChecklistItemsConfig('entree', gite);
     await loadChecklistItemsConfig('sortie', gite);
+}
+
+function populateChecklistDuplicateTargetsConfig() {
+    const sourceSelect = document.getElementById('selectGiteChecklist');
+    const targetSelect = document.getElementById('selectGiteChecklistDuplicateTarget');
+    if (!sourceSelect || !targetSelect) return;
+
+    const sourceValue = sourceSelect.value;
+    const options = Array.from(sourceSelect.options || []);
+
+    targetSelect.innerHTML = '<option value="">Gîte cible (duplication)</option>';
+
+    options
+        .filter((option) => option.value !== sourceValue)
+        .forEach((option) => {
+            const clone = document.createElement('option');
+            clone.value = option.value;
+            clone.textContent = option.textContent;
+            targetSelect.appendChild(clone);
+        });
+
+    targetSelect.disabled = targetSelect.options.length <= 1;
+}
+
+function getChecklistConfigFormElements(type) {
+    const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
+    return {
+        itemFr: document.getElementById(`checklist${capitalizedType}ItemFr`),
+        itemEn: document.getElementById(`checklist${capitalizedType}ItemEn`),
+        obligatoire: document.getElementById(`checklist${capitalizedType}Obligatoire`),
+        saveBtn: document.getElementById(`btnChecklist${capitalizedType}Save`),
+        cancelBtn: document.getElementById(`btnChecklist${capitalizedType}Cancel`)
+    };
+}
+
+function setChecklistConfigFormMode(type, mode = 'create') {
+    const { saveBtn, cancelBtn } = getChecklistConfigFormElements(type);
+
+    if (saveBtn) {
+        saveBtn.innerHTML = mode === 'edit'
+            ? '<i data-lucide="save"></i> Modifier'
+            : '<i data-lucide="plus"></i> Ajouter';
+        saveBtn.classList.toggle('btn-primary', mode === 'edit');
+        saveBtn.classList.toggle('btn-success', mode !== 'edit');
+    }
+
+    if (cancelBtn) {
+        cancelBtn.style.display = mode === 'edit' ? '' : 'none';
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+    }
+}
+
+function clearChecklistConfigForm(type) {
+    const { itemFr, itemEn, obligatoire } = getChecklistConfigFormElements(type);
+    if (itemFr) itemFr.value = '';
+    if (itemEn) itemEn.value = '';
+    if (obligatoire) obligatoire.checked = false;
+    checklistConfigEditingState[type] = null;
+    setChecklistConfigFormMode(type, 'create');
+}
+
+function cancelChecklistEditConfig(type) {
+    clearChecklistConfigForm(type);
 }
 
 async function loadChecklistItemsConfig(type, gite) {
@@ -860,8 +965,8 @@ async function loadChecklistItemsConfig(type, gite) {
                     ${item.obligatoire ? '<span style="color: var(--danger); font-size: 0.75rem;">OBLIGATOIRE</span>' : ''}
                 </div>
                 <div style="display: flex; gap: 5px;">
-                    <button class="btn btn-sm btn-secondary" onclick="editChecklistItem(${item.id})">✏️</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteChecklistItem(${item.id}, '${type}', '${gite}')">🗑️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="editChecklistItemConfig(${item.id}, '${type}')">✏️</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteChecklistItemConfig(${item.id}, '${type}', '${gite}')">🗑️</button>
                 </div>
             </div>
         `).join(''));
@@ -872,44 +977,77 @@ async function loadChecklistItemsConfig(type, gite) {
     }
 }
 
-async function addChecklistItem(type) {
+async function saveChecklistItemConfig(type) {
     const gite = document.getElementById('selectGiteChecklist').value;
-    
-    const itemFr = prompt('Texte en français:');
-    if (!itemFr) return;
-    
-    const itemEn = prompt('Texte en anglais:');
-    if (!itemEn) return;
-    
-    const obligatoire = confirm('Item obligatoire ?');
+    const { itemFr, itemEn, obligatoire } = getChecklistConfigFormElements(type);
+
+    if (!itemFr || !itemEn || !obligatoire) {
+        showNotification('❌ Formulaire checklist introuvable', 'error');
+        return;
+    }
+
+    const itemFrValue = itemFr.value.trim();
+    let itemEnValue = itemEn.value.trim();
+    const obligatoireValue = !!obligatoire.checked;
+
+    if (!itemFrValue) {
+        showNotification('⚠️ Renseignez au moins le champ FR', 'warning');
+        return;
+    }
+
+    let autoTranslated = false;
+    if (!itemEnValue) {
+        itemEnValue = await translateChecklistConfigToEnglish(itemFrValue);
+        autoTranslated = true;
+    }
     
     try {
-        // Trouver le prochain ordre
-        const { data: existing } = await window.supabaseClient
-            .from('checklists')
-            .select('ordre')
-            .eq('gite', gite)
-            .eq('type', type)
-            .order('ordre', { ascending: false })
-            .limit(1);
-        
-        const nextOrdre = existing && existing.length > 0 ? existing[0].ordre + 1 : 1;
-        
-        const { error } = await window.supabaseClient
-            .from('checklists')
-            .insert({
-                gite: gite,
-                type: type,
-                item_fr: itemFr,
-                item_en: itemEn,
-                ordre: nextOrdre,
-                obligatoire: obligatoire
-            });
-        
-        if (error) throw error;
-        
-        showNotification('✅ Item ajouté', 'success');
+        const editingId = checklistConfigEditingState[type];
+
+        if (editingId) {
+            const { error } = await window.supabaseClient
+                .from('checklists')
+                .update({
+                    item_fr: itemFrValue,
+                    item_en: itemEnValue,
+                    obligatoire: obligatoireValue
+                })
+                .eq('id', editingId);
+
+            if (error) throw error;
+            showNotification('✅ Item modifié', 'success');
+        } else {
+            const { data: existing } = await window.supabaseClient
+                .from('checklists')
+                .select('ordre')
+                .eq('gite', gite)
+                .eq('type', type)
+                .order('ordre', { ascending: false })
+                .limit(1);
+
+            const nextOrdre = existing && existing.length > 0 ? existing[0].ordre + 1 : 1;
+
+            const { error } = await window.supabaseClient
+                .from('checklists')
+                .insert({
+                    gite: gite,
+                    type: type,
+                    item_fr: itemFrValue,
+                    item_en: itemEnValue,
+                    ordre: nextOrdre,
+                    obligatoire: obligatoireValue
+                });
+
+            if (error) throw error;
+            showNotification('✅ Item ajouté', 'success');
+        }
+
+        clearChecklistConfigForm(type);
         await loadChecklistsConfig();
+
+        if (autoTranslated && itemEnValue.trim().toLowerCase() === itemFrValue.trim().toLowerCase()) {
+            showNotification('⚠️ Traduction EN indisponible (API), texte FR conservé', 'warning');
+        }
         
     } catch (error) {
         console.error('Erreur:', error);
@@ -917,9 +1055,36 @@ async function addChecklistItem(type) {
     }
 }
 
-async function deleteChecklistItem(itemId, type, gite) {
-    if (!confirm('Supprimer cet item ?')) return;
-    
+async function editChecklistItemConfig(itemId, type) {
+    try {
+        const { data: item, error } = await window.supabaseClient
+            .from('checklists')
+            .select('*')
+            .eq('id', itemId)
+            .single();
+
+        if (error) throw error;
+
+        const { itemFr, itemEn, obligatoire } = getChecklistConfigFormElements(type);
+        if (!itemFr || !itemEn || !obligatoire) {
+            showNotification('❌ Formulaire checklist introuvable', 'error');
+            return;
+        }
+
+        itemFr.value = item.item_fr || '';
+        itemEn.value = item.item_en || '';
+        obligatoire.checked = !!item.obligatoire;
+
+        checklistConfigEditingState[type] = itemId;
+        setChecklistConfigFormMode(type, 'edit');
+        itemFr.focus();
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('❌ Erreur lors de la préparation de la modification', 'error');
+    }
+}
+
+async function deleteChecklistItemConfig(itemId, type) {
     try {
         const { error } = await window.supabaseClient
             .from('checklists')
@@ -929,11 +1094,172 @@ async function deleteChecklistItem(itemId, type, gite) {
         if (error) throw error;
         
         showNotification('✅ Item supprimé', 'success');
+
+        if (checklistConfigEditingState[type] === itemId) {
+            clearChecklistConfigForm(type);
+        }
+
         await loadChecklistsConfig();
         
     } catch (error) {
         console.error('Erreur:', error);
         showNotification('❌ Erreur', 'error');
+    }
+}
+
+function normalizeChecklistConfigValue(value) {
+    return String(value || '').trim().toLowerCase();
+}
+
+function buildChecklistConfigSignature(itemFr, itemEn) {
+    return `${normalizeChecklistConfigValue(itemFr)}||${normalizeChecklistConfigValue(itemEn)}`;
+}
+
+async function duplicateChecklistConfigToOtherGite(type) {
+    const sourceSelect = document.getElementById('selectGiteChecklist');
+    const targetSelect = document.getElementById('selectGiteChecklistDuplicateTarget');
+
+    if (!sourceSelect || !targetSelect) {
+        showNotification('❌ Configuration de duplication indisponible', 'error');
+        return;
+    }
+
+    const sourceGite = sourceSelect.value;
+    const targetGite = targetSelect.value;
+
+    if (!sourceGite || !targetGite) {
+        showNotification('⚠️ Sélectionnez un gîte cible', 'warning');
+        return;
+    }
+
+    if (sourceGite === targetGite) {
+        showNotification('⚠️ Le gîte cible doit être différent du gîte source', 'warning');
+        return;
+    }
+
+    try {
+        const { data: sourceItems, error: sourceError } = await window.supabaseClient
+            .from('checklists')
+            .select('item_fr, item_en, obligatoire, ordre')
+            .eq('gite', sourceGite)
+            .eq('type', type)
+            .order('ordre', { ascending: true });
+
+        if (sourceError) throw sourceError;
+
+        if (!sourceItems || sourceItems.length === 0) {
+            showNotification('ℹ️ Aucun item à dupliquer', 'info');
+            return;
+        }
+
+        const { data: targetItems, error: targetError } = await window.supabaseClient
+            .from('checklists')
+            .select('item_fr, item_en, ordre')
+            .eq('gite', targetGite)
+            .eq('type', type);
+
+        if (targetError) throw targetError;
+
+        const existingSignatures = new Set(
+            (targetItems || []).map((item) => buildChecklistConfigSignature(item.item_fr, item.item_en))
+        );
+
+        const toInsert = sourceItems.filter((item) => (
+            !existingSignatures.has(buildChecklistConfigSignature(item.item_fr, item.item_en))
+        ));
+
+        if (toInsert.length === 0) {
+            showNotification('ℹ️ Tous les items existent déjà sur le gîte cible', 'info');
+            return;
+        }
+
+        const maxOrdre = (targetItems || []).reduce((max, item) => Math.max(max, Number(item.ordre || 0)), 0);
+        const payload = toInsert.map((item, index) => ({
+            gite: targetGite,
+            type,
+            item_fr: item.item_fr,
+            item_en: item.item_en,
+            obligatoire: !!item.obligatoire,
+            ordre: maxOrdre + index + 1
+        }));
+
+        const { error: insertError } = await window.supabaseClient
+            .from('checklists')
+            .insert(payload);
+
+        if (insertError) throw insertError;
+
+        const skippedCount = sourceItems.length - toInsert.length;
+        showNotification(`✅ Duplication ${type}: ${toInsert.length} ajouté(s), ${skippedCount} ignoré(s)`, 'success');
+        await loadChecklistsConfig();
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('❌ Erreur lors de la duplication', 'error');
+    }
+}
+
+async function backfillChecklistConfigTranslations(type) {
+    const sourceSelect = document.getElementById('selectGiteChecklist');
+    if (!sourceSelect) {
+        showNotification('❌ Sélecteur gîte introuvable', 'error');
+        return;
+    }
+
+    const gite = sourceSelect.value;
+    if (!gite || !type) {
+        showNotification('⚠️ Gîte ou type manquant', 'warning');
+        return;
+    }
+
+    showNotification(`🌍 Rétro-traduction ${type} en cours...`, 'info');
+
+    let updated = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    try {
+        const { data: rows, error } = await window.supabaseClient
+            .from('checklists')
+            .select('id, item_fr, item_en')
+            .eq('gite', gite)
+            .eq('type', type)
+            .order('ordre', { ascending: true });
+
+        if (error) throw error;
+
+        for (const row of (rows || [])) {
+            try {
+                const hasFr = !!(row.item_fr && row.item_fr.trim());
+                const needsEn = hasFr && (!row.item_en || row.item_en.trim().toLowerCase() === row.item_fr.trim().toLowerCase());
+
+                if (!needsEn) {
+                    skipped += 1;
+                    continue;
+                }
+
+                const translated = await translateChecklistConfigToEnglish(row.item_fr);
+                const { error: updateError } = await window.supabaseClient
+                    .from('checklists')
+                    .update({ item_en: translated })
+                    .eq('id', row.id);
+
+                if (updateError) {
+                    failed += 1;
+                    continue;
+                }
+
+                updated += 1;
+            } catch (innerError) {
+                console.error('Erreur rétro-traduction checklists:', innerError);
+                failed += 1;
+            }
+        }
+
+        await loadChecklistsConfig();
+        showNotification(`✅ Rétro-traduction ${type}: ${updated} maj, ${skipped} inchangé(s), ${failed} échec(s)`, failed > 0 ? 'warning' : 'success');
+    } catch (error) {
+        console.error('Erreur rétro-traduction checklists:', error);
+        showNotification('❌ Erreur rétro-traduction des checklists', 'error');
     }
 }
 
@@ -984,5 +1310,10 @@ window.contactClient = contactClient;
 window.editGiteInfo = editGiteInfo;
 window.saveGiteInfo = saveGiteInfo;
 window.loadChecklistsConfig = loadChecklistsConfig;
-window.addChecklistItem = addChecklistItem;
-window.deleteChecklistItem = deleteChecklistItem;
+window.addChecklistItem = saveChecklistItemConfig;
+window.saveChecklistItemConfig = saveChecklistItemConfig;
+window.cancelChecklistEditConfig = cancelChecklistEditConfig;
+window.editChecklistItemConfig = editChecklistItemConfig;
+window.deleteChecklistItemConfig = deleteChecklistItemConfig;
+window.duplicateChecklistConfigToOtherGite = duplicateChecklistConfigToOtherGite;
+window.backfillChecklistConfigTranslations = backfillChecklistConfigTranslations;

@@ -16,6 +16,9 @@
                 <button class="btn-neo" data-action="ajouter-question" style="background: #74b9ff; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
                     <i data-lucide="plus" style="width: 16px; height: 16px; margin-right: 6px;"></i>Ajouter une Question
                 </button>
+                <button class="btn-neo" data-action="retro-traduire-faq" style="background: #10b981; color: white; padding: 10px 20px; border: 2px solid #2D3436; box-shadow: 3px 3px 0 #2D3436; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    <i data-lucide="languages" style="width: 16px; height: 16px; margin-right: 6px;"></i>Rétro-traduire FAQ
+                </button>
             </div>
         </div>
     </div>
@@ -147,6 +150,11 @@ document.addEventListener('click', function(e) {
         case 'ajouter-question':
             if (typeof window.ajouterQuestionFAQ === 'function') {
                 window.ajouterQuestionFAQ();
+            }
+            break;
+        case 'retro-traduire-faq':
+            if (typeof window.backfillFAQTranslations === 'function') {
+                window.backfillFAQTranslations();
             }
             break;
         case 'fermer-modal':

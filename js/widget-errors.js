@@ -87,25 +87,55 @@ window.refreshErrorsWidget = async function() {
     `;
 
     try {
-        const { data: errors, error } = await window.supabaseClient
-            .from('v_cm_errors_unresolved')
-            .select('*')
-            .limit(5);
+        const { data: rawErrors, error } = await window.supabaseClient
+            .from('cm_error_logs')
+            .select('id, error_type, source, message, timestamp')
+            .eq('resolved', false)
+            .order('timestamp', { ascending: false })
+            .limit(200);
 
         if (error) throw error;
+
+        const groupedMap = new Map();
+        (rawErrors || []).forEach((err) => {
+            const source = err.source || 'unknown';
+            const message = err.message || '';
+            const signature = `${err.error_type || 'unknown'}|${source}|${message}`;
+
+            if (!groupedMap.has(signature)) {
+                groupedMap.set(signature, {
+                    id: err.id,
+                    error_type: err.error_type || 'warning',
+                    source,
+                    message,
+                    occurrences: 1,
+                    last_occurrence: err.timestamp
+                });
+                return;
+            }
+
+            const existing = groupedMap.get(signature);
+            existing.occurrences += 1;
+            if (new Date(err.timestamp) > new Date(existing.last_occurrence)) {
+                existing.last_occurrence = err.timestamp;
+            }
+        });
+
+        const errors = Array.from(groupedMap.values())
+            .sort((a, b) => new Date(b.last_occurrence) - new Date(a.last_occurrence))
+            .slice(0, 5);
 
         if (!errors || errors.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.9);">
-                    <p style="font-size: 18px; margin: 0;">✅ Aucune erreur critique</p>
-                    <p style="font-size: 14px; opacity: 0.8; margin-top: 8px;">Système stable</p>
+                    <p style="font-size: 14px; opacity: 0.8; margin: 0;">Système stable</p>
                 </div>
             `;
             return;
         }
 
         container.innerHTML = errors.map(err => `
-            <div class="error-card" onclick="window.viewErrorDetails('${err.error_type}', '${err.source}')">
+            <div class="error-card" onclick="window.viewErrorDetails('${err.id}')">
                 <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 8px;">
                     <div style="flex: 1;">
                         <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
@@ -140,6 +170,6 @@ window.refreshErrorsWidget = async function() {
     }
 };
 
-window.viewErrorDetails = async function(errorType, source) {
-    alert(`Détails erreur:\n\nType: ${errorType}\nSource: ${source}\n\n(Module complet Monitoring dans le prochain prompt)`);
+window.viewErrorDetails = async function(errorId) {
+    window.location.href = '/pages/admin-monitoring.html';
 };

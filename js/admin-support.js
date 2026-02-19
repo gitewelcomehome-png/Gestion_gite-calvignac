@@ -20,6 +20,22 @@ const SUPPORT_COPILOT_URGENCY_LEVELS = ['basse', 'normale', 'haute', 'critique']
 const supportCopilotCache = new Map();
 const SUPPORT_REPLY_TEMPLATES_STORAGE_KEY = 'support_reply_templates_v1';
 const ACTIVE_SUPPORT_STATUSES = ['ouvert', 'en_cours', 'en_attente_client', 'en_attente'];
+let supportSolutionsReadAllowed = true;
+let supportSolutionsWriteAllowed = true;
+
+function isSupportSolutionsAccessDenied(error) {
+    const status = Number(error?.status || 0);
+    const code = String(error?.code || '').toUpperCase();
+    const message = String(error?.message || '').toLowerCase();
+
+    if (status === 401 || status === 403) return true;
+    if (code === '42501') return true;
+
+    return message.includes('forbidden')
+        || message.includes('permission')
+        || message.includes('row-level security')
+        || message.includes('rls');
+}
 
 // ================================================================
 // 🔐 INITIALISATION
@@ -349,6 +365,10 @@ function renderTicketDetail(ticket, comments = []) {
                     <i data-lucide="check-circle"></i>
                     Marquer résolu
                 </button>
+                <button class="btn-action primary" onclick="resolveTicketWithClientMessage('${ticket.id}')">
+                    <i data-lucide="badge-check"></i>
+                    Corrigé + notifier + clôturer
+                </button>
             </div>
         </div>
         
@@ -524,6 +544,10 @@ async function loadLearnedSuggestionsForTicket(ticket) {
         .slice(0, 5);
 
     try {
+        if (!supportSolutionsReadAllowed) {
+            return uniqueSuggestions(localSuggestions).slice(0, 5);
+        }
+
         const query = window.supabaseClient
             .from('cm_support_solutions')
             .select('solution, categorie, efficacite_score, nb_utilisations, updated_at')
@@ -536,6 +560,9 @@ async function loadLearnedSuggestionsForTicket(ticket) {
             : await query;
 
         if (error) {
+            if (isSupportSolutionsAccessDenied(error)) {
+                supportSolutionsReadAllowed = false;
+            }
             return uniqueSuggestions(localSuggestions);
         }
 
@@ -860,15 +887,26 @@ async function persistReplyTemplate(ticket, replyText) {
     writeLocalReplyTemplates(localTemplates);
 
     try {
-        const { data: existing, error: existingError } = await window.supabaseClient
-            .from('cm_support_solutions')
-            .select('id')
-            .eq('categorie', payload.categorie)
-            .eq('solution', payload.solution)
-            .limit(1);
+        if (supportSolutionsReadAllowed) {
+            const { data: existing, error: existingError } = await window.supabaseClient
+                .from('cm_support_solutions')
+                .select('id')
+                .eq('categorie', payload.categorie)
+                .eq('solution', payload.solution)
+                .limit(1);
 
-        if (!existingError && Array.isArray(existing) && existing.length > 0) {
-            return { savedInDb: true, message: 'Réponse type déjà existante (réutilisée) ✅' };
+            if (existingError && isSupportSolutionsAccessDenied(existingError)) {
+                supportSolutionsReadAllowed = false;
+                supportSolutionsWriteAllowed = false;
+            }
+
+            if (!existingError && Array.isArray(existing) && existing.length > 0) {
+                return { savedInDb: true, message: 'Réponse type déjà existante (réutilisée) ✅' };
+            }
+        }
+
+        if (!supportSolutionsWriteAllowed) {
+            return { savedInDb: false, message: 'Réponse type sauvegardée localement (droits BDD restreints)' };
         }
 
         const { error } = await window.supabaseClient
@@ -876,6 +914,11 @@ async function persistReplyTemplate(ticket, replyText) {
             .insert([payload]);
 
         if (error) {
+            if (isSupportSolutionsAccessDenied(error)) {
+                supportSolutionsWriteAllowed = false;
+                supportSolutionsReadAllowed = false;
+                return { savedInDb: false, message: 'Réponse type sauvegardée localement (droits BDD restreints)' };
+            }
             return { savedInDb: false, message: 'Réponse type sauvegardée localement (BDD non disponible)' };
         }
 
@@ -945,6 +988,68 @@ window.closeTicket = async function(ticketId) {
     } catch (error) {
         console.error('❌ Erreur clôture ticket:', error);
         alert('❌ Erreur lors de la clôture');
+    }
+};
+
+window.resolveTicketWithClientMessage = async function(ticketId) {
+    const defaultResolution = [
+        'Bonjour,',
+        '',
+        'Nous confirmons que le problème signalé a été corrigé.',
+        'La vérification de notre côté est terminée et votre service est à nouveau opérationnel.',
+        '',
+        'Ce ticket est maintenant clôturé. Si vous constatez encore le moindre souci, vous pouvez le réouvrir directement depuis votre espace support.',
+        '',
+        'Cordialement,',
+        'L\'équipe support'
+    ].join('\n');
+
+    const resolutionMessage = prompt('Message de résolution envoyé au client :', defaultResolution);
+    if (resolutionMessage === null) {
+        return;
+    }
+
+    const safeMessage = String(resolutionMessage || '').trim();
+    if (!safeMessage) {
+        alert('⚠️ Le message de résolution ne peut pas être vide.');
+        return;
+    }
+
+    try {
+        const { error: commentError } = await window.supabaseClient
+            .from('cm_support_comments')
+            .insert([{
+                ticket_id: ticketId,
+                user_id: currentUser.id,
+                content: safeMessage,
+                is_internal: false,
+                is_ai_generated: false,
+                author_role: 'admin'
+            }]);
+
+        if (commentError) throw commentError;
+
+        const { error: ticketError } = await window.supabaseClient
+            .from('cm_support_tickets')
+            .update({
+                statut: 'résolu',
+                resolved_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', ticketId);
+
+        if (ticketError) throw ticketError;
+
+        await persistReplyTemplate(selectedTicketData || { id: ticketId, categorie: 'autre', sujet: '', description: '' }, safeMessage);
+
+        alert('✅ Message de résolution envoyé et ticket clôturé.');
+
+        await loadTickets();
+        await loadStats();
+        await selectTicket(ticketId);
+    } catch (error) {
+        console.error('❌ Erreur résolution + clôture:', error);
+        alert('❌ Impossible d\'envoyer la résolution et clôturer le ticket');
     }
 };
 

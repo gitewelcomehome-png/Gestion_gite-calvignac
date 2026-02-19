@@ -16,7 +16,30 @@ class AuthManager {
         this.redirectCount = 0;
         this.lastRedirectTime = 0;
         this._initPromise = null; // Cache de la promesse d'initialisation
+        this.appUiHiddenByAuth = false;
+
+        // Évite le flash du dashboard avant validation de session
+        this.hideProtectedAppUI();
         // N'appelle PAS init() automatiquement - attendre que la page soit prête
+    }
+
+    isProtectedAppPage() {
+        const path = window.location.pathname || '';
+        return path.endsWith('/app.html') || path === '/app.html' || path.endsWith('/app') || path === '/app';
+    }
+
+    hideProtectedAppUI() {
+        if (!this.isProtectedAppPage()) return;
+
+        document.documentElement.style.visibility = 'hidden';
+        this.appUiHiddenByAuth = true;
+    }
+
+    showProtectedAppUI() {
+        if (!this.appUiHiddenByAuth) return;
+
+        document.documentElement.style.visibility = 'visible';
+        this.appUiHiddenByAuth = false;
     }
 
     async init() {
@@ -65,6 +88,7 @@ class AuthManager {
                 // Session trouvée au retry
                 this.currentUser = retrySession.user;
                 await this.loadUserRoles();
+                this.showProtectedAppUI();
                 this.updateUI();
                 
                 if (window.emailConfirmationGuard) {
@@ -76,6 +100,7 @@ class AuthManager {
             if (session && session.user) {
                 this.currentUser = session.user;
                 await this.loadUserRoles();
+                this.showProtectedAppUI();
                 this.updateUI();
                 
                 // 🔒 Démarrer le Email Confirmation Guard
@@ -95,6 +120,7 @@ class AuthManager {
                 // Session trouvée au retry
                 this.currentUser = retrySession.user;
                 await this.loadUserRoles();
+                this.showProtectedAppUI();
                 this.updateUI();
                 
                 if (window.emailConfirmationGuard) {
@@ -369,6 +395,10 @@ class AuthManager {
      * Mettre à jour l'interface avec les infos utilisateur
      */
     updateUI() {
+        if (this.currentUser) {
+            this.showProtectedAppUI();
+        }
+
         // Afficher l'email dans le header si élément existe
         const userEmailElement = document.getElementById('user-email');
         if (userEmailElement && this.currentUser) {

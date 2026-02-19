@@ -14,6 +14,7 @@ const MAX_SYSTEM_PROMPT_CHARS = 3000;
 const DEFAULT_RATE_LIMIT_MAX = 25;
 const DEFAULT_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const DEFAULT_EUR_PER_USD = 0.92;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const MODEL_PRICING_USD_PER_1M = {
     'gpt-4o-mini': {
@@ -124,6 +125,60 @@ function isSupportAiEnabled() {
 function sanitizeText(value, maxChars, fallback = '') {
     if (typeof value !== 'string') return fallback;
     return value.trim().slice(0, maxChars);
+}
+
+function sanitizeUuid(value) {
+    const input = String(value || '').trim();
+    if (!input || !UUID_REGEX.test(input)) return null;
+    return input;
+}
+
+function extractClientContext(body) {
+    const context = (body && typeof body === 'object' && body.clientContext && typeof body.clientContext === 'object')
+        ? body.clientContext
+        : {};
+
+    return {
+        requesterUserId: sanitizeUuid(context.userId),
+        requesterClientId: sanitizeUuid(context.clientId),
+        requesterTicketId: sanitizeUuid(context.ticketId)
+    };
+}
+
+function buildErrorSignature({ requestSource, errorCode, statusCode, model, requesterClientId }) {
+    const source = sanitizeText(requestSource, 60, 'unknown');
+    const code = sanitizeText(errorCode, 80, 'NO_ERROR');
+    const status = clampNumber(statusCode, 0, 999, 0);
+    const safeModel = sanitizeText(model, 60, 'unknown');
+    const scope = requesterClientId ? `client:${requesterClientId}` : 'client:unknown';
+    return sanitizeText(`${scope}|${source}|${code}|${status}|${safeModel}`, 220, 'incident:unknown');
+}
+
+function withTelemetryBase(base, overrides = {}) {
+    const record = {
+        ...base,
+        ...overrides
+    };
+
+    const requestSource = sanitizeText(record.request_source, 120, 'unknown');
+    const model = sanitizeText(record.model, 120, 'gpt-4o-mini');
+    const statusCode = clampNumber(record.status_code, 100, 599, 500);
+    const errorCode = sanitizeText(record.error_code, 120, record.success ? null : 'UNKNOWN_ERROR');
+
+    return {
+        ...record,
+        request_source: requestSource,
+        model,
+        status_code: statusCode,
+        error_code: errorCode,
+        error_signature: sanitizeText(record.error_signature, 220, '') || buildErrorSignature({
+            requestSource,
+            errorCode,
+            statusCode,
+            model,
+            requesterClientId: record.requester_client_id
+        })
+    };
 }
 
 function createSupabaseAdminClient() {
@@ -240,16 +295,24 @@ export default async function handler(req, res) {
 
     const clientIp = getClientIp(req);
     const clientIpHash = hashIp(clientIp);
+    const requestSource = sanitizeText(req.body?.source, 120, 'unknown');
+    const clientContext = extractClientContext(req.body);
+    const telemetryBase = {
+        endpoint: 'support-ai',
+        request_source: requestSource,
+        origin: requestOrigin || null,
+        client_ip_hash: clientIpHash,
+        requester_user_id: clientContext.requesterUserId,
+        requester_client_id: clientContext.requesterClientId,
+        requester_ticket_id: clientContext.requesterTicketId
+    };
+
     const rate = checkRateLimit(clientIp);
     res.setHeader('X-RateLimit-Remaining', String(rate.remaining));
     res.setHeader('X-RateLimit-Reset', String(Math.floor(rate.resetAt / 1000)));
 
     if (!rate.allowed) {
-        await persistTelemetry({
-            endpoint: 'support-ai',
-            request_source: sanitizeText(req.body?.source, 120, 'unknown'),
-            origin: requestOrigin || null,
-            client_ip_hash: clientIpHash,
+        await persistTelemetry(withTelemetryBase(telemetryBase, {
             model: sanitizeText(req.body?.model, 120, 'gpt-4o-mini'),
             prompt_chars: clampNumber(req.body?.prompt?.length, 0, MAX_PROMPT_CHARS, 0),
             prompt_tokens: 0,
@@ -260,7 +323,7 @@ export default async function handler(req, res) {
             status_code: 429,
             success: false,
             error_code: 'RATE_LIMIT_EXCEEDED'
-        });
+        }));
 
         return res.status(429).json({
             error: 'Trop de requêtes, réessayez plus tard',
@@ -287,11 +350,8 @@ export default async function handler(req, res) {
         const safeMaxTokens = clampNumber(maxTokens, 50, MAX_TOKENS_HARD_LIMIT, DEFAULT_MAX_TOKENS);
 
         if (!safePrompt) {
-            await persistTelemetry({
-                endpoint: 'support-ai',
+            await persistTelemetry(withTelemetryBase(telemetryBase, {
                 request_source: sanitizeText(source, 120, 'unknown'),
-                origin: requestOrigin || null,
-                client_ip_hash: clientIpHash,
                 model: safeModel,
                 prompt_chars: 0,
                 prompt_tokens: 0,
@@ -302,17 +362,14 @@ export default async function handler(req, res) {
                 status_code: 400,
                 success: false,
                 error_code: 'PROMPT_REQUIRED'
-            });
+            }));
 
             return res.status(400).json({ error: 'Prompt requis', code: 'PROMPT_REQUIRED' });
         }
 
         if (!apiKey) {
-            await persistTelemetry({
-                endpoint: 'support-ai',
+            await persistTelemetry(withTelemetryBase(telemetryBase, {
                 request_source: sanitizeText(source, 120, 'unknown'),
-                origin: requestOrigin || null,
-                client_ip_hash: clientIpHash,
                 model: safeModel,
                 prompt_chars: safePrompt.length,
                 prompt_tokens: 0,
@@ -323,7 +380,7 @@ export default async function handler(req, res) {
                 status_code: 503,
                 success: false,
                 error_code: 'OPENAI_NOT_CONFIGURED'
-            });
+            }));
 
             return res.status(503).json({
                 error: 'API OpenAI non configurée. Veuillez ajouter OPENAI_API_KEY dans les variables d\'environnement Vercel.',
@@ -358,11 +415,8 @@ export default async function handler(req, res) {
             const errorData = await openaiResponse.json().catch(() => ({}));
             console.error('❌ [SUPPORT AI] Erreur OpenAI:', errorData);
 
-            await persistTelemetry({
-                endpoint: 'support-ai',
+            await persistTelemetry(withTelemetryBase(telemetryBase, {
                 request_source: sanitizeText(source, 120, 'unknown'),
-                origin: requestOrigin || null,
-                client_ip_hash: clientIpHash,
                 model: safeModel,
                 prompt_chars: safePrompt.length,
                 prompt_tokens: 0,
@@ -373,7 +427,7 @@ export default async function handler(req, res) {
                 status_code: openaiResponse.status,
                 success: false,
                 error_code: 'OPENAI_UPSTREAM_ERROR'
-            });
+            }));
 
             return res.status(openaiResponse.status).json({
                 error: errorData.error?.message || 'Erreur lors de l\'appel à OpenAI',
@@ -385,11 +439,8 @@ export default async function handler(req, res) {
         const content = data?.choices?.[0]?.message?.content;
 
         if (!content) {
-            await persistTelemetry({
-                endpoint: 'support-ai',
+            await persistTelemetry(withTelemetryBase(telemetryBase, {
                 request_source: sanitizeText(source, 120, 'unknown'),
-                origin: requestOrigin || null,
-                client_ip_hash: clientIpHash,
                 model: data?.model || safeModel,
                 prompt_chars: safePrompt.length,
                 prompt_tokens: clampNumber(data?.usage?.prompt_tokens, 0, 2_000_000, 0),
@@ -400,16 +451,13 @@ export default async function handler(req, res) {
                 status_code: 500,
                 success: false,
                 error_code: 'EMPTY_AI_RESPONSE'
-            });
+            }));
 
             return res.status(500).json({ error: 'Aucun contenu généré', code: 'EMPTY_AI_RESPONSE' });
         }
 
-        await persistTelemetry({
-            endpoint: 'support-ai',
+        await persistTelemetry(withTelemetryBase(telemetryBase, {
             request_source: sanitizeText(source, 120, 'unknown'),
-            origin: requestOrigin || null,
-            client_ip_hash: clientIpHash,
             model: data?.model || safeModel,
             prompt_chars: safePrompt.length,
             prompt_tokens: clampNumber(data?.usage?.prompt_tokens, 0, 2_000_000, 0),
@@ -420,7 +468,7 @@ export default async function handler(req, res) {
             status_code: 200,
             success: true,
             error_code: null
-        });
+        }));
 
         return res.status(200).json({
             content,
@@ -428,11 +476,8 @@ export default async function handler(req, res) {
             model: data.model || safeModel
         });
     } catch (error) {
-        await persistTelemetry({
-            endpoint: 'support-ai',
+        await persistTelemetry(withTelemetryBase(telemetryBase, {
             request_source: sanitizeText(req.body?.source, 120, 'unknown'),
-            origin: requestOrigin || null,
-            client_ip_hash: clientIpHash,
             model: sanitizeText(req.body?.model, 120, 'gpt-4o-mini'),
             prompt_chars: clampNumber(req.body?.prompt?.length, 0, MAX_PROMPT_CHARS, 0),
             prompt_tokens: 0,
@@ -443,7 +488,7 @@ export default async function handler(req, res) {
             status_code: 500,
             success: false,
             error_code: 'SUPPORT_AI_SERVER_ERROR'
-        });
+        }));
 
         console.error('❌ [SUPPORT AI] Erreur serveur:', error);
         return res.status(500).json({

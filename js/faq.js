@@ -7,6 +7,48 @@
 
 let faqData = [];
 let categorieFaqActive = 'all';
+let faqBackfillInProgress = false;
+let faqTranslationWarningShown = false;
+let faqTranslationRateLimitedShown = false;
+
+function notifyFAQ(message, type = 'info') {
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, type);
+        return;
+    }
+
+    const host = document.getElementById('faqNotification') || document.body;
+    if (!host) return;
+
+    const existing = host.querySelector('.faq-inline-notification');
+    if (existing) {
+        existing.remove();
+    }
+
+    const div = document.createElement('div');
+    div.className = 'faq-inline-notification';
+    div.textContent = message;
+    div.style.cssText = [
+        'position:fixed',
+        'bottom:24px',
+        'right:24px',
+        'padding:10px 14px',
+        'border-radius:8px',
+        'font-size:0.9rem',
+        'font-weight:600',
+        'z-index:10000',
+        'background:#1f2937',
+        'color:#fff',
+        'box-shadow:0 8px 24px rgba(0,0,0,0.2)'
+    ].join(';');
+
+    if (type === 'success') div.style.background = '#16a34a';
+    if (type === 'warning') div.style.background = '#d97706';
+    if (type === 'error') div.style.background = '#dc2626';
+
+    host.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+}
 
 // ================================================================
 // TRADUCTION AUTOMATIQUE FR → EN
@@ -17,23 +59,155 @@ let categorieFaqActive = 'all';
  * @param {string} text - Texte à traduire
  * @returns {Promise<string>} Texte traduit
  */
-async function translateToEnglish(text) {
+function waitFaq(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function splitFaqTranslationText(text, maxLength = 180, maxEncodedLength = 480) {
+    const source = String(text || '').trim();
+    if (!source) return [];
+    if (source.length <= maxLength && encodeURIComponent(source).length <= maxEncodedLength) return [source];
+
+    const chunks = [];
+    const paragraphs = source.split(/\n+/).map((part) => part.trim()).filter(Boolean);
+
+    for (const paragraph of paragraphs) {
+        if (paragraph.length <= maxLength) {
+            chunks.push(paragraph);
+            continue;
+        }
+
+        const sentences = paragraph
+            .split(/(?<=[.!?;:])\s+/)
+            .map((part) => part.trim())
+            .filter(Boolean);
+
+        let buffer = '';
+
+        for (const sentence of sentences) {
+            if (sentence.length > maxLength) {
+                if (buffer) {
+                    chunks.push(buffer);
+                    buffer = '';
+                }
+
+                for (let i = 0; i < sentence.length; i += maxLength) {
+                    chunks.push(sentence.slice(i, i + maxLength));
+                }
+                continue;
+            }
+
+            const candidate = buffer ? `${buffer} ${sentence}` : sentence;
+            if (candidate.length <= maxLength) {
+                buffer = candidate;
+            } else {
+                if (buffer) chunks.push(buffer);
+                buffer = sentence;
+            }
+        }
+
+        if (buffer) chunks.push(buffer);
+    }
+
+    const safeChunks = [];
+
+    for (const chunk of chunks) {
+        if (encodeURIComponent(chunk).length <= maxEncodedLength) {
+            safeChunks.push(chunk);
+            continue;
+        }
+
+        let start = 0;
+        while (start < chunk.length) {
+            let end = Math.min(start + maxLength, chunk.length);
+            let candidate = chunk.slice(start, end);
+
+            while (candidate && encodeURIComponent(candidate).length > maxEncodedLength) {
+                end -= 10;
+                if (end <= start) {
+                    end = start + 1;
+                    break;
+                }
+                candidate = chunk.slice(start, end);
+            }
+
+            safeChunks.push(candidate);
+            start = end;
+        }
+    }
+
+    return safeChunks.filter(Boolean);
+}
+
+async function translateFAQToEnglish(text) {
     if (!text || text.trim() === '') return '';
     
     try {
-        const response = await fetch(
-            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|en`
-        );
-        const data = await response.json();
-        
-        if (data.responseStatus === 200 && data.responseData?.translatedText) {
-            return data.responseData.translatedText;
+        const attemptTranslation = async (sourceText) => {
+            let lastError = null;
+
+            for (let attempt = 0; attempt < 3; attempt += 1) {
+                if (attempt > 0) {
+                    await waitFaq(700 * attempt);
+                }
+
+                let response;
+                try {
+                    response = await Promise.race([
+                        fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(sourceText)}&langpair=fr|en`),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Translation timeout')), 6000))
+                    ]);
+                } catch (networkError) {
+                    lastError = networkError;
+                    continue;
+                }
+
+                if (response.status === 429) {
+                    if (!faqTranslationRateLimitedShown) {
+                        notifyFAQ('⚠️ API de traduction temporairement limitée, certains textes restent en FR', 'warning');
+                        faqTranslationRateLimitedShown = true;
+                    }
+                    lastError = new Error('Rate limited');
+                    await waitFaq(1200 * (attempt + 1));
+                    continue;
+                }
+
+                const data = await response.json();
+                if (data.responseStatus === 200 && data.responseData?.translatedText) {
+                    return data.responseData.translatedText;
+                }
+
+                const details = String(data.responseDetails || '').toLowerCase();
+                if (details.includes('query length limit exceeded')) {
+                    throw new Error('Query length limit exceeded');
+                }
+
+                lastError = new Error(data.responseDetails || 'Translation unavailable');
+            }
+
+            throw lastError || new Error('Translation unavailable');
+        };
+
+        const chunks = splitFaqTranslationText(text, 180, 480);
+        const translatedChunks = [];
+
+        for (const chunk of chunks) {
+            let translated = await attemptTranslation(chunk);
+            if (!translated || translated.trim() === '') {
+                translated = await attemptTranslation(chunk);
+            }
+
+            await waitFaq(250);
+
+            translatedChunks.push(translated && translated.trim() !== '' ? translated : chunk);
         }
-        
-        console.warn('⚠️ Traduction FAQ échouée, texte original conservé');
-        return text; // Fallback sur le texte original
+
+        return translatedChunks.join(' ').trim() || text;
     } catch (error) {
-        console.error('❌ Erreur traduction FAQ:', error);
+        if (!faqTranslationWarningShown) {
+            notifyFAQ('⚠️ Traduction FAQ indisponible pour certains contenus, texte FR conservé', 'warning');
+            faqTranslationWarningShown = true;
+        }
         return text; // Fallback sur le texte original
     }
 }
@@ -371,7 +545,7 @@ window.sauvegarderQuestionFAQ = async function() {
         const validation = window.ValidationUtils.validateForm(form, rules);
         if (!validation.valid) {
             console.warn('❌ Formulaire FAQ invalide:', validation.errors);
-            showNotification('❌ Veuillez remplir tous les champs requis', 'error');
+            notifyFAQ('❌ Veuillez remplir tous les champs requis', 'error');
             return;
         }
     }
@@ -404,9 +578,12 @@ window.sauvegarderQuestionFAQ = async function() {
         // 🌍 TRADUCTION AUTOMATIQUE FR → EN
         // console.log('🌍 Traduction automatique de la FAQ en anglais...');
         const [questionEn, answerEn] = await Promise.all([
-            translateToEnglish(data.question),
-            translateToEnglish(data.answer)
+            translateFAQToEnglish(data.question),
+            translateFAQToEnglish(data.answer)
         ]);
+
+        const isQuestionTranslated = questionEn && questionEn.trim().toLowerCase() !== data.question.trim().toLowerCase();
+        const isAnswerTranslated = answerEn && answerEn.trim().toLowerCase() !== data.answer.trim().toLowerCase();
         
         // Ajouter les traductions au data
         data.question_en = questionEn;
@@ -433,6 +610,10 @@ window.sauvegarderQuestionFAQ = async function() {
             // console.log('✅ FAQ créée avec traduction EN');
         }
 
+        if (!isQuestionTranslated || !isAnswerTranslated) {
+            notifyFAQ('⚠️ FAQ créée mais traduction EN indisponible (API), texte FR conservé', 'warning');
+        }
+
         fermerModalQuestion();
         await chargerFAQ();
         afficherFAQ();
@@ -443,6 +624,79 @@ window.sauvegarderQuestionFAQ = async function() {
             console.error('Erreur sauvegarde FAQ:', error);
         }
         alert('Erreur lors de la sauvegarde: ' + (error.message || 'Erreur inconnue'));
+    }
+};
+
+window.backfillFAQTranslations = async function() {
+    if (faqBackfillInProgress) {
+        notifyFAQ('⏳ Rétro-traduction FAQ déjà en cours', 'warning');
+        return;
+    }
+
+    faqBackfillInProgress = true;
+    notifyFAQ('🌍 Rétro-traduction FAQ démarrée...', 'info');
+
+    let updated = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    try {
+        const { data: rows, error } = await window.supabaseClient
+            .from('faq')
+            .select('id, question, answer, question_en, answer_en')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        for (const row of (rows || [])) {
+            try {
+                const needsQuestion = !row.question_en || row.question_en.trim().toLowerCase() === (row.question || '').trim().toLowerCase();
+                const needsAnswer = !row.answer_en || row.answer_en.trim().toLowerCase() === (row.answer || '').trim().toLowerCase();
+
+                if (!needsQuestion && !needsAnswer) {
+                    skipped += 1;
+                    continue;
+                }
+
+                const payload = {};
+                if (needsQuestion && row.question) {
+                    payload.question_en = await translateFAQToEnglish(row.question);
+                }
+                if (needsAnswer && row.answer) {
+                    payload.answer_en = await translateFAQToEnglish(row.answer);
+                }
+
+                if (Object.keys(payload).length === 0) {
+                    skipped += 1;
+                    continue;
+                }
+
+                const { error: updateError } = await window.supabaseClient
+                    .from('faq')
+                    .update(payload)
+                    .eq('id', row.id);
+
+                if (updateError) {
+                    failed += 1;
+                    continue;
+                }
+
+                updated += 1;
+            } catch (innerError) {
+                console.error('Erreur rétro-traduction FAQ ligne:', innerError);
+                failed += 1;
+            }
+        }
+
+        await chargerFAQ();
+        afficherFAQ();
+
+        notifyFAQ(`✅ FAQ rétro-traduite: ${updated} maj, ${skipped} inchangée(s), ${failed} échec(s)`, failed > 0 ? 'warning' : 'success');
+    } catch (error) {
+        console.error('Erreur rétro-traduction FAQ:', error);
+        notifyFAQ('❌ Erreur pendant la rétro-traduction FAQ', 'error');
+    } finally {
+        faqBackfillInProgress = false;
     }
 };
 

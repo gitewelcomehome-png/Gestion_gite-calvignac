@@ -4,6 +4,7 @@ const DEFAULT_ALERT_ERROR_RATE_1H_PCT = 8;
 const DEFAULT_ALERT_COST_24H_EUR = 12;
 const DEFAULT_ALERT_LATENCY_1H_MS = 5000;
 const DEFAULT_ALERT_CONSECUTIVE_ERRORS_1H = 5;
+const AUTO_TICKET_ACTIVE_STATUSES = ['ouvert', 'en_cours', 'en_attente', 'en_attente_client'];
 
 function getOriginFromRequest(req) {
     const origin = req.headers.origin || req.headers.referer || '';
@@ -215,6 +216,224 @@ function buildSupportAlerts(metrics, supportAiReady) {
     };
 }
 
+function isCriticalUsageIncident(row) {
+    const statusCode = clampNumber(row?.status_code, 0, 999, 0);
+    const errorCode = String(row?.error_code || '').trim().toUpperCase();
+
+    if (statusCode >= 500) return true;
+    if (errorCode === 'OPENAI_NOT_CONFIGURED') return true;
+    if (errorCode === 'OPENAI_UPSTREAM_ERROR') return true;
+    if (errorCode === 'SUPPORT_AI_SERVER_ERROR') return true;
+    if (errorCode === 'EMPTY_AI_RESPONSE') return true;
+    return false;
+}
+
+function buildIncidentSignature(row) {
+    const client = String(row?.requester_client_id || 'unknown').trim();
+    const source = String(row?.request_source || 'unknown').trim().toLowerCase();
+    const code = String(row?.error_code || 'unknown').trim().toUpperCase();
+    const status = clampNumber(row?.status_code, 0, 999, 0);
+    const model = String(row?.model || 'unknown').trim().toLowerCase();
+    return `client:${client}|${source}|${code}|${status}|${model}`.slice(0, 220);
+}
+
+function buildClientPreAnalysis(row) {
+    const statusCode = clampNumber(row?.status_code, 0, 999, 0);
+    const errorCode = String(row?.error_code || '').trim().toUpperCase();
+    const requestSource = String(row?.request_source || 'support').trim();
+
+    if (errorCode === 'OPENAI_NOT_CONFIGURED') {
+        return `Le service d'assistance IA était momentanément indisponible. Vous avez probablement vu un message d'indisponibilité lors de votre demande (${requestSource}).`;
+    }
+
+    if (errorCode === 'RATE_LIMIT_EXCEEDED') {
+        return `Le service a temporairement limité certaines requêtes pour éviter une saturation. Vous avez pu voir un message de temporisation.`;
+    }
+
+    if (statusCode >= 500) {
+        return `Une erreur technique temporaire est survenue pendant le traitement de votre demande (${requestSource}). Vous avez probablement vu un message d'erreur ou une réponse absente.`;
+    }
+
+    return `Une anomalie technique a été détectée sur votre demande (${requestSource}). Nous avons engagé une vérification proactive.`;
+}
+
+async function insertSupportComment(supabaseAdmin, payload) {
+    const withRole = {
+        ...payload,
+        author_role: 'admin'
+    };
+
+    const { error } = await supabaseAdmin
+        .from('cm_support_comments')
+        .insert(withRole);
+
+    if (!error) return;
+
+    const message = String(error.message || '').toLowerCase();
+    if (!message.includes('author_role')) {
+        throw error;
+    }
+
+    const fallbackPayload = {
+        ticket_id: payload.ticket_id,
+        user_id: payload.user_id,
+        is_internal: payload.is_internal,
+        content: payload.content,
+        is_ai_generated: payload.is_ai_generated
+    };
+
+    const { error: fallbackError } = await supabaseAdmin
+        .from('cm_support_comments')
+        .insert(fallbackPayload);
+
+    if (fallbackError) {
+        throw fallbackError;
+    }
+}
+
+async function processCriticalSupportIncidents({ supabaseAdmin, alerts }) {
+    try {
+        const hasCriticalAlert = Array.isArray(alerts) && alerts.some((alert) => alert?.level === 'critical');
+        if (!hasCriticalAlert) {
+            return { enabled: true, processed: 0, created: 0, linked: 0, skipped: 0, reason: 'no-critical-alert' };
+        }
+
+        const since = new Date(Date.now() - (2 * 60 * 60 * 1000)).toISOString();
+        const { data: rows, error } = await supabaseAdmin
+            .from('cm_support_ai_usage_logs')
+            .select('id, created_at, request_source, model, status_code, error_code, requester_user_id, requester_client_id, auto_ticket_processed_at')
+            .eq('endpoint', 'support-ai')
+            .eq('success', false)
+            .is('auto_ticket_processed_at', null)
+            .not('requester_client_id', 'is', null)
+            .gte('created_at', since)
+            .order('created_at', { ascending: true })
+            .limit(60);
+
+        if (error) {
+            return { enabled: true, processed: 0, created: 0, linked: 0, skipped: 0, reason: 'query-error' };
+        }
+
+        let processed = 0;
+        let created = 0;
+        let linked = 0;
+        let skipped = 0;
+
+        for (const row of rows || []) {
+            const signature = buildIncidentSignature(row);
+            const processedAt = new Date().toISOString();
+
+            if (!isCriticalUsageIncident(row)) {
+                skipped += 1;
+                await supabaseAdmin
+                    .from('cm_support_ai_usage_logs')
+                    .update({
+                        error_signature: signature,
+                        auto_ticket_status: 'ignored',
+                        auto_ticket_note: 'Incident non critique',
+                        auto_ticket_processed_at: processedAt
+                    })
+                    .eq('id', row.id);
+                continue;
+            }
+
+            const clientId = String(row.requester_client_id || '').trim();
+            if (!clientId) {
+                skipped += 1;
+                continue;
+            }
+
+            const { data: existingTicket } = await supabaseAdmin
+                .from('cm_support_tickets')
+                .select('id')
+                .eq('client_id', clientId)
+                .in('statut', AUTO_TICKET_ACTIVE_STATUSES)
+                .ilike('description', `%Signature incident: ${signature}%`)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (existingTicket?.id) {
+                linked += 1;
+                processed += 1;
+                await supabaseAdmin
+                    .from('cm_support_ai_usage_logs')
+                    .update({
+                        error_signature: signature,
+                        auto_ticket_id: existingTicket.id,
+                        auto_ticket_status: 'linked',
+                        auto_ticket_note: 'Incident relié à un ticket existant',
+                        auto_ticket_processed_at: processedAt
+                    })
+                    .eq('id', row.id);
+                continue;
+            }
+
+            const preAnalysis = buildClientPreAnalysis(row);
+            const createdAtText = row?.created_at ? new Date(row.created_at).toLocaleString('fr-FR') : 'inconnue';
+            const subject = `Incident détecté automatiquement sur votre support IA`;
+            const description = [
+                'Bonjour,',
+                '',
+                'Nous avons détecté automatiquement une anomalie sur votre utilisation du support IA et nous avons ouvert ce ticket proactivement.',
+                '',
+                `Pré-analyse: ${preAnalysis}`,
+                '',
+                `Détails techniques: code=${row?.error_code || 'N/A'} | statut HTTP=${row?.status_code || 'N/A'} | modèle=${row?.model || 'N/A'} | source=${row?.request_source || 'N/A'}`,
+                `Détection: ${createdAtText}`,
+                `Signature incident: ${signature}`,
+                '',
+                'Nous revenons vers vous dès que la correction est validée.'
+            ].join('\n');
+
+            const { data: createdTicket, error: createTicketError } = await supabaseAdmin
+                .from('cm_support_tickets')
+                .insert({
+                    client_id: clientId,
+                    sujet: subject,
+                    description,
+                    statut: 'ouvert',
+                    priorite: 'haute',
+                    categorie: 'technique',
+                    sentiment: 'neutre'
+                })
+                .select('id')
+                .single();
+
+            if (createTicketError || !createdTicket?.id) {
+                skipped += 1;
+                await supabaseAdmin
+                    .from('cm_support_ai_usage_logs')
+                    .update({
+                        error_signature: signature,
+                        auto_ticket_status: 'ignored',
+                        auto_ticket_note: 'Échec création ticket auto',
+                        auto_ticket_processed_at: processedAt
+                    })
+                    .eq('id', row.id);
+                continue;
+            }
+
+            created += 1;
+            processed += 1;
+            await supabaseAdmin
+                .from('cm_support_ai_usage_logs')
+                .update({
+                    error_signature: signature,
+                    auto_ticket_id: createdTicket.id,
+                    auto_ticket_status: 'created',
+                    auto_ticket_note: 'Ticket auto créé',
+                    auto_ticket_processed_at: processedAt
+                })
+                .eq('id', row.id);
+        }
+
+        return { enabled: true, processed, created, linked, skipped, reason: 'ok' };
+    } catch {
+        return { enabled: true, processed: 0, created: 0, linked: 0, skipped: 0, reason: 'runtime-error' };
+    }
+}
+
 export default async function handler(req, res) {
     const allowedOrigins = getAllowedOrigins();
     const currentRequestOrigin = getCurrentRequestOrigin(req);
@@ -273,6 +492,16 @@ export default async function handler(req, res) {
             const metrics = summarizeSupportMetrics(Array.isArray(rows) ? rows : []);
             const supportAiReady = isSupportAiEnabled() && Boolean(process.env.OPENAI_API_KEY);
             const { alerts, thresholds } = buildSupportAlerts(metrics, supportAiReady);
+            const autoTicketRequested = String(req.query?.autoTicket || req.query?.auto_ticket || '').trim() === '1';
+            const autoTicketEnabled = String(process.env.SUPPORT_AI_AUTO_TICKET_ENABLED ?? 'true').trim().toLowerCase() === 'true';
+            let autoTicket = { enabled: autoTicketEnabled, processed: 0, created: 0, linked: 0, skipped: 0, reason: 'not-requested' };
+
+            if (autoTicketEnabled && autoTicketRequested) {
+                autoTicket = await processCriticalSupportIncidents({
+                    supabaseAdmin,
+                    alerts
+                });
+            }
 
             return res.status(200).json({
                 ok: true,
@@ -280,6 +509,7 @@ export default async function handler(req, res) {
                 metrics,
                 thresholds,
                 alerts,
+                autoTicket,
                 updatedAt: new Date().toISOString()
             });
         }

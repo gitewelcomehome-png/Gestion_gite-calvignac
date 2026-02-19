@@ -2428,6 +2428,7 @@ let chartTresorerieDashboard = null;
 async function afficherGraphiqueTresorerieDashboard() {
     const canvas = document.getElementById('graphique-tresorerie-dashboard');
     if (!canvas) return;
+    const tresorerieEl = document.getElementById('dashboard-tresorerie');
     
     const anneeActuelle = new Date().getFullYear();
     
@@ -2456,6 +2457,14 @@ async function afficherGraphiqueTresorerieDashboard() {
         soldes.forEach(s => {
             soldesData[s.mois - 1] = parseFloat(s.solde);
         });
+
+        // Mettre à jour l'indicateur avec la dernière valeur disponible
+        if (tresorerieEl) {
+            const dernierSolde = [...soldesData].reverse().find(value => value !== null && Number.isFinite(value));
+            tresorerieEl.textContent = Number.isFinite(dernierSolde) ? formatCurrency(dernierSolde) : '-';
+        }
+    } else if (tresorerieEl) {
+        tresorerieEl.textContent = '-';
     }
     
     chartTresorerieDashboard = new Chart(ctx, {

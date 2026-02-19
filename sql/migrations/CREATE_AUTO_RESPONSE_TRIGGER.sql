@@ -19,6 +19,14 @@ DECLARE
 BEGIN
     -- Ne traiter que les nouveaux tickets
     IF TG_OP = 'INSERT' THEN
+
+        -- Ignorer les tickets créés automatiquement par le monitoring IA
+        -- (sinon on spamme le client avec une réponse IA générique en doublon)
+        IF COALESCE(NEW.sujet, '') ILIKE 'Incident détecté automatiquement sur votre support IA%'
+           OR COALESCE(NEW.description, '') ILIKE '%Signature incident:%' THEN
+            RAISE NOTICE 'IA: auto-réponse ignorée pour ticket incident auto-monitoring %', NEW.id;
+            RETURN NEW;
+        END IF;
         
         -- Rechercher une solution correspondante dans la même catégorie
         SELECT 

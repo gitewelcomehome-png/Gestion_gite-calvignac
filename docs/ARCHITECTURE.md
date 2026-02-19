@@ -1,6 +1,6 @@
 # 🏗️ Architecture - Gestion Gîte Calvignac
 
-**Version :** 2.13.5  
+**Version :** 2.13.7  
 **Dernière MAJ :** 18 février 2026  
 **Environnement :** Production (Supabase + Vercel)
 
@@ -566,6 +566,7 @@ SUPPORT_AI_ALERT_ERROR_RATE_1H_PCT=8
 SUPPORT_AI_ALERT_COST_24H_EUR=12
 SUPPORT_AI_ALERT_LATENCY_1H_MS=5000
 SUPPORT_AI_ALERT_CONSECUTIVE_ERRORS_1H=5
+SUPPORT_AI_AUTO_TICKET_ENABLED=true
 SUPPORT_AI_EUR_PER_USD=0.92
 SUPPORT_AI_PRICE_INPUT_USD_PER_1M_GPT_4O_MINI=0.15
 SUPPORT_AI_PRICE_OUTPUT_USD_PER_1M_GPT_4O_MINI=0.6
@@ -581,7 +582,7 @@ SUPABASE_SERVICE_ROLE_KEY=...
 
 - `/api/openai` : Proxy IA pour génération de contenu éditorial (modules contenu)
 - `/api/support-ai` : Proxy IA dédié support client/admin (analyse ticket, JSON strict)
-- `/api/ai-health?section=support` : KPI/alertes monitoring support IA pour dashboard admin
+- `/api/ai-health?section=support&autoTicket=1` : KPI/alertes monitoring + auto-création de tickets incidents critiques côté client
 - ✅ Clé OpenAI stockée uniquement côté serveur (`OPENAI_API_KEY`)
 - ⛔ Interdiction d'exposer une clé IA dans les scripts frontend
 
@@ -594,6 +595,9 @@ cm_support_ai_usage_logs
     request_source TEXT
     origin TEXT
     client_ip_hash TEXT
+    requester_user_id UUID
+    requester_client_id UUID
+    requester_ticket_id UUID
     model TEXT
     prompt_chars INTEGER
     prompt_tokens INTEGER
@@ -604,6 +608,11 @@ cm_support_ai_usage_logs
     status_code INTEGER
     success BOOLEAN
     error_code TEXT
+    error_signature TEXT
+    auto_ticket_id UUID
+    auto_ticket_status TEXT
+    auto_ticket_note TEXT
+    auto_ticket_processed_at TIMESTAMPTZ
     created_at TIMESTAMPTZ
 ```
 
@@ -804,6 +813,12 @@ psql $DATABASE_URL < backup_20260215.sql
 
 ## 🔄 Changelog
 
+### v2.13.7 - 18 février 2026 🚨
+- ✅ Auto-ticketing incident critique IA branché au monitoring (`/api/ai-health?section=support&autoTicket=1`)
+- ✅ Corrélation client/ticket ajoutée aux logs IA (`requester_user_id`, `requester_client_id`, `requester_ticket_id`, `error_signature`)
+- ✅ Création proactive d'un ticket client avec pré-analyse en cas d'erreur critique détectée
+- ✅ Workflow support admin "Corrigé + notifier + clôturer" pour envoyer un message de résolution puis clore le ticket
+
 ### v2.13.6 - 18 février 2026 🧠
 - ✅ Copilote support N1 renforcé pour incidents (réponses opérationnelles non vagues)
 - ✅ Enregistrement progressif des réponses type depuis `pages/admin-support.html` (bouton "Enregistrer réponse type")
@@ -864,4 +879,4 @@ psql $DATABASE_URL < backup_20260215.sql
 
 **Document maintenu par :** GitHub Copilot  
 **Contact Support :** admin@gite-calvignac.fr  
-**Dernière révision :** 15 février 2026, 23:50
+**Dernière révision :** 18 février 2026, 22:15

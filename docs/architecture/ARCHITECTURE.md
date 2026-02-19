@@ -10,6 +10,7 @@
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Ce fichier (architecture technique)
 - **[DESCRIPTION_COMPLETE_SITE.md](DESCRIPTION_COMPLETE_SITE.md)** - Documentation master complète
 - **[ERREURS_CRITIQUES.md](ERREURS_CRITIQUES.md)** - Historique bugs critiques et solutions
+- **[PROPOSITION_REFONTE_BDD_20260219.md](PROPOSITION_REFONTE_BDD_20260219.md)** - Proposition de refonte BDD (analyse sans migration)
 - **[NETTOYAGE_COMPLET_23JAN2026.md](NETTOYAGE_COMPLET_23JAN2026.md)** - Rapport nettoyage complet
 - **[README.md](README.md)** - Guide de démarrage
 
@@ -43,6 +44,7 @@
 - **Colonnes:** 119 colonnes organisées en 8 sections (voir détails ci-dessous)
 - **Relations:** FK vers `gites(id)` via `gite_id`, FK vers `auth.users` via `owner_user_id`
 - **Bilingue:** Chaque champ a sa version `_en` pour l'anglais
+- **Traduction FR→EN (18/02/2026) :** auto-remplissage des champs `_en` manquants lors de la sauvegarde admin (`js/infos-gites.js`) + fallback de traduction au chargement fiche client (`js/fiche-client-app.js`)
 - **Différence avec `infos_pratiques`:** Table structurée fixe VS table flexible dynamique
 - **Documentation:** [sql/README_INFOS_GITES_VS_INFOS_PRATIQUES.md](sql/README_INFOS_GITES_VS_INFOS_PRATIQUES.md)
 - **RLS activé**
@@ -91,6 +93,12 @@
   - `texte` / `texte_en` : Texte principal de l'item
   - `description` / `description_en` : Description détaillée optionnelle
 - **Traduction automatique :** Les versions anglaises (`_en`) sont générées automatiquement lors de la création/modification via l'API MyMemory
+- **UX gestion (18/02/2026) :**
+  - Édition fiable d'un item existant (mise à jour sans création de doublon)
+  - Duplication des items d'un gîte vers un autre gîte (par type entrée/sortie)
+  - Notifications non bloquantes (suppression des confirmations navigateur côté checklist)
+  - Alignement du module historique de configuration (`js/fiches-clients.js`, table `checklists`) avec édition inline et duplication sans modales bloquantes
+  - Boutons de rétro-traduction FR→EN pour l'existant (FAQ, `checklist_templates`, `checklists`) depuis l'interface
 - Relations : FK vers `gites`, FK vers `auth.users`
 - Utilisé pour génération des fiches clients bilingues
 - Fichiers impliqués : 
@@ -274,6 +282,8 @@
 ### 2. Gestion du Linge
 - Suivi des draps par réservation
 - État: propre, sale, à laver
+- Alerte manque configurable côté client dans l'onglet draps (jour d'alerte + nombre de jours avant rupture estimée)
+- Persistance des paramètres d'alerte en BDD via `user_settings` (`draps_alert_weekday`, `draps_alert_days_before`), pas de stockage local
 
 ### 3. Planning Ménage ⭐ SYSTÈME COMPLET
 - **Fichiers:** `js/menage.js`, `js/cleaning-rules.js`, `js/cleaning-rules-modal.js`

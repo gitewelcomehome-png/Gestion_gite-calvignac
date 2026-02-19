@@ -488,14 +488,28 @@ function t(key) {
     return translations[currentLanguage][key] || key;
 }
 
+function getReservationClientName() {
+    if (!reservationData) return '';
+
+    const rawName = reservationData.client_name
+        || reservationData.nom_client
+        || reservationData.nom
+        || reservationData.guest_name
+        || reservationData.guest
+        || '';
+
+    return typeof rawName === 'string' ? rawName.trim() : '';
+}
+
 function updateTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         const translation = t(key);
+        const clientName = getReservationClientName();
         
         // Cas spéciaux : ne pas écraser le contenu dynamique
-        if (key === 'bienvenue' && reservationData?.client_name) {
-            el.textContent = `${translation} ${reservationData.client_name} !`;
+        if (key === 'bienvenue' && clientName) {
+            el.textContent = `${translation} ${clientName} !`;
         } else if (el.tagName === 'BUTTON' || el.tagName === 'SPAN') {
             // Pour les boutons et spans, seulement mettre à jour si pas de contenu mixte
             if (!el.querySelector('span')) {
@@ -716,9 +730,10 @@ async function loadCleaningSchedule() {
 function initializeUI() {
     // Nom du client dans l'en-tête
     const clientNameEl = document.getElementById('clientName');
-    if (clientNameEl && reservationData.client_name) {
+    const clientName = getReservationClientName();
+    if (clientNameEl && clientName) {
         const welcomeText = t('bienvenue');
-        clientNameEl.textContent = `${welcomeText} ${reservationData.client_name} !`;
+        clientNameEl.textContent = `${welcomeText} ${clientName} !`;
     }
     
     // 📸 Afficher les photos du gîte
@@ -3005,9 +3020,10 @@ async function generatePDF() {
         element.appendChild(style);
         
         // Configuration PDF
+        const clientName = getReservationClientName() || 'Client';
         const opt = {
             margin: [10, 10, 10, 10],
-            filename: `Fiche-Client-${reservationData.gite}-${reservationData.client_name}.pdf`,
+            filename: `Fiche-Client-${reservationData.gite}-${clientName}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { 
                 scale: 2,

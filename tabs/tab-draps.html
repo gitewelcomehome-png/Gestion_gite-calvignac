@@ -79,7 +79,17 @@
     
     <!-- SIMULATION DES BESOINS FUTURS -->
     <div class="card" style="grid-column: 1 / -1; border-color: #E67E22;" padding: 20px; box-shadow: 4px 4px 0 #2D3436; border-radius: 16px;">
-        <h3 class="section-title"><i data-lucide="sparkles"></i> Simulation des Besoins Futurs</h3>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
+            <h3 class="section-title" style="margin: 0;"><i data-lucide="sparkles"></i> Simulation des Besoins Futurs</h3>
+            <button onclick="ouvrirModalAlerteDraps()" style="background: #2D3436; color: white; padding: 8px 14px; border: 2px solid #2D3436; border-radius: 10px; cursor: pointer; font-weight: 700; box-shadow: 2px 2px 0 #E67E22; transition: all 0.2s;">
+                🔔 Configurer alerte manque
+            </button>
+        </div>
+
+        <div id="draps-alert-config-summary" style="margin-bottom: 14px; padding: 10px 12px; border: 2px dashed #E67E22; border-radius: 10px; color: var(--text-secondary); font-size: 0.9rem;">
+            Chargement de la configuration d'alerte...
+        </div>
+
         <div style="margin-bottom: 20px;">
             <label class="form-label-upper">Calculer les besoins jusqu'au :</label>
             <div style="display: flex; gap: 10px; align-items: center;">
@@ -99,12 +109,61 @@
     </div>
 </div>
 
+<div id="draps-alert-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10050; align-items: center; justify-content: center; padding: 16px;">
+    <div class="draps-alert-modal-panel" style="width: 100%; max-width: 480px; background: #ffffff; border: 3px solid #2D3436; border-radius: 14px; box-shadow: 6px 6px 0 #E67E22; padding: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin: 0; font-size: 1.05rem; color: var(--text);">🔔 Alerte manque de draps</h3>
+            <button onclick="fermerModalAlerteDraps()" style="border: 2px solid #2D3436; background: white; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-weight: 700;">×</button>
+        </div>
+
+        <p style="margin: 0 0 14px 0; color: var(--text-secondary); font-size: 0.9rem;">
+            Choisissez quand créer automatiquement la tâche "Commander draps".
+        </p>
+
+        <div style="display: grid; gap: 12px;">
+            <div>
+                <label for="draps-alert-weekday" style="display: block; margin-bottom: 6px; font-weight: 600; color: var(--text);">Jour d'alerte</label>
+                <select id="draps-alert-weekday" style="width: 100%; padding: 10px; border: 2px solid #2D3436; border-radius: 8px; background: var(--card); color: var(--text);">
+                    <option value="all">Tous les jours</option>
+                    <option value="1">Lundi</option>
+                    <option value="2">Mardi</option>
+                    <option value="3">Mercredi</option>
+                    <option value="4">Jeudi</option>
+                    <option value="5">Vendredi</option>
+                    <option value="6">Samedi</option>
+                    <option value="0">Dimanche</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="draps-alert-days-before" style="display: block; margin-bottom: 6px; font-weight: 600; color: var(--text);">Prévenir combien de jours avant la rupture estimée ?</label>
+                <input id="draps-alert-days-before" type="number" min="0" max="30" step="1" style="width: 100%; padding: 10px; border: 2px solid #2D3436; border-radius: 8px; background: var(--card); color: var(--text);" />
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button onclick="fermerModalAlerteDraps()" style="padding: 9px 14px; border: 2px solid #2D3436; border-radius: 8px; background: white; color: #2D3436; font-weight: 700; cursor: pointer;">Annuler</button>
+            <button onclick="enregistrerParametresAlerteDraps()" style="padding: 9px 14px; border: 2px solid #2D3436; border-radius: 8px; background: #E67E22; color: white; font-weight: 700; cursor: pointer;">Enregistrer</button>
+        </div>
+    </div>
+</div>
+
 <style>
 .card {
     background: var(--card);
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+html[data-theme="dark"] .draps-alert-modal-panel,
+html.theme-dark .draps-alert-modal-panel {
+    background: #000000 !important;
+}
+
+html[data-theme="light"] .draps-alert-modal-panel,
+html.theme-light .draps-alert-modal-panel {
+    background: #ffffff !important;
 }
 
 .card h2 {
