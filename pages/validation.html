@@ -708,6 +708,7 @@
                 const { data: rows, error } = await supabaseClient
                     .from('cleaning_schedule')
                     .select('id, reservation_id, gite_id, scheduled_date, notes, status, proposed_by')
+                    .eq('owner_user_id', window.cleanerOwnerId)
                     .ilike('notes', '%[AUTO_CLEANING_CONFLICT]%')
                     .neq('status', 'refused')
                     .order('scheduled_date', { ascending: true });
@@ -751,18 +752,20 @@
                     giteMap[g.id] = g.name;
                 });
                 
-                // Récupérer toutes les réservations futures
+                // Récupérer les réservations du bon propriétaire uniquement
                 const { data: reservations, error: resError } = await supabaseClient
                     .from('reservations')
                     .select('*')
+                    .eq('owner_user_id', window.cleanerOwnerId)
                     .order('check_out', { ascending: true });
 
                 if (resError) throw resError;
 
-                // Récupérer tous les ménages planifiés
+                // Récupérer les ménages planifiés du bon propriétaire uniquement
                 const { data: cleaningSchedules, error: cleanError } = await supabaseClient
                     .from('cleaning_schedule')
-                    .select('*');
+                    .select('*')
+                    .eq('owner_user_id', window.cleanerOwnerId);
 
                 if (cleanError) throw cleanError;
 

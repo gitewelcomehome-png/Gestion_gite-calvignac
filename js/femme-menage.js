@@ -839,7 +839,8 @@ async function supprimerRetourMenage(retourId) {
         const { error } = await window.supabaseClient
             .from('retours_menage')
             .delete()
-            .eq('id', retourId);
+            .eq('id', retourId)
+            .eq('owner_user_id', window.cleanerOwnerId);
         if (error) throw error;
         showToast('🗑️ Retour supprimé', 'success');
         await chargerRetoursMenuge();
