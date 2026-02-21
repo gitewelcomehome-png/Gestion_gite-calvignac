@@ -2548,17 +2548,17 @@ async function submitDemandeHoraire(type) {
         } 
         // 3. Sinon, créer une nouvelle demande
         else {
-            // Récupérer l'owner_user_id depuis la session
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                showToast('❌ Erreur d\'authentification');
+            // Utiliser l'owner_user_id de la réservation (accès anonyme par token)
+            const ownerUserId = reservationData.owner_user_id;
+            if (!ownerUserId) {
+                showToast('❌ Erreur : données de réservation manquantes');
                 return;
             }
             
             const { data, error } = await supabase
                 .from('demandes_horaires')
                 .insert({
-                    owner_user_id: user.id,
+                    owner_user_id: ownerUserId,
                     reservation_id: reservationData.id,
                     type: typeDb,
                     heure_demandee: heureDemandee,
