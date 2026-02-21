@@ -15,8 +15,8 @@ async function initFichesClients() {
     // Validation temps réel pour formulaire édition gîte
     if (window.ValidationUtils) {
         window.ValidationUtils.attachRealtimeValidation('editAdresse', 'text', { required: true });
-        window.ValidationUtils.attachRealtimeValidation('editHeureArrivee', 'hours', { required: true });
-        window.ValidationUtils.attachRealtimeValidation('editHeureDepart', 'hours', { required: true });
+        window.ValidationUtils.attachRealtimeValidation('editHeureArrivee', 'hours', { required: false });
+        window.ValidationUtils.attachRealtimeValidation('editHeureDepart', 'hours', { required: false });
     }
     
     // Attendre que supabaseClient soit disponible
@@ -856,8 +856,8 @@ async function saveGiteInfo(event) {
         const rules = {
             'editAdresse': { type: 'text', required: true },
             'editWifiSsid': { type: 'text', required: false },
-            'editHeureArrivee': { type: 'hours', required: true },
-            'editHeureDepart': { type: 'hours', required: true }
+            'editHeureArrivee': { type: 'hours', required: false },
+            'editHeureDepart': { type: 'hours', required: false }
         };
         
         const validation = window.ValidationUtils.validateForm(form, rules);
@@ -880,12 +880,12 @@ async function saveGiteInfo(event) {
         wifi_ssid: document.getElementById('editWifiSsid').value,
         wifi_password: document.getElementById('editWifiPassword').value,
         wifi_qr_url: document.getElementById('editWifiQr').value || null,
-        heure_arrivee: document.getElementById('editHeureArrivee').value,
-        heure_depart: document.getElementById('editHeureDepart').value,
-        heure_arrivee_min: document.getElementById('editHeureArriveeMin').value,
-        heure_arrivee_menage: document.getElementById('editHeureArriveeAvecMenage').value,
-        heure_depart_max: document.getElementById('editHeureDepartMax').value,
-        heure_depart_dimanche: document.getElementById('editHeureDepartDimanche').value,
+        heure_arrivee: document.getElementById('editHeureArrivee').value || null,
+        heure_depart: document.getElementById('editHeureDepart').value || null,
+        heure_arrivee_min: document.getElementById('editHeureArriveeMin').value || null,
+        heure_arrivee_menage: document.getElementById('editHeureArriveeAvecMenage').value || null,
+        heure_depart_max: document.getElementById('editHeureDepartMax').value || null,
+        heure_depart_dimanche: document.getElementById('editHeureDepartDimanche').value || null,
         tabac: document.getElementById('editReglementFr').value,
         tabac_en: document.getElementById('editReglementEn').value
     };
