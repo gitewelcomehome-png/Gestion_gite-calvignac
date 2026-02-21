@@ -43,6 +43,15 @@ async function initTokenMode() {
         window.cleanerOwnerId = tokenData.owner_user_id;
         window.cleanerTokenMode = true;
         window.cleanerTokenType = tokenData.type || 'cleaner';
+
+        // Recréer le client Supabase avec le header x-cleaner-token
+        // → les RLS policies côté BDD filtrent automatiquement par owner
+        const { createClient } = window.supabase;
+        window.supabaseClient = createClient(
+            window.APP_CONFIG.SUPABASE_URL,
+            window.APP_CONFIG.SUPABASE_KEY,
+            { global: { headers: { 'x-cleaner-token': token } } }
+        );
         return true;
     }
 

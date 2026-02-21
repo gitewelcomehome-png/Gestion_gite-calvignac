@@ -522,7 +522,7 @@
         document.documentElement.classList.remove('theme-dark');
         
         // Utiliser le client Supabase déjà initialisé dans shared-config.js
-        const supabaseClient = window.supabaseClient;
+        let supabaseClient = window.supabaseClient;
 
         // --- Mode token (lien partageable société) ---
         window.cleanerOwnerId = null;
@@ -541,6 +541,16 @@
                     if (error || !tokenData) throw new Error('Token invalide');
                     window.cleanerOwnerId = tokenData.owner_user_id;
                     window.cleanerTokenMode = true;
+
+                    // Recréer le client Supabase avec le header x-cleaner-token
+                    // → les RLS policies côté BDD filtrent automatiquement par owner
+                    const { createClient } = window.supabase;
+                    window.supabaseClient = createClient(
+                        window.APP_CONFIG.SUPABASE_URL,
+                        window.APP_CONFIG.SUPABASE_KEY,
+                        { global: { headers: { 'x-cleaner-token': token } } }
+                    );
+                    supabaseClient = window.supabaseClient;
                 } catch (e) {
                     document.body.innerHTML = '<div style="padding:40px;text-align:center;"><h2>❌ Lien invalide ou expiré</h2></div>';
                     throw e;
