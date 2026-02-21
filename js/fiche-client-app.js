@@ -3634,9 +3634,9 @@ async function toggleClientChecklistItem(templateId, type) {
             .select('*')
             .eq('reservation_id', reservationData.id)
             .eq('template_id', templateId)
-            .single();
+            .maybeSingle();
         
-        if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = pas trouvé (OK)
+        if (fetchError) { // maybeSingle() ne renvoie pas d'erreur si pas de ligne
             throw fetchError;
         }
         
