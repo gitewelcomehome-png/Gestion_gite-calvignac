@@ -102,15 +102,15 @@ ON public.linen_stock_items FOR UPDATE TO anon
 USING (owner_user_id = public.cleaner_token_owner_id())
 WITH CHECK (owner_user_id = public.cleaner_token_owner_id());
 
--- 8. reservations : lecture anon filtrée par l'owner du token
-DROP POLICY IF EXISTS "anon_read_reservations" ON public.reservations;
-CREATE POLICY "anon_read_reservations"
+-- 8. reservations : lecture anon filtrée par l'owner du token (lien ménage uniquement)
+DROP POLICY IF EXISTS "anon_cleaner_read_reservations" ON public.reservations;
+CREATE POLICY "anon_cleaner_read_reservations"
 ON public.reservations FOR SELECT TO anon
 USING (owner_user_id = public.cleaner_token_owner_id());
 
 -- 9. cleaning_schedule : lecture + écriture anon filtrées par l'owner du token
-DROP POLICY IF EXISTS "anon_read_cleaning_schedule" ON public.cleaning_schedule;
-CREATE POLICY "anon_read_cleaning_schedule"
+DROP POLICY IF EXISTS "anon_cleaner_read_cleaning_schedule" ON public.cleaning_schedule;
+CREATE POLICY "anon_cleaner_read_cleaning_schedule"
 ON public.cleaning_schedule FOR SELECT TO anon
 USING (owner_user_id = public.cleaner_token_owner_id());
 
