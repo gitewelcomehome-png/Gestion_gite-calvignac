@@ -524,6 +524,34 @@
         // Utiliser le client Supabase déjà initialisé dans shared-config.js
         const supabaseClient = window.supabaseClient;
 
+        // --- Mode token (lien partageable société) ---
+        window.cleanerOwnerId = null;
+        window.cleanerTokenMode = false;
+
+        async function initTokenMode() {
+            const token = new URLSearchParams(window.location.search).get('token');
+            if (token) {
+                try {
+                    const { data: tokenData, error } = await supabaseClient
+                        .from('cleaner_tokens')
+                        .select('owner_user_id, type')
+                        .eq('token', token)
+                        .in('type', ['company', 'cleaner'])
+                        .single();
+                    if (error || !tokenData) throw new Error('Token invalide');
+                    window.cleanerOwnerId = tokenData.owner_user_id;
+                    window.cleanerTokenMode = true;
+                } catch (e) {
+                    document.body.innerHTML = '<div style="padding:40px;text-align:center;"><h2>❌ Lien invalide ou expiré</h2></div>';
+                    throw e;
+                }
+            } else {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) { window.location.href = '/'; return; }
+                window.cleanerOwnerId = user.id;
+            }
+        }
+
         function setSafeHtml(el, html) {
             if (!el) return;
             if (window.SecurityUtils && typeof window.SecurityUtils.setInnerHTML === 'function') {
@@ -700,8 +728,18 @@
             const container = document.getElementById('planningContainer');
             
             try {
-                // Charger les gîtes
-                const gites = await window.gitesManager.getAll();
+                // Charger les gîtes (mode token ou auth)
+                let gites;
+                if (window.cleanerTokenMode) {
+                    const { data: gitesData } = await supabaseClient
+                        .from('gites')
+                        .select('*')
+                        .eq('owner_user_id', window.cleanerOwnerId)
+                        .order('name');
+                    gites = gitesData;
+                } else {
+                    gites = await window.gitesManager.getAll();
+                }
                 if (!gites || gites.length === 0) {
                     console.error('❌ Aucun gîte trouvé');
                     return;
@@ -1143,13 +1181,10 @@
                 
                 if (resError) throw resError;
                 
-                // Récupérer l'utilisateur actuel
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                
                 const { error } = await supabaseClient
                     .from('cleaning_schedule')
                     .upsert({
-                        owner_user_id: user.id,
+                        owner_user_id: window.cleanerOwnerId,
                         reservation_id: reservationId,
                         gite_id: reservation.gite_id,
                         scheduled_date: scheduledDate,
@@ -1189,11 +1224,8 @@
                 
                 if (resError) throw resError;
                 
-                // Récupérer l'utilisateur actuel
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                
                 const dataToPropose = {
-                    owner_user_id: user.id,
+                    owner_user_id: window.cleanerOwnerId,
                     reservation_id: reservationId,
                     gite_id: reservation.gite_id,
                     scheduled_date: scheduledDate,
@@ -1266,11 +1298,11 @@
             }
         }
 
-        // Charger au démarrage
-        loadPlanning();
-
-        // Recharger toutes les 30 secondes
-        setInterval(loadPlanning, 30000);
+        // Charger au démarrage (après init token)
+        initTokenMode().then(() => {
+            loadPlanning();
+            setInterval(loadPlanning, 30000);
+        }).catch(() => {});
     </script>
 </body>
 </html>

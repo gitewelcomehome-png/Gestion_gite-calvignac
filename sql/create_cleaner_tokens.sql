@@ -88,4 +88,27 @@ ON public.linen_stock_items FOR UPDATE TO anon
 USING (true)
 WITH CHECK (true);
 
+-- 8. reservations : lecture anon (pour afficher le planning société)
+DROP POLICY IF EXISTS "anon_read_reservations" ON public.reservations;
+CREATE POLICY "anon_read_reservations"
+ON public.reservations FOR SELECT TO anon
+USING (true);
+
+-- 9. cleaning_schedule : lecture + écriture anon (validation/proposition société)
+DROP POLICY IF EXISTS "anon_read_cleaning_schedule" ON public.cleaning_schedule;
+CREATE POLICY "anon_read_cleaning_schedule"
+ON public.cleaning_schedule FOR SELECT TO anon
+USING (true);
+
+DROP POLICY IF EXISTS "anon_insert_cleaning_schedule" ON public.cleaning_schedule;
+CREATE POLICY "anon_insert_cleaning_schedule"
+ON public.cleaning_schedule FOR INSERT TO anon
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "anon_update_cleaning_schedule" ON public.cleaning_schedule;
+CREATE POLICY "anon_update_cleaning_schedule"
+ON public.cleaning_schedule FOR UPDATE TO anon
+USING (true)
+WITH CHECK (true);
+
 SELECT '✅ cleaner_tokens créé + toutes les policies anon configurées' as status;

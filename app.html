@@ -1824,7 +1824,7 @@
                     existing = newToken;
                 }
 
-                const url = `${window.location.origin}/pages/femme-menage.html?token=${existing.token}`;
+                const url = `${window.location.origin}/pages/validation.html?token=${existing.token}`;
                 try {
                     await navigator.clipboard.writeText(url);
                     showToast('🔗 Lien copié ! Envoyez-le à votre société de ménage.', 'success');
