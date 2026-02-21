@@ -556,11 +556,14 @@ html.theme-dark.style-apple .card {
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    color: var(--upstay-cyan, #00C2CB) !important;
 }
 
 .section-title-main i,
 .section-title-main svg {
     flex-shrink: 0;
+    color: var(--upstay-cyan, #00C2CB) !important;
+    stroke: var(--upstay-cyan, #00C2CB) !important;
 }
 
 .section-description {

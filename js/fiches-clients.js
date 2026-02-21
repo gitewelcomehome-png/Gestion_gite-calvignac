@@ -246,7 +246,7 @@ async function loadFichesClientList() {
                             <button class="btn btn-success" onclick="openFicheClient('${resa.token[0].token}')">
                                 👁️ Voir la fiche
                             </button>
-                            <button class="btn btn-primary" onclick="sendWhatsAppFicheReservation(${resa.id}, '${resa.client_phone}', '${resa.token[0].token}')">
+                            <button class="btn btn-primary" data-wa-resa-id="${resa.id}" data-wa-token="${resa.token[0].token}" onclick="envoyerWhatsAppFiche(this)">
                                 💬 WhatsApp
                             </button>
                         `}
@@ -359,14 +359,55 @@ function openFicheClient(token) {
     window.open(url, '_blank');
 }
 
-function sendWhatsAppFicheReservation(reservationId, telephone, token) {
-    if (!telephone) {
-        showNotification('⚠️ Numéro de téléphone manquant pour cette réservation', 'error');
+// ==================== WHATSAPP - SYSTÈME RECONSTRUIT ====================
+// Principe : le numéro n'est JAMAIS passé en paramètre HTML inline.
+// Il est toujours récupéré fraîchement depuis Supabase au moment du clic.
+
+function _normaliserTelephoneWhatsApp(raw) {
+    if (!raw) return null;
+    let digits = String(raw).replace(/[^0-9]/g, '');
+    if (!digits) return null;
+    // Format 00XXXXXXXXXX -> supprimer les deux zéros
+    if (digits.startsWith('00')) digits = digits.slice(2);
+    // Format français 0XXXXXXXXX (10 chiffres) -> 33XXXXXXXXX
+    else if (digits.startsWith('0') && digits.length === 10) digits = '33' + digits.slice(1);
+    // Validation longueur minimale (8 chiffres hors indicatif)
+    if (digits.length < 8) return null;
+    return digits;
+}
+
+async function envoyerWhatsAppFiche(btn) {
+    const reservationId = parseInt(btn.getAttribute('data-wa-resa-id'), 10);
+    const token = btn.getAttribute('data-wa-token');
+
+    if (!reservationId || !token) {
+        showNotification('⚠️ Données manquantes pour envoyer WhatsApp', 'error');
         return;
     }
-    
-    const ficheUrl = `${window.location.origin}/pages/fiche-client.html?token=${token}`;
-    const message = `Bonjour,
+
+    btn.disabled = true;
+    btn.textContent = '⏳...';
+
+    try {
+        // Fetch du numéro DIRECTEMENT en base — jamais depuis le HTML
+        const { data: resa, error } = await window.supabaseClient
+            .from('reservations')
+            .select('client_phone, client_name')
+            .eq('id', reservationId)
+            .single();
+
+        if (error || !resa) throw new Error('Réservation introuvable en base');
+
+        const rawPhone = resa.client_phone;
+        const waPhone = _normaliserTelephoneWhatsApp(rawPhone);
+
+        if (!waPhone) {
+            showNotification(`⚠️ Numéro invalide en base : "${rawPhone || 'vide'}". Corrigez-le dans la réservation.`, 'error');
+            return;
+        }
+
+        const ficheUrl = `${window.location.origin}/pages/fiche-client.html?token=${encodeURIComponent(token)}`;
+        const message = `Bonjour ${resa.client_name || ''},
 
 Voici votre guide pour votre séjour :
 ${ficheUrl}
@@ -374,19 +415,25 @@ ${ficheUrl}
 Vous y trouverez toutes les informations nécessaires (codes, horaires, activités...).
 
 À très bientôt !`;
-    
-    const whatsappUrl = `https://wa.me/${telephone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-    
-    // Logger l'envoi
-    window.supabaseClient
-        .from('fiche_generation_logs')
-        .insert({
+
+        const whatsappUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+
+        // Log en base
+        window.supabaseClient.from('fiche_generation_logs').insert({
             reservation_id: reservationId,
             type_generation: 'whatsapp',
             generated_by: 'admin',
             fiche_url: ficheUrl
-        });
+        }).catch(() => {});
+
+    } catch (err) {
+        console.error('❌ envoyerWhatsAppFiche:', err);
+        showNotification('❌ Erreur envoi WhatsApp : ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '💬 WhatsApp';
+    }
 }
 
 // ==================== DEMANDES HORAIRES ====================
@@ -669,7 +716,7 @@ async function loadRetoursClients() {
                                 ✅ Marquer résolu
                             </button>
                             ${retour.reservation.telephone ? `
-                                <button class="btn btn-secondary" onclick="contactClient('${retour.reservation.client_phone}', '${escapeHtml(retour.reservation.client_name)}', '${escapeHtml(retour.sujet)}')">
+                                <button class="btn btn-secondary" data-wa-retour-resa-id="${retour.reservation_id}" data-wa-sujet="${escapeHtml(retour.sujet)}" onclick="contactClientWhatsApp(this)">
                                     📞 Contacter
                                 </button>
                             ` : ''}
@@ -711,14 +758,46 @@ async function marquerRetourResolu(retourId) {
     }
 }
 
-function contactClient(telephone, nom, sujet) {
-    const message = `Bonjour ${nom},
+async function contactClientWhatsApp(btn) {
+    const reservationId = parseInt(btn.getAttribute('data-wa-retour-resa-id'), 10);
+    const sujet = btn.getAttribute('data-wa-sujet') || '';
+
+    if (!reservationId) {
+        showNotification('⚠️ ID réservation manquant', 'error');
+        return;
+    }
+
+    btn.disabled = true;
+
+    try {
+        // Fetch du numéro DIRECTEMENT en base — jamais depuis le HTML
+        const { data: resa, error } = await window.supabaseClient
+            .from('reservations')
+            .select('client_phone, client_name')
+            .eq('id', reservationId)
+            .single();
+
+        if (error || !resa) throw new Error('Réservation introuvable');
+
+        const waPhone = _normaliserTelephoneWhatsApp(resa.client_phone);
+        if (!waPhone) {
+            showNotification(`⚠️ Numéro invalide en base : "${resa.client_phone || 'vide'}". Corrigez-le dans la réservation.`, 'error');
+            return;
+        }
+
+        const message = `Bonjour ${resa.client_name || ''},
 
 Suite à votre message concernant : ${sujet}
 
 `;
-    const whatsappUrl = `https://wa.me/${telephone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+        window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`, '_blank');
+
+    } catch (err) {
+        console.error('❌ contactClientWhatsApp:', err);
+        showNotification('❌ Erreur : ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+    }
 }
 
 // ==================== CONFIGURATION GÎTES ====================
@@ -1300,13 +1379,13 @@ window.openModalGenereFiche = openModalGenereFiche;
 window.confirmerGenerationFiche = confirmerGenerationFiche;
 window.copyFicheUrl = copyFicheUrl;
 window.openFicheClient = openFicheClient;
-window.sendWhatsAppFicheReservation = sendWhatsAppFicheReservation;
+window.envoyerWhatsAppFiche = envoyerWhatsAppFiche;
 window.openModalValidation = openModalValidation;
 window.approuverDemande = approuverDemande;
 window.showRefusForm = showRefusForm;
 window.refuserDemande = refuserDemande;
 window.marquerRetourResolu = marquerRetourResolu;
-window.contactClient = contactClient;
+window.contactClientWhatsApp = contactClientWhatsApp;
 window.editGiteInfo = editGiteInfo;
 window.saveGiteInfo = saveGiteInfo;
 window.loadChecklistsConfig = loadChecklistsConfig;

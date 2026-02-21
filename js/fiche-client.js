@@ -178,13 +178,37 @@ function showSimpleModal(reservation, ficheUrl, token, clientName, clientPhone) 
     };
     
     if (hasPhone) {
-        document.getElementById('btn-whatsapp').onclick = () => {
-            const phone = reservation.telephone.replace(/\D/g, '').replace(/^0/, '33');
-            const message = `Bonjour ${reservation.nom} ! 👋\n\nVoici votre fiche d'accueil pour votre séjour au gîte ${reservation.gite} :\n\n${ficheUrl}\n\nBon séjour ! 🏡`;
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-            // console.log('💬 Ouverture WhatsApp:', whatsappUrl.substring(0, 50) + '...');
-            window.open(whatsappUrl, '_blank');
-            modal.remove();
+        document.getElementById('btn-whatsapp').onclick = async () => {
+            // Le numéro est récupéré DIRECTEMENT en base à chaque clic — jamais depuis le DOM ou un cache
+            try {
+                const { data: resaFresh, error } = await window.supabaseClient
+                    .from('reservations')
+                    .select('client_phone, client_name')
+                    .eq('id', reservation.id)
+                    .single();
+
+                if (error || !resaFresh) throw new Error('Réservation introuvable');
+
+                const rawPhone = resaFresh.client_phone;
+                let waPhone = String(rawPhone || '').replace(/[^0-9]/g, '');
+                if (waPhone.startsWith('00')) waPhone = waPhone.slice(2);
+                else if (waPhone.startsWith('0') && waPhone.length === 10) waPhone = '33' + waPhone.slice(1);
+
+                if (!waPhone || waPhone.length < 8) {
+                    alert(`⚠️ Numéro invalide en base : "${rawPhone || 'vide'}". Corrigez-le dans la réservation.`);
+                    return;
+                }
+
+                const nomDisplay = resaFresh.client_name || clientName || '';
+                const giteDisplay = reservation.gite || '';
+                const message = `Bonjour ${nomDisplay} ! 👋\n\nVoici votre fiche d'accueil pour votre séjour${giteDisplay ? ` au gîte ${giteDisplay}` : ''} :\n\n${ficheUrl}\n\nBon séjour ! 🏡`;
+                window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`, '_blank');
+                modal.remove();
+
+            } catch (err) {
+                console.error('❌ WhatsApp fiche-client:', err);
+                alert('❌ Erreur WhatsApp : ' + err.message);
+            }
         };
     }
     

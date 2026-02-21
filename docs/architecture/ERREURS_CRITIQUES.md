@@ -31,6 +31,78 @@ Ce qu'il faut faire pour éviter que ça se reproduise
 
 ## 🔴 Erreurs Référencées
 
+### [20 Février 2026] - Ménage conservé au milieu d'une nouvelle réservation (risque opérationnel)
+
+**Contexte:**
+Lorsqu'une nouvelle réservation était importée/ajoutée entre deux séjours, un ménage déjà planifié pouvait rester dans la période occupée par cette nouvelle réservation.
+
+**Erreur:**
+- Ancienne date de ménage conservée alors qu'elle tombait au milieu d'un séjour
+- Pas de suppression automatique de l'ancien ménage
+- Pas de proposition explicite des 2 nouvelles dates (avant/après nouvelle réservation)
+
+**Cause:**
+Absence de workflow automatique de replanification au moment de la création/mise à jour réservation.
+
+**Solution:**
+✅ Ajout d'une résolution automatique via `autoResolveCleaningConflictForReservation()`:
+- détection des lignes `cleaning_schedule` en conflit strict (`scheduled_date` dans la nouvelle réservation)
+- suppression automatique de l'ancien ménage conflictuel
+- création automatique de 2 nouveaux ménages proposés:
+    - avant la nouvelle réservation (matin)
+    - après la nouvelle réservation (matin)
+- enregistrement d'un warning métier dans `notes` (`[AUTO_CLEANING_CONFLICT] ...`)
+
+✅ Affichage warning:
+- côté owner: alerte dashboard + bloc d'explication dans l'onglet ménage
+- côté société ménage: warning explicatif dans `pages/validation.html` avec anciennes/nouvelles dates
+
+**Prévention:**
+1. Exécuter la résolution conflit ménage à chaque création/mise à jour de réservation (manuel + iCal)
+2. Conserver une trace explicite en `notes` pour audit et validation humaine
+3. Vérifier que l'ancien ménage est supprimé et que les 2 nouvelles dates sont visibles dans les deux interfaces
+
+**Fichiers concernés:**
+- `js/supabase-operations.js`
+- `js/sync-ical-v2.js`
+- `js/menage.js`
+- `js/dashboard.js`
+- `pages/validation.html`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [20 Février 2026] - Conflits planning ménage non signalés sur le dashboard owner
+
+**Contexte:**
+Des ménages pouvaient rester planifiés après la prochaine arrivée d'un même gîte sans alerte visible dans le dashboard.
+
+**Erreur:**
+- Absence d'alerte proactive pour conflit de date ménage
+- Risque opérationnel: ménage trop tardif par rapport au check-in suivant
+
+**Cause:**
+Le bloc d'alertes dashboard couvrait les statuts (`refused`, `pending_validation`) mais pas le contrôle métier de cohérence `scheduled_date > prochaine arrivée`.
+
+**Solution:**
+✅ Extension de `updateDashboardAlerts()` dans `js/dashboard.js`:
+- chargement des lignes `cleaning_schedule`
+- reconstitution des réservations par gîte
+- détection des conflits de planning (date ménage strictement après la prochaine arrivée)
+- ajout d'une alerte `danger` avec redirection vers l'onglet ménage
+
+**Prévention:**
+1. Maintenir les alertes de statut + les alertes de cohérence métier
+2. Revalider ce contrôle à chaque évolution des règles de planification ménage
+
+**Fichiers concernés:**
+- `js/dashboard.js`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
 ### [18 Février 2026] - Alertes critiques monitoring sans ticket client proactif
 
 **Contexte:**

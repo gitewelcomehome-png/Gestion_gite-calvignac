@@ -10,3 +10,8 @@ config.local.js
 .env.local
 .vercel
 .env*.local
+
+# 💾 Backups (fichiers lourds, hors git)
+_backups/
+*.tar.gz
+*.tar.gz.sha256

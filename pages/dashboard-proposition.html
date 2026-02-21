@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark" id="app-root" class="theme-dark style-sidebar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Proposition - Complet</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/shared-config.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-primary, Inter, sans-serif);
+        }
+
+        .page-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(1150px 520px at 12% -18%, color-mix(in srgb, var(--upstay-cyan) 18%, transparent), transparent 62%),
+                radial-gradient(950px 420px at 70% -22%, color-mix(in srgb, #ff6b9d 17%, transparent), transparent 60%),
+                radial-gradient(900px 440px at 95% -14%, color-mix(in srgb, var(--upstay-blue) 20%, transparent), transparent 60%),
+                radial-gradient(1100px 500px at 18% 105%, color-mix(in srgb, #ffae42 12%, transparent), transparent 64%),
+                var(--bg-primary);
+        }
+
+        .wrap {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .quick-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 0 12px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--bg-secondary) 92%, #ffffff 8%);
+            box-shadow: var(--shadow);
+        }
+
+        .quick-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: color-mix(in srgb, var(--upstay-cyan) 10%, var(--bg-secondary));
+            transition: transform .15s ease, border-color .15s ease;
+        }
+
+        .quick-nav-link:hover {
+            transform: translateY(-1px);
+            border-color: color-mix(in srgb, #7c3aed 40%, var(--border-color));
+        }
+
+        .actions { display: flex; align-items: center; gap: 8px; }
+
+        .btn-link,
+        .btn-refresh {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 10px;
+            border: 2px solid color-mix(in srgb, #ffffff 24%, var(--border-color));
+            background: linear-gradient(180deg, color-mix(in srgb, #ffffff 20%, var(--bg-secondary)), color-mix(in srgb, #ffffff 8%, var(--bg-secondary)));
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 800;
+            cursor: pointer;
+            padding: 9px 14px;
+            box-shadow: 0 3px 0 color-mix(in srgb, #0f172a 45%, transparent), var(--shadow);
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        .btn-refresh {
+            border-color: color-mix(in srgb, #06b6d4 55%, var(--border-color));
+        }
+
+        .btn-link:hover,
+        .btn-refresh:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 0 color-mix(in srgb, #0f172a 55%, transparent), var(--shadow-hover);
+        }
+
+        .sync-label { font-size: 0.8rem; color: var(--text-secondary); }
+
+        .hero {
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg,
+                color-mix(in srgb, #67e8f9 22%, var(--bg-secondary)) 0%,
+                color-mix(in srgb, #93c5fd 20%, var(--bg-secondary)) 45%,
+                color-mix(in srgb, #f9a8d4 18%, var(--bg-secondary)) 100%);
+            box-shadow: var(--shadow-hover);
+            margin-bottom: 14px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: clamp(1.24rem, 2vw, 1.9rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            margin: 8px 0 0;
+            color: color-mix(in srgb, var(--text-primary) 84%, var(--text-secondary));
+            font-size: .9rem;
+        }
+
+        .live-strip {
+            margin-top: 12px;
+            border: 1px solid rgba(255,255,255,.35);
+            border-radius: 10px;
+            background: linear-gradient(90deg, rgba(255,255,255,.16), rgba(255,255,255,.08));
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 8px 10px;
+        }
+
+        .live-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: .82rem;
+            font-weight: 700;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: color-mix(in srgb, #0891b2 72%, #ffffff 28%);
+            box-shadow: 0 0 0 0 rgba(8,145,178,.3);
+            animation: pulse 1.6s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,255,255,.4); }
+            70% { box-shadow: 0 0 0 7px rgba(255,255,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .kpi {
+            border: 1px solid color-mix(in srgb, #ffffff 32%, var(--border-color));
+            border-radius: 12px;
+            background: color-mix(in srgb, #ffffff 74%, var(--bg-secondary));
+            padding: 10px;
+        }
+
+        .kpi-label { color: var(--text-secondary); font-size: .76rem; margin-bottom: 4px; }
+        .kpi-value { color: var(--text-primary); font-size: 1.06rem; font-weight: 800; letter-spacing: -.01em; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .span-12 { grid-column: span 12; }
+        .span-8 { grid-column: span 8; }
+        .span-6 { grid-column: span 6; }
+        .span-4 { grid-column: span 4; }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--bg-secondary) 86%, #ffffff 14%);
+            box-shadow: var(--shadow);
+            padding: 14px;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card h3 {
+            margin: 0 0 10px;
+            font-size: .95rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 3px 8px;
+            border: 1px solid color-mix(in srgb, #7c3aed 35%, var(--border-color));
+            font-size: .72rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, color-mix(in srgb, #22d3ee 30%, var(--bg-secondary)), color-mix(in srgb, #a855f7 32%, var(--bg-secondary)));
+            color: #fff;
+        }
+
+        .list {
+            display: grid;
+            gap: 8px;
+            max-height: 360px;
+            overflow: auto;
+        }
+
+        .item {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: linear-gradient(135deg, color-mix(in srgb, #06b6d4 10%, var(--bg-secondary)), color-mix(in srgb, #f472b6 8%, var(--bg-secondary)));
+            padding: 10px;
+        }
+
+        .item:hover {
+            border-color: color-mix(in srgb, #f472b6 30%, var(--border-color));
+        }
+
+        .item-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .item-title { font-size: .88rem; font-weight: 700; }
+        .item-sub { font-size: .8rem; color: var(--text-secondary); }
+
+        .alert-warn { border-left: 4px solid #f59e0b; }
+        .alert-danger { border-left: 4px solid #ef4444; }
+        .alert-info { border-left: 4px solid #3b82f6; }
+
+        .action-row {
+            margin-top: 8px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            border: 2px solid color-mix(in srgb, #ffffff 24%, var(--border-color));
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: .74rem;
+            font-weight: 800;
+            line-height: 1;
+            min-height: 30px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+            background: linear-gradient(180deg, color-mix(in srgb, #ffffff 22%, var(--bg-secondary)), color-mix(in srgb, #ffffff 8%, var(--bg-secondary)));
+            box-shadow: 0 2px 0 color-mix(in srgb, #0f172a 40%, transparent);
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+            opacity: .95;
+            box-shadow: 0 3px 0 color-mix(in srgb, #0f172a 50%, transparent);
+        }
+        .btn-accept { background: linear-gradient(180deg, color-mix(in srgb, #10b981 32%, #ffffff), color-mix(in srgb, #10b981 20%, var(--bg-secondary))); border-color: color-mix(in srgb, #10b981 58%, var(--border-color)); }
+        .btn-refuse { background: linear-gradient(180deg, color-mix(in srgb, #ef4444 30%, #ffffff), color-mix(in srgb, #ef4444 18%, var(--bg-secondary))); border-color: color-mix(in srgb, #ef4444 58%, var(--border-color)); }
+        .btn-primary { background: linear-gradient(180deg, color-mix(in srgb, #3b82f6 30%, #ffffff), color-mix(in srgb, #3b82f6 18%, var(--bg-secondary))); border-color: color-mix(in srgb, #3b82f6 56%, var(--border-color)); }
+        .btn-secondary { background: linear-gradient(180deg, color-mix(in srgb, #8b5cf6 30%, #ffffff), color-mix(in srgb, #8b5cf6 18%, var(--bg-secondary))); border-color: color-mix(in srgb, #8b5cf6 56%, var(--border-color)); }
+        .btn-warning { background: linear-gradient(180deg, color-mix(in srgb, #f59e0b 34%, #ffffff), color-mix(in srgb, #f59e0b 20%, var(--bg-secondary))); border-color: color-mix(in srgb, #f59e0b 60%, var(--border-color)); }
+
+        .toast {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 99999;
+            background: linear-gradient(135deg, #111827, #374151);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 10px;
+            padding: 10px 12px;
+            box-shadow: 0 8px 26px rgba(0,0,0,.35);
+            font-size: .82rem;
+            font-weight: 600;
+        }
+
+        .bars {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            align-items: end;
+            gap: 8px;
+            min-height: 180px;
+        }
+
+        .bar-col { display: grid; gap: 6px; justify-items: center; }
+        .bar-value {
+            width: 100%;
+            border-radius: 8px 8px 4px 4px;
+            background: linear-gradient(180deg, var(--upstay-cyan), var(--upstay-blue));
+            min-height: 4px;
+        }
+
+        .bar-month { font-size: .72rem; color: var(--text-secondary); }
+
+        .mini-bars {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 8px;
+            align-items: end;
+            min-height: 150px;
+        }
+
+        .mini-col { display: grid; gap: 6px; justify-items: center; }
+        .mini-col-val {
+            width: 100%;
+            border-radius: 6px 6px 3px 3px;
+            min-height: 4px;
+            background: linear-gradient(180deg, #a78bfa 0%, #6366f1 100%);
+        }
+
+        .hbars { display: grid; gap: 8px; }
+        .hbar-row { display: grid; gap: 4px; }
+        .hbar-label { font-size: .78rem; color: var(--text-secondary); }
+        .hbar-track {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--text-secondary) 26%, transparent);
+            overflow: hidden;
+        }
+        .hbar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #22d3ee 0%, #3b82f6 55%, #8b5cf6 100%);
+        }
+
+        .meta {
+            color: var(--text-secondary);
+            font-size: .82rem;
+            line-height: 1.5;
+        }
+
+        .empty {
+            border: 1px dashed var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: .85rem;
+            text-align: center;
+            padding: 12px;
+        }
+
+        @media (max-width: 1080px) {
+            .span-8, .span-6, .span-4 { grid-column: span 12; }
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+<div class="page-shell">
+    <main class="wrap">
+        <header class="topbar">
+            <a href="/app.html" class="btn-link"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Retour application</a>
+            <div class="actions">
+                <button id="btn-refresh" class="btn-refresh"><i data-lucide="refresh-cw" style="width:16px;height:16px"></i> Actualiser</button>
+                <span id="last-sync" class="sync-label">Chargement…</span>
+            </div>
+        </header>
+
+        <nav class="quick-nav" aria-label="Navigation proposition">
+            <a href="#section-kpi" class="quick-nav-link"><i data-lucide="layout-dashboard" style="width:14px;height:14px"></i> Vue globale</a>
+            <a href="#section-alertes" class="quick-nav-link"><i data-lucide="siren" style="width:14px;height:14px"></i> Alertes</a>
+            <a href="#section-actions" class="quick-nav-link"><i data-lucide="check-square" style="width:14px;height:14px"></i> Actions</a>
+            <a href="#section-resas" class="quick-nav-link"><i data-lucide="calendar-days" style="width:14px;height:14px"></i> Réservations</a>
+            <a href="#section-graphes" class="quick-nav-link"><i data-lucide="chart-column" style="width:14px;height:14px"></i> Graphiques</a>
+        </nav>
+
+        <section id="section-kpi" class="hero">
+            <h1>Proposition dashboard — complète et autonome</h1>
+            <p id="hero-subtitle">Toutes les données du dashboard sont chargées ici sans toucher à la page principale.</p>
+            <div class="live-strip" id="live-strip"></div>
+            <div class="kpi-grid">
+                <div class="kpi"><div class="kpi-label">Trésorerie actuelle</div><div class="kpi-value" id="kpi-tresorerie">-</div></div>
+                <div class="kpi"><div class="kpi-label">CA mois</div><div class="kpi-value" id="kpi-ca-mois">-</div></div>
+                <div class="kpi"><div class="kpi-label">Bénéfice YTD</div><div class="kpi-value" id="kpi-benefice">-</div></div>
+                <div class="kpi"><div class="kpi-label">Marge nette</div><div class="kpi-value" id="kpi-marge">-</div></div>
+            </div>
+        </section>
+
+        <section class="grid">
+            <article id="section-alertes" class="card span-6">
+                <h3><span><i data-lucide="calendar-clock" style="width:16px;height:16px"></i> Demandes horaires</span><span id="badge-demandes" class="badge">0</span></h3>
+                <div id="liste-demandes" class="list"></div>
+            </article>
+
+            <article class="card span-6">
+                <h3><span><i data-lucide="calendar-sync" style="width:16px;height:16px"></i> Propositions ménage</span><span id="badge-propositions" class="badge">0</span></h3>
+                <div id="liste-propositions" class="list"></div>
+            </article>
+
+            <article class="card span-6">
+                <h3><span><i data-lucide="headphones" style="width:16px;height:16px"></i> Tickets support</span><span id="badge-tickets" class="badge">0</span></h3>
+                <div id="liste-tickets" class="list"></div>
+            </article>
+
+            <article class="card span-6">
+                <h3><span><i data-lucide="alert-triangle" style="width:16px;height:16px"></i> Problèmes urgents</span><span id="badge-urgents" class="badge">0</span></h3>
+                <div id="liste-urgents" class="list"></div>
+            </article>
+
+            <article id="section-actions" class="card span-6">
+                <h3><span><i data-lucide="message-circle" style="width:16px;height:16px"></i> Demandes & retours</span><span id="badge-retours" class="badge">0</span></h3>
+                <div id="liste-retours" class="list"></div>
+            </article>
+
+            <article class="card span-6">
+                <h3><span><i data-lucide="check-square" style="width:16px;height:16px"></i> Tâches ouvertes</span><span id="badge-todos" class="badge">0</span></h3>
+                <div id="liste-todos" class="list"></div>
+            </article>
+
+            <article id="section-resas" class="card span-8">
+                <h3><span><i data-lucide="calendar-days" style="width:16px;height:16px"></i> Réservations semaine</span><span id="badge-reservations" class="badge">0</span></h3>
+                <div id="liste-reservations" class="list"></div>
+            </article>
+
+            <article id="section-graphes" class="card span-4">
+                <h3><span><i data-lucide="wallet" style="width:16px;height:16px"></i> Trésorerie mensuelle</span></h3>
+                <div id="tresorerie-bars" class="bars"></div>
+            </article>
+
+            <article class="card span-6">
+                <h3><span><i data-lucide="bar-chart-3" style="width:16px;height:16px"></i> Réservations mensuelles</span></h3>
+                <div id="reservations-month-bars" class="mini-bars"></div>
+            </article>
+
+            <article class="card span-6">
+                <h3><span><i data-lucide="list-checks" style="width:16px;height:16px"></i> Répartition tâches</span></h3>
+                <div id="todos-category-bars" class="hbars"></div>
+            </article>
+
+            <article class="card span-12">
+                <h3><span><i data-lucide="database" style="width:16px;height:16px"></i> Contrôle sources</span></h3>
+                <div id="source-status" class="meta"></div>
+            </article>
+        </section>
+    </main>
+</div>
+
+<script>
+(function applyTheme() {
+    try {
+        const savedTheme = localStorage.getItem('icalou-theme') || 'dark';
+        const root = document.documentElement;
+        root.setAttribute('data-theme', savedTheme);
+        root.classList.remove('theme-light', 'theme-dark');
+        root.classList.add(savedTheme === 'dark' ? 'theme-dark' : 'theme-light');
+    } catch (error) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+})();
+
+const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+function formatCurrency(value) {
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Number(value || 0));
+}
+
+function safeDate(value) {
+    if (!value) return null;
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+}
+
+function setBadge(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = String(value);
+}
+
+function renderEmpty(id, text) {
+    const container = document.getElementById(id);
+    if (!container) return;
+    container.innerHTML = '<div class="empty">' + text + '</div>';
+}
+
+function escapeHtml(text) {
+    return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function weekRange(date) {
+    const today = new Date(date);
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(today);
+    const day = start.getDay();
+    const delta = day === 0 ? -6 : 1 - day;
+    start.setDate(start.getDate() + delta);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+}
+
+function isPendingStatus(statusValue) {
+    const s = String(statusValue || '').toLowerCase();
+    return !s || ['pending', 'en_attente', 'pending_validation', 'open', 'nouveau'].includes(s);
+}
+
+function findField(row, fields, fallback = '') {
+    for (const f of fields) {
+        if (row && row[f] !== undefined && row[f] !== null && row[f] !== '') return row[f];
+    }
+    return fallback;
+}
+
+async function querySafe(label, fn) {
+    try {
+        const { data, error } = await fn();
+        if (error) return { label, data: [], error };
+        return { label, data: data || [], error: null };
+    } catch (error) {
+        return { label, data: [], error };
+    }
+}
+
+function renderList(containerId, items, cls = '') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (!items.length) {
+        renderEmpty(containerId, 'Aucune donnée.');
+        return;
+    }
+    container.innerHTML = items.map(item => '<div class="item ' + cls + '">' + item + '</div>').join('');
+}
+
+function renderLive(stats) {
+    const container = document.getElementById('live-strip');
+    if (!container) return;
+    const data = [
+        'Demandes horaires : ' + stats.demandes,
+        'Changements ménage : ' + stats.propositions,
+        'Tickets support : ' + stats.tickets,
+        'Problèmes urgents : ' + stats.urgents,
+        'Tâches ouvertes : ' + stats.todos,
+        'Réservations semaine : ' + stats.reservations
+    ];
+    container.innerHTML = data.map(x => '<span class="live-item"><span class="dot"></span>' + x + '</span>').join('');
+}
+
+function actionButtons(type, id) {
+    const safeId = escapeHtml(id || '');
+    if (type === 'demandes') {
+        return '<div class="action-row">'
+            + '<button class="btn-action btn-accept" data-prop-action="Valider" data-prop-id="' + safeId + '">✓ Valider</button>'
+            + '<button class="btn-action btn-refuse" data-prop-action="Refuser" data-prop-id="' + safeId + '">✕ Refuser</button>'
+            + '</div>';
+    }
+    if (type === 'propositions') {
+        return '<div class="action-row">'
+            + '<button class="btn-action btn-accept" data-prop-action="Accepter" data-prop-id="' + safeId + '">✓ Accepter</button>'
+            + '<button class="btn-action btn-refuse" data-prop-action="Refuser" data-prop-id="' + safeId + '">✕ Refuser</button>'
+            + '</div>';
+    }
+    if (type === 'tickets') {
+        return '<div class="action-row">'
+            + '<button class="btn-action btn-primary" data-prop-action="Ouvrir" data-prop-id="' + safeId + '">↗ Ouvrir</button>'
+            + '<button class="btn-action btn-accept" data-prop-action="Traiter" data-prop-id="' + safeId + '">✓ Traiter</button>'
+            + '</div>';
+    }
+    if (type === 'urgents') {
+        return '<div class="action-row">'
+            + '<button class="btn-action btn-warning" data-prop-action="Répondre" data-prop-id="' + safeId + '">💬 Répondre</button>'
+            + '<button class="btn-action btn-accept" data-prop-action="Traité" data-prop-id="' + safeId + '">✓ Traité</button>'
+            + '</div>';
+    }
+    if (type === 'retours') {
+        return '<div class="action-row">'
+            + '<button class="btn-action btn-warning" data-prop-action="Répondre" data-prop-id="' + safeId + '">💬 Répondre</button>'
+            + '<button class="btn-action btn-secondary" data-prop-action="Clore" data-prop-id="' + safeId + '">○ Clore</button>'
+            + '</div>';
+    }
+    if (type === 'todos') {
+        return '<div class="action-row">'
+            + '<button class="btn-action btn-secondary" data-prop-action="Modifier" data-prop-id="' + safeId + '">✎ Modifier</button>'
+            + '<button class="btn-action btn-accept" data-prop-action="Terminer" data-prop-id="' + safeId + '">✓ Terminer</button>'
+            + '</div>';
+    }
+    if (type === 'reservations') {
+        return '<div class="action-row">'
+            + '<button class="btn-action btn-primary" data-prop-action="Fiche" data-prop-id="' + safeId + '">📄 Fiche</button>'
+            + '<button class="btn-action btn-secondary" data-prop-action="Modifier" data-prop-id="' + safeId + '">✎ Modifier</button>'
+            + '</div>';
+    }
+    return '';
+}
+
+function showLocalToast(message) {
+    const old = document.querySelector('.toast');
+    if (old) old.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2200);
+}
+
+function renderTresorerie(rows) {
+    const container = document.getElementById('tresorerie-bars');
+    if (!container) return;
+
+    const values = Array(12).fill(null);
+    rows.forEach(r => {
+        const month = Number(r.mois);
+        const value = Number.parseFloat(r.solde);
+        if (Number.isFinite(month) && month >= 1 && month <= 12 && Number.isFinite(value)) values[month - 1] = value;
+    });
+
+    const valid = values.filter(v => Number.isFinite(v));
+    if (!valid.length) {
+        renderEmpty('tresorerie-bars', 'Aucune donnée de trésorerie.');
+        return;
+    }
+
+    const maxAbs = Math.max(...valid.map(v => Math.abs(v)), 1);
+    container.innerHTML = values.map((v, i) => {
+        const h = Number.isFinite(v) ? Math.max(6, Math.round((Math.abs(v) / maxAbs) * 140)) : 4;
+        const op = Number.isFinite(v) ? '1' : '.2';
+        return '<div class="bar-col"><div class="bar-value" style="height:' + h + 'px;opacity:' + op + '"></div><div class="bar-month">' + MONTHS[i] + '</div></div>';
+    }).join('');
+}
+
+function renderReservationsMonthly(reservations) {
+    const container = document.getElementById('reservations-month-bars');
+    if (!container) return;
+
+    const monthCounts = Array(12).fill(0);
+    reservations.forEach(r => {
+        const inDate = safeDate(findField(r, ['check_in', 'date_arrivee', 'dateDebut']));
+        if (inDate) monthCounts[inDate.getMonth()] += 1;
+    });
+
+    const max = Math.max(...monthCounts, 1);
+    container.innerHTML = monthCounts.map((value, idx) => {
+        const h = Math.max(6, Math.round((value / max) * 120));
+        return '<div class="mini-col">'
+            + '<div class="mini-col-val" style="height:' + h + 'px;opacity:' + (value > 0 ? '1' : '.2') + '"></div>'
+            + '<div class="bar-month">' + MONTHS[idx] + '</div>'
+            + '</div>';
+    }).join('');
+}
+
+function renderTodosByCategory(todos) {
+    const container = document.getElementById('todos-category-bars');
+    if (!container) return;
+
+    const counts = {
+        reservations: 0,
+        travaux: 0,
+        achats: 0,
+        autres: 0
+    };
+
+    todos.forEach(todo => {
+        const category = String(findField(todo, ['category', 'categorie'], 'autres')).toLowerCase();
+        if (counts[category] !== undefined) counts[category] += 1;
+        else counts.autres += 1;
+    });
+
+    const total = Object.values(counts).reduce((sum, val) => sum + val, 0);
+    if (total === 0) {
+        renderEmpty('todos-category-bars', 'Aucune tâche ouverte.');
+        return;
+    }
+
+    const labels = [
+        ['reservations', 'Réservations'],
+        ['travaux', 'Travaux'],
+        ['achats', 'Achats'],
+        ['autres', 'Autres']
+    ];
+
+    container.innerHTML = labels.map(([key, label]) => {
+        const value = counts[key];
+        const pct = Math.round((value / total) * 100);
+        return '<div class="hbar-row">'
+            + '<div class="hbar-label">' + label + ' • ' + value + ' (' + pct + '%)</div>'
+            + '<div class="hbar-track"><div class="hbar-fill" style="width:' + pct + '%"></div></div>'
+            + '</div>';
+    }).join('');
+}
+
+async function loadAllData() {
+    const syncEl = document.getElementById('last-sync');
+    const sourceStatusEl = document.getElementById('source-status');
+    const heroSubtitle = document.getElementById('hero-subtitle');
+
+    if (syncEl) syncEl.textContent = 'Chargement…';
+
+    try {
+        const sb = window.supabaseClient;
+        if (!sb) throw new Error('Supabase non initialisé');
+
+        const { data: sessionData } = await sb.auth.getSession();
+        if (!sessionData || !sessionData.session) {
+            if (heroSubtitle) heroSubtitle.textContent = 'Session non active. Reconnecte-toi dans l’application.';
+            if (sourceStatusEl) sourceStatusEl.textContent = 'Authentification requise pour afficher les données.';
+            return;
+        }
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const { start: weekStart, end: weekEnd } = weekRange(now);
+
+        const [
+            demandesRes,
+            propositionsRes,
+            ticketsRes,
+            ticketsFallbackRes,
+            problemesRes,
+            todosRes,
+            reservationsRes,
+            soldesRes,
+            fiscalRes,
+            gitesRes
+        ] = await Promise.all([
+            querySafe('demandes_horaires', () => sb.from('demandes_horaires').select('*').order('created_at', { ascending: false }).limit(300)),
+            querySafe('cleaning_schedule', () => sb.from('cleaning_schedule').select('id,status,proposed_by,scheduled_date,reservation_end,reservation_id,reservations(id,client_name,gite_id,check_in,check_out)').order('scheduled_date', { ascending: true }).limit(300)),
+            querySafe('support_tickets', () => sb.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(300)),
+            querySafe('tickets_support', () => sb.from('tickets_support').select('*').order('created_at', { ascending: false }).limit(300)),
+            querySafe('problemes_signales', () => sb.from('problemes_signales').select('*').order('created_at', { ascending: false }).limit(300)),
+            querySafe('todos', () => sb.from('todos').select('*').order('created_at', { ascending: false }).limit(800)),
+            querySafe('reservations', () => sb.from('reservations').select('*').gte('check_in', year + '-01-01').lte('check_out', year + '-12-31').order('check_in', { ascending: true }).limit(1500)),
+            querySafe('suivi_soldes_bancaires', () => sb.from('suivi_soldes_bancaires').select('mois,solde').eq('annee', year).order('mois', { ascending: true })),
+            querySafe('fiscal_history', () => sb.from('fiscal_history').select('donnees_detaillees').eq('year', year).order('created_at', { ascending: false }).limit(1)),
+            querySafe('gites', () => sb.from('gites').select('id,nom,name,color').limit(200))
+        ]);
+
+        const gitesMap = new Map((gitesRes.data || []).map(g => [g.id, g.nom || g.name || 'Gîte']));
+
+        const demandes = (demandesRes.data || []).filter(d => isPendingStatus(findField(d, ['statut', 'status'])));
+        const propositions = (propositionsRes.data || []).filter(p => String(p.status || '').toLowerCase() === 'pending_validation' && String(p.proposed_by || '').toLowerCase() === 'company');
+
+        const ticketsSource = ticketsRes.error ? (ticketsFallbackRes.data || []) : (ticketsRes.data || []);
+        const tickets = ticketsSource.filter(t => isPendingStatus(findField(t, ['statut', 'status'])));
+
+        const problemes = (problemesRes.data || []);
+        const urgents = problemes.filter(p => String(p.type || '').toLowerCase() === 'probleme');
+        const retours = problemes.filter(p => String(p.type || '').toLowerCase() !== 'probleme');
+
+        const todos = (todosRes.data || []).filter(t => {
+            const done = Boolean(t.completed);
+            const archived = t.archived_at !== null && t.archived_at !== undefined;
+            const status = String(t.status || '').toLowerCase();
+            return !done && !archived && status !== 'done' && status !== 'completed';
+        });
+
+        const reservations = reservationsRes.data || [];
+        const reservationsWeek = reservations.filter(r => {
+            const inDate = safeDate(findField(r, ['check_in', 'date_arrivee', 'dateDebut']));
+            const outDate = safeDate(findField(r, ['check_out', 'date_depart', 'dateFin']));
+            if (!inDate || !outDate) return false;
+            return outDate >= weekStart && inDate <= weekEnd;
+        });
+
+        const reservationsMonth = reservations.filter(r => {
+            const inDate = safeDate(findField(r, ['check_in', 'date_arrivee', 'dateDebut']));
+            return inDate && inDate.getFullYear() === year && inDate.getMonth() === now.getMonth();
+        });
+
+        const reservationsYear = reservations.filter(r => {
+            const inDate = safeDate(findField(r, ['check_in', 'date_arrivee', 'dateDebut']));
+            return inDate && inDate.getFullYear() === year;
+        });
+
+        const caMois = reservationsMonth.reduce((s, r) => s + Number.parseFloat(findField(r, ['total_price', 'montant', 'prix_total'], 0) || 0), 0);
+        const caAnnee = reservationsYear.reduce((s, r) => s + Number.parseFloat(findField(r, ['total_price', 'montant', 'prix_total'], 0) || 0), 0);
+
+        const details = (fiscalRes.data && fiscalRes.data[0] && fiscalRes.data[0].donnees_detaillees) || {};
+        const charges = Number.parseFloat(details.total_charges || details.charges_totales || details.totalChargesAnnee || details.total_charges_annuelles || details.charges || 0) || 0;
+        const beneficeYtd = caAnnee - charges;
+        const marge = caAnnee > 0 ? (beneficeYtd / caAnnee) * 100 : 0;
+
+        const soldes = soldesRes.data || [];
+        const latestSolde = [...soldes].reverse().map(s => Number.parseFloat(s.solde)).find(v => Number.isFinite(v));
+
+        setText('kpi-tresorerie', Number.isFinite(latestSolde) ? formatCurrency(latestSolde) : '-');
+        setText('kpi-ca-mois', formatCurrency(caMois));
+        setText('kpi-benefice', formatCurrency(beneficeYtd));
+        setText('kpi-marge', (Number.isFinite(marge) ? marge.toFixed(1) : '0.0') + '%');
+
+        renderLive({
+            demandes: demandes.length,
+            propositions: propositions.length,
+            tickets: tickets.length,
+            urgents: urgents.length,
+            todos: todos.length,
+            reservations: reservationsWeek.length
+        });
+
+        setBadge('badge-demandes', demandes.length);
+        setBadge('badge-propositions', propositions.length);
+        setBadge('badge-tickets', tickets.length);
+        setBadge('badge-urgents', urgents.length);
+        setBadge('badge-retours', retours.length);
+        setBadge('badge-todos', todos.length);
+        setBadge('badge-reservations', reservationsWeek.length);
+
+        const demandesHtml = demandes.slice(0, 60).map(d => {
+            const typ = String(findField(d, ['type'], 'demande')).toLowerCase();
+            const hour = escapeHtml(findField(d, ['heure_demandee', 'requested_time'], '-'));
+            const created = safeDate(findField(d, ['created_at']));
+            return '<div class="item-head"><div class="item-title">' + (typ === 'arrivee' ? 'Arrivée' : typ === 'depart' ? 'Départ' : 'Demande') + '</div><span class="badge">' + hour + '</span></div>'
+                 + '<div class="item-sub">' + (created ? created.toLocaleDateString('fr-FR') : 'Date N/A') + '</div>'
+                 + actionButtons('demandes', d.id);
+        });
+        demandesHtml.length ? renderList('liste-demandes', demandesHtml, 'alert-warn') : renderEmpty('liste-demandes', 'Aucune demande horaire en attente.');
+
+        const propositionsHtml = propositions.slice(0, 60).map(p => {
+            const resa = p.reservations || {};
+            const client = escapeHtml(findField(resa, ['client_name', 'nom_client'], 'Client'));
+            const giteName = escapeHtml(gitesMap.get(resa.gite_id) || 'Gîte');
+            const proposed = safeDate(p.scheduled_date);
+            const original = safeDate(p.reservation_end);
+            const originalText = original ? new Date(original.getTime() + 24 * 3600 * 1000).toLocaleDateString('fr-FR') : '-';
+            const proposedText = proposed ? proposed.toLocaleDateString('fr-FR') : '-';
+            return '<div class="item-head"><div class="item-title">' + giteName + ' • ' + client + '</div><span class="badge">' + proposedText + '</span></div>'
+                  + '<div class="item-sub">Date initiale: ' + originalText + '</div>'
+                  + actionButtons('propositions', p.id);
+        });
+        propositionsHtml.length ? renderList('liste-propositions', propositionsHtml, 'alert-warn') : renderEmpty('liste-propositions', 'Aucune proposition de ménage en attente.');
+
+        const ticketsHtml = tickets.slice(0, 60).map(t => {
+            const subject = escapeHtml(findField(t, ['subject', 'sujet', 'title'], 'Ticket'));
+            const status = escapeHtml(findField(t, ['status', 'statut'], 'en attente'));
+            const created = safeDate(findField(t, ['created_at']));
+            return '<div class="item-head"><div class="item-title">' + subject + '</div><span class="badge">' + status + '</span></div>'
+                  + '<div class="item-sub">' + (created ? created.toLocaleDateString('fr-FR') : 'Date N/A') + '</div>'
+                  + actionButtons('tickets', t.id);
+        });
+        ticketsHtml.length ? renderList('liste-tickets', ticketsHtml, 'alert-info') : renderEmpty('liste-tickets', 'Aucun ticket support en attente.');
+
+        const urgentsHtml = urgents.slice(0, 60).map(p => {
+            const sujet = escapeHtml(findField(p, ['sujet', 'subject'], 'Problème'));
+            const urgence = escapeHtml(findField(p, ['urgence'], 'moyenne'));
+            const client = escapeHtml(findField(p, ['client_nom', 'client_name'], 'Client'));
+            return '<div class="item-head"><div class="item-title">' + sujet + '</div><span class="badge">' + urgence + '</span></div>'
+                  + '<div class="item-sub">' + client + '</div>'
+                  + actionButtons('urgents', p.id);
+        });
+        urgentsHtml.length ? renderList('liste-urgents', urgentsHtml, 'alert-danger') : renderEmpty('liste-urgents', 'Aucun problème urgent.');
+
+        const retoursHtml = retours.slice(0, 60).map(p => {
+            const sujet = escapeHtml(findField(p, ['sujet', 'subject'], 'Demande'));
+            const type = escapeHtml(findField(p, ['type'], 'retour'));
+            const client = escapeHtml(findField(p, ['client_nom', 'client_name'], 'Client'));
+            return '<div class="item-head"><div class="item-title">' + sujet + '</div><span class="badge">' + type + '</span></div>'
+                  + '<div class="item-sub">' + client + '</div>'
+                  + actionButtons('retours', p.id);
+        });
+        retoursHtml.length ? renderList('liste-retours', retoursHtml, 'alert-info') : renderEmpty('liste-retours', 'Aucune demande/retour en attente.');
+
+        const todosHtml = todos.slice(0, 120).map(t => {
+            const title = escapeHtml(findField(t, ['title', 'nom'], 'Tâche'));
+            const category = escapeHtml(findField(t, ['category', 'categorie'], 'autre'));
+            const gite = escapeHtml(gitesMap.get(t.gite_id) || 'Tous gîtes');
+            return '<div class="item-head"><div class="item-title">' + title + '</div><span class="badge">' + category + '</span></div>'
+                  + '<div class="item-sub">' + gite + '</div>'
+                  + actionButtons('todos', t.id);
+        });
+        todosHtml.length ? renderList('liste-todos', todosHtml) : renderEmpty('liste-todos', 'Aucune tâche ouverte.');
+
+        const reservationsHtml = reservationsWeek.slice(0, 120).map(r => {
+            const inDate = safeDate(findField(r, ['check_in', 'date_arrivee', 'dateDebut']));
+            const outDate = safeDate(findField(r, ['check_out', 'date_depart', 'dateFin']));
+            const client = escapeHtml(findField(r, ['client_name', 'nom_client', 'guest_name'], 'Client'));
+            const gite = escapeHtml(findField(r, ['gite'], gitesMap.get(r.gite_id) || 'Gîte'));
+            const montant = Number.parseFloat(findField(r, ['total_price', 'montant', 'prix_total'], 0) || 0);
+            const inText = inDate ? inDate.toLocaleDateString('fr-FR') : '-';
+            const outText = outDate ? outDate.toLocaleDateString('fr-FR') : '-';
+            return '<div class="item-head"><div class="item-title">' + client + ' • ' + gite + '</div><span class="badge">' + formatCurrency(montant) + '</span></div>'
+                  + '<div class="item-sub">' + inText + ' → ' + outText + '</div>'
+                  + actionButtons('reservations', r.id);
+        });
+        reservationsHtml.length ? renderList('liste-reservations', reservationsHtml) : renderEmpty('liste-reservations', 'Aucune réservation sur la semaine.');
+
+        renderTresorerie(soldes);
+        renderReservationsMonthly(reservations);
+        renderTodosByCategory(todos);
+
+        const sources = [
+            'demandes_horaires: ' + (demandesRes.error ? 'KO' : 'OK (' + demandes.length + ')'),
+            'cleaning_schedule: ' + (propositionsRes.error ? 'KO' : 'OK (' + propositions.length + ')'),
+            'support_tickets/tickets_support: ' + ((ticketsRes.error && ticketsFallbackRes.error) ? 'KO' : 'OK (' + tickets.length + ')'),
+            'problemes_signales: ' + (problemesRes.error ? 'KO' : 'OK (' + problemes.length + ')'),
+            'todos: ' + (todosRes.error ? 'KO' : 'OK (' + todos.length + ')'),
+            'reservations: ' + (reservationsRes.error ? 'KO' : 'OK (' + reservations.length + ')'),
+            'suivi_soldes_bancaires: ' + (soldesRes.error ? 'KO' : 'OK (' + soldes.length + ')')
+        ];
+
+        if (sourceStatusEl) sourceStatusEl.textContent = sources.join(' • ');
+        if (heroSubtitle) heroSubtitle.textContent = 'Données chargées • semaine du ' + weekStart.toLocaleDateString('fr-FR') + ' au ' + weekEnd.toLocaleDateString('fr-FR');
+        if (syncEl) syncEl.textContent = 'Mis à jour : ' + new Date().toLocaleTimeString('fr-FR');
+    } catch (error) {
+        if (syncEl) syncEl.textContent = 'Erreur de chargement';
+        if (sourceStatusEl) sourceStatusEl.textContent = 'Erreur globale: ' + (error?.message || 'inconnue');
+
+        ['liste-demandes','liste-propositions','liste-tickets','liste-urgents','liste-retours','liste-todos','liste-reservations','tresorerie-bars']
+            .forEach(id => renderEmpty(id, 'Erreur de chargement.'));
+    } finally {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+}
+
+document.getElementById('btn-refresh')?.addEventListener('click', loadAllData);
+
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-prop-action]');
+    if (!button) return;
+    const action = button.getAttribute('data-prop-action') || 'Action';
+    showLocalToast(action + ' prêt sur la page principale');
+});
+
+loadAllData();
+</script>
+</body>
+</html>

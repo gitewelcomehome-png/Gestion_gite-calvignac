@@ -503,6 +503,10 @@ async function addReservationFromIcal(reservation) {
         .single();
 
     if (result.error) throw result.error;
+
+    if (typeof window.autoResolveCleaningConflictForReservation === 'function') {
+        await window.autoResolveCleaningConflictForReservation(result.data.id);
+    }
     
     // 🚗 Automatisation des trajets kilométriques
     if (result.data && typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {
@@ -539,6 +543,10 @@ async function updateReservationFromIcal(reservationId, newData) {
         .eq('id', reservationId);
 
     if (error) throw error;
+
+    if (typeof window.autoResolveCleaningConflictForReservation === 'function') {
+        await window.autoResolveCleaningConflictForReservation(reservationId);
+    }
     
     // 🚗 Si les dates ont changé, recréer les trajets auto
     if (oldResa && (oldResa.check_in !== newData.dateDebut || oldResa.check_out !== newData.dateFin)) {

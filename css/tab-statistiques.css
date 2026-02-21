@@ -25,15 +25,15 @@
 .stats-header-title {
     font-size: 1.75rem;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--upstay-cyan, #00C2CB);
     margin: 0 0 8px 0;
-    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%);
-    padding: 12px 20px;
-    border-radius: 8px;
+    background: none;
+    padding: 0;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: none;
 }
 
 .stats-header-title i,
@@ -109,17 +109,17 @@
 }
 
 .stats-card-title {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: #ffffff;
-    margin: 0 0 20px 0;
-    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%);
-    padding: 12px 20px;
-    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--upstay-cyan, #00C2CB);
+    margin: 0 0 16px 0;
+    background: none;
+    padding: 0;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    gap: 8px;
+    text-shadow: none;
 }
 
 .stats-card-title i,
@@ -486,12 +486,10 @@ html.theme-light.style-apple .stats-header {
 }
 
 html.theme-light.style-apple .stats-header-title {
-    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%) !important;
-    color: #ffffff !important;
-    padding: 12px 20px !important;
-    border-radius: 8px !important;
-    display: inline-block !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    background: none !important;
+    color: var(--upstay-cyan, #00C2CB) !important;
+    padding: 0 !important;
+    text-shadow: none !important;
 }
 
 html.theme-light.style-apple .stats-card {
@@ -501,11 +499,10 @@ html.theme-light.style-apple .stats-card {
 }
 
 html.theme-light.style-apple .stats-card-title {
-    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%) !important;
-    color: #ffffff !important;
-    padding: 12px 20px !important;
-    border-radius: 8px !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    background: none !important;
+    color: var(--upstay-cyan, #00C2CB) !important;
+    padding: 0 !important;
+    text-shadow: none !important;
 }
 
 html.theme-light.style-apple .stats-card:hover {
@@ -547,12 +544,10 @@ html.theme-dark.style-apple .stats-header {
 }
 
 html.theme-dark.style-apple .stats-header-title {
-    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%) !important;
-    color: #ffffff !important;
-    padding: 12px 20px !important;
-    border-radius: 8px !important;
-    display: inline-block !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    background: none !important;
+    color: var(--upstay-cyan, #00C2CB) !important;
+    padding: 0 !important;
+    text-shadow: none !important;
 }
 
 /* Cartes en mode Apple Nuit */
@@ -563,11 +558,10 @@ html.theme-dark.style-apple .stats-card {
 }
 
 html.theme-dark.style-apple .stats-card-title {
-    background: linear-gradient(135deg, #00C2CB 0%, #0891b2 100%) !important;
-    color: #ffffff !important;
-    padding: 12px 20px !important;
-    border-radius: 8px !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    background: none !important;
+    color: var(--upstay-cyan, #00C2CB) !important;
+    padding: 0 !important;
+    text-shadow: none !important;
 }
 
 html.theme-dark.style-apple .stats-card:hover {

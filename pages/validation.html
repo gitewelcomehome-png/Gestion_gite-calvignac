@@ -421,6 +421,56 @@
             margin-bottom: 20px;
         }
 
+        .auto-conflict-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auto-conflict-modal {
+            width: min(760px, 100%);
+            max-height: 85vh;
+            overflow: auto;
+            background: #fff;
+            border: 3px solid #2D3436;
+            border-radius: 14px;
+            box-shadow: 6px 6px 0 #2D3436;
+            padding: 20px;
+        }
+
+        .auto-conflict-modal h2 {
+            margin: 0 0 8px 0;
+            font-size: 1.4rem;
+            color: #2D3436;
+        }
+
+        .auto-conflict-modal p {
+            margin: 0 0 14px 0;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .auto-conflict-modal-item {
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            background: #fff8e1;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            color: #7a5a00;
+            font-weight: 600;
+        }
+
+        .auto-conflict-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
         @media (max-width: 768px) {
             .gites-container {
                 flex-direction: column;
@@ -455,6 +505,17 @@
         <span id="toastMessage"></span>
     </div>
 
+    <div id="autoConflictModalOverlay" class="auto-conflict-modal-overlay">
+        <div class="auto-conflict-modal">
+            <h2>⚠️ Replanification automatique détectée</h2>
+            <p>Des ménages ont été replanifiés automatiquement suite à de nouvelles réservations. Merci de valider ces propositions.</p>
+            <div id="autoConflictModalList"></div>
+            <div class="auto-conflict-modal-actions">
+                <button class="btn btn-validate" id="autoConflictModalCloseBtn">Compris</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Forcer mode jour uniquement
         document.documentElement.classList.add('theme-light');
@@ -462,6 +523,15 @@
         
         // Utiliser le client Supabase déjà initialisé dans shared-config.js
         const supabaseClient = window.supabaseClient;
+
+        function setSafeHtml(el, html) {
+            if (!el) return;
+            if (window.SecurityUtils && typeof window.SecurityUtils.setInnerHTML === 'function') {
+                window.SecurityUtils.setInnerHTML(el, html);
+            } else {
+                el.innerHTML = html;
+            }
+        }
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -531,7 +601,7 @@
             });
             
             html += '</div>';
-            window.SecurityUtils.setInnerHTML(banner, html);
+            setSafeHtml(banner, html);
             banner.style.display = 'block';
         }
 
@@ -546,6 +616,84 @@
             d.setDate(d.getDate() + 4 - (d.getDay() || 7));
             const yearStart = new Date(d.getFullYear(), 0, 1);
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function renderAutoConflictWarning(notes) {
+            if (!notes || typeof notes !== 'string' || !notes.includes('[AUTO_CLEANING_CONFLICT]')) {
+                return '';
+            }
+
+            const details = notes
+                .replace('[AUTO_CLEANING_CONFLICT]', '')
+                .split('|')
+                .map(part => part.trim())
+                .filter(Boolean)
+                .map(part => `<li style="margin-bottom: 4px;">${part}</li>`)
+                .join('');
+
+            return `
+                <div class="proposal-alert" style="background: #fff3cd; padding: 15px; margin: 10px 0; border: 2px solid #f39c12; border-radius: 8px; box-shadow: 2px 2px 0 #f39c12;">
+                    <strong>⚠️ Warning conflit ménage / nouvelle réservation</strong>
+                    <p style="margin: 8px 0 10px 0;">L'ancien ménage a été supprimé automatiquement. Deux nouveaux ménages ont été proposés (avant et après la nouvelle réservation).</p>
+                    <ul style="margin: 0; padding-left: 18px; color: #856404;">${details}</ul>
+                </div>
+            `;
+        }
+
+        function showAutoConflictModal(menages) {
+            const overlay = document.getElementById('autoConflictModalOverlay');
+            const list = document.getElementById('autoConflictModalList');
+            const closeBtn = document.getElementById('autoConflictModalCloseBtn');
+            if (!overlay || !list || !closeBtn) return;
+
+            const autoConflicts = (menages || []).filter(m =>
+                (typeof m?.cleaning?.notes === 'string' && m.cleaning.notes.includes('[AUTO_CLEANING_CONFLICT]')) ||
+                (typeof m?.notes === 'string' && m.notes.includes('[AUTO_CLEANING_CONFLICT]') && !!(m.scheduled_date || m.date || m.scheduledDate))
+            );
+
+            if (autoConflicts.length === 0) {
+                overlay.style.display = 'none';
+                return;
+            }
+
+            const rows = autoConflicts.map((m) => {
+                const gite = m.giteName || m.reservation?.gite || m.gite_name || 'Gîte';
+                const client = m.reservation?.client_name || m.reservation?.nom || m.client_name || 'Client';
+                const dateObj =
+                    m.scheduledDate ||
+                    (m.scheduled_date ? new Date(`${m.scheduled_date}T00:00:00`) : null) ||
+                    (m.date ? new Date(`${m.date}T00:00:00`) : null);
+                const dateText = dateObj?.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) || '-';
+                return `<div class="auto-conflict-modal-item">${gite} — ${client}<br/>Date proposée : ${dateText}</div>`;
+            }).join('');
+
+            setSafeHtml(list, rows);
+            overlay.style.display = 'flex';
+
+            closeBtn.onclick = () => {
+                overlay.style.display = 'none';
+            };
+        }
+
+        async function loadAutoConflictRowsForModal(giteMap) {
+            try {
+                const { data: rows, error } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .select('id, reservation_id, gite_id, scheduled_date, notes, status, proposed_by')
+                    .ilike('notes', '%[AUTO_CLEANING_CONFLICT]%')
+                    .neq('status', 'refused')
+                    .order('scheduled_date', { ascending: true });
+
+                if (error || !rows || rows.length === 0) return [];
+
+                return rows.map(r => ({
+                    ...r,
+                    gite_name: giteMap?.[r.gite_id] || 'Gîte',
+                    client_name: 'Client'
+                }));
+            } catch (_) {
+                return [];
+            }
         }
 
         async function loadPlanning() {
@@ -701,11 +849,14 @@
                     document.title = 'Validation Ménage';
                 }
 
+                const modalRows = await loadAutoConflictRowsForModal(giteMap);
+
                 // Afficher les notifications
                 displayNotifications(allMenages);
+                showAutoConflictModal([...allMenages, ...modalRows]);
                 
                 if (sortedWeeks.length === 0) {
-                    window.SecurityUtils.setInnerHTML(container, `
+                    setSafeHtml(container, `
                         <div class="week-card">
                             <div class="empty-state">
                                 <div class="empty-state-icon">📭</div>
@@ -757,11 +908,11 @@
                     `;
                 });
 
-                window.SecurityUtils.setInnerHTML(container, html);
+                setSafeHtml(container, html);
 
             } catch (error) {
                 console.error('Erreur:', error);
-                window.SecurityUtils.setInnerHTML(container, `
+                setSafeHtml(container, `
                     <div class="week-card">
                         <div class="empty-state">
                             <div class="empty-state-icon">❌</div>
@@ -776,6 +927,7 @@
         function generateMenageHTML(menage) {
             const { reservation, cleaning, dateFin, scheduledDate, nextReservationDate, timeOfDay, status, validated } = menage;
             const proposedBy = cleaning?.proposed_by; // Qui a proposé : 'owner' (site principal) ou 'company' (société)
+            const autoConflictWarning = renderAutoConflictWarning(cleaning?.notes);
             
             const statusBadge = validated ? 
                 '<span class="status-badge status-validated">✓ Validé par le client</span>' :
@@ -819,6 +971,8 @@
                             <p style="margin: 5px 0 0 0;">${refusalReason}</p>
                         </div>
                     ` : ''}
+
+                    ${autoConflictWarning}
                     
                     ${!validated && status !== 'pending_validation' && status !== 'refused' ? `
                         <div id="${formId}" style="display: none;">

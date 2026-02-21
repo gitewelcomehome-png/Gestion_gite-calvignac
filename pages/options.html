@@ -3174,6 +3174,12 @@
                                 })
                                 .eq('id', existingClient.id);
                         }
+
+                        // Sauvegarder le thème dans infos_gites pour que la fiche client le lise
+                        await window.supabaseClient
+                            .from('infos_gites')
+                            .update({ fiche_client_theme: selectedTheme })
+                            .eq('owner_user_id', currentUser.id);
                     }
                 } catch (dbError) {
                     // console.log('⚠️ Sauvegarde Supabase ignorée (colonne preferences manquante?):', dbError);

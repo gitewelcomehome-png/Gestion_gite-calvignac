@@ -8,6 +8,351 @@
 // RÉSERVATIONS
 // ==========================================
 
+function parseYmdLocal(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return null;
+    const [year, month, day] = dateStr.slice(0, 10).split('-').map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+}
+
+function formatYmdLocal(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function formatDateFrFromYmd(dateStr) {
+    const date = parseYmdLocal(dateStr);
+    if (!date) return dateStr || '-';
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function isAutoCleaningConflictEnabled() {
+    try {
+        return localStorage.getItem('auto_cleaning_conflict_enabled') !== '0';
+    } catch (_) {
+        return true;
+    }
+}
+
+function buildAutoConflictNote({ newReservationId, oldReservationId, oldDate, beforeDate, afterDate }) {
+    const meta = `meta:new=${newReservationId};old=${oldReservationId};oldDate=${oldDate};before=${beforeDate};after=${afterDate}`;
+    const human = [
+        `Ancienne date supprimée: ${formatDateFrFromYmd(oldDate)}`,
+        `Nouvelles dates proposées: avant réservation ${formatDateFrFromYmd(beforeDate)} (matin) | après réservation ${formatDateFrFromYmd(afterDate)} (matin)`
+    ].join(' | ');
+    return `[AUTO_CLEANING_CONFLICT] ${meta} | ${human}`;
+}
+
+function parseAutoConflictMeta(notes) {
+    if (!notes || typeof notes !== 'string' || !notes.includes('[AUTO_CLEANING_CONFLICT]')) return null;
+    const marker = 'meta:';
+    const metaStart = notes.indexOf(marker);
+    if (metaStart === -1) return null;
+    const metaPart = notes.slice(metaStart + marker.length).split('|')[0].trim();
+    const values = {};
+    metaPart.split(';').forEach(part => {
+        const [key, value] = part.split('=');
+        if (key && value) values[key.trim()] = value.trim();
+    });
+    return {
+        newReservationId: values.new || null,
+        oldReservationId: values.old || null,
+        oldDate: values.oldDate || null,
+        beforeDate: values.before || null,
+        afterDate: values.after || null
+    };
+}
+
+function notifyAutoCleaningConflict(message, type = 'warning') {
+    let displayed = false;
+    try {
+        const hasNativeToast = typeof document !== 'undefined' && !!document.getElementById('toast') && typeof window.showToast === 'function';
+        if (hasNativeToast) {
+            window.showToast(message, type);
+            displayed = true;
+        }
+
+        if (!displayed && typeof document !== 'undefined' && document.body) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.right = '20px';
+            toast.style.bottom = '20px';
+            toast.style.zIndex = '100000';
+            toast.style.padding = '12px 14px';
+            toast.style.borderRadius = '10px';
+            toast.style.color = '#fff';
+            toast.style.fontSize = '0.9rem';
+            toast.style.fontWeight = '600';
+            toast.style.boxShadow = '0 8px 24px rgba(0,0,0,0.25)';
+            toast.style.background = type === 'error' ? '#e74c3c' : (type === 'warning' ? '#f39c12' : '#27ae60');
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(8px)';
+            toast.style.transition = 'opacity 160ms ease, transform 160ms ease';
+
+            document.body.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            });
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 180);
+            }, 3600);
+
+            displayed = true;
+        }
+
+        if (!displayed && typeof window !== 'undefined' && typeof window.alert === 'function') {
+            window.alert(message);
+            displayed = true;
+        }
+
+        if (!displayed) {
+            console.info('[AUTO_CLEANING_CONFLICT]', message);
+        }
+    } catch (_) {
+        try {
+            if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+                window.alert(message);
+            } else {
+                console.info('[AUTO_CLEANING_CONFLICT]', message);
+            }
+        } catch (__){
+            // no-op
+        }
+    }
+}
+
+function pushPersistentOwnerNotification({ title, message, data }) {
+    try {
+        if (window.notificationSystem && typeof window.notificationSystem.addNotification === 'function') {
+            window.notificationSystem.addNotification({
+                type: 'menage_conflict',
+                title,
+                message,
+                data: data || {},
+                timestamp: new Date()
+            });
+            return;
+        }
+
+        const stored = localStorage.getItem('notifications');
+        const notifications = stored ? JSON.parse(stored) : [];
+        const notifId = `menage_conflict_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+        notifications.unshift({
+            id: notifId,
+            type: 'menage_conflict',
+            title,
+            message,
+            data: data || {},
+            timestamp: new Date().toISOString(),
+            read: false
+        });
+
+        localStorage.setItem('notifications', JSON.stringify(notifications.slice(0, 50)));
+
+        if (window.notificationSystem && typeof window.notificationSystem.loadNotifications === 'function') {
+            window.notificationSystem.loadNotifications();
+            window.notificationSystem.updateBadge();
+        }
+    } catch (_) {
+        // no-op
+    }
+}
+
+async function autoResolveCleaningConflictForReservation(reservationId) {
+    try {
+        if (!isAutoCleaningConflictEnabled()) {
+            return { resolved: 0, skipped: 'disabled' };
+        }
+
+        if (!reservationId) return { resolved: 0 };
+
+        const { data: newReservation, error: reservationError } = await window.supabaseClient
+            .from('reservations')
+            .select('id, owner_user_id, gite_id, check_in, check_out')
+            .eq('id', reservationId)
+            .single();
+
+        if (reservationError || !newReservation?.gite_id || !newReservation?.check_in || !newReservation?.check_out) {
+            return { resolved: 0 };
+        }
+
+        const { data: conflictingCleanings, error: conflictError } = await window.supabaseClient
+            .from('cleaning_schedule')
+            .select('id, owner_user_id, reservation_id, gite_id, scheduled_date, status, reservation_end, reservation_start_after')
+            .eq('gite_id', newReservation.gite_id)
+            .neq('reservation_id', newReservation.id)
+            .gt('scheduled_date', newReservation.check_in)
+            .lt('scheduled_date', newReservation.check_out)
+            .neq('status', 'refused');
+
+        if (conflictError || !conflictingCleanings || conflictingCleanings.length === 0) {
+            return { resolved: 0 };
+        }
+
+        const beforeDate = newReservation.check_in;
+        const afterDate = newReservation.check_out;
+
+        let resolved = 0;
+
+        for (const conflict of conflictingCleanings) {
+            if (!conflict?.reservation_id) continue;
+
+            const warningNote = buildAutoConflictNote({
+                newReservationId: newReservation.id,
+                oldReservationId: conflict.reservation_id,
+                oldDate: conflict.scheduled_date,
+                beforeDate,
+                afterDate
+            });
+
+            await window.supabaseClient
+                .from('cleaning_schedule')
+                .delete()
+                .eq('id', conflict.id);
+
+            await window.supabaseClient
+                .from('cleaning_schedule')
+                .upsert({
+                    owner_user_id: conflict.owner_user_id || newReservation.owner_user_id,
+                    reservation_id: conflict.reservation_id,
+                    gite_id: conflict.gite_id || newReservation.gite_id,
+                    scheduled_date: beforeDate,
+                    time_of_day: 'morning',
+                    status: 'pending_validation',
+                    proposed_by: 'owner',
+                    validated_by_company: false,
+                    reservation_end: conflict.reservation_end,
+                    reservation_start_after: conflict.reservation_start_after,
+                    notes: warningNote
+                }, { onConflict: 'reservation_id' });
+
+            await window.supabaseClient
+                .from('cleaning_schedule')
+                .upsert({
+                    owner_user_id: newReservation.owner_user_id,
+                    reservation_id: newReservation.id,
+                    gite_id: newReservation.gite_id,
+                    scheduled_date: afterDate,
+                    time_of_day: 'morning',
+                    status: 'pending_validation',
+                    proposed_by: 'owner',
+                    validated_by_company: false,
+                    reservation_end: newReservation.check_out,
+                    reservation_start_after: null,
+                    notes: warningNote
+                }, { onConflict: 'reservation_id' });
+
+            resolved++;
+        }
+
+        if (resolved > 0) {
+            notifyAutoCleaningConflict(`⚠️ ${resolved} ménage(s) replanifié(s) automatiquement (conflit nouvelle réservation)`, 'warning');
+            pushPersistentOwnerNotification({
+                title: '⚠️ Replanification ménage automatique',
+                message: `${resolved} ménage(s) replanifié(s) suite à une nouvelle réservation`,
+                data: {
+                    reservationId: newReservation.id,
+                    beforeDate,
+                    afterDate,
+                    resolved
+                }
+            });
+        }
+
+        return {
+            resolved,
+            beforeDate,
+            afterDate
+        };
+    } catch (error) {
+        console.error('❌ Erreur autoResolveCleaningConflictForReservation:', error);
+        return { resolved: 0, error };
+    }
+}
+
+window.autoResolveCleaningConflictForReservation = autoResolveCleaningConflictForReservation;
+
+window.setAutoCleaningConflictEnabled = function(enabled) {
+    try {
+        localStorage.setItem('auto_cleaning_conflict_enabled', enabled ? '1' : '0');
+        return true;
+    } catch (error) {
+        console.error('❌ Erreur setAutoCleaningConflictEnabled:', error);
+        return false;
+    }
+};
+
+window.rollbackAutoCleaningConflict = async function(newReservationId) {
+    try {
+        if (!newReservationId) {
+            throw new Error('newReservationId requis');
+        }
+
+        const { data: newCleaning, error: newCleaningError } = await window.supabaseClient
+            .from('cleaning_schedule')
+            .select('id, reservation_id, notes')
+            .eq('reservation_id', newReservationId)
+            .ilike('notes', '%[AUTO_CLEANING_CONFLICT]%')
+            .maybeSingle();
+
+        if (newCleaningError || !newCleaning) {
+            throw new Error('Aucune replanification auto trouvée pour cette réservation');
+        }
+
+        const meta = parseAutoConflictMeta(newCleaning.notes);
+        if (!meta?.oldReservationId || !meta?.oldDate) {
+            throw new Error('Métadonnées incomplètes pour rollback');
+        }
+
+        await window.supabaseClient
+            .from('cleaning_schedule')
+            .update({
+                scheduled_date: meta.oldDate,
+                time_of_day: 'afternoon',
+                status: 'pending',
+                proposed_by: null,
+                validated_by_company: false,
+                notes: 'Rollback auto conflit ménage appliqué'
+            })
+            .eq('reservation_id', meta.oldReservationId);
+
+        await window.supabaseClient
+            .from('cleaning_schedule')
+            .delete()
+            .eq('reservation_id', newReservationId)
+            .ilike('notes', '%[AUTO_CLEANING_CONFLICT]%');
+
+        window.invalidateCache('reservations');
+
+        notifyAutoCleaningConflict('✅ Rollback conflit ménage appliqué', 'success');
+        pushPersistentOwnerNotification({
+            title: '✅ Rollback ménage appliqué',
+            message: `Ancien ménage restauré au ${formatDateFrFromYmd(meta.oldDate)}`,
+            data: {
+                reservationId: newReservationId,
+                restoredOldReservationId: meta.oldReservationId,
+                restoredDate: meta.oldDate
+            }
+        });
+
+        return {
+            success: true,
+            restoredOldReservationId: meta.oldReservationId,
+            restoredDate: meta.oldDate,
+            deletedNewReservationCleaning: newReservationId
+        };
+    } catch (error) {
+        console.error('❌ Erreur rollbackAutoCleaningConflict:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 async function addReservation(reservation) {
     try {
         // Helper pour formater les dates en YYYY-MM-DD (heure locale française)
@@ -80,6 +425,8 @@ async function addReservation(reservation) {
             .single();
         
         if (result.error) throw result.error;
+
+        await autoResolveCleaningConflictForReservation(result.data.id);
         
         // 🚗 Automatisation des trajets kilométriques
         if (result.data && typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {
@@ -212,6 +559,10 @@ async function updateReservation(id, updates) {
         // 🚗 Si les dates ont changé, recréer les trajets auto
         const datesChanged = (data.check_in && data.check_in !== oldResa?.check_in) || 
                             (data.check_out && data.check_out !== oldResa?.check_out);
+
+        if (datesChanged) {
+            await autoResolveCleaningConflictForReservation(id);
+        }
         
         if (datesChanged && typeof window.KmManager?.supprimerTrajetsAutoReservation === 'function' &&
             typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {

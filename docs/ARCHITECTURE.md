@@ -1,7 +1,7 @@
 # 🏗️ Architecture - Gestion Gîte Calvignac
 
-**Version :** 2.13.7  
-**Dernière MAJ :** 18 février 2026  
+**Version :** 2.13.9  
+**Dernière MAJ :** 20 février 2026  
 **Environnement :** Production (Supabase + Vercel)
 
 ---
@@ -813,6 +813,16 @@ psql $DATABASE_URL < backup_20260215.sql
 
 ## 🔄 Changelog
 
+### v2.13.9 - 20 février 2026 🚨
+- ✅ Conflit ménage au milieu d'une nouvelle réservation : suppression automatique de l'ancienne date de ménage
+- ✅ Création automatique de 2 nouveaux ménages proposés : avant la nouvelle réservation + après la nouvelle réservation
+- ✅ Warning explicatif ajouté côté owner (`js/menage.js`, `js/dashboard.js`) et côté société ménage (`pages/validation.html`)
+- ✅ Automatisation branchée sur créations/mises à jour réservation (`js/supabase-operations.js`, `js/sync-ical-v2.js`)
+
+### v2.13.8 - 20 février 2026 🧹
+- ✅ Dashboard owner : alerte proactive ajoutée pour les conflits de planning ménage (date ménage > prochaine arrivée)
+- ✅ Détection ajoutée dans `js/dashboard.js` et redirection vers l'onglet Ménage
+
 ### v2.13.7 - 18 février 2026 🚨
 - ✅ Auto-ticketing incident critique IA branché au monitoring (`/api/ai-health?section=support&autoTicket=1`)
 - ✅ Corrélation client/ticket ajoutée aux logs IA (`requester_user_id`, `requester_client_id`, `requester_ticket_id`, `error_signature`)
@@ -879,4 +889,4 @@ psql $DATABASE_URL < backup_20260215.sql
 
 **Document maintenu par :** GitHub Copilot  
 **Contact Support :** admin@gite-calvignac.fr  
-**Dernière révision :** 18 février 2026, 22:15
+**Dernière révision :** 20 février 2026, 12:05

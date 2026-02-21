@@ -25,10 +25,46 @@ const KanbanState = {
 const KANBAN_ORDER_STORAGE_KEY = 'kanban_cards_order_v1';
 
 /**
+ * Injecter le CSS des cartes kanban dans <head> (contourne tout conflit CSS externe)
+ */
+function injectKanbanStyles() {
+    if (document.getElementById('kanban-card-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'kanban-card-styles';
+    style.textContent = `
+        .kanban-card { background:#fff !important; border:1px solid #e5e7eb !important; border-left-width:4px !important; border-radius:8px !important; display:flex !important; flex-direction:column !important; gap:6px !important; padding:14px 16px !important; box-shadow:0 1px 4px rgba(0,0,0,.10) !important; cursor:grab; transition:transform .2s,box-shadow .2s; font-size:.9rem; line-height:1.5; }
+        .kanban-card:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.13) !important; }
+        .kanban-card[data-category='reservations'] { border-left-color:#3b82f6 !important; }
+        .kanban-card[data-category='achats']       { border-left-color:#f59e0b !important; }
+        .kanban-card[data-category='travaux']      { border-left-color:#ef4444 !important; }
+        .kanban-card > * { background:transparent !important; border:none !important; box-shadow:none !important; border-radius:0 !important; }
+        .kanban-card .kcard-header { display:flex !important; align-items:center !important; gap:6px !important; padding:0 !important; margin:0 !important; background:transparent !important; border:none !important; }
+        .kanban-card .kcard-category-dot { display:inline-block !important; width:10px !important; height:10px !important; min-width:10px !important; min-height:10px !important; max-width:10px !important; max-height:10px !important; border-radius:50% !important; flex-shrink:0 !important; padding:0 !important; border:none !important; box-shadow:none !important; }
+        .kanban-card .kcard-category-dot.category-reservations { background:#3b82f6 !important; }
+        .kanban-card .kcard-category-dot.category-achats       { background:#f59e0b !important; }
+        .kanban-card .kcard-category-dot.category-travaux      { background:#ef4444 !important; }
+        .kanban-card .kcard-category-label { font-size:.7rem !important; font-weight:700 !important; text-transform:uppercase !important; letter-spacing:.6px !important; color:#9ca3af !important; background:transparent !important; border:none !important; padding:0 !important; box-shadow:none !important; }
+        .kanban-card .kcard-recurrent-badge { margin-left:auto !important; font-size:.68rem !important; font-weight:600 !important; background:#f3f4f6 !important; border:1px solid #e5e7eb !important; padding:2px 7px !important; border-radius:20px !important; color:#6b7280 !important; }
+        .kanban-card .kcard-title { font-size:.95rem !important; font-weight:700 !important; color:#111827 !important; margin:4px 0 0 0 !important; padding:0 !important; line-height:1.4 !important; background:transparent !important; border:none !important; }
+        .kanban-card .kcard-desc  { font-size:.82rem !important; color:#6b7280 !important; line-height:1.45 !important; margin:0 !important; padding:0 0 8px 0 !important; background:transparent !important; border:none !important; border-bottom:1px solid #e5e7eb !important; }
+        .kanban-card .kcard-footer { display:flex !important; gap:6px !important; flex-wrap:wrap !important; margin-top:auto !important; padding-top:8px !important; padding-bottom:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; }
+        .kanban-card .kcard-btn { display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:4px !important; padding:4px 10px !important; height:26px !important; line-height:1 !important; border-radius:6px !important; font-size:.78rem !important; font-weight:600 !important; cursor:pointer !important; border:none !important; box-shadow:none !important; transition:all .15s ease !important; white-space:nowrap !important; }
+        .kanban-card .kcard-btn:hover { transform:scale(1.04) !important; opacity:.9 !important; }
+        .kanban-card .kcard-btn svg, .kanban-card .kcard-btn i { display:block !important; width:12px !important; height:12px !important; min-width:12px !important; min-height:12px !important; max-width:12px !important; max-height:12px !important; flex-shrink:0 !important; overflow:hidden !important; }
+        .kanban-card .kcard-btn.btn-reservations { background:#dbeafe !important; color:#1d4ed8 !important; }
+        .kanban-card .kcard-btn.btn-achats       { background:#fef3c7 !important; color:#92400e !important; }
+        .kanban-card .kcard-btn.btn-travaux      { background:#fee2e2 !important; color:#991b1b !important; }
+        .kanban-card .kcard-btn.btn-neutral      { background:#e5e7eb !important; color:#374151 !important; }
+        .kanban-card .kcard-btn.btn-danger       { background:#fee2e2 !important; color:#991b1b !important; }
+    `;
+    document.head.appendChild(style);
+}
+
+/**
  * Initialiser le Kanban au chargement de l'onglet
  */
 async function initKanban() {
-    console.log('🎯 Initialisation du Kanban');
+    injectKanbanStyles();
     loadCardOrderFromStorage();
     await loadKanbanData();
     renderKanban();
@@ -166,12 +202,21 @@ function renderColumn(status, todos) {
             travaux: 'Travaux'
         };
         
+        const safeTitle = window.SecurityUtils ? window.SecurityUtils.sanitizeText(todo.title) : todo.title;
+        const safeDesc  = todo.description ? (window.SecurityUtils ? window.SecurityUtils.sanitizeText(todo.description) : todo.description) : '';
+
         html += `
             <div class="kanban-card" data-id="${todo.id}" data-status="${status}" data-category="${todo.category}" draggable="true">
-                <p class="card-title-line"><strong class="label-bold-underline">Titre :</strong> ${window.SecurityUtils ? window.SecurityUtils.sanitizeText(todo.title) : todo.title}</p>
-                ${todo.description ? `<p><strong class="label-bold-underline">Descriptif :</strong> ${window.SecurityUtils ? window.SecurityUtils.sanitizeText(todo.description) : todo.description}</p>` : ''}
-                <p><strong class="label-bold-underline">Récurrent :</strong> ${todo.is_recurrent ? 'Oui' : 'Non'}</p>
-                ${getActionButtons(todo, status)}
+                <div class="kcard-header">
+                    <span class="kcard-category-dot category-${todo.category}"></span>
+                    <span class="kcard-category-label">${categoryLabels[todo.category] || todo.category}</span>
+                    ${todo.is_recurrent ? '<span class="kcard-recurrent-badge">🔁 Récurrent</span>' : ''}
+                </div>
+                <p class="kcard-title">${safeTitle}</p>
+                ${safeDesc ? `<p class="kcard-desc">${safeDesc}</p>` : ''}
+                <div class="kcard-footer">
+                    ${getActionButtons(todo, status)}
+                </div>
             </div>
         `;
     });
@@ -341,48 +386,42 @@ function sortTodosByStoredOrder(status, todos) {
  * Obtenir les boutons d'action selon le statut
  */
 function getActionButtons(todo, status) {
+    const cat = todo.category || 'neutral';
+
     let buttons = '';
-    const buttonThemeByCategory = {
-        reservations: { background: '#6f95d8', border: '#5c80c2', text: '#ffffff' },
-        achats: { background: '#e0b646', border: '#cda238', text: '#1a1a1a' },
-        travaux: { background: '#dc6a6a', border: '#c45858', text: '#ffffff' }
-    };
-    const defaultTheme = { background: '#7f8c8d', border: '#6c7a7b', text: '#ffffff' };
-    const currentTheme = buttonThemeByCategory[todo.category] || defaultTheme;
-    const inlineButtonStyle = `style="background:${currentTheme.background};border:1px solid ${currentTheme.border};color:${currentTheme.text};"`;
-    
+
     switch (status) {
         case 'todo':
             buttons = `
-                <button class="kanban-card-btn btn-start" ${inlineButtonStyle} onclick="window.updateTaskStatus('${todo.id}', 'in_progress')">
+                <button class="kcard-btn btn-${cat}" onclick="window.updateTaskStatus('${todo.id}', 'in_progress')">
                     <i data-lucide="play"></i> Démarrer
                 </button>
             `;
             break;
-            
+
         case 'in_progress':
             buttons = `
-                <button class="kanban-card-btn btn-complete" ${inlineButtonStyle} onclick="window.updateTaskStatus('${todo.id}', 'done')">
+                <button class="kcard-btn btn-${cat}" onclick="window.updateTaskStatus('${todo.id}', 'done')">
                     <i data-lucide="check"></i> Terminer
                 </button>
-                <button class="kanban-card-btn btn-back" ${inlineButtonStyle} onclick="window.updateTaskStatus('${todo.id}', 'todo')">
+                <button class="kcard-btn btn-neutral" onclick="window.updateTaskStatus('${todo.id}', 'todo')">
                     <i data-lucide="arrow-left"></i>
                 </button>
             `;
             break;
-            
+
         case 'done':
             buttons = `
-                <button class="kanban-card-btn btn-back" ${inlineButtonStyle} onclick="window.updateTaskStatus('${todo.id}', 'in_progress')">
+                <button class="kcard-btn btn-${cat}" onclick="window.updateTaskStatus('${todo.id}', 'in_progress')">
                     <i data-lucide="rotate-ccw"></i> Réactiver
                 </button>
-                <button class="kanban-card-btn btn-delete" ${inlineButtonStyle} onclick="window.deleteTask('${todo.id}')">
-                    <i data-lucide="trash-2"></i> Supprimer
+                <button class="kcard-btn btn-danger" onclick="window.deleteTask('${todo.id}')">
+                    <i data-lucide="trash-2"></i>
                 </button>
             `;
             break;
     }
-    
+
     return buttons;
 }
 

@@ -1,11 +1,11 @@
 <div class="tab-container">
     <!-- Header Style Dashboard -->
-    <div class="stats-header">
-        <div class="stats-header-content">
-            <div>
-                <h2 class="stats-header-title"><i data-lucide="bar-chart-3"></i> Statistiques</h2>
-                <p class="stats-header-subtitle">Analyse des performances et réservations</p>
-            </div>
+    <header class="page-header">
+        <div class="page-header__content">
+            <h1 class="page-title"><i data-lucide="bar-chart-3"></i> Statistiques</h1>
+            <p class="page-subtitle">Analyse des performances et réservations</p>
+        </div>
+        <div class="page-header__actions">
             <div class="stats-header-actions">
                 <label for="yearFilterStats" class="stats-year-label"><i data-lucide="calendar"></i> Année :</label>
                 <select id="yearFilterStats" onchange="filterStatsByYear()" class="stats-year-select">
@@ -16,7 +16,7 @@
                 </button>
             </div>
         </div>
-    </div>
+    </header>
 
             <!-- 📊 RÉSERVATIONS PAR PLATEFORME -->
             <div class="stats-card">
@@ -82,7 +82,7 @@
                 <div id="historicalDataForm" class="historical-data-form">
                     <div class="stats-card historical-data-card">
                         <div style="margin-bottom: 20px;">
-                            <h3 style="margin: 0 0 15px 0; color: var(--primary);"><i data-lucide="calendar" style="width: 22px; height: 22px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i>Données Historiques (Années Précédentes)</h3>
+                            <h3 class="stats-card-title" style="margin: 0 0 15px 0;"><i data-lucide="calendar" style="width: 22px; height: 22px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i>Données Historiques (Années Précédentes)</h3>
                             <div class="alert alert-info" style="margin-bottom: 20px;">
                                 <strong><i data-lucide="info" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i> Info :</strong> Saisissez les chiffres d'affaires des années précédentes pour comparer avec l'année en cours dans les graphiques.
                             </div>

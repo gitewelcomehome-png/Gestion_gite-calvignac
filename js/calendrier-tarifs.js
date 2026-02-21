@@ -851,9 +851,16 @@ async function loadRegles() {
 function createDefaultRegles() {
     return {
         promotions: {
-            long_sejour: { actif: false, pourcentage: 10, a_partir_de: 7 },
             last_minute: { actif: false, pourcentage: 15, jours_avant: 7 },
             early_booking: { actif: false, pourcentage: 10, jours_avant: 60 }
+        },
+        reductions_duree: {
+            nuit_3: 0,
+            nuit_4: 0,
+            nuit_5: 0,
+            nuit_6: 0,
+            nuit_7: 0,
+            nuit_plus: 0
         },
         configuration_gite: {
             tarif_nuit_base: 0,
@@ -896,34 +903,6 @@ function renderReglesForm() {
 
     // Promotions
     const promos = reglesCache.promotions || {};
-    
-    if (promos.long_sejour) {
-        const checkbox = document.getElementById('promo-long-sejour');
-        if (checkbox) {
-            // Retirer les anciens événements
-            const newCheckbox = checkbox.cloneNode(true);
-            checkbox.parentNode.replaceChild(newCheckbox, checkbox);
-            
-            newCheckbox.checked = promos.long_sejour.actif;
-            
-            // Event change avec auto-save
-            newCheckbox.addEventListener('change', (e) => {
-                autoSaveRegles();
-            });
-        } else {
-            console.error('❌ Checkbox promo-long-sejour NON TROUVÉ');
-        }
-        const pct = document.getElementById('long-sejour-pct');
-        if (pct) {
-            pct.value = promos.long_sejour.pourcentage;
-            pct.addEventListener('input', () => autoSaveRegles());
-        }
-        const nuits = document.getElementById('long-sejour-nuits');
-        if (nuits) {
-            nuits.value = promos.long_sejour.a_partir_de;
-            nuits.addEventListener('input', () => autoSaveRegles());
-        }
-    }
     
     if (promos.last_minute) {
         const checkbox = document.getElementById('promo-last-minute');
@@ -987,7 +966,25 @@ function renderReglesForm() {
         dureeMin.value = reglesCache.duree_min_defaut || 2;
         dureeMin.addEventListener('input', () => autoSaveRegles());
     }
-    
+
+    // Réductions par durée de séjour
+    const rdCache = reglesCache.reductions_duree || {};
+    const rdIds = [
+        { id: 'reduction-duree-3',    key: 'nuit_3'    },
+        { id: 'reduction-duree-4',    key: 'nuit_4'    },
+        { id: 'reduction-duree-5',    key: 'nuit_5'    },
+        { id: 'reduction-duree-6',    key: 'nuit_6'    },
+        { id: 'reduction-duree-7',    key: 'nuit_7'    },
+        { id: 'reduction-duree-plus', key: 'nuit_plus' }
+    ];
+    rdIds.forEach(({ id, key }) => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.value = parseFloat(rdCache[key]) || 0;
+            input.addEventListener('input', () => autoSaveRegles());
+        }
+    });
+
     // Périodes spécifiques
     renderPeriodesList();
 }
@@ -1130,11 +1127,6 @@ async function saveRegles(isAutoSave = false) {
         
         // Récupérer les valeurs du formulaire
         const promotions = {
-            long_sejour: {
-                actif: document.getElementById('promo-long-sejour')?.checked || false,
-                pourcentage: parseFloat(document.getElementById('long-sejour-pct')?.value) || 10,
-                a_partir_de: parseInt(document.getElementById('long-sejour-nuits')?.value) || 7
-            },
             last_minute: {
                 actif: document.getElementById('promo-last-minute')?.checked || false,
                 pourcentage: parseFloat(document.getElementById('last-minute-pct')?.value) || 15,
@@ -1155,8 +1147,19 @@ async function saveRegles(isAutoSave = false) {
             frais_draps: parseFloat(document.getElementById('config-frais-draps')?.value) || 0
         };
         
+        // Réductions par durée de séjour
+        const reductionsDuree = {
+            nuit_3:    parseFloat(document.getElementById('reduction-duree-3')?.value)    || 0,
+            nuit_4:    parseFloat(document.getElementById('reduction-duree-4')?.value)    || 0,
+            nuit_5:    parseFloat(document.getElementById('reduction-duree-5')?.value)    || 0,
+            nuit_6:    parseFloat(document.getElementById('reduction-duree-6')?.value)    || 0,
+            nuit_7:    parseFloat(document.getElementById('reduction-duree-7')?.value)    || 0,
+            nuit_plus: parseFloat(document.getElementById('reduction-duree-plus')?.value) || 0
+        };
+
         const regles = {
             promotions: promotions,
+            reductions_duree: reductionsDuree,
             configuration_gite: configurationGite,
             duree_min_defaut: dureeMinDefaut,
             periodes_duree_min: reglesCache.periodes_duree_min || []
@@ -1430,7 +1433,7 @@ function calculateTarifForDuration(dateDebut, dateFin, nbNuits) {
         date.setDate(date.getDate() + i);
         const dateStr = toLocalDateString(date);
         
-        const tarifBase = tarifsCache.find(t => t.date === dateStr)?.prix_nuit || 0;
+        const tarifBase = parseFloat(tarifsCache.find(t => t.date === dateStr)?.prix_nuit) || 0;
         
         // Appliquer la grille de durée
         let multiplicateur = 1;
@@ -1441,7 +1444,8 @@ function calculateTarifForDuration(dateDebut, dateFin, nbNuits) {
             if (reglesCache.grille_duree.type === 'pourcentage') {
                 multiplicateur = value / 100;
             } else {
-                multiplicateur = value / tarifBase;
+                // Tarif fixe par position : si tarifBase est 0, contribue 0 (pas de division par zéro)
+                multiplicateur = tarifBase > 0 ? value / tarifBase : 0;
             }
         }
         
@@ -1451,11 +1455,6 @@ function calculateTarifForDuration(dateDebut, dateFin, nbNuits) {
     // Appliquer les promotions
     if (reglesCache?.promotions) {
         const promos = reglesCache.promotions;
-        
-        // Long séjour
-        if (promos.long_sejour?.actif && nbNuits >= promos.long_sejour.a_partir_de) {
-            tarifTotal *= (1 - promos.long_sejour.pourcentage / 100);
-        }
         
         // Last minute
         const joursAvantArrivee = Math.ceil((new Date(dateDebut) - new Date()) / (1000 * 60 * 60 * 24));
@@ -1467,6 +1466,18 @@ function calculateTarifForDuration(dateDebut, dateFin, nbNuits) {
         if (promos.early_booking?.actif && joursAvantArrivee >= promos.early_booking.jours_avant) {
             tarifTotal *= (1 - promos.early_booking.pourcentage / 100);
         }
+    }
+
+    // Appliquer la réduction par durée de séjour
+    const rd = reglesCache?.reductions_duree;
+    if (rd) {
+        let pct = 0;
+        if (nbNuits >= 7)      pct = parseFloat(rd.nuit_plus) || 0;
+        else if (nbNuits === 6) pct = parseFloat(rd.nuit_6)    || 0;
+        else if (nbNuits === 5) pct = parseFloat(rd.nuit_5)    || 0;
+        else if (nbNuits === 4) pct = parseFloat(rd.nuit_4)    || 0;
+        else if (nbNuits === 3) pct = parseFloat(rd.nuit_3)    || 0;
+        if (pct > 0) tarifTotal *= (1 - pct / 100);
     }
     
     return tarifTotal;
@@ -1484,7 +1495,7 @@ function calculateTarifSansPromo(dateDebut, dateFin, nbNuits) {
         date.setDate(date.getDate() + i);
         const dateStr = toLocalDateString(date);
         
-        const tarifBase = tarifsCache.find(t => t.date === dateStr)?.prix_nuit || 0;
+        const tarifBase = parseFloat(tarifsCache.find(t => t.date === dateStr)?.prix_nuit) || 0;
         
         // Appliquer la grille de durée
         let multiplicateur = 1;
@@ -1495,7 +1506,8 @@ function calculateTarifSansPromo(dateDebut, dateFin, nbNuits) {
             if (reglesCache.grille_duree.type === 'pourcentage') {
                 multiplicateur = value / 100;
             } else {
-                multiplicateur = value / tarifBase;
+                // Tarif fixe par position : si tarifBase est 0, contribue 0 (pas de division par zéro)
+                multiplicateur = tarifBase > 0 ? value / tarifBase : 0;
             }
         }
         
@@ -1629,6 +1641,18 @@ function toDateOnlyString(value) {
     return toLocalDateString(date);
 }
 
+// Vérifie que toutes les nuits d'un séjour ont un prix défini (non nul)
+function hasAllPricesDefined(dateDebutStr, nbNuits) {
+    for (let i = 0; i < nbNuits; i++) {
+        const d = parseDateOnly(dateDebutStr);
+        d.setDate(d.getDate() + i);
+        const ds = toLocalDateString(d);
+        const prix = parseFloat(tarifsCache.find(t => t.date === ds)?.prix_nuit);
+        if (!prix || prix <= 0) return false;
+    }
+    return true;
+}
+
 function hasReservationConflict(startDateStr, endDateStr) {
     if (!Array.isArray(reservationsCache) || reservationsCache.length === 0) {
         return false;
@@ -1726,6 +1750,15 @@ async function generateTableauGDF() {
             const dateFin = new Date(dateObj);
             dateFin.setDate(dateFin.getDate() + nights);
             const dateFinStr = toLocalDateString(dateFin);
+
+            // Pour la nuit supp (nights=8), le conflit se vérifie sur 7 nuits (pas 8)
+            const dateFin7 = new Date(dateObj);
+            dateFin7.setDate(dateFin7.getDate() + 7);
+            const dateFin7Str = toLocalDateString(dateFin7);
+            const dateFin6 = new Date(dateObj);
+            dateFin6.setDate(dateFin6.getDate() + 6);
+            const dateFin6Str = toLocalDateString(dateFin6);
+            const conflictCheckEnd = nights === 8 ? dateFin7Str : dateFinStr;
             
             // Vérifier la durée minimale
             if (nights < dureeMinimale) {
@@ -1734,21 +1767,26 @@ async function generateTableauGDF() {
             }
             
             // Vérifier si le séjour chevauche une réservation existante
-            const hasConflict = hasReservationConflict(dateStr, dateFinStr);
+            const hasConflict = hasReservationConflict(dateStr, conflictCheckEnd);
+
+            // Vérifier que toutes les nuits du séjour ont un prix défini
+            const nbNuitsCheck = nights === 8 ? 7 : nights;
+            const allPricesDefined = hasAllPricesDefined(dateStr, nbNuitsCheck);
             
             if (hasConflict) {
                 html += `<td class="cell-reserved-impact" style="padding: 12px; text-align: center; font-weight: 700;">&nbsp;</td>`;
+            } else if (!allPricesDefined) {
+                html += `<td class="cell-min-duration" style="padding: 12px; text-align: center; font-weight: 600; opacity: 0.35;" title="Tarif(s) manquant(s) pour ce séjour">—</td>`;
             } else {
-                const tarif = calculateTarifForDuration(dateStr, dateFinStr, nights);
-                
-                // Pour la nuit supp (nights=8) : afficher le prix d'UNE nuit seule (tarif8 - tarif7)
-                let tarifAffiche = tarif;
+                // Pour la nuit supp (nights=8) : prix_7nuits - prix_6nuits
+                // = augmentation du prix entre 6 et 7 jours (coût marginal de la 7ème nuit)
+                let tarifAffiche;
                 if (nights === 8) {
-                    const dateFin7 = new Date(dateObj);
-                    dateFin7.setDate(dateFin7.getDate() + 7);
-                    const dateFin7Str = toLocalDateString(dateFin7);
                     const tarif7 = calculateTarifForDuration(dateStr, dateFin7Str, 7);
-                    tarifAffiche = tarif - tarif7;
+                    const tarif6 = calculateTarifForDuration(dateStr, dateFin6Str, 6);
+                    tarifAffiche = tarif7 - tarif6;
+                } else {
+                    tarifAffiche = calculateTarifForDuration(dateStr, dateFinStr, nights);
                 }
                 
                 // Déterminer la classe CSS selon le tarif
@@ -1757,21 +1795,35 @@ async function generateTableauGDF() {
                     cellClass += ' high-price';
                 }
                 
-                // Vérifier si promo appliquée (comparaison avec tarif de base)
-                const tarifBase = calculateTarifSansPromo(dateStr, dateFinStr, nights);
-                let tarifBaseAffiche = tarifBase;
+                // Vérifier si promo appliquée (comparaison avec tarif de base sans promos)
+                let tarifBaseAffiche;
                 if (nights === 8) {
-                    const dateFin7 = new Date(dateObj);
-                    dateFin7.setDate(dateFin7.getDate() + 7);
-                    const dateFin7Str = toLocalDateString(dateFin7);
                     const tarif7Base = calculateTarifSansPromo(dateStr, dateFin7Str, 7);
-                    tarifBaseAffiche = tarifBase - tarif7Base;
+                    const tarif6Base = calculateTarifSansPromo(dateStr, dateFin6Str, 6);
+                    tarifBaseAffiche = tarif7Base - tarif6Base;
+                } else {
+                    tarifBaseAffiche = calculateTarifSansPromo(dateStr, dateFinStr, nights);
                 }
                 if (tarifAffiche < tarifBaseAffiche) {
                     cellClass += ' promo-price';
                 }
                 
-                html += `<td class="${cellClass}" style="padding: 12px; text-align: center; font-weight: 700; font-size: 1rem;">${Math.round(tarifAffiche)}</td>`;
+                // Tooltip : nuits incluses et date de départ
+                // Pour nuit supp : montre les 7 nuits incluses (nuit 1 à 7)
+                const nbNuitsTooltip = nights === 8 ? 7 : nights;
+                const nuitsDetails = [];
+                for (let k = 0; k < nbNuitsTooltip; k++) {
+                    const nd = new Date(dateObj);
+                    nd.setDate(nd.getDate() + k);
+                    nuitsDetails.push(nd.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }));
+                }
+                const departDate = new Date(dateObj);
+                departDate.setDate(departDate.getDate() + nbNuitsTooltip);
+                const tooltipText = nights === 8
+                    ? `Nuit supp. = prix 7 nuits − prix 6 nuits\nArrivée ${dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}, départ ${departDate.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}\nNuits incluses : ${nuitsDetails.join(', ')}`
+                    : `Arrivée ${dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}, départ ${departDate.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}\nNuits incluses : ${nuitsDetails.join(', ')}`;
+                
+                html += `<td class="${cellClass}" style="padding: 12px; text-align: center; font-weight: 700; font-size: 1rem; cursor: help;" title="${tooltipText}">${Math.round(tarifAffiche)}</td>`;
             }
         }
         
@@ -1872,14 +1924,6 @@ function exportCalendrierComplet() {
         const promosData = [];
         if (reglesCache?.promotions) {
             const promos = reglesCache.promotions;
-            if (promos.long_sejour) {
-                promosData.push({
-                    'Promotion': 'Long Séjour',
-                    'Activée': promos.long_sejour.actif ? 'Oui' : 'Non',
-                    'Réduction (%)': promos.long_sejour.pourcentage,
-                    'Condition': `À partir de ${promos.long_sejour.a_partir_de} nuits`
-                });
-            }
             if (promos.last_minute) {
                 promosData.push({
                     'Promotion': 'Last Minute',
@@ -2149,16 +2193,6 @@ function renderCalendrierTarifsTab() {
                             🎁 Promotions Automatiques
                         </h4>
                         <div class="promo-grid">
-                            <div class="promo-card success">
-                                <div class="promo-header">
-                                    <label class="toggle-switch"><input type="checkbox" id="promo-long-sejour"><span class="toggle-slider"></span></label>
-                                    <span class="promo-title success">Long Séjour</span>
-                                </div>
-                                <label class="promo-input-label" for="long-sejour-pct">Réduction (%)</label>
-                                <input type="number" id="long-sejour-pct" placeholder="Ex: 10" class="input-neo" />
-                                <label class="promo-input-label" for="long-sejour-nuits">À partir de (nuits)</label>
-                                <input type="number" id="long-sejour-nuits" placeholder="Ex: 7" class="input-neo" />
-                            </div>
                             <div class="promo-card warning">
                                 <div class="promo-header">
                                     <label class="toggle-switch"><input type="checkbox" id="promo-last-minute"><span class="toggle-slider"></span></label>
@@ -2228,6 +2262,57 @@ function renderCalendrierTarifsTab() {
                 </button>
                 <div id="export-gdf" class="accordion-content active">
                     <div id="tableau-gdf-container" style="display: block;">
+
+                        <!-- Réductions par durée de séjour -->
+                        <div style="background: rgba(39,174,96,0.08); border: 2px solid #27AE60; border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+                            <div style="font-weight: 700; font-size: 1rem; margin-bottom: 14px; color: var(--text);">🏷️ Réductions par durée de séjour (%)</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                                <div style="display:flex;flex-direction:column;gap:4px;">
+                                    <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);">3 nuits</label>
+                                    <div style="display:flex;align-items:center;gap:4px;">
+                                        <input type="number" id="reduction-duree-3" class="input-neo" min="0" max="100" step="0.5" style="width:70px;padding:6px 8px;font-size:0.95rem;" placeholder="0" />
+                                        <span style="font-weight:700;">%</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:4px;">
+                                    <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);">4 nuits</label>
+                                    <div style="display:flex;align-items:center;gap:4px;">
+                                        <input type="number" id="reduction-duree-4" class="input-neo" min="0" max="100" step="0.5" style="width:70px;padding:6px 8px;font-size:0.95rem;" placeholder="0" />
+                                        <span style="font-weight:700;">%</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:4px;">
+                                    <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);">5 nuits</label>
+                                    <div style="display:flex;align-items:center;gap:4px;">
+                                        <input type="number" id="reduction-duree-5" class="input-neo" min="0" max="100" step="0.5" style="width:70px;padding:6px 8px;font-size:0.95rem;" placeholder="0" />
+                                        <span style="font-weight:700;">%</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:4px;">
+                                    <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);">6 nuits</label>
+                                    <div style="display:flex;align-items:center;gap:4px;">
+                                        <input type="number" id="reduction-duree-6" class="input-neo" min="0" max="100" step="0.5" style="width:70px;padding:6px 8px;font-size:0.95rem;" placeholder="0" />
+                                        <span style="font-weight:700;">%</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:4px;">
+                                    <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);">7 nuits</label>
+                                    <div style="display:flex;align-items:center;gap:4px;">
+                                        <input type="number" id="reduction-duree-7" class="input-neo" min="0" max="100" step="0.5" style="width:70px;padding:6px 8px;font-size:0.95rem;" placeholder="0" />
+                                        <span style="font-weight:700;">%</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:4px;">
+                                    <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);">7+ nuits</label>
+                                    <div style="display:flex;align-items:center;gap:4px;">
+                                        <input type="number" id="reduction-duree-plus" class="input-neo" min="0" max="100" step="0.5" style="width:70px;padding:6px 8px;font-size:0.95rem;" placeholder="0" />
+                                        <span style="font-weight:700;">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top:10px;font-size:0.8rem;color:var(--text-secondary);">💡 Les réductions s'appliquent au total de la colonne correspondante. Modification auto-enregistrée.</div>
+                        </div>
+
                         <!-- Navigation mois -->
                         <div class="calendar-controls success">
                             <button class="btn-neo btn-nav" onclick="previousMonthGDF()">◀ Précédent</button>
@@ -2637,61 +2722,100 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
 
 async function appliquerSuggestionsIATarifs() {
     const entries = Object.entries(aiSuggestionsCacheTarifs || {});
-    if (!entries.length || !currentGiteId) { alert('Aucune suggestion disponible'); return; }
+    if (!entries.length) {
+        showToast('Aucune suggestion disponible', 'error');
+        return;
+    }
+    if (!currentGiteId) {
+        showToast('Aucun gîte sélectionné', 'error');
+        return;
+    }
     if (!confirm(`Appliquer les ${entries.length} prix suggérés sur ce mois ?`)) return;
-    
+
     try {
+        // Construire une copie propre du cache avec les nouvelles valeurs IA
+        const cacheModifie = [...tarifsCache];
         for (const [date, prix_nuit] of entries) {
-            const idx = tarifsCache.findIndex(t => t.date === date);
+            const prixNuit = parseFloat(prix_nuit);
+            if (isNaN(prixNuit) || prixNuit <= 0) continue;
+            const idx = cacheModifie.findIndex(t => t.date === date);
             if (idx >= 0) {
-                tarifsCache[idx].prix_nuit = prix_nuit;
+                cacheModifie[idx] = { ...cacheModifie[idx], prix_nuit: prixNuit };
             } else {
-                tarifsCache.push({ date, prix_nuit });
+                cacheModifie.push({ date, prix_nuit: prixNuit });
             }
         }
 
-        const { error } = await window.supabaseClient
+        // Sauvegarder et vérifier que des lignes ont bien été mises à jour
+        const { data: saved, error } = await window.supabaseClient
             .from('gites')
-            .update({ tarifs_calendrier: tarifsCache })
-            .eq('id', currentGiteId);
+            .update({ tarifs_calendrier: cacheModifie })
+            .eq('id', currentGiteId)
+            .select('id');
 
         if (error) throw error;
+        if (!saved || saved.length === 0) throw new Error(`Aucune ligne mise à jour — id gîte : ${currentGiteId}`);
 
+        showToast(`✅ ${entries.length} tarif(s) IA enregistré(s) en base de données`, 'success');
         aiSuggestionsCacheTarifs = {};
+        // Recharger depuis la BDD pour garantir la cohérence
         await loadTarifsBase();
         quitterModeIATarifs();
+        await generateTableauGDF();
     } catch (err) {
-        alert('❌ Erreur : ' + err.message);
+        console.error('❌ Erreur sauvegarde tarifs IA:', err);
+        showToast('❌ Erreur sauvegarde : ' + (err.message || 'Impossible de sauvegarder'), 'error');
     }
 }
 
 async function accepterSuggestionJourTarifs(dateStr, prix) {
-    if (!currentGiteId) return;
+    if (!currentGiteId) {
+        showToast('Aucun gîte sélectionné', 'error');
+        return;
+    }
     try {
-        const idx = tarifsCache.findIndex(t => t.date === dateStr);
-        if (idx >= 0) {
-            tarifsCache[idx].prix_nuit = prix;
-        } else {
-            tarifsCache.push({ date: dateStr, prix_nuit: prix });
+        const prixNuit = parseFloat(prix);
+        if (isNaN(prixNuit) || prixNuit <= 0) {
+            showToast('Prix invalide', 'error');
+            return;
         }
 
-        const { error } = await window.supabaseClient
+        // Construire une copie propre du cache avec la nouvelle valeur
+        const cacheModifie = [...tarifsCache];
+        const idx = cacheModifie.findIndex(t => t.date === dateStr);
+        if (idx >= 0) {
+            cacheModifie[idx] = { ...cacheModifie[idx], prix_nuit: prixNuit };
+        } else {
+            cacheModifie.push({ date: dateStr, prix_nuit: prixNuit });
+        }
+
+        // Sauvegarder et vérifier que des lignes ont bien été mises à jour
+        const { data: saved, error } = await window.supabaseClient
             .from('gites')
-            .update({ tarifs_calendrier: tarifsCache })
-            .eq('id', currentGiteId);
+            .update({ tarifs_calendrier: cacheModifie })
+            .eq('id', currentGiteId)
+            .select('id');
 
         if (error) throw error;
+        if (!saved || saved.length === 0) throw new Error(`Aucune ligne mise à jour — id gîte : ${currentGiteId}`);
 
-        // Mettre à jour le cache local
+        const dateFormatee = new Date(dateStr + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+        showToast(`✅ Tarif IA enregistré : ${Math.round(prixNuit)}€ pour le ${dateFormatee}`, 'success');
+
+        // Retirer la suggestion du cache et recharger depuis la BDD
         delete aiSuggestionsCacheTarifs[dateStr];
-        // Si plus aucune suggestion restante, quitter le mode
+        await loadTarifsBase();
+
         if (Object.keys(aiSuggestionsCacheTarifs).length === 0) {
             quitterModeIATarifs();
         } else {
             _renderCalendrierTarifsImmediate();
         }
+        // Mettre à jour le tableau GDF
+        await generateTableauGDF();
     } catch (err) {
-        console.error('❌ Erreur sauvegarde tarif:', err);
+        console.error('❌ Erreur sauvegarde tarif IA:', err);
+        showToast('❌ Erreur sauvegarde : ' + (err.message || 'Impossible de sauvegarder'), 'error');
     }
 }
 

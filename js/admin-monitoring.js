@@ -5,6 +5,26 @@
 let currentUser = null;
 let unresolvedGroupedErrors = [];
 
+function getValidatedCorrectionIds() {
+    try {
+        const raw = localStorage.getItem('cm_monitoring_validated_corrections');
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function markCorrectionAsValidated(correctionId) {
+    try {
+        const existing = new Set(getValidatedCorrectionIds());
+        existing.add(Number(correctionId));
+        localStorage.setItem('cm_monitoring_validated_corrections', JSON.stringify(Array.from(existing)));
+    } catch (error) {
+        // ignore
+    }
+}
+
 // ================================================================
 // INITIALISATION
 // ================================================================
@@ -1358,12 +1378,15 @@ window.loadTestCorrections = async function() {
             }
         ];
         
-        if (!corrections || corrections.length === 0) {
+        const validatedIds = new Set(getValidatedCorrectionIds());
+        const visibleCorrections = (corrections || []).filter(c => !validatedIds.has(Number(c.id)));
+
+        if (!visibleCorrections || visibleCorrections.length === 0) {
             container.innerHTML = `
                 <div style="background: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; color: #64748b;">
                     <i data-lucide="clipboard-list" style="width: 64px; height: 64px; margin-bottom: 15px; opacity: 0.5;"></i>
                     <p style="font-size: 16px; margin: 0;">Aucune correction à tester actuellement</p>
-                    <p style="font-size: 14px; margin-top: 10px; opacity: 0.8;">Les corrections appliquées apparaîtront ici</p>
+                    <p style="font-size: 14px; margin-top: 10px; opacity: 0.8;">Toutes les corrections ont été validées ✅</p>
                 </div>
             `;
             lucide.createIcons();
@@ -1372,7 +1395,7 @@ window.loadTestCorrections = async function() {
         
         // Afficher les tests
         let html = '';
-        corrections.forEach((correction, index) => {
+        visibleCorrections.forEach((correction, index) => {
             const errorType = correction.error_type || 'unknown';
             const tagClass = errorType === 'critical' ? 'test-tag-critical' : 
                             errorType === 'warning' ? 'test-tag-warning' : 'test-tag-info';
@@ -1504,6 +1527,21 @@ window.validateTestCorrection = async function(correctionId, filePath) {
             </div>
         `;
         lucide.createIcons();
+
+        // Marquer visuellement comme validé puis retirer de la liste
+        markCorrectionAsValidated(correctionId);
+        const testBox = document.getElementById(`test-${correctionId}`);
+        if (testBox) {
+            testBox.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+            testBox.style.opacity = '0';
+            testBox.style.transform = 'translateY(-6px)';
+            setTimeout(() => {
+                testBox.remove();
+                if (typeof window.loadTestCorrections === 'function') {
+                    window.loadTestCorrections();
+                }
+            }, 260);
+        }
         
     } catch (err) {
         resultDiv.innerHTML = `

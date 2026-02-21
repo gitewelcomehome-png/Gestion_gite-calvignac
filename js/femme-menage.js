@@ -1,10 +1,90 @@
 /**
  * 🧹 ESPACE FEMME DE MÉNAGE
  * Interface dédiée pour la femme de ménage
+ * Supporte deux modes :
+ *   - Authentifié (owner connecté)
+ *   - Token (lien partageable envoyé par email/SMS)
  */
 
-// Utiliser le supabase déjà configuré globalement
-// (pas besoin de redéclarer)
+// ================================================================
+// ÉTAT GLOBAL DU MODE D'ACCÈS
+// ================================================================
+window.cleanerOwnerId = null;   // owner_user_id résolu (auth ou token)
+window.cleanerTokenMode = false; // true si accès par lien
+
+/**
+ * Initialise le mode d'accès : token URL ou auth Supabase
+ * @returns {boolean} true si accès autorisé
+ */
+async function initTokenMode() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    if (token) {
+        // ── Mode lien partageable ──
+        const { data: tokenData, error } = await window.supabaseClient
+            .from('cleaner_tokens')
+            .select('owner_user_id, label, type')
+            .eq('token', token)
+            .single();
+
+        if (error || !tokenData) {
+            document.body.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">
+                    <div style="text-align:center;padding:40px;border:3px solid #ff7675;border-radius:16px;box-shadow:4px 4px 0 #ff7675;background:white;">
+                        <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
+                        <h2 style="color:#e74c3c;">Lien invalide</h2>
+                        <p style="color:#636e72;">Ce lien est incorrect ou a été révoqué.<br>Demandez un nouveau lien au propriétaire.</p>
+                    </div>
+                </div>`;
+            return false;
+        }
+
+        window.cleanerOwnerId = tokenData.owner_user_id;
+        window.cleanerTokenMode = true;
+        window.cleanerTokenType = tokenData.type || 'cleaner';
+        return true;
+    }
+
+    // ── Mode authentifié (propriétaire connecté) ──
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (user) {
+            window.cleanerOwnerId = user.id;
+            window.cleanerTokenMode = false;
+            return true;
+        }
+    } catch (e) { /* ignore */ }
+
+    // Ni token ni auth
+    document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">
+            <div style="text-align:center;padding:40px;border:3px solid #e0e0e0;border-radius:16px;background:white;">
+                <div style="font-size:3rem;margin-bottom:16px;">🔑</div>
+                <h2>Accès non autorisé</h2>
+                <p style="color:#636e72;">Utilisez le lien fourni par le propriétaire.</p>
+            </div>
+        </div>`;
+    return false;
+}
+
+/**
+ * Charge la liste des gîtes selon le mode d'accès
+ */
+async function getGitesPourUser() {
+    if (window.cleanerTokenMode) {
+        // Requête directe filtrée par owner (pas de RLS auth)
+        const { data } = await window.supabaseClient
+            .from('gites')
+            .select('id, name, slug')
+            .eq('owner_user_id', window.cleanerOwnerId)
+            .eq('is_active', true)
+            .order('ordre_affichage', { ascending: true, nullsFirst: false })
+            .order('name', { ascending: true });
+        return data || [];
+    }
+    return await window.gitesManager.getVisibleGites();
+}
 
 // ================================================================
 // FONCTION TOAST (NOTIFICATIONS)
@@ -37,7 +117,7 @@ function showToast(message, type = 'success') {
  * Peuple tous les selects de gîtes avec les données dynamiques
  */
 async function peuplerSelectsGites() {
-    const gites = await window.gitesManager.getVisibleGites();
+    const gites = await getGitesPourUser();
     if (!gites || gites.length === 0) {
         console.error('❌ Aucun gîte trouvé pour peupler les selects');
         return;
@@ -80,11 +160,15 @@ async function peuplerSelectsGites() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Attendre l'initialisation de gitesManager
-    if (window.gitesManager && !window.gitesManager.loaded) {
+    // Initialiser le mode d'accès (token URL ou auth)
+    const accesAutorise = await initTokenMode();
+    if (!accesAutorise) return;
+
+    // En mode auth, attendre gitesManager
+    if (!window.cleanerTokenMode && window.gitesManager && !window.gitesManager.loaded) {
         await window.gitesManager.loadGites();
     }
-    
+
     // Peupler les selects de gîtes dynamiquement
     await peuplerSelectsGites();
     
@@ -127,6 +211,7 @@ async function chargerInterventions() {
         const { data: menages, error } = await window.supabaseClient
             .from('cleaning_schedule')
             .select('*')
+            .eq('owner_user_id', window.cleanerOwnerId)
             .gte('scheduled_date', today.toISOString().split('T')[0])
             .lte('scheduled_date', troisSemaines.toISOString().split('T')[0])
             .order('scheduled_date', { ascending: true });
@@ -178,87 +263,69 @@ async function chargerInterventions() {
 
         // Générer le HTML avec colonnes par gîte
         let html = '';
-        const visibleGites = await window.gitesManager.getVisibleGites();
+        const visibleGites = await getGitesPourUser();
         const visibleGiteIds = visibleGites.map(g => g.id);
 
         Object.keys(semaines).sort().forEach(weekKey => {
             const semaine = semaines[weekKey];
             const weekEnd = new Date(semaine.debut);
             weekEnd.setDate(weekEnd.getDate() + 6);
-            
+
             const weekNumber = getWeekNumber(semaine.debut);
             const dateDebut = semaine.debut.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
             const dateFin = weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-            
-            // Colonnes par gîte avec gitesManager - Filtrer selon abonnement
+
+            // Filtrer selon gîtes visibles
             const allGiteIds = Object.keys(semaine.gites).sort();
-            
-            // Ne garder que les gîtes visibles selon l'abonnement
             const giteIds = allGiteIds.filter(id => visibleGiteIds.includes(id));
-            
-            // Style de centrage selon le nombre de gîtes
-            let bodyStyle = '';
-            if (giteIds.length === 1) {
-                bodyStyle = ' style="max-width: 600px; margin: 0 auto;"';
-            } else if (giteIds.length === 2) {
-                bodyStyle = ' style="max-width: 1000px; margin: 0 auto;"';
-            }
-            
+
             html += `
-                <div class="cleaning-week-table">
-                    <div class="cleaning-week-header">
-                        <div class="week-number-big">📅 Semaine ${weekNumber}</div>
-                        <div class="week-dates-small">${dateDebut} - ${dateFin}</div>
+                <div class="week-block">
+                    <div class="week-badge">
+                        <span class="week-label">Semaine ${weekNumber}</span>
+                        <span class="week-range">${dateDebut} – ${dateFin}</span>
+                        <div class="week-separator"></div>
                     </div>
-                    <div class="cleaning-week-body"${bodyStyle}>
+                    <div class="week-interventions">
             `;
-            
+
             giteIds.forEach((giteId) => {
                 const menagesGite = semaine.gites[giteId];
                 const gite = window.gitesManager?.getById(giteId);
                 const giteName = gite?.name || 'Gîte inconnu';
-                const couleur = gite?.color || '#667eea';
                 const giteSlug = giteName.toLowerCase().replace(/[^a-z0-9]/g, '');
-                
-                html += `
-                    <div class="cleaning-column" data-gite="${giteSlug}">
-                        <div class="cleaning-column-header">
-                            ${giteName}
-                        </div>
-                `;
-                
+
                 menagesGite.forEach(menage => {
                     const date = new Date(menage.scheduled_date);
-                    const dateFormatee = date.toLocaleDateString('fr-FR', { 
-                        weekday: 'long', 
-                        day: 'numeric', 
-                        month: 'long' 
+                    const dateFormatee = date.toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long'
                     });
-                    
+
                     const validated = menage.validated_by_company;
-                    const itemClass = validated ? 'cleaning-item validated' : 'cleaning-item';
-                    
+                    const heureLabel = menage.time_of_day === 'morning' ? 'Matin (7h–12h)' : 'Après-midi (12h–17h)';
+
                     html += `
-                        <div class="${itemClass}">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">${dateFormatee}</div>
-                                <div class="validation-status ${validated ? 'validated' : ''}">
-                                    ${validated ? '✓' : '⏳'}
+                        <div class="intervention-neo-card ${validated ? 'validated' : ''}" data-gite-color="${giteSlug}">
+                            <div class="intervention-neo-body">
+                                <div class="intervention-neo-header">
+                                    <div>
+                                        <div class="intervention-neo-gite">${giteName}</div>
+                                        <div class="intervention-neo-date">${dateFormatee}</div>
+                                    </div>
+                                    <div class="intervention-neo-badge ${validated ? 'validated' : ''}">
+                                        ${validated ? '✓' : '⏳'}
+                                    </div>
                                 </div>
+                                <div class="intervention-neo-time">⏰ ${heureLabel}</div>
+                                ${menage.notes ? `<div class="intervention-neo-notes">📝 ${menage.notes}</div>` : ''}
                             </div>
-                            <div style="font-size: 0.9rem; color: #636e72; margin-bottom: 5px;">
-                                ⏰ ${menage.time_of_day === 'morning' ? 'Matin (7h-12h)' : 'Après-midi (12h-17h)'}
-                            </div>
-                            ${menage.notes ? `<div style="margin-top: 8px; padding: 8px; background: var(--card); border-radius: 6px; font-size: 0.85rem; color: var(--text-secondary);">📝 ${menage.notes}</div>` : ''}
                         </div>
                     `;
                 });
-                
-                html += `
-                    </div>
-                `;
             });
-            
+
             html += `
                     </div>
                 </div>
@@ -358,13 +425,10 @@ async function creerTacheAchats(e) {
     const description = document.getElementById('tache-achats-description').value;
     
     try {
-        const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) throw new Error('Non connecté');
-        
         const { error } = await window.supabaseClient
             .from('todos')
             .insert({
-                owner_user_id: user.id,
+                owner_user_id: window.cleanerOwnerId,
                 category: 'achats',
                 title: titre,
                 description: description || `Signalé par la femme de ménage`,
@@ -406,13 +470,10 @@ async function creerTacheTravaux(e) {
     const titreComplet = priorite === 'urgente' ? `🚨 URGENT: ${titre}` : titre;
     
     try {
-        const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) throw new Error('Non connecté');
-        
         const { error } = await window.supabaseClient
             .from('todos')
             .insert({
-                owner_user_id: user.id,
+                owner_user_id: window.cleanerOwnerId,
                 category: 'travaux',
                 title: titreComplet,
                 description: `${description}\n\n📍 Signalé par la femme de ménage`,
@@ -439,26 +500,23 @@ let stocksParGite = {};
 
 async function chargerStocksDraps() {
     try {
-        const gites = await window.gitesManager.getVisibleGites();
+        const gites = await getGitesPourUser();
         if (!gites || gites.length === 0) {
             console.error('❌ Aucun gîte pour charger les stocks');
             return;
         }
 
-        const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) throw new Error('Non connecté');
-
         const { data: besoins, error: besoinsError } = await window.supabaseClient
             .from('linen_needs')
             .select('gite_id, item_key, item_label')
-            .eq('owner_user_id', user.id);
+            .eq('owner_user_id', window.cleanerOwnerId);
 
         if (besoinsError) throw besoinsError;
 
         const { data: stocks, error: stocksError } = await window.supabaseClient
             .from('linen_stock_items')
             .select('gite_id, item_key, quantity')
-            .eq('owner_user_id', user.id);
+            .eq('owner_user_id', window.cleanerOwnerId);
 
         if (stocksError) throw stocksError;
 
@@ -563,14 +621,11 @@ function afficherGrilleStock(giteId, stocks, besoinsGite) {
 
 async function sauvegarderStocks(giteId) {
     try {
-        const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) throw new Error('Non connecté');
-        
         const besoinsGite = besoinsParGite[giteId] || [];
         const items = besoinsGite.map(article => {
             const input = document.getElementById(`${giteId}-${article.item_key}`);
             return {
-                owner_user_id: user.id,
+                owner_user_id: window.cleanerOwnerId,
                 gite_id: giteId,
                 item_key: article.item_key,
                 quantity: parseInt(input?.value) || 0,
@@ -616,9 +671,6 @@ window.switchStockTab = function(giteId) {
  */
 async function chargerRetoursMenuge() {
     try {
-        const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) throw new Error('Non connecté');
-
         // Charger les retours des 30 derniers jours
         const dateDebut = new Date();
         dateDebut.setDate(dateDebut.getDate() - 30);
@@ -629,7 +681,7 @@ async function chargerRetoursMenuge() {
                 *,
                 gites:gite_id(name)
             `)
-            .eq('owner_user_id', user.id)
+            .eq('owner_user_id', window.cleanerOwnerId)
             .gte('date_menage', dateDebut.toISOString().split('T')[0])
             .order('date_menage', { ascending: false });
 
@@ -674,8 +726,8 @@ async function chargerRetoursMenuge() {
             
             html += `
                 <div style="border: 2px solid #2D3436; border-radius: 12px; padding: 20px; background: white; box-shadow: 2px 2px 0 #2D3436;">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                        <div>
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; gap: 10px;">
+                        <div style="flex: 1;">
                             <div class="intervention-gite" style="font-weight: 800; color: #2D3436; font-size: 1.1rem; margin-bottom: 5px;">
                                 🏠 ${window.SecurityUtils ? window.SecurityUtils.sanitizeText(giteName) : giteName}
                             </div>
@@ -683,7 +735,15 @@ async function chargerRetoursMenuge() {
                                 📅 ${dateFormatted}
                             </div>
                         </div>
-                        <span class="intervention-status ${statusClass}">${statusText}</span>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                            <span class="intervention-status ${statusClass}">${statusText}</span>
+                            <button onclick="supprimerRetourMenage('${retour.id}')" title="Supprimer ce retour"
+                                style="width:32px;height:32px;border:2px solid #ff7675;background:white;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 #ff7675;transition:all 0.15s;flex-shrink:0;"
+                                onmouseover="this.style.transform='translate(-1px,-1px)';this.style.boxShadow='3px 3px 0 #ff7675';"
+                                onmouseout="this.style.transform='';this.style.boxShadow='2px 2px 0 #ff7675';">
+                                🗑️
+                            </button>
+                        </div>
                     </div>
                     ${retour.commentaires ? `
                         <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border-radius: 8px; border-left: 3px solid #667eea;">
@@ -748,14 +808,11 @@ async function envoyerRetourMenage(e) {
     if (detailsDeroulement) commentaires += `Détails déroulement: ${detailsDeroulement}`;
     
     try {
-        const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) throw new Error('Non connecté');
-        
         const { error } = await window.supabaseClient
             .from('retours_menage')
             .insert({
-                owner_user_id: user.id,
-                reported_by: user.id,
+                owner_user_id: window.cleanerOwnerId,
+                reported_by: window.cleanerOwnerId,
                 gite_id: giteId,
                 date_menage: date,
                 commentaires: commentaires.trim() || null,
@@ -775,3 +832,20 @@ async function envoyerRetourMenage(e) {
         showToast('❌ Erreur lors de l\'envoi du retour', 'error');
     }
 }
+
+async function supprimerRetourMenage(retourId) {
+    if (!confirm('Supprimer ce retour ? Cette action est irréversible.')) return;
+    try {
+        const { error } = await window.supabaseClient
+            .from('retours_menage')
+            .delete()
+            .eq('id', retourId);
+        if (error) throw error;
+        showToast('🗑️ Retour supprimé', 'success');
+        await chargerRetoursMenuge();
+    } catch (error) {
+        console.error('Erreur suppression retour:', error);
+        showToast('❌ Erreur lors de la suppression', 'error');
+    }
+}
+window.supprimerRetourMenage = supprimerRetourMenage;

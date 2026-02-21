@@ -250,119 +250,163 @@
 }
 
 /* ============================================
-   CARTES POST-IT - DESIGN ULTRA SIMPLE
+   CARTES KANBAN - DESIGN PROPRE
    ============================================ */
 
-/* Base Post-it */
 .kanban-card {
     position: relative;
-    padding: 16px;
-    border-radius: 3px;
-    cursor: grab;
-    transition: all 0.25s ease;
-    box-shadow: 
-        0 2px 4px rgba(0,0,0,0.12),
-        0 4px 10px rgba(0,0,0,0.08);
-    min-height: 110px;
-    font-size: 0.95rem;
-    line-height: 1.5;
-}
-
-.kanban-card.is-dragging {
-    opacity: 0.6;
-    transform: scale(0.98);
-    cursor: grabbing;
-}
-
-.kanban-column-content.is-drop-target {
-    border: 2px dashed rgba(52, 152, 219, 0.55);
+    padding: 14px 16px;
     border-radius: 8px;
-    background: rgba(52, 152, 219, 0.06);
-}
-
-.kanban-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 
-        0 4px 12px rgba(0,0,0,0.16),
-        0 8px 24px rgba(0,0,0,0.12);
-}
-
-/* Carte : labels et contenu */
-.kanban-card p {
-    margin: 10px 0;
-    font-size: 0.95rem;
+    cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    font-size: 0.9rem;
     line-height: 1.5;
-    color: #1a1a1a;
-    background: transparent !important;
-    border: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-left-width: 4px !important;
+    border-radius: 8px !important;
 }
 
-.kanban-card .card-title-line {
-    font-size: 1.15rem;
-    margin-top: 18px;
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-    border: none !important;
-    border-bottom: 0.5px solid rgba(0,0,0,0.25) !important;
+.kanban-card.is-dragging { opacity: 0.6; transform: scale(0.97); cursor: grabbing; }
+.kanban-column-content.is-drop-target { border: 2px dashed rgba(52,152,219,0.55); border-radius: 8px; background: rgba(52,152,219,0.06); }
+.kanban-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.13); }
+
+/* Couleur bordure gauche par catégorie */
+.kanban-card[data-category="reservations"] { border-left-color: #3b82f6 !important; }
+.kanban-card[data-category="achats"]       { border-left-color: #f59e0b !important; }
+.kanban-card[data-category="travaux"]      { border-left-color: #ef4444 !important; }
+
+/* ---- Reset anti-pollution CSS global ---- */
+/* Neutralise tout ce que .card global peut appliquer aux div/p/span enfants */
+.kanban-card > div,
+.kanban-card > p {
     background: transparent !important;
-    border-radius: 0 !important;
+    border: none !important;
     box-shadow: none !important;
-    outline: none !important;
+    border-radius: 0 !important;
+}
+/* Spans non-badge : aussi reset */
+.kanban-card span:not(.kcard-recurrent-badge):not(.kcard-category-dot) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
 }
 
-
-
-.kanban-card .label-bold-underline {
-    font-weight: 700;
-    text-decoration: underline;
-    color: #000;
+/* ---- En-tête ---- */
+.kanban-card .kcard-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
-/* Couleurs POST-IT par catégorie */
-.kanban-card[data-category="reservations"] {
-    background: #a4c2f4 !important;
-    border-bottom: 4px solid #6d9eeb !important;
+/* ---- Point couleur catégorie ---- */
+.kanban-card .kcard-category-dot {
+    display: inline-block !important;
+    width: 10px !important;
+    height: 10px !important;
+    min-width: 10px !important;
+    min-height: 10px !important;
+    max-width: 10px !important;
+    max-height: 10px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+}
+.kanban-card .kcard-category-dot.category-reservations { background: #3b82f6 !important; }
+.kanban-card .kcard-category-dot.category-achats       { background: #f59e0b !important; }
+.kanban-card .kcard-category-dot.category-travaux      { background: #ef4444 !important; }
+
+/* ---- Label catégorie ---- */
+.kanban-card .kcard-category-label {
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.6px !important;
+    color: #9ca3af !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
 }
 
-.kanban-card[data-category="achats"] {
-    background: #ffd966 !important;
-    border-bottom: 4px solid #f1c232 !important;
+/* ---- Badge récurrent ---- */
+.kanban-card .kcard-recurrent-badge {
+    margin-left: auto !important;
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    padding: 2px 7px !important;
+    border-radius: 20px !important;
+    color: #6b7280 !important;
 }
 
-.kanban-card[data-category="travaux"] {
-    background: #ff9999 !important;
-    border-bottom: 4px solid #e06666 !important;
+/* ---- Titre ---- */
+.kanban-card .kcard-title {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin: 4px 0 0 0 !important;
+    padding: 0 !important;
+    line-height: 1.4 !important;
+    background: transparent !important;
+    border: none !important;
 }
 
-/* Couleur des boutons pilotée directement depuis le rendu JS */
-
-.kanban-card-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-right: 6px;
-    margin-top: 4px;
+/* ---- Description ---- */
+.kanban-card .kcard-desc {
+    font-size: 0.82rem !important;
+    color: #6b7280 !important;
+    line-height: 1.45 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
 }
 
-.kanban-card-btn:hover {
-    transform: scale(1.05);
-    opacity: 0.9;
+/* ---- Footer ---- */
+.kanban-card .kcard-footer {
+    display: flex !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    margin-top: 6px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-.kanban-card-btn i {
-    width: 14px;
-    height: 14px;
+/* ---- Boutons ---- */
+.kanban-card .kcard-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    padding: 5px 12px !important;
+    border-radius: 6px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    white-space: nowrap !important;
+    border: none !important;
+    box-shadow: none !important;
 }
+.kanban-card .kcard-btn:hover { transform: scale(1.04) !important; opacity: 0.9 !important; }
+.kanban-card .kcard-btn i, .kanban-card .kcard-btn svg { width: 13px !important; height: 13px !important; }
+
+.kanban-card .kcard-btn.btn-reservations { background: #dbeafe !important; color: #1d4ed8 !important; }
+.kanban-card .kcard-btn.btn-achats       { background: #fef3c7 !important; color: #92400e !important; }
+.kanban-card .kcard-btn.btn-travaux      { background: #fee2e2 !important; color: #991b1b !important; }
+.kanban-card .kcard-btn.btn-neutral      { background: #e5e7eb !important; color: #374151 !important; }
+.kanban-card .kcard-btn.btn-danger       { background: #fee2e2 !important; color: #991b1b !important; }
 
 
 

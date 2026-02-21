@@ -17,6 +17,72 @@
 // ==========================================
 
 function showToast(message, type = 'success') {
+    const activeTab = document.querySelector('.tab-content.active');
+
+    if (activeTab) {
+        const activeContainer = activeTab.querySelector('.tab-container') || activeTab;
+        let inlineToast = document.getElementById('dashboardInlineToast');
+
+        if (!inlineToast) {
+            inlineToast = document.createElement('div');
+            inlineToast.id = 'dashboardInlineToast';
+            inlineToast.style.display = 'none';
+            inlineToast.style.position = 'absolute';
+            inlineToast.style.top = '12px';
+            inlineToast.style.left = '16px';
+            inlineToast.style.right = '16px';
+            inlineToast.style.zIndex = '1200';
+            inlineToast.style.padding = '12px 14px';
+            inlineToast.style.borderRadius = '10px';
+            inlineToast.style.border = '2px solid var(--stroke)';
+            inlineToast.style.fontWeight = '700';
+            inlineToast.style.boxShadow = '2px 2px 0 var(--stroke)';
+            inlineToast.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+            inlineToast.style.opacity = '0';
+            inlineToast.style.transform = 'translateY(-6px)';
+            inlineToast.style.pointerEvents = 'none';
+
+            if (window.getComputedStyle(activeContainer).position === 'static') {
+                activeContainer.style.position = 'relative';
+            }
+
+            activeContainer.insertBefore(inlineToast, activeContainer.firstChild);
+        } else {
+            if (window.getComputedStyle(activeContainer).position === 'static') {
+                activeContainer.style.position = 'relative';
+            }
+            if (inlineToast.parentElement !== activeContainer) {
+                activeContainer.insertBefore(inlineToast, activeContainer.firstChild);
+            }
+        }
+
+        inlineToast.textContent = message;
+        inlineToast.style.background = type === 'error'
+            ? '#fee2e2'
+            : type === 'warning'
+                ? '#fff7cc'
+                : '#dcfce7';
+        inlineToast.style.color = type === 'error'
+            ? '#991b1b'
+            : type === 'warning'
+                ? '#92400e'
+                : '#166534';
+        inlineToast.style.display = 'block';
+        inlineToast.style.opacity = '1';
+        inlineToast.style.transform = 'translateY(0)';
+
+        clearTimeout(window.__dashboardInlineToastTimer);
+        window.__dashboardInlineToastTimer = setTimeout(() => {
+            inlineToast.style.opacity = '0';
+            inlineToast.style.transform = 'translateY(-6px)';
+            setTimeout(() => {
+                inlineToast.style.display = 'none';
+            }, 200);
+        }, 4000);
+
+        return;
+    }
+
     const toast = document.getElementById('toast');
     if (!toast) {
         console.warn('Toast element not found');

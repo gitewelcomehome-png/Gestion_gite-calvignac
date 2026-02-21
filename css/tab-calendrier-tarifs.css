@@ -120,6 +120,13 @@
     margin: 0 0 12px 0;
     font-size: 1rem;
     font-weight: 700;
+    color: var(--upstay-cyan, #00C2CB) !important;
+}
+
+.cal-section-title i,
+.cal-section-title svg {
+    color: var(--upstay-cyan, #00C2CB) !important;
+    stroke: var(--upstay-cyan, #00C2CB) !important;
 }
 
 .form-field {

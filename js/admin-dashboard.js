@@ -13,6 +13,7 @@ let errorsKPIRefreshInterval = null;
 let errorsRealtimeSubscription = null;
 let supportAiMetricsCache = null;
 let supportAiMetricsCachedAt = 0;
+let aiHealthApiUnavailable = false;
 
 // ================================================================
 // INITIALISATION
@@ -241,6 +242,24 @@ async function loadAIStatusKPI() {
     }
 
     try {
+        if (aiHealthApiUnavailable) {
+            updateAIProviderBadge('kpiAIOpenAI', 'OpenAI', null);
+            updateAIProviderBadge('kpiAIAnthropic', 'Anthropic', null);
+            updateAIProviderBadge('kpiAIGemini', 'Gemini', null);
+            updateAIProviderBadge('kpiAIStability', 'Stability', null);
+
+            updateAIServiceDot('dashAIOpenAIDot', false);
+            updateAIServiceDot('dashAIAnthropicDot', false);
+            updateAIServiceDot('dashAIGeminiDot', false);
+            updateAIServiceDot('dashAIStabilityDot', false);
+
+            if (globalEl) globalEl.textContent = 'API IA non disponible';
+            if (healthGlobalEl) healthGlobalEl.textContent = 'API IA non disponible';
+            if (updatedEl) updatedEl.textContent = 'Vérification désactivée (API absente)';
+            if (healthUpdatedEl) healthUpdatedEl.textContent = 'Dernière vérification: API absente';
+            return;
+        }
+
         if (globalEl) {
             globalEl.textContent = 'Vérification...';
         }
@@ -251,6 +270,9 @@ async function loadAIStatusKPI() {
         });
 
         if (!response.ok) {
+            if (response.status === 404) {
+                aiHealthApiUnavailable = true;
+            }
             throw new Error(`HTTP ${response.status}`);
         }
 
@@ -314,11 +336,17 @@ async function loadAIStatusKPI() {
         if (window.lucide) {
             lucide.createIcons();
         }
-        console.warn('⚠️ Impossible de charger l\'état des IA:', error.message || error);
+        if (!aiHealthApiUnavailable) {
+            console.warn('⚠️ Impossible de charger l\'état des IA:', error.message || error);
+        }
     }
 }
 
 async function fetchSupportAiMetrics(forceRefresh = false) {
+    if (aiHealthApiUnavailable) {
+        return null;
+    }
+
     const cacheAge = Date.now() - supportAiMetricsCachedAt;
     if (!forceRefresh && supportAiMetricsCache && cacheAge < 20000) {
         return supportAiMetricsCache;
@@ -330,6 +358,10 @@ async function fetchSupportAiMetrics(forceRefresh = false) {
     });
 
     if (!response.ok) {
+        if (response.status === 404) {
+            aiHealthApiUnavailable = true;
+            return null;
+        }
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `HTTP ${response.status}`);
     }
@@ -363,6 +395,19 @@ async function loadSupportAiMonitoring() {
 
     try {
         const data = await fetchSupportAiMetrics();
+        if (!data) {
+            healthEl.textContent = 'API IA non disponible';
+            healthEl.className = 'support-ai-health support-ai-health-warning';
+            requestsEl.textContent = '-';
+            costEl.textContent = '-';
+            errorRateEl.textContent = '-';
+            latencyEl.textContent = '-';
+            if (updatedEl) {
+                updatedEl.textContent = 'Dernière MAJ: API absente';
+            }
+            return;
+        }
+
         const metrics = data?.metrics || {};
         const thresholds = data?.thresholds || {};
         const alerts = Array.isArray(data?.alerts) ? data.alerts : [];
@@ -413,7 +458,9 @@ async function loadSupportAiMonitoring() {
         if (updatedEl) {
             updatedEl.textContent = 'Dernière MAJ: erreur';
         }
-        console.error('❌ Erreur monitoring support IA:', error);
+        if (!aiHealthApiUnavailable) {
+            console.error('❌ Erreur monitoring support IA:', error);
+        }
     }
 }
 
@@ -838,14 +885,16 @@ async function loadAlerts() {
         // 4. Alertes IA support (coûts, erreurs, indisponibilité)
         try {
             const aiData = await fetchSupportAiMetrics();
-            const aiAlerts = Array.isArray(aiData?.alerts) ? aiData.alerts : [];
-            aiAlerts.forEach((alert) => {
-                alerts.push({
-                    type: alert.level === 'critical' ? 'critical' : 'warning',
-                    title: `IA Support · ${alert.title || 'Alerte'}`,
-                    message: alert.message || 'Vérifier la configuration et les logs IA support.'
+            if (aiData) {
+                const aiAlerts = Array.isArray(aiData?.alerts) ? aiData.alerts : [];
+                aiAlerts.forEach((alert) => {
+                    alerts.push({
+                        type: alert.level === 'critical' ? 'critical' : 'warning',
+                        title: `IA Support · ${alert.title || 'Alerte'}`,
+                        message: alert.message || 'Vérifier la configuration et les logs IA support.'
+                    });
                 });
-            });
+            }
         } catch (err) {
             alerts.push({
                 type: 'warning',
@@ -1367,8 +1416,11 @@ function parseFiscalRulesFromSources(sources) {
             y2025: c2025?.BAREME_IR || [],
             y2026: c2026?.BAREME_IR || []
         },
-        microBIC: c2025?.MICRO_BIC || {},
-        urssaf: c2025?.URSSAF || {},
+        microBIC: c2026?.MICRO_BIC || c2025?.MICRO_BIC || {},
+        urssaf: c2026?.URSSAF || c2025?.URSSAF || {},
+        cotisationsMinimales: c2026?.COTISATIONS_MINIMALES || c2025?.COTISATIONS_MINIMALES || {},
+        retraite: c2026?.RETRAITE || c2025?.RETRAITE || {},
+        abattementSalaire: c2026?.ABATTEMENT_SALAIRE || c2025?.ABATTEMENT_SALAIRE || {},
         amortissement: {
             seuilHT: seuilAmortHT,
             seuilTTC: seuilAmortTTC
@@ -1399,8 +1451,9 @@ function escapeHtml(value) {
 
 function buildFiscalRulesBusinessHtmlReport({ exportedAt, exportedBy, rules }) {
         const formatNumber = (value) => Number.isFinite(value) ? new Intl.NumberFormat('fr-FR').format(value) : 'N/D';
-        const formatPercent = (value) => Number.isFinite(value) ? `${(value * 100).toFixed(2)}%` : 'N/D';
+    const formatPercent = (value) => Number.isFinite(value) ? `${(value * 100).toFixed(2)}%` : 'N/D';
         const formatAmount = (value) => Number.isFinite(value) ? `${new Intl.NumberFormat('fr-FR').format(value)} €` : 'N/D';
+    const formatEuroMaybe = (value) => Number.isFinite(value) ? `${new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} €` : 'N/D';
 
         const irRows = (rules.baremeIR?.y2026 || []).map((tranche) => `
             <tr>
@@ -1410,6 +1463,10 @@ function buildFiscalRulesBusinessHtmlReport({ exportedAt, exportedBy, rules }) {
         `).join('');
 
         const urssaf = rules.urssaf || {};
+        const microBIC = rules.microBIC || {};
+        const cotisationsMin = rules.cotisationsMinimales || {};
+        const retraite = rules.retraite || {};
+        const abattementSalaire = rules.abattementSalaire || {};
 
     return `<!DOCTYPE html>
 <html lang="fr">
@@ -1480,22 +1537,28 @@ function buildFiscalRulesBusinessHtmlReport({ exportedAt, exportedBy, rules }) {
             <article class="card">
                 <h2>4) Cotisations URSSAF (principaux taux)</h2>
                 <ul>
+                    <li>Maladie-maternité : <strong>${formatPercent(urssaf.maladie?.taux)}</strong> (exonération jusqu'à <strong>${formatAmount(urssaf.maladie?.seuil_exoneration)}</strong>)</li>
                     <li>Indemnités journalières : <strong>${formatPercent(urssaf.indemnites_journalieres?.taux)}</strong></li>
-                    <li>Retraite de base : <strong>${formatPercent(urssaf.retraite_base?.taux)}</strong></li>
+                    <li>Retraite de base : <strong>${formatPercent(urssaf.retraite_base?.taux)}</strong> (plafond base : <strong>${formatAmount(urssaf.retraite_base?.plafond)}</strong>)</li>
                     <li>Retraite complémentaire : <strong>${formatPercent(urssaf.retraite_complementaire?.taux)}</strong></li>
                     <li>Invalidité décès : <strong>${formatPercent(urssaf.invalidite_deces?.taux)}</strong></li>
                     <li>CSG/CRDS : <strong>${formatPercent(urssaf.csg_crds?.taux)}</strong></li>
                     <li>Formation pro : <strong>${formatPercent(urssaf.formation_pro?.taux)}</strong> (base PASS)</li>
+                    <li>Allocations familiales : 0 → <strong>${formatPercent(urssaf.allocations_familiales?.taux_max)}</strong> (progressif entre <strong>${formatAmount(urssaf.allocations_familiales?.seuil_debut)}</strong> et <strong>${formatAmount(urssaf.allocations_familiales?.seuil_fin)}</strong>)</li>
                 </ul>
             </article>
 
             <article class="card">
                 <h2>5) Micro-BIC (seuils/taux)</h2>
                 <ul>
-                    <li>Plafond non classé : <strong>${formatAmount(rules.microBIC?.plafond_non_classe)}</strong></li>
-                    <li>Plafond classé : <strong>${formatAmount(rules.microBIC?.plafond_classe)}</strong></li>
-                    <li>Abattement non classé : <strong>${formatPercent(rules.microBIC?.abattement_non_classe)}</strong></li>
-                    <li>Abattement classé : <strong>${formatPercent(rules.microBIC?.abattement_classe)}</strong></li>
+                    <li>Plafond non classé : <strong>${formatAmount(microBIC.plafond_non_classe)}</strong></li>
+                    <li>Plafond classé : <strong>${formatAmount(microBIC.plafond_classe)}</strong></li>
+                    <li>Abattement non classé : <strong>${formatPercent(microBIC.abattement_non_classe)}</strong></li>
+                    <li>Abattement classé : <strong>${formatPercent(microBIC.abattement_classe)}</strong></li>
+                    <li>Taux cotisations sociales non classé : <strong>${formatPercent(microBIC.taux_cotis_non_classe)}</strong></li>
+                    <li>Taux cotisations sociales classé : <strong>${formatPercent(microBIC.taux_cotis_classe)}</strong></li>
+                    <li>Versement libératoire non classé : <strong>${formatPercent(microBIC.taux_vl_non_classe)}</strong></li>
+                    <li>Versement libératoire classé : <strong>${formatPercent(microBIC.taux_vl_classe)}</strong></li>
                 </ul>
             </article>
 
@@ -1504,14 +1567,36 @@ function buildFiscalRulesBusinessHtmlReport({ exportedAt, exportedBy, rules }) {
                 <ul>
                     <li>Seuil amortissement HT : <strong>${formatAmount(rules.amortissement?.seuilHT)}</strong></li>
                     <li>Seuil amortissement TTC : <strong>${formatAmount(rules.amortissement?.seuilTTC)}</strong></li>
+                    <li>Cotisations minimales SSI applicables : <strong>${cotisationsMin.applicable ? 'Oui' : 'Non'}</strong> (${formatAmount(cotisationsMin.montant)})</li>
                     <li>Barème KM fallback 2024 si année non définie :
                         <span class="badge ${rules.conformite?.baremeKMFallback2024 ? 'ok' : 'warn'}">${rules.conformite?.baremeKMFallback2024 ? 'Actif' : 'À vérifier'}</span>
                     </li>
                 </ul>
             </article>
 
+            <article class="card">
+                <h2>7) Retraite (validation trimestres)</h2>
+                <ul>
+                    <li>SMIC horaire retenu : <strong>${formatEuroMaybe(retraite.smic_horaire)}</strong></li>
+                    <li>Heures par trimestre : <strong>${Number.isFinite(retraite.heures_par_trimestre) ? retraite.heures_par_trimestre : 'N/D'}</strong></li>
+                    <li>Seuil 1 trimestre : <strong>${formatAmount(retraite.trimestre_1)}</strong></li>
+                    <li>Seuil 2 trimestres : <strong>${formatAmount(retraite.trimestre_2)}</strong></li>
+                    <li>Seuil 3 trimestres : <strong>${formatAmount(retraite.trimestre_3)}</strong></li>
+                    <li>Seuil 4 trimestres : <strong>${formatAmount(retraite.trimestre_4)}</strong></li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <h2>8) Abattement salaires</h2>
+                <ul>
+                    <li>Taux d'abattement : <strong>${formatPercent(abattementSalaire.taux)}</strong></li>
+                    <li>Minimum : <strong>${formatAmount(abattementSalaire.minimum)}</strong></li>
+                    <li>Maximum : <strong>${formatAmount(abattementSalaire.maximum)}</strong></li>
+                </ul>
+            </article>
+
             <article class="card full">
-                <h2>7) Contrôles de conformité intégrés</h2>
+                <h2>9) Contrôles de conformité intégrés</h2>
                 <ul>
                     <li>Déficit LMNP non imputable revenu global :
                         <span class="badge ${rules.conformite?.lmnpDeficitNonImputableGlobal ? 'ok' : 'warn'}">${rules.conformite?.lmnpDeficitNonImputableGlobal ? 'Oui' : 'À vérifier'}</span>

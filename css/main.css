@@ -1204,6 +1204,42 @@ h1, h2, h3, h4, h5, h6,
     color: var(--text-primary);
 }
 
+/* Couleur cyan pour tous les titres de section sur toutes les pages */
+.section-title,
+.section-title-main,
+.cal-section-title {
+    color: var(--upstay-cyan) !important;
+}
+
+.section-title i, .section-title svg,
+.section-title-main i, .section-title-main svg,
+.cal-section-title i, .cal-section-title svg {
+    color: var(--upstay-cyan) !important;
+    stroke: var(--upstay-cyan) !important;
+}
+
+.card h3 {
+    color: var(--upstay-cyan) !important;
+}
+
+.card h3 i, .card h3 svg {
+    color: var(--upstay-cyan) !important;
+    stroke: var(--upstay-cyan) !important;
+}
+
+/* Titres onglet Statistiques — même style que dashboard */
+.stats-card-title,
+.stats-header-title,
+.stats-comparison-title {
+    color: var(--upstay-cyan) !important;
+}
+.stats-card-title i, .stats-card-title svg,
+.stats-header-title i, .stats-header-title svg,
+.stats-comparison-title i, .stats-comparison-title svg {
+    color: var(--upstay-cyan) !important;
+    stroke: var(--upstay-cyan) !important;
+}
+
 /* Alignement des icônes dans les titres */
 .section-title,
 .section-subtitle,
@@ -1482,7 +1518,8 @@ html.theme-dark a {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     margin-top: 70px;
     border-radius: 12px;
-    max-width: fit-content;
+    width: calc(100% - 40px);
+    max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -1494,6 +1531,8 @@ html.theme-dark a {
     padding: 5px;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
+    width: 100%;
+    justify-content: space-between;
 }
 
 .nav-tab {
@@ -1511,8 +1550,8 @@ html.theme-dark a {
     gap: 4px;
     border-radius: 8px;
     white-space: nowrap;
-    width: auto;
-    flex-shrink: 0;
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .tab-icon {
@@ -5077,21 +5116,33 @@ html.style-apple .dashboard-icalou .badge--info {
 .dashboard-icalou .section-title {
     font-size: 24px;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--upstay-cyan) !important;
     margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
+.dashboard-icalou .section-title i,
+.dashboard-icalou .section-title svg {
+    color: var(--upstay-cyan);
+    stroke: var(--upstay-cyan);
+}
+
 .dashboard-icalou .card h3 {
     font-size: 18px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--upstay-cyan) !important;
     margin: 0 0 20px 0;
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.dashboard-icalou .card h3 i,
+.dashboard-icalou .card h3 svg {
+    color: var(--upstay-cyan);
+    stroke: var(--upstay-cyan);
 }
 
 .dashboard-icalou .indicator__label {
@@ -5173,6 +5224,7 @@ html.style-apple .dashboard-icalou .badge--info {
 .dashboard-icalou .section-header .section-title {
     font-size: 0.95rem;
     font-weight: 700;
+    color: var(--upstay-cyan) !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0;
@@ -5239,6 +5291,7 @@ html.style-apple .dashboard-icalou .badge--info {
     font-size: 0.7rem !important;
     margin: 0 !important;
     font-weight: 600 !important;
+    color: var(--upstay-cyan) !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -6161,6 +6214,13 @@ html.style-apple .dashboard-graph-container-benefice .section-header {
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+    color: var(--upstay-cyan);
+}
+
+.grid--6 .section-title-small i,
+.grid--6 .section-title-small svg {
+    color: var(--upstay-cyan);
+    stroke: var(--upstay-cyan);
 }
 
 .indicator--violet {

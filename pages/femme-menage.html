@@ -47,8 +47,8 @@
             background: white;
             border: 3px solid #2D3436;
             border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
             box-shadow: 4px 4px 0 #2D3436;
             text-align: center;
         }
@@ -71,15 +71,15 @@
             background: white;
             border: 3px solid #2D3436;
             border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
             box-shadow: 4px 4px 0 #2D3436;
         }
 
         .card-title {
             color: #2D3436;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -89,13 +89,13 @@
 
         .section-subtitle {
             color: #636e72;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
             font-weight: 600;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .form-group label {
@@ -136,7 +136,7 @@
         .btn {
             background: #74b9ff;
             color: #2D3436;
-            padding: 15px 30px;
+            padding: 12px 24px;
             border: 2px solid #2D3436;
             border-radius: 10px;
             font-size: 1rem;
@@ -144,8 +144,9 @@
             cursor: pointer;
             transition: all 0.2s;
             width: 100%;
-            box-shadow: 4px 4px 0 #2D3436;
+            box-shadow: 3px 3px 0 #2D3436;
             text-transform: uppercase;
+            margin-top: 4px;
         }
 
         .btn:hover {
@@ -177,175 +178,183 @@
             color: white;
         }
 
-        /* Neo-Brutalism Styles for Cleaning Schedule */
-        .cleaning-week-table {
-            background: white;
-            border: 3px solid #2D3436;
-            border-radius: 16px;
-            box-shadow: 4px 4px 0 #2D3436;
-            margin-bottom: 30px;
-            overflow: hidden;
+        /* ══ INTERVENTIONS — Nouveau design compact ══ */
+
+        /* Bloc semaine */
+        .week-block {
+            margin-bottom: 28px;
         }
 
-        .cleaning-week-header {
-            background: linear-gradient(135deg, #2D3436 0%, #636e72 100%);
+        .week-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .week-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #2D3436;
             color: white;
-            padding: 20px 25px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .week-range {
+            color: #636e72;
+            font-size: 0.88rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .week-separator {
+            flex: 1;
+            height: 2px;
+            background: #e9ecef;
+            border-radius: 2px;
+        }
+
+        /* Grille des cartes d'intervention */
+        .week-interventions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 14px;
+        }
+
+        /* Carte d'intervention */
+        .intervention-neo-card {
+            background: white;
+            border: 2px solid #2D3436;
+            border-radius: 14px;
+            box-shadow: 3px 3px 0 #2D3436;
+            overflow: hidden;
+            transition: transform 0.15s, box-shadow 0.15s;
+            cursor: default;
+        }
+
+        .intervention-neo-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #2D3436;
+        }
+
+        .intervention-neo-card.validated {
+            border-color: #00b894;
+            box-shadow: 3px 3px 0 #00b894;
+        }
+
+        .intervention-neo-card.validated:hover {
+            box-shadow: 5px 5px 0 #00b894;
+        }
+
+        /* Barre colorée en haut selon le gîte */
+        .card-gite-banner {
+            height: 5px;
+            background: #95a5a6;
+        }
+
+        .intervention-neo-card[data-gite-color="trvoux"] .card-gite-banner,
+        .intervention-neo-card[data-gite-color="trevoux"] .card-gite-banner {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .intervention-neo-card[data-gite-color="couzon"] .card-gite-banner {
+            background: linear-gradient(90deg, #E74C3C, #c0392b);
+        }
+
+        /* Corps de la carte */
+        .intervention-neo-body {
+            padding: 16px 18px;
+        }
+
+        .intervention-neo-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid #2D3436;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
-        .week-number-big {
-            font-size: 1.8rem;
+        .intervention-neo-gite {
+            font-size: 0.75rem;
             font-weight: 800;
+            text-transform: uppercase;
             letter-spacing: 1px;
-            text-transform: uppercase;
+            color: #95a5a6;
+            margin-bottom: 4px;
         }
 
-        .week-dates-small {
-            font-size: 1rem;
-            opacity: 0.95;
-            font-weight: 500;
-        }
-
-        .cleaning-week-body {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0;
-            background: #e0e0e0;
-            min-height: 100px;
-        }
-
-        /* Style Vision Globale pour les ménages */
-        .cleaning-column {
-            background: white;
-            padding: 0;
-            min-height: 150px;
-            position: relative;
-            border-right: 2px solid #e0e0e0;
-        }
-
-        .cleaning-column:last-child {
-            border-right: none;
-        }
-
-        .cleaning-column-header {
-            padding: 15px 20px;
-            font-size: 1rem;
-            font-weight: 700;
-            text-align: center;
-            border-bottom: 3px solid;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: white;
-        }
-
-        /* Couleurs par gîte - Style Vision Globale */
-        .cleaning-column[data-gite="trevoux"] .cleaning-column-header {
-            background: rgba(102, 126, 234, 0.08);
-            border-color: #667eea;
+        .intervention-neo-card[data-gite-color="trvoux"] .intervention-neo-gite,
+        .intervention-neo-card[data-gite-color="trevoux"] .intervention-neo-gite {
             color: #667eea;
         }
 
-        .cleaning-column[data-gite="couzon"] .cleaning-column-header {
-            background: rgba(231, 76, 60, 0.08);
-            border-color: #E74C3C;
+        .intervention-neo-card[data-gite-color="couzon"] .intervention-neo-gite {
             color: #E74C3C;
         }
 
-        .cleaning-column[data-gite="other"] .cleaning-column-header {
-            background: rgba(39, 174, 96, 0.08);
-            border-color: #27AE60;
-            color: #27AE60;
+        .intervention-neo-date {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #2D3436;
+            line-height: 1.3;
         }
 
-        .cleaning-item {
-            margin: 15px;
-            padding: 18px;
-            border: 2px solid;
-            border-radius: 12px;
-            box-shadow: 2px 2px 0;
-            transition: all 0.2s;
-            position: relative;
-            background: white;
-        }
-
-        /* Couleurs des items selon le gîte */
-        .cleaning-column[data-gite="trevoux"] .cleaning-item {
-            border-color: #667eea;
-            box-shadow: 2px 2px 0 #667eea;
-        }
-
-        .cleaning-column[data-gite="trevoux"] .cleaning-item:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 4px 4px 0 #667eea;
-        }
-
-        .cleaning-column[data-gite="couzon"] .cleaning-item {
-            border-color: #E74C3C;
-            box-shadow: 2px 2px 0 #E74C3C;
-        }
-
-        .cleaning-column[data-gite="couzon"] .cleaning-item:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 4px 4px 0 #E74C3C;
-        }
-
-        .cleaning-column[data-gite="other"] .cleaning-item {
-            border-color: #27AE60;
-            box-shadow: 2px 2px 0 #27AE60;
-        }
-
-        .cleaning-column[data-gite="other"] .cleaning-item:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 4px 4px 0 #27AE60;
-        }
-
-        .cleaning-column[data-gite="empty"] .cleaning-column-header {
-            background: rgba(149, 165, 166, 0.05);
-            border-color: #ddd;
-            color: #95a5a6;
-        }
-
-        .cleaning-item.validated {
-            background: rgba(85, 239, 196, 0.15);
-            border-width: 3px;
-        }
-
-        .cleaning-item.empty {
-            background: transparent;
-            border: 2px dashed #ddd;
-            box-shadow: none;
-            text-align: center;
-            color: #95a5a6;
-            font-style: italic;
-            padding: 40px 20px;
-        }
-
-        .cleaning-item.empty:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        .validation-status {
-            width: 24px;
-            height: 24px;
+        /* Badge statut */
+        .intervention-neo-badge {
+            flex-shrink: 0;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
-            font-weight: 700;
+            font-size: 1rem;
+            font-weight: 800;
             border: 2px solid #2D3436;
             box-shadow: 2px 2px 0 #2D3436;
             background: #ffeaa7;
         }
 
-        .validation-status.validated {
+        .intervention-neo-badge.validated {
             background: #55efc4;
-            color: #2D3436;
+            border-color: #00b894;
+            box-shadow: 2px 2px 0 #00b894;
+        }
+
+        /* Créneau horaire */
+        .intervention-neo-time {
+            font-size: 0.85rem;
+            color: #636e72;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Notes */
+        .intervention-neo-notes {
+            margin-top: 10px;
+            padding: 9px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.83rem;
+            color: #636e72;
+            border-left: 3px solid #e9ecef;
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .week-interventions {
+                grid-template-columns: 1fr;
+            }
         }
 
         .menage-item {
@@ -374,40 +383,33 @@
             font-size: 0.95rem;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .cleaning-week-body {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 640px) {
-            .cleaning-week-body {
-                grid-template-columns: 1fr;
-            }
-        }
-
         /* Tabs neo-brutalism style */
         .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            display: flex !important;
+            gap: 10px !important;
+            margin-bottom: 14px !important;
+            flex-wrap: wrap !important;
+            justify-content: flex-start !important;
+            border-bottom: none !important;
+            padding: 0 !important;
+            background: transparent !important;
         }
 
         .tab {
-            padding: 12px 24px;
-            border: 3px solid #2D3436;
-            background: white;
-            color: #2D3436;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 800;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            box-shadow: 4px 4px 0 #2D3436;
-            transition: all 0.2s;
-            letter-spacing: 0.5px;
+            padding: 10px 20px !important;
+            border: 2px solid #2D3436 !important;
+            background: white !important;
+            color: #2D3436 !important;
+            border-radius: 10px !important;
+            cursor: pointer !important;
+            font-weight: 800 !important;
+            font-size: 0.85rem !important;
+            text-transform: uppercase !important;
+            box-shadow: 3px 3px 0 #2D3436 !important;
+            transition: all 0.2s !important;
+            letter-spacing: 0.5px !important;
+            flex: 0 0 auto !important;
+            width: auto !important;
         }
 
         .tab.active {
@@ -525,61 +527,7 @@
             color: #2D3436;
         }
 
-        /* Neo-brutalism interventions list */
-        .interventions-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
 
-        .intervention-card {
-            background: white;
-            border: 3px solid #2D3436;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 4px 4px 0 #2D3436;
-            transition: all 0.2s;
-        }
-
-        .intervention-card:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 #2D3436;
-        }
-
-        .intervention-gite {
-            font-weight: 800;
-            color: #2D3436;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .intervention-date {
-            color: #636e72;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .intervention-status {
-            display: inline-block;
-            padding: 5px 12px;
-            border: 2px solid #2D3436;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            box-shadow: 2px 2px 0 #2D3436;
-        }
-
-        .status-pending {
-            background: #ffeaa7;
-            color: #2D3436;
-        }
-
-        .status-validated {
-            background: #55efc4;
-            color: #2D3436;
-        }
 
         .empty-state {
             text-align: center;
@@ -787,13 +735,13 @@
     </div>
 
     <!-- Configuration Supabase partagée -->
-    <script src="../js/shared-config.js"></script>
+    <script src="../js/shared-config.js?v=2.0"></script>
     <!-- Forcer mode jour uniquement -->
     <script>
         document.documentElement.classList.add('theme-light');
         document.documentElement.classList.remove('theme-dark');
     </script>
     <!-- Script de la page -->
-    <script src="../js/femme-menage.js"></script>
+    <script src="../js/femme-menage.js?v=2.2"></script>
 </body>
 </html>

@@ -997,6 +997,13 @@ class NotificationSystem {
 
         if (notif.type === 'reservation' && notif.data?.id) {
             this.openReservationEditFromNotification(notif.data.id);
+            return;
+        }
+
+        if (notif.type === 'menage_conflict') {
+            if (typeof window.switchTab === 'function') {
+                window.switchTab('menage');
+            }
         }
     }
 

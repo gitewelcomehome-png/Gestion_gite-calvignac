@@ -27,12 +27,24 @@
             <button onclick="showRulesModal()" class="btn-neo btn-show-rules" title="Voir les Règles">
                 <i data-lucide="clipboard"></i> VOIR RÈGLES
             </button>
-            <button onclick="ouvrirPageValidation()" class="btn-neo btn-validation" title="Page Validation Société">
-                <i data-lucide="building"></i> VALIDATION SOCIÉTÉ
-            </button>
-            <button onclick="ouvrirPageFemmeMenage()" class="btn-neo btn-femme-menage" title="Espace Femme de Ménage">
-                <i data-lucide="user-check"></i> ESPACE MÉNAGE
-            </button>
+            <!-- Société de ménage + icône lien -->
+            <div style="display:flex;align-items:center;gap:4px;">
+                <button onclick="ouvrirPageValidation()" class="btn-neo btn-validation" title="Page Validation Société">
+                    <i data-lucide="building"></i> VALIDATION SOCIÉTÉ
+                </button>
+                <button onclick="copierLienSociete()" class="btn-neo" style="padding:8px 10px;min-width:unset;" title="Copier le lien société de ménage">
+                    <i data-lucide="link"></i>
+                </button>
+            </div>
+            <!-- Femme de ménage + icône lien -->
+            <div style="display:flex;align-items:center;gap:4px;">
+                <button onclick="ouvrirPageFemmeMenage()" class="btn-neo btn-femme-menage" title="Espace Femme de Ménage">
+                    <i data-lucide="user-check"></i> ESPACE MÉNAGE
+                </button>
+                <button onclick="copierLienFemmeMenage()" class="btn-neo" style="padding:8px 10px;min-width:unset;" title="Copier le lien femme de ménage">
+                    <i data-lucide="link"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -52,16 +64,18 @@
     </div>
 
     <!-- Retours de la Femme de Ménage -->
-    <div class="card" style="margin-top: 30px;">
-        <div class="header-title-group" style="margin-bottom: 20px;">
-            <h2 class="page-title">
-                <i data-lucide="message-circle"></i> RETOURS DE LA FEMME DE MÉNAGE
-            </h2>
-            <p class="page-subtitle">Observations et signalements des 30 derniers jours</p>
-        </div>
-        <div id="retoursMenugeList">
-            <!-- Les retours seront générés ici par JavaScript -->
-        </div>
+    <div class="dashboard-icalou">
+        <section id="card-retours-menage" class="section-alert section-alert--info mb-md" style="display: none;">
+            <header class="section-header">
+                <h2 class="section-title">
+                    <i data-lucide="message-circle"></i> RETOURS DE LA FEMME DE MÉNAGE
+                </h2>
+                <span id="badge-retours-menage-count" class="badge badge--info badge--count">0</span>
+            </header>
+            <div id="retoursMenugeList" class="section-content section-content--compact">
+                <!-- Les retours seront générés ici par JavaScript -->
+            </div>
+        </section>
     </div>
 
 </div>

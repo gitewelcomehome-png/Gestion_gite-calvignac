@@ -582,7 +582,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideLoading();
     } catch (error) {
         console.error('❌ Erreur lors du chargement:', error);
-        showError('Impossible de charger les données. Veuillez réessayer plus tard.');
+        const detail = error?.message || error?.details || error?.hint || JSON.stringify(error);
+        showError(`Impossible de charger les données. Erreur : ${detail}`);
     }
 });
 
@@ -3919,8 +3920,8 @@ function initThemeSwitcher() {
     const logoGites = document.getElementById('logoGitesDeFrance');
     const brandName = document.getElementById('headerBrandName');
     
-    // Charger le thème depuis localStorage
-    const savedTheme = localStorage.getItem('ficheClientTheme') || 'cyan';
+    // Thème depuis la DB (giteInfo) — priorité sur localStorage qui serait vide chez le client
+    const savedTheme = (giteInfo && giteInfo.fiche_client_theme) || localStorage.getItem('ficheClientTheme') || 'cyan';
     
     // Appliquer le thème sauvegardé au chargement
     applyTheme(savedTheme);

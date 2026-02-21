@@ -187,6 +187,21 @@
     
     <!-- 📱 STYLES RESPONSIVE MOBILE -->
     <style>
+        /* Éviter que les bandeaux/toasts recouvrent la barre theme-controls */
+        #toast.toast {
+            position: fixed !important;
+            top: 118px !important;
+            right: 20px !important;
+            z-index: 9990 !important;
+        }
+
+        @media (max-width: 768px) {
+            #toast.toast {
+                top: 128px !important;
+                right: 12px !important;
+            }
+        }
+
         /* Style par défaut - Cacher le bouton hamburger sur desktop */
         .mobile-menu-btn {
             display: none;
@@ -1517,7 +1532,6 @@
     
     <!-- Toast -->
     <div class="toast" id="toast">
-        <span style="font-size: 1.5rem;">✓</span>
         <span id="toastMessage"></span>
     </div>
     <!-- Modal Bienvenue Première Connexion -->
@@ -1788,6 +1802,42 @@
             window.open('pages/validation.html', '_blank');
         }
         
+        async function copierLienSociete() {
+            try {
+                const { data: { user } } = await window.supabaseClient.auth.getUser();
+                if (!user) { showToast('Non connecté', 'error'); return; }
+
+                let { data: existing } = await window.supabaseClient
+                    .from('cleaner_tokens')
+                    .select('token')
+                    .eq('owner_user_id', user.id)
+                    .eq('type', 'company')
+                    .single();
+
+                if (!existing) {
+                    const { data: newToken, error } = await window.supabaseClient
+                        .from('cleaner_tokens')
+                        .insert({ owner_user_id: user.id, label: 'Société de ménage', type: 'company' })
+                        .select('token')
+                        .single();
+                    if (error) throw error;
+                    existing = newToken;
+                }
+
+                const url = `${window.location.origin}/pages/femme-menage.html?token=${existing.token}`;
+                try {
+                    await navigator.clipboard.writeText(url);
+                    showToast('🔗 Lien copié ! Envoyez-le à votre société de ménage.', 'success');
+                } catch (e) {
+                    prompt('Copiez ce lien et envoyez-le :', url);
+                }
+            } catch (error) {
+                console.error('Erreur génération lien société:', error);
+                showToast('Erreur : avez-vous exécuté le SQL cleaner_tokens dans Supabase ?', 'error');
+            }
+        }
+        window.copierLienSociete = copierLienSociete;
+
         function ouvrirPageFemmeMenage() {
             // Ouvrir dans un nouvel onglet au lieu d'une modal
             window.open('pages/femme-menage.html', '_blank');

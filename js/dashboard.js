@@ -173,16 +173,35 @@ function formatDateFromObj(dateObj) {
     return `${day}/${month}/${year}`;
 }
 
+function formatDateKeyLocal(dateObj) {
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = dateObj.getFullYear();
+    return `${year}-${month}-${day}`;
+}
+
+function getCurrentWeekRange(referenceDate = new Date()) {
+    const today = new Date(referenceDate);
+    today.setHours(0, 0, 0, 0);
+
+    const weekStart = new Date(today);
+    const dayOfWeek = today.getDay();
+    weekStart.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)); // Lundi
+    weekStart.setHours(0, 0, 0, 0);
+
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6); // Dimanche
+    weekEnd.setHours(23, 59, 59, 999);
+
+    return { today, weekStart, weekEnd };
+}
+
 // ==========================================
 // �📅 INFORMATIONS SEMAINE
 // ==========================================
 
 function updateDashboardHeader() {
-    const today = new Date();
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - today.getDay() + 1); // Lundi
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6); // Dimanche
+    const { today, weekStart, weekEnd } = getCurrentWeekRange();
     
     // Utiliser le vrai calcul ISO 8601 de getWeekNumber
     const weekNumber = getWeekNumber(today);
@@ -343,6 +362,88 @@ async function updateDashboardAlerts() {
             action: () => switchTab('dashboard')
         });
     }
+
+    // Vérifier les replanifications automatiques suite à conflit ménage/réservation
+    const { data: autoConflictCleanings } = await window.supabaseClient
+        .from('cleaning_schedule')
+        .select('id')
+        .eq('status', 'pending_validation')
+        .eq('proposed_by', 'owner')
+        .ilike('notes', '%[AUTO_CLEANING_CONFLICT]%');
+
+    if (autoConflictCleanings && autoConflictCleanings.length > 0) {
+        alerts.push({
+            type: 'danger',
+            icon: '⚠️',
+            message: `${autoConflictCleanings.length} replanification(s) auto ménage suite à nouvelle réservation`,
+            action: () => switchTab('menage')
+        });
+    }
+
+    // Vérifier les conflits planning ménage: ménage planifié après la prochaine arrivée
+    try {
+        const { data: cleaningsForConflicts, error: cleaningsConflictError } = await window.supabaseClient
+            .from('cleaning_schedule')
+            .select('id, reservation_id, gite_id, scheduled_date, status');
+
+        if (!cleaningsConflictError && cleaningsForConflicts && cleaningsForConflicts.length > 0) {
+            const reservationsById = new Map();
+            reservations.forEach(r => {
+                reservationsById.set(r.id, r);
+            });
+
+            const reservationsByGite = new Map();
+            reservations.forEach(r => {
+                if (!reservationsByGite.has(r.gite_id)) {
+                    reservationsByGite.set(r.gite_id, []);
+                }
+                reservationsByGite.get(r.gite_id).push(r);
+            });
+
+            reservationsByGite.forEach(giteReservations => {
+                giteReservations.sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
+            });
+
+            let conflitsPlanning = 0;
+
+            cleaningsForConflicts.forEach(cleaning => {
+                if (!cleaning || !cleaning.reservation_id || !cleaning.scheduled_date || cleaning.status === 'refused') {
+                    return;
+                }
+
+                const reservation = reservationsById.get(cleaning.reservation_id);
+                if (!reservation || !reservation.gite_id) return;
+
+                const departureDate = parseLocalDate(reservation.dateFin);
+                const giteReservations = reservationsByGite.get(reservation.gite_id) || [];
+
+                const nextReservation = giteReservations.find(next => {
+                    if (next.id === reservation.id) return false;
+                    return parseLocalDate(next.dateDebut) >= departureDate;
+                });
+
+                if (!nextReservation) return;
+
+                const scheduledDate = parseLocalDate(cleaning.scheduled_date);
+                const nextArrivalDate = parseLocalDate(nextReservation.dateDebut);
+
+                if (scheduledDate > nextArrivalDate) {
+                    conflitsPlanning++;
+                }
+            });
+
+            if (conflitsPlanning > 0) {
+                alerts.push({
+                    type: 'danger',
+                    icon: '⚠️',
+                    message: `${conflitsPlanning} conflit(s) planning ménage (date après arrivée suivante)`,
+                    action: () => switchTab('menage')
+                });
+            }
+        }
+    } catch (conflictError) {
+        console.error('❌ Erreur vérification conflits planning ménage:', conflictError);
+    }
     
     // ============================================================
     // ❌ FEATURE SUPPRIMÉE - 23 JAN 2026
@@ -421,20 +522,14 @@ function openEditReservation(id) {
 // ==========================================
 
 async function updateDashboardStats() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - today.getDay() + 1);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
+    const { weekStart, weekEnd } = getCurrentWeekRange();
     
     // Compteur ménages à faire cette semaine
     const { data: cleanings } = await window.supabaseClient
         .from('cleaning_schedule')
         .select('*')
-        .gte('scheduled_date', weekStart.toISOString().split('T')[0])
-        .lte('scheduled_date', weekEnd.toISOString().split('T')[0]);
+        .gte('scheduled_date', formatDateKeyLocal(weekStart))
+        .lte('scheduled_date', formatDateKeyLocal(weekEnd));
     
     const cleaningsCount = cleanings ? cleanings.length : 0;
     
@@ -635,8 +730,6 @@ async function updateDashboardReservations() {
         
         const gite = await window.gitesManager.getByName(r.gite) || await window.gitesManager.getById(r.gite_id);
         const giteColor = gite ? gite.color : '#667eea';
-        const paiementIcon = r.paiement === 'Soldé' ? '<svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' : r.paiement === 'Acompte reçu' ? '<svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="#F39C12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' : '<svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
-        
         // Récupérer la plateforme et sa couleur
         const getPlatformInfo = (platform) => {
             if (!platform) return { name: 'Direct', color: '#95a5a6' };
@@ -729,9 +822,6 @@ async function updateDashboardReservations() {
                         <div class="dashboard-reservation-info">
                             <strong class="dashboard-reservation-name" style="font-size: 0.95rem;">${r.nom}</strong>
                             ${shouldSendReminder ? '<div style="position: absolute; top: 15px; right: 68px; background: #ffeaa7; color: var(--text); padding: 5px 10px; border: 2px solid var(--stroke); box-shadow: 2px 2px 0 var(--stroke); border-radius: 8px; font-size: 0.7rem; font-weight: 700;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:2px;" stroke="currentColor" fill="none" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> J-3 : Fiche</div>' : ''}
-                            <div class="dashboard-reservation-badge-wrapper">
-                                <span class="dashboard-reservation-badge" style="background: ${badgeColor};">${badge}</span>
-                            </div>
                             <div class="dashboard-reservation-dates">
                                 <svg style="width:16px;height:16px;flex-shrink:0;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                                 <span style="min-width: 120px;">${formatDateFromObj(dateDebut)}</span>
@@ -750,7 +840,6 @@ async function updateDashboardReservations() {
                             </div>
                             ${checklistHtml}
                         </div>
-                        <span class="dashboard-reservation-payment" title="${r.paiement}">${paiementIcon}</span>
                     </div>
                     <div class="dashboard-reservation-actions" style="display: flex; align-items: center; gap: 6px;">
                         ${hasPrestations ? `
@@ -1154,20 +1243,14 @@ async function updateDashboardPrestations() {
 
 async function updateDashboardMenages() {
     // console.log('🧹 updateDashboardMenages() début');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - today.getDay() + 1);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
+    const { today, weekEnd } = getCurrentWeekRange();
     
     // Filtrer uniquement les ménages à partir d'aujourd'hui (pas les dates passées)
     const { data: cleanings } = await window.supabaseClient
         .from('cleaning_schedule')
         .select('*')
-        .gte('scheduled_date', today.toISOString().split('T')[0])
-        .lte('scheduled_date', weekEnd.toISOString().split('T')[0])
+        .gte('scheduled_date', formatDateKeyLocal(today))
+        .lte('scheduled_date', formatDateKeyLocal(weekEnd))
         .order('scheduled_date', { ascending: true });
     
     const container = document.getElementById('dashboard-menages');
@@ -2097,7 +2180,9 @@ async function updateFinancialIndicators() {
         urssaf2025El.textContent = simulationPrecedente ? formatCurrency(urssafPrecedent) : '-';
     }
     if (urssaf2026El) {
-        urssaf2026El.textContent = formatCurrency(urssafTotal);
+        // Priorité : valeur sauvegardée en BDD depuis la simulation fiscale
+        const urssafSimule = parseFloat(simFiscale?.donnees_detaillees?.cotisations_urssaf || 0);
+        urssaf2026El.textContent = urssafSimule > 0 ? formatCurrency(urssafSimule) : formatCurrency(urssafTotal);
     }
     
     // Afficher IR des 2 années (seulement si option personnelle activée)
@@ -2113,12 +2198,16 @@ async function updateFinancialIndicators() {
             ir2025El.textContent = simulationPrecedente ? formatCurrency(impotRevenuPrecedent) : '-';
         }
         if (ir2026El) {
-            ir2026El.textContent = formatCurrency(impotRevenuCourant);
+            // Priorité : valeur sauvegardée en BDD depuis la simulation fiscale
+            const irSimule = parseFloat(simFiscale?.donnees_detaillees?.impot_revenu || 0);
+            ir2026El.textContent = irSimule > 0 ? formatCurrency(irSimule) : formatCurrency(impotRevenuCourant);
         }
     }
     
-    // Afficher bénéfice APRÈS URSSAF uniquement (l'IR concerne les salaires, pas l'activité gîtes)
-    const beneficeFinal = beneficeAnnee - urssafTotal;
+    // Afficher bénéfice APRÈS URSSAF — priorité à l'URSSAF sauvegardé en BDD (même source que l'indicateur URSSAF)
+    const urssafSimulePourBenefice = parseFloat(simFiscale?.donnees_detaillees?.cotisations_urssaf || 0);
+    const urssafPourBenefice = urssafSimulePourBenefice > 0 ? urssafSimulePourBenefice : urssafTotal;
+    const beneficeFinal = beneficeAnnee - urssafPourBenefice;
     if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeFinal);
     
     // console.log('💰 URSSAF Total:', urssafTotal.toFixed(2), '€');
@@ -2371,38 +2460,35 @@ async function updateKPIPerformance() {
         });
         
         const nbReservations = reservations.length;
-        const tauxOccupation = ((totalNuitsReservees / 365) * 100).toFixed(1);
+        const joursAnnee = ((anneeActuelle % 4 === 0 && anneeActuelle % 100 !== 0) || anneeActuelle % 400 === 0) ? 366 : 365;
+        const nbGites = gitesVisibles.length || 1;
+        const tauxOccupation = ((totalNuitsReservees / (nbGites * joursAnnee)) * 100).toFixed(1);
         const revenuMoyenNuit = totalNuitsReservees > 0 ? (totalCA / totalNuitsReservees) : 0;
         const dureeMoyenneSejour = nbReservations > 0 ? (totalDureeSejour / nbReservations).toFixed(1) : 0;
         
         const { data: simFiscale } = await window.supabaseClient
-            .from('simulations_fiscales')
+            .from('fiscal_history')
             .select('*')
-            .eq('annee', anneeActuelle)
+            .eq('year', anneeActuelle)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
         
         let chargesTotales = 0;
         
-        if (simFiscale) {
-            chargesTotales = 
-                (simFiscale.ecs_couzon || 0) + (simFiscale.compteur_eau_couzon || 0) + (simFiscale.assurance_gites_couzon || 0) +
-                (simFiscale.taxe_fonciere_couzon || 0) + (simFiscale.taxe_habitation_couzon || 0) + (simFiscale.electricite_couzon || 0) +
-                (simFiscale.internet_couzon || 0) + (simFiscale.eau_piscine_couzon || 0) + (simFiscale.linge_maison_couzon || 0) +
-                (simFiscale.produits_entretien_couzon || 0) + (simFiscale.produits_piscine_couzon || 0) + (simFiscale.petits_travaux_couzon || 0) +
-                (simFiscale.commissions_couzon || 0) + (simFiscale.ecs_trevoux || 0) + (simFiscale.compteur_eau_trevoux || 0) +
-                (simFiscale.assurance_gites_trevoux || 0) + (simFiscale.taxe_fonciere_trevoux || 0) + (simFiscale.taxe_habitation_trevoux || 0) +
-                (simFiscale.electricite_trevoux || 0) + (simFiscale.internet_trevoux || 0) + (simFiscale.linge_maison_trevoux || 0) +
-                (simFiscale.produits_entretien_trevoux || 0) + (simFiscale.petits_travaux_trevoux || 0) + (simFiscale.commissions_trevoux || 0) +
-                (simFiscale.comptable || 0) + (simFiscale.frais_bancaires || 0) + (simFiscale.materiel_info || 0) +
-                (simFiscale.rc_pro || 0) + (simFiscale.formation || 0) +
-                ((simFiscale.telephone || 0) * (simFiscale.telephone_type === 'mensuel' ? 12 : 1)) +
-                ((simFiscale.fournitures || 0) * (simFiscale.fournitures_type === 'mensuel' ? 12 : 1)) +
-                (simFiscale.travaux_liste || []).reduce((sum, item) => sum + item.montant, 0) +
-                (simFiscale.frais_divers_liste || []).reduce((sum, item) => sum + item.montant, 0) +
-                (simFiscale.produits_accueil_liste || []).reduce((sum, item) => sum + item.montant, 0) +
-                (simFiscale.credits_liste || []).reduce((sum, c) => sum + (c.mensualite * 12), 0);
+        if (simFiscale && typeof window.calculerChargesParGiteSansAmortissement === 'function') {
+            try {
+                const charges = await window.calculerChargesParGiteSansAmortissement(simFiscale, gitesVisibles);
+                chargesTotales = charges.total;
+            } catch (e) {
+                // Fallback : lire benefice_imposable depuis donnees_detaillees
+                const beneficeSimule = parseFloat(simFiscale.donnees_detaillees?.benefice_imposable || 0);
+                if (beneficeSimule > 0) chargesTotales = totalCA - beneficeSimule;
+            }
+        } else if (simFiscale) {
+            // Fallback : dériver les charges depuis le bénéfice sauvegardé
+            const beneficeSimule = parseFloat(simFiscale.donnees_detaillees?.benefice_imposable || 0);
+            if (beneficeSimule > 0) chargesTotales = totalCA - beneficeSimule;
         }
         
         const benefice = totalCA - chargesTotales;
@@ -3250,6 +3336,9 @@ async function updateProblemesClients() {
     // ✅ Table problemes_signales restaurée et migrée - 28/01/2026
     
     try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) return;
+
         const { data: problemes, error } = await supabaseClient
             .from('problemes_signales')
             .select('*')
@@ -3326,22 +3415,88 @@ async function updateProblemesClients() {
             attachProblemesEventListeners(); // Event delegation pour les boutons
         }
         
+        // === RETOURS FEMME DE MÉNAGE (non validés) ===
+        let retoursMenage = [];
+        try {
+            const dateDebutRetours = new Date();
+            dateDebutRetours.setDate(dateDebutRetours.getDate() - 30);
+
+            const { data: retours, error: retoursError } = await window.supabaseClient
+                .from('retours_menage')
+                .select('id, gite_id, date_menage, commentaires, validated, created_at, gites:gite_id(name)')
+                .eq('owner_user_id', user.id)
+                .eq('validated', false)
+                .gte('date_menage', dateDebutRetours.toISOString().split('T')[0])
+                .order('date_menage', { ascending: false })
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (retoursError) {
+                console.error('❌ Erreur chargement retours ménage dashboard:', retoursError);
+            } else {
+                retoursMenage = retours || [];
+            }
+        } catch (retoursCatchError) {
+            console.error('❌ Erreur récupération retours ménage dashboard:', retoursCatchError);
+        }
+
         // === CARD BLEUE : DEMANDES & RETOURS ===
         const containerDemandes = document.getElementById('liste-demandes-retours');
         const badgeDemandes = document.getElementById('badge-demandes-retours-count');
         const cardDemandes = document.getElementById('dashboard-demandes-retours');
-        
-        if (!autresDemandes || autresDemandes.length === 0) {
+
+        const totalDemandesEtRetours = (autresDemandes?.length || 0) + (retoursMenage?.length || 0);
+
+        if (!totalDemandesEtRetours) {
             window.SecurityUtils.setInnerHTML(containerDemandes, '<p style="color: #95a5a6; font-style: italic; margin: 0;">Aucune demande en attente</p>');
             badgeDemandes.textContent = '0';
             cardDemandes.style.display = 'none';
         } else {
             cardDemandes.style.display = 'block';
-            badgeDemandes.textContent = autresDemandes.length;
+            badgeDemandes.textContent = totalDemandesEtRetours;
             let htmlDemandes = '';
             autresDemandes.forEach(pb => {
                 htmlDemandes += renderProblemeCard(pb, false);
             });
+
+            retoursMenage.forEach(retour => {
+                const giteName = retour.gites?.name || 'Gîte inconnu';
+                const dateFormatee = new Date(retour.date_menage).toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                const commentaire = (retour.commentaires || '').trim();
+                const apercu = commentaire.length > 160 ? `${commentaire.slice(0, 160)}...` : commentaire;
+                const statutHtml = '<span style="background:#f39c12; color:white; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:600;">En attente</span>';
+
+                htmlDemandes += `
+                    <div style="background: var(--card); padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:1.2rem;">🧹</span>
+                                <strong style="color:#2c3e50;">Retour ménage - ${window.SecurityUtils ? window.SecurityUtils.sanitizeText(giteName) : giteName}</strong>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                ${statutHtml}
+                                <span style="font-size:0.85rem; color:#95a5a6;">${dateFormatee}</span>
+                            </div>
+                        </div>
+                        ${apercu ? `<p style="margin:0 0 12px 0; color:#7f8c8d; font-size:0.9rem; line-height:1.5; white-space:pre-wrap;">${window.SecurityUtils ? window.SecurityUtils.sanitizeText(apercu) : apercu}</p>` : '<p style="margin:0 0 12px 0; color:#95a5a6; font-style:italic;">Aucun commentaire</p>'}
+                        <div style="display:flex; gap:8px; justify-content:flex-end;">
+                            <button onclick="afficherDetailsRetourMenage('${retour.id}')"
+                                style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85rem;">
+                                Voir détail
+                            </button>
+                            <button onclick="fermerEtValiderRetourMenage('${retour.id}')"
+                                style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85rem;">
+                                ✓ Valider
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
             window.SecurityUtils.setInnerHTML(containerDemandes, htmlDemandes);
             attachProblemesEventListeners(); // Event delegation pour les boutons
         }
@@ -3757,7 +3912,6 @@ function getProgressColorDashboard(percent) {
 // ==========================================
 
 async function afficherDetailsRetourMenage(retourId) {
-    return; // ❌ Table retours_menage supprimée - 23/01/2026
     try {
         const { data: retour, error } = await window.supabaseClient
             .from('retours_menage')
@@ -3794,20 +3948,20 @@ async function afficherDetailsRetourMenage(retourId) {
             <div style="padding: 20px;">
                 <h2 style="color: #667eea; margin-bottom: 20px;">🧹 Retour Ménage</h2>
                 
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                    <div style="font-weight: 600; margin-bottom: 8px;">🏠 ${giteName}</div>
+                <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">🏠 ${giteName}</div>
                     <div style="color: var(--text-secondary);">📅 ${dateFormatee}</div>
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <h3 style="color: #333; margin-bottom: 10px;">Commentaires</h3>
-                    <div style="padding: 15px; background: #fff; border-left: 4px solid #667eea; border-radius: 8px;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 10px;">Commentaires</h3>
+                    <div style="padding: 15px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-left: 4px solid #667eea; border-radius: 8px;">
                         <div style="white-space: pre-wrap; color: var(--text-secondary); font-size: 0.95rem;">${retour.commentaires || 'Aucun commentaire'}</div>
                     </div>
                 </div>
 
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="fermerEtValiderRetourMenage('${retourId}')" class="btn" style="flex: 1; background: #ddd; color: #333; padding: 15px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                    <button onclick="fermerEtValiderRetourMenage('${retourId}')" class="btn" style="flex: 1; background: var(--btn-neutral-bg, #e5e7eb); color: var(--text-primary); padding: 15px; border: 1px solid var(--border-color); border-radius: 10px; font-weight: 600; cursor: pointer;">
                         Fermer
                     </button>
                 </div>
@@ -3824,7 +3978,7 @@ async function afficherDetailsRetourMenage(retourId) {
         }
 
         window.SecurityUtils.setInnerHTML(modal, `
-            <div onclick="event.stopPropagation()" style="background: var(--card); border-radius: 20px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div onclick="event.stopPropagation()" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow);">
                 ${modalContent}
             </div>
         `);
@@ -3838,7 +3992,6 @@ async function afficherDetailsRetourMenage(retourId) {
 }
 
 async function fermerEtValiderRetourMenage(retourId) {
-    return; // ❌ Table retours_menage supprimée - 23/01/2026
     try {
         // Marquer le retour comme validé pour qu'il disparaisse des alertes
         const { error } = await window.supabaseClient
@@ -3851,13 +4004,16 @@ async function fermerEtValiderRetourMenage(retourId) {
         // Fermer la modal
         fermerModalRetourMenage();
         
-        // Recharger les alertes pour enlever ce retour
+        // Recharger les sections dashboard pour retirer immédiatement le retour
+        await updateProblemesClients();
         await updateDashboardAlerts();
+        showToast('✓ Retour ménage validé', 'success');
         
     } catch (error) {
         console.error('Erreur validation retour:', error);
         // Fermer quand même la modal
         fermerModalRetourMenage();
+        showToast('❌ Erreur lors de la validation du retour', 'error');
     }
 }
 
@@ -3897,6 +4053,8 @@ document.addEventListener('DOMContentLoaded', () => {
 window.affichEtValiderRetourMenage = fermerEtValiderRetourMenage;
 window.fermererDetailsRetourMenage = afficherDetailsRetourMenage;
 window.fermerModalRetourMenage = fermerModalRetourMenage;
+window.afficherDetailsRetourMenage = afficherDetailsRetourMenage;
+window.fermerEtValiderRetourMenage = fermerEtValiderRetourMenage;
 window.chargerGraphiqueTresorerie = afficherGraphiqueTresorerieDashboard;
 
 // =============================================

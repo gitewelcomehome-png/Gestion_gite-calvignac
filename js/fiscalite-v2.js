@@ -1111,6 +1111,8 @@ function ajusterStatutFiscalAutomatique(ca, benefice, urssafActuel) {
         document.getElementById('preview-urssaf').textContent = urssafNew.toFixed(2) + ' €';
         document.getElementById('preview-reste').textContent = resteAvantIRNew.toFixed(2) + ' €';
         document.getElementById('detail-total-urssaf').textContent = urssafNew.toFixed(2) + ' €';
+        const dashUrssafEl2 = document.getElementById('dashboard-urssaf-2026');
+        if (dashUrssafEl2) dashUrssafEl2.textContent = Math.round(urssafNew).toLocaleString('fr-FR') + ' €';
         
         // Forcer la mise à jour du badge et des messages
         setTimeout(() => {
@@ -1446,6 +1448,8 @@ function calculerTempsReel() {
         document.getElementById('detail-formation-pro').textContent = formationPro.toFixed(2) + ' €';
         document.getElementById('detail-allocations').textContent = allocations.toFixed(2) + ' €';
         document.getElementById('detail-total-urssaf').textContent = urssaf.toFixed(2) + ' €';
+        const dashUrssafEl = document.getElementById('dashboard-urssaf-2026');
+        if (dashUrssafEl) dashUrssafEl.textContent = Math.round(urssaf).toLocaleString('fr-FR') + ' €';
         document.getElementById('detail-trimestres').textContent = trimestres;
         
         // Affichage total des charges (dynamique par gîte)
@@ -2016,6 +2020,8 @@ function calculerIR() {
     document.getElementById('ir-quotient').textContent = quotient.toFixed(2) + ' €';
     document.getElementById('ir-montant').textContent = impotTotal.toFixed(2) + ' €';
     document.getElementById('ir-reste-final').textContent = resteFinalTotal.toFixed(2) + ' €';
+    const dashIr2026El = document.getElementById('dashboard-ir-2026');
+    if (dashIr2026El) dashIr2026El.textContent = Math.round(impotTotal).toLocaleString('fr-FR') + '\u00a0€';
     
     // Calculer le reste à vivre après le calcul de l'IR
     setTimeout(() => calculerResteAVivre(), 100);

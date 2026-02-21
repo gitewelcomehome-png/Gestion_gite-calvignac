@@ -565,6 +565,7 @@ async function afficherPlanningParSemaine() {
             status: validation ? validation.status : 'pending',
             timeOfDay: validation ? validation.time_of_day : calculatedTimeOfDay,
             proposedBy: validation ? validation.proposed_by : null,
+            notes: validation ? validation.notes : null,
             reservationEndBefore: dateFin,
             reservationStartAfter: null, // À calculer
             allowedDates: dateWindow.allowedDates,
@@ -705,7 +706,7 @@ async function afficherPlanningParSemaine() {
  * @returns {string} - HTML de la card
  */
 function generateMenageCardHTML(menageInfo) {
-    const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay, proposedBy, allowedDates, morningOnlyDates } = menageInfo;
+    const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay, proposedBy, allowedDates, morningOnlyDates, notes } = menageInfo;
     const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
     
     // Statut
@@ -761,6 +762,10 @@ function generateMenageCardHTML(menageInfo) {
         ? '<svg style="width:18px;height:18px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' 
         : '<svg style="width:18px;height:18px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
     const badgeClass = validated ? 'menage-status-badge menage-status-badge-validated' : 'menage-status-badge menage-status-badge-pending';
+    const isAutoConflict = typeof notes === 'string' && notes.includes('[AUTO_CLEANING_CONFLICT]');
+    const autoConflictHtml = isAutoConflict
+        ? `<div class="menage-company-proposal" style="margin-bottom:10px;background:#fff3cd;border-color:#f39c12;"><div class="menage-company-proposal-title">⚠️ Replanification auto conflit</div><div class="menage-company-proposal-info">${notes.replace('[AUTO_CLEANING_CONFLICT] | ', '')}</div></div>`
+        : '';
     
     return `
         <div class="${cardClass}">
@@ -784,6 +789,8 @@ function generateMenageCardHTML(menageInfo) {
                 </div>
                 ` : ''}
             </div>
+
+            ${autoConflictHtml}
             
             ${proposedByCompany ? `
                 <div class="menage-company-proposal">
@@ -1027,6 +1034,54 @@ function ouvrirPageFemmeMenage() {
 }
 
 /**
+ * Génère (ou récupère) le lien partageable pour la femme/société de ménage
+ * et le copie dans le presse-papier
+ */
+async function copierLienFemmeMenage() {
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) { showToast('Non connecté', 'error'); return; }
+
+        // Chercher un token existant
+        let { data: existing } = await window.supabaseClient
+            .from('cleaner_tokens')
+            .select('token')
+            .eq('owner_user_id', user.id)
+            .eq('type', 'cleaner')
+            .single();
+
+        if (!existing) {
+            // Créer un nouveau token
+            const { data: newToken, error } = await window.supabaseClient
+                .from('cleaner_tokens')
+                .insert({
+                    owner_user_id: user.id,
+                    label: 'Femme de ménage',
+                    type: 'cleaner'
+                })
+                .select('token')
+                .single();
+            if (error) throw error;
+            existing = newToken;
+        }
+
+        const url = `${window.location.origin}/pages/femme-menage.html?token=${existing.token}`;
+
+        try {
+            await navigator.clipboard.writeText(url);
+            showToast('🔗 Lien copié ! Envoyez-le à votre femme de ménage.', 'success');
+        } catch (e) {
+            // Fallback si clipboard API non disponible
+            prompt('Copiez ce lien et envoyez-le :', url);
+        }
+    } catch (error) {
+        console.error('Erreur génération lien:', error);
+        showToast('Erreur lors de la génération du lien', 'error');
+    }
+}
+window.copierLienFemmeMenage = copierLienFemmeMenage;
+
+/**
  * Charge et affiche les retours ménage envoyés par la femme de ménage
  */
 async function loadRetoursMenuge() {
@@ -1056,16 +1111,18 @@ async function loadRetoursMenuge() {
 
         const container = document.getElementById('retoursMenugeList');
         if (!container) return; // Container pas encore chargé
-        
+
+        const card = document.getElementById('card-retours-menage');
+
         if (!retours || retours.length === 0) {
-            const html = `
-                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
-                    <p>Aucun retour envoyé ces 30 derniers jours</p>
-                </div>
-            `;
-            window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+            if (card) card.style.display = 'none';
             return;
+        }
+
+        if (card) {
+            card.style.display = 'block';
+            const badge = document.getElementById('badge-retours-menage-count');
+            if (badge) badge.textContent = retours.length;
         }
 
         // Construire l'affichage des retours

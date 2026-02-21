@@ -599,22 +599,22 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         }
         let statusBadge = '';
         if (validation) {
-            if (validation.status === 'validated') {
-                // VERT = Validé
+            if (validation.validated_by_company === true || validation.status === 'validated') {
+                // VERT = Validé par la société de ménage
                 statusBadge = '<span class="validation-status validated" title="Validé par société" style="margin-left: 8px;">✓</span>';
             } else if (validation.status === 'pending_validation') {
-                // ORANGE = En attente de validation client
-                statusBadge = '<span class="validation-status pending" title="En attente validation client" style="margin-left: 8px;">⏳</span>';
+                // ORANGE = En attente de validation
+                statusBadge = '<span class="validation-status pending" title="En attente validation" style="margin-left: 8px;">⏳</span>';
             } else if (validation.status === 'refused') {
                 // ROUGE FONCE = Refusé
-                statusBadge = '<span class="validation-status refused" title="Refusé par client" style="margin-left: 8px;">❌</span>';
+                statusBadge = '<span class="validation-status refused" title="Refusé" style="margin-left: 8px;">❌</span>';
             } else {
-                // ROUGE = À valider (status = 'pending')
-                statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
+                // ROUGE = À planifier (status = 'pending')
+                statusBadge = '<span class="validation-status notvalidated" title="À planifier" style="margin-left: 8px;">✗</span>';
             }
         } else {
-            // Pas de validation enregistrée = ROUGE = À valider
-            statusBadge = '<span class="validation-status notvalidated" title="À valider" style="margin-left: 8px;">✗</span>';
+            // Pas de planning = ROUGE = À planifier
+            statusBadge = '<span class="validation-status notvalidated" title="À planifier" style="margin-left: 8px;">✗</span>';
         }
         
         // Masquer bouton si réservation se termine aujourd'hui ou avant
