@@ -22,6 +22,42 @@ const SUPPORT_REPLY_TEMPLATES_STORAGE_KEY = 'support_reply_templates_v1';
 const ACTIVE_SUPPORT_STATUSES = ['ouvert', 'en_cours', 'en_attente_client', 'en_attente'];
 let supportSolutionsReadAllowed = true;
 let supportSolutionsWriteAllowed = true;
+let supportDelegationInitialized = false;
+const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+async function isCurrentUserAdmin(user) {
+    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+        ? window.APP_CONFIG.ADMIN_EMAILS
+        : [];
+    const adminEmails = new Set(
+        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+            .map(normalizeEmail)
+            .filter(Boolean)
+    );
+
+    if (adminEmails.has(normalizeEmail(user?.email))) {
+        return true;
+    }
+
+    try {
+        const { data: rolesData, error: rolesError } = await window.supabaseClient
+            .from('user_roles')
+            .select('role, is_active')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+
+        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+    } catch (rolesCheckError) {
+        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+        return false;
+    }
+}
 
 function isSupportSolutionsAccessDenied(error) {
     const status = Number(error?.status || 0);
@@ -44,7 +80,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // console.log('🎫 Initialisation Module Support');
     
     // Vérifier auth
-    await checkAuth();
+    const isAllowed = await checkAuth();
+    if (!isAllowed) {
+        return;
+    }
     
     // Charger données
     await loadStats();
@@ -67,28 +106,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ================================================================
 async function checkAuth() {
     try {
-        const { data: { user }, error } = await window.supabaseClient.auth.getUser();
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
         
-        if (error || !user) {
+        if (error || !session?.user) {
             window.location.href = '../index.html';
-            return;
+            return false;
         }
         
         // Stocker utilisateur
-        currentUser = user;
+        currentUser = session.user;
         
-        // Vérifier admin
-        if (user.email !== 'stephanecalvignac@hotmail.fr') {
+        // Vérifier admin (allowlist + rôle actif)
+        const isAdmin = await isCurrentUserAdmin(currentUser);
+        if (!isAdmin) {
             alert('⛔ Accès refusé - Admin uniquement');
             window.location.href = '../index.html';
-            return;
+            return false;
         }
         
-        document.getElementById('userEmail').textContent = user.email;
+        const userEmailEl = document.getElementById('userEmail');
+        if (userEmailEl) {
+            userEmailEl.textContent = currentUser.email || '';
+        }
+        
+        return true;
         
     } catch (err) {
         console.error('❌ Erreur auth:', err);
         window.location.href = '../index.html';
+        return false;
     }
 }
 
@@ -250,7 +296,7 @@ function renderTicketItem(ticket) {
     
     return `
         <div class="ticket-item ${selectedTicketId === ticket.id ? 'active' : ''}" 
-             onclick="selectTicket('${ticket.id}')"
+             data-action="select-ticket"
              data-ticket-id="${ticket.id}">
             <div class="ticket-header">
                 <div class="ticket-id">#${ticket.id.substring(0, 8)}</div>
@@ -353,19 +399,19 @@ function renderTicketDetail(ticket, comments = []) {
                 </div>
             </div>
             <div class="ticket-actions">
-                <button class="btn-action" onclick="changeTicketStatus('${ticket.id}', 'en_cours')">
+                <button class="btn-action" data-action="change-ticket-status" data-ticket-id="${escapeHtml(String(ticket.id || ''))}" data-ticket-status="en_cours">
                     <i data-lucide="play-circle"></i>
                     Prendre en charge
                 </button>
-                <button class="btn-action" onclick="changeTicketStatus('${ticket.id}', 'en_attente')">
+                <button class="btn-action" data-action="change-ticket-status" data-ticket-id="${escapeHtml(String(ticket.id || ''))}" data-ticket-status="en_attente">
                     <i data-lucide="clock"></i>
                     En attente client
                 </button>
-                <button class="btn-action primary" onclick="changeTicketStatus('${ticket.id}', 'résolu')">
+                <button class="btn-action primary" data-action="change-ticket-status" data-ticket-id="${escapeHtml(String(ticket.id || ''))}" data-ticket-status="résolu">
                     <i data-lucide="check-circle"></i>
                     Marquer résolu
                 </button>
-                <button class="btn-action primary" onclick="resolveTicketWithClientMessage('${ticket.id}')">
+                <button class="btn-action primary" data-action="resolve-ticket-with-message" data-ticket-id="${escapeHtml(String(ticket.id || ''))}">
                     <i data-lucide="badge-check"></i>
                     Corrigé + notifier + clôturer
                 </button>
@@ -427,26 +473,26 @@ function renderTicketDetail(ticket, comments = []) {
             <textarea id="replyText" placeholder="Écrivez votre réponse..."></textarea>
             <div class="reply-actions">
                 <div class="reply-options">
-                    <button class="btn-reply-option" onclick="insertTemplate('greeting')">
+                    <button class="btn-reply-option" data-action="insert-template" data-template-type="greeting">
                         <i data-lucide="smile"></i>
                         Salutation
                     </button>
-                    <button class="btn-reply-option" onclick="insertTemplate('closing')">
+                    <button class="btn-reply-option" data-action="insert-template" data-template-type="closing">
                         <i data-lucide="check"></i>
                         Clôture
                     </button>
                     ${ticket.statut !== 'résolu' ? `
-                        <button class="btn-close-ticket" onclick="closeTicket('${ticket.id}')" style="background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <button class="btn-close-ticket" data-action="close-ticket" data-ticket-id="${escapeHtml(String(ticket.id || ''))}" style="background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                             <i data-lucide="check-circle"></i>
                             Clôturer le ticket
                         </button>
                     ` : ''}
                 </div>
-                <button class="btn-send-reply" onclick="sendReply('${ticket.id}')">
+                <button class="btn-send-reply" data-action="send-reply" data-ticket-id="${escapeHtml(String(ticket.id || ''))}">
                     <i data-lucide="send"></i>
                     Envoyer
                 </button>
-                <button class="btn-reply-option" onclick="saveCurrentReplyAsTemplate('${ticket.id}')">
+                <button class="btn-reply-option" data-action="save-reply-template" data-ticket-id="${escapeHtml(String(ticket.id || ''))}">
                     <i data-lucide="bookmark-plus"></i>
                     Enregistrer réponse type
                 </button>
@@ -468,7 +514,7 @@ function renderSupportSuggestions(suggestions = []) {
     }
 
     return suggestions.map((suggestion, i) => `
-        <div class="suggestion-item" onclick="useSuggestion(${i})">
+        <div class="suggestion-item" data-action="use-suggestion" data-suggestion-index="${i}">
             ${escapeHtml(suggestion)}
         </div>
     `).join('');
@@ -1433,7 +1479,7 @@ async function loadKnowledgeBase() {
 
 function renderKBArticles(articles) {
     const html = articles.map(article => `
-        <div class="kb-article" onclick="openKBArticle(${article.id})">
+        <div class="kb-article" data-action="open-kb-article" data-article-id="${escapeHtml(String(article.id || ''))}">
             <div class="kb-article-header">
                 <div class="kb-article-title">${escapeHtml(article.title)}</div>
                 <div class="kb-article-icon">
@@ -1469,6 +1515,99 @@ window.openKBArticle = function(articleId) {
 // 🎛️ EVENT LISTENERS
 // ================================================================
 function setupEventListeners() {
+    if (!supportDelegationInitialized) {
+        document.addEventListener('click', (event) => {
+            const navButton = event.target.closest('[data-nav-url]');
+            if (navButton) {
+                const targetUrl = navButton.getAttribute('data-nav-url');
+                if (targetUrl) {
+                    window.location.href = targetUrl;
+                }
+                return;
+            }
+
+            const actionElement = event.target.closest('[data-action]');
+            if (!actionElement) {
+                return;
+            }
+
+            const action = actionElement.dataset.action;
+            switch (action) {
+                case 'coming-soon-ticket':
+                    alert('Fonctionnalité à venir');
+                    break;
+                case 'select-ticket': {
+                    const ticketId = actionElement.dataset.ticketId;
+                    if (ticketId) {
+                        selectTicket(ticketId);
+                    }
+                    break;
+                }
+                case 'change-ticket-status': {
+                    const ticketId = actionElement.dataset.ticketId;
+                    const newStatus = actionElement.dataset.ticketStatus;
+                    if (ticketId && newStatus) {
+                        window.changeTicketStatus(ticketId, newStatus);
+                    }
+                    break;
+                }
+                case 'resolve-ticket-with-message': {
+                    const ticketId = actionElement.dataset.ticketId;
+                    if (ticketId) {
+                        window.resolveTicketWithClientMessage(ticketId);
+                    }
+                    break;
+                }
+                case 'insert-template': {
+                    const type = actionElement.dataset.templateType;
+                    if (type) {
+                        window.insertTemplate(type);
+                    }
+                    break;
+                }
+                case 'close-ticket': {
+                    const ticketId = actionElement.dataset.ticketId;
+                    if (ticketId) {
+                        window.closeTicket(ticketId);
+                    }
+                    break;
+                }
+                case 'send-reply': {
+                    const ticketId = actionElement.dataset.ticketId;
+                    if (ticketId) {
+                        window.sendReply(ticketId);
+                    }
+                    break;
+                }
+                case 'save-reply-template': {
+                    const ticketId = actionElement.dataset.ticketId;
+                    if (ticketId) {
+                        window.saveCurrentReplyAsTemplate(ticketId);
+                    }
+                    break;
+                }
+                case 'use-suggestion': {
+                    const suggestionIndex = Number(actionElement.dataset.suggestionIndex);
+                    if (Number.isFinite(suggestionIndex)) {
+                        window.useSuggestion(suggestionIndex);
+                    }
+                    break;
+                }
+                case 'open-kb-article': {
+                    const articleId = actionElement.dataset.articleId;
+                    if (articleId) {
+                        window.openKBArticle(articleId);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        });
+
+        supportDelegationInitialized = true;
+    }
+
     // Recherche
     document.getElementById('searchTickets').addEventListener('input', debounce((e) => {
         currentFilters.search = e.target.value;

@@ -3,12 +3,72 @@
 // Version: 1.0
 // ==========================================
 
-const { createClient } = supabase;
+const supabaseClient = window.supabaseClient;
+const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+let currentUser = null;
 
-// Configuration Supabase
-const SUPABASE_URL = 'https://bndhywxqzwiwblhhqbzz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuZGh5d3hxendpd2JsaGhxYnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU4OTEwMzAsImV4cCI6MjA1MTQ2NzAzMH0.hB4oWGnmZNxN7T5CKuxcr8Qa9WgFzwZnxhZIHqL-Jxg';
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+async function isCurrentUserAdmin(user) {
+    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+        ? window.APP_CONFIG.ADMIN_EMAILS
+        : [];
+    const adminEmails = new Set(
+        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+            .map(normalizeEmail)
+            .filter(Boolean)
+    );
+
+    if (adminEmails.has(normalizeEmail(user?.email))) {
+        return true;
+    }
+
+    try {
+        const { data: rolesData, error: rolesError } = await supabaseClient
+            .from('user_roles')
+            .select('role, is_active')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+
+        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+    } catch (rolesCheckError) {
+        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+        return false;
+    }
+}
+
+async function checkAuth() {
+    try {
+        if (!supabaseClient) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error || !session?.user) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        currentUser = session.user;
+        const isAdmin = await isCurrentUserAdmin(currentUser);
+        if (!isAdmin) {
+            alert('Accès refusé : Réservé aux administrateurs');
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        return true;
+    } catch (authError) {
+        console.error('Erreur authentification prestations:', authError);
+        window.location.href = '../index.html';
+        return false;
+    }
+}
 
 // État global
 let currentGiteId = null;
@@ -19,6 +79,13 @@ let commandes = [];
 // INITIALISATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
+    initUIEventBindings();
+
+    const isAllowed = await checkAuth();
+    if (!isAllowed) {
+        return;
+    }
+
     await loadGites();
 });
 
@@ -98,23 +165,28 @@ function renderPrestations() {
             <div class="empty-state">
                 <div class="empty-state-icon">📦</div>
                 <p>Aucune prestation créée pour ce gîte</p>
-                <button class="btn btn-primary" onclick="openModal('add')">Créer une prestation</button>
+                <button class="btn btn-primary" data-action="open-add-prestation">Créer une prestation</button>
             </div>
         `;
         return;
     }
     
-    grid.innerHTML = prestations.map(p => `
+    grid.innerHTML = prestations.map(p => {
+        const safeNom = escapeHtml(p.nom || '');
+        const safeDescription = escapeHtml(p.description || '');
+        const safeIcone = escapeHtml(p.icone || '📦');
+
+        return `
         <div class="prestation-card">
             <div class="prestation-header">
-                <div class="icone">${p.icone || '📦'}</div>
+                <div class="icone">${safeIcone}</div>
                 <div class="prestation-info">
-                    <h3 class="prestation-nom">${p.nom}</h3>
+                    <h3 class="prestation-nom">${safeNom}</h3>
                     <div class="prestation-prix">${p.prix.toFixed(2)} €</div>
                 </div>
             </div>
             
-            ${p.description ? `<p class="prestation-description">${p.description}</p>` : ''}
+            ${p.description ? `<p class="prestation-description">${safeDescription}</p>` : ''}
             
             <div class="prestation-meta">
                 <span class="badge ${p.is_active ? 'badge-success' : 'badge-danger'}">
@@ -124,15 +196,16 @@ function renderPrestations() {
             </div>
             
             <div class="prestation-actions">
-                <button class="btn btn-warning btn-sm" onclick="editPrestation(${p.id})">
+                <button class="btn btn-warning btn-sm" data-action="edit-prestation" data-prestation-id="${p.id}">
                     ✏️ Modifier
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="deletePrestation(${p.id})">
+                <button class="btn btn-danger btn-sm" data-action="delete-prestation" data-prestation-id="${p.id}">
                     🗑️ Supprimer
                 </button>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function getCategorieLabel(categorie) {
@@ -321,18 +394,107 @@ function renderCommandes() {
         return;
     }
     
-    tbody.innerHTML = commandes.map(c => `
+    tbody.innerHTML = commandes.map(c => {
+        const safeNumero = escapeHtml(c.numero_commande || '');
+        const safeClient = escapeHtml(c.reservation?.client_name || 'N/A');
+
+        return `
         <tr>
-            <td><strong>${c.numero_commande}</strong></td>
+            <td><strong>${safeNumero}</strong></td>
             <td>${new Date(c.date_commande).toLocaleDateString('fr-FR')}</td>
-            <td>${c.reservation?.client_name || 'N/A'}</td>
+            <td>${safeClient}</td>
             <td><strong>${c.montant_prestations.toFixed(2)} €</strong></td>
             <td><span class="badge ${getStatutBadge(c.statut)}">${getStatutLabel(c.statut)}</span></td>
             <td>
-                <button class="btn btn-sm btn-secondary" onclick="viewCommande(${c.id})">Voir détails</button>
+                <button class="btn btn-sm btn-secondary" data-action="view-commande" data-commande-id="${c.id}">Voir détails</button>
             </td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
+}
+
+function initUIEventBindings() {
+    const giteSelect = document.getElementById('giteSelect');
+    if (giteSelect) {
+        giteSelect.addEventListener('change', loadPrestations);
+    }
+
+    const prestationForm = document.getElementById('prestationForm');
+    if (prestationForm) {
+        prestationForm.addEventListener('submit', savePrestation);
+    }
+
+    const configForm = document.getElementById('configForm');
+    if (configForm) {
+        configForm.addEventListener('submit', saveConfig);
+    }
+
+    document.addEventListener('click', handleActionClick);
+}
+
+function handleActionClick(event) {
+    const tab = event.target.closest('.tab[data-tab]');
+    if (tab) {
+        const tabName = tab.getAttribute('data-tab');
+        if (tabName) {
+            switchTab(tabName);
+        }
+        return;
+    }
+
+    const actionEl = event.target.closest('[data-action]');
+    if (!actionEl) {
+        return;
+    }
+
+    const action = actionEl.getAttribute('data-action');
+    if (!action) {
+        return;
+    }
+
+    switch (action) {
+        case 'open-config':
+            openConfigModal();
+            break;
+        case 'open-add-prestation':
+            openModal('add');
+            break;
+        case 'close-modal':
+            closeModal();
+            break;
+        case 'close-config':
+            closeConfigModal();
+            break;
+        case 'edit-prestation': {
+            const id = Number(actionEl.getAttribute('data-prestation-id'));
+            if (Number.isFinite(id)) {
+                editPrestation(id);
+            }
+            break;
+        }
+        case 'delete-prestation': {
+            const id = Number(actionEl.getAttribute('data-prestation-id'));
+            if (Number.isFinite(id)) {
+                deletePrestation(id);
+            }
+            break;
+        }
+        case 'view-commande': {
+            const id = Number(actionEl.getAttribute('data-commande-id'));
+            if (Number.isFinite(id)) {
+                viewCommande(id);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+function escapeHtml(value) {
+    const div = document.createElement('div');
+    div.textContent = String(value || '');
+    return div.innerHTML;
 }
 
 function getStatutLabel(statut) {

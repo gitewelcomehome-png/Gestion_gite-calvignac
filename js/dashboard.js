@@ -2415,6 +2415,13 @@ async function updateKPIPerformance() {
     today.setHours(0, 0, 0, 0);
     
     try {
+        const setKpiValue = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+            }
+        };
+
         // Récupérer les gîtes visibles selon l'abonnement
         const gitesVisibles = await window.gitesManager.getVisibleGites();
         const gitesVisiblesIds = gitesVisibles.map(g => g.id);
@@ -2430,12 +2437,12 @@ async function updateKPIPerformance() {
         const reservations = (allReservations || []).filter(r => gitesVisiblesIds.includes(r.gite_id));
         
         if (!reservations || reservations.length === 0) {
-            document.getElementById('dashboard-taux-occupation').textContent = '-';
-            document.getElementById('dashboard-revenu-nuit').textContent = '-';
-            document.getElementById('dashboard-duree-sejour').textContent = '-';
-            document.getElementById('dashboard-charges-totales').textContent = '-';
-            document.getElementById('dashboard-marge-nette').textContent = '-';
-            document.getElementById('dashboard-reste-percevoir').textContent = '-';
+            setKpiValue('dashboard-taux-occupation', '-');
+            setKpiValue('dashboard-revenu-nuit', '-');
+            setKpiValue('dashboard-duree-sejour', '-');
+            setKpiValue('dashboard-charges-totales', '-');
+            setKpiValue('dashboard-marge-nette', '-');
+            setKpiValue('dashboard-reste-percevoir', '-');
             return;
         }
         
@@ -2494,12 +2501,12 @@ async function updateKPIPerformance() {
         const benefice = totalCA - chargesTotales;
         const margeNette = totalCA > 0 ? ((benefice / totalCA) * 100).toFixed(1) : 0;
         
-        document.getElementById('dashboard-taux-occupation').textContent = tauxOccupation + '%';
-        document.getElementById('dashboard-revenu-nuit').textContent = formatCurrency(revenuMoyenNuit);
-        document.getElementById('dashboard-duree-sejour').textContent = dureeMoyenneSejour + ' j';
-        document.getElementById('dashboard-charges-totales').textContent = formatCurrency(chargesTotales);
-        document.getElementById('dashboard-marge-nette').textContent = margeNette + '%';
-        document.getElementById('dashboard-reste-percevoir').textContent = formatCurrency(resteAPercevoir);
+        setKpiValue('dashboard-taux-occupation', tauxOccupation + '%');
+        setKpiValue('dashboard-revenu-nuit', formatCurrency(revenuMoyenNuit));
+        setKpiValue('dashboard-duree-sejour', dureeMoyenneSejour + ' j');
+        setKpiValue('dashboard-charges-totales', formatCurrency(chargesTotales));
+        setKpiValue('dashboard-marge-nette', margeNette + '%');
+        setKpiValue('dashboard-reste-percevoir', formatCurrency(resteAPercevoir));
         
     } catch (error) {
         console.error('❌ Erreur KPI Performance:', error);

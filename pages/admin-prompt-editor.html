@@ -221,20 +221,20 @@
             <div class="editor-panel">
                 <h3>
                     ✏️ Éditer le Prompt
-                    <button class="btn btn-secondary" onclick="loadPrompt()" style="margin-left: auto; font-size: 12px; padding: 8px 15px;">
+                    <button class="btn btn-secondary" data-action="load-prompt" style="margin-left: auto; font-size: 12px; padding: 8px 15px;">
                         🔄 Recharger
                     </button>
                 </h3>
                 <textarea id="promptEditor" class="prompt-textarea" placeholder="Chargement du prompt..."></textarea>
                 
                 <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="savePrompt()">
+                    <button class="btn btn-primary" data-action="save-prompt">
                         💾 Sauvegarder & Déployer
                     </button>
-                    <button class="btn btn-success" onclick="testPrompt()">
+                    <button class="btn btn-success" data-action="test-prompt">
                         🧪 Tester avec Claude
                     </button>
-                    <button class="btn btn-secondary" onclick="viewHistory()">
+                    <button class="btn btn-secondary" data-action="view-history">
                         📜 Historique Versions
                     </button>
                 </div>
@@ -255,20 +255,109 @@
             <ul id="rulesList" class="rules-list">
                 <li>Chargement des règles...</li>
             </ul>
-            <button class="btn btn-primary" onclick="addRule()">
+            <button class="btn btn-primary" data-action="add-rule">
                 ➕ Ajouter Nouvelle Règle
             </button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/shared-config.js"></script>
     <script>
-        // Init Supabase
-        const SUPABASE_URL = 'https://mbmpkskdsnjncouictvd.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ibXBrc2tkc25qbmNvdWljdHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU0NzU4OTcsImV4cCI6MjA1MTA1MTg5N30.H-hcHZ_NMXNEr1VBPWkw7xdU_eXJt8PJlXYQDlRdoIY';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabaseClient;
 
         let currentPrompt = '';
+        let currentUser = null;
+
+        document.addEventListener('click', async (event) => {
+            const actionEl = event.target.closest('[data-action]');
+            if (!actionEl) {
+                return;
+            }
+
+            switch (actionEl.dataset.action) {
+                case 'load-prompt':
+                    await loadPrompt();
+                    break;
+                case 'save-prompt':
+                    await savePrompt();
+                    break;
+                case 'test-prompt':
+                    await testPrompt();
+                    break;
+                case 'view-history':
+                    await viewHistory();
+                    break;
+                case 'add-rule':
+                    await addRule();
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        async function checkAdminAccess() {
+            if (!supabase) {
+                throw new Error('Client Supabase indisponible');
+            }
+
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error) throw error;
+
+            if (!session || !session.user) {
+                window.location.href = '../index.html';
+                return false;
+            }
+
+            currentUser = session.user;
+
+            const fallbackAdminEmails = ['stephanecalvignac@hotmail.fr'];
+            const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+                ? window.APP_CONFIG.ADMIN_EMAILS
+                : [];
+            const adminEmails = new Set(
+                [...fallbackAdminEmails, ...configuredAdminEmails]
+                    .map((email) => String(email || '').trim().toLowerCase())
+                    .filter(Boolean)
+            );
+
+            let isAdmin = adminEmails.has(String(currentUser.email || '').trim().toLowerCase());
+
+            if (!isAdmin) {
+                try {
+                    const { data: rolesData, error: rolesError } = await supabase
+                        .from('user_roles')
+                        .select('role, is_active')
+                        .eq('user_id', currentUser.id)
+                        .eq('is_active', true)
+                        .in('role', ['admin', 'super_admin'])
+                        .limit(1);
+
+                    if (!rolesError && Array.isArray(rolesData) && rolesData.length > 0) {
+                        isAdmin = true;
+                    }
+                } catch (rolesCheckError) {
+                    console.warn('Vérification rôle indisponible:', rolesCheckError?.message || rolesCheckError);
+                }
+            }
+
+            if (!isAdmin) {
+                alert('Accès refusé : réservé aux administrateurs.');
+                window.location.href = '../index.html';
+                return false;
+            }
+
+            return true;
+        }
 
         // Charger le prompt
         async function loadPrompt() {
@@ -340,15 +429,15 @@
 
                 const rulesList = document.getElementById('rulesList');
                 rulesList.innerHTML = rules.map(rule => `
-                    <li class="rule-item ${rule.categorie}">
+                    <li class="rule-item ${escapeHtml(rule.categorie)}">
                         <div class="rule-header">
-                            <span class="rule-category">${rule.categorie}</span>
-                            <span class="severity-badge ${rule.severite}">${rule.severite}</span>
+                            <span class="rule-category">${escapeHtml(rule.categorie)}</span>
+                            <span class="severity-badge ${escapeHtml(rule.severite)}">${escapeHtml(rule.severite)}</span>
                         </div>
-                        <div style="font-weight: 600; margin-bottom: 5px;">${rule.regle}</div>
+                        <div style="font-weight: 600; margin-bottom: 5px;">${escapeHtml(rule.regle)}</div>
                         ${rule.exemples_mauvais?.length ? `
                             <div style="font-size: 12px; color: #dc3545;">
-                                ❌ ${rule.exemples_mauvais.join(', ')}
+                                ❌ ${rule.exemples_mauvais.map(example => escapeHtml(example)).join(', ')}
                             </div>
                         ` : ''}
                     </li>
@@ -400,8 +489,13 @@
         });
 
         // Init
-        loadPrompt();
-        loadRules();
+        (async () => {
+            const allowed = await checkAdminAccess();
+            if (!allowed) return;
+
+            await loadPrompt();
+            await loadRules();
+        })();
     </script>
 </body>
 </html>

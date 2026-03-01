@@ -186,13 +186,42 @@ class GitesManager {
                 owner_user_id: user.id,
                 name: giteData.name,
                 slug: slug,
-                icon: giteData.emoji || 'house-simple',
+                icon: giteData.icon || giteData.emoji || 'house-simple',
                 color: giteData.color || '#667eea',
                 capacity: giteData.capacity || null,
-                address: giteData.location || null,
-                ical_urls: giteData.ical_urls && giteData.ical_urls.length > 0 
+                address: giteData.address || giteData.location || null,
+                city: giteData.city || null,
+                postal_code: giteData.postal_code || null,
+                country: giteData.country || 'France',
+                bedrooms: giteData.bedrooms || null,
+                beds: giteData.beds || null,
+                bathrooms: giteData.bathrooms || null,
+                surface_m2: giteData.surface_m2 || null,
+                type_hebergement: giteData.type_hebergement || null,
+                label_classement: giteData.label_classement || null,
+                department: giteData.department || null,
+                region: giteData.region || null,
+                environment: giteData.environment || null,
+                situation: giteData.situation || null,
+                cuisine_niveau: giteData.cuisine_niveau || null,
+                animaux_acceptes: Boolean(giteData.animaux_acceptes),
+                access_pmr: Boolean(giteData.access_pmr),
+                parking: Boolean(giteData.parking),
+                platform_airbnb: Boolean(giteData.platform_airbnb),
+                platform_booking: Boolean(giteData.platform_booking),
+                platform_abritel: Boolean(giteData.platform_abritel),
+                platform_gdf: Boolean(giteData.platform_gdf),
+                platform_direct: Boolean(giteData.platform_direct),
+                price_per_night: giteData.price_per_night || null,
+                description: giteData.description || null,
+                amenities: Array.isArray(giteData.amenities) ? giteData.amenities : [],
+                settings: (giteData.settings && typeof giteData.settings === 'object') ? giteData.settings : {},
+                ical_sources: giteData.ical_sources && giteData.ical_sources.length > 0
+                    ? giteData.ical_sources
+                    : (giteData.ical_urls && giteData.ical_urls.length > 0 ? giteData.ical_urls : []),
+                ical_urls: giteData.ical_urls && giteData.ical_urls.length > 0
                     ? giteData.ical_urls
-                    : []
+                    : (giteData.ical_sources && giteData.ical_sources.length > 0 ? giteData.ical_sources : [])
             };
             
             // console.log('📤 Données INSERT gites:', insertData);

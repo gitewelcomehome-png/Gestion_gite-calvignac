@@ -120,7 +120,7 @@
     
     <script src="js/init-validation.js?v=3.0"></script>
     <script src="js/shared-utils.js?v=4.3"></script>
-    <script src="js/supabase-operations.js"></script>
+    <script src="js/supabase-operations.js?v=1.3"></script>
     <script src="js/icons.js"></script>
     <script src="js/client-communications.js"></script>
     <!-- 💰 FISCALITÉ CHARGÉE EN PREMIER pour exposer window.calculerChargesParGiteSansAmortissement -->
@@ -138,7 +138,7 @@
     <script src="js/cleaning-rules-modal.js"></script>
     <script src="js/decouvrir.js?v=3.0"></script>
     <!-- Reservations.js : CHARGÉ POUR DESKTOP ET MOBILE (fonctions de filtrage communes) -->
-    <script src="js/reservations.js?v=5.1"></script>
+    <script src="js/reservations.js?v=5.6"></script>
     <script src="js/archives.js?v=10.0"></script>
     <script src="js/km-manager.js"></script>
     <script src="js/infos-gites.js?v=4.1"></script>
@@ -953,28 +953,17 @@
         
         // 📱 GESTION MENU MOBILE
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🍔 Initialisation menu mobile...');
             const menuToggle = document.getElementById('mobile-menu-toggle');
             const mobileNav = document.querySelector('.icalou-modern-nav');
             const mobileOverlay = document.getElementById('mobile-nav-overlay');
             
-            console.log('🔍 Éléments trouvés:', {
-                menuToggle: !!menuToggle,
-                mobileNav: !!mobileNav,
-                mobileOverlay: !!mobileOverlay
-            });
-            
             if (menuToggle && mobileNav && mobileOverlay) {
-                console.log('✅ Tous les éléments du menu mobile sont présents');
-                
                 // Ouvrir/Fermer le menu
                 menuToggle.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🍔 Clic sur hamburger');
                     
                     const isActive = mobileNav.classList.contains('active');
-                    console.log('État actuel:', isActive ? 'ouvert' : 'fermé');
                     
                     if (isActive) {
                         // Fermer
@@ -982,20 +971,17 @@
                         mobileOverlay.classList.remove('active');
                         menuToggle.classList.remove('active');
                         document.body.style.overflow = '';
-                        console.log('➡️ Menu fermé');
                     } else {
                         // Ouvrir
                         mobileNav.classList.add('active');
                         mobileOverlay.classList.add('active');
                         menuToggle.classList.add('active');
                         document.body.style.overflow = 'hidden';
-                        console.log('➡️ Menu ouvert');
                     }
                 });
                 
                 // Fermer au clic sur l'overlay
                 mobileOverlay.addEventListener('click', () => {
-                    console.log('🔘 Clic sur overlay - fermeture');
                     mobileNav.classList.remove('active');
                     mobileOverlay.classList.remove('active');
                     menuToggle.classList.remove('active');
@@ -1004,7 +990,6 @@
                 
                 // Fermer au clic sur un onglet
                 const navTabs = mobileNav.querySelectorAll('.nav-tab');
-                console.log(`📑 ${navTabs.length} onglets trouvés`);
                 navTabs.forEach(tab => {
                     tab.addEventListener('click', () => {
                         // Délai pour permettre la transition de l'onglet
@@ -1013,16 +998,11 @@
                             mobileOverlay.classList.remove('active');
                             menuToggle.classList.remove('active');
                             document.body.style.overflow = '';
-                            console.log('📑 Menu fermé après clic onglet');
                         }, 100);
                     });
                 });
             } else {
-                console.error('❌ Éléments manquants pour le menu mobile:', {
-                    menuToggle: menuToggle ? 'OK' : 'MANQUANT',
-                    mobileNav: mobileNav ? 'OK' : 'MANQUANT',
-                    mobileOverlay: mobileOverlay ? 'OK' : 'MANQUANT'
-                });
+                return;
             }
         });
         
@@ -1039,7 +1019,6 @@
                         initializeFeatureGates()
                             .then(() => {
                                 // ✅ Abonnement chargé, on peut continuer
-                                console.log('✅ Système d\'abonnements initialisé');
                             })
                             .catch(err => console.error('❌ Erreur init abonnements:', err));
                     }
@@ -1145,7 +1124,7 @@
         const desktopTabs = {
             'tab-dashboard': 'tabs/tab-dashboard.html' + cacheBuster,
             'tab-gestion': 'tabs/tab-gestion.html' + cacheBuster,
-            'tab-reservations': 'tabs/tab-reservations.html',
+            'tab-reservations': 'tabs/tab-reservations.html' + cacheBuster,
             'tab-archives': 'tabs/tab-archives.html',
             'tab-statistiques': 'tabs/tab-statistiques.html',
             'tab-prestations': 'tabs/tab-prestations.html' + cacheBuster,
@@ -1177,7 +1156,7 @@
         
         const tabFiles = isMobile ? mobileTabs : desktopTabs;
         for (const [tabId, file] of Object.entries(tabFiles)) {
-            fetch(file)
+            fetch(file, { cache: 'no-store' })
                 .then(r => r.text())
                 .then(html => {
                     const targetElement = document.getElementById(tabId);
@@ -5033,7 +5012,6 @@
                     clearInterval(waitForSupabase);
                     
                     // Initialiser le système de notifications AVEC LOGS
-                    console.log('🔔 Initialisation NotificationSystem...');
                     window.notificationSystem = new NotificationSystem();
                     window.notificationSystem.start();
                 }

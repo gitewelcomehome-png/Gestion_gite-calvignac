@@ -1,6 +1,6 @@
 {
   "name": "gestion-gite-calvignac",
-  "version": "6.3.0",
+  "version": "6.4.0",
   "description": "Système de gestion de gîtes avec intégration Abritel",
   "type": "module",
   "engines": {
@@ -15,14 +15,14 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "expo": "~51.0.0",
-    "react": "18.2.0",
-    "react-native": "0.74.5",
     "@supabase/supabase-js": "^2.39.0",
-    "nodemailer": "^6.9.8"
+    "expo": "~51.0.0",
+    "nodemailer": "^6.9.8",
+    "react": "18.2.0",
+    "react-native": "0.74.5"
   },
   "devDependencies": {
     "sharp": "^0.34.5",
-    "vercel": "^33.0.0"
+    "vercel": "^50.22.1"
   }
 }

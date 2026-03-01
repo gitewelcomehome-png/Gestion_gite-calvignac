@@ -2,6 +2,12 @@
  * APPLICATION FICHE CLIENT INTERACTIVE
  * Gestion de la fiche personnalisée par réservation pour les clients
  * 
+ * @version 2.10.1 - 24 février 2026
+ * - Correction robustesse init Supabase (createClient indisponible selon contexte de chargement)
+ *   • Fallback window.supabase?.createClient || window.createClient
+ *   • Réutilisation window.supabaseClient si déjà initialisé
+ *   • Initialisation tokenisée déplacée dans le bloc try de DOMContentLoaded
+ *
  * @version 2.10.0 - 15 février 2026
  * - Ajout export PDF de la fiche client
  *   • Bibliothèque html2pdf.js
@@ -34,10 +40,27 @@ if (!window.ficheClientAppLoaded) {
     const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL || window.SUPABASE_URL || 'https://fgqimtpjjhdqeyyaptoj.supabase.co';
     const SUPABASE_KEY = window.APP_CONFIG?.SUPABASE_KEY || window.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZncWltdHBqamhkcWV5eWFwdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNTU0MjQsImV4cCI6MjA4MzczMTQyNH0.fOuYg0COYts7XXWxgB7AM01Fg6P86f8oz8XVpGdIaNM';
 
+    const createFicheClientSupabase = (clientToken = null) => {
+        const createClient = window.supabase?.createClient || window.createClient;
+
+        if (typeof createClient !== 'function') {
+            if (window.supabaseClient && typeof window.supabaseClient.from === 'function') {
+                return window.supabaseClient;
+            }
+            throw new Error('Supabase non initialisé: createClient indisponible');
+        }
+
+        const headers = clientToken ? { 'x-client-token': clientToken } : {};
+        return createClient(SUPABASE_URL, SUPABASE_KEY, {
+            global: { headers }
+        });
+    };
+
+    window.createFicheClientSupabase = createFicheClientSupabase;
+
     // Initialiser Supabase (une seule fois)
     if (!window.ficheClientSupabase) {
-        const { createClient } = window.supabase;
-        window.ficheClientSupabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        window.ficheClientSupabase = createFicheClientSupabase();
         // Alias pour compatibilité avec d'autres modules
         window.supabaseClient = window.ficheClientSupabase;
     }
@@ -565,8 +588,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         showError('Token manquant. Veuillez utiliser le lien fourni par email.');
         return;
     }
-    
+
     try {
+        if (typeof window.createFicheClientSupabase === 'function') {
+            window.ficheClientSupabase = window.createFicheClientSupabase(token);
+            window.supabaseClient = window.ficheClientSupabase;
+            supabase = window.ficheClientSupabase;
+        }
+
         await loadReservationData();
         
         await loadGiteInfo();

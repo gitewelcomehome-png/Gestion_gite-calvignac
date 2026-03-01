@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-03-01T18-11-28Z",
+  "scenario": "admin_security_page",
+  "phase": "ramp_2",
+  "generated_at": "2026-03-01T19:04:31.173Z",
+  "summary": {
+    "requests": 1200,
+    "success_count": 1196,
+    "error_count": 4,
+    "error_rate_pct": 0.33,
+    "latency_ms": {
+      "min": 23,
+      "p50": 31,
+      "p95": 251,
+      "p99": 372,
+      "max": 667,
+      "avg": 51
+    },
+    "status_buckets": {
+      "0": 4,
+      "200": 1196
+    }
+  }
+}

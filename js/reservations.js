@@ -14,6 +14,15 @@
 
 // Variable globale pour stocker les compteurs de commandes prestations
 window.commandesPrestationsCountMap = {};
+let commandesPrestationsCountCache = null;
+let commandesPrestationsCountCacheAt = 0;
+const COMMANDES_PRESTATIONS_COUNT_CACHE_TTL_MS = 60 * 1000;
+const COMMANDES_PRESTATIONS_QUERY_TIMEOUT_MS = 8000;
+const RESERVATIONS_REFRESH_LIMIT_KEY = 'reservations-list-refresh';
+const RESERVATIONS_REFRESH_COOLDOWN_MS = 4000;
+let lastReservationsRefreshAt = 0;
+let isEditReservationSaving = false;
+let lastEditSourceTabId = null;
 
 // ==========================================
 // UTILITAIRES
@@ -23,24 +32,48 @@ window.commandesPrestationsCountMap = {};
  * Récupérer le nombre de commandes prestations par réservation
  */
 async function getCommandesPrestationsCount() {
-    try {
-        const { data, error } = await window.supabaseClient
+    const now = Date.now();
+    if (commandesPrestationsCountCache && (now - commandesPrestationsCountCacheAt) < COMMANDES_PRESTATIONS_COUNT_CACHE_TTL_MS) {
+        return commandesPrestationsCountCache;
+    }
+
+    const fetchCountMap = async () => {
+        const queryPromise = window.supabaseClient
             .from('commandes_prestations')
             .select('reservation_id, id')
             .neq('statut', 'cancelled');
-        
+
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout récupération commandes prestations')), COMMANDES_PRESTATIONS_QUERY_TIMEOUT_MS);
+        });
+
+        const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
         if (error) throw error;
-        
-        // Créer un objet avec le compteur par reservation_id
+
         const countMap = {};
         (data || []).forEach(cmd => {
             countMap[cmd.reservation_id] = (countMap[cmd.reservation_id] || 0) + 1;
         });
-        
+
+        return countMap;
+    };
+
+    try {
+        const countMap = await fetchCountMap();
+        commandesPrestationsCountCache = countMap;
+        commandesPrestationsCountCacheAt = Date.now();
         return countMap;
     } catch (err) {
-        console.error('❌ Erreur récupération commandes prestations:', err);
-        return {};
+        try {
+            await new Promise(resolve => setTimeout(resolve, 250));
+            const countMapRetry = await fetchCountMap();
+            commandesPrestationsCountCache = countMapRetry;
+            commandesPrestationsCountCacheAt = Date.now();
+            return countMapRetry;
+        } catch (retryErr) {
+            console.error('❌ Erreur récupération commandes prestations:', retryErr || err);
+            return commandesPrestationsCountCache || {};
+        }
     }
 }
 
@@ -52,6 +85,112 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function applyInstantReservationUpdate(reservationId, updates) {
+    if (!reservationId) return;
+
+    let cards = Array.from(document.querySelectorAll(`.week-reservation[data-reservation-id="${reservationId}"]`));
+
+    if (cards.length === 0) {
+        const editButtons = document.querySelectorAll(`button[onclick*="${reservationId}"]`);
+        editButtons.forEach(button => {
+            const card = button.closest('.week-reservation')
+                || button.closest('.reservation-item')
+                || button.closest('[data-reservation-id]')
+                || button.closest('div[style*="box-shadow: 2px 2px 0 #2D3436"]');
+            if (card) cards.push(card);
+        });
+    }
+
+    if (!cards || cards.length === 0) return;
+
+    cards.forEach(card => {
+        const nameElement = card.querySelector('.reservation-name-text');
+        if (nameElement && typeof updates.nom === 'string') {
+            nameElement.textContent = updates.nom;
+        } else if (typeof updates.nom === 'string') {
+            const nameFallback = card.querySelector('.reservation-name')
+                || card.querySelector('.reservation-header .reservation-name')
+                || card.querySelector('div[style*="font-size: 0.7rem"][style*="font-weight: 700"]');
+            if (nameFallback) {
+                nameFallback.textContent = updates.nom;
+            }
+        }
+
+        const priceElement = card.querySelector('.reservation-price');
+        if (priceElement && typeof updates.montant === 'number' && !isNaN(updates.montant)) {
+            priceElement.textContent = `${updates.montant.toFixed(2)} €`;
+        }
+
+        const phoneElement = card.querySelector('.reservation-phone');
+        if (phoneElement) {
+            const phone = (updates.telephone || '').trim();
+            if (phone) {
+                phoneElement.textContent = `📱 ${phone}`;
+                phoneElement.style.display = '';
+            } else {
+                phoneElement.textContent = '';
+                phoneElement.style.display = 'none';
+            }
+        } else {
+            const mobilePhoneFallback = card.querySelector('div[style*="font-size: 0.6rem"][style*="color: var(--text-secondary)"]');
+            if (mobilePhoneFallback) {
+                const phone = (updates.telephone || '').trim();
+                if (phone) {
+                    mobilePhoneFallback.textContent = `📱 ${phone}`;
+                    mobilePhoneFallback.style.display = '';
+                } else {
+                    mobilePhoneFallback.textContent = '';
+                    mobilePhoneFallback.style.display = 'none';
+                }
+            }
+        }
+    });
+}
+
+async function refreshEditedReservationSourceView() {
+    const activeTabId = document.querySelector('.tab-content.active')?.id || lastEditSourceTabId;
+
+    try {
+        if (activeTabId === 'tab-archives' && typeof updateArchivesDisplay === 'function') {
+            await updateArchivesDisplay();
+            return;
+        }
+
+        if (activeTabId === 'tab-dashboard' && typeof window.refreshDashboard === 'function') {
+            await window.refreshDashboard();
+            return;
+        }
+
+        if (typeof updateReservationsList === 'function') {
+            await updateReservationsList(true);
+        }
+    } catch (error) {
+        console.error('❌ Erreur refresh source view après édition:', error);
+    }
+}
+
+async function reloadEditedReservationCard(reservationId) {
+    if (!reservationId) return;
+
+    try {
+        if (typeof invalidateCache === 'function') {
+            invalidateCache('reservations');
+        }
+
+        const reservations = await getAllReservations(true);
+        const reservation = reservations.find(r => r.id === reservationId);
+        if (!reservation) return;
+
+        applyInstantReservationUpdate(reservationId, {
+            nom: reservation.nom || reservation.client_name || '',
+            telephone: reservation.telephone || reservation.client_phone || '',
+            montant: Number(reservation.montant || 0)
+        });
+    } catch (error) {
+        console.error('❌ Erreur rechargement carte réservation:', error);
+    }
 }
 
 // ==========================================// � ACTUALISATION FORCÉE
@@ -71,6 +210,9 @@ async function forceRefreshReservations() {
         if (typeof syncAllCalendars === 'function') {
             syncAllCalendars().catch(err => console.error('Erreur sync iCal:', err));
         }
+
+        commandesPrestationsCountCache = null;
+        commandesPrestationsCountCacheAt = 0;
         
         invalidateCache('all');
         await updateReservationsList();
@@ -201,7 +343,8 @@ function displayFilteredReservations(reservations) {
         const borderColor = borderColors[index % 4];
         const platformLogo = getPlatformLogo(r.site);
         const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 700; font-size: 1.1rem;">✓</span>' : '';
-        const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.95rem; color: var(--text-secondary);">📱 ${r.telephone}</span>` : '';
+        const phoneValue = (r.telephone || '').trim();
+        const telephoneDisplay = `<br><span class="reservation-phone" style="font-size: 0.95rem; color: var(--text-secondary);${phoneValue ? '' : ' display:none;'}">${phoneValue ? `📱 ${escapeHtml(phoneValue)}` : ''}</span>`;
         
         const isIncomplete = !r.nom || r.nom.includes('⚠️') || r.nom.includes('À COMPLÉTER') || r.nom.includes('Client');
         const incompleteBadge = isIncomplete ? 
@@ -213,7 +356,7 @@ function displayFilteredReservations(reservations) {
         const hasPrestations = commandesCount > 0;
         
         html += `
-            <div class="week-reservation ${isIncomplete ? 'week-reservation-incomplete' : ''}">
+            <div class="week-reservation ${isIncomplete ? 'week-reservation-incomplete' : ''}" data-reservation-id="${r.id}">
                 <div style="position: relative;">
                     <div class="reservation-buttons">
                         ${hasPrestations ? `<button data-reservation-id="${r.id}" class="btn-reservation btn-voir-commande-prestations" style="background: #27AE60; border-color: #27AE60;" title="Voir commandes prestations"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> ${commandesCount}</button>` : ''}
@@ -223,7 +366,7 @@ function displayFilteredReservations(reservations) {
                     </div>
                     
                     <div class="reservation-name">
-                        ${escapeHtml(r.nom)}${messageEnvoye}${incompleteBadge}
+                        <span class="reservation-name-text">${escapeHtml(r.nom)}</span>${messageEnvoye}${incompleteBadge}
                     </div>
                     
                     <div class="reservation-details">
@@ -248,6 +391,8 @@ function displayFilteredReservations(reservations) {
 // ==========================================
 
 function openEditModal(id) {
+    lastEditSourceTabId = document.querySelector('.tab-content.active')?.id || null;
+
     getAllReservations(true).then(reservations => {
         const reservation = reservations.find(r => r.id === id);
         if (!reservation) return;
@@ -271,6 +416,26 @@ function closeEditModal() {
 
 async function saveEditReservation(event) {
     event.preventDefault();
+
+    if (isEditReservationSaving) {
+        return;
+    }
+
+    if (window.ValidationUtils && typeof window.ValidationUtils.validateForm === 'function') {
+        const rules = {
+            editNom: { type: 'text', required: true },
+            editTelephone: { type: 'text', required: false },
+            editMontant: { type: 'amount', required: true },
+            editAcompte: { type: 'amount', required: false },
+            editNbPersonnes: { type: 'integer', required: false }
+        };
+
+        const validation = window.ValidationUtils.validateForm(document.getElementById('editForm'), rules);
+        if (!validation.valid) {
+            showToast('Formulaire invalide : corrigez les champs en rouge', 'error');
+            return;
+        }
+    }
     
     const id = document.getElementById('editId').value; // UUID est une string, pas parseInt
     const nom = document.getElementById('editNom').value.trim();
@@ -280,6 +445,7 @@ async function saveEditReservation(event) {
     const montant = parseFloat(document.getElementById('editMontant').value);
     const acompte = parseFloat(document.getElementById('editAcompte').value) || 0;
     const paiement = document.getElementById('editPaiement').value;
+
     
     if (!nom) {
         showToast('Le nom est obligatoire', 'error');
@@ -290,6 +456,15 @@ async function saveEditReservation(event) {
         showToast('Le montant est obligatoire', 'error');
         return;
     }
+
+    const submitButton = document.querySelector('#editForm button[type="submit"]');
+    const originalSubmitText = submitButton ? submitButton.innerHTML : '';
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span>⏳</span> Enregistrement...';
+    }
+
+    isEditReservationSaving = true;
     
     try {
         const updates = {
@@ -304,14 +479,41 @@ async function saveEditReservation(event) {
         };
         
         await updateReservation(id, updates);
-        await updateReservationsList(true); // Garder la position du scroll
-        await updateStats();
-        
+        applyInstantReservationUpdate(id, {
+            nom,
+            telephone,
+            montant
+        });
         closeEditModal();
+        await reloadEditedReservationCard(id); // Recharger la div concernée à la fermeture
         showToast('✓ Réservation modifiée', 'success');
+
+        if (typeof invalidateCache === 'function') {
+            invalidateCache('reservations');
+        }
+
+        await refreshEditedReservationSourceView();
+
+        setTimeout(() => {
+            updateReservationsList(true).catch(err => {
+                console.error('❌ Erreur rechargement de sécurité après modification:', err);
+            });
+        }, 700);
+
+        if (typeof updateStats === 'function') {
+            updateStats().catch(err => {
+                console.error('❌ Erreur mise à jour stats après modification:', err);
+            });
+        }
     } catch (error) {
         console.error('❌ Erreur lors de la modification:', error);
-        showToast('Erreur lors de la modification', 'error');
+        showToast(`Erreur lors de la modification${error?.message ? ' : ' + error.message : ''}`, 'error');
+    } finally {
+        isEditReservationSaving = false;
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalSubmitText;
+        }
     }
 }
 
@@ -338,10 +540,26 @@ async function deleteReservationById(id) {
 async function updateReservationsList(keepScrollPosition = false) {
     // Mémoriser la position du scroll si demandé
     const scrollY = keepScrollPosition ? window.scrollY : null;
+    const now = Date.now();
+    let degradedMode = false;
+
+    if (!keepScrollPosition) {
+        if ((now - lastReservationsRefreshAt) < RESERVATIONS_REFRESH_COOLDOWN_MS) {
+            degradedMode = true;
+        } else if (window.apiLimiter && typeof window.apiLimiter.canAttempt === 'function') {
+            const refreshGate = window.apiLimiter.canAttempt(RESERVATIONS_REFRESH_LIMIT_KEY);
+            if (!refreshGate.allowed) {
+                degradedMode = true;
+                console.warn('⚠️ Rate limit rafraîchissement réservations, bascule en mode dégradé:', refreshGate.message);
+            }
+        }
+    }
+
+    lastReservationsRefreshAt = now;
     
     // Synchroniser les calendriers iCal UNIQUEMENT au premier chargement (pas lors des rafraîchissements)
     // et seulement si on a des gîtes configurés
-    if (!keepScrollPosition && typeof syncAllCalendars === 'function') {
+    if (!keepScrollPosition && !degradedMode && typeof syncAllCalendars === 'function') {
         const gites = await window.gitesManager?.getAll() || [];
         
         // Vérifier si au moins un gîte a des URLs iCal configurées
@@ -358,20 +576,28 @@ async function updateReservationsList(keepScrollPosition = false) {
         }
     }
     
-    // ⚠️ IMPORTANT : forceRefresh=true  pour recharger depuis BDD après sync
-    const reservations = await getAllReservations(true);
+    const shouldForceRefreshReservations = !degradedMode;
+    const reservations = await getAllReservations(shouldForceRefreshReservations);
     const gites = await window.gitesManager.getVisibleGites(); // Charger les gîtes visibles selon abonnement
-    
-    // Récupérer les compteurs de commandes prestations
-    window.commandesPrestationsCountMap = await getCommandesPrestationsCount();
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     // Récupérer les validations de la société de ménage
-    const { data: cleaningSchedules } = await window.supabaseClient
-        .from('cleaning_schedule')
-        .select('*');
+    let cleaningSchedules = null;
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('cleaning_schedule')
+            .select('*');
+
+        if (error) {
+            throw error;
+        }
+
+        cleaningSchedules = data;
+    } catch (cleaningError) {
+        console.warn('⚠️ Impossible de charger cleaning_schedule (mode dégradé):', cleaningError?.message || cleaningError);
+    }
     
     const validationMap = {};
     if (cleaningSchedules) {
@@ -410,6 +636,9 @@ async function updateReservationsList(keepScrollPosition = false) {
         window.SecurityUtils.setInnerHTML(container, '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">Aucune réservation</p>');
         return;
     }
+
+    // Récupérer les compteurs de commandes prestations uniquement si des réservations sont affichées
+    window.commandesPrestationsCountMap = await getCommandesPrestationsCount();
     
     // Organiser par gîte (dynamique)
     const byGite = {};
@@ -590,7 +819,8 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         }
         
         const messageEnvoye = r.messageEnvoye ? ' <span style="color: #27ae60; font-weight: 600;">✓</span>' : '';
-        const telephoneDisplay = r.telephone ? `<br><span style="font-size: 0.9rem;">📱 ${r.telephone}</span>` : '';
+        const phoneValue = (r.telephone || '').trim();
+        const telephoneDisplay = `<br><span class="reservation-phone" style="font-size: 0.9rem;${phoneValue ? '' : ' display:none;'}">${phoneValue ? `📱 ${escapeHtml(phoneValue)}` : ''}</span>`;
         
         // Moment de la journée depuis cleaning_schedule
         let timeLabel = '';
@@ -629,7 +859,7 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
         const prestationsButton = hasPrestations ? `<button data-reservation-id="${r.id}" class="btn-reservation btn-voir-commande-prestations" style="background: #27AE60; border-color: #27AE60;" title="Voir commandes prestations"><svg style="width:16px;height:16px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> ${commandesCount}</button>` : '';
         
         html += `
-            <div class="week-reservation ${cssClass}">
+            <div class="week-reservation ${cssClass}" data-reservation-id="${r.id}">
                 <!-- Boutons en haut -->
                 <div class="reservation-buttons">
                     ${prestationsButton}
@@ -640,7 +870,7 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
                 
                 <!-- Nom en dessous des boutons -->
                 <div class="reservation-name">
-                    ${escapeHtml(r.nom)}${messageEnvoye}
+                    <span class="reservation-name-text">${escapeHtml(r.nom)}</span>${messageEnvoye}
                 </div>
                 
                 <!-- Dates et tarif avec horaires -->

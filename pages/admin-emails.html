@@ -565,15 +565,15 @@
         <section class="tabs-navigation">
             <div class="tabs-sidebar">
             <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
-            <button class="tab-btn" data-tab="dashboard" onclick="window.location.href='/pages/admin-channel-manager.html'">
+            <button class="tab-btn" data-tab="dashboard" data-nav-url="/pages/admin-channel-manager.html">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </button>
-            <button class="tab-btn" data-tab="clients" onclick="window.location.href='/pages/admin-clients.html'">
+            <button class="tab-btn" data-tab="clients" data-nav-url="/pages/admin-clients.html">
                 <i data-lucide="users"></i>
                 <span>Clients</span>
             </button>
-            <button class="tab-btn" data-tab="support" onclick="window.location.href='/pages/admin-support.html'" style="position: relative;">
+            <button class="tab-btn" data-tab="support" data-nav-url="/pages/admin-support.html" style="position: relative;">
                 <i data-lucide="headphones"></i>
                 <span>Support</span>
                 <span id="badge-support-nouveaux" style="position: absolute; top: 10px; right: 15px; background: rgb(233, 30, 99); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; display: none; align-items: center; justify-content: center;">0</span>
@@ -582,27 +582,27 @@
                 <i data-lucide="mail"></i>
                 <span>Messagerie</span>
             </button>
-            <button class="tab-btn" data-tab="promotions" onclick="window.location.href='/pages/admin-promotions.html'">
+            <button class="tab-btn" data-tab="promotions" data-nav-url="/pages/admin-promotions.html">
                 <i data-lucide="tag"></i>
                 <span>Promotions</span>
             </button>
-            <button class="tab-btn" data-tab="parrainage" onclick="window.location.href='/pages/admin-parrainage.html'">
+            <button class="tab-btn" data-tab="parrainage" data-nav-url="/pages/admin-parrainage.html">
                 <i data-lucide="gift"></i>
                 <span>Parrainage</span>
             </button>
-            <button class="tab-btn" data-tab="finance" onclick="window.location.href='/pages/admin-finance.html'">
+            <button class="tab-btn" data-tab="finance" data-nav-url="/pages/admin-finance.html">
                 <i data-lucide="bar-chart-2"></i>
                 <span>Finance & BI</span>
             </button>
-            <button class="tab-btn" data-tab="content" onclick="window.location.href='/pages/admin-content.html'">
+            <button class="tab-btn" data-tab="content" data-nav-url="/pages/admin-content.html">
                 <i data-lucide="pen-tool"></i>
                 <span>Content IA</span>
             </button>
-            <button class="tab-btn" data-tab="communications" onclick="window.location.href='/pages/admin-communications.html'">
+            <button class="tab-btn" data-tab="communications" data-nav-url="/pages/admin-communications.html">
                 <i data-lucide="megaphone"></i>
                 <span>Communications</span>
             </button>
-            <button class="tab-btn" data-tab="monitoring" onclick="window.location.href='/pages/admin-monitoring.html'">
+            <button class="tab-btn" data-tab="monitoring" data-nav-url="/pages/admin-monitoring.html">
                 <i data-lucide="activity"></i>
                 <span>Monitoring</span>
             </button>
@@ -624,7 +624,7 @@
             <p class="auth-text">
                 Connectez-vous avec Zoho Mail pour accéder à vos emails directement depuis votre interface d'administration.
             </p>
-            <button class="auth-btn" onclick="initiateZohoAuth()">
+            <button class="auth-btn" data-action="initiate-zoho-auth">
                 <i data-lucide="log-in" style="width: 20px; height: 20px;"></i>
                 Se connecter à Zoho Mail
             </button>
@@ -634,7 +634,7 @@
         <div style="display: none; flex: 1;" id="mainApp">
             <!-- Sidebar -->
             <div class="email-sidebar">
-                <button class="compose-btn" onclick="openCompose()">
+                <button class="compose-btn" data-action="open-compose">
                     <i data-lucide="pencil" style="width: 18px; height: 18px;"></i>
                     Nouveau message
                 </button>
@@ -692,7 +692,7 @@
         <div class="compose-form">
             <div class="compose-header">
                 <h3 class="compose-title">Nouveau message</h3>
-                <button class="btn-secondary" style="border: none; cursor: pointer;" onclick="closeCompose()">
+                <button class="btn-secondary" style="border: none; cursor: pointer;" data-action="close-compose">
                     <i data-lucide="x" style="width: 20px; height: 20px;"></i>
                 </button>
             </div>
@@ -711,8 +711,8 @@
                 </div>
             </div>
             <div class="compose-footer">
-                <button class="btn btn-secondary" onclick="closeCompose()">Annuler</button>
-                <button class="btn" onclick="sendEmail()">
+                <button class="btn btn-secondary" data-action="close-compose">Annuler</button>
+                <button class="btn" data-action="send-email">
                     <i data-lucide="send" style="width: 16px; height: 16px;"></i>
                     Envoyer
                 </button>
@@ -741,6 +741,69 @@
         let unreadCounter = 0;
         const LOCAL_READ_IDS_KEY = 'zoho_locally_read_ids';
         const locallyReadMessageIds = new Set();
+        const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+
+        function normalizeEmail(email) {
+            return String(email || '').trim().toLowerCase();
+        }
+
+        async function isCurrentUserAdmin(user) {
+            const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+                ? window.APP_CONFIG.ADMIN_EMAILS
+                : [];
+            const adminEmails = new Set(
+                [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+                    .map(normalizeEmail)
+                    .filter(Boolean)
+            );
+
+            if (adminEmails.has(normalizeEmail(user?.email))) {
+                return true;
+            }
+
+            try {
+                const { data: rolesData, error: rolesError } = await window.supabaseClient
+                    .from('user_roles')
+                    .select('role, is_active')
+                    .eq('user_id', user.id)
+                    .eq('is_active', true)
+                    .in('role', ['admin', 'super_admin'])
+                    .limit(1);
+
+                return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+            } catch (rolesCheckError) {
+                console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+                return false;
+            }
+        }
+
+        async function checkAdminAccess() {
+            try {
+                if (!window.supabaseClient) {
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+                if (error || !session?.user) {
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                const isAdmin = await isCurrentUserAdmin(session.user);
+                if (!isAdmin) {
+                    alert('Accès refusé : Réservé aux administrateurs');
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                return true;
+            } catch (authError) {
+                console.error('Erreur authentification admin emails:', authError);
+                window.location.href = '../index.html';
+                return false;
+            }
+        }
 
         function loadLocalReadIds() {
             try {
@@ -891,7 +954,7 @@
             }
 
             emailItemsDiv.innerHTML = visibleEntries.map(({ email, index }) => `
-                <div class="email-item ${isEmailRead(email) ? '' : 'unread'}" data-email-index="${index}" onclick="viewEmail(this, ${index})">
+                <div class="email-item ${isEmailRead(email) ? '' : 'unread'}" data-action="view-email" data-email-index="${index}">
                     <div class="email-item-from">${escapeHtml(email.fromAddress)}</div>
                     <div class="email-item-subject">${escapeHtml(email.subject || '(sans objet)')}</div>
                     <div class="email-item-preview">${escapeHtml(email.summary || '')}</div>
@@ -902,6 +965,11 @@
         
         // Vérifier l'authentification au chargement
         window.addEventListener('DOMContentLoaded', async () => {
+            const isAllowed = await checkAdminAccess();
+            if (!isAllowed) {
+                return;
+            }
+
             loadLocalReadIds();
 
             // Vérifier si on revient après OAuth
@@ -928,7 +996,7 @@
                         <p class="auth-text">
                             L'authentification avec Zoho Mail a échoué. Vérifiez la console pour plus de détails.
                         </p>
-                        <button class="auth-btn" onclick="location.reload()">
+                        <button class="auth-btn" data-action="reload-page">
                             <i data-lucide="refresh-cw" style="width: 20px; height: 20px;"></i>
                             Réessayer
                         </button>
@@ -1088,15 +1156,15 @@
                         <span><strong>Date:</strong> ${formatDate(email.receivedTime)}</span>
                     </div>
                     <div class="email-viewer-actions">
-                        <button class="action-btn" onclick="replyEmail()" title="Répondre">
+                        <button class="action-btn" data-action="reply-email" title="Répondre">
                             <i data-lucide="reply" style="width: 16px; height: 16px;"></i>
                             Répondre
                         </button>
-                        <button class="action-btn" onclick="replyAllEmail()" title="Répondre à tous">
+                        <button class="action-btn" data-action="reply-all-email" title="Répondre à tous">
                             <i data-lucide="reply-all" style="width: 16px; height: 16px;"></i>
                             Répondre à tous
                         </button>
-                        <button class="action-btn" onclick="forwardEmail()" title="Transférer">
+                        <button class="action-btn" data-action="forward-email" title="Transférer">
                             <i data-lucide="forward" style="width: 16px; height: 16px;"></i>
                             Transférer
                         </button>
@@ -1253,8 +1321,55 @@
             return folder ? folder.folderId : null;
         }
         
-        // Changement de dossier
+        // Délégation des actions UI
         document.addEventListener('click', async (e) => {
+            const navButton = e.target.closest('[data-nav-url]');
+            if (navButton) {
+                const navUrl = navButton.dataset.navUrl;
+                if (navUrl) {
+                    window.location.href = navUrl;
+                }
+                return;
+            }
+
+            const actionEl = e.target.closest('[data-action]');
+            if (actionEl) {
+                const action = actionEl.dataset.action;
+                switch (action) {
+                    case 'initiate-zoho-auth':
+                        await initiateZohoAuth();
+                        return;
+                    case 'open-compose':
+                        openCompose();
+                        return;
+                    case 'close-compose':
+                        closeCompose();
+                        return;
+                    case 'send-email':
+                        await sendEmail();
+                        return;
+                    case 'reload-page':
+                        window.location.reload();
+                        return;
+                    case 'reply-email':
+                        replyEmail();
+                        return;
+                    case 'reply-all-email':
+                        replyAllEmail();
+                        return;
+                    case 'forward-email':
+                        forwardEmail();
+                        return;
+                    case 'view-email': {
+                        const index = Number(actionEl.dataset.emailIndex);
+                        await viewEmail(actionEl, index);
+                        return;
+                    }
+                    default:
+                        break;
+                }
+            }
+
             const folderItem = e.target.closest('.folder-item');
             if (folderItem) {
                 const folderName = folderItem.dataset.folder;

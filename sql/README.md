@@ -1,58 +1,40 @@
-# 📂 Scripts SQL - Gestion Gîtes
+# Scripts SQL — Socle propre (rebuild)
 
-## � Organisation des Dossiers
+Nettoyage effectué le 24/02/2026 pour garder uniquement un ensemble SQL utile à la reconstruction de la base.
 
-### 🔐 `/securite/` - Suppression Tables BDD
-Scripts de sauvegarde et suppression des **7 tables obsolètes** (23/01/2026)
+## Exécution unique (rebuild complet)
 
-**Voir** : [README_SECURITE_BDD.md](securite/README_SECURITE_BDD.md)
+```bash
+cd /workspaces/Gestion_gite-calvignac
+psql "$DATABASE_URL" -f sql/rebuild/01_REBUILD_SITE_ORDER.sql
+```
 
-### 📊 `/rapports/` - Rapports de Nettoyage
-Rapports détaillés des opérations de maintenance BDD
+## Socle conservé
 
-### 🔧 `/fixes/` - Correctifs SQL
-Scripts de correction bugs (RLS, permissions, etc.)
+- `sql/rebuild/01_REBUILD_SITE_ORDER.sql` (orchestrateur unique)
+- `sql/core/REBUILD_COMPLETE_DATABASE.sql`
+- `sql/core/REBUILD_COMPLETE_DATABASE_PART2.sql`
+- `sql/create_km_management.sql`
+- `sql/create_linen_stock_transactions.sql`
+- `sql/create_auto_ticket_tables.sql`
+- `sql/migrations/CREATE_SUPPORT_AI_USAGE_LOGS.sql`
+- `sql/security_hardening_rls_fiche_client_token.sql`
+- `sql/securite/FIX_USER_ROLES_RLS_RECURSION_2026-02-23.sql`
+- `sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql`
+- `sql/securite/fiche_client_rls_lot3_pre_backup_20260223.sql`
+- `sql/securite/fiche_client_rls_lot3_postcheck_20260223.sql`
+- `sql/securite/fiche_client_rls_lot3_rollback_20260223.sql`
+- `sql/securite/SUIVI_HEBDO_SECURITE_ADMIN_2026-02-23.sql`
 
-### 🩹 `/patches/` - Patches Code
-Patches appliqués au code JavaScript après nettoyage BDD
+## Archives du bazar SQL
 
----
+- Archive complète du surplus : `_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/`
+- Manifest de traçabilité : `_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/MANIFEST.md`
+- Archive passe MVP rebuild (réduction visibilité `sql/`) : `_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/`
+- Manifest MVP : `_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/MANIFEST.md`
 
-## 🎯 Fichiers Essentiels (dans l'ordre)
+## Règles
 
-### 1️⃣ CRÉATION COMPLÈTE DE LA BDD
-**Fichier** : `SCHEMA_COMPLET_FINAL_2026.sql`  
-**Usage** : Créer TOUTE la base de données from scratch (tables, RLS, policies, functions)  
-**Quand** : Nouveau projet Supabase ou réinitialisation totale
-
----
-
-### 2️⃣ MAINTENANCE COURANTE
-
-#### 🧺 Stock linge dynamique
-**Fichier** : `update_linen_stock_items.sql`  
-Créer la table `linen_stock_items` (stocks dynamiques par type) + RLS + backfill depuis `linen_stocks`
-
-#### 📊 Comptage
-**Fichier** : `COMPTE_RESERVATIONS.sql`  
-Compter le nombre total de réservations
-
-#### 🧹 Nettoyage
-**Fichier** : `NETTOYAGE_COMPLET_RESA.sql`  
-Supprimer les BLOCKED / Not available / Indisponible
-
----
-
-## 📁 Archives
-
-Tous les anciens scripts (migrations, diagnostics, fixes) sont dans :  
-`../sql_archives_13jan/`
-
----
-
-## ⚠️ Règles d'Utilisation
-
-1. **Toujours exécuter dans le SQL Editor** de Supabase (pas Table Editor)
-2. **Lire les commentaires** avant d'exécuter
-3. **Backup avant toute modification** destructive
-4. Les scripts respectent les **RLS** et **organization_id**
+1. Ajouter tout nouveau SQL utile dans le socle (pas de duplication de versions).
+2. Si un script devient obsolète, l’archiver (ne pas laisser en vrac).
+3. Utiliser l’orchestrateur rebuild comme point d’entrée unique.

@@ -1043,12 +1043,16 @@ async function copierLienFemmeMenage() {
         if (!user) { showToast('Non connecté', 'error'); return; }
 
         // Chercher un token existant
-        let { data: existing } = await window.supabaseClient
+        let { data: existing, error: existingError } = await window.supabaseClient
             .from('cleaner_tokens')
             .select('token')
             .eq('owner_user_id', user.id)
             .eq('type', 'cleaner')
-            .single();
+            .maybeSingle();
+
+        if (existingError) {
+            throw existingError;
+        }
 
         if (!existing) {
             // Créer un nouveau token

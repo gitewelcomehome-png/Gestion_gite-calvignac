@@ -7,6 +7,8 @@
 
 // Gestion localStorage pour sauvegardes et masquages
 const STORAGE_KEY = 'client_communications_state';
+let communicationsDisabledUntilReload = false;
+let communicationsDisabledReason = '';
 
 function getCommState() {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -47,6 +49,10 @@ function hideComm(id) {
 
 async function loadClientCommunications() {
     try {
+        if (communicationsDisabledUntilReload) {
+            return;
+        }
+
         if (!window.supabaseClient) {
             console.error('❌ window.supabaseClient non disponible');
             return;
@@ -60,6 +66,19 @@ async function loadClientCommunications() {
             .order('created_at', { ascending: false });
         
         if (error) {
+            const code = String(error?.code || '');
+            const message = String(error?.message || '').toLowerCase();
+            if (code === '42P17' || message.includes('infinite recursion detected in policy')) {
+                communicationsDisabledUntilReload = true;
+                communicationsDisabledReason = 'RLS user_roles en récursion (42P17)';
+                const container = document.getElementById('clientCommunicationsWidget');
+                if (container) {
+                    container.style.display = 'none';
+                }
+                console.warn('⚠️ Communications désactivées temporairement :', communicationsDisabledReason);
+                return;
+            }
+
             console.error('❌ Erreur chargement communications:', error);
             return;
         }
@@ -86,6 +105,18 @@ async function loadClientCommunications() {
         displayClientCommunications(visibleComms);
         
     } catch (error) {
+        const message = String(error?.message || '').toLowerCase();
+        if (message.includes('42p17') || message.includes('infinite recursion detected in policy')) {
+            communicationsDisabledUntilReload = true;
+            communicationsDisabledReason = 'RLS user_roles en récursion (42P17)';
+            const container = document.getElementById('clientCommunicationsWidget');
+            if (container) {
+                container.style.display = 'none';
+            }
+            console.warn('⚠️ Communications désactivées temporairement :', communicationsDisabledReason);
+            return;
+        }
+
         console.error('❌ Erreur:', error);
     }
 }

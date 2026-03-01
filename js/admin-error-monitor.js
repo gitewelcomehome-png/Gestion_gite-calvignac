@@ -34,6 +34,7 @@ class AdminErrorMonitor {
         await this.loadStats();
         this.setupRealtimeListener();
         this.setupStorageSync();
+        this.setupEventDelegation();
         this.renderDashboard();
         this.checkBurstErrors();
     }
@@ -136,6 +137,94 @@ class AdminErrorMonitor {
         window.addEventListener('storage', (event) => {
             if (event.key !== 'cm_monitoring_errors_changed_at') return;
             this.refreshFromDatabase();
+        });
+    }
+
+    setupEventDelegation() {
+        if (this._delegationSetup) {
+            return;
+        }
+        this._delegationSetup = true;
+
+        document.addEventListener('click', async (event) => {
+            const actionEl = event.target.closest('[data-action]');
+            if (!actionEl) {
+                return;
+            }
+
+            const action = actionEl.dataset.action;
+            const errorId = actionEl.dataset.errorId;
+            const userId = actionEl.dataset.userId;
+
+            switch (action) {
+                case 'remove-parent-toast': {
+                    const toast = actionEl.closest('.error-toast');
+                    if (toast) {
+                        toast.remove();
+                    }
+                    break;
+                }
+                case 'toggle-error-monitor-expanded':
+                    this.toggleExpanded();
+                    break;
+                case 'clear-resolved-errors':
+                    await this.clearResolved();
+                    break;
+                case 'show-error-details':
+                    if (errorId) {
+                        await this.showErrorDetails(errorId);
+                    }
+                    break;
+                case 'resolve-error':
+                    if (errorId && confirm('Supprimer cette erreur de la BDD ?')) {
+                        await this.markAsResolved(errorId);
+                    }
+                    break;
+                case 'copy-user-id':
+                    if (userId) {
+                        await navigator.clipboard.writeText(userId);
+                        alert('UUID copié !');
+                    }
+                    break;
+                case 'close-parent-modal': {
+                    const modal = actionEl.parentElement;
+                    if (modal) {
+                        modal.remove();
+                    }
+                    break;
+                }
+                case 'close-nearest-modal': {
+                    const modal = actionEl.closest('.modal');
+                    if (modal) {
+                        modal.remove();
+                    }
+                    break;
+                }
+                case 'resolve-error-and-close-modal': {
+                    if (errorId) {
+                        await this.markAsResolved(errorId);
+                        const modal = actionEl.closest('.modal');
+                        if (modal) {
+                            modal.remove();
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        });
+
+        document.addEventListener('change', (event) => {
+            if (event.target?.id === 'error-type-filter') {
+                this.filterErrors();
+            }
+        });
+
+        document.addEventListener('input', (event) => {
+            if (event.target?.id === 'error-user-filter') {
+                this.filterErrors();
+            }
         });
     }
 
@@ -258,7 +347,7 @@ class AdminErrorMonitor {
         toast.innerHTML = `
             <div class="error-toast__header">
                 <strong>${title}</strong>
-                <button class="error-toast__close" onclick="this.parentElement.parentElement.remove()">×</button>
+                <button class="error-toast__close" data-action="remove-parent-toast">×</button>
             </div>
             <div class="error-toast__message">${message}</div>
             ${actions.length > 0 ? `
@@ -327,7 +416,7 @@ class AdminErrorMonitor {
             <div class="error-monitor">
                 <div class="error-monitor__header">
                     <h3>🚨 Surveillance Erreurs</h3>
-                    <button class="btn btn-sm" onclick="window.errorMonitor.toggleExpanded()">
+                    <button class="btn btn-sm" data-action="toggle-error-monitor-expanded">
                         <span id="error-monitor-toggle">▼</span>
                     </button>
                 </div>
@@ -353,7 +442,7 @@ class AdminErrorMonitor {
 
                 <div class="error-monitor__content" id="error-monitor-content" style="display: none;">
                     <div class="error-monitor__filters">
-                        <select id="error-type-filter" onchange="window.errorMonitor.filterErrors()">
+                        <select id="error-type-filter">
                             <option value="all">Tous les types</option>
                             <option value="critical">Critiques uniquement</option>
                             <option value="warning">Warnings uniquement</option>
@@ -362,10 +451,9 @@ class AdminErrorMonitor {
                             type="text" 
                             id="error-user-filter" 
                             placeholder="Filtrer par UUID ou email client..." 
-                            onkeyup="window.errorMonitor.filterErrors()"
                             style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; margin-left: 10px; width: 250px;"
                         />
-                        <button class="btn btn-sm btn-danger" onclick="window.errorMonitor.clearResolved()">
+                        <button class="btn btn-sm btn-danger" data-action="clear-resolved-errors">
                             🗑️ Effacer résolues
                         </button>
                     </div>
@@ -410,14 +498,14 @@ class AdminErrorMonitor {
                     ${error.user_id && affectedCount === 0 ? `<span title="UUID Client">🆔 ${error.user_id.substring(0, 8)}...</span>` : ''}
                 </div>
                 <div class="error-item__actions">
-                    <button class="btn-link" onclick="window.errorMonitor.showErrorDetails('${error.id}')">
+                    <button class="btn-link" data-action="show-error-details" data-error-id="${error.id}">
                         Détails
                     </button>
-                    <button class="btn-link btn-danger" onclick="if(confirm('Supprimer cette erreur de la BDD ?')) window.errorMonitor.markAsResolved('${error.id}')">
+                    <button class="btn-link btn-danger" data-action="resolve-error" data-error-id="${error.id}">
                         ✓ Corriger
                     </button>
                     ${error.user_id ? `
-                        <button class="btn-link" onclick="navigator.clipboard.writeText('${error.user_id}');alert('UUID copié !')" title="Copier UUID">
+                        <button class="btn-link" data-action="copy-user-id" data-user-id="${error.user_id}" title="Copier UUID">
                             📋 UUID
                         </button>
                     ` : ''}
@@ -468,11 +556,11 @@ class AdminErrorMonitor {
         const modal = document.createElement('div');
         modal.className = 'modal modal-error-details';
         modal.innerHTML = `
-            <div class="modal-overlay" onclick="this.parentElement.remove()"></div>
+            <div class="modal-overlay" data-action="close-parent-modal"></div>
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>🔍 Détails de l'erreur</h2>
-                    <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
+                    <button class="modal-close" data-action="close-nearest-modal">×</button>
                 </div>
                 <div class="modal-body">
                     <div class="error-detail-section">
@@ -501,7 +589,7 @@ class AdminErrorMonitor {
                         <div class="error-detail-section">
                             <strong>UUID Client:</strong>
                             <code>${error.user_id}</code>
-                            <button class="btn btn-sm" onclick="navigator.clipboard.writeText('${error.user_id}');alert('UUID copié !')" style="margin-left: 10px;">
+                            <button class="btn btn-sm" data-action="copy-user-id" data-user-id="${error.user_id}" style="margin-left: 10px;">
                                 📋 Copier
                             </button>
                         </div>
@@ -524,10 +612,10 @@ class AdminErrorMonitor {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" onclick="window.errorMonitor.markAsResolved('${errorId}'); this.closest('.modal').remove();">
+                    <button class="btn btn-danger" data-action="resolve-error-and-close-modal" data-error-id="${errorId}">
                         ✓ Marquer comme résolu
                     </button>
-                    <button class="btn" onclick="this.closest('.modal').remove()">Fermer</button>
+                    <button class="btn" data-action="close-nearest-modal">Fermer</button>
                 </div>
             </div>
         `;

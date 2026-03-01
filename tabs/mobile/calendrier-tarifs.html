@@ -29,6 +29,16 @@
         <!-- Généré dynamiquement -->
     </div>
 
+    <!-- Analyse IA affichée sous le calendrier -->
+    <div id="ai-calendar-analysis" class="ai-prix-panel" style="display:none; margin-top:10px;">
+        <div class="ai-prix-panel-header" style="padding-bottom:8px;">
+            <span class="ai-prix-panel-title">🧠 Analyse IA du mois</span>
+        </div>
+        <div id="ai-calendar-analysis-content" style="font-size:0.8rem; color:var(--text-secondary); line-height:1.45;">
+            <!-- Injecté dynamiquement -->
+        </div>
+    </div>
+
     <!-- Boutons analyse IA (toujours visibles) -->
     <div class="ai-cal-actions" id="ai-cal-actions">
         <button id="btnAIVoirDemande" class="btn-ai-cal">
@@ -254,12 +264,34 @@
 // console.log('🎯 ========================================');
 
 let currentGiteIdMobile = null;
+let currentGiteNameMobile = '';
+let currentGiteCapacityMobile = null;
+let currentGiteAdresseMobile = '';
+let currentGiteContextMobile = {};
 let currentMonthMobile = new Date().getMonth();
 let currentYearMobile = new Date().getFullYear();
 let tarifsCacheMobile = [];
 let reservationsCacheMobile = [];
 let reglesCacheMobile = null;
 let selectedDateMobile = null;
+const gitesMetaByIdMobile = new Map();
+
+const LOU_INTELLIGENCE_TARIFAIRE_SYSTEM_PROMPT = `Tu es un expert en revenue management spécialisé dans la location saisonnière de courte durée en France. Ton rôle est d'aider un propriétaire de gîte à positionner ses tarifs de façon optimale par rapport au marché local, en fonction d'une période donnée.
+
+Règles métier:
+- Toujours adapter l'analyse aux caractéristiques réelles du gîte.
+- Toujours expliciter les bases de calcul avant de proposer des prix.
+- Toujours signaler quand les données de marché sont limitées.
+- Toujours tenir compte des commissions plateformes pour raisonner en revenu net propriétaire.
+- Si un critère gîte est inconnu, l'indiquer explicitement comme non renseigné.
+
+Format attendu:
+1) Contexte marché
+2) Fourchette de prix recommandée (bas, recommandé, premium)
+3) Facteurs clés
+4) Recommandations concrètes
+
+Si on te demande du JSON, réponds uniquement en JSON valide.`;
 
 // Couleurs des plateformes (comme desktop)
 function getPlateformeColorMobile(plateforme) {
@@ -284,6 +316,10 @@ async function loadGitesSelectorMobile() {
         }
         
         const gites = await window.gitesManager.getAll();
+        gitesMetaByIdMobile.clear();
+        gites.forEach((gite) => {
+            if (gite?.id) gitesMetaByIdMobile.set(gite.id, gite);
+        });
         // console.log('✅ Gîtes chargés:', gites.length);
         
         const selector = document.getElementById('giteSelectTarifs');
@@ -315,12 +351,34 @@ async function loadGitesSelectorMobile() {
     }
 }
 
+function updateCurrentGiteContextMobile(giteId) {
+    const gite = gitesMetaByIdMobile.get(giteId) || {};
+    currentGiteContextMobile = gite;
+
+    if (!currentGiteNameMobile && typeof gite.name === 'string') {
+        currentGiteNameMobile = gite.name.trim();
+    }
+
+    if (!currentGiteAdresseMobile) {
+        const adresseCandidate = gite.adresse || gite.address || gite.city || '';
+        currentGiteAdresseMobile = String(adresseCandidate || '').trim();
+    }
+
+    if (currentGiteCapacityMobile === null || currentGiteCapacityMobile === undefined) {
+        const cap = Number(gite.capacity);
+        currentGiteCapacityMobile = Number.isFinite(cap) ? cap : null;
+    }
+}
+
 async function loadTarifsMobile() {
     // console.log('📅 Chargement tarifs pour gîte:', currentGiteIdMobile);
     if (!currentGiteIdMobile) {
         console.warn('⚠️ Pas de gîte sélectionné');
         return;
     }
+
+    resetAnalysePrixIA();
+    updateCurrentGiteContextMobile(currentGiteIdMobile);
     
     try {
         const { data: { user } } = await window.supabaseClient.auth.getUser();
@@ -334,11 +392,24 @@ async function loadTarifsMobile() {
         // Charger les tarifs depuis le champ JSON tarifs_calendrier de la table gites
         const { data: giteData, error: errorTarifs } = await window.supabaseClient
             .from('gites')
-            .select('tarifs_calendrier, regles_tarifs, adresse, name')
+            .select('tarifs_calendrier, regles_tarifs, adresse, name, capacity')
             .eq('id', currentGiteIdMobile)
             .single();
         
         if (errorTarifs) throw errorTarifs;
+
+        currentGiteNameMobile = (giteData?.name || '').trim();
+        currentGiteAdresseMobile = (giteData?.adresse || '').trim();
+        currentGiteCapacityMobile = Number.isFinite(Number(giteData?.capacity))
+            ? Number(giteData.capacity)
+            : null;
+
+        currentGiteContextMobile = {
+            ...currentGiteContextMobile,
+            name: currentGiteNameMobile,
+            adresse: currentGiteAdresseMobile,
+            capacity: currentGiteCapacityMobile
+        };
         
         // Convertir le JSON en tableau
         const tarifData = giteData?.tarifs_calendrier;
@@ -470,6 +541,13 @@ function renderCalendrierMobile() {
     
     // Jours du mois
     const lastDay = new Date(currentYearMobile, currentMonthMobile + 1, 0).getDate();
+
+    const aiSuggestionsByDate = {};
+    aiSuggestionsCache.forEach((suggestion) => {
+        if (suggestion && suggestion.date) {
+            aiSuggestionsByDate[suggestion.date] = suggestion;
+        }
+    });
     
     for (let day = 1; day <= lastDay; day++) {
         const dateObj = new Date(currentYearMobile, currentMonthMobile, day);
@@ -513,7 +591,7 @@ function renderCalendrierMobile() {
         }
 
         // Badge IA : vérifier si la date a une suggestion
-        const aiSugg = aiSuggestionsCache.find(s => s.date === dateStr);
+        const aiSugg = aiSuggestionsByDate[dateStr] || null;
         if (aiSugg && !isReserved) {
             dayCard.classList.add(`ai-${aiSugg.type}`);
             dayCard.title = aiSugg.label;
@@ -522,11 +600,28 @@ function renderCalendrierMobile() {
         const demandeLabel = (aiModeActif === 'demande' && aiDemandeCache[dateStr] === 'haute') ? '🔥' :
                              (aiModeActif === 'demande' && aiDemandeCache[dateStr] === 'faible') ? '💤' : '';
 
+        const prixExistant = tarif ? Number(tarif.prix_nuit) : null;
+        const suggestionPrix = aiSugg ? Number(aiSugg.prixSuggere) : null;
+        const showSuggestedPrice = Boolean(aiSugg && !isReserved && Number.isFinite(suggestionPrix));
+
+        let prixHtml = '<div style="font-size: 0.65rem; color: var(--text-secondary);">—</div>';
+        if (isReserved) {
+            prixHtml = '<div style="font-size: 0.55rem; color: rgba(255,255,255,0.9); font-weight: 600;">🔒</div>';
+        } else if (showSuggestedPrice) {
+            const basePart = Number.isFinite(prixExistant)
+                ? `<span style="display:block; font-size:0.56rem; color:var(--text-secondary); text-decoration:line-through; line-height:1;">${prixExistant}€</span>`
+                : '';
+            prixHtml = `
+                ${basePart}
+                <div class="day-price-mobile" style="font-weight: 800; line-height:1.1;">${suggestionPrix}€</div>
+            `;
+        } else if (tarif) {
+            prixHtml = `<div class="day-price-mobile">${tarif.prix_nuit}€</div>`;
+        }
+
         dayCard.innerHTML = `
             <div class="day-number-mobile" style="${isReserved ? 'color: white; font-weight: 700;' : ''}">${day}</div>
-            ${isReserved ? `<div style="font-size: 0.55rem; color: rgba(255,255,255,0.9); font-weight: 600;">🔒</div>` : 
-              tarif ? `<div class="day-price-mobile">${tarif.prix_nuit}€</div>` : 
-              '<div style="font-size: 0.65rem; color: var(--text-secondary);">—</div>'}
+            ${prixHtml}
             ${demandeLabel ? `<span class="ai-badge">${demandeLabel}</span>` : (aiSugg && !isReserved ? `<span class="ai-badge">${aiSugg.icon}</span>` : '')}
         `;
         
@@ -742,6 +837,18 @@ let aiSuggestionsCache = [];
 let aiModeActif = null;
 // Cache des niveaux de demande par date : { 'YYYY-MM-DD': 'haute'|'normale'|'faible', ... }
 let aiDemandeCache = {};
+let aiWebSearchLastStatus = null; // true | false | null
+let aiMarketAnalysisLast = null;
+
+function resetAnalysePrixIA() {
+    aiSuggestionsCache = [];
+    aiMarketAnalysisLast = null;
+    aiWebSearchLastStatus = null;
+    const panel = document.getElementById('ai-calendar-analysis');
+    const container = document.getElementById('ai-suggestions-container');
+    if (panel) panel.style.display = 'none';
+    if (container) container.style.display = 'none';
+}
 
 /**
  * Retourne le niveau de demande d'une date : 'haute', 'normale', ou 'faible'
@@ -928,6 +1035,7 @@ async function analyserDatesIA(withAI = false) {
     const prixBase = parseFloat(document.getElementById('aiPrixBase').value);
     const zone = document.getElementById('aiZoneScolaire').value;
     const region = document.getElementById('aiRegionInput').value.trim();
+    if (!prixBase || prixBase <= 0) {
         showToast('Veuillez saisir un prix de base', 'error');
         return;
     }
@@ -1000,7 +1108,14 @@ async function analyserDatesIA(withAI = false) {
 
         // 2. Si withAI → appeler OpenAI pour les événements locaux
         if (withAI && region) {
-            const eventsIA = await fetchEvenementsIA(region, dateDebut, dateFin);
+            const eventsIA = await fetchEvenementsIA({
+                region,
+                dateDebut,
+                dateFin,
+                giteName: currentGiteNameMobile,
+                giteAddress: currentGiteAdresseMobile,
+                capacity: currentGiteCapacityMobile
+            });
             eventsIA.forEach(ev => {
                 // Éviter les doublons avec les fériés/vacances déjà détectés
                 const existeDeja = suggestions.find(s => s.date === ev.date);
@@ -1028,10 +1143,25 @@ async function analyserDatesIA(withAI = false) {
             return !tarifExistant || tarifExistant.prix_nuit < s.prixSuggere;
         });
 
-        // Mettre en cache pour les badges du calendrier
-        aiSuggestionsCache = suggestions;
+        // Mettre en cache uniquement les suggestions actionnables pour le rendu calendrier
+        aiSuggestionsCache = suggestionsUtiles;
         renderCalendrierMobile(); // Rafraîchir pour afficher les badges
 
+        if (withAI) {
+            aiMarketAnalysisLast = await fetchAnalyseTarifaireLOU({
+                dateDebut,
+                dateFin,
+                prixBase,
+                region,
+                zone,
+                suggestions,
+                suggestionsUtiles
+            });
+        } else {
+            aiMarketAnalysisLast = null;
+        }
+
+        afficherAnalyseSousCalendrier(suggestions, suggestionsUtiles, withAI, zone);
         afficherSuggestionsIA(suggestionsUtiles);
 
     } catch (err) {
@@ -1045,16 +1175,38 @@ async function analyserDatesIA(withAI = false) {
 /**
  * Appelle l'API OpenAI pour obtenir les événements locaux/touristiques
  */
-async function fetchEvenementsIA(region, dateDebut, dateFin) {
+async function fetchEvenementsIA({ region, dateDebut, dateFin, giteName, giteAddress, capacity }) {
     try {
-        const prompt = `Tu es un expert du tourisme rural en France. Le gîte se situe à "${region}". Liste les principaux événements touristiques, festivals, marchés importants et périodes de forte affluence dans ce secteur entre le ${dateDebut} et le ${dateFin}. 
-Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou après. Format: [{"date":"YYYY-MM-DD","label":"Nom de l'événement"},...] 
-Si un événement dure plusieurs jours, liste chaque jour séparément. Maximum 30 entrées. Si tu n'es pas sûr d'une date exacte, n'inclus pas l'événement. Réponds uniquement en JSON.`;
+    const prompt = `Tu es un analyste revenue management pour gîte en France.
+Contexte gîte:
+- Nom: ${giteName || 'non renseigné'}
+- Localisation cible: ${region}
+- Adresse complète (si disponible): ${giteAddress || 'non renseignée'}
+- Capacité couchages: ${capacity || 'non renseignée'} personnes
+- Période d'analyse: du ${dateDebut} au ${dateFin}
+
+Objectif:
+1) Identifier les principaux événements touristiques, festivals, marchés importants et pics d'affluence locaux pour cette zone.
+2) Prioriser les événements pertinents pour un gîte de cette capacité.
+
+Contraintes de réponse:
+- Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après.
+- Format strict: [{"date":"YYYY-MM-DD","label":"Nom de l'événement"},...]
+- Si un événement dure plusieurs jours, liste chaque jour séparément.
+- Maximum 30 entrées.
+- Si une date n'est pas fiable, n'inclus pas l'événement.
+- N'invente pas d'événement.`;
 
         const response = await fetch('/api/openai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt, maxTokens: 800, model: 'gpt-4o-mini' })
+            body: JSON.stringify({
+                prompt,
+                maxTokens: 800,
+                model: 'gpt-4o-mini',
+                webSearch: true,
+                webSearchModel: 'gpt-4.1-mini'
+            })
         });
 
         if (!response.ok) {
@@ -1063,7 +1215,8 @@ Si un événement dure plusieurs jours, liste chaque jour séparément. Maximum 
         }
 
         const data = await response.json();
-        const content = data.choices?.[0]?.message?.content || '';
+        aiWebSearchLastStatus = typeof data?.webSearchUsed === 'boolean' ? data.webSearchUsed : null;
+        const content = data?.content || data?.choices?.[0]?.message?.content || '';
 
         // Extraire le JSON de la réponse
         const jsonMatch = content.match(/\[[\s\S]*\]/);
@@ -1078,6 +1231,91 @@ Si un événement dure plusieurs jours, liste chaque jour séparément. Maximum 
     } catch (err) {
         console.warn('⚠️ Erreur récupération événements IA:', err.message);
         return [];
+    }
+}
+
+async function fetchAnalyseTarifaireLOU({ dateDebut, dateFin, prixBase, region, zone, suggestions, suggestionsUtiles }) {
+    try {
+        const meta = currentGiteContextMobile || {};
+        const profil = {
+            nom: currentGiteNameMobile || meta.name || 'non renseigné',
+            localisation: currentGiteAdresseMobile || meta.adresse || meta.address || region || 'non renseignée',
+            capacite: currentGiteCapacityMobile ?? meta.capacity ?? null,
+            chambres: meta.bedrooms ?? meta.nb_chambres ?? null,
+            lits: meta.beds ?? meta.nb_lits ?? null,
+            sallesDeBain: meta.bathrooms ?? meta.nb_salles_bain ?? null,
+            superficieM2: meta.surface_m2 ?? meta.superficie ?? null,
+            typeHebergement: meta.type || meta.type_hebergement || null,
+            label: meta.label || meta.classement || null,
+            amenities: Array.isArray(meta.amenities) ? meta.amenities : []
+        };
+
+        const prompt = `Analyse tarifaire LOU pour la période du ${dateDebut} au ${dateFin}.
+
+Profil hébergement:
+${JSON.stringify(profil, null, 2)}
+
+Contexte de tarification actuel:
+- Prix de base saisi par le propriétaire: ${prixBase}€ / nuit
+- Zone scolaire: ${zone}
+- Marché cible par défaut: local strict autour de ${region}
+- Nombre total de signaux détectés (fériés/vacances/événements): ${suggestions.length}
+- Nombre de dates réellement actionnables: ${suggestionsUtiles.length}
+
+Contraintes de sortie:
+- Réponds UNIQUEMENT en JSON valide.
+- Structure obligatoire:
+{
+  "contexte_marche": "...",
+  "fourchette": {
+    "nuit": { "bas": number, "recommande": number, "premium": number },
+    "weekend": { "bas": number, "recommande": number, "premium": number },
+    "semaine": { "bas": number, "recommande": number, "premium": number }
+  },
+  "facteurs_cles": ["...", "...", "..."],
+  "recommandations": ["...", "...", "..."],
+  "fiabilite": { "niveau": "faible|moyenne|élevée", "commentaire": "..." },
+  "position_tarif_actuel": { "diagnostic": "sous_marche|dans_marche|sur_marche", "ecart_pct": number }
+}
+
+Rappels:
+- Ne jamais proposer de prix sans base explicite.
+- Adapter les comparables à la capacité et au type d'hébergement.
+- Prendre en compte la réalité des commissions plateformes dans le raisonnement.
+- Si données marché insuffisantes, le dire clairement dans fiabilite.commentaire.`;
+
+        const response = await fetch('/api/openai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prompt,
+                systemPrompt: LOU_INTELLIGENCE_TARIFAIRE_SYSTEM_PROMPT,
+                maxTokens: 1400,
+                model: 'gpt-4o-mini',
+                webSearch: true,
+                webSearchModel: 'gpt-4.1-mini'
+            })
+        });
+
+        if (!response.ok) {
+            console.warn('⚠️ Analyse marché LOU indisponible');
+            return null;
+        }
+
+        const payload = await response.json();
+        if (typeof payload?.webSearchUsed === 'boolean') {
+            aiWebSearchLastStatus = payload.webSearchUsed;
+        }
+
+        const raw = payload?.content || '';
+        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) return null;
+
+        const parsed = JSON.parse(jsonMatch[0]);
+        return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch (error) {
+        console.warn('⚠️ Erreur analyse marché LOU:', error?.message || error);
+        return null;
     }
 }
 
@@ -1119,6 +1357,64 @@ function afficherSuggestionsIA(suggestions) {
     }).join('');
 
     container.style.display = 'block';
+}
+
+function afficherAnalyseSousCalendrier(suggestions, suggestionsUtiles, withAI, zone) {
+    const panel = document.getElementById('ai-calendar-analysis');
+    const content = document.getElementById('ai-calendar-analysis-content');
+    if (!panel || !content) return;
+
+    const total = suggestions.length;
+    const actionnables = suggestionsUtiles.length;
+    const feries = suggestions.filter(s => s.type === 'ferie').length;
+    const vacances = suggestions.filter(s => s.type === 'vacances').length;
+    const events = suggestions.filter(s => s.type === 'event').length;
+    const hausseMoyenne = actionnables > 0
+        ? Math.round(
+            suggestionsUtiles.reduce((acc, suggestion) => {
+                const ratio = suggestion.prixBase > 0
+                    ? ((suggestion.prixSuggere - suggestion.prixBase) / suggestion.prixBase) * 100
+                    : 0;
+                return acc + Math.max(0, ratio);
+            }, 0) / actionnables
+        )
+        : 0;
+
+    const hasMarket = Boolean(aiMarketAnalysisLast && typeof aiMarketAnalysisLast === 'object');
+    const marche = aiMarketAnalysisLast || {};
+    const fourchette = marche.fourchette || {};
+    const nuit = fourchette.nuit || {};
+    const weekend = fourchette.weekend || {};
+    const semaine = fourchette.semaine || {};
+    const facteurs = Array.isArray(marche.facteurs_cles) ? marche.facteurs_cles.slice(0, 4) : [];
+    const recos = Array.isArray(marche.recommandations) ? marche.recommandations.slice(0, 3) : [];
+
+    content.innerHTML = `
+        <div style="display:grid; gap:4px;">
+            <div>📌 <strong>${actionnables}</strong> date${actionnables > 1 ? 's' : ''} à ajuster sur <strong>${total}</strong> date${total > 1 ? 's' : ''} détectée${total > 1 ? 's' : ''}.</div>
+            <div>🗓️ Répartition: ${feries} férié${feries > 1 ? 's' : ''}, ${vacances} vacances (zone ${zone})${withAI ? `, ${events} événement${events > 1 ? 's' : ''} local${events > 1 ? 'aux' : ''}` : ''}.</div>
+            ${withAI ? `<div>🌐 Sources événements: ${aiWebSearchLastStatus === true ? '<strong>sondage web activé</strong>' : aiWebSearchLastStatus === false ? '<strong>fallback sans web</strong>' : '<strong>statut indisponible</strong>'}.</div>` : ''}
+            <div>📈 Hausse moyenne suggérée: <strong>+${hausseMoyenne}%</strong> sur les dates actionnables.</div>
+            <div style="font-size:0.74rem; opacity:0.9;">Les prix affichés dans le calendrier sont des recommandations IA prêtes à appliquer.</div>
+            ${hasMarket ? `
+                <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
+                    <div><strong>1) Contexte marché</strong></div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary);">${marche.contexte_marche || 'Contexte non disponible.'}</div>
+                    <div style="margin-top:6px;"><strong>2) Fourchette recommandée</strong></div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary);">Nuit: ${nuit.bas ?? '-'}€ / ${nuit.recommande ?? '-'}€ / ${nuit.premium ?? '-'}€</div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary);">Week-end: ${weekend.bas ?? '-'}€ / ${weekend.recommande ?? '-'}€ / ${weekend.premium ?? '-'}€</div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary);">Semaine: ${semaine.bas ?? '-'}€ / ${semaine.recommande ?? '-'}€ / ${semaine.premium ?? '-'}€</div>
+                    <div style="margin-top:6px;"><strong>3) Facteurs clés</strong></div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary);">${facteurs.length ? facteurs.join(' • ') : 'Non disponible.'}</div>
+                    <div style="margin-top:6px;"><strong>4) Recommandations concrètes</strong></div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary);">${recos.length ? recos.join(' • ') : 'Non disponible.'}</div>
+                    <div style="margin-top:6px; font-size:0.74rem; color:var(--text-secondary);">Fiabilité: <strong>${marche?.fiabilite?.niveau || 'non précisée'}</strong>${marche?.fiabilite?.commentaire ? ` — ${marche.fiabilite.commentaire}` : ''}</div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    panel.style.display = 'block';
 }
 
 /**
@@ -1243,6 +1539,8 @@ setTimeout(() => {
         }
         renderCalendrierMobile();
         if (aiModeActif === 'demande') voirDemandeMois();
+    });
+
     // ---- Boutons IA calendrier ----
     document.getElementById('btnAIVoirDemande')?.addEventListener('click', voirDemandeMois);
     document.getElementById('btnAIQuitterAnalyse')?.addEventListener('click', quitterModeIA);

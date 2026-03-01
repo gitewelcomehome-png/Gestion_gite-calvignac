@@ -6,16 +6,11 @@
 </head>
 <body>
     <p>Déconnexion en cours...</p>
-    <script src="js/shared-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/shared-config.js"></script>
     <script>
         (async () => {
-            const { createClient } = supabase;
-            const client = createClient(
-                window.LOCAL_CONFIG?.SUPABASE_URL,
-                window.LOCAL_CONFIG?.SUPABASE_KEY
-            );
-            await client.auth.signOut();
+            await window.supabaseClient.auth.signOut();
             window.location.href = '/pages/login.html';
         })();
     </script>

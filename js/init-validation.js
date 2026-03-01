@@ -123,31 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.ValidationUtils.attachRealtimeValidation('editAcompte', 'amount', { required: false });
         window.ValidationUtils.attachRealtimeValidation('editNbPersonnes', 'integer', { required: false });
         
-        // Validation à la soumission
-        // IMPORTANT: Ce listener doit s'exécuter AVANT celui de reservations.js
-        // On utilise capture phase (3ème paramètre = true) pour garantir l'ordre
-        editForm.addEventListener('submit', function(e) {
-            const rules = {
-                editNom: { type: 'name', required: true },
-                editTelephone: { type: 'phone', required: false },
-                editMontant: { type: 'amount', required: true },
-                editAcompte: { type: 'amount', required: false },
-                editNbPersonnes: { type: 'integer', required: false }
-            };
-            
-            const validation = window.ValidationUtils.validateForm(this, rules);
-            
-            if (!validation.valid) {
-                e.preventDefault();
-                e.stopImmediatePropagation(); // STOP les autres listeners
-                console.warn('❌ Formulaire invalide:', validation.errors);
-                // Les erreurs sont déjà affichées sous chaque champ par validateForm()
-                return false;
-            }
-            
-            // console.log('✅ Formulaire valide, valeurs sanitized:', validation.values);
-            // Le formulaire continue sa soumission normale
-        }, true); // capture = true pour s'exécuter en premier
+        // Validation submit gérée directement dans saveEditReservation (js/reservations.js)
     }
     
     // console.log('✅ Validation formulaires initialisée');

@@ -26,7 +26,7 @@ async function initTokenMode() {
             .from('cleaner_tokens')
             .select('owner_user_id, label, type')
             .eq('token', token)
-            .single();
+            .maybeSingle();
 
         if (error || !tokenData) {
             document.body.innerHTML = `

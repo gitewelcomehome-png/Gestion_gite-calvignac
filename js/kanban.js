@@ -99,7 +99,6 @@ async function loadKanbanData() {
             }
         }
         
-        console.log(`✅ ${KanbanState.todos.length} tâches chargées`);
     } catch (error) {
         console.error('❌ Erreur chargement Kanban:', error);
     }
@@ -109,7 +108,6 @@ async function loadKanbanData() {
  * Rafraîchir le Kanban
  */
 async function refreshKanban() {
-    console.log('🔄 Rafraîchissement du Kanban');
     await loadKanbanData();
     renderKanban();
 }
@@ -443,8 +441,6 @@ function updateColumnCounts(todosByStatus) {
  */
 async function updateTaskStatus(taskId, newStatus) {
     try {
-        console.log(`🔄 Mise à jour tâche ${taskId} vers ${newStatus}`);
-        
         const updateData = {
             status: newStatus,
             updated_at: new Date().toISOString()
@@ -465,8 +461,6 @@ async function updateTaskStatus(taskId, newStatus) {
             .eq('id', taskId);
         
         if (error) throw error;
-        
-        console.log('✅ Statut mis à jour');
         
         // Rafraîchir le Kanban
         await refreshKanban();
@@ -534,16 +528,12 @@ async function deleteTask(taskId) {
     }
     
     try {
-        console.log(`🗑️ Suppression tâche ${taskId}`);
-        
         const { error } = await window.supabaseClient
             .from('todos')
             .delete()
             .eq('id', taskId);
         
         if (error) throw error;
-        
-        console.log('✅ Tâche supprimée');
         
         // Rafraîchir le Kanban
         await refreshKanban();
@@ -642,4 +632,3 @@ async function addKanbanTask(category) {
 window.showAddTaskMenu = showAddTaskMenu;
 window.addKanbanTask = addKanbanTask;
 
-console.log('✅ Module Kanban chargé');

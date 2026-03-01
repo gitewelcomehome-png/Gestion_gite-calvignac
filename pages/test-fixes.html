@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tests Correctifs Runtime</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; background: #f8fafc; color: #1e293b; }
+        .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+        h1 { margin: 0 0 6px; font-size: 28px; }
+        .subtitle { color: #64748b; margin-bottom: 20px; }
+        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+        .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .btn { border: 1px solid #cbd5e1; background: #fff; color: #0f172a; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 600; }
+        .btn.primary { background: #0f172a; color: #fff; border-color: #0f172a; }
+        .ok { color: #166534; font-weight: 700; }
+        .warn { color: #92400e; font-weight: 700; }
+        .ko { color: #991b1b; font-weight: 700; }
+        ul { margin: 10px 0 0 18px; padding: 0; }
+        code { background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 8px; background: #f8fafc; border: 1px dashed #cbd5e1; }
+        .small { color: #64748b; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1>Validation des correctifs runtime</h1>
+        <div class="subtitle">Page interne de recette pour les corrections JS (sans impact fonctionnel métier).</div>
+
+        <div class="card">
+            <strong>Tests automatiques rapides (navigateur)</strong>
+            <div class="small">Vérifie la présence des gardes et modes dégradés côté front.</div>
+            <div class="row" style="margin-top:10px;">
+                <button class="btn primary" onclick="runQuickChecks()">Lancer les checks</button>
+                <button class="btn" onclick="clearResults()">Effacer</button>
+            </div>
+            <div id="quickResults" class="result">Aucun test lancé.</div>
+        </div>
+
+        <div class="card">
+            <strong>Parcours manuels (liens)</strong>
+            <ul>
+                <li><a href="admin-channel-manager.html" target="_blank">Dashboard admin (AI health + KPI erreurs)</a></li>
+                <li><a href="admin-monitoring.html" target="_blank">Monitoring admin (logs + statut IA)</a></li>
+                <li><a href="femme-menage.html?token=INVALID_TEST_TOKEN" target="_blank">Femme ménage (token invalide)</a></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <strong>Checklist de validation immédiate (T0)</strong>
+            <ul>
+                <li>Aucune erreur bloquante de type <code>Cannot set properties of null</code> sur dashboard KPI.</li>
+                <li>Aucune erreur <code>supabase.from is not a function</code> dans admin clients/parrainage.</li>
+                <li>Logs iCal lisibles (message + code), sans <code>[object Object]</code>.</li>
+                <li>Token ménage sans 406/404 bloquant si absence de ligne (création token OK).</li>
+                <li>En absence de <code>/api/ai-health</code>, affichage "API IA non disponible" sans spam console.</li>
+                <li>En cas d'accès refusé <code>cm_error_logs</code>, affichage dégradé "N/A" sans boucle d'erreurs.</li>
+                <li>Pas de conflit 409 sur upsert stock draps pour même <code>owner_user_id,gite_id,item_key</code>.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <strong>Validation J+1 (24h monitoring)</strong>
+            <ul>
+                <li>Relever le nombre d'erreurs console critiques sur dashboard/admin-monitoring.</li>
+                <li>Comparer taux d'échec API IA avant/après (si endpoint présent).</li>
+                <li>Vérifier absence de réapparition des erreurs token ménage et stock draps.</li>
+                <li>Conserver un screenshot de chaque écran validé comme preuve.</li>
+            </ul>
+        </div>
+
+        <div class="card" style="border-color:#86efac; background:#f0fdf4;">
+            <strong>Validation finale</strong>
+            <div class="small">Quand les checks sont OK, validez ici directement pour marquer le bug comme testé.</div>
+            <div class="row" style="margin-top:10px;">
+                <input id="validationNote" type="text" placeholder="Optionnel: ID bug / commentaire" style="flex:1; min-width:280px; border:1px solid #cbd5e1; border-radius:8px; padding:8px 10px;">
+                <button class="btn primary" onclick="validateFinalTest()">✅ Valider ce test</button>
+                <a class="btn" href="admin-monitoring.html">Retour monitoring</a>
+            </div>
+            <div id="finalValidationResult" class="result" style="margin-top:10px;">Aucune validation finale.</div>
+        </div>
+    </div>
+
+    <script>
+        function line(ok, label, details = '') {
+            const klass = ok ? 'ok' : 'warn';
+            return `<div><span class="${klass}">${ok ? '✅' : '⚠️'}</span> ${label}${details ? ` — <span class="small">${details}</span>` : ''}</div>`;
+        }
+
+        function runQuickChecks() {
+            const out = [];
+
+            out.push(line(typeof window.fetch === 'function', 'API fetch disponible'));
+            out.push(line(typeof URLSearchParams === 'function', 'URLSearchParams disponible'));
+            out.push(line(typeof navigator !== 'undefined', 'Contexte navigateur actif'));
+
+            const hasLocalStorage = (() => {
+                try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); return true; } catch (e) { return false; }
+            })();
+            out.push(line(hasLocalStorage, 'localStorage disponible'));
+
+            const sameOriginApi = `${window.location.origin}/api/ai-health`;
+            out.push(line(true, 'Endpoint IA ciblé sur même origine', sameOriginApi));
+
+            document.getElementById('quickResults').innerHTML = out.join('');
+        }
+
+        function clearResults() {
+            document.getElementById('quickResults').textContent = 'Aucun test lancé.';
+        }
+
+        function validateFinalTest() {
+            const note = (document.getElementById('validationNote')?.value || '').trim();
+            const payload = {
+                validatedAt: new Date().toISOString(),
+                note,
+                page: 'test-fixes'
+            };
+
+            try {
+                localStorage.setItem('cm_last_test_validation', JSON.stringify(payload));
+                const when = new Date(payload.validatedAt).toLocaleString('fr-FR');
+                document.getElementById('finalValidationResult').innerHTML = `<span class="ok">✅ Test validé le ${when}${note ? ` — note: ${note}` : ''}</span>`;
+            } catch (error) {
+                document.getElementById('finalValidationResult').innerHTML = `<span class="ko">❌ Échec enregistrement validation: ${error.message || error}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -259,6 +259,18 @@ window.showAddGiteForm = function(giteToEdit = null) {
     
     // Icon/type de propriété
     const iconValue = isEdit ? (giteToEdit.icon || 'house') : 'house';
+    const existingSettings = (isEdit && giteToEdit?.settings && typeof giteToEdit.settings === 'object') ? giteToEdit.settings : {};
+    const pricingProfile = existingSettings?.pricing_profile && typeof existingSettings.pricing_profile === 'object'
+        ? existingSettings.pricing_profile
+        : {};
+    const accessProfile = existingSettings?.accessibility && typeof existingSettings.accessibility === 'object'
+        ? existingSettings.accessibility
+        : {};
+    const platformsProfile = existingSettings?.platforms_active && typeof existingSettings.platforms_active === 'object'
+        ? existingSettings.platforms_active
+        : {};
+    const existingAmenities = Array.isArray(giteToEdit?.amenities) ? giteToEdit.amenities : [];
+    const hasAmenity = (key) => existingAmenities.includes(key);
     
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -298,10 +310,170 @@ window.showAddGiteForm = function(giteToEdit = null) {
                             <input type="text" name="location" class="form-input-modern" placeholder="Ex: Trévoux, Ain" value="${isEdit ? (giteToEdit.address || '') : ''}">
                         </div>
                     </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Ville</label>
+                            <input type="text" name="city" class="form-input-modern" placeholder="Ex: Calvignac" value="${isEdit ? (giteToEdit.city || pricingProfile.city || '') : ''}">
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Code postal</label>
+                            <input type="text" name="postal_code" class="form-input-modern" placeholder="Ex: 46160" value="${isEdit ? (giteToEdit.postal_code || pricingProfile.postal_code || '') : ''}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Département</label>
+                            <input type="text" name="department" class="form-input-modern" placeholder="Ex: Lot" value="${isEdit ? (pricingProfile.department || '') : ''}">
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Région</label>
+                            <input type="text" name="region" class="form-input-modern" placeholder="Ex: Occitanie" value="${isEdit ? (pricingProfile.region || '') : ''}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Pays</label>
+                            <input type="text" name="country" class="form-input-modern" placeholder="France" value="${isEdit ? (giteToEdit.country || 'France') : 'France'}">
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Tarif de base / nuit (€)</label>
+                            <input type="number" name="price_per_night" class="form-input-modern" min="0" step="1" placeholder="Ex: 150" value="${isEdit && giteToEdit.price_per_night ? giteToEdit.price_per_night : ''}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Type d'hébergement</label>
+                            <select name="type_hebergement" class="form-select-modern">
+                                <option value="">Non renseigné</option>
+                                <option value="gite_rural" ${isEdit && pricingProfile.type_hebergement === 'gite_rural' ? 'selected' : ''}>Gîte rural</option>
+                                <option value="maison" ${isEdit && pricingProfile.type_hebergement === 'maison' ? 'selected' : ''}>Maison</option>
+                                <option value="villa" ${isEdit && pricingProfile.type_hebergement === 'villa' ? 'selected' : ''}>Villa</option>
+                                <option value="ferme" ${isEdit && pricingProfile.type_hebergement === 'ferme' ? 'selected' : ''}>Ferme</option>
+                                <option value="chalet" ${isEdit && pricingProfile.type_hebergement === 'chalet' ? 'selected' : ''}>Chalet</option>
+                                <option value="appartement" ${isEdit && pricingProfile.type_hebergement === 'appartement' ? 'selected' : ''}>Appartement</option>
+                                <option value="autre" ${isEdit && pricingProfile.type_hebergement === 'autre' ? 'selected' : ''}>Autre</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Label / classement</label>
+                            <select name="label_classement" class="form-select-modern">
+                                <option value="">Non renseigné</option>
+                                <option value="gdf" ${isEdit && pricingProfile.label_classement === 'gdf' ? 'selected' : ''}>Gîtes de France</option>
+                                <option value="meuble_tourisme" ${isEdit && pricingProfile.label_classement === 'meuble_tourisme' ? 'selected' : ''}>Meublé de Tourisme</option>
+                                <option value="clevacances" ${isEdit && pricingProfile.label_classement === 'clevacances' ? 'selected' : ''}>Clévacances</option>
+                                <option value="aucun" ${isEdit && pricingProfile.label_classement === 'aucun' ? 'selected' : ''}>Aucun</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Nombre de chambres</label>
+                            <input type="number" name="bedrooms" class="form-input-modern" min="0" step="1" placeholder="Ex: 3" value="${isEdit && giteToEdit.bedrooms ? giteToEdit.bedrooms : ''}">
+                        </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Nombre de lits</label>
+                            <input type="number" name="beds" class="form-input-modern" min="0" step="1" placeholder="Ex: 5" value="${isEdit && pricingProfile.beds ? pricingProfile.beds : ''}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Salles de bain</label>
+                            <input type="number" name="bathrooms" class="form-input-modern" min="0" step="1" placeholder="Ex: 2" value="${isEdit && pricingProfile.bathrooms ? pricingProfile.bathrooms : ''}">
+                        </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Superficie (m²)</label>
+                            <input type="number" name="surface_m2" class="form-input-modern" min="0" step="1" placeholder="Ex: 120" value="${isEdit && pricingProfile.surface_m2 ? pricingProfile.surface_m2 : ''}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Environnement</label>
+                            <input type="text" name="environment" class="form-input-modern" placeholder="Ex: campagne, vue vallée" value="${isEdit ? (pricingProfile.environment || '') : ''}">
+                        </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Situation</label>
+                            <input type="text" name="situation" class="form-input-modern" placeholder="Ex: isolé, village" value="${isEdit ? (pricingProfile.situation || '') : ''}">
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Description</label>
+                        <textarea name="description" class="form-input-modern" rows="3" placeholder="Description courte du gîte">${isEdit ? (giteToEdit.description || '') : ''}</textarea>
+                    </div>
                     
                     <div class="form-group-modern">
                         <label class="form-label-modern">Couleur d'affichage</label>
                         <input type="color" name="color" class="form-input-modern" value="${isEdit ? (giteToEdit.color || '#667eea') : '#667eea'}">
+                    </div>
+                </div>
+
+                <div class="form-section-modern">
+                    <div class="form-section-title">
+                        <i data-lucide="sparkles"></i>
+                        Équipements & accessibilité (tarification IA)
+                    </div>
+
+                    <div class="form-grid-2">
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_wifi" ${isEdit && hasAmenity('wifi') ? 'checked' : ''}>Wi-Fi</label>
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_piscine" ${isEdit && (hasAmenity('piscine_privee') || hasAmenity('piscine_partagee')) ? 'checked' : ''}>Piscine</label>
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_jacuzzi" ${isEdit && hasAmenity('jacuzzi') ? 'checked' : ''}>Jacuzzi</label>
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_sauna" ${isEdit && hasAmenity('sauna') ? 'checked' : ''}>Sauna</label>
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_clim" ${isEdit && hasAmenity('climatisation') ? 'checked' : ''}>Climatisation</label>
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_cheminee" ${isEdit && hasAmenity('cheminee') ? 'checked' : ''}>Cheminée/poêle</label>
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_jardin" ${isEdit && hasAmenity('jardin') ? 'checked' : ''}>Jardin</label>
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_terrasse" ${isEdit && hasAmenity('terrasse') ? 'checked' : ''}>Terrasse</label>
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_barbecue" ${isEdit && hasAmenity('barbecue') ? 'checked' : ''}>Barbecue</label>
+                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_animaux" ${isEdit && (accessProfile.animaux_acceptes === true) ? 'checked' : ''}>Animaux acceptés</label>
+                    </div>
+
+                    <div class="form-grid-2" style="margin-top:10px;">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Cuisine</label>
+                            <select name="cuisine_niveau" class="form-select-modern">
+                                <option value="">Non renseigné</option>
+                                <option value="basique" ${isEdit && pricingProfile.cuisine_niveau === 'basique' ? 'selected' : ''}>Basique</option>
+                                <option value="complete" ${isEdit && pricingProfile.cuisine_niveau === 'complete' ? 'selected' : ''}>Complète</option>
+                                <option value="professionnelle" ${isEdit && pricingProfile.cuisine_niveau === 'professionnelle' ? 'selected' : ''}>Professionnelle</option>
+                            </select>
+                        </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Accessibilité PMR</label>
+                            <select name="pmr" class="form-select-modern">
+                                <option value="non" ${isEdit && accessProfile.pmr === true ? '' : 'selected'}>Non</option>
+                                <option value="oui" ${isEdit && accessProfile.pmr === true ? 'selected' : ''}>Oui</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2" style="margin-top:10px;">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Parking</label>
+                            <select name="parking" class="form-select-modern">
+                                <option value="non" ${isEdit && accessProfile.parking === true ? '' : 'selected'}>Non</option>
+                                <option value="oui" ${isEdit && accessProfile.parking === true ? 'selected' : ''}>Oui</option>
+                            </select>
+                        </div>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Plateformes actives</label>
+                            <div class="form-grid-2" style="gap:6px;">
+                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_airbnb" ${isEdit && platformsProfile.airbnb ? 'checked' : ''}>Airbnb</label>
+                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_booking" ${isEdit && platformsProfile.booking ? 'checked' : ''}>Booking</label>
+                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_abritel" ${isEdit && platformsProfile.abritel ? 'checked' : ''}>Abritel</label>
+                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_gdf" ${isEdit && platformsProfile.gdf ? 'checked' : ''}>Gîtes de France</label>
+                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_direct" ${isEdit && platformsProfile.direct ? 'checked' : ''}>Direct</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -535,14 +707,95 @@ window.handleSaveGite = async function(event, giteId = null) {
             icalUrls.push({ platform, url });
         }
     });
+
+    const toIntegerOrNull = (value) => {
+        const parsed = Number.parseInt(value, 10);
+        return Number.isFinite(parsed) ? parsed : null;
+    };
+
+    const toNumberOrNull = (value) => {
+        const parsed = Number.parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : null;
+    };
+
+    const amenities = [];
+    if (formData.get('amenity_wifi')) amenities.push('wifi');
+    if (formData.get('amenity_piscine')) amenities.push('piscine_privee');
+    if (formData.get('amenity_jacuzzi')) amenities.push('jacuzzi');
+    if (formData.get('amenity_sauna')) amenities.push('sauna');
+    if (formData.get('amenity_clim')) amenities.push('climatisation');
+    if (formData.get('amenity_cheminee')) amenities.push('cheminee');
+    if (formData.get('amenity_jardin')) amenities.push('jardin');
+    if (formData.get('amenity_terrasse')) amenities.push('terrasse');
+    if (formData.get('amenity_barbecue')) amenities.push('barbecue');
+
+    const pricingProfile = {
+        department: (formData.get('department') || '').trim() || null,
+        region: (formData.get('region') || '').trim() || null,
+        beds: toIntegerOrNull(formData.get('beds')),
+        bathrooms: toIntegerOrNull(formData.get('bathrooms')),
+        surface_m2: toNumberOrNull(formData.get('surface_m2')),
+        type_hebergement: (formData.get('type_hebergement') || '').trim() || null,
+        label_classement: (formData.get('label_classement') || '').trim() || null,
+        environment: (formData.get('environment') || '').trim() || null,
+        situation: (formData.get('situation') || '').trim() || null,
+        cuisine_niveau: (formData.get('cuisine_niveau') || '').trim() || null
+    };
+
+    const accessibility = {
+        animaux_acceptes: Boolean(formData.get('amenity_animaux')),
+        pmr: (formData.get('pmr') || 'non') === 'oui',
+        parking: (formData.get('parking') || 'non') === 'oui'
+    };
+
+    const platformsActive = {
+        airbnb: Boolean(formData.get('platform_airbnb')),
+        booking: Boolean(formData.get('platform_booking')),
+        abritel: Boolean(formData.get('platform_abritel')),
+        gdf: Boolean(formData.get('platform_gdf')),
+        direct: Boolean(formData.get('platform_direct'))
+    };
+
+    const settings = {
+        pricing_profile: pricingProfile,
+        accessibility,
+        platforms_active: platformsActive
+    };
     
     const giteData = {
         name: formData.get('name'),
-        capacity: parseInt(formData.get('capacity')) || null,
+        capacity: toIntegerOrNull(formData.get('capacity')),
         address: formData.get('location') || null,
+        city: (formData.get('city') || '').trim() || null,
+        postal_code: (formData.get('postal_code') || '').trim() || null,
+        country: (formData.get('country') || 'France').trim() || 'France',
+        bedrooms: toIntegerOrNull(formData.get('bedrooms')),
+        beds: toIntegerOrNull(formData.get('beds')),
+        bathrooms: toIntegerOrNull(formData.get('bathrooms')),
+        surface_m2: toNumberOrNull(formData.get('surface_m2')),
+        type_hebergement: (formData.get('type_hebergement') || '').trim() || null,
+        label_classement: (formData.get('label_classement') || '').trim() || null,
+        department: (formData.get('department') || '').trim() || null,
+        region: (formData.get('region') || '').trim() || null,
+        environment: (formData.get('environment') || '').trim() || null,
+        situation: (formData.get('situation') || '').trim() || null,
+        cuisine_niveau: (formData.get('cuisine_niveau') || '').trim() || null,
+        animaux_acceptes: Boolean(formData.get('amenity_animaux')),
+        access_pmr: (formData.get('pmr') || 'non') === 'oui',
+        parking: (formData.get('parking') || 'non') === 'oui',
+        platform_airbnb: Boolean(formData.get('platform_airbnb')),
+        platform_booking: Boolean(formData.get('platform_booking')),
+        platform_abritel: Boolean(formData.get('platform_abritel')),
+        platform_gdf: Boolean(formData.get('platform_gdf')),
+        platform_direct: Boolean(formData.get('platform_direct')),
+        price_per_night: toNumberOrNull(formData.get('price_per_night')),
+        description: (formData.get('description') || '').trim() || null,
+        amenities,
+        settings,
         color: formData.get('color'),
         icon: formData.get('icon'),
-        ical_sources: icalUrls.length > 0 ? icalUrls : []
+        ical_sources: icalUrls.length > 0 ? icalUrls : [],
+        ical_urls: icalUrls.length > 0 ? icalUrls : []
     };
     
     // console.log('📤 Données gîte à sauvegarder:', giteData);

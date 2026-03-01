@@ -4,6 +4,71 @@
 // =====================================================
 
 let currentEditId = null;
+let currentUser = null;
+const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+async function isCurrentUserAdmin(user) {
+    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+        ? window.APP_CONFIG.ADMIN_EMAILS
+        : [];
+    const adminEmails = new Set(
+        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+            .map(normalizeEmail)
+            .filter(Boolean)
+    );
+
+    if (adminEmails.has(normalizeEmail(user?.email))) {
+        return true;
+    }
+
+    try {
+        const { data: rolesData, error: rolesError } = await window.supabaseClient
+            .from('user_roles')
+            .select('role, is_active')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+
+        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+    } catch (rolesCheckError) {
+        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+        return false;
+    }
+}
+
+async function checkAuth() {
+    try {
+        if (!window.supabaseClient) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        if (error || !session?.user) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        currentUser = session.user;
+        const isAdmin = await isCurrentUserAdmin(currentUser);
+        if (!isAdmin) {
+            alert('Accès refusé : Réservé aux administrateurs');
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        return true;
+    } catch (authError) {
+        console.error('Erreur authentification parrainage:', authError);
+        window.location.href = '../index.html';
+        return false;
+    }
+}
 
 // =====================================================
 // INITIALISATION
@@ -11,6 +76,42 @@ let currentEditId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        document.addEventListener('click', async (event) => {
+            const actionEl = event.target.closest('[data-action]');
+            if (!actionEl) {
+                return;
+            }
+
+            const action = actionEl.dataset.action;
+            const campaignId = actionEl.dataset.campaignId;
+
+            switch (action) {
+                case 'edit-campaign':
+                    if (campaignId) {
+                        await editCampaign(campaignId);
+                    }
+                    break;
+                case 'view-participants':
+                    if (campaignId) {
+                        const campaignName = decodeURIComponent(actionEl.dataset.campaignName || '');
+                        await viewParticipants(campaignId, campaignName);
+                    }
+                    break;
+                case 'delete-campaign':
+                    if (campaignId) {
+                        await deleteCampaign(campaignId);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        const isAllowed = await checkAuth();
+        if (!isAllowed) {
+            return;
+        }
+
         await loadGlobalStats();
         await loadCampaigns();
     } catch (error) {
@@ -178,15 +279,15 @@ function createCampaignCard(campaign) {
                     </div>
                 </div>
                 <div>
-                    <button class="btn-edit" onclick="editCampaign('${campaign.id}')">
+                    <button class="btn-edit" data-action="edit-campaign" data-campaign-id="${campaign.id}">
                         <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
                         Modifier
                     </button>
-                    <button class="btn-view-participants" onclick="viewParticipants('${campaign.id}', '${campaign.name.replace(/'/g, "\\'")}')">
+                    <button class="btn-view-participants" data-action="view-participants" data-campaign-id="${campaign.id}" data-campaign-name="${encodeURIComponent(campaign.name || '')}">
                         <i data-lucide="users" style="width: 16px; height: 16px;"></i>
                         Voir participants
                     </button>
-                    <button class="btn-delete" onclick="deleteCampaign('${campaign.id}')">
+                    <button class="btn-delete" data-action="delete-campaign" data-campaign-id="${campaign.id}">
                         <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                         Supprimer
                     </button>

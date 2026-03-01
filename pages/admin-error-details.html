@@ -201,7 +201,7 @@
     <div class="error-details-container">
         <!-- Header -->
         <div class="error-header">
-            <button class="btn-back" onclick="window.history.back()">
+            <button class="btn-back" id="btnBackToMonitoring">
                 <i data-lucide="arrow-left"></i>
                 Retour au monitoring
             </button>
@@ -251,12 +251,78 @@
         </div>
     </div>
 
-    <script src="../js/supabase-init.js"></script>
+    <script src="../js/shared-config.js"></script>
     <script>
         lucide.createIcons();
+        document.getElementById('btnBackToMonitoring')?.addEventListener('click', () => {
+            window.history.back();
+        });
 
         const urlParams = new URLSearchParams(window.location.search);
         const errorId = urlParams.get('error');
+        const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+
+        function normalizeEmail(email) {
+            return String(email || '').trim().toLowerCase();
+        }
+
+        async function isCurrentUserAdmin(user) {
+            const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+                ? window.APP_CONFIG.ADMIN_EMAILS
+                : [];
+            const adminEmails = new Set(
+                [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+                    .map(normalizeEmail)
+                    .filter(Boolean)
+            );
+
+            if (adminEmails.has(normalizeEmail(user?.email))) {
+                return true;
+            }
+
+            try {
+                const { data: rolesData, error: rolesError } = await window.supabaseClient
+                    .from('user_roles')
+                    .select('role, is_active')
+                    .eq('user_id', user.id)
+                    .eq('is_active', true)
+                    .in('role', ['admin', 'super_admin'])
+                    .limit(1);
+
+                return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+            } catch (rolesCheckError) {
+                console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+                return false;
+            }
+        }
+
+        async function checkAdminAccess() {
+            try {
+                if (!window.supabaseClient) {
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+                if (error || !session?.user) {
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                const isAdmin = await isCurrentUserAdmin(session.user);
+                if (!isAdmin) {
+                    alert('Accès refusé : Réservé aux administrateurs');
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                return true;
+            } catch (authError) {
+                console.error('Erreur authentification détails erreur:', authError);
+                window.location.href = '../index.html';
+                return false;
+            }
+        }
 
         async function loadErrorDetails() {
             if (!errorId) {
@@ -480,7 +546,14 @@
         }
 
         // Charger au démarrage
-        loadErrorDetails();
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isAllowed = await checkAdminAccess();
+            if (!isAllowed) {
+                return;
+            }
+
+            loadErrorDetails();
+        });
     </script>
 </body>
 </html>

@@ -6,7 +6,82 @@
 // Cette fonction serverless fait le fetch côté serveur (pas de CORS)
 // ================================================================
 
+function getOriginFromRequest(req) {
+    const origin = req.headers.origin || req.headers.referer || '';
+    if (!origin) return null;
+
+    try {
+        return new URL(origin).origin;
+    } catch {
+        return null;
+    }
+}
+
+function getAllowedOrigins() {
+    const raw = String(
+        process.env.CORS_PROXY_ALLOWED_ORIGINS
+        || process.env.CORS_ALLOWED_ORIGINS
+        || process.env.SUPPORT_AI_ALLOWED_ORIGINS
+        || ''
+    ).trim();
+
+    if (!raw) {
+        return new Set([
+            'https://liveownerunit.fr',
+            'https://www.liveownerunit.fr',
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://localhost:5500',
+            'http://127.0.0.1:5500'
+        ]);
+    }
+
+    return new Set(
+        raw
+            .split(',')
+            .map((value) => value.trim())
+            .filter(Boolean)
+    );
+}
+
+function shouldEnforceOrigin() {
+    return String(process.env.CORS_PROXY_ENFORCE_ALLOWED_ORIGINS || 'true').trim().toLowerCase() === 'true';
+}
+
+function setCorsHeaders(req, res, allowedOrigin) {
+    const requestOrigin = getOriginFromRequest(req);
+    const originToSet = requestOrigin && allowedOrigin && requestOrigin === allowedOrigin
+        ? requestOrigin
+        : allowedOrigin || 'null';
+
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', originToSet);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Vary', 'Origin');
+}
+
 export default async function handler(req, res) {
+    const allowedOrigins = getAllowedOrigins();
+    const requestOrigin = getOriginFromRequest(req);
+    const isAllowed = requestOrigin ? allowedOrigins.has(requestOrigin) : false;
+    const enforceOrigin = shouldEnforceOrigin();
+
+    setCorsHeaders(req, res, (isAllowed || !enforceOrigin) ? requestOrigin : null);
+    res.setHeader('X-Origin-Validation', isAllowed ? 'allowed' : 'not-listed');
+    res.setHeader('X-Origin-Enforcement', enforceOrigin ? 'enforce' : 'monitor');
+
+    if (req.method === 'OPTIONS') {
+        if (enforceOrigin && !isAllowed) {
+            return res.status(403).json({ error: 'Origin non autorisée', code: 'ORIGIN_NOT_ALLOWED' });
+        }
+        return res.status(204).end();
+    }
+
+    if (enforceOrigin && !isAllowed) {
+        return res.status(403).json({ error: 'Origin non autorisée', code: 'ORIGIN_NOT_ALLOWED' });
+    }
+
     // Autoriser uniquement GET
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -96,7 +171,6 @@ export default async function handler(req, res) {
 
         // Retourner le contenu avec les bons headers
         res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-        res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate'); // Cache 5 min
         
         return res.status(200).send(text);
@@ -109,8 +183,7 @@ export default async function handler(req, res) {
         }
 
         return res.status(500).json({ 
-            error: 'Proxy fetch failed',
-            message: err.message
+            error: 'Proxy fetch failed'
         });
     }
 }

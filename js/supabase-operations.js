@@ -26,6 +26,28 @@ function formatDateFrFromYmd(dateStr) {
     return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+const reservationsUpdateSchemaSupport = {
+    paiement: true,
+    manual_override: true,
+    client_name: true,
+    nom: true,
+    client_phone: true,
+    telephone: true
+};
+
+function isMissingOrForbiddenColumn(errorMessage, columnName) {
+    const msg = (errorMessage || '').toLowerCase();
+    const col = (columnName || '').toLowerCase();
+    if (!msg || !col) return false;
+    const mentionsColumn = msg.includes(col);
+    if (!mentionsColumn) return false;
+    return msg.includes('does not exist')
+        || msg.includes('could not find')
+        || msg.includes('schema cache')
+        || msg.includes('unknown column')
+        || msg.includes('permission denied');
+}
+
 function isAutoCleaningConflictEnabled() {
     try {
         return localStorage.getItem('auto_cleaning_conflict_enabled') !== '0';
@@ -467,7 +489,7 @@ async function getAllReservations(forceRefresh) {
         const reservations = (result.data || []).map(function(r) {
             return {
                 id: r.id,
-                gite: r.gite,
+                gite: r.gite || r.gite_name || '',
                 gite_id: r.gite_id,
                 giteId: r.gite_id,
                 check_in: r.check_in,
@@ -479,15 +501,15 @@ async function getAllReservations(forceRefresh) {
                 plateforme: r.platform,
                 total_price: r.total_price,
                 montant: r.total_price,
-                client_name: r.client_name,
-                nom: r.client_name,
-                nomClient: r.client_name,
-                client_phone: r.client_phone,
-                telephone: r.client_phone,
-                client_email: r.client_email,
-                email: r.client_email,
-                client_address: r.client_address,
-                provenance: r.client_address,
+                client_name: r.nom || r.client_name || r.nom_client || '',
+                nom: r.nom || r.client_name || r.nom_client || '',
+                nomClient: r.nom || r.client_name || r.nom_client || '',
+                client_phone: r.telephone || r.client_phone || '',
+                telephone: r.telephone || r.client_phone || '',
+                client_email: r.client_email || r.email || '',
+                email: r.client_email || r.email || '',
+                client_address: r.client_address || r.provenance || '',
+                provenance: r.client_address || r.provenance || '',
                 guest_count: r.guest_count,
                 nbPersonnes: r.guest_count,
                 paid_amount: r.paid_amount,
@@ -527,34 +549,118 @@ async function updateReservation(id, updates) {
             .eq('id', id)
             .single();
         
-        const data = {};
-        if (updates.gite !== undefined) data.gite_id = updates.gite;
-        if (updates.giteId !== undefined) data.gite_id = updates.giteId;
-        if (updates.dateDebut !== undefined) data.check_in = updates.dateDebut;
-        if (updates.dateFin !== undefined) data.check_out = updates.dateFin;
-        if (updates.site !== undefined) data.platform = updates.site;
-        if (updates.plateforme !== undefined) data.platform = updates.plateforme;
-        if (updates.montant !== undefined) data.total_price = parseFloat(updates.montant);
-        if (updates.nom !== undefined) data.client_name = updates.nom;
-        if (updates.nomClient !== undefined) data.client_name = updates.nomClient;
-        if (updates.telephone !== undefined) data.client_phone = updates.telephone;
-        if (updates.email !== undefined) data.client_email = updates.email;
-        if (updates.provenance !== undefined) data.client_address = updates.provenance;
-        if (updates.nbPersonnes !== undefined) data.guest_count = updates.nbPersonnes;
-        if (updates.acompte !== undefined) data.paid_amount = parseFloat(updates.acompte);
-        if (updates.status !== undefined) data.status = updates.status;
-        if (updates.paiement !== undefined) data.paiement = updates.paiement;
+        function buildUpdatePayload() {
+            const payload = {};
+
+            if (updates.gite !== undefined) payload.gite_id = updates.gite;
+            if (updates.giteId !== undefined) payload.gite_id = updates.giteId;
+            if (updates.dateDebut !== undefined) payload.check_in = updates.dateDebut;
+            if (updates.dateFin !== undefined) payload.check_out = updates.dateFin;
+            if (updates.site !== undefined) payload.platform = updates.site;
+            if (updates.plateforme !== undefined) payload.platform = updates.plateforme;
+            if (updates.montant !== undefined) payload.total_price = parseFloat(updates.montant);
+
+            if (updates.nom !== undefined) {
+                if (reservationsUpdateSchemaSupport.client_name) {
+                    payload.client_name = updates.nom;
+                } else if (reservationsUpdateSchemaSupport.nom) {
+                    payload.nom = updates.nom;
+                }
+            }
+
+            if (updates.nomClient !== undefined) {
+                if (reservationsUpdateSchemaSupport.client_name) {
+                    payload.client_name = updates.nomClient;
+                } else if (reservationsUpdateSchemaSupport.nom) {
+                    payload.nom = updates.nomClient;
+                }
+            }
+
+            if (updates.telephone !== undefined) {
+                if (reservationsUpdateSchemaSupport.client_phone) {
+                    payload.client_phone = updates.telephone;
+                } else if (reservationsUpdateSchemaSupport.telephone) {
+                    payload.telephone = updates.telephone;
+                }
+            }
+            if (updates.email !== undefined) payload.client_email = updates.email;
+            if (updates.provenance !== undefined) payload.client_address = updates.provenance;
+            if (updates.nbPersonnes !== undefined) payload.guest_count = updates.nbPersonnes;
+            if (updates.acompte !== undefined) payload.paid_amount = parseFloat(updates.acompte);
+            if (updates.status !== undefined) payload.status = updates.status;
+            if (updates.paiement !== undefined && reservationsUpdateSchemaSupport.paiement) payload.paiement = updates.paiement;
+
+            if (reservationsUpdateSchemaSupport.manual_override) {
+                payload.manual_override = true;
+            }
+
+            return payload;
+        }
+
+        const data = buildUpdatePayload();
         
-        // 🛡️ PROTECTION : Si l'utilisateur modifie manuellement une réservation,
-        // marquer manual_override = true pour la protéger des syncs iCal
-        data.manual_override = true;
-        
-        const result = await window.supabaseClient
-            .from('reservations')
-            .update(data)
-            .eq('id', id);
-        
+        async function runUpdate(payload) {
+            return window.supabaseClient
+                .from('reservations')
+                .update(payload)
+                .eq('id', id)
+                .select('id');
+        }
+
+        let result = await runUpdate(data);
+
+        // Fallback schéma: certaines bases n'ont pas toutes les colonnes legacy
+        if (result.error && isMissingOrForbiddenColumn(result.error.message, 'paiement')) {
+            reservationsUpdateSchemaSupport.paiement = false;
+            const retryPayload = buildUpdatePayload();
+            delete retryPayload.paiement;
+            result = await runUpdate(retryPayload);
+        }
+
+        if (result.error && isMissingOrForbiddenColumn(result.error.message, 'manual_override')) {
+            reservationsUpdateSchemaSupport.manual_override = false;
+            const retryPayload = buildUpdatePayload();
+            delete retryPayload.manual_override;
+            result = await runUpdate(retryPayload);
+        }
+
+        if (result.error && isMissingOrForbiddenColumn(result.error.message, 'nom')) {
+            reservationsUpdateSchemaSupport.nom = false;
+            reservationsUpdateSchemaSupport.client_name = true;
+            const retryPayload = buildUpdatePayload();
+            delete retryPayload.nom;
+            result = await runUpdate(retryPayload);
+        }
+
+        if (result.error && isMissingOrForbiddenColumn(result.error.message, 'client_phone')) {
+            reservationsUpdateSchemaSupport.client_phone = false;
+            reservationsUpdateSchemaSupport.telephone = true;
+            const retryPayload = buildUpdatePayload();
+            delete retryPayload.client_phone;
+            result = await runUpdate(retryPayload);
+        }
+
+        if (result.error && isMissingOrForbiddenColumn(result.error.message, 'telephone')) {
+            reservationsUpdateSchemaSupport.telephone = false;
+            reservationsUpdateSchemaSupport.client_phone = true;
+            const retryPayload = buildUpdatePayload();
+            delete retryPayload.telephone;
+            result = await runUpdate(retryPayload);
+        }
+
+        // Fallback schéma: certaines bases utilisent "nom" au lieu de client_name
+        if (result.error && isMissingOrForbiddenColumn(result.error.message, 'client_name')) {
+            reservationsUpdateSchemaSupport.client_name = false;
+            reservationsUpdateSchemaSupport.nom = true;
+            const fallbackPayload = buildUpdatePayload();
+            delete fallbackPayload.client_name;
+            result = await runUpdate(fallbackPayload);
+        }
+
         if (result.error) throw result.error;
+        if (!result.data || result.data.length === 0) {
+            throw new Error('Mise à jour non appliquée (ligne introuvable ou non autorisée).');
+        }
         
         // 🚗 Si les dates ont changé, recréer les trajets auto
         const datesChanged = (data.check_in && data.check_in !== oldResa?.check_in) || 

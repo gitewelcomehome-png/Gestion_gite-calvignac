@@ -389,24 +389,24 @@
         <header>
             <h1>📦 Gestion Prestations Supplémentaires</h1>
             <div style="display: flex; gap: 10px;">
-                <button class="btn btn-secondary" onclick="openConfigModal()">⚙️ Configuration</button>
-                <button class="btn btn-primary" onclick="openModal('add')">+ Nouvelle Prestation</button>
+                <button class="btn btn-secondary" data-action="open-config">⚙️ Configuration</button>
+                <button class="btn btn-primary" data-action="open-add-prestation">+ Nouvelle Prestation</button>
             </div>
         </header>
         
         <!-- Sélecteur de gîte -->
         <div class="gite-selector">
             <label>Sélectionner un gîte :</label>
-            <select id="giteSelect" onchange="loadPrestations()">
+            <select id="giteSelect">
                 <option value="">Chargement...</option>
             </select>
         </div>
         
         <!-- Onglets -->
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('catalogue')">📋 Catalogue</div>
-            <div class="tab" onclick="switchTab('commandes')">🛒 Commandes</div>
-            <div class="tab" onclick="switchTab('stats')">📊 Statistiques</div>
+            <div class="tab active" data-tab="catalogue">📋 Catalogue</div>
+            <div class="tab" data-tab="commandes">🛒 Commandes</div>
+            <div class="tab" data-tab="stats">📊 Statistiques</div>
         </div>
         
         <!-- ONGLET CATALOGUE -->
@@ -474,10 +474,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">Nouvelle Prestation</h2>
-                <button class="close-modal" onclick="closeModal()">&times;</button>
+                <button class="close-modal" data-action="close-modal">&times;</button>
             </div>
             
-            <form id="prestationForm" onsubmit="savePrestation(event)">
+            <form id="prestationForm">
                 <input type="hidden" id="prestationId">
                 
                 <div class="form-row">
@@ -533,7 +533,7 @@
                 </div>
                 
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="button" class="btn btn-secondary" data-action="close-modal">Annuler</button>
                     <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </div>
             </form>
@@ -545,9 +545,9 @@
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
                 <h2>⚙️ Configuration Commission</h2>
-                <button class="close-btn" onclick="closeConfigModal()">&times;</button>
+                <button class="close-btn" data-action="close-config">&times;</button>
             </div>
-            <form id="configForm" onsubmit="saveConfig(event)">
+            <form id="configForm">
                 <div class="form-group">
                     <label>Pourcentage de commission (%)</label>
                     <input type="number" id="commission_percent" min="0" max="100" step="0.1" required>
@@ -557,7 +557,7 @@
                 </div>
                 
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeConfigModal()">Annuler</button>
+                    <button type="button" class="btn btn-secondary" data-action="close-config">Annuler</button>
                     <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
                 </div>
             </form>
@@ -565,6 +565,7 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/shared-config.js"></script>
     <script src="../js/admin-prestations.js"></script>
 </body>
 </html>

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Performance - Channel Manager</title>
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .audit-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            color: #0f172a;
+        }
+        .audit-header {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .audit-header h1 {
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 28px;
+        }
+        .audit-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .score-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .score-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #475569;
+        }
+        .score-value {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .score-meta {
+            font-size: 13px;
+            color: #64748b;
+        }
+        .score-critical { color: #dc2626; }
+        .score-warning { color: #ea580c; }
+        .score-ok { color: #16a34a; }
+        .audit-section {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .audit-section h2 {
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 20px;
+        }
+        .risk-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .risk-table th,
+        .risk-table td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 10px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .risk-table th {
+            color: #475569;
+            font-weight: 700;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .badge-critical { background: #fee2e2; color: #b91c1c; }
+        .badge-warning { background: #ffedd5; color: #c2410c; }
+        .badge-ok { background: #dcfce7; color: #166534; }
+        ul { margin: 0; padding-left: 18px; }
+        li { margin-bottom: 6px; }
+        .links a {
+            color: #1d4ed8;
+            text-decoration: none;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        .quick-action {
+            margin-top: 14px;
+        }
+        .quick-actions {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .quick-action a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            color: #1e293b;
+            background: #f8fafc;
+        }
+        .quick-action a:hover {
+            background: #f1f5f9;
+        }
+        .tabs-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .tab-btn {
+            border: 1px solid #cbd5e1;
+            border-radius: 999px;
+            background: #f8fafc;
+            color: #1e293b;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background: #1e293b;
+            color: #ffffff;
+            border-color: #1e293b;
+        }
+        .tab-panel {
+            display: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            background: #ffffff;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+        @media (max-width: 980px) {
+            .audit-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="audit-container">
+        <section class="audit-header">
+            <h1><i data-lucide="gauge"></i> Audit Performance & Montée en Charge</h1>
+            <div><strong>Date d'audit :</strong> 01/03/2026</div>
+            <div><strong>Type :</strong> test de charge progressif API-only hors admin (warmup/ramp/peak), requêtes GET only</div>
+            <div><strong>Run ID de référence :</strong> 2026-03-01T22-API-ONLY-3Z</div>
+            <div><strong>Avancement campagne :</strong> 100% (8/8 phases)</div>
+            <div class="quick-actions">
+                <div class="quick-action">
+                    <a href="#surveillance-evolution"><i data-lucide="activity"></i> Surveillance évolution</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="audit-grid">
+            <article class="score-card">
+                <h3>Verdict SLO Global</h3>
+                <div class="score-value score-ok">PASS</div>
+                <div class="score-meta">Objectif SLO API-only: p95 &lt; 500ms et erreurs &lt; 1% atteint.</div>
+            </article>
+            <article class="score-card">
+                <h3>Point Fort</h3>
+                <div class="score-value score-ok">API stable</div>
+                <div class="score-meta">`/api/test` et `/api/ai-health` à 0.25% d'erreurs agrégées.</div>
+            </article>
+            <article class="score-card">
+                <h3>Point Bloquant</h3>
+                <div class="score-value score-warning">Point de vigilance</div>
+                <div class="score-meta">Erreurs transport intermittentes (`code 0`) observées sur certains runs précédents, à monitorer.</div>
+            </article>
+        </section>
+
+        <section class="audit-section">
+            <h2><i data-lucide="bar-chart-3"></i> Résultats consolidés</h2>
+            <table class="risk-table">
+                <thead>
+                    <tr>
+                        <th>Scénario</th>
+                        <th>Volume</th>
+                        <th>Erreur</th>
+                        <th>Latence</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/api/test</code></td>
+                        <td>4000 req</td>
+                        <td>0.25%</td>
+                        <td>p95 207ms / p99 529ms</td>
+                        <td><span class="badge badge-ok">Conforme</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/ai-health</code></td>
+                        <td>2000 req</td>
+                        <td>0.25%</td>
+                        <td>p95 205ms / p99 438ms</td>
+                        <td><span class="badge badge-ok">Conforme</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>scope</code></td>
+                        <td>API-only</td>
+                        <td>—</td>
+                        <td>Scénario admin exclu</td>
+                        <td><span class="badge badge-ok">Aligné périmètre</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="audit-section">
+            <h2><i data-lucide="list-checks"></i> Points à améliorer (priorisés)</h2>
+            <ul>
+                <li><strong>P0:</strong> maintenir la surveillance des erreurs transport (`code 0`) en production.</li>
+                <li><strong>P0:</strong> conserver l’alignement timeout client/edge/function et les retries idempotents.</li>
+                <li><strong>P1:</strong> rejouer périodiquement le protocole API-only comme garde-fou pré-release.</li>
+                <li><strong>P1:</strong> instrumenter p95/p99 + taux d'erreur par route en monitoring continu.</li>
+                <li><strong>P2:</strong> exécuter ce protocole en pré-release avec seuil Go/No-Go bloquant.</li>
+            </ul>
+        </section>
+
+        <section id="surveillance-evolution" class="audit-section">
+            <h2><i data-lucide="activity"></i> Surveillance évolution</h2>
+            <div class="tabs-nav">
+                <button class="tab-btn active" type="button" data-tab="tab-overview">Vue globale</button>
+                <button class="tab-btn" type="button" data-tab="tab-blocker">Point bloquant</button>
+                <button class="tab-btn" type="button" data-tab="tab-weekly">Check hebdo</button>
+                <button class="tab-btn" type="button" data-tab="tab-scalability">Scalabilité</button>
+            </div>
+
+            <div id="tab-overview" class="tab-panel active">
+                <ul>
+                    <li><strong>Statut actuel :</strong> GO hors admin, SLO API-only conforme.</li>
+                    <li><strong>Run de référence :</strong> 2026-03-01T22-API-ONLY-3Z (8/8 phases).</li>
+                    <li><strong>Worst p95 :</strong> 207ms.</li>
+                    <li><strong>Worst error rate :</strong> 0.25%.</li>
+                </ul>
+            </div>
+
+            <div id="tab-blocker" class="tab-panel">
+                <ul>
+                    <li><strong>Point bloquant actuel :</strong> erreurs transport intermittentes (`code 0`) sur certains runs.</li>
+                    <li><strong>Impact :</strong> pas bloquant sur le run de référence PASS, mais variabilité possible en pic réseau.</li>
+                    <li><strong>Actions immédiates :</strong> alerte >1% erreurs transport, conserver timeout/retry alignés.</li>
+                </ul>
+            </div>
+
+            <div id="tab-weekly" class="tab-panel">
+                <ul>
+                    <li><strong>Étape 1 :</strong> lancer la campagne API-only.</li>
+                    <li><strong>Étape 2 :</strong> lire le summary JSON généré.</li>
+                    <li><strong>Étape 3 :</strong> exécuter le script SQL de suivi perf interne.</li>
+                </ul>
+                <div class="quick-actions">
+                    <div class="quick-action">
+                        <a href="#" id="copy-api-only-command"><i data-lucide="copy"></i> Copier commande API-only</a>
+                    </div>
+                </div>
+                <table class="risk-table" style="margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Seuil</th>
+                            <th>GO</th>
+                            <th>NO-GO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Worst p95 API-only</td>
+                            <td>&lt; 500ms</td>
+                            <td>&ge; 500ms</td>
+                        </tr>
+                        <tr>
+                            <td>Worst error rate API-only</td>
+                            <td>&lt; 1%</td>
+                            <td>&ge; 1%</td>
+                        </tr>
+                        <tr>
+                            <td>KPI DB</td>
+                            <td>dead&gt;20%=0 et queries&gt;30s=0</td>
+                            <td>sinon</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="tab-scalability" class="tab-panel">
+                <p style="margin: 0 0 10px 0; color: #475569;">Plan d’accompagnement de la montée en charge par paliers utilisateurs (hors admin), cible long terme: <strong>70 000 utilisateurs</strong>.</p>
+
+                <table class="risk-table">
+                    <thead>
+                        <tr>
+                            <th>Palier utilisateurs actifs</th>
+                            <th>Objectif principal</th>
+                            <th>Actions à faire</th>
+                            <th>Déclencheur de passage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>0 → 500</strong></td>
+                            <td>Fiabilité de base</td>
+                            <td>Monitoring erreurs transport, check hebdo API-only, KPI DB hebdo.</td>
+                            <td>4 semaines stables (&lt;1% erreurs, p95 &lt; 500ms)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>500 → 2 000</strong></td>
+                            <td>Stabiliser pics standards</td>
+                            <td>Rate-limit sur flux critiques, cache lectures fréquentes, retry idempotent uniquement.</td>
+                            <td>2 runs de charge PASS consécutifs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2 000 → 10 000</strong></td>
+                            <td>Tenue API + DB</td>
+                            <td>Audit index/FK, optimisation requêtes lentes, suivi dead tuples renforcé.</td>
+                            <td>Worst p95 &lt; 350ms, 0 query &gt; 30s</td>
+                        </tr>
+                        <tr>
+                            <td><strong>10 000 → 25 000</strong></td>
+                            <td>Robustesse sous charge continue</td>
+                            <td>Soak test 4–8h, alerting proactif, runbook incident prêt et testé.</td>
+                            <td>Soak PASS sans dérive ni alerte critique</td>
+                        </tr>
+                        <tr>
+                            <td><strong>25 000 → 50 000</strong></td>
+                            <td>Pré-scaling</td>
+                            <td>Réduction coûts route chaude, durcissement quotas/limites, tests rollback + reprise.</td>
+                            <td>3 cycles release sans régression + 1 stress test PASS</td>
+                        </tr>
+                        <tr>
+                            <td><strong>50 000 → 70 000</strong></td>
+                            <td>Industrialisation</td>
+                            <td>Tests de charge planifiés, budget perf par route, gouvernance perf hebdo, plan capacité documenté.</td>
+                            <td>2 campagnes PASS successives à cible haute + SLO respectés</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 12px;">
+                    <strong>Checklist minimale à chaque palier :</strong>
+                    <ul>
+                        <li>Run API-only à jour avec verdict PASS.</li>
+                        <li>Script SQL hebdo exécuté (dead tuples, index non utilisés, requêtes longues).</li>
+                        <li>Plan de rollback vérifié sur la release en cours.</li>
+                        <li>Alerte erreurs transport active (seuil: 1%).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="audit-section links">
+            <h2><i data-lucide="folder-open"></i> Artefacts de preuve</h2>
+            <ul>
+                <li><a href="../docs/rapports/performance/AUDIT_MONTEE_CHARGE_2026-03-01.md" target="_blank" rel="noopener">Rapport détaillé (Markdown)</a></li>
+                <li><a href="../docs/rapports/performance/RUNBOOK_CHECK_HEBDO_PERF_INTERNE.md" target="_blank" rel="noopener">Runbook check hebdo (5 min)</a></li>
+                <li><a href="../docs/rapports/performance/LOAD_TEST_MANIFEST_2026-03-01T22-API-ONLY-3Z.json" target="_blank" rel="noopener">Manifest d'exécution (progression)</a></li>
+                <li><a href="../docs/rapports/performance/LOAD_TEST_SUMMARY_2026-03-01T22-API-ONLY-3Z.json" target="_blank" rel="noopener">Résumé consolidé JSON</a></li>
+                <li><a href="../docs/rapports/performance/LOAD_TEST_RAW_2026-03-01T22-API-ONLY-3Z.csv" target="_blank" rel="noopener">Données brutes CSV</a></li>
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        const apiOnlyCommand = 'cd /workspaces/Gestion_gite-calvignac && RUN_ID_OVERRIDE=$(date -u +%Y-%m-%dT%H-%M-%SZ) INCLUDE_ADMIN_SCENARIO=0 ./scripts/load-test-curl.sh https://liveownerunit.fr';
+
+        async function copyApiOnlyCommand(event) {
+            event.preventDefault();
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(apiOnlyCommand);
+                } else {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = apiOnlyCommand;
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = '0';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+                alert('Commande API-only copiée ✅');
+            } catch (error) {
+                alert('Copie impossible. Utilise la commande du bloc Check Hebdo.');
+            }
+        }
+
+        const copyButton = document.getElementById('copy-api-only-command');
+        if (copyButton) {
+            copyButton.addEventListener('click', copyApiOnlyCommand);
+        }
+
+        const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+        const tabPanels = Array.from(document.querySelectorAll('.tab-panel'));
+
+        function activateTab(tabId) {
+            tabButtons.forEach((button) => {
+                button.classList.toggle('active', button.dataset.tab === tabId);
+            });
+            tabPanels.forEach((panel) => {
+                panel.classList.toggle('active', panel.id === tabId);
+            });
+        }
+
+        tabButtons.forEach((button) => {
+            button.addEventListener('click', () => activateTab(button.dataset.tab));
+        });
+
+        const hashTab = window.location.hash ? window.location.hash.slice(1) : '';
+        if (hashTab && document.getElementById(hashTab)) {
+            activateTab(hashTab);
+        }
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

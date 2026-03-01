@@ -5,6 +5,41 @@
 let currentUser = null;
 let allClients = [];
 let currentClientId = null;
+const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+async function isCurrentUserAdmin(user) {
+    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+        ? window.APP_CONFIG.ADMIN_EMAILS
+        : [];
+    const adminEmails = new Set(
+        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+            .map(normalizeEmail)
+            .filter(Boolean)
+    );
+
+    if (adminEmails.has(normalizeEmail(user?.email))) {
+        return true;
+    }
+
+    try {
+        const { data: rolesData, error: rolesError } = await window.supabaseClient
+            .from('user_roles')
+            .select('role, is_active')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+
+        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+    } catch (rolesCheckError) {
+        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+        return false;
+    }
+}
 
 // Traduction des statuts
 function getStatutLabel(statut) {
@@ -22,22 +57,30 @@ function getStatutLabel(statut) {
 // ================================================================
 
 async function checkAuth() {
-    const { data: { user }, error } = await window.supabaseClient.auth.getUser();
-    
-    if (error || !user) {
+    try {
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+
+        if (error || !session?.user) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        currentUser = session.user;
+
+        const isAdmin = await isCurrentUserAdmin(currentUser);
+        if (!isAdmin) {
+            alert('❌ Accès réservé aux administrateurs');
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        await loadClients();
+        return true;
+    } catch (authError) {
+        console.error('❌ Erreur authentification admin:', authError);
         window.location.href = '../index.html';
-        return;
+        return false;
     }
-    
-    // Vérifier que c'est un admin
-    if (user.email !== 'stephanecalvignac@hotmail.fr') {
-        alert('❌ Accès réservé aux administrateurs');
-        window.location.href = '../index.html';
-        return;
-    }
-    
-    currentUser = user;
-    loadClients();
 }
 
 // ================================================================
@@ -80,7 +123,7 @@ function displayClients(clients) {
     }
     
     tbody.innerHTML = clients.map(client => `
-        <tr onclick="openClientModal('${client.id}')">
+        <tr data-action="open-client-modal" data-client-id="${client.id}">
             <td>
                 <div style="font-weight: 600;">${client.prenom_contact} ${client.nom_contact}</div>
             </td>
@@ -111,7 +154,7 @@ function updateStats(clients) {
 // 🔍 RECHERCHE ET FILTRES
 // ================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('searchInput');
     const filterStatut = document.getElementById('filterStatut');
     const filterAbonnement = document.getElementById('filterAbonnement');
@@ -119,8 +162,41 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput?.addEventListener('input', filterClients);
     filterStatut?.addEventListener('change', filterClients);
     filterAbonnement?.addEventListener('change', filterClients);
+
+    document.addEventListener('click', async (event) => {
+        const actionEl = event.target.closest('[data-action]');
+        if (!actionEl) {
+            return;
+        }
+
+        const action = actionEl.dataset.action;
+        switch (action) {
+            case 'open-client-modal':
+                if (actionEl.dataset.clientId) {
+                    await openClientModal(actionEl.dataset.clientId);
+                }
+                break;
+            default:
+                break;
+        }
+    });
+
+    document.addEventListener('change', async (event) => {
+        const actionEl = event.target.closest('[data-action]');
+        if (!actionEl) {
+            return;
+        }
+
+        if (actionEl.dataset.action === 'update-referral-settings') {
+            const clientId = actionEl.dataset.clientId;
+            const settingType = actionEl.dataset.settingType;
+            if (clientId && settingType) {
+                await updateReferralSettings(clientId, settingType, actionEl.value);
+            }
+        }
+    });
     
-    checkAuth();
+    await checkAuth();
 });
 
 function filterClients() {
@@ -431,11 +507,11 @@ async function loadParrainage(clientId) {
         const container = document.getElementById('parrainageContent');
         
         // Récupérer les paramètres de parrainage
-        const { data: settings } = await supabase
+        const { data: settings } = await window.supabaseClient
             .from('user_settings')
             .select('referral_enabled, subscription_type')
             .eq('user_id', clientId)
-            .single();
+            .maybeSingle();
         
         const referralEnabled = settings?.referral_enabled || false;
         const subscriptionType = settings?.subscription_type || 'standard';
@@ -469,7 +545,9 @@ async function loadParrainage(clientId) {
                             Statut du programme
                         </label>
                         <select id="referralEnabledSelect" 
-                                onchange="updateReferralSettings('${clientId}', 'enabled', this.value)"
+                                data-action="update-referral-settings"
+                                data-client-id="${clientId}"
+                                data-setting-type="enabled"
                                 style="width: 100%; padding: 10px; border-radius: 6px; border: none; font-size: 14px;">
                             <option value="false" ${!referralEnabled ? 'selected' : ''}>❌ Désactivé</option>
                             <option value="true" ${referralEnabled ? 'selected' : ''}>✅ Activé</option>
@@ -481,7 +559,9 @@ async function loadParrainage(clientId) {
                             Type d'abonnement
                         </label>
                         <select id="subscriptionTypeSelect" 
-                                onchange="updateReferralSettings('${clientId}', 'type', this.value)"
+                                data-action="update-referral-settings"
+                                data-client-id="${clientId}"
+                                data-setting-type="type"
                                 style="width: 100%; padding: 10px; border-radius: 6px; border: none; font-size: 14px;">
                             <option value="standard" ${subscriptionType === 'standard' ? 'selected' : ''}>💵 Standard (réductions %)</option>
                             <option value="gites_france" ${subscriptionType === 'gites_france' ? 'selected' : ''}>🏆 Gîtes de France (points)</option>

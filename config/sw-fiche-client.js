@@ -7,7 +7,7 @@ const CACHE_NAME = 'fiche-client-v4'; // Version avec logs debug
 const urlsToCache = [
     '/fiche-client.html',
     '/js/fiche-client-app.js',
-    '/manifest-fiche-client.json',
+    '/config/manifest-fiche-client.json',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'

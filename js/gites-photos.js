@@ -259,5 +259,3 @@ window.handlePhotoUpload = handlePhotoUpload;
 window.removePhoto = removePhoto;
 window.removePhotoFromGrid = removePhotoFromGrid;
 window.loadGitePhotos = loadGitePhotos;
-
-console.log('✅ Module gites-photos.js chargé');

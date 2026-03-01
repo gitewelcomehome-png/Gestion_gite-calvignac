@@ -407,7 +407,7 @@
     <section class="tabs-navigation">
         <div class="tabs-sidebar">
             <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-channel-manager.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-channel-manager.html">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </button>
@@ -415,35 +415,35 @@
                 <i data-lucide="users"></i>
                 <span>Clients</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-support.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-support.html">
                 <i data-lucide="headphones"></i>
                 <span>Support</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-emails.html?build=20260217-4'">
+            <button class="tab-btn" data-nav-url="/pages/admin-emails.html?build=20260217-4">
                 <i data-lucide="mail"></i>
                 <span>Messagerie</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-promotions.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-promotions.html">
                 <i data-lucide="tag"></i>
                 <span>Promotions</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-parrainage.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-parrainage.html">
                 <i data-lucide="gift"></i>
                 <span>Parrainage</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-finance.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-finance.html">
                 <i data-lucide="bar-chart-2"></i>
                 <span>Finance & BI</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-content.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-content.html">
                 <i data-lucide="pen-tool"></i>
                 <span>Content IA</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-communications.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-communications.html">
                 <i data-lucide="megaphone"></i>
                 <span>Communications</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-monitoring.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-monitoring.html">
                 <i data-lucide="activity"></i>
                 <span>Monitoring</span>
             </button>
@@ -465,7 +465,7 @@
                 </p>
             </div>
             <div class="page-header__actions">
-                <button onclick="window.location.href='/pages/admin-clients-ameliorations-demo.html'" class="btn btn--primary">
+                <button data-nav-url="/pages/admin-clients-ameliorations-demo.html" class="btn btn--primary">
                     <i data-lucide="zap"></i>
                     Voir les améliorations
                 </button>
@@ -528,7 +528,7 @@
                     <h2 style="margin: 0;" id="modalClientName">Nom Client</h2>
                     <p style="margin: 5px 0 0 0; opacity: 0.9;" id="modalClientEmail">email@example.com</p>
                 </div>
-                <button class="modal-close" onclick="closeClientModal()">
+                <button class="modal-close" data-action="close-client-modal">
                     <i data-lucide="x"></i>
                 </button>
             </div>
@@ -536,15 +536,15 @@
             <div class="modal-body">
                 <!-- Actions rapides -->
                 <div class="client-actions" style="margin-bottom: 25px;">
-                    <button class="btn btn-primary" onclick="sendPasswordResetEmail()">
+                    <button class="btn btn-primary" data-action="send-password-reset-email">
                         <i data-lucide="mail"></i>
                         Envoyer lien mot de passe
                     </button>
-                    <button class="btn btn-secondary" onclick="editClient()">
+                    <button class="btn btn-secondary" data-action="edit-client">
                         <i data-lucide="edit"></i>
                         Modifier
                     </button>
-                    <button class="btn btn-danger" onclick="suspendClient()">
+                    <button class="btn btn-danger" data-action="suspend-client">
                         <i data-lucide="user-x"></i>
                         Suspendre
                     </button>
@@ -552,23 +552,23 @@
 
                 <!-- Tabs -->
                 <div class="tabs">
-                    <button class="tab active" onclick="switchClientTab('infos')">
+                    <button class="tab active" data-action="switch-client-tab" data-tab="infos">
                         <i data-lucide="user" style="width: 16px; height: 16px;"></i>
                         Informations
                     </button>
-                    <button class="tab" onclick="switchClientTab('abonnements')">
+                    <button class="tab" data-action="switch-client-tab" data-tab="abonnements">
                         <i data-lucide="package" style="width: 16px; height: 16px;"></i>
                         Abonnements
                     </button>
-                    <button class="tab" onclick="switchClientTab('promotions')">
+                    <button class="tab" data-action="switch-client-tab" data-tab="promotions">
                         <i data-lucide="tag" style="width: 16px; height: 16px;"></i>
                         Promotions
                     </button>
-                    <button class="tab" onclick="switchClientTab('parrainage')">
+                    <button class="tab" data-action="switch-client-tab" data-tab="parrainage">
                         <i data-lucide="users" style="width: 16px; height: 16px;"></i>
                         Parrainage
                     </button>
-                    <button class="tab" onclick="switchClientTab('activite')">
+                    <button class="tab" data-action="switch-client-tab" data-tab="activite">
                         <i data-lucide="activity" style="width: 16px; height: 16px;"></i>
                         Activité
                     </button>
@@ -609,8 +609,46 @@
     <script src="../js/error-tracker.js"></script>
     <script src="../js/admin-clients.js"></script>
     <script>
-        // Initialiser Lucide icons
         lucide.createIcons();
+
+        document.addEventListener('click', async (event) => {
+            const navButton = event.target.closest('[data-nav-url]');
+            if (navButton) {
+                const navUrl = navButton.dataset.navUrl;
+                if (navUrl) {
+                    window.location.href = navUrl;
+                }
+                return;
+            }
+
+            const actionEl = event.target.closest('[data-action]');
+            if (!actionEl) {
+                return;
+            }
+
+            const action = actionEl.dataset.action;
+            switch (action) {
+                case 'close-client-modal':
+                    window.closeClientModal?.();
+                    break;
+                case 'send-password-reset-email':
+                    await window.sendPasswordResetEmail?.();
+                    break;
+                case 'edit-client':
+                    await window.editClient?.();
+                    break;
+                case 'suspend-client':
+                    await window.suspendClient?.();
+                    break;
+                case 'switch-client-tab':
+                    if (actionEl.dataset.tab) {
+                        window.switchClientTab?.(actionEl.dataset.tab);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
     </script>
 </body>
 </html>

@@ -1,0 +1,360 @@
+{
+  "generatedAt": "2026-03-01T19:06:28.134Z",
+  "inputPath": "docs/rapports/performance/LOAD_TEST_RAW_2026-03-01T18-11-28Z.csv",
+  "scenarios": [
+    {
+      "name": "api_test",
+      "aggregate": {
+        "requests": 3604,
+        "successCount": 3604,
+        "errorCount": 0,
+        "errorRatePct": 0,
+        "latencyMs": {
+          "min": 122,
+          "p50": 847,
+          "p95": 1436,
+          "p99": 1664,
+          "max": 36277,
+          "avg": 910
+        },
+        "statusBuckets": {
+          "200": 3604
+        },
+        "errorBuckets": {}
+      },
+      "phases": [
+        {
+          "phase": "warmup",
+          "summary": {
+            "requests": 200,
+            "successCount": 200,
+            "errorCount": 0,
+            "errorRatePct": 0,
+            "latencyMs": {
+              "min": 130,
+              "p50": 223,
+              "p95": 472,
+              "p99": 1129,
+              "max": 1293,
+              "avg": 275
+            },
+            "statusBuckets": {
+              "200": 200
+            },
+            "errorBuckets": {}
+          }
+        },
+        {
+          "phase": "ramp_1",
+          "summary": {
+            "requests": 532,
+            "successCount": 532,
+            "errorCount": 0,
+            "errorRatePct": 0,
+            "latencyMs": {
+              "min": 122,
+              "p50": 420,
+              "p95": 627,
+              "p99": 19916,
+              "max": 36277,
+              "avg": 800
+            },
+            "statusBuckets": {
+              "200": 532
+            },
+            "errorBuckets": {}
+          }
+        },
+        {
+          "phase": "ramp_2",
+          "summary": {
+            "requests": 1089,
+            "successCount": 1089,
+            "errorCount": 0,
+            "errorRatePct": 0,
+            "latencyMs": {
+              "min": 127,
+              "p50": 724,
+              "p95": 944,
+              "p99": 1072,
+              "max": 1406,
+              "avg": 720
+            },
+            "statusBuckets": {
+              "200": 1089
+            },
+            "errorBuckets": {}
+          }
+        },
+        {
+          "phase": "peak",
+          "summary": {
+            "requests": 1783,
+            "successCount": 1783,
+            "errorCount": 0,
+            "errorRatePct": 0,
+            "latencyMs": {
+              "min": 160,
+              "p50": 1139,
+              "p95": 1524,
+              "p99": 1721,
+              "max": 2239,
+              "avg": 1131
+            },
+            "statusBuckets": {
+              "200": 1783
+            },
+            "errorBuckets": {}
+          }
+        }
+      ]
+    },
+    {
+      "name": "api_ai_health",
+      "aggregate": {
+        "requests": 1975,
+        "successCount": 1973,
+        "errorCount": 2,
+        "errorRatePct": 0.1,
+        "latencyMs": {
+          "min": 115,
+          "p50": 136,
+          "p95": 397,
+          "p99": 613,
+          "max": 989,
+          "avg": 179
+        },
+        "statusBuckets": {
+          "0": 2,
+          "200": 1973
+        },
+        "errorBuckets": {
+          "0": 2
+        }
+      },
+      "phases": [
+        {
+          "phase": "warmup",
+          "summary": {
+            "requests": 75,
+            "successCount": 75,
+            "errorCount": 0,
+            "errorRatePct": 0,
+            "latencyMs": {
+              "min": 117,
+              "p50": 156,
+              "p95": 355,
+              "p99": 836,
+              "max": 836,
+              "avg": 184
+            },
+            "statusBuckets": {
+              "200": 75
+            },
+            "errorBuckets": {}
+          }
+        },
+        {
+          "phase": "ramp_1",
+          "summary": {
+            "requests": 300,
+            "successCount": 300,
+            "errorCount": 0,
+            "errorRatePct": 0,
+            "latencyMs": {
+              "min": 140,
+              "p50": 305,
+              "p95": 534,
+              "p99": 834,
+              "max": 989,
+              "avg": 331
+            },
+            "statusBuckets": {
+              "200": 300
+            },
+            "errorBuckets": {}
+          }
+        },
+        {
+          "phase": "ramp_2",
+          "summary": {
+            "requests": 600,
+            "successCount": 600,
+            "errorCount": 0,
+            "errorRatePct": 0,
+            "latencyMs": {
+              "min": 117,
+              "p50": 132,
+              "p95": 450,
+              "p99": 523,
+              "max": 659,
+              "avg": 170
+            },
+            "statusBuckets": {
+              "200": 600
+            },
+            "errorBuckets": {}
+          }
+        },
+        {
+          "phase": "peak",
+          "summary": {
+            "requests": 1000,
+            "successCount": 998,
+            "errorCount": 2,
+            "errorRatePct": 0.2,
+            "latencyMs": {
+              "min": 115,
+              "p50": 131,
+              "p95": 176,
+              "p99": 224,
+              "max": 368,
+              "avg": 138
+            },
+            "statusBuckets": {
+              "0": 2,
+              "200": 998
+            },
+            "errorBuckets": {
+              "0": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "admin_security_page",
+      "aggregate": {
+        "requests": 3800,
+        "successCount": 3789,
+        "errorCount": 11,
+        "errorRatePct": 0.29,
+        "latencyMs": {
+          "min": 22,
+          "p50": 31,
+          "p95": 208,
+          "p99": 397,
+          "max": 667,
+          "avg": 52
+        },
+        "statusBuckets": {
+          "0": 11,
+          "200": 3789
+        },
+        "errorBuckets": {
+          "0": 11
+        }
+      },
+      "phases": [
+        {
+          "phase": "warmup",
+          "summary": {
+            "requests": 300,
+            "successCount": 299,
+            "errorCount": 1,
+            "errorRatePct": 0.33,
+            "latencyMs": {
+              "min": 24,
+              "p50": 33,
+              "p95": 169,
+              "p99": 276,
+              "max": 292,
+              "avg": 62
+            },
+            "statusBuckets": {
+              "0": 1,
+              "200": 299
+            },
+            "errorBuckets": {
+              "0": 1
+            }
+          }
+        },
+        {
+          "phase": "ramp_1",
+          "summary": {
+            "requests": 800,
+            "successCount": 798,
+            "errorCount": 2,
+            "errorRatePct": 0.25,
+            "latencyMs": {
+              "min": 22,
+              "p50": 31,
+              "p95": 344,
+              "p99": 478,
+              "max": 546,
+              "avg": 62
+            },
+            "statusBuckets": {
+              "0": 2,
+              "200": 798
+            },
+            "errorBuckets": {
+              "0": 2
+            }
+          }
+        },
+        {
+          "phase": "ramp_2",
+          "summary": {
+            "requests": 1200,
+            "successCount": 1196,
+            "errorCount": 4,
+            "errorRatePct": 0.33,
+            "latencyMs": {
+              "min": 23,
+              "p50": 31,
+              "p95": 251,
+              "p99": 372,
+              "max": 667,
+              "avg": 51
+            },
+            "statusBuckets": {
+              "0": 4,
+              "200": 1196
+            },
+            "errorBuckets": {
+              "0": 4
+            }
+          }
+        },
+        {
+          "phase": "peak",
+          "summary": {
+            "requests": 1500,
+            "successCount": 1496,
+            "errorCount": 4,
+            "errorRatePct": 0.27,
+            "latencyMs": {
+              "min": 23,
+              "p50": 30,
+              "p95": 130,
+              "p99": 391,
+              "max": 578,
+              "avg": 47
+            },
+            "statusBuckets": {
+              "0": 4,
+              "200": 1496
+            },
+            "errorBuckets": {
+              "0": 4
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "conclusion": {
+    "slo": {
+      "p95MsTarget": 500,
+      "errorRatePctTarget": 1
+    },
+    "measured": {
+      "totalRequests": 9379,
+      "worstP95": 1436,
+      "worstErrorRate": 0.29
+    },
+    "passed": false
+  }
+}

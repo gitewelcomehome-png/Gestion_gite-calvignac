@@ -73,30 +73,89 @@ const ZOHO_CONFIG = {
     authDomain: 'https://accounts.zoho.com' // Par défaut, détecté lors de l'OAuth
 };
 
-// Stockage sécurisé du token (à améliorer avec encryption)
+function safeSessionStorage() {
+    try {
+        return window.sessionStorage;
+    } catch (_) {
+        return null;
+    }
+}
+
+function safeLocalStorage() {
+    try {
+        return window.localStorage;
+    } catch (_) {
+        return null;
+    }
+}
+
+function migrateLegacyZohoTokensToSession() {
+    const session = safeSessionStorage();
+    const local = safeLocalStorage();
+    if (!session || !local) return;
+
+    ['zoho_access_token', 'zoho_refresh_token', 'zoho_token_expiry'].forEach((key) => {
+        const localValue = local.getItem(key);
+        if (localValue && !session.getItem(key)) {
+            session.setItem(key, localValue);
+        }
+        local.removeItem(key);
+    });
+}
+
+migrateLegacyZohoTokensToSession();
+
+// Stockage des tokens OAuth en session (évite persistance disque côté navigateur)
 const ZohoAuth = {
     getAccessToken() {
-        return localStorage.getItem('zoho_access_token');
+        const session = safeSessionStorage();
+        if (session) return session.getItem('zoho_access_token');
+        const local = safeLocalStorage();
+        return local ? local.getItem('zoho_access_token') : null;
     },
     
     setAccessToken(token) {
-        localStorage.setItem('zoho_access_token', token);
+        const session = safeSessionStorage();
+        if (session) {
+            session.setItem('zoho_access_token', token);
+            return;
+        }
+        const local = safeLocalStorage();
+        if (local) local.setItem('zoho_access_token', token);
     },
     
     getRefreshToken() {
-        return localStorage.getItem('zoho_refresh_token');
+        const session = safeSessionStorage();
+        if (session) return session.getItem('zoho_refresh_token');
+        const local = safeLocalStorage();
+        return local ? local.getItem('zoho_refresh_token') : null;
     },
     
     setRefreshToken(token) {
-        localStorage.setItem('zoho_refresh_token', token);
+        const session = safeSessionStorage();
+        if (session) {
+            session.setItem('zoho_refresh_token', token);
+            return;
+        }
+        const local = safeLocalStorage();
+        if (local) local.setItem('zoho_refresh_token', token);
     },
     
     getTokenExpiry() {
-        return localStorage.getItem('zoho_token_expiry');
+        const session = safeSessionStorage();
+        if (session) return session.getItem('zoho_token_expiry');
+        const local = safeLocalStorage();
+        return local ? local.getItem('zoho_token_expiry') : null;
     },
     
     setTokenExpiry(expiry) {
-        localStorage.setItem('zoho_token_expiry', expiry);
+        const session = safeSessionStorage();
+        if (session) {
+            session.setItem('zoho_token_expiry', String(expiry));
+            return;
+        }
+        const local = safeLocalStorage();
+        if (local) local.setItem('zoho_token_expiry', String(expiry));
     },
     
     isTokenValid() {
@@ -106,9 +165,18 @@ const ZohoAuth = {
     },
     
     clearTokens() {
-        localStorage.removeItem('zoho_access_token');
-        localStorage.removeItem('zoho_refresh_token');
-        localStorage.removeItem('zoho_token_expiry');
+        const session = safeSessionStorage();
+        if (session) {
+            session.removeItem('zoho_access_token');
+            session.removeItem('zoho_refresh_token');
+            session.removeItem('zoho_token_expiry');
+        }
+        const local = safeLocalStorage();
+        if (local) {
+            local.removeItem('zoho_access_token');
+            local.removeItem('zoho_refresh_token');
+            local.removeItem('zoho_token_expiry');
+        }
     }
 };
 

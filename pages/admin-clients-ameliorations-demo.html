@@ -390,7 +390,7 @@
             </h1>
         </div>
         <div class="header-right">
-            <button class="btn-icon" onclick="window.location.href='/pages/admin-clients.html'" title="Retour">
+            <button class="btn-icon" data-nav-url="/pages/admin-clients.html" title="Retour">
                 <i data-lucide="arrow-left"></i>
             </button>
         </div>
@@ -400,11 +400,11 @@
     <section class="tabs-navigation">
         <div class="tabs-sidebar">
             <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-channel-manager.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-channel-manager.html">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-clients.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-clients.html">
                 <i data-lucide="users"></i>
                 <span>Clients</span>
             </button>
@@ -695,7 +695,7 @@ npm install xlsx
                 <strong>Proposition :</strong> Modal avec formulaire complet de modification.
             </div>
 
-            <button class="btn-export" onclick="document.getElementById('modalEdit').style.display='flex'">
+            <button class="btn-export" data-action="open-edit-modal">
                 <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
                 Ouvrir modal édition (démo)
             </button>
@@ -739,7 +739,7 @@ supabaseClient
         <div class="modal-edit-content">
             <h2 style="margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
                 Modifier Client
-                <button onclick="document.getElementById('modalEdit').style.display='none'" style="background: none; border: none; cursor: pointer;">
+                <button data-action="close-edit-modal" style="background: none; border: none; cursor: pointer;">
                     <i data-lucide="x" style="width: 24px; height: 24px;"></i>
                 </button>
             </h2>
@@ -800,7 +800,7 @@ supabaseClient
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn-cancel" onclick="document.getElementById('modalEdit').style.display='none'">Annuler</button>
+                    <button type="button" class="btn-cancel" data-action="close-edit-modal">Annuler</button>
                     <button type="submit" class="btn-save">
                         <i data-lucide="save" style="width: 16px; height: 16px;"></i>
                         Enregistrer
@@ -813,6 +813,35 @@ supabaseClient
     <script>
         // Initialiser Lucide
         lucide.createIcons();
+
+        document.addEventListener('click', (event) => {
+            const navButton = event.target.closest('[data-nav-url]');
+            if (navButton) {
+                const navUrl = navButton.dataset.navUrl;
+                if (navUrl) {
+                    window.location.href = navUrl;
+                }
+                return;
+            }
+
+            const actionEl = event.target.closest('[data-action]');
+            if (!actionEl) {
+                return;
+            }
+
+            const modal = document.getElementById('modalEdit');
+            if (!modal) {
+                return;
+            }
+
+            if (actionEl.dataset.action === 'open-edit-modal') {
+                modal.style.display = 'flex';
+            }
+
+            if (actionEl.dataset.action === 'close-edit-modal') {
+                modal.style.display = 'none';
+            }
+        });
 
         // Graphique 1: Évolution clients
         const ctxClients = document.getElementById('chartClients').getContext('2d');

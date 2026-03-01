@@ -6,6 +6,70 @@
 
 // console.log('🤖 Module Stratégie IA chargé');
 
+const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+async function isCurrentUserAdmin(user) {
+    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+        ? window.APP_CONFIG.ADMIN_EMAILS
+        : [];
+    const adminEmails = new Set(
+        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+            .map(normalizeEmail)
+            .filter(Boolean)
+    );
+
+    if (adminEmails.has(normalizeEmail(user?.email))) {
+        return true;
+    }
+
+    try {
+        const { data: rolesData, error: rolesError } = await window.supabaseClient
+            .from('user_roles')
+            .select('role, is_active')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+
+        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+    } catch (rolesCheckError) {
+        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+        return false;
+    }
+}
+
+async function checkAuth() {
+    try {
+        if (!window.supabaseClient) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        if (error || !session?.user) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const isAdmin = await isCurrentUserAdmin(session.user);
+        if (!isAdmin) {
+            alert('Accès refusé : Réservé aux administrateurs');
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        return true;
+    } catch (authError) {
+        console.error('Erreur authentification stratégie IA:', authError);
+        window.location.href = '../index.html';
+        return false;
+    }
+}
+
 // ================================================================
 // ARCHIVAGE AUTOMATIQUE DES SEMAINES PASSÉES
 // ================================================================
@@ -361,21 +425,21 @@ function displayLongtermPlan(plan) {
         <div style="margin-bottom: 20px; padding: 24px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 18px;">
                 <h3 style="margin: 0; font-size: 1.4rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">🎯 Vision 3 mois</h3>
-                <button onclick="improvePlan()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
+                <button data-action="improve-plan" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
                     <span>✨</span> Améliorer le plan
                 </button>
             </div>
             <p style="margin: 0 0 20px 0; font-size: 1.05rem; line-height: 1.7; color: #475569;">${plan.plan_global.vision_3_mois || plan.plan_global.vision || 'Devenir référence gestion locative'}</p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
-                <div style="padding: 18px; background: white; border-radius: 10px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.04)';">
+                <div style="padding: 18px; background: white; border-radius: 10px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s;">
                     <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Leads Qualifiés</div>
                     <div style="font-size: 1.9rem; font-weight: bold; color: #1e293b;">${plan.plan_global.objectifs_finaux?.leads_qualifies || '250'}</div>
                 </div>
-                <div style="padding: 18px; background: white; border-radius: 10px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.04)';">
+                <div style="padding: 18px; background: white; border-radius: 10px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s;">
                     <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Clients Signés</div>
                     <div style="font-size: 1.9rem; font-weight: bold; color: #1e293b;">${plan.plan_global.objectifs_finaux?.clients_signes || '35'}</div>
                 </div>
-                <div style="padding: 18px; background: white; border-radius: 10px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.04)';">
+                <div style="padding: 18px; background: white; border-radius: 10px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s;">
                     <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">MRR Cible</div>
                     <div style="font-size: 1.9rem; font-weight: bold; color: #1e293b;">${plan.plan_global.objectifs_finaux?.mrr_cible || '1800€'}</div>
                 </div>
@@ -384,7 +448,7 @@ function displayLongtermPlan(plan) {
         
         <div style="display: grid; gap: 20px;">
             ${plan.semaines.map(s => `
-                <div style="padding: 28px; background: white; border-radius: 12px; border-left: 5px solid ${s.numero === 1 ? '#10B981' : '#667eea'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'; this.style.transform='translateY(0)';">
+                <div style="padding: 28px; background: white; border-radius: 12px; border-left: 5px solid ${s.numero === 1 ? '#10B981' : '#667eea'}; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; transition: all 0.3s;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
                         <h4 style="margin: 0; font-size: 1.3rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">📅 ${s.numero === 1 ? 'Semaine en cours' : 'Semaine +' + (s.numero - 1)}</h4>
                         ${s.numero === 1 ? `
@@ -392,7 +456,7 @@ function displayLongtermPlan(plan) {
                             <span style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);">
                                 EN COURS
                             </span>
-                            <button onclick="validateCurrentWeek()" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.3)';">✓ Valider & Passer à la suivante</button>
+                            <button data-action="validate-current-week" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); transition: all 0.3s;">✓ Valider & Passer à la suivante</button>
                         </div>
                         ` : `<span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);">PLANIFIÉE</span>`}
                     </div>
@@ -437,13 +501,13 @@ function displayLongtermPlan(plan) {
                                     const borderColor = platformColors[action.type] || '#667eea';
                                     
                                     return `
-                                    <div style="padding: 20px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 12px; border: 2px solid ${borderColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.3s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'; this.style.transform='translateY(0)';">
+                                    <div style="padding: 20px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 12px; border: 2px solid ${borderColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.3s;">
                                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                                             <strong style="flex: 1; font-size: 1rem; color: #1e293b;">${idx + 1}. ${action.sujet || action.titre || 'Action'}</strong>
                                             <div style="display: flex; gap: 8px;">
                                                 <span style="font-size: 0.75rem; background: ${borderColor}; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 500;">${action.type}</span>
-                                                <button onclick="generateFullContent(${s.numero}, ${idx})" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)';">✨ Générer</button>
-                                                <button onclick="validateAndArchiveAction(${s.numero}, ${idx})" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.3)';">✅ Valider</button>
+                                                <button data-action="generate-full-content" data-week-num="${s.numero}" data-action-idx="${idx}" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); transition: all 0.3s;">✨ Générer</button>
+                                                <button data-action="validate-and-archive-action" data-week-num="${s.numero}" data-action-idx="${idx}" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); transition: all 0.3s;">✅ Valider</button>
                                             </div>
                                         </div>
                                         ${action.timing ? `<div style="font-size: 0.85rem; margin-bottom: 8px; color: #64748b;">⏰ ${action.timing}</div>` : ''}
@@ -648,7 +712,7 @@ window.validateAndArchiveAction = async function(weekNum, actionIdx) {
                             <!-- Plateforme -->
                             <div style="margin-bottom: 22px;">
                                 <label style="display: block; margin-bottom: 10px; color: #1e293b; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">📱 Plateforme</label>
-                                <select id="platformPublished" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; transition: all 0.3s; cursor: pointer;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                                <select id="platformPublished" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; transition: all 0.3s; cursor: pointer;">
                                     <option value="linkedin">🔗 LinkedIn</option>
                                     <option value="facebook">👍 Facebook</option>
                                     <option value="instagram">📸 Instagram</option>
@@ -661,13 +725,13 @@ window.validateAndArchiveAction = async function(weekNum, actionIdx) {
                             <!-- Date -->
                             <div style="margin-bottom: 22px;">
                                 <label style="display: block; margin-bottom: 10px; color: #1e293b; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">📅 Date de publication</label>
-                                <input type="datetime-local" id="publishDate" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; transition: all 0.3s;" value="${new Date().toISOString().slice(0, 16)}" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                                <input type="datetime-local" id="publishDate" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; transition: all 0.3s;" value="${new Date().toISOString().slice(0, 16)}">
                             </div>
                             
                             <!-- URL -->
                             <div style="margin-bottom: 22px;">
                                 <label style="display: block; margin-bottom: 10px; color: #1e293b; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">🔗 URL Publication <span style="color: #94a3b8; font-size: 0.75rem; text-transform: none;">(optionnel)</span></label>
-                                <input type="url" id="publishUrl" placeholder="https://linkedin.com/posts/..." style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; transition: all 0.3s;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                                <input type="url" id="publishUrl" placeholder="https://linkedin.com/posts/..." style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; transition: all 0.3s;">
                             </div>
                             
                             <!-- Métriques Grid -->
@@ -677,42 +741,42 @@ window.validateAndArchiveAction = async function(weekNum, actionIdx) {
                                     <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); padding: 2px; border-radius: 12px;">
                                         <div style="background: white; border-radius: 11px; padding: 12px;">
                                             <label style="display: block; margin-bottom: 6px; color: #3B82F6; font-weight: 600; font-size: 0.85rem;">👁️ Vues</label>
-                                            <input type="number" id="metricVues" placeholder="150" style="width: 100%; padding: 10px; border: 1px solid #DBEAFE; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#3B82F6';" onblur="this.style.borderColor='#DBEAFE';">
+                                            <input type="number" id="metricVues" placeholder="150" style="width: 100%; padding: 10px; border: 1px solid #DBEAFE; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;">
                                         </div>
                                     </div>
                                     
                                     <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); padding: 2px; border-radius: 12px;">
                                         <div style="background: white; border-radius: 11px; padding: 12px;">
                                             <label style="display: block; margin-bottom: 6px; color: #EF4444; font-weight: 600; font-size: 0.85rem;">❤️ Likes</label>
-                                            <input type="number" id="metricLikes" placeholder="23" style="width: 100%; padding: 10px; border: 1px solid #FEE2E2; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#EF4444';" onblur="this.style.borderColor='#FEE2E2';">
+                                            <input type="number" id="metricLikes" placeholder="23" style="width: 100%; padding: 10px; border: 1px solid #FEE2E2; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;">
                                         </div>
                                     </div>
                                     
                                     <div style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); padding: 2px; border-radius: 12px;">
                                         <div style="background: white; border-radius: 11px; padding: 12px;">
                                             <label style="display: block; margin-bottom: 6px; color: #8B5CF6; font-weight: 600; font-size: 0.85rem;">💬 Commentaires</label>
-                                            <input type="number" id="metricComments" placeholder="5" style="width: 100%; padding: 10px; border: 1px solid #EDE9FE; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#8B5CF6';" onblur="this.style.borderColor='#EDE9FE';">
+                                            <input type="number" id="metricComments" placeholder="5" style="width: 100%; padding: 10px; border: 1px solid #EDE9FE; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;">
                                         </div>
                                     </div>
                                     
                                     <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 2px; border-radius: 12px;">
                                         <div style="background: white; border-radius: 11px; padding: 12px;">
                                             <label style="display: block; margin-bottom: 6px; color: #10B981; font-weight: 600; font-size: 0.85rem;">🔄 Partages</label>
-                                            <input type="number" id="metricShares" placeholder="2" style="width: 100%; padding: 10px; border: 1px solid #D1FAE5; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#10B981';" onblur="this.style.borderColor='#D1FAE5';">
+                                            <input type="number" id="metricShares" placeholder="2" style="width: 100%; padding: 10px; border: 1px solid #D1FAE5; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;">
                                         </div>
                                     </div>
                                     
                                     <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); padding: 2px; border-radius: 12px;">
                                         <div style="background: white; border-radius: 11px; padding: 12px;">
                                             <label style="display: block; margin-bottom: 6px; color: #F59E0B; font-weight: 600; font-size: 0.85rem;">🖱️ Clics</label>
-                                            <input type="number" id="metricClicks" placeholder="12" style="width: 100%; padding: 10px; border: 1px solid #FEF3C7; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#F59E0B';" onblur="this.style.borderColor='#FEF3C7';">
+                                            <input type="number" id="metricClicks" placeholder="12" style="width: 100%; padding: 10px; border: 1px solid #FEF3C7; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;">
                                         </div>
                                     </div>
                                     
                                     <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 2px; border-radius: 12px;">
                                         <div style="background: white; border-radius: 11px; padding: 12px;">
                                             <label style="display: block; margin-bottom: 6px; color: #059669; font-weight: 600; font-size: 0.85rem;">🎯 LEADS</label>
-                                            <input type="number" id="metricLeads" placeholder="3" style="width: 100%; padding: 10px; border: 1px solid #D1FAE5; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;" onfocus="this.style.borderColor='#059669';" onblur="this.style.borderColor='#D1FAE5';">
+                                            <input type="number" id="metricLeads" placeholder="3" style="width: 100%; padding: 10px; border: 1px solid #D1FAE5; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;">
                                         </div>
                                     </div>
                                 </div>
@@ -721,13 +785,13 @@ window.validateAndArchiveAction = async function(weekNum, actionIdx) {
                             <!-- Notes -->
                             <div style="margin-bottom: 25px;">
                                 <label style="display: block; margin-bottom: 10px; color: #1e293b; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">📝 Notes Performance</label>
-                                <textarea id="performanceNotes" placeholder="Ce qui a bien fonctionné, insights, leçons apprises..." style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; min-height: 100px; font-family: inherit; resize: vertical; transition: all 0.3s;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"></textarea>
+                                <textarea id="performanceNotes" placeholder="Ce qui a bien fonctionné, insights, leçons apprises..." style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc; min-height: 100px; font-family: inherit; resize: vertical; transition: all 0.3s;"></textarea>
                             </div>
                             
                             <!-- Boutons -->
                             <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 10px; border-top: 2px solid #f1f5f9;">
-                                <button onclick="document.getElementById('metricsModal').remove()" style="padding: 14px 28px; border: 2px solid #e2e8f0; background: white; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem; color: #64748b; transition: all 0.3s;" onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='white'; this.style.borderColor='#e2e8f0';">✖️ Annuler</button>
-                                <button onclick="saveMetricsAndArchive(${weekNum}, ${actionIdx})" style="padding: 14px 28px; border: none; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';">✅ Valider & Archiver</button>
+                                <button data-action="close-metrics-modal" style="padding: 14px 28px; border: 2px solid #e2e8f0; background: white; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem; color: #64748b; transition: all 0.3s;">✖️ Annuler</button>
+                                <button data-action="save-metrics-and-archive" data-week-num="${weekNum}" data-action-idx="${actionIdx}" style="padding: 14px 28px; border: none; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); transition: all 0.3s;">✅ Valider & Archiver</button>
                             </div>
                         </div>
                     </div>
@@ -906,8 +970,8 @@ window.loadArchivedActions = async function() {
                             ` : ''}
                             
                             <div style="margin-top: 15px; display: flex; gap: 10px;">
-                                <button onclick="reuseAction('${action.id}')" style="padding: 8px 15px; background: #10B981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">♻️ Réutiliser</button>
-                                <button onclick="duplicateAction('${action.id}')" style="padding: 8px 15px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">📋 Dupliquer</button>
+                                <button data-action="reuse-action" data-action-id="${action.id}" style="padding: 8px 15px; background: #10B981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">♻️ Réutiliser</button>
+                                <button data-action="duplicate-action" data-action-id="${action.id}" style="padding: 8px 15px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">📋 Dupliquer</button>
                             </div>
                         </div>
                     `;
@@ -1045,7 +1109,7 @@ async function loadCurrentStrategy() {
             document.getElementById('currentStrategy').innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #9CA3AF;">
                     <p style="margin-bottom: 15px;">📋 Aucune stratégie active cette semaine</p>
-                    <button onclick="generateWeeklyStrategy()" class="btn-primary" style="background: #667eea;">
+                    <button data-action="generate-weekly-strategy" class="btn-primary" style="background: #667eea;">
                         <i data-lucide="sparkles"></i>
                         Générer Stratégie
                     </button>
@@ -1110,7 +1174,7 @@ async function loadContentQueue() {
         // console.log('✅ Publications programmées trouvées:', data.length);
         
         const html = data.map(item => `
-            <div onclick="openActionDetails('${item.id}')" style="padding: 15px; background: white; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)'">
+            <div data-action="open-action-details" data-item-id="${item.id}" style="padding: 15px; background: white; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                     <strong style="color: #1e293b;">${item.type} - ${item.plateforme || 'N/A'}</strong>
                     <span style="font-size: 0.85rem; color: #64748b;">📅 ${new Date(item.scheduled_date).toLocaleDateString('fr-FR')}</span>
@@ -1163,10 +1227,10 @@ async function loadAIActions() {
                 <strong style="display: block; margin-bottom: 5px;">${action.titre}</strong>
                 <p style="margin: 8px 0; font-size: 0.9rem; opacity: 0.9;">${action.description}</p>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button onclick="approveAction('${action.id}')" class="btn-success" style="background: #10B981; padding: 5px 12px; border-radius: 4px; border: none; color: white; cursor: pointer;">
+                    <button data-action="approve-action" data-action-id="${action.id}" class="btn-success" style="background: #10B981; padding: 5px 12px; border-radius: 4px; border: none; color: white; cursor: pointer;">
                         ✅ Approuver
                     </button>
-                    <button onclick="rejectAction('${action.id}')" class="btn-danger" style="background: #EF4444; padding: 5px 12px; border-radius: 4px; border: none; color: white; cursor: pointer;">
+                    <button data-action="reject-action" data-action-id="${action.id}" class="btn-danger" style="background: #EF4444; padding: 5px 12px; border-radius: 4px; border: none; color: white; cursor: pointer;">
                         ❌ Rejeter
                     </button>
                 </div>
@@ -1262,8 +1326,108 @@ function showToast(message, type) {
     // console.log(`[${type}] ${message}`);
 }
 
+function decodeHtmlEntities(value) {
+    return String(value || '').replace(/&quot;/g, '"');
+}
+
+function setupContentAIStrategyDelegation() {
+    document.addEventListener('click', async (event) => {
+        const actionEl = event.target.closest('[data-action]');
+        if (!actionEl) {
+            return;
+        }
+
+        const action = actionEl.dataset.action;
+        const actionId = actionEl.dataset.actionId;
+
+        switch (action) {
+            case 'improve-plan':
+                await window.improvePlan?.();
+                break;
+            case 'validate-current-week':
+                await window.validateCurrentWeek?.();
+                break;
+            case 'generate-full-content':
+                await window.generateFullContent?.(
+                    Number(actionEl.dataset.weekNum),
+                    Number(actionEl.dataset.actionIdx)
+                );
+                break;
+            case 'validate-and-archive-action':
+                await window.validateAndArchiveAction?.(
+                    Number(actionEl.dataset.weekNum),
+                    Number(actionEl.dataset.actionIdx)
+                );
+                break;
+            case 'close-metrics-modal': {
+                const metricsModal = document.getElementById('metricsModal');
+                if (metricsModal) {
+                    metricsModal.remove();
+                }
+                break;
+            }
+            case 'save-metrics-and-archive':
+                await window.saveMetricsAndArchive?.(
+                    Number(actionEl.dataset.weekNum),
+                    Number(actionEl.dataset.actionIdx)
+                );
+                break;
+            case 'reuse-action':
+                if (actionId) {
+                    await window.reuseAction?.(actionId);
+                }
+                break;
+            case 'duplicate-action':
+                if (actionId) {
+                    await window.duplicateAction?.(actionId);
+                }
+                break;
+            case 'generate-weekly-strategy':
+                await window.generateWeeklyStrategy?.();
+                break;
+            case 'open-action-details':
+                if (actionEl.dataset.itemId) {
+                    await window.openActionDetails?.(actionEl.dataset.itemId);
+                }
+                break;
+            case 'approve-action':
+                if (actionId) {
+                    await window.approveAction?.(actionId);
+                }
+                break;
+            case 'reject-action':
+                if (actionId) {
+                    await window.rejectAction?.(actionId);
+                }
+                break;
+            case 'close-action-modal':
+                window.closeActionModal?.();
+                break;
+            case 'generate-action-plan': {
+                const title = decodeHtmlEntities(actionEl.dataset.actionTitle);
+                const content = decodeHtmlEntities(actionEl.dataset.actionContent);
+                const type = actionEl.dataset.actionType;
+                if (actionId && type) {
+                    await window.generateActionPlan?.(actionId, title, content, type);
+                }
+                break;
+            }
+            case 'save-plan':
+                await window.savePlan?.(window.currentActionId);
+                break;
+            default:
+                break;
+        }
+    });
+}
+
 // Init au chargement
 document.addEventListener('DOMContentLoaded', async () => {
+    const isAllowed = await checkAuth();
+    if (!isAllowed) {
+        return;
+    }
+
     // Note: archiveOldWeeks() désactivé - utilise semaine ISO au lieu de 1-12
     // await archiveOldWeeks();
     
@@ -1274,6 +1438,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('aiActions')) {
         loadAIActions();
     }
+
+    setupContentAIStrategyDelegation();
 });
 
 // ================================================================
@@ -1347,7 +1513,7 @@ window.openActionDetails = async function(actionId) {
                             <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">${action.sujet}</h2>
                             <p style="margin: 0; opacity: 0.9;">${action.type} - ${action.plateforme || 'N/A'}</p>
                         </div>
-                        <button onclick="closeActionModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;">✕</button>
+                        <button data-action="close-action-modal" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;">✕</button>
                     </div>
                 </div>
                 
@@ -1378,10 +1544,10 @@ window.openActionDetails = async function(actionId) {
                     </div>
                     
                     <div style="display: flex; gap: 1rem;">
-                        <button onclick="generateActionPlan('${action.id}', '${action.sujet.replace(/'/g, "\\'")}', '${action.contenu.replace(/'/g, "\\'")}', '${action.type}')" style="flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(102,126,234,0.3); transition: all 0.3s;">
+                        <button data-action="generate-action-plan" data-action-id="${action.id}" data-action-title="${action.sujet.replace(/"/g, '&quot;')}" data-action-content="${action.contenu.replace(/"/g, '&quot;')}" data-action-type="${action.type}" style="flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(102,126,234,0.3); transition: all 0.3s;">
                             🤖 Générer Plan d'Action Détaillé
                         </button>
-                        <button onclick="closeActionModal()" style="background: #e2e8f0; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        <button data-action="close-action-modal" style="background: #e2e8f0; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
                             Fermer
                         </button>
                     </div>
@@ -1487,7 +1653,7 @@ window.generateActionPlan = async function(actionId, titre, description, type) {
         
         // Afficher bouton sauvegarder
         window.currentPlan = plan;
-        const saveBtnHtml = `<button id="savePlanBtn" onclick="savePlan(window.currentActionId)" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; margin-top: 1rem;">💾 Sauvegarder ce Plan</button>`;
+        const saveBtnHtml = `<button id="savePlanBtn" data-action="save-plan" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; margin-top: 1rem;">💾 Sauvegarder ce Plan</button>`;
         document.getElementById('planContent').insertAdjacentHTML('afterend', saveBtnHtml);
         
     } catch (error) {

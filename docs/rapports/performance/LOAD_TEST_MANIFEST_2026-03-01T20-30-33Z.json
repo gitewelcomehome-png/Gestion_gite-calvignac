@@ -1,0 +1,87 @@
+{
+  "run_id": "2026-03-01T20-30-33Z",
+  "base_url": "https://liveownerunit.fr",
+  "status": "completed",
+  "updated_at": "2026-03-01T21:10:11.466Z",
+  "raw_file": "docs/rapports/performance/LOAD_TEST_RAW_2026-03-01T20-30-33Z.csv",
+  "phases_completed": [
+    {
+      "scenario": "api_test",
+      "phase": "warmup",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_api_test_warmup.json",
+      "completed_at": "2026-03-01T20:30:46.228Z"
+    },
+    {
+      "scenario": "api_test",
+      "phase": "ramp_1",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_api_test_ramp_1.json",
+      "completed_at": "2026-03-01T20:31:24.731Z"
+    },
+    {
+      "scenario": "api_test",
+      "phase": "ramp_2",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_api_test_ramp_2.json",
+      "completed_at": "2026-03-01T20:32:43.296Z"
+    },
+    {
+      "scenario": "api_test",
+      "phase": "peak",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_api_test_peak.json",
+      "completed_at": "2026-03-01T20:35:24.866Z"
+    },
+    {
+      "scenario": "api_ai_health",
+      "phase": "warmup",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_api_ai_health_warmup.json",
+      "completed_at": "2026-03-01T20:45:04.881Z"
+    },
+    {
+      "scenario": "api_ai_health",
+      "phase": "ramp_1",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_api_ai_health_ramp_1.json",
+      "completed_at": "2026-03-01T20:45:25.401Z"
+    },
+    {
+      "scenario": "api_ai_health",
+      "phase": "ramp_2",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_api_ai_health_ramp_2.json",
+      "completed_at": "2026-03-01T20:46:35.087Z"
+    },
+    {
+      "scenario": "api_ai_health",
+      "phase": "peak",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_api_ai_health_peak.json",
+      "completed_at": "2026-03-01T20:48:23.102Z"
+    },
+    {
+      "scenario": "admin_security_page",
+      "phase": "warmup",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_admin_security_page_warmup.json",
+      "completed_at": "2026-03-01T20:48:56.399Z"
+    },
+    {
+      "scenario": "admin_security_page",
+      "phase": "ramp_1",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_admin_security_page_ramp_1.json",
+      "completed_at": "2026-03-01T20:54:33.553Z"
+    },
+    {
+      "scenario": "admin_security_page",
+      "phase": "ramp_2",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_admin_security_page_ramp_2.json",
+      "completed_at": "2026-03-01T21:00:33.181Z"
+    },
+    {
+      "scenario": "admin_security_page",
+      "phase": "peak",
+      "phase_summary_file": "docs/rapports/performance/LOAD_TEST_PHASE_2026-03-01T20-30-33Z_admin_security_page_peak.json",
+      "completed_at": "2026-03-01T21:06:36.170Z"
+    }
+  ],
+  "progress": {
+    "done": 12,
+    "total": 12,
+    "percent": 100
+  },
+  "summary_file": "docs/rapports/performance/LOAD_TEST_SUMMARY_2026-03-01T20-30-33Z.json"
+}

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Référentiel Conformité RGPD & Sécurité</title>
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --ok: #065f46;
+      --warn: #92400e;
+      --border: #e5e7eb;
+      --accent: #1d4ed8;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.5rem;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    .status-ok {
+      color: var(--ok);
+      font-weight: 600;
+    }
+
+    .status-warn {
+      color: var(--warn);
+      font-weight: 600;
+    }
+
+    .doc-list code {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .footer {
+      margin-top: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="header">
+      <h1>Référentiel — Ce qu’il faut conserver (RGPD & Sécurité)</h1>
+      <div class="meta">
+        Dernière mise à jour : 22/02/2026 • Usage interne • Sans action runtime
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>1) Documents obligatoires à conserver</h2>
+        <ul>
+          <li>Politique de confidentialité publiée</li>
+          <li>Mentions légales publiées</li>
+          <li>CGU/CGV contractuelles signées</li>
+          <li>DPA/SCC de chaque sous-traitant</li>
+          <li>Registre DSAR opérationnel</li>
+          <li>Matrice de conservation validée juridiquement</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>2) Preuves techniques à conserver</h2>
+        <ul class="doc-list">
+          <li><code>docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md</code></li>
+          <li><code>docs/rapports/RGPD_DOSSIER_CONFORMITE_CENTRAL.md</code></li>
+          <li><code>docs/rapports/REGISTRE_PREUVES_AUDIT_EXTERNE_2026-02-22.md</code></li>
+          <li><code>docs/ARCHITECTURE.md</code></li>
+          <li><code>docs/architecture/ERREURS_CRITIQUES.md</code></li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>3) Éléments de gouvernance à figer</h2>
+        <ul>
+          <li>Responsable de traitement (nominal)</li>
+          <li>Contact DSAR dédié</li>
+          <li>Responsables sécurité et conformité</li>
+          <li>Processus de validation documentaire</li>
+          <li>Périodicité de revue (mensuelle/trimestrielle)</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>4) Statut actuel</h2>
+        <ul>
+          <li><span class="status-ok">OK</span> — Dossier RGPD central structuré</li>
+          <li><span class="status-ok">OK</span> — Checklist exécution et registre des preuves</li>
+          <li><span class="status-warn">À finaliser</span> — Pièces juridiques externes</li>
+          <li><span class="status-warn">À finaliser</span> — DPA/SCC consolidés</li>
+          <li><span class="status-warn">À finaliser</span> — Contact DSAR nominatif</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>5) Règles de conservation minimales</h2>
+        <ul>
+          <li>Conserver uniquement le nécessaire à la finalité</li>
+          <li>Renseigner une durée explicite par type de donnée</li>
+          <li>Tracer la suppression/anonymisation en fin de durée</li>
+          <li>Conserver les preuves d’audit et de décision</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>6) Prochaine revue recommandée</h2>
+        <ul>
+          <li>Revues rapides hebdomadaires sur les points ⚠️</li>
+          <li>Revue mensuelle de conformité documentaire</li>
+          <li>Mise à jour de la décision GO / NO GO</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="footer">
+      URL directe : <strong>/pages/conformite-rgpd-securite.html</strong><br />
+      Cette page sert de mémo opérationnel et de point d’entrée audit interne.
+    </section>
+  </main>
+</body>
+</html>

@@ -342,11 +342,11 @@
             <p style="font-size: 14px; opacity: 0.9; margin-top: 5px;">Vue d'ensemble de tous les clients</p>
         </div>
         <div style="display: flex; gap: 15px;">
-            <button class="btn btn-secondary" onclick="window.location.href='/pages/admin-channel-manager.html'">
+            <button class="btn btn-secondary" data-nav-url="/pages/admin-channel-manager.html">
                 <i data-lucide="arrow-left"></i>
                 Retour
             </button>
-            <button class="btn btn-primary" onclick="openConfigModal()">
+            <button class="btn btn-primary" data-action="open-config-modal">
                 <i data-lucide="settings"></i>
                 Configuration
             </button>
@@ -459,7 +459,7 @@
             <div class="modal-header">
                 <h2>⚙️ Configuration Commission</h2>
             </div>
-            <form id="formConfig" onsubmit="saveConfig(event)">
+            <form id="formConfig">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="commissionPercent">Pourcentage de commission (%)</label>
@@ -479,7 +479,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeConfigModal()">
+                    <button type="button" class="btn btn-secondary" data-action="close-config-modal">
                         Annuler
                     </button>
                     <button type="submit" class="btn btn-primary">
@@ -492,12 +492,40 @@
     </div>
     
     <!-- Script Supabase -->
-    <script src="../config/supabase-config.js"></script>
+    <script src="../js/shared-config.js"></script>
     <script src="../js/admin-prestations-stats.js"></script>
     <script>
-        // Initialiser Lucide Icons
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+
+            document.addEventListener('click', (event) => {
+                const navButton = event.target.closest('[data-nav-url]');
+                if (navButton) {
+                    const navUrl = navButton.dataset.navUrl;
+                    if (navUrl) {
+                        window.location.href = navUrl;
+                    }
+                    return;
+                }
+
+                const actionEl = event.target.closest('[data-action]');
+                if (!actionEl) {
+                    return;
+                }
+
+                if (actionEl.dataset.action === 'open-config-modal') {
+                    window.openConfigModal?.();
+                }
+
+                if (actionEl.dataset.action === 'close-config-modal') {
+                    window.closeConfigModal?.();
+                }
+            });
+
+            document.getElementById('formConfig')?.addEventListener('submit', (event) => {
+                event.preventDefault();
+                window.saveConfig?.(event);
+            });
         });
     </script>
 </body>

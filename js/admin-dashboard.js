@@ -14,6 +14,13 @@ let errorsRealtimeSubscription = null;
 let supportAiMetricsCache = null;
 let supportAiMetricsCachedAt = 0;
 let aiHealthApiUnavailable = false;
+let cmErrorLogsAccessUnavailable = false;
+
+function isAccessDeniedError(error) {
+    const code = String(error?.code || error?.status || '');
+    const message = String(error?.message || '').toLowerCase();
+    return code === '401' || code === '403' || message.includes('permission denied') || message.includes('row-level security');
+}
 
 // ================================================================
 // INITIALISATION
@@ -21,7 +28,6 @@ let aiHealthApiUnavailable = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // console.log('🚀 Initialisation Dashboard Channel Manager...');
-    ensureFiscalRulesExportButton();
     
     // Vérifier l'authentification
     await checkAuth();
@@ -31,6 +37,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Initialiser les event listeners
     initEventListeners();
+
+    if (window.location.hash === '#fiscal-export') {
+        try {
+            await exportFiscalRulesReadableReport();
+        } catch (error) {
+            console.error('❌ Erreur export fiscal via hash:', error);
+        } finally {
+            if (window.history?.replaceState) {
+                window.history.replaceState(null, '', window.location.pathname);
+            }
+        }
+    }
 
     if (aiStatusRefreshInterval) {
         clearInterval(aiStatusRefreshInterval);
@@ -89,9 +107,39 @@ async function checkAuth() {
         
         currentUser = session.user;
         // console.log('✅ Utilisateur connecté:', currentUser.email);
-        
-        // Vérifier si c'est l'admin
-        if (currentUser.email !== 'stephanecalvignac@hotmail.fr') {
+
+        // Vérifier si c'est l'admin (email allowlist + rôle actif si disponible)
+        const fallbackAdminEmails = ['stephanecalvignac@hotmail.fr'];
+        const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+            ? window.APP_CONFIG.ADMIN_EMAILS
+            : [];
+        const adminEmails = new Set(
+            [...fallbackAdminEmails, ...configuredAdminEmails]
+                .map((email) => String(email || '').trim().toLowerCase())
+                .filter(Boolean)
+        );
+
+        let isAdmin = adminEmails.has(String(currentUser.email || '').trim().toLowerCase());
+
+        if (!isAdmin) {
+            try {
+                const { data: rolesData, error: rolesError } = await window.supabaseClient
+                    .from('user_roles')
+                    .select('role, is_active')
+                    .eq('user_id', currentUser.id)
+                    .eq('is_active', true)
+                    .in('role', ['admin', 'super_admin'])
+                    .limit(1);
+
+                if (!rolesError && Array.isArray(rolesData) && rolesData.length > 0) {
+                    isAdmin = true;
+                }
+            } catch (rolesCheckError) {
+                console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+            }
+        }
+
+        if (!isAdmin) {
             alert('Accès refusé : Réservé aux administrateurs');
             window.location.href = '../index.html';
             return;
@@ -328,7 +376,7 @@ async function loadAIStatusKPI() {
             healthGlobalEl.textContent = 'Statut indisponible';
         }
         if (updatedEl) {
-            updatedEl.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px;"></i><span>Impossible de vérifier (${error.message})</span>`;
+            updatedEl.innerHTML = '<i data-lucide="alert-triangle" style="width: 14px; height: 14px;"></i><span>Impossible de vérifier</span>';
         }
         if (healthUpdatedEl) {
             healthUpdatedEl.textContent = 'Dernière vérification: erreur';
@@ -761,7 +809,7 @@ async function loadRecentClients() {
             const nomComplet = `${client.prenom_contact || ''} ${client.nom_contact || 'Inconnu'}`.trim();
             
             return `
-                <div class="recent-client-item" onclick="window.location.href='admin-clients.html?id=${client.id}'">
+                <div class="recent-client-item" data-nav-url="admin-clients.html?id=${client.id}">
                     <div class="client-avatar">
                         ${(client.prenom_contact || 'U')[0].toUpperCase()}
                     </div>
@@ -777,6 +825,15 @@ async function loadRecentClients() {
                 </div>
             `;
         }).join('');
+
+        container.querySelectorAll('[data-nav-url]').forEach((item) => {
+            item.addEventListener('click', () => {
+                const navUrl = item.dataset.navUrl;
+                if (navUrl) {
+                    window.location.href = navUrl;
+                }
+            });
+        });
         
         if (window.lucide) lucide.createIcons();
         
@@ -1116,6 +1173,17 @@ async function loadSystemHealthOverview() {
     };
 
     try {
+        if (cmErrorLogsAccessUnavailable) {
+            avgLatencyEl.textContent = '~';
+            requestsPerMinEl.textContent = '~';
+            errorRateEl.textContent = 'N/A';
+            errorRateEl.style.color = '#64748b';
+            markServiceUp(svcSupabaseEl, true);
+            markServiceUp(svcApiEl, true);
+            markServiceUp(svcVercelEl, true);
+            return;
+        }
+
         const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
         const { data: errors24h, error } = await window.supabaseClient
@@ -1124,7 +1192,20 @@ async function loadSystemHealthOverview() {
             .eq('resolved', false)
             .gte('timestamp', since24h);
 
-        if (error) throw error;
+        if (error) {
+            if (isAccessDeniedError(error)) {
+                cmErrorLogsAccessUnavailable = true;
+                avgLatencyEl.textContent = '~';
+                requestsPerMinEl.textContent = '~';
+                errorRateEl.textContent = 'N/A';
+                errorRateEl.style.color = '#64748b';
+                markServiceUp(svcSupabaseEl, true);
+                markServiceUp(svcApiEl, true);
+                markServiceUp(svcVercelEl, true);
+                return;
+            }
+            throw error;
+        }
 
         const unresolvedCount24h = Array.isArray(errors24h) ? errors24h.length : 0;
         const totalRequestsEstimation = Math.max(1000, unresolvedCount24h * 50);
@@ -1165,11 +1246,26 @@ async function loadErrorsKPI() {
             return;
         }
 
+        if (cmErrorLogsAccessUnavailable) {
+            if (criticalEl) criticalEl.textContent = 'N/A';
+            if (warningEl) warningEl.textContent = 'N/A';
+            if (errors24hEl) errors24hEl.textContent = 'N/A';
+            return;
+        }
+
         // Erreurs non résolues par type
         const { data: errorsByType, error: errorsError } = await window.supabaseClient
             .from('cm_error_logs')
             .select('error_type')
             .eq('resolved', false);
+
+        if (errorsError && isAccessDeniedError(errorsError)) {
+            cmErrorLogsAccessUnavailable = true;
+            if (criticalEl) criticalEl.textContent = 'N/A';
+            if (warningEl) warningEl.textContent = 'N/A';
+            if (errors24hEl) errors24hEl.textContent = 'N/A';
+            return;
+        }
         
         if (!errorsError && errorsByType) {
             const critical = errorsByType.filter(e => e.error_type === 'critical').length;
@@ -1192,6 +1288,12 @@ async function loadErrorsKPI() {
             .select('id')
             .eq('resolved', false)
             .gte('timestamp', yesterday.toISOString());
+
+        if (errors24hError && isAccessDeniedError(errors24hError)) {
+            cmErrorLogsAccessUnavailable = true;
+            if (errors24hEl) errors24hEl.textContent = 'N/A';
+            return;
+        }
         
         if (!errors24hError && errors24h) {
             if (errors24hEl) {
@@ -1302,6 +1404,96 @@ function ensureFiscalRulesExportButton() {
     });
 
     actionsContainer.appendChild(buttonReadable);
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+function ensureSecurityAuditReportButton() {
+    const actionsContainer = document.querySelector('.header-right > div');
+    if (!actionsContainer || document.getElementById('btnSecurityAuditReport')) {
+        return;
+    }
+
+    const buttonAudit = document.createElement('button');
+    buttonAudit.id = 'btnSecurityAuditReport';
+    buttonAudit.type = 'button';
+    buttonAudit.style.background = 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
+    buttonAudit.style.color = 'white';
+    buttonAudit.style.border = 'none';
+    buttonAudit.style.padding = '12px 20px';
+    buttonAudit.style.borderRadius = '8px';
+    buttonAudit.style.fontWeight = '600';
+    buttonAudit.style.cursor = 'pointer';
+    buttonAudit.style.display = 'flex';
+    buttonAudit.style.alignItems = 'center';
+    buttonAudit.style.gap = '8px';
+    buttonAudit.style.fontSize = '13px';
+    buttonAudit.style.transition = 'transform 0.2s, box-shadow 0.2s';
+    buttonAudit.title = 'Consulter le rapport d’audit sécurité et la note RGPD';
+    buttonAudit.innerHTML = '<i data-lucide="shield-check" style="width: 16px; height: 16px;"></i>Audit sécurité / RGPD';
+
+    buttonAudit.addEventListener('click', () => {
+        window.location.href = '/pages/admin-security-audit.html';
+    });
+
+    buttonAudit.addEventListener('mouseover', () => {
+        buttonAudit.style.transform = 'translateY(-2px)';
+        buttonAudit.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.35)';
+    });
+
+    buttonAudit.addEventListener('mouseout', () => {
+        buttonAudit.style.transform = 'translateY(0)';
+        buttonAudit.style.boxShadow = 'none';
+    });
+
+    actionsContainer.appendChild(buttonAudit);
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+function ensurePerformanceAuditReportButton() {
+    const actionsContainer = document.querySelector('.header-right > div');
+    if (!actionsContainer || document.getElementById('btnPerformanceAuditReport')) {
+        return;
+    }
+
+    const buttonPerformance = document.createElement('button');
+    buttonPerformance.id = 'btnPerformanceAuditReport';
+    buttonPerformance.type = 'button';
+    buttonPerformance.style.background = 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
+    buttonPerformance.style.color = 'white';
+    buttonPerformance.style.border = 'none';
+    buttonPerformance.style.padding = '12px 20px';
+    buttonPerformance.style.borderRadius = '8px';
+    buttonPerformance.style.fontWeight = '600';
+    buttonPerformance.style.cursor = 'pointer';
+    buttonPerformance.style.display = 'flex';
+    buttonPerformance.style.alignItems = 'center';
+    buttonPerformance.style.gap = '8px';
+    buttonPerformance.style.fontSize = '13px';
+    buttonPerformance.style.transition = 'transform 0.2s, box-shadow 0.2s';
+    buttonPerformance.title = 'Consulter le rapport performance et montée en charge';
+    buttonPerformance.innerHTML = '<i data-lucide="gauge" style="width: 16px; height: 16px;"></i>Audit performance';
+
+    buttonPerformance.addEventListener('click', () => {
+        window.location.href = '/pages/admin-performance-audit.html';
+    });
+
+    buttonPerformance.addEventListener('mouseover', () => {
+        buttonPerformance.style.transform = 'translateY(-2px)';
+        buttonPerformance.style.boxShadow = '0 4px 12px rgba(124, 58, 237, 0.35)';
+    });
+
+    buttonPerformance.addEventListener('mouseout', () => {
+        buttonPerformance.style.transform = 'translateY(0)';
+        buttonPerformance.style.boxShadow = 'none';
+    });
+
+    actionsContainer.appendChild(buttonPerformance);
 
     if (window.lucide) {
         lucide.createIcons();

@@ -224,39 +224,39 @@
     <section class="tabs-navigation">
         <div class="tabs-sidebar">
             <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-channel-manager.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-channel-manager.html">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-clients.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-clients.html">
                 <i data-lucide="users"></i>
                 <span>Clients</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-support.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-support.html">
                 <i data-lucide="headphones"></i>
                 <span>Support</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-emails.html?build=20260217-4'">
+            <button class="tab-btn" data-nav-url="/pages/admin-emails.html?build=20260217-4">
                 <i data-lucide="mail"></i>
                 <span>Messagerie</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-promotions.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-promotions.html">
                 <i data-lucide="tag"></i>
                 <span>Promotions</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-parrainage.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-parrainage.html">
                 <i data-lucide="gift"></i>
                 <span>Parrainage</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-finance.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-finance.html">
                 <i data-lucide="bar-chart-2"></i>
                 <span>Finance & BI</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-content.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-content.html">
                 <i data-lucide="pen-tool"></i>
                 <span>Content IA</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-communications.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-communications.html">
                 <i data-lucide="megaphone"></i>
                 <span>Communications</span>
             </button>
@@ -280,7 +280,7 @@
                 <p class="page-subtitle">Surveillance des performances en temps réel</p>
             </div>
             <div class="page-header__actions">
-                <button class="btn btn--secondary" onclick="location.reload()">
+                <button class="btn btn--secondary" data-action="reload-page">
                     <i data-lucide="refresh-cw"></i>
                     Actualiser
                 </button>
@@ -349,7 +349,7 @@
                             <i data-lucide="bot"></i>
                             État des IA
                         </span>
-                        <button class="btn btn-primary" onclick="refreshAIHealthStatus()" style="padding: 6px 10px; font-size: 12px;">
+                        <button class="btn btn-primary" data-action="refresh-ai-health" style="padding: 6px 10px; font-size: 12px;">
                             <i data-lucide="refresh-cw"></i>
                             Rafraîchir
                         </button>
@@ -388,15 +388,15 @@
                         <option value="critical">Critiques</option>
                         <option value="warning">Warnings</option>
                     </select>
-                    <button class="btn btn-danger" onclick="deleteAllErrors()" title="Supprimer toutes les erreurs non résolues">
+                    <button class="btn btn-danger" data-action="delete-all-errors" title="Supprimer toutes les erreurs non résolues">
                         <i data-lucide="trash-2"></i>
                         Supprimer tout
                     </button>
-                    <button class="btn btn-primary" onclick="autoFixErrors()" title="Correction automatique des erreurs">
+                    <button class="btn btn-primary" data-action="auto-fix-errors" title="Correction automatique des erreurs">
                         <i data-lucide="wand-2"></i>
                         Auto-Fix
                     </button>
-                    <button class="btn btn-success" onclick="refreshErrors()">
+                    <button class="btn btn-success" data-action="refresh-errors">
                         <i data-lucide="refresh-cw"></i>
                         Actualiser
                     </button>
@@ -413,11 +413,24 @@
         <section style="margin-bottom: 30px;" id="testsCorrectionsSection">
             <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; justify-content: space-between;">
                 <span><i data-lucide="test-tubes"></i> Tests de Corrections</span>
-                <button class="btn btn-secondary" onclick="loadTestCorrections()">
-                    <i data-lucide="refresh-cw"></i>
-                    Rafraîchir
-                </button>
+                <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                    <a class="btn btn-primary" href="/pages/test-fixes.html" target="_blank" rel="noopener noreferrer" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                        <i data-lucide="flask-conical"></i>
+                        Ouvrir page de test
+                    </a>
+                    <button class="btn btn-secondary" data-action="refresh-test-status">
+                        <i data-lucide="check-check"></i>
+                        Statut validation
+                    </button>
+                    <button class="btn btn-secondary" data-action="refresh-test-corrections">
+                        <i data-lucide="refresh-cw"></i>
+                        Rafraîchir
+                    </button>
+                </div>
             </h2>
+            <div id="testValidationStatus" style="background:#eef2ff; border:1px solid #c7d2fe; color:#3730a3; border-radius:10px; padding:12px 14px; margin-bottom:14px; font-size:14px;">
+                Statut validation : aucune validation finale enregistrée.
+            </div>
             <div id="testsCorrectionsContainer">
                 <div style="background: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; color: #64748b;">
                     <i data-lucide="clipboard-list" style="width: 64px; height: 64px; margin-bottom: 15px; opacity: 0.5;"></i>
@@ -447,12 +460,12 @@
                 <input type="date" id="filterDateFrom" title="Date de début">
                 <input type="date" id="filterDateTo" title="Date de fin">
                 
-                <button class="btn btn-primary" onclick="searchLogs()">
+                <button class="btn btn-primary" data-action="search-logs">
                     <i data-lucide="search"></i>
                     Rechercher
                 </button>
                 
-                <button class="btn btn-danger" onclick="clearFilters()">
+                <button class="btn btn-danger" data-action="clear-filters">
                     <i data-lucide="x"></i>
                     Réinitialiser
                 </button>
@@ -502,7 +515,7 @@
                     <i data-lucide="wand-2"></i>
                     Correction Automatique des Erreurs
                 </h2>
-                <button onclick="closeAutoFixModal()" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                <button data-action="close-autofix-modal" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
             </div>
             <div id="autoFixContent" style="padding: 30px; max-height: 70vh; overflow-y: auto;">
                 <div style="text-align: center; padding: 40px;">
@@ -651,6 +664,101 @@
     <script src="../js/auto-ticket-system.js"></script>
     <script src="../js/auto-ticket-diagnostic.js"></script>
     <script src="../js/admin-monitoring.js"></script>
-    <script>lucide.createIcons();</script>
+    <script>
+        function refreshTestValidationStatus() {
+            const statusEl = document.getElementById('testValidationStatus');
+            if (!statusEl) return;
+
+            try {
+                const raw = localStorage.getItem('cm_last_test_validation');
+                if (!raw) {
+                    statusEl.textContent = 'Statut validation : aucune validation finale enregistrée.';
+                    return;
+                }
+
+                const data = JSON.parse(raw);
+                const date = data?.validatedAt ? new Date(data.validatedAt) : null;
+                const when = date ? date.toLocaleString('fr-FR') : 'date inconnue';
+                const note = data?.note ? ` — note: ${data.note}` : '';
+                statusEl.textContent = `Statut validation : ✅ validé le ${when}${note}`;
+            } catch (error) {
+                statusEl.textContent = 'Statut validation : impossible de lire la validation locale.';
+            }
+        }
+
+        function setupMonitoringPageDelegation() {
+            document.addEventListener('click', (event) => {
+                const navButton = event.target.closest('[data-nav-url]');
+                if (navButton) {
+                    const targetUrl = navButton.getAttribute('data-nav-url');
+                    if (targetUrl) {
+                        window.location.href = targetUrl;
+                    }
+                    return;
+                }
+
+                const actionButton = event.target.closest('[data-action]');
+                if (!actionButton) {
+                    return;
+                }
+
+                const action = actionButton.getAttribute('data-action');
+                switch (action) {
+                    case 'reload-page':
+                        location.reload();
+                        break;
+                    case 'refresh-ai-health':
+                        if (typeof window.refreshAIHealthStatus === 'function') {
+                            window.refreshAIHealthStatus();
+                        }
+                        break;
+                    case 'delete-all-errors':
+                        if (typeof window.deleteAllErrors === 'function') {
+                            window.deleteAllErrors();
+                        }
+                        break;
+                    case 'auto-fix-errors':
+                        if (typeof window.autoFixErrors === 'function') {
+                            window.autoFixErrors();
+                        }
+                        break;
+                    case 'refresh-errors':
+                        if (typeof window.refreshErrors === 'function') {
+                            window.refreshErrors();
+                        }
+                        break;
+                    case 'refresh-test-status':
+                        refreshTestValidationStatus();
+                        break;
+                    case 'refresh-test-corrections':
+                        if (typeof window.loadTestCorrections === 'function') {
+                            window.loadTestCorrections();
+                        }
+                        break;
+                    case 'search-logs':
+                        if (typeof window.searchLogs === 'function') {
+                            window.searchLogs();
+                        }
+                        break;
+                    case 'clear-filters':
+                        if (typeof window.clearFilters === 'function') {
+                            window.clearFilters();
+                        }
+                        break;
+                    case 'close-autofix-modal':
+                        if (typeof window.closeAutoFixModal === 'function') {
+                            window.closeAutoFixModal();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+
+        setupMonitoringPageDelegation();
+        lucide.createIcons();
+        refreshTestValidationStatus();
+    </script>
 </body>
 </html>

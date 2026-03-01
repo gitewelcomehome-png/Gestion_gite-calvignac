@@ -12,6 +12,76 @@
 
 let allPromotions = [];
 let currentPromoId = null;
+let currentUser = null;
+const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+async function isCurrentUserAdmin(user) {
+    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+        ? window.APP_CONFIG.ADMIN_EMAILS
+        : [];
+    const adminEmails = new Set(
+        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+            .map(normalizeEmail)
+            .filter(Boolean)
+    );
+
+    if (adminEmails.has(normalizeEmail(user?.email))) {
+        return true;
+    }
+
+    try {
+        const { data: rolesData, error: rolesError } = await window.supabaseClient
+            .from('user_roles')
+            .select('role, is_active')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+
+        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+    } catch (rolesCheckError) {
+        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+        return false;
+    }
+}
+
+async function checkAuth() {
+    try {
+        if (!window.supabaseClient) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        if (error || !session?.user) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        currentUser = session.user;
+        const isAdmin = await isCurrentUserAdmin(currentUser);
+        if (!isAdmin) {
+            alert('Accès refusé : Réservé aux administrateurs');
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const userEmailEl = document.getElementById('userEmail');
+        if (userEmailEl) {
+            userEmailEl.textContent = currentUser.email || '';
+        }
+
+        return true;
+    } catch (authError) {
+        console.error('❌ Erreur authentification promotions:', authError);
+        window.location.href = '../index.html';
+        return false;
+    }
+}
 
 // ================================================================
 // INITIALISATION
@@ -19,6 +89,10 @@ let currentPromoId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // console.log('📋 Initialisation page promotions');
+    const isAllowed = await checkAuth();
+    if (!isAllowed) {
+        return;
+    }
     
     await loadPromotions();
     await loadStats();
@@ -173,21 +247,21 @@ function renderPromotions(promotions) {
                 </td>
                 <td>${utilisations}</td>
                 <td>
-                    <button class="btn-icon" onclick="showPromoStats('${promo.id}')" title="Voir stats">
+                    <button class="btn-icon" data-action="show-promo-stats" data-promo-id="${promo.id}" title="Voir stats">
                         <i data-lucide="bar-chart"></i>
                     </button>
                 </td>
                 <td>${statutHTML}</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon" onclick="editPromotion('${promo.id}')" title="Modifier">
+                        <button class="btn-icon" data-action="edit-promo" data-promo-id="${promo.id}" title="Modifier">
                             <i data-lucide="edit-2"></i>
                         </button>
-                        <button class="btn-icon" onclick="togglePromoStatus('${promo.id}', ${!promo.actif})" 
+                        <button class="btn-icon" data-action="toggle-promo-status" data-promo-id="${promo.id}" data-new-status="${!promo.actif}" 
                                 title="${promo.actif ? 'Désactiver' : 'Activer'}">
                             <i data-lucide="${promo.actif ? 'toggle-right' : 'toggle-left'}"></i>
                         </button>
-                        <button class="btn-icon btn-danger" onclick="deletePromotion('${promo.id}')" title="Supprimer">
+                        <button class="btn-icon btn-danger" data-action="delete-promo" data-promo-id="${promo.id}" title="Supprimer">
                             <i data-lucide="trash-2"></i>
                         </button>
                     </div>
@@ -204,6 +278,44 @@ function renderPromotions(promotions) {
 // ================================================================
 
 function setupEventListeners() {
+    document.addEventListener('click', async (event) => {
+        const navButton = event.target.closest('[data-nav-url]');
+        if (navButton) {
+            const navUrl = navButton.dataset.navUrl;
+            if (navUrl) {
+                window.location.href = navUrl;
+            }
+            return;
+        }
+
+        const actionButton = event.target.closest('[data-action]');
+        if (!actionButton) {
+            return;
+        }
+
+        const { action, promoId, newStatus } = actionButton.dataset;
+        if (!action || !promoId) {
+            return;
+        }
+
+        switch (action) {
+            case 'show-promo-stats':
+                await showPromoStats(promoId);
+                break;
+            case 'edit-promo':
+                await editPromotion(promoId);
+                break;
+            case 'toggle-promo-status':
+                await togglePromoStatus(promoId, newStatus === 'true');
+                break;
+            case 'delete-promo':
+                await deletePromotion(promoId);
+                break;
+            default:
+                break;
+        }
+    });
+
     // Bouton nouvelle promo
     document.getElementById('btnNewPromo').addEventListener('click', openNewPromoModal);
     
@@ -551,9 +663,3 @@ function showToast(message, type = 'info') {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-
-// Rendre fonctions globales
-window.editPromotion = editPromotion;
-window.togglePromoStatus = togglePromoStatus;
-window.deletePromotion = deletePromotion;
-window.showPromoStats = showPromoStats;

@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-03-01T21-API-ONLY-2Z",
+  "scenario": "api_ai_health",
+  "phase": "warmup",
+  "generated_at": "2026-03-01T21:30:47.271Z",
+  "summary": {
+    "requests": 100,
+    "success_count": 95,
+    "error_count": 5,
+    "error_rate_pct": 5,
+    "latency_ms": {
+      "min": 118,
+      "p50": 131,
+      "p95": 615,
+      "p99": 688,
+      "max": 688,
+      "avg": 167
+    },
+    "status_buckets": {
+      "0": 5,
+      "200": 95
+    }
+  }
+}

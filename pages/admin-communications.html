@@ -381,7 +381,7 @@
             </h1>
         </div>
         <div class="header-right">
-            <button class="btn-primary" onclick="alert('Fonctionnalité à venir')">
+            <button class="btn-primary" data-action="coming-soon">
                 <i data-lucide="plus"></i>
                 Nouvelle Communication
             </button>
@@ -392,35 +392,35 @@
     <section class="tabs-navigation">
         <div class="tabs-sidebar">
             <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-channel-manager.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-channel-manager.html">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-clients.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-clients.html">
                 <i data-lucide="users"></i>
                 <span>Clients</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-support.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-support.html">
                 <i data-lucide="headphones"></i>
                 <span>Support</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-emails.html?build=20260217-4'">
+            <button class="tab-btn" data-nav-url="/pages/admin-emails.html?build=20260217-4">
                 <i data-lucide="mail"></i>
                 <span>Messagerie</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-promotions.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-promotions.html">
                 <i data-lucide="tag"></i>
                 <span>Promotions</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-parrainage.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-parrainage.html">
                 <i data-lucide="gift"></i>
                 <span>Parrainage</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-finance.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-finance.html">
                 <i data-lucide="bar-chart-2"></i>
                 <span>Finance & BI</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-content.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-content.html">
                 <i data-lucide="pen-tool"></i>
                 <span>Content IA</span>
             </button>
@@ -428,11 +428,11 @@
                 <i data-lucide="megaphone"></i>
                 <span>Communications</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-monitoring.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-monitoring.html">
                 <i data-lucide="activity"></i>
                 <span>Monitoring</span>
             </button>
-            <button class="tab-btn" onclick="window.location.href='/pages/admin-channel-manager.html'">
+            <button class="tab-btn" data-nav-url="/pages/admin-channel-manager.html">
                 <i data-lucide="globe"></i>
                 <span>Site Web</span>
             </button>
@@ -446,7 +446,7 @@
                 <p class="page-subtitle">Emails et notifications personnalisés</p>
             </div>
             <div class="page-header__actions">
-                <button class="btn btn--primary" onclick="alert('Fonctionnalité à venir')">
+                <button class="btn btn--primary" data-action="coming-soon">
                     <i data-lucide="plus"></i>
                     Nouvelle Communication
                 </button>
@@ -466,10 +466,10 @@
                     <div class="form-group">
                         <label>Mode de création</label>
                         <div style="display: flex; gap: 10px;">
-                            <button type="button" class="mode-btn active" data-mode="text" onclick="switchMode('text')">
+                            <button type="button" class="mode-btn active" data-mode="text" data-action="switch-mode">
                                 <i data-lucide="type"></i> Texte
                             </button>
-                            <button type="button" class="mode-btn" data-mode="video" onclick="switchMode('video')">
+                            <button type="button" class="mode-btn" data-mode="video" data-action="switch-mode">
                                 <i data-lucide="video"></i> Vidéo
                             </button>
                         </div>
@@ -481,7 +481,7 @@
                             <label for="videoUrl">URL de la vidéo (YouTube, Vimeo, etc.)</label>
                             <input type="url" id="videoUrl" placeholder="https://youtube.com/watch?v=...">
                         </div>
-                        <button type="button" class="btn-ai" onclick="analyzeVideo()">
+                        <button type="button" class="btn-ai" data-action="analyze-video">
                             <i data-lucide="sparkles"></i>
                             Analyser avec l'IA
                         </button>
@@ -503,7 +503,7 @@
                             <textarea id="commMessage" required placeholder="Décrivez votre communication..."></textarea>
                         </div>
                         
-                        <button type="button" class="btn-ai" onclick="improveText()">
+                        <button type="button" class="btn-ai" data-action="improve-text">
                             <i data-lucide="wand-2"></i>
                             Améliorer avec l'IA
                         </button>
@@ -565,9 +565,74 @@
     <script>
         // Client Supabase global
         const supabaseClient = window.supabaseClient;
+        const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+        let currentAdminUser = null;
         
         // Détecter si on est en dev local
         const isDev = window.location.hostname.includes('github.dev') || window.location.hostname === 'localhost';
+
+        function normalizeEmail(email) {
+            return String(email || '').trim().toLowerCase();
+        }
+
+        async function isCurrentUserAdmin(user) {
+            const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+                ? window.APP_CONFIG.ADMIN_EMAILS
+                : [];
+            const adminEmails = new Set(
+                [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+                    .map(normalizeEmail)
+                    .filter(Boolean)
+            );
+
+            if (adminEmails.has(normalizeEmail(user?.email))) {
+                return true;
+            }
+
+            try {
+                const { data: rolesData, error: rolesError } = await supabaseClient
+                    .from('user_roles')
+                    .select('role, is_active')
+                    .eq('user_id', user.id)
+                    .eq('is_active', true)
+                    .in('role', ['admin', 'super_admin'])
+                    .limit(1);
+
+                return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+            } catch (rolesCheckError) {
+                console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+                return false;
+            }
+        }
+
+        async function checkAdminAccess() {
+            try {
+                if (!supabaseClient) {
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (error || !session?.user) {
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                currentAdminUser = session.user;
+                const isAdmin = await isCurrentUserAdmin(currentAdminUser);
+                if (!isAdmin) {
+                    alert('Accès refusé : Réservé aux administrateurs');
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                return true;
+            } catch (authError) {
+                console.error('Erreur authentification communications:', authError);
+                window.location.href = '../index.html';
+                return false;
+            }
+        }
         
         // Switch entre mode texte et vidéo
         function switchMode(mode) {
@@ -891,10 +956,64 @@ IMPORTANT : Réponds UNIQUEMENT avec le JSON, sans texte additionnel.`;
         }
         
         // Charger les communications au démarrage
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isAllowed = await checkAdminAccess();
+            if (!isAllowed) {
+                return;
+            }
+
+            setupUIEventDelegation();
+
             loadCommunications();
             lucide.createIcons();
         });
+
+        function setupUIEventDelegation() {
+            document.addEventListener('click', (event) => {
+                const navButton = event.target.closest('[data-nav-url]');
+                if (navButton) {
+                    const targetUrl = navButton.getAttribute('data-nav-url');
+                    if (targetUrl) {
+                        window.location.href = targetUrl;
+                    }
+                    return;
+                }
+
+                const actionButton = event.target.closest('[data-action]');
+                if (!actionButton) {
+                    return;
+                }
+
+                const action = actionButton.getAttribute('data-action');
+                switch (action) {
+                    case 'coming-soon':
+                        alert('Fonctionnalité à venir');
+                        break;
+                    case 'switch-mode': {
+                        const mode = actionButton.getAttribute('data-mode');
+                        if (mode) {
+                            switchMode(mode);
+                        }
+                        break;
+                    }
+                    case 'analyze-video':
+                        analyzeVideo();
+                        break;
+                    case 'improve-text':
+                        improveText();
+                        break;
+                    case 'delete-communication': {
+                        const id = actionButton.getAttribute('data-comm-id');
+                        if (id) {
+                            deleteCommunication(id);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            });
+        }
         
         // Charger les communications
         async function loadCommunications() {
@@ -922,21 +1041,26 @@ IMPORTANT : Réponds UNIQUEMENT avec le JSON, sans texte additionnel.`;
                 container.innerHTML = data.map(comm => {
                     const isActive = !comm.date_fin || new Date(comm.date_fin) >= new Date();
                     const badgeClass = `badge-${comm.type}`;
+                    const safeId = String(comm.id || '').replace(/'/g, "\\'");
+                    const safeTitre = escapeHtml(comm.titre || '');
+                    const safeType = escapeHtml(comm.type || '');
+                    const safeMessage = escapeHtml(comm.message || '');
+                    const safeCible = escapeHtml(comm.cible || '');
                     
                     return `
                         <div class="comm-item" style="opacity: ${isActive ? 1 : 0.5}">
                             <div class="comm-header">
-                                <div class="comm-title">${comm.titre}</div>
+                                <div class="comm-title">${safeTitre}</div>
                                 <div class="comm-badges">
-                                    <span class="badge ${badgeClass}">${comm.type}</span>
-                                    <button class="btn-delete" onclick="deleteCommunication('${comm.id}')" title="Supprimer">
+                                    <span class="badge ${badgeClass}">${safeType}</span>
+                                    <button class="btn-delete" data-action="delete-communication" data-comm-id="${safeId}" title="Supprimer">
                                         <i data-lucide="trash-2" style="width: 14px; height: 14px; color: #dc2626;"></i>
                                     </button>
                                 </div>
                             </div>
-                            <p class="comm-message">${comm.message}</p>
+                            <p class="comm-message">${safeMessage}</p>
                             <div class="comm-meta">
-                                <span><i data-lucide="users" style="width: 12px; height: 12px;"></i> ${comm.cible}</span>
+                                <span><i data-lucide="users" style="width: 12px; height: 12px;"></i> ${safeCible}</span>
                                 <span><i data-lucide="calendar" style="width: 12px; height: 12px;"></i> ${new Date(comm.created_at).toLocaleDateString('fr-FR')}</span>
                                 ${comm.date_fin ? `<span><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Expire le ${new Date(comm.date_fin).toLocaleDateString('fr-FR')}</span>` : '<span>Permanent</span>'}
                             </div>
@@ -996,6 +1120,12 @@ IMPORTANT : Réponds UNIQUEMENT avec le JSON, sans texte additionnel.`;
                 console.error('Erreur suppression:', err);
                 alert('Erreur: ' + err.message);
             }
+        }
+
+        function escapeHtml(value) {
+            const div = document.createElement('div');
+            div.textContent = String(value || '');
+            return div.innerHTML;
         }
     </script>
 </body>

@@ -2124,8 +2124,6 @@ function applyLanguageDisplay() {
     const allCards = Array.from(document.querySelectorAll('#infosGiteForm .infos-card'));
     const frenchCards = allCards.filter(c => c !== englishCard);
     
-    console.log(`🌍 applyLanguageDisplay: langue="${currentLangInfos}", cards FR trouvées: ${frenchCards.length}`);
-    
     if (currentLangInfos === 'en') {
         // Mode ANGLAIS : afficher la card EN, cacher les cards FR
         label.src = '../images/flag-en.svg';
@@ -2140,8 +2138,6 @@ function applyLanguageDisplay() {
         frenchCards.forEach(card => {
             card.style.display = 'none';
         });
-        
-        console.log('✅ Mode EN activé - Card EN visible, cards FR cachées');
         
     } else {
         // Mode FRANÇAIS : cacher la card EN, afficher toutes les cards FR
@@ -2158,7 +2154,6 @@ function applyLanguageDisplay() {
             card.style.display = '';
         });
         
-        console.log('✅ Mode FR activé - Card EN cachée, cards FR visibles');
     }
 }
 

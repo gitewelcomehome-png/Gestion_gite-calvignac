@@ -134,7 +134,7 @@
     <!-- Header -->
     <header class="admin-header">
         <div class="header-left">
-            <button onclick="history.back()" style="background: none; border: none; cursor: pointer; padding: 8px; display: flex; align-items: center; color: #64748b;">
+            <button id="btnBack" style="background: none; border: none; cursor: pointer; padding: 8px; display: flex; align-items: center; color: #64748b;">
                 <i data-lucide="arrow-left"></i>
             </button>
             <h1>
@@ -198,29 +198,29 @@
                     </div>
                     
                     <!-- Actions principales -->
-                    <button class="action-btn primary" onclick="openInSupport()">
+                    <button class="action-btn primary" id="btnOpenInSupport">
                         <i data-lucide="external-link"></i>
                         Ouvrir dans Support
                     </button>
                     
-                    <button class="action-btn" onclick="viewError()">
+                    <button class="action-btn" id="btnViewError">
                         <i data-lucide="alert-circle"></i>
                         Voir l'erreur complète
                     </button>
                     
-                    <button class="action-btn" onclick="notifyClient()">
+                    <button class="action-btn" id="btnNotifyClient">
                         <i data-lucide="mail"></i>
                         Notifier le client
                     </button>
                     
                     <div style="border-top: 1px solid #e2e8f0; margin: 15px 0;"></div>
                     
-                    <button class="action-btn success" onclick="markResolved()">
+                    <button class="action-btn success" id="btnMarkResolved">
                         <i data-lucide="check-circle"></i>
                         Marquer comme résolu
                     </button>
                     
-                    <button class="action-btn danger" onclick="closeTicket()">
+                    <button class="action-btn danger" id="btnCloseTicket">
                         <i data-lucide="x-circle"></i>
                         Fermer le ticket
                     </button>
@@ -231,7 +231,7 @@
                             Ajouter un commentaire
                         </label>
                         <textarea id="commentText" class="comment-textarea" placeholder="Votre commentaire..."></textarea>
-                        <button class="action-btn primary" style="margin-top: 10px;" onclick="addComment()">
+                        <button class="action-btn primary" style="margin-top: 10px;" id="btnAddComment">
                             <i data-lucide="message-circle"></i>
                             Ajouter
                         </button>
@@ -248,10 +248,48 @@
     <script>
         let workflow = null;
         let ticketId = null;
+        const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+
+        function normalizeEmail(email) {
+            return String(email || '').trim().toLowerCase();
+        }
+
+        async function isCurrentUserAdmin(user) {
+            const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+                ? window.APP_CONFIG.ADMIN_EMAILS
+                : [];
+            const adminEmails = new Set(
+                [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+                    .map(normalizeEmail)
+                    .filter(Boolean)
+            );
+
+            if (adminEmails.has(normalizeEmail(user?.email))) {
+                return true;
+            }
+
+            try {
+                const { data: rolesData, error: rolesError } = await window.supabaseClient
+                    .from('user_roles')
+                    .select('role, is_active')
+                    .eq('user_id', user.id)
+                    .eq('is_active', true)
+                    .in('role', ['admin', 'super_admin'])
+                    .limit(1);
+
+                return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+            } catch (rolesCheckError) {
+                console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+                return false;
+            }
+        }
         
         // Initialisation
         document.addEventListener('DOMContentLoaded', async () => {
-            await checkAuth();
+            const isAllowed = await checkAuth();
+            if (!isAllowed) {
+                return;
+            }
             
             // Récupérer l'ID du ticket depuis l'URL
             const urlParams = new URLSearchParams(window.location.search);
@@ -274,14 +312,28 @@
         
         // Authentification
         async function checkAuth() {
-            const { data: { session } } = await window.supabaseClient.auth.getSession();
-            
-            if (!session) {
+            try {
+                const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+
+                if (error || !session?.user) {
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                const isAdmin = await isCurrentUserAdmin(session.user);
+                if (!isAdmin) {
+                    alert('Accès refusé : Réservé aux administrateurs');
+                    window.location.href = '../index.html';
+                    return false;
+                }
+
+                document.getElementById('userEmail').textContent = session.user.email || '';
+                return true;
+            } catch (authError) {
+                console.error('Erreur authentification workflow:', authError);
                 window.location.href = '../index.html';
-                return;
+                return false;
             }
-            
-            document.getElementById('userEmail').textContent = session.user.email;
         }
         
         // Charger le workflow
@@ -305,11 +357,22 @@
         
         // Event listeners
         function initEventListeners() {
+            document.getElementById('btnBack').addEventListener('click', () => {
+                history.back();
+            });
+
             // Logout
             document.getElementById('btnLogout').addEventListener('click', async () => {
                 await window.supabaseClient.auth.signOut();
                 window.location.href = '../index.html';
             });
+
+            document.getElementById('btnOpenInSupport').addEventListener('click', openInSupport);
+            document.getElementById('btnViewError').addEventListener('click', viewError);
+            document.getElementById('btnNotifyClient').addEventListener('click', notifyClient);
+            document.getElementById('btnMarkResolved').addEventListener('click', markResolved);
+            document.getElementById('btnCloseTicket').addEventListener('click', closeTicket);
+            document.getElementById('btnAddComment').addEventListener('click', addComment);
             
             // Changement de statut
             document.getElementById('statusSelect').addEventListener('change', async (e) => {

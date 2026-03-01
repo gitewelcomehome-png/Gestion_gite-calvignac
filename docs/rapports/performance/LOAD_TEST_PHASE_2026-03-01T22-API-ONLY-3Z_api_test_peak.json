@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-03-01T22-API-ONLY-3Z",
+  "scenario": "api_test",
+  "phase": "peak",
+  "generated_at": "2026-03-01T22:03:14.897Z",
+  "summary": {
+    "requests": 2000,
+    "success_count": 1990,
+    "error_count": 10,
+    "error_rate_pct": 0.5,
+    "latency_ms": {
+      "min": 114,
+      "p50": 127,
+      "p95": 232,
+      "p99": 588,
+      "max": 855,
+      "avg": 148
+    },
+    "status_buckets": {
+      "0": 10,
+      "200": 1990
+    }
+  }
+}

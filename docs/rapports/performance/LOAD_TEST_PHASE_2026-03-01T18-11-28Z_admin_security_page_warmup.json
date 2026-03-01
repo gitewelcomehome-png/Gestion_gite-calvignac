@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-03-01T18-11-28Z",
+  "scenario": "admin_security_page",
+  "phase": "warmup",
+  "generated_at": "2026-03-01T18:57:29.345Z",
+  "summary": {
+    "requests": 300,
+    "success_count": 299,
+    "error_count": 1,
+    "error_rate_pct": 0.33,
+    "latency_ms": {
+      "min": 24,
+      "p50": 33,
+      "p95": 169,
+      "p99": 276,
+      "max": 292,
+      "avg": 62
+    },
+    "status_buckets": {
+      "0": 1,
+      "200": 299
+    }
+  }
+}

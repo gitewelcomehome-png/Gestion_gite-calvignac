@@ -101,3 +101,51 @@ window.GITES_COORDS = GITES_COORDS;
 window.CACHE = CACHE;
 window.createParisDate = createParisDate;
 window.initDB = initDB;
+
+function hardenExternalLinks() {
+    const applySecurityRel = (anchor) => {
+        if (!anchor || anchor.tagName !== 'A') return;
+        const target = (anchor.getAttribute('target') || '').toLowerCase();
+        if (target !== '_blank') return;
+
+        const existingRel = new Set(
+            String(anchor.getAttribute('rel') || '')
+                .split(/\s+/)
+                .map((value) => value.trim())
+                .filter(Boolean)
+        );
+
+        existingRel.add('noopener');
+        existingRel.add('noreferrer');
+        anchor.setAttribute('rel', Array.from(existingRel).join(' '));
+    };
+
+    document.querySelectorAll('a[target="_blank"]').forEach(applySecurityRel);
+
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (!(node instanceof Element)) return;
+
+                if (node.matches && node.matches('a[target="_blank"]')) {
+                    applySecurityRel(node);
+                }
+
+                if (node.querySelectorAll) {
+                    node.querySelectorAll('a[target="_blank"]').forEach(applySecurityRel);
+                }
+            });
+        });
+    });
+
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hardenExternalLinks, { once: true });
+} else {
+    hardenExternalLinks();
+}

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LiveOwnerUnit : la plateforme de gestion pour locations saisonnières. Réservations, tâches, ménage, fiscalité, tout en un seul endroit.">
+    <title>LiveOwnerUnit - Page Commerciale</title>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --primary: #06b6d4;
+            --primary-dark: #0e7490;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            line-height: 1.5;
+        }
+
+        .container {
+            width: min(1200px, 92vw);
+            margin: 0 auto;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            background: rgba(245, 247, 251, 0.9);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 1.15rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            text-decoration: none;
+            font-weight: 700;
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .hero {
+            padding: 56px 0 36px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 4.5vw, 3.2rem);
+            line-height: 1.1;
+            margin: 0 0 14px;
+        }
+
+        .hero p {
+            margin: 0 0 20px;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .hero-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .hero-card img {
+            width: 100%;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .section {
+            margin: 22px 0;
+        }
+
+        .section-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+        }
+
+        .section h2 {
+            margin: 0 0 8px;
+            font-size: clamp(1.4rem, 2.4vw, 2rem);
+        }
+
+        .section .subtitle {
+            margin: 0 0 18px;
+            color: var(--muted);
+        }
+
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .kpi {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .kpi strong {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 3px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .shot {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .shot img {
+            width: 100%;
+            display: block;
+            background: #eef2f7;
+        }
+
+        .img-placeholder {
+            width: 100%;
+            min-height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 18px;
+            color: var(--muted);
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+            font-weight: 600;
+        }
+
+        .shot .label {
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .cta {
+            text-align: center;
+            padding: 28px 18px;
+        }
+
+        .cta p {
+            color: var(--muted);
+            margin: 8px 0 16px;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--muted);
+            padding: 24px 0 40px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 900px) {
+            .hero-grid,
+            .gallery,
+            .kpis {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a class="brand" href="/commercial.html">LiveOwnerUnit</a>
+            <a class="btn btn-primary" href="/pages/login.html">Demander une démo</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-grid">
+                <div>
+                    <h1>Le pilotage complet de vos gîtes, sans chaos</h1>
+                    <p>Réservations, tâches, stocks de draps, ménage, fiscalité et calendrier centralisés dans un seul outil. Conçu pour les propriétaires de locations saisonnières qui veulent gagner du temps chaque semaine.</p>
+                    <a class="btn btn-primary" href="/pages/login.html">Voir la plateforme</a>
+                </div>
+                <div class="hero-card">
+                    <img src="images/commercial/dashboard_resa.jpg" alt="Tableau de bord LiveOwnerUnit" data-required="dashboard_resa.jpg">
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-card">
+                <h2>Un outil pensé pour l'opérationnel réel</h2>
+                <p class="subtitle">Chaque écran correspond à une action terrain : préparer les séjours, coordonner le ménage, suivre les stocks, anticiper les charges.</p>
+                <div class="kpis">
+                    <div class="kpi">
+                        <strong>7+</strong>
+                        Modules métier intégrés
+                    </div>
+                    <div class="kpi">
+                        <strong>1 vue</strong>
+                        Centralise vos gîtes
+                    </div>
+                    <div class="kpi">
+                        <strong>0 Excel</strong>
+                        Pour la gestion quotidienne
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-card">
+                <h2>Captures de la plateforme</h2>
+                <p class="subtitle">Extraits réels de l'interface : tableau de bord, réservations, tâches, draps, ménage, fiscalité et calendrier.</p>
+                <div class="gallery">
+                    <article class="shot">
+                        <img src="images/commercial/r%C3%A9servations.jpg" alt="Module réservations" data-required="réservations.jpg">
+                        <div class="label">Réservations</div>
+                    </article>
+                    <article class="shot">
+                        <img src="images/commercial/taches_kanban.jpg" alt="Tableau Kanban des tâches" data-required="taches_kanban.jpg">
+                        <div class="label">Tâches (Kanban)</div>
+                    </article>
+                    <article class="shot">
+                        <img src="images/commercial/gextion_draps.jpg" alt="Gestion des draps" data-required="gextion_draps.jpg">
+                        <div class="label">Stocks de draps</div>
+                    </article>
+                    <article class="shot">
+                        <img src="images/commercial/menage-planning.jpg" alt="Planning ménage" data-required="menage-planning.jpg">
+                        <div class="label">Planning ménage</div>
+                    </article>
+                    <article class="shot">
+                        <img src="images/commercial/fiscalite_choix.jpg" alt="Comparatif fiscal" data-required="fiscalite_choix.jpg">
+                        <div class="label">Fiscalité</div>
+                    </article>
+                    <article class="shot">
+                        <img src="images/commercial/gextion_calendrier_prix_gdf.jpg" alt="Calendrier des séjours" data-required="gextion_calendrier_prix_gdf.jpg">
+                        <div class="label">Calendrier</div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-card cta">
+                <h2>Prêt à structurer la gestion de vos gîtes ?</h2>
+                <p>Créez votre espace, connectez vos gîtes et pilotez toute votre activité depuis une seule interface.</p>
+                <a class="btn btn-primary" href="/pages/login.html">Commencer maintenant</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        © 2026 LiveOwnerUnit • Page commerciale dédiée
+    </footer>
+
+    <script>
+        (function () {
+            const images = document.querySelectorAll('img[data-required]');
+            images.forEach((img) => {
+                img.addEventListener('error', () => {
+                    const requiredName = img.getAttribute('data-required') || 'capture';
+                    const holder = document.createElement('div');
+                    holder.className = 'img-placeholder';
+                    holder.textContent = 'Image manquante : ' + requiredName;
+                    img.replaceWith(holder);
+                }, { once: true });
+            });
+        })();
+    </script>
+</body>
+</html>

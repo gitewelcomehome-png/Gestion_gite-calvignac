@@ -9,6 +9,110 @@
 // ================================================================
 
 let syncInProgress = false;
+let cachedSyncUserId = null;
+let cachedSyncUserIdAt = 0;
+let lastSyncAttemptAt = 0;
+
+const PERF_SLOW_THRESHOLD_MS = 1200;
+const SYNC_GLOBAL_COOLDOWN_MS = 15000;
+const SYNC_RATE_LIMIT_KEY = 'sync-ical-global';
+
+function isInternalPerfEnabled() {
+    try {
+        return localStorage.getItem('internal_perf_enabled') !== '0';
+    } catch (_) {
+        return true;
+    }
+}
+
+function recordInternalPerf(metric, payload = {}) {
+    if (!isInternalPerfEnabled()) return;
+
+    try {
+        if (!Array.isArray(window.__louInternalPerfMetrics)) {
+            window.__louInternalPerfMetrics = [];
+        }
+
+        const entry = {
+            metric,
+            ts: new Date().toISOString(),
+            ...payload
+        };
+
+        window.__louInternalPerfMetrics.push(entry);
+
+        if (window.__louInternalPerfMetrics.length > 500) {
+            window.__louInternalPerfMetrics = window.__louInternalPerfMetrics.slice(-500);
+        }
+
+        if (Number.isFinite(entry.durationMs) && entry.durationMs >= PERF_SLOW_THRESHOLD_MS) {
+            console.warn(`[PERF_INTERNE] ${metric} lent`, {
+                durationMs: entry.durationMs,
+                context: payload
+            });
+        }
+    } catch (_) {
+        // no-op
+    }
+}
+
+window.getInternalPerfMetrics = function() {
+    return Array.isArray(window.__louInternalPerfMetrics)
+        ? [...window.__louInternalPerfMetrics]
+        : [];
+};
+
+function canStartSyncNow() {
+    const now = Date.now();
+
+    if ((now - lastSyncAttemptAt) < SYNC_GLOBAL_COOLDOWN_MS) {
+        const retryAfter = Math.ceil((SYNC_GLOBAL_COOLDOWN_MS - (now - lastSyncAttemptAt)) / 1000);
+        return {
+            allowed: false,
+            reason: 'cooldown',
+            retryAfter,
+            message: `Synchronisation iCal temporisée (${retryAfter}s).`
+        };
+    }
+
+    if (window.apiLimiter && typeof window.apiLimiter.canAttempt === 'function') {
+        const limiterResult = window.apiLimiter.canAttempt(SYNC_RATE_LIMIT_KEY);
+        if (!limiterResult.allowed) {
+            return {
+                allowed: false,
+                reason: 'rate_limited',
+                retryAfter: limiterResult.retryAfter || 30,
+                message: limiterResult.message || 'Trop de synchronisations iCal rapprochées.'
+            };
+        }
+    }
+
+    lastSyncAttemptAt = now;
+    return { allowed: true };
+}
+
+async function getSyncUserId() {
+    const now = Date.now();
+    if (cachedSyncUserId && (now - cachedSyncUserIdAt) < 5 * 60 * 1000) {
+        return cachedSyncUserId;
+    }
+
+    const userStartedAt = performance.now();
+    const { data: userData, error } = await window.supabaseClient.auth.getUser();
+
+    recordInternalPerf('sync_auth_get_user', {
+        durationMs: Math.round(performance.now() - userStartedAt),
+        ok: !error && !!userData?.user?.id
+    });
+
+    if (error || !userData?.user?.id) {
+        throw error || new Error('Utilisateur non authentifié');
+    }
+
+    cachedSyncUserId = userData.user.id;
+    cachedSyncUserIdAt = now;
+    return cachedSyncUserId;
+}
 
 // 🗑️ Liste des annulations détectées en attente de confirmation
 window.pendingCancellations = [];
@@ -18,10 +122,34 @@ window.pendingCancellations = [];
  */
 async function syncAllCalendars() {
     // console.log('🔄 DÉBUT SYNCHRONISATION iCal');
+    const syncStartedAt = performance.now();
+    let syncFailed = false;
     
     if (syncInProgress) {
         // console.log('⏸️ Sync déjà en cours, annulation');
         return;
+    }
+
+    const syncGate = canStartSyncNow();
+    if (!syncGate.allowed) {
+        addMessage(`⏸️ ${syncGate.message}`, 'info');
+        recordInternalPerf('sync_all_calendars', {
+            ok: false,
+            blocked: true,
+            reason: syncGate.reason,
+            retryAfter: syncGate.retryAfter,
+            durationMs: 0
+        });
+        return {
+            added: 0,
+            updated: 0,
+            cancelled: 0,
+            skipped: 0,
+            errors: 0,
+            blocked: true,
+            reason: syncGate.reason,
+            retryAfter: syncGate.retryAfter
+        };
     }
 
     try {
@@ -89,6 +217,7 @@ async function syncAllCalendars() {
             // console.log(`  📡 ${platforms.length} plateforme(s) configurée(s):`, platforms.map(p => p[0]));
 
             for (const [platform, url] of platforms) {
+                const platformStartedAt = performance.now();
                 try {
                     addMessage(`  • ${platform}...`, 'info');
                     const result = await syncCalendar(gite.id, platform, url);
@@ -105,9 +234,26 @@ async function syncAllCalendars() {
                     ].filter(Boolean).join(', ');
                     
                     addMessage(`  ✓ ${platform}: ${msg}`, 'success');
+                    recordInternalPerf('sync_calendar_platform', {
+                        giteId: gite.id,
+                        platform,
+                        added: result.added,
+                        updated: result.updated,
+                        cancelled: result.cancelled,
+                        skipped: result.skipped,
+                        durationMs: Math.round(performance.now() - platformStartedAt),
+                        ok: true
+                    });
                 } catch (error) {
                     totalErrors++;
                     addMessage(`  ✗ ${platform}: ${error.message || 'Erreur'}`, 'error');
+                    recordInternalPerf('sync_calendar_platform', {
+                        giteId: gite.id,
+                        platform,
+                        error: error?.message || 'Erreur',
+                        durationMs: Math.round(performance.now() - platformStartedAt),
+                        ok: false
+                    });
                 }
             }
         }
@@ -177,10 +323,31 @@ async function syncAllCalendars() {
         };
 
     } catch (error) {
+        syncFailed = true;
         console.error('❌ ERREUR sync globale:', error);
         addMessage('❌ Erreur de synchronisation', 'error');
-        throw error;
+        recordInternalPerf('sync_all_calendars', {
+            totalErrors: 1,
+            durationMs: Math.round(performance.now() - syncStartedAt),
+            ok: false,
+            error: error?.message || 'Erreur sync globale'
+        });
+        return {
+            added: 0,
+            updated: 0,
+            cancelled: 0,
+            skipped: 0,
+            errors: 1,
+            blocked: false,
+            reason: 'error'
+        };
     } finally {
+        if (!syncFailed) {
+            recordInternalPerf('sync_all_calendars', {
+                durationMs: Math.round(performance.now() - syncStartedAt),
+                ok: true
+            });
+        }
         syncInProgress = false;
         // console.log('🔓 Sync terminée, verrou libéré');
     }
@@ -194,6 +361,7 @@ async function syncAllCalendars() {
  * @returns {Promise<{added: number, updated: number, cancelled: number, skipped: number}>}
  */
 async function syncCalendar(giteId, platform, url) {
+    const calendarStartedAt = performance.now();
     const gite = await window.gitesManager.getById(giteId);
     const giteName = gite ? gite.name : 'Inconnu';
 
@@ -276,15 +444,25 @@ async function syncCalendar(giteId, platform, url) {
         const today = new Date().toISOString().split('T')[0];
         // console.log(`  📊 Chargement BDD (gîte: ${giteName}, plateforme: ${platform}, date: ${today})`);
         
+        const dbLoadStartedAt = performance.now();
+
         const { data: existingReservations, error: dbError } = await window.supabaseClient
             .from('reservations')
-            .select('*')
+            .select('id, check_in, check_out, status, manual_override, ical_uid, last_seen_in_ical, client_name')
             .eq('gite_id', giteId)
             .eq('synced_from', platform)
             .gte('check_out', today); // Toutes les réservations futures (y compris cancelled pour éviter doublons)
+
+        recordInternalPerf('sync_calendar_db_load', {
+            giteId,
+            platform,
+            rows: Array.isArray(existingReservations) ? existingReservations.length : 0,
+            durationMs: Math.round(performance.now() - dbLoadStartedAt),
+            ok: !dbError
+        });
         
         if (dbError) {
-            console.error(`  ❌ Erreur lecture BDD:`, dbError);
+            console.error(`  ❌ Erreur lecture BDD: ${dbError?.message || 'Erreur inconnue'} (code: ${dbError?.code || 'n/a'})`);
             return { added: 0, updated: 0, cancelled: 0, skipped: 0 };
         }
 
@@ -462,10 +640,27 @@ async function syncCalendar(giteId, platform, url) {
         
         // console.log(`  📊 Résultat: ${added} ajoutées, ${updated} mises à jour, ${cancelled} annulées, ${skipped} ignorées`);
 
-        return { added, updated, cancelled, skipped };
+        const result = { added, updated, cancelled, skipped };
+
+        recordInternalPerf('sync_calendar_total', {
+            giteId,
+            platform,
+            ...result,
+            durationMs: Math.round(performance.now() - calendarStartedAt),
+            ok: true
+        });
+
+        return result;
 
     } catch (error) {
         console.error(`Erreur parsing iCal ${giteName}/${platform}:`, error);
+        recordInternalPerf('sync_calendar_total', {
+            giteId,
+            platform,
+            durationMs: Math.round(performance.now() - calendarStartedAt),
+            ok: false,
+            error: error?.message || 'Erreur parsing iCal'
+        });
         throw error;
     }
 }
@@ -474,12 +669,12 @@ async function syncCalendar(giteId, platform, url) {
  * Ajouter une réservation depuis iCal
  */
 async function addReservationFromIcal(reservation) {
-    const { data: userData } = await window.supabaseClient.auth.getUser();
+    const ownerUserId = await getSyncUserId();
     
     const result = await window.supabaseClient
         .from('reservations')
         .insert({
-            owner_user_id: userData.user.id,
+            owner_user_id: ownerUserId,
             gite_id: reservation.giteId,
             check_in: reservation.dateDebut,
             check_out: reservation.dateFin,

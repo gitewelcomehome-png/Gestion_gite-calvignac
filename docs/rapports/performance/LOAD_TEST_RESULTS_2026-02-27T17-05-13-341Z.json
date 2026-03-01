@@ -1,0 +1,452 @@
+{
+  "runId": "2026-02-27T17-05-13-341Z",
+  "executedAt": "2026-02-27T17:12:05.266Z",
+  "baseUrl": "https://liveownerunit.fr",
+  "timeoutMs": 15000,
+  "scenarios": [
+    {
+      "name": "api_test_stable",
+      "method": "GET",
+      "path": "/api/test",
+      "startedAt": "2026-02-27T17:05:13.342Z",
+      "completedAt": "2026-02-27T17:07:24.858Z",
+      "phases": [
+        {
+          "label": "warmup",
+          "durationSec": 20,
+          "concurrency": 10,
+          "summary": {
+            "requests": 57604,
+            "successCount": 0,
+            "errorCount": 57604,
+            "errorRatePct": 100,
+            "throughputRps": 2880.2,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "403": 57604
+            },
+            "errorBuckets": {
+              "HTTP_403": 57604
+            }
+          }
+        },
+        {
+          "label": "ramp_1",
+          "durationSec": 30,
+          "concurrency": 30,
+          "summary": {
+            "requests": 80298,
+            "successCount": 0,
+            "errorCount": 80298,
+            "errorRatePct": 100,
+            "throughputRps": 2676.6,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 49,
+              "403": 80249
+            },
+            "errorBuckets": {
+              "HTTP_403": 80249,
+              "TIMEOUT": 36,
+              "NETWORK_ERROR": 13
+            }
+          }
+        },
+        {
+          "label": "ramp_2",
+          "durationSec": 30,
+          "concurrency": 60,
+          "summary": {
+            "requests": 347,
+            "successCount": 0,
+            "errorCount": 347,
+            "errorRatePct": 100,
+            "throughputRps": 11.57,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 180,
+              "403": 167
+            },
+            "errorBuckets": {
+              "HTTP_403": 167,
+              "NETWORK_ERROR": 175,
+              "TIMEOUT": 5
+            }
+          }
+        },
+        {
+          "label": "peak",
+          "durationSec": 30,
+          "concurrency": 100,
+          "summary": {
+            "requests": 300,
+            "successCount": 0,
+            "errorCount": 300,
+            "errorRatePct": 100,
+            "throughputRps": 10,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 300
+            },
+            "errorBuckets": {
+              "NETWORK_ERROR": 300
+            }
+          }
+        }
+      ],
+      "aggregate": {
+        "requests": 138549,
+        "successCount": 0,
+        "errorCount": 138549,
+        "errorRatePct": 100,
+        "throughputRps": 1259.54,
+        "latencyMs": {
+          "min": 0,
+          "p50": 0,
+          "p95": 0,
+          "p99": 0,
+          "max": 0,
+          "avg": 0
+        },
+        "statusBuckets": {
+          "0": 529,
+          "403": 138020
+        },
+        "errorBuckets": {
+          "HTTP_403": 138020,
+          "TIMEOUT": 41,
+          "NETWORK_ERROR": 488
+        }
+      }
+    },
+    {
+      "name": "api_ai_health_monitoring",
+      "method": "GET",
+      "path": "/api/ai-health",
+      "startedAt": "2026-02-27T17:07:24.858Z",
+      "completedAt": "2026-02-27T17:09:39.819Z",
+      "phases": [
+        {
+          "label": "warmup",
+          "durationSec": 20,
+          "concurrency": 5,
+          "summary": {
+            "requests": 10,
+            "successCount": 0,
+            "errorCount": 10,
+            "errorRatePct": 100,
+            "throughputRps": 0.5,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 10
+            },
+            "errorBuckets": {
+              "NETWORK_ERROR": 10
+            }
+          }
+        },
+        {
+          "label": "ramp_1",
+          "durationSec": 30,
+          "concurrency": 15,
+          "summary": {
+            "requests": 45,
+            "successCount": 0,
+            "errorCount": 45,
+            "errorRatePct": 100,
+            "throughputRps": 1.5,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 45
+            },
+            "errorBuckets": {
+              "NETWORK_ERROR": 45
+            }
+          }
+        },
+        {
+          "label": "ramp_2",
+          "durationSec": 30,
+          "concurrency": 30,
+          "summary": {
+            "requests": 5666,
+            "successCount": 0,
+            "errorCount": 5666,
+            "errorRatePct": 100,
+            "throughputRps": 188.87,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 85,
+              "403": 5581
+            },
+            "errorBuckets": {
+              "NETWORK_ERROR": 85,
+              "HTTP_403": 5581
+            }
+          }
+        },
+        {
+          "label": "peak",
+          "durationSec": 30,
+          "concurrency": 50,
+          "summary": {
+            "requests": 136420,
+            "successCount": 0,
+            "errorCount": 136420,
+            "errorRatePct": 100,
+            "throughputRps": 4547.33,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 49,
+              "403": 136371
+            },
+            "errorBuckets": {
+              "HTTP_403": 136371,
+              "NETWORK_ERROR": 22,
+              "TIMEOUT": 27
+            }
+          }
+        }
+      ],
+      "aggregate": {
+        "requests": 142141,
+        "successCount": 0,
+        "errorCount": 142141,
+        "errorRatePct": 100,
+        "throughputRps": 1292.19,
+        "latencyMs": {
+          "min": 0,
+          "p50": 0,
+          "p95": 0,
+          "p99": 0,
+          "max": 0,
+          "avg": 0
+        },
+        "statusBuckets": {
+          "0": 189,
+          "403": 141952
+        },
+        "errorBuckets": {
+          "NETWORK_ERROR": 162,
+          "HTTP_403": 141952,
+          "TIMEOUT": 27
+        }
+      }
+    },
+    {
+      "name": "admin_security_report_page",
+      "method": "GET",
+      "path": "/pages/admin-security-audit.html",
+      "startedAt": "2026-02-27T17:09:39.819Z",
+      "completedAt": "2026-02-27T17:12:05.266Z",
+      "phases": [
+        {
+          "label": "warmup",
+          "durationSec": 20,
+          "concurrency": 10,
+          "summary": {
+            "requests": 59913,
+            "successCount": 0,
+            "errorCount": 59913,
+            "errorRatePct": 100,
+            "throughputRps": 2995.65,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 2,
+              "403": 59911
+            },
+            "errorBuckets": {
+              "HTTP_403": 59911,
+              "TIMEOUT": 2
+            }
+          }
+        },
+        {
+          "label": "ramp_1",
+          "durationSec": 30,
+          "concurrency": 40,
+          "summary": {
+            "requests": 35677,
+            "successCount": 0,
+            "errorCount": 35677,
+            "errorRatePct": 100,
+            "throughputRps": 1189.23,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 109,
+              "403": 35568
+            },
+            "errorBuckets": {
+              "HTTP_403": 35568,
+              "NETWORK_ERROR": 93,
+              "TIMEOUT": 16
+            }
+          }
+        },
+        {
+          "label": "ramp_2",
+          "durationSec": 30,
+          "concurrency": 80,
+          "summary": {
+            "requests": 12116,
+            "successCount": 0,
+            "errorCount": 12116,
+            "errorRatePct": 100,
+            "throughputRps": 403.87,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 237,
+              "403": 11879
+            },
+            "errorBuckets": {
+              "HTTP_403": 11879,
+              "NETWORK_ERROR": 237
+            }
+          }
+        },
+        {
+          "label": "peak",
+          "durationSec": 30,
+          "concurrency": 120,
+          "summary": {
+            "requests": 3877,
+            "successCount": 0,
+            "errorCount": 3877,
+            "errorRatePct": 100,
+            "throughputRps": 129.23,
+            "latencyMs": {
+              "min": 0,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "max": 0,
+              "avg": 0
+            },
+            "statusBuckets": {
+              "0": 360,
+              "403": 3517
+            },
+            "errorBuckets": {
+              "HTTP_403": 3517,
+              "NETWORK_ERROR": 358,
+              "TIMEOUT": 2
+            }
+          }
+        }
+      ],
+      "aggregate": {
+        "requests": 111583,
+        "successCount": 0,
+        "errorCount": 111583,
+        "errorRatePct": 100,
+        "throughputRps": 1014.39,
+        "latencyMs": {
+          "min": 0,
+          "p50": 0,
+          "p95": 0,
+          "p99": 0,
+          "max": 0,
+          "avg": 0
+        },
+        "statusBuckets": {
+          "0": 708,
+          "403": 110875
+        },
+        "errorBuckets": {
+          "HTTP_403": 110875,
+          "TIMEOUT": 20,
+          "NETWORK_ERROR": 688
+        }
+      }
+    }
+  ],
+  "conclusion": {
+    "passed": false,
+    "slo": {
+      "p95MsTarget": 500,
+      "errorRatePctTarget": 1
+    },
+    "measured": {
+      "totalRequests": 392273,
+      "worstP95": 0,
+      "worstErrorRate": 100
+    }
+  }
+}

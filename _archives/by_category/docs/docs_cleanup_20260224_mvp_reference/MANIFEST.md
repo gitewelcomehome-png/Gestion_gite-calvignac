@@ -1,0 +1,101 @@
+]633;E;{   echo "# Manifest archive docs — MVP référence"\x3b   echo\x3b   echo "Date: 2026-02-24"\x3b   echo "Objectif: conserver visibles uniquement les documents de référence dans docs/."\x3b   echo\x3b   echo "## Conservés visibles"\x3b   echo "- docs/ARCHITECTURE.md"\x3b   echo "- docs/README.md"\x3b   echo "- docs/architecture/ERREURS_CRITIQUES.md"\x3b   echo "- docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md"\x3b   echo "- docs/rapports/RGPD_DOSSIER_CONFORMITE_CENTRAL.md"\x3b   echo "- docs/rapports/REGISTRE_PREUVES_AUDIT_EXTERNE_2026-02-22.md"\x3b   echo "- docs/rapports/RESTE_A_FAIRE_RGPD_2026-02-24.md"\x3b   echo "- docs/rapports/AUDIT_COMPLET_CODEBASE_TRI_ARCHIVAGE_2026-02-24.md"\x3b   echo\x3b   echo "## Déplacés en archive"\x3b   find "$ARCHIVE_DIR/docs" -mindepth 1 -print | sort\x3b } > "$MANIFEST";7d0db152-172c-488e-bdd9-278c949ad99d]633;C# Manifest archive docs — MVP référence
+
+Date: 2026-02-24
+Objectif: conserver visibles uniquement les documents de référence dans docs/.
+
+## Conservés visibles
+- docs/ARCHITECTURE.md
+- docs/README.md
+- docs/architecture/ERREURS_CRITIQUES.md
+- docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md
+- docs/rapports/RGPD_DOSSIER_CONFORMITE_CENTRAL.md
+- docs/rapports/REGISTRE_PREUVES_AUDIT_EXTERNE_2026-02-22.md
+- docs/rapports/RESTE_A_FAIRE_RGPD_2026-02-24.md
+- docs/rapports/AUDIT_COMPLET_CODEBASE_TRI_ARCHIVAGE_2026-02-24.md
+
+## Déplacés en archive
+_archives/docs_cleanup_20260224_mvp_reference/docs/AUDIT_COMPLET_LIVEOWNERUNIT_2026.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/AUDIT_COMPLET_LIVEOWNERUNIT_2026_PARTIE2.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/DESCRIPTION_COMPLETE_SITE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/GUIDE_ASSISTANT_IA.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/GUIDE_COMPLET_FONCTIONNALITES.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/GUIDE_DEPLOIEMENT_VERCEL_COMPLET.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/GUIDE_OPERATIONNEL.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/GUIDE_REFERENCEMENT_GOOGLE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/INTEGRATION_PHOTOS_INFOS_GITES.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/KANBAN_DOCUMENTATION.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/KANBAN_GUIDE_UTILISATEUR.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/KANBAN_README.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/PHOTOS_GITES_README.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/PLAN_200_UTILISATEURS_REALISTE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/RESPONSIVE_MOBILE_GUIDE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/SUIVI_SCALABILITE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/SUIVI_SCALABILITE_100K_TECHNIQUE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/architecture
+_archives/docs_cleanup_20260224_mvp_reference/docs/architecture/ARCHITECTURE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/architecture/PROPOSITION_REFONTE_BDD_20260219.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/architecture/STRUCTURE_PROJET.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/audits
+_archives/docs_cleanup_20260224_mvp_reference/docs/audits/AUDIT_STYLES_INLINE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/business
+_archives/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/business/PROPOSITION_SITE_COMMERCIAL.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/business/SYSTEME_PRIX_PROMOTIONS.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/business/SYSTEME_PROMOTIONS_AUTOMATIQUES.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/business/TARIFS_ABONNEMENTS.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/configuration
+_archives/docs_cleanup_20260224_mvp_reference/docs/configuration/CONFIGURATION_OPENAI_VERCEL.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/configuration/SETUP_CLAUDE_API.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/demos
+_archives/docs_cleanup_20260224_mvp_reference/docs/demos/calou-design.html
+_archives/docs_cleanup_20260224_mvp_reference/docs/demos/demo-boutons.html
+_archives/docs_cleanup_20260224_mvp_reference/docs/demos/demo-themes.html
+_archives/docs_cleanup_20260224_mvp_reference/docs/demos/icons-preview.html
+_archives/docs_cleanup_20260224_mvp_reference/docs/demos/pictogrammes-reference.html
+_archives/docs_cleanup_20260224_mvp_reference/docs/demos/template-themes-icalou.html
+_archives/docs_cleanup_20260224_mvp_reference/docs/demos/test-design-moderne.html
+_archives/docs_cleanup_20260224_mvp_reference/docs/guides
+_archives/docs_cleanup_20260224_mvp_reference/docs/guides/GUIDE_BOUTONS.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/guides/GUIDE_DEPLOIEMENT_VERCEL.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/guides/GUIDE_INTEGRATION_THEMES.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/guides/GUIDE_MODERNISATION_CSS.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/guides/GUIDE_TEST_DESIGN.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/guides/PLAN_MIGRATION_CSS_CALOU.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/guides/_MIGRATION_CSS_CENTRALISEE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/integration
+_archives/docs_cleanup_20260224_mvp_reference/docs/integration/INDEX.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/integration/INDEX_FICHIERS_SUBSCRIPTION_SYSTEM.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/integration/PROMPT_STRATEGIE_AMELIORE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/integration/README_DEPLOIEMENT.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/integration/README_ORGANISATION.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/integration/README_SUBSCRIPTION_SYSTEM.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/inventaires
+_archives/docs_cleanup_20260224_mvp_reference/docs/inventaires/INVENTAIRE_COMPLET_552_CLASSES.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/inventaires/INVENTAIRE_CONTENANTS.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/inventaires/LISTE_ICONES_SITE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/migration
+_archives/docs_cleanup_20260224_mvp_reference/docs/migration/MIGRATION_CSS_V2.5.0.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/migration/MIGRATION_TAB_FISCALITE_27JAN2026.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/migration/PROPOSITION_RESTRUCTURATION.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/migration/RESTAURATION_VERSION.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/migration/RESTRUCTURATION_MODULAIRE_RESUME.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/CHECKLIST_EXECUTION_NON_PROD_15J_2026-02-22.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/CHECKLIST_FINALE_CLOTURE_JURIDIQUE_RGPD_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/INVENTAIRE_COMPLET_SITE_LIVEOWNERUNIT_2026-02-19.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/NOTE_RELEASE_SECURITE_2026-02-23.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/PLAN_ACTION_NON_PROD_SECURITE_RGPD_2026-02-22.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/PROCEDURE_RESTAURATION_SNAPSHOT_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RAPPORT_NETTOYAGE_11FEB2026.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_ANNEXES_CONTRACTUELLES_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_COLLECTE_INFOS_LEGALES_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_GOUVERNANCE_NOMINATIVE_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_INDEX_OPERATIONNEL_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_MATRICE_CONSERVATION_MODELE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_NOTATION_AVANCEMENT_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_PACK_PREUVES_OK_INTERNE_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_REGISTRE_DSAR_MODELE.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_REGISTRE_DSAR_OPERATIONNEL_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_REGISTRE_SOUS_TRAITANTS_DPA_SCC_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/RGPD_VALIDATION_JURIDIQUE_TEXTES_2026-02-24.md
+_archives/docs_cleanup_20260224_mvp_reference/docs/rapports/STATUS_PROJET.md

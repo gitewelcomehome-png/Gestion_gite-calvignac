@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-03-01T18-11-28Z",
+  "scenario": "api_ai_health",
+  "phase": "ramp_1",
+  "generated_at": "2026-03-01T18:51:36.317Z",
+  "summary": {
+    "requests": 300,
+    "success_count": 300,
+    "error_count": 0,
+    "error_rate_pct": 0,
+    "latency_ms": {
+      "min": 140,
+      "p50": 305,
+      "p95": 534,
+      "p99": 834,
+      "max": 989,
+      "avg": 331
+    },
+    "status_buckets": {
+      "200": 300
+    }
+  }
+}

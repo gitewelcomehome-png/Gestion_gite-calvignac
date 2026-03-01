@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-03-01T20-30-33Z",
+  "scenario": "api_test",
+  "phase": "warmup",
+  "generated_at": "2026-03-01T20:30:46.162Z",
+  "summary": {
+    "requests": 200,
+    "success_count": 200,
+    "error_count": 0,
+    "error_rate_pct": 0,
+    "latency_ms": {
+      "min": 119,
+      "p50": 148,
+      "p95": 339,
+      "p99": 823,
+      "max": 868,
+      "avg": 202
+    },
+    "status_buckets": {
+      "200": 200
+    }
+  }
+}

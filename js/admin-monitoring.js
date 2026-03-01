@@ -4,6 +4,49 @@
 
 let currentUser = null;
 let unresolvedGroupedErrors = [];
+const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+let aiHealthApiUnavailable = false;
+let cmErrorLogsAccessUnavailable = false;
+
+function isAccessDeniedError(error) {
+    const code = String(error?.code || error?.status || '');
+    const message = String(error?.message || '').toLowerCase();
+    return code === '401' || code === '403' || message.includes('permission denied') || message.includes('row-level security');
+}
+
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+async function isCurrentUserAdmin(user) {
+    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+        ? window.APP_CONFIG.ADMIN_EMAILS
+        : [];
+    const adminEmails = new Set(
+        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+            .map(normalizeEmail)
+            .filter(Boolean)
+    );
+
+    if (adminEmails.has(normalizeEmail(user?.email))) {
+        return true;
+    }
+
+    try {
+        const { data: rolesData, error: rolesError } = await window.supabaseClient
+            .from('user_roles')
+            .select('role, is_active')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+
+        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+    } catch (rolesCheckError) {
+        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+        return false;
+    }
+}
 
 function getValidatedCorrectionIds() {
     try {
@@ -33,7 +76,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // console.log('🚀 Initialisation Monitoring Dashboard...');
     
     // Vérifier l'authentification
-    await checkAuth();
+    const isAllowed = await checkAuth();
+    if (!isAllowed) {
+        return;
+    }
     
     // Charger les données
     await loadMonitoringData();
@@ -57,28 +103,37 @@ async function checkAuth() {
     try {
         if (!window.supabaseClient) {
             console.error('❌ Supabase client non initialisé');
-            return;
+            window.location.href = '../index.html';
+            return false;
         }
         
         const { data: { session }, error } = await window.supabaseClient.auth.getSession();
         
         if (error || !session) {
             window.location.href = '../index.html';
-            return;
+            return false;
         }
         
         currentUser = session.user;
         
-        if (currentUser.email !== 'stephanecalvignac@hotmail.fr') {
+        const isAdmin = await isCurrentUserAdmin(currentUser);
+        if (!isAdmin) {
             alert('Accès refusé : Réservé aux administrateurs');
             window.location.href = '../index.html';
-            return;
+            return false;
         }
         
-        document.getElementById('userEmail').textContent = currentUser.email;
+        const userEmailEl = document.getElementById('userEmail');
+        if (userEmailEl) {
+            userEmailEl.textContent = currentUser.email || '';
+        }
+        
+        return true;
         
     } catch (error) {
         console.error('❌ Erreur authentification:', error);
+        window.location.href = '../index.html';
+        return false;
     }
 }
 
@@ -128,6 +183,18 @@ async function loadAIHealthStatus() {
     if (!globalEl) return;
 
     try {
+        if (aiHealthApiUnavailable) {
+            updateMonitoringAIProviderDot('monitorAIOpenAIDot', null);
+            updateMonitoringAIProviderDot('monitorAIAnthropicDot', null);
+            updateMonitoringAIProviderDot('monitorAIGeminiDot', null);
+            updateMonitoringAIProviderDot('monitorAIStabilityDot', null);
+            globalEl.textContent = 'API IA non disponible';
+            if (updatedEl) {
+                updatedEl.textContent = 'Dernière vérification: API absente';
+            }
+            return;
+        }
+
         globalEl.textContent = 'Vérification...';
 
         const response = await fetch('/api/ai-health', {
@@ -136,6 +203,14 @@ async function loadAIHealthStatus() {
         });
 
         if (!response.ok) {
+            if (response.status === 404) {
+                aiHealthApiUnavailable = true;
+                globalEl.textContent = 'API IA non disponible';
+                if (updatedEl) {
+                    updatedEl.textContent = 'Dernière vérification: API absente';
+                }
+                return;
+            }
             throw new Error(`HTTP ${response.status}`);
         }
 
@@ -174,6 +249,11 @@ window.refreshAIHealthStatus = function() {
 
 async function loadErrorsData() {
     try {
+        if (cmErrorLogsAccessUnavailable) {
+            displayErrors([]);
+            return;
+        }
+
         // Récupérer TOUTES les erreurs non résolues (sans limite pour grouper correctement)
         const { data: errors, error } = await window.supabaseClient
             .from('cm_error_logs')
@@ -181,7 +261,14 @@ async function loadErrorsData() {
             .eq('resolved', false)
             .order('timestamp', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            if (isAccessDeniedError(error)) {
+                cmErrorLogsAccessUnavailable = true;
+                displayErrors([]);
+                return;
+            }
+            throw error;
+        }
         
         // Récupérer TOUS les tickets liés aux erreurs
         const { data: allTickets } = await window.supabaseClient
@@ -308,11 +395,6 @@ function displayErrors(errors) {
     }
     
     container.innerHTML = errors.map((err, index) => {
-        // Échapper les quotes pour éviter les erreurs JavaScript
-        const errorTypeEscaped = err.error_type.replace(/'/g, "\\'");
-        const sourceEscaped = (err.source || '').replace(/'/g, "\\'");
-        const messageEscaped = (err.message || '').replace(/'/g, "\\'");
-        
         // Extraire fichier et ligne depuis metadata ou stack trace
         let fileName = err.source || 'unknown';
         let lineNumber = null;
@@ -377,22 +459,29 @@ function displayErrors(errors) {
                 </div>
                 <div style="display: flex; gap: 8px; flex-direction: column;">
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-primary" onclick="showErrorDetails(${index})" style="padding: 6px 12px; font-size: 13px;">
+                        <button class="btn btn-primary" data-action="show-error-details" data-error-index="${index}" style="padding: 6px 12px; font-size: 13px;">
                             <i data-lucide="code"></i>
                             Détails
                         </button>
                         ${ticketsCount > 0 ? `
-                        <button class="btn" style="background: #06b6d4; color: white; padding: 6px 12px; font-size: 13px;" onclick="showErrorTickets(${index})">
+                        <button class="btn" style="background: #06b6d4; color: white; padding: 6px 12px; font-size: 13px;" data-action="show-error-tickets" data-error-index="${index}">
                             <i data-lucide="ticket"></i>
                             Tickets (${ticketsCount})
                         </button>
                         ` : `
-                        <button class="btn" style="background: #06b6d4; color: white; padding: 6px 12px; font-size: 13px;" onclick="createTicketForError(${index})">
+                        <button class="btn" style="background: #06b6d4; color: white; padding: 6px 12px; font-size: 13px;" data-action="create-ticket-for-error" data-error-index="${index}">
                             <i data-lucide="plus-circle"></i>
                             Créer Ticket
                         </button>
                         `}
-                        <button class="btn btn-success" onclick="markErrorResolved('${errorTypeEscaped}', '${sourceEscaped}', '${messageEscaped}')" style="padding: 6px 12px; font-size: 13px;">
+                        <button
+                            class="btn btn-success"
+                            data-action="mark-error-resolved"
+                            data-error-type="${escapeHtml(err.error_type || '')}"
+                            data-error-source="${escapeHtml(err.source || '')}"
+                            data-error-message="${escapeHtml(err.message || '')}"
+                            style="padding: 6px 12px; font-size: 13px;"
+                        >
                             <i data-lucide="check"></i>
                             Résoudre
                         </button>
@@ -427,11 +516,11 @@ function displayErrors(errors) {
                                 </div>
                             </div>
                             <div style="display: flex; gap: 6px; flex-direction: column;">
-                                <button class="btn btn-sm" style="padding: 4px 10px; font-size: 12px; white-space: nowrap;" onclick="openTicket('${ticket.id}')">
+                                <button class="btn btn-sm" style="padding: 4px 10px; font-size: 12px; white-space: nowrap;" data-action="open-ticket" data-ticket-id="${escapeHtml(String(ticket.id))}">
                                     <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
                                     Ouvrir
                                 </button>
-                                <select onchange="updateTicketStatus('${ticket.id}', this.value)" style="padding: 4px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">
+                                <select data-action="update-ticket-status" data-ticket-id="${escapeHtml(String(ticket.id))}" style="padding: 4px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">
                                     <option value="">Actions...</option>
                                     <option value="en_cours">En cours</option>
                                     <option value="en_attente_client">En attente client</option>
@@ -446,7 +535,7 @@ function displayErrors(errors) {
             ` : ''}
             
             <div id="error-details-${index}" style="display: none; background: #0f172a; color: #e2e8f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px; margin-top: 10px; position: relative;">
-                <button onclick="copyErrorDetails(${index})" style="position: absolute; top: 10px; right: 10px; padding: 6px 12px; background: #334155; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px;">
+                <button data-action="copy-error-details" data-error-index="${index}" style="position: absolute; top: 10px; right: 10px; padding: 6px 12px; background: #334155; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px;">
                     <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
                     Copier
                 </button>
@@ -603,12 +692,29 @@ window.markErrorResolved = async function(errorType, source, message) {
 
 async function loadPerformanceMetrics() {
     try {
+        if (cmErrorLogsAccessUnavailable) {
+            document.getElementById('avgLatency').textContent = '~';
+            document.getElementById('requestsPerMin').textContent = '~';
+            document.getElementById('errorRate').textContent = 'N/A';
+            document.getElementById('errorRate').style.color = '#64748b';
+            return;
+        }
+
         // Calculer métriques de performance basiques
         const { data: errors24h, error } = await window.supabaseClient
             .from('cm_error_logs')
             .select('id, timestamp')
             .eq('resolved', false)
             .gte('timestamp', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+        if (error && isAccessDeniedError(error)) {
+            cmErrorLogsAccessUnavailable = true;
+            document.getElementById('avgLatency').textContent = '~';
+            document.getElementById('requestsPerMin').textContent = '~';
+            document.getElementById('errorRate').textContent = 'N/A';
+            document.getElementById('errorRate').style.color = '#64748b';
+            return;
+        }
         
         if (!error && errors24h) {
             const totalRequests = Math.max(1000, errors24h.length * 50); // Estimation
@@ -702,7 +808,7 @@ function displayLogs(logs) {
             </td>
             <td>${log.user_email || '-'}</td>
             <td>
-                <button class="btn btn-primary" onclick="viewLogDetails('${log.id}')" style="padding: 4px 8px; font-size: 12px;">
+                <button class="btn btn-primary" data-action="view-log-details" data-log-id="${escapeHtml(String(log.id))}" style="padding: 4px 8px; font-size: 12px;">
                     Détails
                 </button>
             </td>
@@ -1057,11 +1163,11 @@ function showAutoFixModal(errors, report) {
         </details>
         
         <div style="display: flex; gap: 10px;">
-            <button class="btn btn-primary" onclick="copyReportAgain()" style="flex: 1;">
+            <button class="btn btn-primary" data-action="copy-report-again" style="flex: 1;">
                 <i data-lucide="copy"></i>
                 Re-copier le rapport
             </button>
-            <button class="btn btn-success" onclick="closeAutoFixModal()" style="flex: 1;">
+            <button class="btn btn-success" data-action="close-autofix-modal" style="flex: 1;">
                 <i data-lucide="check"></i>
                 Compris, je vais le coller
             </button>
@@ -1115,13 +1221,14 @@ window.viewCorrections = async function(errorId) {
     
     // Afficher dans un modal
     const modal = document.createElement('div');
+    modal.setAttribute('data-monitoring-modal', 'dynamic');
     modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;';
     
     const content = `
         <div style="background: white; max-width: 900px; max-height: 90vh; overflow-y: auto; border-radius: 12px; padding: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2 style="margin: 0;">🔧 Corrections apportées</h2>
-                <button onclick="this.closest('[style*=fixed]').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+                <button data-action="close-dynamic-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
             </div>
             
             ${corrections.map(corr => `
@@ -1149,7 +1256,7 @@ window.viewCorrections = async function(errorId) {
                 </div>
             `).join('')}
             
-            <button onclick="window.viewErrorDetails(${errorId})" style="width: 100%; padding: 0.75rem; background: #06b6d4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            <button data-action="view-error-details" data-error-id="${escapeHtml(String(errorId || ''))}" style="width: 100%; padding: 0.75rem; background: #06b6d4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
                 Voir tous les détails
             </button>
         </div>
@@ -1262,8 +1369,10 @@ window.openTicket = function(ticketId) {
 };
 
 // Mettre à jour le statut d'un ticket
-window.updateTicketStatus = async function(ticketId, newStatus) {
+window.updateTicketStatus = async function(ticketId, newStatus, controlElement = null) {
     if (!newStatus) return;
+
+    const selectElement = controlElement || (typeof event !== 'undefined' ? event?.target : null);
     
     try {
         const statusMapping = {
@@ -1275,7 +1384,9 @@ window.updateTicketStatus = async function(ticketId, newStatus) {
         
         const confirmed = confirm(`Changer le statut du ticket #${ticketId} vers "${statusMapping[newStatus]}" ?`);
         if (!confirmed) {
-            event.target.value = '';
+            if (selectElement) {
+                selectElement.value = '';
+            }
             return;
         }
         
@@ -1314,7 +1425,9 @@ window.updateTicketStatus = async function(ticketId, newStatus) {
         console.error('❌ Erreur mise à jour statut:', err);
         alert('❌ Erreur lors de la mise à jour: ' + err.message);
     } finally {
-        event.target.value = '';
+        if (selectElement) {
+            selectElement.value = '';
+        }
     }
 };
 
@@ -1428,7 +1541,7 @@ window.loadTestCorrections = async function() {
                     <div id="test-result-${correction.id}" style="margin: 15px 0;"></div>
                     
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-success" onclick="validateTestCorrection(${correction.id}, '${correction.file_path}')" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <button class="btn btn-success" data-action="validate-test-correction" data-correction-id="${correction.id}" data-file-path="${escapeHtml(correction.file_path || '')}" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                             <i data-lucide="check" style="width: 16px; height: 16px;"></i>
                             ✅ Corrigé et Testé
                         </button>
@@ -1644,7 +1757,134 @@ function escapeHtml(text) {
 // EVENT LISTENERS
 // ================================================================
 
+let monitoringDelegationInitialized = false;
+
+function parseDataIndex(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function setupMonitoringDynamicDelegation() {
+    if (monitoringDelegationInitialized) {
+        return;
+    }
+
+    document.addEventListener('click', (event) => {
+        const actionElement = event.target.closest('[data-action]');
+        if (!actionElement) {
+            return;
+        }
+
+        const { action } = actionElement.dataset;
+        if (!action) {
+            return;
+        }
+
+        switch (action) {
+            case 'show-error-details': {
+                const index = parseDataIndex(actionElement.dataset.errorIndex);
+                if (index !== null) {
+                    window.showErrorDetails(index);
+                }
+                break;
+            }
+            case 'show-error-tickets': {
+                const index = parseDataIndex(actionElement.dataset.errorIndex);
+                if (index !== null) {
+                    window.showErrorTickets(index);
+                }
+                break;
+            }
+            case 'create-ticket-for-error': {
+                const index = parseDataIndex(actionElement.dataset.errorIndex);
+                if (index !== null) {
+                    window.createTicketForError(index);
+                }
+                break;
+            }
+            case 'mark-error-resolved': {
+                window.markErrorResolved(
+                    actionElement.dataset.errorType || '',
+                    actionElement.dataset.errorSource || '',
+                    actionElement.dataset.errorMessage || ''
+                );
+                break;
+            }
+            case 'open-ticket': {
+                const ticketId = actionElement.dataset.ticketId;
+                if (ticketId) {
+                    window.openTicket(ticketId);
+                }
+                break;
+            }
+            case 'copy-error-details': {
+                const index = parseDataIndex(actionElement.dataset.errorIndex);
+                if (index !== null) {
+                    window.copyErrorDetails(index);
+                }
+                break;
+            }
+            case 'view-log-details': {
+                const logId = actionElement.dataset.logId;
+                if (logId) {
+                    window.viewLogDetails(logId);
+                }
+                break;
+            }
+            case 'copy-report-again': {
+                window.copyReportAgain();
+                break;
+            }
+            case 'close-autofix-modal': {
+                window.closeAutoFixModal();
+                break;
+            }
+            case 'close-dynamic-modal': {
+                const modal = actionElement.closest('[data-monitoring-modal="dynamic"]');
+                if (modal) {
+                    modal.remove();
+                }
+                break;
+            }
+            case 'view-error-details': {
+                const errorId = actionElement.dataset.errorId || '';
+                if (errorId) {
+                    window.viewErrorDetails(errorId);
+                }
+                break;
+            }
+            case 'validate-test-correction': {
+                const correctionId = parseDataIndex(actionElement.dataset.correctionId);
+                const filePath = actionElement.dataset.filePath || '';
+                if (correctionId !== null) {
+                    window.validateTestCorrection(correctionId, filePath);
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    });
+
+    document.addEventListener('change', (event) => {
+        const selectElement = event.target.closest('select[data-action="update-ticket-status"]');
+        if (!selectElement) {
+            return;
+        }
+
+        window.updateTicketStatus(
+            selectElement.dataset.ticketId,
+            selectElement.value,
+            selectElement
+        );
+    });
+
+    monitoringDelegationInitialized = true;
+}
+
 function initEventListeners() {
+    setupMonitoringDynamicDelegation();
+
     document.getElementById('btnLogout')?.addEventListener('click', async () => {
         await window.supabaseClient.auth.signOut();
         window.location.href = '../index.html';

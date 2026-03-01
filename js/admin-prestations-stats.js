@@ -4,11 +4,81 @@
 // ==========================================
 
 let tauxCommission = 5; // Par défaut 5%
+const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+let currentUser = null;
+
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+async function isCurrentUserAdmin(user) {
+    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+        ? window.APP_CONFIG.ADMIN_EMAILS
+        : [];
+    const adminEmails = new Set(
+        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+            .map(normalizeEmail)
+            .filter(Boolean)
+    );
+
+    if (adminEmails.has(normalizeEmail(user?.email))) {
+        return true;
+    }
+
+    try {
+        const { data: rolesData, error: rolesError } = await window.supabaseClient
+            .from('user_roles')
+            .select('role, is_active')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+
+        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+    } catch (rolesCheckError) {
+        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+        return false;
+    }
+}
+
+async function checkAuth() {
+    try {
+        if (!window.supabaseClient) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        if (error || !session?.user) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        currentUser = session.user;
+        const isAdmin = await isCurrentUserAdmin(currentUser);
+        if (!isAdmin) {
+            alert('Accès refusé : Réservé aux administrateurs');
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        return true;
+    } catch (authError) {
+        console.error('Erreur authentification stats prestations:', authError);
+        window.location.href = '../index.html';
+        return false;
+    }
+}
 
 // ==========================================
 // INITIALISATION
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const isAllowed = await checkAuth();
+    if (!isAllowed) {
+        return;
+    }
+
     loadConfig();
     loadStatsGlobales();
     loadCommandesHistory();

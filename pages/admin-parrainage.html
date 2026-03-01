@@ -312,7 +312,7 @@
                 <p class="page-subtitle">Campagnes de parrainage et statistiques</p>
             </div>
             <div class="page-header__actions">
-                <button class="btn btn--primary" onclick="openCreateModal()">
+                <button class="btn btn--primary" data-action="open-create-modal">
                     <i data-lucide="plus"></i>
                     Nouvelle Campagne
                 </button>
@@ -323,23 +323,23 @@
         <section class="tabs-navigation">
             <div class="tabs-sidebar">
                 <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
-                <button class="tab-btn" data-tab="dashboard" onclick="window.location.href='/pages/admin-channel-manager.html'">
+                <button class="tab-btn" data-tab="dashboard" data-nav-url="/pages/admin-channel-manager.html">
                     <i data-lucide="layout-dashboard"></i>
                     <span>Dashboard</span>
                 </button>
-                <button class="tab-btn" data-tab="clients" onclick="window.location.href='/pages/admin-clients.html'">
+                <button class="tab-btn" data-tab="clients" data-nav-url="/pages/admin-clients.html">
                     <i data-lucide="users"></i>
                     <span>Clients</span>
                 </button>
-                <button class="tab-btn" data-tab="support" onclick="window.location.href='/pages/admin-support.html'">
+                <button class="tab-btn" data-tab="support" data-nav-url="/pages/admin-support.html">
                     <i data-lucide="headphones"></i>
                     <span>Support</span>
                 </button>
-                <button class="tab-btn" data-tab="emails" onclick="window.location.href='/pages/admin-emails.html?build=20260217-4'">
+                <button class="tab-btn" data-tab="emails" data-nav-url="/pages/admin-emails.html?build=20260217-4">
                     <i data-lucide="mail"></i>
                     <span>Messagerie</span>
                 </button>
-                <button class="tab-btn" data-tab="promotions" onclick="window.location.href='/pages/admin-promotions.html'">
+                <button class="tab-btn" data-tab="promotions" data-nav-url="/pages/admin-promotions.html">
                     <i data-lucide="tag"></i>
                     <span>Promotions</span>
                 </button>
@@ -347,23 +347,23 @@
                     <i data-lucide="gift"></i>
                     <span>Parrainage</span>
                 </button>
-                <button class="tab-btn" data-tab="finance" onclick="window.location.href='/pages/admin-finance.html'">
+                <button class="tab-btn" data-tab="finance" data-nav-url="/pages/admin-finance.html">
                     <i data-lucide="bar-chart-2"></i>
                     <span>Finance & BI</span>
                 </button>
-                <button class="tab-btn" data-tab="content" onclick="window.location.href='/pages/admin-content.html'">
+                <button class="tab-btn" data-tab="content" data-nav-url="/pages/admin-content.html">
                     <i data-lucide="pen-tool"></i>
                     <span>Content IA</span>
                 </button>
-                <button class="tab-btn" data-tab="communications" onclick="window.location.href='/pages/admin-communications.html'">
+                <button class="tab-btn" data-tab="communications" data-nav-url="/pages/admin-communications.html">
                     <i data-lucide="megaphone"></i>
                     <span>Communications</span>
                 </button>
-                <button class="tab-btn" data-tab="monitoring" onclick="window.location.href='/pages/admin-monitoring.html'">
+                <button class="tab-btn" data-tab="monitoring" data-nav-url="/pages/admin-monitoring.html">
                     <i data-lucide="activity"></i>
                     <span>Monitoring</span>
                 </button>
-                <button class="tab-btn" data-tab="website" onclick="window.location.href='/pages/admin-channel-manager.html'">
+                <button class="tab-btn" data-tab="website" data-nav-url="/pages/admin-channel-manager.html">
                     <i data-lucide="globe"></i>
                     <span>Site Web</span>
                 </button>
@@ -427,12 +427,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">Nouvelle Campagne</h2>
-                <button onclick="closeModal()" style="background: none; border: none; cursor: pointer;">
+                <button data-action="close-modal" style="background: none; border: none; cursor: pointer;">
                     <i data-lucide="x" style="width: 24px; height: 24px; color: #64748b;"></i>
                 </button>
             </div>
 
-            <form id="campaignForm" onsubmit="saveCampaign(event)">
+            <form id="campaignForm">
                 <div class="form-group">
                     <label class="form-label">Nom de la campagne</label>
                     <input type="text" class="form-input" id="campaignName" required placeholder="Ex: Double Bonus Février 2026">
@@ -450,7 +450,7 @@
 
                 <div class="form-group">
                     <label class="form-label">Type de bonus</label>
-                    <select class="form-select" id="bonusType" required onchange="updateBonusFields()">
+                    <select class="form-select" id="bonusType" required>
                         <option value="">-- Sélectionner --</option>
                         <option value="discount_multiplier">Réduction par filleul (%) - Modifie le taux de base</option>
                         <option value="discount_fixed">Réduction fixe (%) - Ajoute un bonus</option>
@@ -498,7 +498,7 @@
                     <i data-lucide="save"></i>
                     Créer la campagne
                 </button>
-                <button type="button" class="btn-cancel" onclick="closeModal()">Annuler</button>
+                <button type="button" class="btn-cancel" data-action="close-modal">Annuler</button>
             </form>
         </div>
     </div>
@@ -508,7 +508,7 @@
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
                 <h2 id="participantsModalTitle">Participants de la campagne</h2>
-                <button onclick="closeParticipantsModal()" style="background: none; border: none; cursor: pointer; font-size: 24px; color: #64748b;">×</button>
+                <button data-action="close-participants-modal" style="background: none; border: none; cursor: pointer; font-size: 24px; color: #64748b;">×</button>
             </div>
             
             <div id="participantsList" style="margin-top: 20px;">
@@ -591,6 +591,45 @@
     <script src="../js/admin-parrainage.js"></script>
     <script>
         lucide.createIcons();
+
+        document.addEventListener('click', async (event) => {
+            const navButton = event.target.closest('[data-nav-url]');
+            if (navButton) {
+                const navUrl = navButton.dataset.navUrl;
+                if (navUrl) {
+                    window.location.href = navUrl;
+                }
+                return;
+            }
+
+            const actionEl = event.target.closest('[data-action]');
+            if (!actionEl) {
+                return;
+            }
+
+            switch (actionEl.dataset.action) {
+                case 'open-create-modal':
+                    window.openCreateModal?.();
+                    break;
+                case 'close-modal':
+                    window.closeModal?.();
+                    break;
+                case 'close-participants-modal':
+                    window.closeParticipantsModal?.();
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        document.getElementById('campaignForm')?.addEventListener('submit', (event) => {
+            event.preventDefault();
+            window.saveCampaign?.(event);
+        });
+
+        document.getElementById('bonusType')?.addEventListener('change', () => {
+            window.updateBonusFields?.();
+        });
     </script>
 </body>
 </html>

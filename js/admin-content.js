@@ -13,6 +13,78 @@
 let currentContentType = '';
 let generatedContent = '';
 let currentContentId = null;
+let currentUser = null;
+const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+async function isCurrentUserAdmin(user) {
+    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
+        ? window.APP_CONFIG.ADMIN_EMAILS
+        : [];
+    const adminEmails = new Set(
+        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
+            .map(normalizeEmail)
+            .filter(Boolean)
+    );
+
+    if (adminEmails.has(normalizeEmail(user?.email))) {
+        return true;
+    }
+
+    try {
+        const { data: rolesData, error: rolesError } = await window.supabaseClient
+            .from('user_roles')
+            .select('role, is_active')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+
+        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
+    } catch (rolesCheckError) {
+        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
+        return false;
+    }
+}
+
+async function checkAuth() {
+    try {
+        if (!window.supabaseClient) {
+            console.error('❌ Supabase client non initialisé');
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+
+        if (error || !session?.user) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        currentUser = session.user;
+        const isAdmin = await isCurrentUserAdmin(currentUser);
+        if (!isAdmin) {
+            alert('Accès refusé : Réservé aux administrateurs');
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const userEmailEl = document.getElementById('userEmail');
+        if (userEmailEl) {
+            userEmailEl.textContent = currentUser.email || '';
+        }
+
+        return true;
+    } catch (authError) {
+        console.error('❌ Erreur authentification:', authError);
+        window.location.href = '../index.html';
+        return false;
+    }
+}
 
 // Templates prédéfinis
 const TEMPLATES = {
@@ -53,6 +125,11 @@ const TEMPLATES = {
 document.addEventListener('DOMContentLoaded', async () => {
     // console.log('📝 Initialisation Content IA');
     
+    const isAllowed = await checkAuth();
+    if (!isAllowed) {
+        return;
+    }
+    
     lucide.createIcons();
     
     await loadContent();
@@ -60,6 +137,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function setupEventListeners() {
+    document.addEventListener('click', async (event) => {
+        const actionEl = event.target.closest('[data-action]');
+        if (!actionEl) {
+            return;
+        }
+
+        const action = actionEl.dataset.action;
+        const contentId = actionEl.dataset.contentId;
+        if (!action || !contentId) {
+            return;
+        }
+
+        switch (action) {
+            case 'view-content':
+                await viewContent(contentId);
+                break;
+            case 'edit-content':
+                await editContent(contentId);
+                break;
+            case 'delete-content':
+                await deleteContent(contentId);
+                break;
+            default:
+                break;
+        }
+    });
+
     // Filtres
     document.getElementById('filterType').addEventListener('change', filterContent);
     document.getElementById('searchContent').addEventListener('input', filterContent);
@@ -139,13 +243,13 @@ function renderContent(contents) {
                     ${getPerformanceHTML(content)}
                 </td>
                 <td style="padding: 12px; border-bottom: 1px solid #E5E7EB; text-align: center;">
-                    <button onclick="viewContent('${content.id}')" class="btn-icon" title="Voir">
+                    <button data-action="view-content" data-content-id="${content.id}" class="btn-icon" title="Voir">
                         <i data-lucide="eye"></i>
                     </button>
-                    <button onclick="editContent('${content.id}')" class="btn-icon" title="Éditer">
+                    <button data-action="edit-content" data-content-id="${content.id}" class="btn-icon" title="Éditer">
                         <i data-lucide="edit"></i>
                     </button>
-                    <button onclick="deleteContent('${content.id}')" class="btn-icon" title="Supprimer">
+                    <button data-action="delete-content" data-content-id="${content.id}" class="btn-icon" title="Supprimer">
                         <i data-lucide="trash-2"></i>
                     </button>
                 </td>

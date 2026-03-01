@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-03-01T21-API-ONLY-Z",
+  "base_url": "https://liveownerunit.fr",
+  "status": "running",
+  "updated_at": "2026-03-01T21:24:17.600Z",
+  "raw_file": "docs/rapports/performance/LOAD_TEST_RAW_2026-03-01T21-API-ONLY-Z.csv",
+  "include_admin_scenario": 0,
+  "total_phases": 8,
+  "phases_completed": [],
+  "progress": {
+    "done": 0,
+    "total": 8,
+    "percent": 0
+  }
+}

@@ -9,6 +9,35 @@
     // DOMPurify sera chargé via le CDN dans le HTML principal
     const DOMPurify = window.DOMPurify;
 
+    const INLINE_HANDLER_COMPAT_ROUTES = new Set([
+        '/',
+        '/index.html',
+        '/app',
+        '/app.html',
+        '/login',
+        '/pages/client-support.html',
+        '/pages/fiche-client.html',
+        '/pages/femme-menage.html',
+        '/pages/onboarding.html',
+        '/pages/options.html',
+        '/pages/validation.html'
+    ]);
+
+    function isInlineHandlerCompatibilityPath(pathname) {
+        const currentPath = String(pathname || '').toLowerCase();
+        if (!currentPath) return false;
+
+        if (INLINE_HANDLER_COMPAT_ROUTES.has(currentPath)) {
+            return true;
+        }
+
+        if (currentPath.startsWith('/tabs/')) {
+            return true;
+        }
+
+        return false;
+    }
+
     // ==========================================
     // 🧹 SANITIZATION HTML (Protection XSS)
     // ==========================================
@@ -24,10 +53,11 @@
     
     const defaultConfig = {
         ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'small', 'button', 'img', 'input', 'textarea', 'select', 'option', 'label', 'form', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'section', 'article', 'nav', 'header', 'footer', 'aside', 'main', 'figure', 'figcaption', 'canvas', 'svg', 'path', 'circle', 'rect', 'line', 'polygon', 'polyline', 'ellipse', 'g'],
-        ALLOWED_ATTR: ['href', 'title', 'target', 'style', 'class', 'type', 'data-activite-id', 'data-wa-resa-id', 'data-wa-token', 'data-wa-retour-resa-id', 'data-wa-sujet', 'src', 'alt', 'onclick', 'onmouseover', 'onmouseout', 'id', 'name', 'value', 'placeholder', 'required', 'disabled', 'checked', 'selected', 'for', 'min', 'max', 'step', 'pattern', 'maxlength', 'minlength', 'rows', 'cols', 'readonly', 'autocomplete', 'multiple', 'size', 'onchange', 'oninput', 'onsubmit', 'onfocus', 'onblur', 'viewBox', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'd', 'points', 'cx', 'cy', 'r', 'x', 'y', 'width', 'height', 'x1', 'y1', 'x2', 'y2'],
+        ALLOWED_ATTR: ['href', 'title', 'target', 'style', 'class', 'type', 'data-activite-id', 'data-wa-resa-id', 'data-wa-token', 'data-wa-retour-resa-id', 'data-wa-sujet', 'src', 'alt', 'id', 'name', 'value', 'placeholder', 'required', 'disabled', 'checked', 'selected', 'for', 'min', 'max', 'step', 'pattern', 'maxlength', 'minlength', 'rows', 'cols', 'readonly', 'autocomplete', 'multiple', 'size', 'viewBox', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'd', 'points', 'cx', 'cy', 'r', 'x', 'y', 'width', 'height', 'x1', 'y1', 'x2', 'y2'],
         ALLOW_DATA_ATTR: true,
-        // ⚠️ Bloquer les event handlers dangereux
-        FORBID_ATTR: ['onerror', 'onload']
+        FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'meta', 'base'],
+        // ⚠️ Bloquer tous les event handlers inline
+        FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onmouseout', 'onchange', 'oninput', 'onsubmit', 'onfocus', 'onblur']
     };
     
     return DOMPurify.sanitize(dirty, { ...defaultConfig, ...config });
@@ -45,27 +75,21 @@
         return;
     }
     
-    // Pour le contenu "trusted" (fichiers HTML statiques du projet), 
-    // autoriser tout (y compris <script> et <style>) car c'est du contenu contrôlé
+    // Pour le contenu "trusted" (templates internes),
+    // conserver les styles inline mais ne jamais exécuter de <script> injecté
     if (config.trusted) {
         const trustedConfig = {
             ALLOW_DATA_ATTR: true,
             KEEP_CONTENT: true,
-            ADD_TAGS: ['script', 'style'],
+            ADD_TAGS: ['style'],
             ADD_ATTR: ['onclick', 'onmouseover', 'onmouseout', 'onchange', 'oninput', 'onsubmit', 'onfocus', 'onblur'],
             FORBID_ATTR: ['onerror', 'onload']
         };
         
-        // Extraire les scripts ET les styles avant sanitization
-        const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+        // Extraire uniquement les styles avant sanitization
         const styleRegex = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
-        const scripts = [];
         const styles = [];
         let match;
-        
-        while ((match = scriptRegex.exec(html)) !== null) {
-            scripts.push(match[1]);
-        }
         
         while ((match = styleRegex.exec(html)) !== null) {
             styles.push(match[1]);
@@ -83,20 +107,24 @@
             }
         });
         
-        // Exécuter les scripts extraits
-        scripts.forEach((scriptContent, index) => {
-            if (scriptContent.trim()) {
-                try {
-                    const script = document.createElement('script');
-                    script.textContent = scriptContent;
-                    element.appendChild(script);
-                } catch (err) {
-                    console.error(`❌ [setInnerHTML] Erreur script ${index + 1}:`, err);
-                }
-            }
-        });
     } else {
-        element.innerHTML = sanitizeHTML(html, config);
+        const htmlString = String(html || '');
+        const containsInlineHandlers = /\son[a-z]+\s*=\s*/i.test(htmlString);
+        const currentPath = String(window.location?.pathname || '').toLowerCase();
+        const isAdminSurface = currentPath.includes('/pages/admin-') || currentPath.includes('/pages/admin/');
+        const isAllowlistedLegacySurface = isInlineHandlerCompatibilityPath(currentPath);
+        const allowInlineHandlers = config.allowInlineHandlers === true || isAllowlistedLegacySurface;
+
+        if (containsInlineHandlers && !isAdminSurface && allowInlineHandlers) {
+            const compatibilityConfig = {
+                ADD_ATTR: ['onclick', 'onmouseover', 'onmouseout', 'onchange', 'oninput', 'onsubmit', 'onfocus', 'onblur'],
+                FORBID_ATTR: ['onerror', 'onload']
+            };
+
+            element.innerHTML = sanitizeHTML(htmlString, { ...compatibilityConfig, ...config });
+        } else {
+            element.innerHTML = sanitizeHTML(htmlString, config);
+        }
     }
 }
 

@@ -508,5 +508,3 @@ window.debugPhotos = function() {
     });
     console.log('==========================');
 };
-
-console.log('✅ Module infos-gites-photos.js chargé (v1.7)');

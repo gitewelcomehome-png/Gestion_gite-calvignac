@@ -31,6 +31,564 @@ Ce qu'il faut faire pour éviter que ça se reproduise
 
 ## 🔴 Erreurs Référencées
 
+### [1 Mars 2026] - Doublons de phases manifest (progression >100%) en reprise de charge
+
+**Contexte:**
+Lors d'une reprise de campagne longue avec plusieurs relances, certaines phases pouvaient être enregistrées plusieurs fois dans `phases_completed`, ce qui faussait la progression (`>100%`) et brouillait la lecture d'exécution.
+
+**Erreur:**
+- `progress.done` supérieur au nombre réel de phases
+- `%` de progression pouvant dépasser 100%
+- manifest contenant des entrées dupliquées `scenario + phase`
+
+**Cause:**
+1. ajout systématique dans `phases_completed` sans vérification d'existence
+2. calcul de progression basé sur la longueur brute du tableau
+
+**Solution:**
+✅ Correctif appliqué dans `scripts/load-test-curl.sh`:
+- remplacement du comptage brut par un comptage **unique** (`scenario|phase`) pour `progress.done`
+- upsert d'une phase dans `phases_completed` (mise à jour si déjà présente, sinon ajout)
+
+**Prévention:**
+1. conserver un identifiant de phase canonique (`scenario + phase`) pour tout état de progression
+2. borner les KPI de progression sur des décomptes uniques
+
+**Fichiers concernés:**
+- `scripts/load-test-curl.sh`
+- `docs/rapports/performance/LOAD_TEST_MANIFEST_2026-03-01T20-30-33Z.json`
+
+---
+
+### [1 Mars 2026] - Campagne de charge interrompue sans reprise fiable (effet tunnel)
+
+**Contexte:**
+Une campagne de montée en charge longue (12 phases) s'interrompait en cours de route ; la reprise relançait partiellement des phases, ce qui provoquait des pertes de temps et une perception de blocage.
+
+**Erreur:**
+- progression peu lisible pendant l'exécution
+- redémarrage perçu "depuis zéro" lors des coupures de session
+- exécution parallèle instable via `bash -lc` (bruit d'initialisation environnement)
+
+**Cause:**
+1. script initial sans mode reprise explicite par `run_id`
+2. absence de compteur d'avancement `%` persistant
+3. sous-processus lancés via shell login (`bash -lc`) avec hooks environnement non nécessaires
+
+**Solution:**
+✅ Fiabilisation appliquée sur `scripts/load-test-curl.sh`:
+- ajout de reprise par `RUN_ID_OVERRIDE`
+- skip automatique des phases déjà validées depuis le manifest
+- ajout d'un bloc `progress` (done/total/percent) mis à jour à chaque phase
+- remplacement `bash -lc` par `sh -c` pour stabiliser l'exécution parallèle
+
+✅ Résultat opérationnel:
+- campagne finalisée à **100% (12/12 phases)** avec checkpoints persistés
+- génération des artefacts de preuve dans `docs/rapports/performance/`
+
+**Prévention:**
+1. lancer les campagnes longues uniquement en mode checkpoint/reprise
+2. imposer un indicateur de progression `%` côté manifest pour tout run multi-phases
+3. éviter les shells login pour les workers parallèles non interactifs
+
+**Fichiers concernés:**
+- `scripts/load-test-curl.sh`
+- `docs/rapports/performance/LOAD_TEST_MANIFEST_2026-03-01T18-11-28Z.json`
+- `docs/rapports/performance/AUDIT_MONTEE_CHARGE_2026-03-01.md`
+
+---
+
+### [24 Février 2026] - Régression potentielle évitée: scripts legacy orphelins et logs debug verbeux en runtime
+
+**Contexte:**
+Un audit qualité a identifié des scripts JS historiques présents dans `js/` mais non référencés par les HTML actifs, ainsi qu'un volume élevé de `console.log` dans des modules chargés en production.
+
+**Erreur:**
+- Risque de confusion opérationnelle (fichiers legacy dans le périmètre actif)
+- Bruit console excessif rendant le diagnostic d'incidents plus difficile
+
+**Cause:**
+1. accumulation de scripts historiques non retirés après migration (`sync-ical-v2` remplaçant `sync-ical`)
+2. persistance de logs de debug dans des modules métier actifs
+
+**Solution:**
+✅ Nettoyage préventif appliqué:
+- archivage des scripts orphelins:
+    - `js/calou-icons.js`
+    - `js/mobile.js`
+    - `js/sync-ical.js`
+    vers `_archives/by_category/js/js_cleanup_20260224_orphans_phase2/` (avec `MANIFEST.md`)
+- réduction du bruit console dans:
+    - `js/kanban.js`
+    - `js/infos-gites.js`
+
+**Prévention:**
+1. maintenir un scan périodique des références HTML actives vers `js/`
+2. archiver (et non supprimer) les modules non référencés en lot versionné
+3. interdire les `console.log` de debug non indispensables sur les modules runtime actifs
+
+**Fichiers concernés:**
+- `_archives/by_category/js/js_cleanup_20260224_orphans_phase2/MANIFEST.md`
+- `js/kanban.js`
+- `js/infos-gites.js`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Récursion infinie RLS sur `user_roles` (42P17) bloquant le chargement des communications client
+
+**Contexte:**
+Le dashboard client déclenchait des erreurs 500 lors du chargement de `admin_communications`, avec le message Postgres `infinite recursion detected in policy for relation "user_roles"`.
+
+**Erreur:**
+- `GET .../rest/v1/admin_communications ... 500`
+- code: `42P17`
+- message: `infinite recursion detected in policy for relation "user_roles"`
+- effet visible: bruit console répétitif + widget communications non chargé
+
+**Cause:**
+Policy RLS `Admins gèrent les rôles` sur `user_roles` écrite avec une sous-requête sur `user_roles` elle-même (`EXISTS (SELECT 1 FROM user_roles ...)`), ce qui crée une boucle d'évaluation de policy.
+
+**Solution:**
+✅ Correctif structurel appliqué:
+- suppression de la policy auto-référente
+- remplacement par un modèle non récursif:
+    - `authenticated`: lecture de ses propres rôles (`user_id = auth.uid()`)
+    - `service_role`: gestion complète des rôles
+- patch source: `_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/create_user_roles.sql` (historique)
+- script prod de remédiation immédiate: `sql/securite/FIX_USER_ROLES_RLS_RECURSION_2026-02-23.sql`
+
+✅ Stabilisation runtime front:
+- ajout d'un garde dans `js/client-communications.js` pour désactiver temporairement le widget en cas de `42P17` afin d'éviter la boucle de requêtes/erreurs tant que le fix SQL n'est pas exécuté.
+
+**Prévention:**
+1. interdire toute policy `user_roles` qui contient une sous-requête directe sur `user_roles`
+2. réserver l'écriture `user_roles` à `service_role` ou à une fonction `SECURITY DEFINER` explicitement auditée
+3. conserver un post-check SQL sur les policies `user_roles` après chaque migration sécurité
+
+**Fichiers concernés:**
+- `_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/create_user_roles.sql` (historique)
+- `sql/securite/FIX_USER_ROLES_RLS_RECURSION_2026-02-23.sql`
+- `js/client-communications.js`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Clics non fonctionnels après durcissement sanitization (`onclick` supprimés dans HTML injecté)
+
+**Contexte:**
+Après durcissement XSS, plusieurs boutons ne répondaient plus sur des écrans qui injectent du HTML via `SecurityUtils.setInnerHTML(...)`.
+
+**Erreur:**
+- boutons visibles mais aucun effet au clic
+- régressions dispersées sur modules utilisant du HTML injecté avec handlers inline
+
+**Cause:**
+La configuration de sanitization retirait les attributs `on*` dans le flux par défaut de `setInnerHTML`, ce qui supprimait les `onclick` attendus par des composants legacy.
+
+**Solution:**
+✅ Correctif de compatibilité appliqué dans `js/security-utils.js` :
+- détection des handlers inline dans le HTML injecté
+- autorisation ciblée des attributs `onclick/onchange/oninput/...` **uniquement** sur ce chemin de compatibilité
+- périmètre réduit: compatibilité inline active uniquement sur une **allowlist explicite** de routes legacy (et blocage sur surfaces admin)
+- activation hors allowlist possible seulement par opt-in explicite (`config.allowInlineHandlers === true`)
+- maintien du blocage des vecteurs dangereux (`script`, `onerror`, `onload`)
+
+**Prévention:**
+1. privilégier `data-action` + délégation d’événements pour tout nouveau composant
+2. ne pas réintroduire d’exécution de `<script>` dans `setInnerHTML`
+3. conserver ce mode compatibilité uniquement pour les vues legacy tant que la migration complète n’est pas terminée
+
+**Fichiers concernés:**
+- `js/security-utils.js`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Clôture globale : handlers inline résiduels sur périmètre admin actif
+
+**Contexte:**
+Après plusieurs lots successifs (`admin-prestations`, `admin-finance`, `admin-communications`, `admin-monitoring`, `admin-channel-manager`, `admin-support`), des reliquats inline subsistaient encore sur d'autres modules admin actifs (pages statiques + rendu dynamique JS).
+
+**Erreur:**
+- surface XSS admin encore fragmentée sur différents écrans
+- hétérogénéité d'implémentation entre modules migrés et modules restants
+- risque de régression de sécurité tant que le pattern inline n'était pas éliminé globalement
+
+**Cause:**
+1. héritage historique de templates HTML avec `onclick/onchange/onsubmit` sur plusieurs pages admin
+2. rendu dynamique JS avec actions injectées en inline dans certains modules restants
+
+**Solution:**
+✅ Clôture complète appliquée:
+- migration des modules restants (`admin-content`, `admin-clients`, `admin-emails`, `admin-parrainage`, `admin-promotions`, `admin-ticket-workflow`)
+- nettoyage des reliquats complémentaires (`admin-content-analytics`, `admin-error-details`, `admin-prestations-stats`, `admin-prompt-editor`, `admin-dashboard`, `admin-error-monitor`)
+- remplacement par `data-action`/`data-nav-url` + délégation d'événements centralisée
+- validation finale: scan global des fichiers actifs `admin-*.html/js` sans archives = `0` handlers inline
+
+**Prévention:**
+1. interdire toute réintroduction de `on*=` inline sur modules admin actifs
+2. imposer la délégation centralisée pour tous les rendus statiques et dynamiques
+3. conserver un scan de conformité sécurité avant chaque release admin
+
+**Fichiers concernés:**
+- `pages/admin-content.html`
+- `js/admin-content.js`
+- `js/admin-content-ai-strategy.js`
+- `pages/admin-clients.html`
+- `js/admin-clients.js`
+- `pages/admin-emails.html`
+- `pages/admin-parrainage.html`
+- `js/admin-parrainage.js`
+- `pages/admin-promotions.html`
+- `pages/admin-ticket-workflow.html`
+- `pages/admin-content-analytics.html`
+- `pages/admin-error-details.html`
+- `pages/admin-prestations-stats.html`
+- `pages/admin-prompt-editor.html`
+- `js/admin-dashboard.js`
+- `js/admin-error-monitor.js`
+- `docs/ARCHITECTURE.md`
+- `docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Handlers inline persistants sur modules admin channel manager / support
+
+**Contexte:**
+Après migration des modules `admin-prestations`, `admin-finance`, `admin-communications` et `admin-monitoring`, les interfaces actives `pages/admin-channel-manager.html` et `pages/admin-support.html` conservaient des handlers inline statiques (`onclick`) ; le rendu dynamique de `js/admin-support.js` conservait également un reliquat inline.
+
+**Erreur:**
+- surface XSS admin résiduelle maintenue sur des écrans opérationnels critiques
+- dépendance au binding inline pour navigation/actions alors que la base de durcissement impose la délégation centralisée
+- incohérence entre pages migrées et pages support/channel manager
+
+**Cause:**
+1. héritage de templates HTML historiques avec `onclick="window.location.href=..."`
+2. reliquat de rendu dynamique dans `js/admin-support.js` avec handlers inline non totalement supprimés
+
+**Solution:**
+✅ Durcissements appliqués:
+- retrait des handlers inline statiques dans `pages/admin-channel-manager.html` et `pages/admin-support.html`
+- migration vers `data-nav-url` / `data-action`
+- ajout/usage de délégation d'événements centralisée pour les actions de navigation et de support
+- suppression du reliquat inline dans `js/admin-support.js` (détail ticket), validation sans erreurs éditeur
+
+**Prévention:**
+1. interdire toute réintroduction de `onclick/onchange` sur pages admin actives
+2. imposer `data-action`/`data-nav-url` + délégation centralisée pour tout rendu statique/dynamique
+3. vérifier systématiquement les fichiers actifs (`pages/`, `js/`) via scan ciblé avant release (hors `_versions`)
+
+**Fichiers concernés:**
+- `pages/admin-channel-manager.html`
+- `pages/admin-support.html`
+- `js/admin-support.js`
+- `docs/ARCHITECTURE.md`
+- `docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md`
+- `pages/admin-security-audit.html`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Handlers inline dynamiques persistants dans js/admin-monitoring
+
+**Contexte:**
+Après retrait des handlers inline statiques de `pages/admin-monitoring.html`, le rendu dynamique de `js/admin-monitoring.js` conservait encore des `onclick/onchange` injectés dans le HTML (actions erreurs/tickets/logs/modals/tests).
+
+**Erreur:**
+- surface XSS admin résiduelle maintenue dans le code JS de rendu
+- dépendance à des handlers inline concaténés dans des templates dynamiques
+- robustesse incomplète sur la mise à jour de statut ticket (usage implicite de `event` global)
+
+**Cause:**
+1. héritage de templates dynamiques historiques construits avec `onclick`/`onchange`
+2. absence d'un routeur d'actions unique pour les composants générés à chaud
+
+**Solution:**
+✅ Durcissements appliqués:
+- retrait des handlers inline dynamiques dans `js/admin-monitoring.js`
+- migration vers attributs `data-action`/`data-*` sur boutons/selects générés
+- ajout d'une délégation centralisée (`setupMonitoringDynamicDelegation()`)
+- sécurisation de `updateTicketStatus(ticketId, newStatus, controlElement)` sans dépendance au `event` global
+
+**Prévention:**
+1. interdire toute réintroduction de `onclick/onchange` dans les templates dynamiques admin
+2. imposer un dispatch centralisé par `data-action` pour les éléments rendus côté JS
+3. vérifier systématiquement les fichiers actifs `js/` + `pages/` avant release (hors archives)
+
+**Fichiers concernés:**
+- `js/admin-monitoring.js`
+- `docs/ARCHITECTURE.md`
+- `docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md`
+- `pages/admin-security-audit.html`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Handlers inline statiques persistants sur module admin monitoring
+
+**Contexte:**
+Après les migrations `admin-prestations`, `admin-finance` et `admin-communications`, la page `admin-monitoring` conservait des handlers inline statiques (`onclick`) sur navigation, actions de pilotage et fermeture de modal.
+
+**Erreur:**
+- surface XSS admin résiduelle sur une interface critique de supervision
+- dépendance au binding inline au lieu d'une délégation centralisée
+
+**Cause:**
+1. héritage de templates statiques avec `onclick` côté HTML
+2. absence de délégation unifiée pour les actions de page principales
+
+**Solution:**
+✅ Durcissements appliqués:
+- retrait des `onclick` inline statiques dans `pages/admin-monitoring.html`
+- migration vers attributs `data-nav-url` / `data-action`
+- délégation d'événements centralisée dans le script inline de la page
+
+**Prévention:**
+1. interdire toute réintroduction de handlers inline sur pages admin critiques
+2. imposer `data-action` + délégation d'événements pour les actions de page
+3. vérifier systématiquement le périmètre courant avant release via grep ciblé
+
+**Fichiers concernés:**
+- `pages/admin-monitoring.html`
+- `docs/ARCHITECTURE.md`
+- `docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md`
+- `pages/admin-security-audit.html`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Handlers inline persistants sur module admin communications
+
+**Contexte:**
+Après migration des modules `admin-prestations` et `admin-finance`, la page `admin-communications` conservait encore des handlers inline (`onclick`) sur des actions actives (navigation, modes IA, suppression d'items).
+
+**Erreur:**
+- surface XSS admin résiduelle inutilement maintenue
+- dépendance à l'exécution inline dans une page à fort usage opérationnel
+
+**Cause:**
+1. héritage de templates historiques avec `onclick` dans le HTML statique
+2. génération dynamique des items avec action de suppression en inline
+
+**Solution:**
+✅ Durcissements appliqués:
+- retrait des `onclick` inline dans `pages/admin-communications.html`
+- migration vers attributs `data-nav-url` / `data-action`
+- délégation d'événements centralisée dans le script de page
+
+**Prévention:**
+1. interdire toute réintroduction de handlers inline sur pages admin actives
+2. imposer `data-action` + délégation d'événements pour le HTML dynamique
+3. vérifier systématiquement le périmètre courant avec grep ciblé avant release
+
+**Fichiers concernés:**
+- `pages/admin-communications.html`
+- `docs/ARCHITECTURE.md`
+- `docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md`
+- `pages/admin-security-audit.html`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Handlers inline persistants sur module admin finance (navigation/export)
+
+**Contexte:**
+Après migration du module admin prestations, la page `admin-finance` conservait des `onclick` inline sur la navigation sidebar et l'action d'export CSV.
+
+**Erreur:**
+- maintien d'une surface XSS évitable sur une interface admin active
+- dépendance au JavaScript inline pour des actions sensibles de navigation/extraction
+
+**Cause:**
+1. implémentation historique de la navigation admin via `onclick="window.location.href=..."`
+2. action export exposée via `onclick` inline côté template HTML
+
+**Solution:**
+✅ Durcissements appliqués:
+- retrait des `onclick` inline dans `pages/admin-finance.html`
+- migration vers `data-nav-url` / `data-action`
+- binding événementiel centralisé dans `js/admin-finance.js`
+
+**Prévention:**
+1. interdire tout `onclick` inline sur les pages admin actives
+2. imposer les handlers JS centralisés pour navigation et actions sensibles
+3. contrôler via grep ciblé `onclick=` avant publication
+
+**Fichiers concernés:**
+- `pages/admin-finance.html`
+- `js/admin-finance.js`
+- `docs/ARCHITECTURE.md`
+- `docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md`
+- `pages/admin-security-audit.html`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Handlers inline persistants sur module admin prestations (surface XSS résiduelle)
+
+**Contexte:**
+Malgré les durcissements RLS/CORS, le module `admin-prestations` conservait des handlers inline (`onclick`, `onchange`, `onsubmit`) dans le HTML statique et dans le rendu dynamique JS.
+
+**Erreur:**
+- maintien d'une surface XSS évitable sur une interface admin active
+- dépendance à l'exécution inline côté navigateur, moins robuste en posture durcie
+
+**Cause:**
+1. implémentation historique orientée rapidité (`onclick=...`) sur actions et onglets
+2. rendu dynamique des cartes/tableau avec handlers inline concaténés
+
+**Solution:**
+✅ Durcissements appliqués:
+- retrait des handlers inline dans `pages/admin-prestations.html`
+- migration vers attributs `data-action` / `data-tab`
+- délégation d'événements centralisée dans `js/admin-prestations.js` (actions, tabs, formulaires)
+
+**Prévention:**
+1. interdire toute réintroduction de `onclick/onchange/onsubmit` inline sur pages admin actives
+2. imposer la délégation d'événements via JS pour les vues dynamiques
+3. valider systématiquement l'absence de régression via grep ciblé sur `onclick=` avant release
+
+**Fichiers concernés:**
+- `pages/admin-prestations.html`
+- `js/admin-prestations.js`
+- `docs/ARCHITECTURE.md`
+- `docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md`
+- `pages/admin-security-audit.html`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Endpoints API en CORS monitor/wildcard + exécution implicite scripts injectés
+
+**Contexte:**
+Après clôture du hardening RLS, plusieurs endpoints sensibles restaient en posture CORS monitor (ou wildcard pour `content-ai`) et le mode `trusted` du helper `SecurityUtils.setInnerHTML` pouvait exécuter des scripts injectés.
+
+**Erreur:**
+- exposition API potentielle à des origines non autorisées tant que l'enforcement n'était pas la posture par défaut
+- surface XSS accrue via exécution implicite de `<script>` injectés en mode `trusted`
+
+**Cause:**
+1. paramètres CORS conservateurs orientés compatibilité (`ENFORCE_ALLOWED_ORIGINS=false` par défaut)
+2. implémentation historique du mode `trusted` autorisant l'exécution dynamique de scripts
+
+**Solution:**
+✅ Durcissements appliqués:
+- activation de l'enforcement CORS par défaut sur endpoints sensibles (`api/openai.js`, `api/send-email.js`, `api/cors-proxy.js`)
+- remplacement du CORS wildcard de `api/content-ai.js` par allowlist + enforcement configurable
+- suppression de l'exécution automatique de scripts injectés dans `js/security-utils.js` (mode `trusted`)
+
+**Prévention:**
+1. maintenir les allowlists d'origines via variables d'environnement explicitement documentées
+2. refuser toute réintroduction de `Access-Control-Allow-Origin: *` sur endpoints sensibles
+3. interdire toute exécution automatique de scripts injectés via helper frontend partagé
+
+**Fichiers concernés:**
+- `api/openai.js`
+- `api/send-email.js`
+- `api/cors-proxy.js`
+- `api/content-ai.js`
+- `js/security-utils.js`
+- `docs/ARCHITECTURE.md`
+- `docs/rapports/AUDIT_SECURITE_RGPD_2026-02-21.md`
+- `pages/admin-security-audit.html`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [23 Février 2026] - Surface d'exposition anon fiche-client trop large (RLS permissif + token persistant)
+
+**Contexte:**
+La fiche client publique reposait sur des policies anon trop permissives (`USING(true)` sur plusieurs tables) et un stockage OAuth côté navigateur persistant au-delà de la session.
+
+**Erreur:**
+- exposition potentielle inter-clients si policy anon trop large
+- persistance locale de tokens sensibles Zoho (`localStorage`)
+- sanitization par défaut autorisant des attributs inline de type event handler
+
+**Cause:**
+1. anciennes policies de secours créées pour rétablir rapidement l'accès mobile fiche-client
+2. stockage token OAuth historiquement orienté persistance utilisateur
+3. configuration sanitizer trop permissive pour les attributs HTML
+
+**Solution:**
+✅ Durcissements appliqués:
+- migration stockage tokens Zoho vers `sessionStorage` avec purge/migration legacy (`js/zoho-mail-config.js`)
+- suppression des event handlers inline autorisés par défaut et interdiction explicite des balises actives (`js/security-utils.js`)
+- ajout du header `x-client-token` dans le client Supabase fiche-client (`js/fiche-client-app.js`)
+- ajout d'un script SQL RLS strict token-scope (owner/réservation) pour remplacement des accès anon permissifs (`sql/security_hardening_rls_fiche_client_token.sql`)
+
+**Prévention:**
+1. interdire toute nouvelle policy anon en `USING(true)` sur tables métier client
+2. imposer le scope token via header dédié (`x-client-token`) pour les accès publics
+3. conserver les tokens OAuth sensibles en session uniquement côté frontend
+4. maintenir le sanitizer par défaut sans attributs d'événements inline
+
+**Fichiers concernés:**
+- `js/zoho-mail-config.js`
+- `js/security-utils.js`
+- `js/fiche-client-app.js`
+- `sql/security_hardening_rls_fiche_client_token.sql`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [22 Février 2026] - Rafale d'erreurs runtime admin/monitoring (KPI null, Supabase invalide, 404/401 bruit)
+
+**Contexte:**
+Plusieurs erreurs JS remontaient en cascade sur les écrans admin (dashboard, monitoring, parrainage, ménage, draps), avec impact lecture KPI et pollution console.
+
+**Erreur:**
+- `Cannot set properties of null` sur KPI dashboard
+- `supabase.from is not a function` sur parrainage admin
+- logs iCal peu exploitables (`[object Object]`)
+- erreurs no-row sur `cleaner_tokens` (usage `.single()`)
+- bruit récurrent 404 `/api/ai-health` et 401/403 `cm_error_logs`
+- conflits 409 potentiels sur upsert `linen_stock_items`
+
+**Cause:**
+1. Écritures DOM non protégées sur éléments parfois absents selon écran
+2. Variable client Supabase incohérente (`supabase` au lieu de `window.supabaseClient`)
+3. Appels `.single()` sur lectures optionnelles
+4. Absence de mode dégradé local pour endpoints/tables indisponibles
+5. Upsert stock sans clé de conflit explicite complète
+
+**Solution:**
+✅ Correctifs appliqués:
+- garde d'écriture DOM KPI (`js/dashboard.js`)
+- correction client Supabase + `maybeSingle` settings (`js/admin-clients.js`)
+- log erreur BDD iCal structuré (message + code) (`js/sync-ical-v2.js`)
+- `maybeSingle` sur tokens ménage (`js/menage.js`, `js/femme-menage.js`)
+- mode dégradé pour accès refusé `cm_error_logs` et API IA absente (`js/admin-dashboard.js`, `js/admin-monitoring.js`)
+- upsert stock draps avec `onConflict: owner_user_id,gite_id,item_key` (`js/draps.js`)
+- page de recette/validation créée: `pages/test-fixes.html`
+
+**Prévention:**
+1. Toujours protéger les écritures DOM sur blocs optionnels
+2. Utiliser `window.supabaseClient` de manière uniforme
+3. Réserver `.single()` aux cas strictement garantis, sinon `maybeSingle()`
+4. Implémenter un mode dégradé explicite pour 404/401 attendus en environnement partiel
+5. Conserver les scripts de recette rapide après chaque lot de fix runtime
+
+**Fichiers concernés:**
+- `js/dashboard.js`
+- `js/admin-clients.js`
+- `js/sync-ical-v2.js`
+- `js/menage.js`
+- `js/femme-menage.js`
+- `js/draps.js`
+- `js/admin-dashboard.js`
+- `js/admin-monitoring.js`
+- `pages/test-fixes.html`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
 ### [20 Février 2026] - Ménage conservé au milieu d'une nouvelle réservation (risque opérationnel)
 
 **Contexte:**
@@ -331,7 +889,7 @@ ERROR: null value in column "id" violates not-null constraint
 3. Les valeurs par défaut des colonnes doivent être redéfinies manuellement
 
 **Solution:**
-✅ **Fix SQL idempotent** (`sql/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql`) :
+✅ **Fix SQL idempotent** (`_archives/sql_obsoletes_2026/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql`) :
 ```sql
 -- Ajout colonne id avec génération auto UUID
 ALTER TABLE demandes_horaires 
@@ -356,7 +914,7 @@ ADD COLUMN id UUID DEFAULT gen_random_uuid() PRIMARY KEY;
 - Fix déployé en production sans downtime
 
 **Fichiers concernés:**
-- `sql/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql` - Script de correction
+- `_archives/sql_obsoletes_2026/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql` - Script de correction (historique)
 - Tables: `demandes_horaires`, `problemes_signales`
 
 ---
@@ -403,7 +961,7 @@ SELECT * FROM backup_problemes_signales_20260123;
 **Fichiers concernés:**
 - `pages/fiche-client.html` - Formulaires clients
 - `js/fiche-client-app.js` - Lignes 1550-1690 (demandes_horaires), 2585-2660 (problemes_signales)
-- `sql/RESTAURATION_URGENTE_28JAN2026.sql` - Script de restauration
+- `_archives/sql_obsoletes_2026/RESTAURATION_URGENTE_28JAN2026.sql` - Script de restauration (historique)
 
 ---
 

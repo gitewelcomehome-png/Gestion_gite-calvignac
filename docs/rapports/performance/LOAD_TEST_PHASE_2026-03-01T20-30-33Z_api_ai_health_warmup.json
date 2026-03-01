@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-03-01T20-30-33Z",
+  "scenario": "api_ai_health",
+  "phase": "warmup",
+  "generated_at": "2026-03-01T20:45:04.788Z",
+  "summary": {
+    "requests": 100,
+    "success_count": 100,
+    "error_count": 0,
+    "error_rate_pct": 0,
+    "latency_ms": {
+      "min": 118,
+      "p50": 160,
+      "p95": 309,
+      "p99": 350,
+      "max": 350,
+      "avg": 170
+    },
+    "status_buckets": {
+      "200": 100
+    }
+  }
+}
