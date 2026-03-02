@@ -65,7 +65,7 @@ BEGIN
                 'Content-Type', 'application/json',
                 'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
             ),
-            body := payload::text
+            body := payload
         );
     EXCEPTION WHEN OTHERS THEN
         -- Ne pas bloquer l'INSERT si pg_net indisponible
@@ -110,7 +110,7 @@ BEGIN
                 'Content-Type', 'application/json',
                 'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
             ),
-            body := payload::text
+            body := payload
         );
     EXCEPTION WHEN OTHERS THEN
         -- Ne pas bloquer l'INSERT si pg_net indisponible
