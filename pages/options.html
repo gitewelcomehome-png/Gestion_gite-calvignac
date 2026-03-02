@@ -1376,6 +1376,14 @@
                                 </span>
                                 <input id="optionsNotifTaches" class="notif-switch" type="checkbox" />
                             </label>
+
+                            <label class="notif-row" for="optionsNotifRetours">
+                                <span class="notif-row-label">
+                                    <strong>💬 Retours / Demandes clients</strong>
+                                    <span>Nouveaux retours ou demandes soumis par les voyageurs</span>
+                                </span>
+                                <input id="optionsNotifRetours" class="notif-switch" type="checkbox" />
+                            </label>
                         </div>
                     </div>
 
@@ -1739,6 +1747,7 @@
                 notify_demandes: true,
                 notify_reservations: true,
                 notify_taches: true,
+                notify_retours: true,
                 email_frequency: 'immediate'
             };
         }
@@ -1808,6 +1817,7 @@
             const notifyDemandes = document.getElementById('optionsNotifDemandes');
             const notifyReservations = document.getElementById('optionsNotifReservations');
             const notifyTaches = document.getElementById('optionsNotifTaches');
+            const notifyRetours = document.getElementById('optionsNotifRetours');
             const emailFrequency = document.getElementById('optionsNotifFrequency');
 
             if (emailEnabled) emailEnabled.checked = !!prefs.email_enabled;
@@ -1815,6 +1825,7 @@
             if (notifyDemandes) notifyDemandes.checked = !!prefs.notify_demandes;
             if (notifyReservations) notifyReservations.checked = !!prefs.notify_reservations;
             if (notifyTaches) notifyTaches.checked = !!prefs.notify_taches;
+            if (notifyRetours) notifyRetours.checked = prefs.notify_retours !== false;
             if (emailFrequency) emailFrequency.value = prefs.email_frequency || 'immediate';
 
             setNotificationStatusInOptions('Préférences chargées', 'success');
@@ -1859,6 +1870,7 @@
                     notify_demandes: prefs.notify_demandes ?? true,
                     notify_reservations: prefs.notify_reservations ?? true,
                     notify_taches: prefs.notify_taches ?? true,
+                    notify_retours: prefs.notify_retours ?? true,
                     email_frequency: prefs.email_frequency ?? 'immediate',
                     [key]: value
                 };
@@ -1906,6 +1918,7 @@
             const notifyDemandes = document.getElementById('optionsNotifDemandes');
             const notifyReservations = document.getElementById('optionsNotifReservations');
             const notifyTaches = document.getElementById('optionsNotifTaches');
+            const notifyRetours = document.getElementById('optionsNotifRetours');
             const emailFrequency = document.getElementById('optionsNotifFrequency');
 
             if (emailEnabled) {
@@ -1935,6 +1948,12 @@
             if (notifyTaches) {
                 notifyTaches.addEventListener('change', (event) => {
                     saveNotificationPreferenceInOptions('notify_taches', event.target.checked);
+                });
+            }
+
+            if (notifyRetours) {
+                notifyRetours.addEventListener('change', (event) => {
+                    saveNotificationPreferenceInOptions('notify_retours', event.target.checked);
                 });
             }
 

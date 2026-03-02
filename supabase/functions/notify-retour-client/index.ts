@@ -48,14 +48,14 @@ Deno.serve(async (req: Request) => {
         // Récupérer les préférences de l'owner
         const { data: prefs, error: prefsError } = await supabase
             .from('user_notification_preferences')
-            .select('email_enabled, email_address, notify_demandes')
+            .select('email_enabled, email_address, notify_retours')
             .eq('user_id', retour.owner_user_id)
             .maybeSingle();
 
         if (prefsError) throw prefsError;
 
         // Si notifications explicitement désactivées → skip
-        if (prefs && (prefs.email_enabled === false || prefs.notify_demandes === false)) {
+        if (prefs && (prefs.email_enabled === false || prefs.notify_retours === false)) {
             return new Response(JSON.stringify({ skipped: true, reason: 'notifications désactivées' }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
