@@ -1837,21 +1837,13 @@
         }
 
         async function saveNotificationPreferenceInOptions(key, value) {
-            console.log('[NOTIF] saveNotificationPreferenceInOptions appelée →', key, '=', value);
-            if (!window.supabaseClient) {
-                console.warn('[NOTIF] supabaseClient non disponible');
-                return;
-            }
+            if (!window.supabaseClient) return;
             if (!optionsNotificationState.user) {
                 try {
                     const { data: { user } } = await window.supabaseClient.auth.getUser();
-                    if (!user) {
-                        console.warn('[NOTIF] Utilisateur non connecté, abandon sauvegarde');
-                        return;
-                    }
+                    if (!user) return;
                     optionsNotificationState.user = user;
                 } catch(e) {
-                    console.error('[NOTIF] Erreur getUser:', e);
                     return;
                 }
             }
@@ -1880,7 +1872,6 @@
                     ...(optionsNotificationState.preferences || {}),
                     [key]: value
                 };
-                console.log('[NOTIF] Sauvegarde OK →', key, '=', value);
                 setNotificationStatusInOptions('Préférence sauvegardée', 'success');
                 if (key === 'email_address') {
                     const fb = document.getElementById('optionsSaveEmailFeedback');
@@ -1893,7 +1884,6 @@
                     }
                 }
             } catch (error) {
-                console.error('[NOTIF] Erreur sauvegarde préférence notification:', error.message || error);
                 setNotificationStatusInOptions('Erreur : ' + (error.message || 'inconnue'), 'error');
                 if (key === 'email_address') {
                     const fb = document.getElementById('optionsSaveEmailFeedback');
@@ -1959,7 +1949,6 @@
                 saveEmailBtn.addEventListener('click', () => {
                     const addr = document.getElementById('optionsNotifEmailAddress');
                     const val = addr ? addr.value : '';
-                    console.log('[NOTIF] Clic bouton Sauvegarder email →', val);
                     saveNotificationPreferenceInOptions('email_address', val);
                 });
             }
