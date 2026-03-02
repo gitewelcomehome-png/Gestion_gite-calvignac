@@ -537,8 +537,8 @@
                         .select('owner_user_id, type')
                         .eq('token', token)
                         .in('type', ['company', 'cleaner'])
-                        .single();
-                    if (error || !tokenData) throw new Error('Token invalide');
+                        .maybeSingle();
+                    if (error || !tokenData) throw new Error('Token invalide ou introuvable');
                     window.cleanerOwnerId = tokenData.owner_user_id;
                     window.cleanerTokenMode = true;
 
