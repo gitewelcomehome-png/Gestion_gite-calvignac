@@ -229,11 +229,44 @@ module.exports = async (req, res) => {
     }
     
     try {
-        const { to, subject, template, data } = req.body;
-        
+        const { to, subject, html, template, data } = req.body;
+
+        // --- Mode notification directe via Resend (html fourni directement) ---
+        if (to && subject && html) {
+            const apiKey = process.env.RESEND_API_KEY;
+            if (!apiKey) {
+                return res.status(500).json({ error: 'Configuration email manquante (RESEND_API_KEY)' });
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+                return res.status(400).json({ error: 'Adresse email invalide' });
+            }
+            const fromEmail = process.env.RESEND_FROM_EMAIL || 'notifications@liveownerunit.fr';
+            const fromName = process.env.RESEND_FROM_NAME || 'Gîte Welcome Home';
+            const resendRes = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    from: `${fromName} <${fromEmail}>`,
+                    to: [to],
+                    subject: subject,
+                    html: html
+                })
+            });
+            const resendData = await resendRes.json();
+            if (!resendRes.ok) {
+                console.error('Resend API error:', resendData);
+                return res.status(502).json({ error: 'Erreur envoi email' });
+            }
+            return res.status(200).json({ success: true, id: resendData.id });
+        }
+
+        // --- Mode template via SMTP ---
         if (!to || !template || !data) {
             return res.status(400).json({ 
-                error: 'Missing required fields: to, template, data' 
+                error: 'Missing required fields: to + (html+subject) or (template+data)' 
             });
         }
         
