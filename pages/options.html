@@ -1344,8 +1344,9 @@
                                 <label for="optionsNotifEmailAddress" style="display: block; margin-bottom: 0.45rem; color: var(--text-secondary); font-size: 0.86rem;">Adresse email de destination</label>
                                 <div style="display: flex; gap: 8px;">
                                     <input id="optionsNotifEmailAddress" type="email" class="support-native-input" placeholder="votre@email.com" style="flex: 1;" />
-                                    <button onclick="saveNotificationPreferenceInOptions('email_address', document.getElementById('optionsNotifEmailAddress').value)" style="padding: 10px 16px; background: #06b6d4; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; white-space: nowrap;">💾 Sauvegarder</button>
+                                    <button id="optionsSaveEmailBtn" style="padding: 10px 16px; background: #06b6d4; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; white-space: nowrap;">💾 Sauvegarder</button>
                                 </div>
+                                <div id="optionsSaveEmailFeedback" style="display:none; margin-top: 6px; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;"></div>
                             </div>
                         </div>
 
@@ -1836,13 +1837,23 @@
         }
 
         async function saveNotificationPreferenceInOptions(key, value) {
-            if (!window.supabaseClient || !optionsNotificationState.user) {
-                // Tenter de charger l'user si pas encore fait
+            console.log('[NOTIF] saveNotificationPreferenceInOptions appelée →', key, '=', value);
+            if (!window.supabaseClient) {
+                console.warn('[NOTIF] supabaseClient non disponible');
+                return;
+            }
+            if (!optionsNotificationState.user) {
                 try {
                     const { data: { user } } = await window.supabaseClient.auth.getUser();
-                    if (!user) return;
+                    if (!user) {
+                        console.warn('[NOTIF] Utilisateur non connecté, abandon sauvegarde');
+                        return;
+                    }
                     optionsNotificationState.user = user;
-                } catch(e) { return; }
+                } catch(e) {
+                    console.error('[NOTIF] Erreur getUser:', e);
+                    return;
+                }
             }
 
             try {
@@ -1869,10 +1880,31 @@
                     ...(optionsNotificationState.preferences || {}),
                     [key]: value
                 };
+                console.log('[NOTIF] Sauvegarde OK →', key, '=', value);
                 setNotificationStatusInOptions('Préférence sauvegardée', 'success');
+                if (key === 'email_address') {
+                    const fb = document.getElementById('optionsSaveEmailFeedback');
+                    if (fb) {
+                        fb.textContent = '✅ Email sauvegardé : ' + value;
+                        fb.style.display = 'block';
+                        fb.style.background = '#d1fae5';
+                        fb.style.color = '#065f46';
+                        setTimeout(() => { fb.style.display = 'none'; }, 4000);
+                    }
+                }
             } catch (error) {
-                console.error('Erreur sauvegarde préférence notification:', error.message || error);
+                console.error('[NOTIF] Erreur sauvegarde préférence notification:', error.message || error);
                 setNotificationStatusInOptions('Erreur : ' + (error.message || 'inconnue'), 'error');
+                if (key === 'email_address') {
+                    const fb = document.getElementById('optionsSaveEmailFeedback');
+                    if (fb) {
+                        fb.textContent = '❌ Erreur : ' + (error.message || 'inconnue');
+                        fb.style.display = 'block';
+                        fb.style.background = '#fee2e2';
+                        fb.style.color = '#991b1b';
+                        setTimeout(() => { fb.style.display = 'none'; }, 5000);
+                    }
+                }
             }
         }
 
@@ -1919,6 +1951,16 @@
             if (emailFrequency) {
                 emailFrequency.addEventListener('change', (event) => {
                     saveNotificationPreferenceInOptions('email_frequency', event.target.value || 'immediate');
+                });
+            }
+
+            const saveEmailBtn = document.getElementById('optionsSaveEmailBtn');
+            if (saveEmailBtn) {
+                saveEmailBtn.addEventListener('click', () => {
+                    const addr = document.getElementById('optionsNotifEmailAddress');
+                    const val = addr ? addr.value : '';
+                    console.log('[NOTIF] Clic bouton Sauvegarder email →', val);
+                    saveNotificationPreferenceInOptions('email_address', val);
                 });
             }
 
