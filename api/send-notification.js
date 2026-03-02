@@ -49,7 +49,7 @@ function setCorsHeaders(req, res, allowedOrigin) {
     res.setHeader('Vary', 'Origin');
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     const allowedOrigins = getAllowedOrigins();
     const requestOrigin = getOriginFromRequest(req);
     const isAllowed = requestOrigin ? allowedOrigins.has(requestOrigin) : false;
@@ -116,4 +116,4 @@ module.exports = async (req, res) => {
         console.error('send-notification error:', error);
         return res.status(500).json({ error: 'Erreur interne' });
     }
-};
+}
