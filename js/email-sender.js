@@ -12,42 +12,28 @@
  * ============================================================================
  */
 
-const RESEND_CONFIG = {
-    apiKey: window.ENV?.RESEND_API_KEY || null, // À configurer dans Vercel Environment Variables
-    fromEmail: 'notifications@liveownerunit.fr',
-    fromName: 'Gîte Welcome Home'
-};
-
 /**
- * Envoyer un email via Resend API
+ * Envoyer un email via l'API Vercel /api/send-notification
+ * La clé Resend est stockée côté serveur (Vercel env vars), jamais exposée au navigateur
  */
-async function sendEmail({ to, subject, html, fromName }) {
+async function sendEmail({ to, subject, html }) {
     try {
-        const response = await fetch('https://api.resend.com/emails', {
+        const response = await fetch('/api/send-notification', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${RESEND_CONFIG.apiKey}`
-            },
-            body: JSON.stringify({
-                from: `${fromName || RESEND_CONFIG.fromName} <${RESEND_CONFIG.fromEmail}>`,
-                to: [to],
-                subject: subject,
-                html: html
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, subject, html })
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || 'Erreur envoi email');
+            return { success: false, error: data.error || 'Erreur envoi email' };
         }
 
-        // console.log('✅ Email envoyé avec succès:', data);
         return { success: true, data };
 
     } catch (error) {
-        // Erreur API email catchée silencieusement (ne pas polluer console)
+        // Erreur réseau catchée silencieusement
         return { success: false, error: error.message };
     }
 }
