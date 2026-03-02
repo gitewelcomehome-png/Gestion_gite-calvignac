@@ -3836,6 +3836,8 @@ async function submitRetourDemande(event) {
                 .insert([{
                     reservation_id: formData.reservation_id,
                     gite: formData.gite,
+                    owner_user_id: reservationData.owner_user_id || null,
+                    client_name: reservationData.client_name || null,
                     type: 'probleme',
                     sujet: formData.sujet,
                     urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
@@ -3854,6 +3856,8 @@ async function submitRetourDemande(event) {
                 .insert([{
                     reservation_id: formData.reservation_id,
                     gite: formData.gite,
+                    owner_user_id: reservationData.owner_user_id || null,
+                    client_name: reservationData.client_name || null,
                     type: type, // demande, retour, amelioration
                     sujet: formData.sujet,
                     urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),

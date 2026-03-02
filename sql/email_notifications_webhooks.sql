@@ -147,4 +147,49 @@ CREATE TRIGGER trigger_notify_new_reservation
 -- ================================================================
 SELECT trigger_name, event_manipulation, event_object_table
 FROM information_schema.triggers
-WHERE trigger_name IN ('trigger_notify_new_demande', 'trigger_notify_new_reservation');
+WHERE trigger_name IN ('trigger_notify_new_demande', 'trigger_notify_new_reservation', 'trigger_notify_retour_client');
+
+-- ----------------------------------------------------------------
+-- WEBHOOK 3 : Nouveau retour / demande / problème client
+-- ----------------------------------------------------------------
+CREATE OR REPLACE FUNCTION notify_new_retour_client()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    payload jsonb;
+BEGIN
+    -- owner_user_id et client_name sont insérés directement dans problemes_signales
+    payload := jsonb_build_object(
+        'type', 'INSERT',
+        'table', 'problemes_signales',
+        'schema', 'public',
+        'record', row_to_json(NEW)::jsonb || jsonb_build_object(
+            '_client_name', COALESCE(NEW.client_name, '')
+        )
+    );
+
+    BEGIN
+        PERFORM net.http_post(
+            url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-retour-client',
+            headers := jsonb_build_object(
+                'Content-Type', 'application/json',
+                'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
+            ),
+            body := payload
+        );
+    EXCEPTION WHEN OTHERS THEN
+        NULL;
+    END;
+
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trigger_notify_retour_client ON public.problemes_signales;
+
+CREATE TRIGGER trigger_notify_retour_client
+    AFTER INSERT ON public.problemes_signales
+    FOR EACH ROW
+    EXECUTE FUNCTION notify_new_retour_client();
