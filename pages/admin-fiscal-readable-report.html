@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rapport fiscal client — synthèse métier</title>
+  <script src="../js/taux-fiscaux-config.js"></script>
   <style>
     body { font-family: Inter, Arial, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }
     .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
@@ -52,13 +53,9 @@
       const fiscalConfig = sources.taux_fiscaux_config?.content || '';
       const fiscalEngine = sources.fiscalite_client?.content || '';
 
-      let taux = null;
-      try {
-        const factory = new Function(`${fiscalConfig}; return TAUX_FISCAUX;`);
-        taux = factory();
-      } catch (_) {
-        taux = null;
-      }
+      // TAUX_FISCAUX est chargé via <script> tag dans le <head>
+      // new Function() est bloqué par la CSP (pas d'unsafe-eval)
+      const taux = window.TAUX_FISCAUX || null;
 
       const c2024 = taux?.getConfig ? taux.getConfig(2024) : null;
       const c2025 = taux?.getConfig ? taux.getConfig(2025) : null;
@@ -109,7 +106,7 @@
           lmnpDeficitNonImputableGlobal: fiscalEngine.includes('revenuLMNPRetenuIR = Math.max(0, beneficeLMNP)'),
           irLocationNonNegatif: fiscalEngine.includes('Math.max(0, irImpactLocation)'),
           lmpDeficitImputableGlobal: fiscalEngine.includes('Déficit LMP imputable au revenu global'),
-          baremeKMFallback2024: fiscalConfig.includes('this.TAUX_ANNEES[2024]?.BAREME_KM')
+          baremeKMFallback2024: !!(window.TAUX_FISCAUX?.TAUX_ANNEES?.[2024]?.BAREME_KM)
         }
       };
     }
@@ -260,7 +257,6 @@
 
       try {
         const targets = [
-          { key: 'taux_fiscaux_config', path: '../js/taux-fiscaux-config.js' },
           { key: 'fiscalite_client', path: '../js/fiscalite-v2.js' }
         ];
 
@@ -273,6 +269,8 @@
           const content = await response.text();
           sources[target.key] = { content };
         }
+        // taux-fiscaux-config.js est chargé via <script> dans le <head>
+        sources.taux_fiscaux_config = { content: '' };
 
         const now = new Date();
         const isoDate = now.toISOString();
