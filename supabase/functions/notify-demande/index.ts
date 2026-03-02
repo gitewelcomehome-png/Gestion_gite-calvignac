@@ -79,16 +79,30 @@ Deno.serve(async (req: Request) => {
 
         // Formater les infos de la demande
         const typeLabel = demande.type === 'arrivee' ? 'Arrivée anticipée' : 'Départ tardif';
-        const dateSejour = demande.date_sejour
-            ? new Date(demande.date_sejour).toLocaleDateString('fr-FR')
-            : 'Non précisée';
         const heure = demande.heure_demandee || 'Non précisée';
         const motif = demande.motif || 'Aucun motif précisé';
+
+        // Récupérer les infos de la réservation (voyageur + dates)
+        let nomVoyageur = 'Voyageur inconnu';
+        let checkIn = 'Non précisée';
+        let checkOut = 'Non précisée';
+        if (demande.reservation_id) {
+            const { data: resa } = await supabase
+                .from('reservations')
+                .select('client_name, nom_client, check_in, check_out')
+                .eq('id', demande.reservation_id)
+                .maybeSingle();
+            if (resa) {
+                nomVoyageur = resa.client_name || resa.nom_client || 'Voyageur inconnu';
+                checkIn = resa.check_in ? new Date(resa.check_in).toLocaleDateString('fr-FR') : 'Non précisée';
+                checkOut = resa.check_out ? new Date(resa.check_out).toLocaleDateString('fr-FR') : 'Non précisée';
+            }
+        }
 
         // Envoyer via Resend
         const resendKey = Deno.env.get('RESEND_API_KEY');
         const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'notifications@liveownerunit.fr';
-        const fromName = Deno.env.get('RESEND_FROM_NAME') || 'Gîte Welcome Home';
+        const fromName = Deno.env.get('RESEND_FROM_NAME') || 'LiveOwnerUnit';
 
         if (!resendKey) throw new Error('RESEND_API_KEY manquante');
 
@@ -105,8 +119,10 @@ Deno.serve(async (req: Request) => {
       <p>Bonjour,</p>
       <p>Un voyageur vient d'envoyer une demande d'horaire pour votre gîte.</p>
       <div style="background: #f0f9ff; border-left: 4px solid #06b6d4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <p style="margin: 0 0 8px 0;"><strong>Voyageur :</strong> ${nomVoyageur}</p>
         <p style="margin: 0 0 8px 0;"><strong>Type :</strong> ${typeLabel}</p>
-        <p style="margin: 0 0 8px 0;"><strong>Date :</strong> ${dateSejour}</p>
+        <p style="margin: 0 0 8px 0;"><strong>Arrivée :</strong> ${checkIn}</p>
+        <p style="margin: 0 0 8px 0;"><strong>Départ :</strong> ${checkOut}</p>
         <p style="margin: 0 0 8px 0;"><strong>Heure demandée :</strong> ${heure}</p>
         <p style="margin: 0;"><strong>Motif :</strong> ${motif}</p>
       </div>

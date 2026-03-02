@@ -105,7 +105,7 @@ Deno.serve(async (req: Request) => {
         // Envoyer via Resend
         const resendKey = Deno.env.get('RESEND_API_KEY');
         const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'notifications@liveownerunit.fr';
-        const fromName = Deno.env.get('RESEND_FROM_NAME') || 'Gîte Welcome Home';
+        const fromName = Deno.env.get('RESEND_FROM_NAME') || 'LiveOwnerUnit';
 
         if (!resendKey) throw new Error('RESEND_API_KEY manquante');
 
