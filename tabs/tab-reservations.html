@@ -8,9 +8,14 @@
             </div>
             <div class="header-actions">
                 <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
-                    <button onclick="forceRefreshReservations()" class="btn-neo btn-refresh" title="Actualiser les données">
-                        <i data-lucide="refresh-cw"></i> ACTUALISER
-                    </button>
+                    <div style="display: flex; flex-direction: row; gap: 8px; align-items: center;">
+                        <button onclick="forceRefreshReservations()" class="btn-neo btn-refresh" title="Actualiser les données">
+                            <i data-lucide="refresh-cw"></i> ACTUALISER
+                        </button>
+                        <button onclick="openTaxesSejourModal()" class="btn-neo" title="Taxes de séjour" style="background:#f39c12;color:white;">
+                            💰 TAXES SÉJOUR
+                        </button>
+                    </div>
                     <small id="last-sync-reservations" style="color: #888; font-size: 0.75rem; margin-left: 4px;"></small>
                 </div>
                 <input type="text" id="searchReservations" class="search-input" placeholder="Rechercher..." oninput="filterReservations(this.value)">

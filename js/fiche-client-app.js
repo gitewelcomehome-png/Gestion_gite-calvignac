@@ -374,7 +374,53 @@ const translations = {
         btn_voir_carte: 'Voir sur carte',
         btn_voir_google_maps: 'Voir sur Google Maps',
         btn_ouvrir_google_maps: 'Ouvrir dans Google Maps',
-        btn_retour_gite: 'Retour gîte seul'
+        btn_retour_gite: 'Retour gîte seul',
+        // Labels dynamiques
+        wifi_debit_label: 'Débit approximatif',
+        wifi_localisation_label: 'Localisation box/routeur',
+        wifi_zones_label: 'Zones de meilleure réception',
+        etage_label: 'Étage du logement',
+        ascenseur_label: 'Ascenseur disponible',
+        itineraire_label: 'Itinéraire parking → porte',
+        premiere_visite_label: 'À savoir pour votre première visite',
+        four_label: 'Four',
+        plaques_label: 'Plaques',
+        lave_vaisselle_label: 'Lave-vaisselle',
+        lave_linge_label: 'Lave-linge',
+        seche_linge_label: 'Sèche-linge',
+        fer_repasser_label: 'Fer et planche à repasser',
+        linge_fourni_label: 'Linge fourni',
+        config_chambres_label: 'Configuration des chambres',
+        detecteur_fumee_label: 'Détecteur de fumée',
+        extincteur_label: 'Extincteur',
+        coupure_eau_label: 'Coupure d\'eau',
+        disjoncteur_label: 'Disjoncteur général',
+        proprietaire_label: 'Propriétaire',
+        appeler: 'Appeler',
+        email_label: 'Email',
+        urgence_contact: 'En cas d\'urgence',
+        restitution_cles_label: 'Restitution des clés',
+        erreur_chargement_activites: 'Erreur lors du chargement des activités',
+        coordonnees_indisponibles: 'Coordonnées du gîte non disponibles',
+        aucune_activite: 'Aucune activité configurée pour ce gîte',
+        votre_gite: 'Votre gîte',
+        site_web: 'Site web',
+        aucune_description: 'Aucune description disponible',
+        non_specifie: 'Non spécifié',
+        horaires_a_verifier: 'Se renseigner',
+        erreur_chargement: 'Erreur de chargement',
+        aucun_commerce: 'Aucun commerce ajouté pour le moment',
+        donnees_indisponibles: 'Données de réservation non disponibles',
+        aucune_faq: 'Aucune FAQ disponible',
+        acces_logement: 'Accès au logement',
+        linge_chambres: 'Linge & Chambres',
+        securite_equipements: 'Sécurité & Équipements',
+        evenements_semaine: 'Événements de la semaine',
+        evenements_description: 'Activités et événements prévus pendant votre séjour',
+        prestations_title: 'Prestations',
+        prestations_description: 'Découvrez nos services supplémentaires pour agrémenter votre séjour',
+        photo_entree: 'Entrée',
+        photo_boite_cles: 'Boîte à clés'
     },
     en: {
         tab_entree: 'Check-in',
@@ -503,7 +549,53 @@ const translations = {
         btn_voir_carte: 'View on map',
         btn_voir_google_maps: 'View on Google Maps',
         btn_ouvrir_google_maps: 'Open in Google Maps',
-        btn_retour_gite: 'Back to cottage only'
+        btn_retour_gite: 'Back to cottage only',
+        // Dynamic labels
+        wifi_debit_label: 'Approximate speed',
+        wifi_localisation_label: 'Router/box location',
+        wifi_zones_label: 'Best reception areas',
+        etage_label: 'Property floor',
+        ascenseur_label: 'Elevator available',
+        itineraire_label: 'Parking → entrance route',
+        premiere_visite_label: 'Good to know for your first visit',
+        four_label: 'Oven',
+        plaques_label: 'Hob',
+        lave_vaisselle_label: 'Dishwasher',
+        lave_linge_label: 'Washing machine',
+        seche_linge_label: 'Tumble dryer',
+        fer_repasser_label: 'Iron and ironing board',
+        linge_fourni_label: 'Linen provided',
+        config_chambres_label: 'Room configuration',
+        detecteur_fumee_label: 'Smoke detector',
+        extincteur_label: 'Fire extinguisher',
+        coupure_eau_label: 'Water shut-off',
+        disjoncteur_label: 'Main circuit breaker',
+        proprietaire_label: 'Owner',
+        appeler: 'Call',
+        email_label: 'Email',
+        urgence_contact: 'In case of emergency',
+        restitution_cles_label: 'Key return',
+        erreur_chargement_activites: 'Error loading activities',
+        coordonnees_indisponibles: 'Property coordinates unavailable',
+        aucune_activite: 'No activities configured for this property',
+        votre_gite: 'Your accommodation',
+        site_web: 'Website',
+        aucune_description: 'No description available',
+        non_specifie: 'Not specified',
+        horaires_a_verifier: 'Please inquire',
+        erreur_chargement: 'Loading error',
+        aucun_commerce: 'No shops added yet',
+        donnees_indisponibles: 'Reservation data unavailable',
+        aucune_faq: 'No FAQ available',
+        acces_logement: 'Building access',
+        linge_chambres: 'Linen & Bedrooms',
+        securite_equipements: 'Safety & Equipment',
+        evenements_semaine: 'Events this week',
+        evenements_description: 'Activities and events planned during your stay',
+        prestations_title: 'Services',
+        prestations_description: 'Discover additional services to enhance your stay',
+        photo_entree: 'Entrance',
+        photo_boite_cles: 'Key box'
     }
 };
 
@@ -559,6 +651,23 @@ function updateTranslations() {
     initOngletEntree();
     initOngletPendant();
     initOngletSortie();
+    
+    // Mettre à jour les titres des photos (créées une seule fois, non rechargées)
+    const photoTitleMap = {
+        'entree': t('photo_entree'),
+        'boite_cles': t('photo_boite_cles'),
+        'parking': t('parking_title')
+    };
+    document.querySelectorAll('[data-i18n-photo]').forEach(el => {
+        const type = el.getAttribute('data-i18n-photo');
+        if (photoTitleMap[type]) {
+            // Préserver l'icône <i> et mettre à jour uniquement le texte
+            const icon = el.querySelector('i');
+            el.innerHTML = '';
+            if (icon) el.appendChild(icon);
+            el.appendChild(document.createTextNode(' ' + photoTitleMap[type]));
+        }
+    });
     
     // Recharger les checklists avec la bonne langue
     if (typeof loadClientChecklists === 'function') {
@@ -905,7 +1014,7 @@ function displayGitePhotos() {
     
     // 3. PHOTO BOITE À CLÉS - Dans la section parking/accès
     if (photos.boite_cles && Array.isArray(photos.boite_cles) && photos.boite_cles.length > 0) {
-        displayPhotoInSection('boite_cles', photos.boite_cles[0], 'Boîte à clés');
+        displayPhotoInSection('boite_cles', photos.boite_cles[0], t('photo_boite_cles'));
     }
     
     // 4. PHOTO PARKING
@@ -915,7 +1024,7 @@ function displayGitePhotos() {
     
     // 5. PHOTO ENTRÉE
     if (photos.entree && Array.isArray(photos.entree) && photos.entree.length > 0) {
-        displayPhotoInSection('entree', photos.entree[0], 'Entrée');
+        displayPhotoInSection('entree', photos.entree[0], t('photo_entree'));
     }
 }
 
@@ -1003,7 +1112,7 @@ function displayPhotoInSection(sectionType, photo, sectionTitle) {
         photoContainer.id = photoId;
         photoContainer.style.cssText = 'margin-top: 1rem; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
         photoContainer.innerHTML = `
-            <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="camera" style="width: 16px; height: 16px;"></i> ${sectionTitle}</p>
+            <p data-i18n-photo="${sectionType}" style="font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="camera" style="width: 16px; height: 16px;"></i> ${sectionTitle}</p>
             <img class="single-photo" data-photo-url="${photoUrl}" src="${photoUrl}" alt="${sectionTitle}" style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; cursor: pointer;">
         `;
         
@@ -1617,13 +1726,13 @@ function initOngletEntree() {
     
     let wifiDetailsHTML = '';
     if (wifiDebit) {
-        wifiDetailsHTML += `<p style="margin-bottom: 0.5rem;"><strong>📡 Débit approximatif :</strong> ${wifiDebit}</p>`;
+        wifiDetailsHTML += `<p style="margin-bottom: 0.5rem;"><strong>📡 ${t('wifi_debit_label')} :</strong> ${wifiDebit}</p>`;
     }
     if (wifiLocalisation) {
-        wifiDetailsHTML += `<p style="margin-bottom: 0.5rem;"><strong>📍 Localisation box/routeur :</strong> ${wifiLocalisation}</p>`;
+        wifiDetailsHTML += `<p style="margin-bottom: 0.5rem;"><strong>📍 ${t('wifi_localisation_label')} :</strong> ${wifiLocalisation}</p>`;
     }
     if (wifiZones) {
-        wifiDetailsHTML += `<p style="white-space: pre-line; line-height: 1.5;"><strong>📶 Zones de meilleure réception :</strong><br>${wifiZones}</p>`;
+        wifiDetailsHTML += `<p style="white-space: pre-line; line-height: 1.5;"><strong>📶 ${t('wifi_zones_label')} :</strong><br>${wifiZones}</p>`;
     }
     
     const wifiDetailsSection = document.getElementById('wifiDetailsSection');
@@ -1642,20 +1751,20 @@ function initOngletEntree() {
     
     let accesHTML = '';
     if (etage) {
-        accesHTML += `<p style="margin-bottom: 0.5rem;"><strong>🏢 Étage du logement :</strong> ${etage}</p>`;
+        accesHTML += `<p style="margin-bottom: 0.5rem;"><strong>🏢 ${t('etage_label')} :</strong> ${etage}</p>`;
     }
     if (ascenseur) {
-        accesHTML += `<p style="margin-bottom: 0.5rem;"><strong>🛗 Ascenseur disponible :</strong> ${ascenseur}</p>`;
+        accesHTML += `<p style="margin-bottom: 0.5rem;"><strong>🛗 ${t('ascenseur_label')} :</strong> ${ascenseur}</p>`;
     }
     if (itineraire) {
         accesHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <strong>🚶 Itinéraire parking → porte :</strong><br>
+            <strong>🚶 ${t('itineraire_label')} :</strong><br>
             <p style="white-space: pre-line; line-height: 1.5; margin-top: 0.5rem;">${itineraire}</p>
         </div>`;
     }
     if (premiereVisite) {
         accesHTML += `<div style="background: var(--primary-light, #e8f5e9); padding: 0.75rem; border-radius: 0.5rem; border-left: 4px solid var(--primary, #68a84f);">
-            <strong>💡 À savoir pour votre première visite :</strong><br>
+            <strong>💡 ${t('premiere_visite_label')} :</strong><br>
             <p style="white-space: pre-line; line-height: 1.5; margin-top: 0.5rem;">${premiereVisite}</p>
         </div>`;
     }
@@ -1683,10 +1792,10 @@ function initOngletEntree() {
     
     let parkingHTML = '';
     if (parkingInfo.dispo) {
-        parkingHTML += `<p style="margin-bottom: 0.5rem;"><strong>Disponibilité :</strong> ${parkingInfo.dispo}</p>`;
+        parkingHTML += `<p style="margin-bottom: 0.5rem;"><strong>${t('disponibilite')} :</strong> ${parkingInfo.dispo}</p>`;
     }
     if (parkingInfo.places) {
-        parkingHTML += `<p style="margin-bottom: 0.5rem;"><strong>Places :</strong> ${parkingInfo.places}</p>`;
+        parkingHTML += `<p style="margin-bottom: 0.5rem;"><strong>${t('places')} :</strong> ${parkingInfo.places}</p>`;
     }
     if (parkingInfo.details) {
         parkingHTML += `<p style="white-space: pre-line; color: var(--gray-700); line-height: 1.5;">${parkingInfo.details}</p>`;
@@ -1719,14 +1828,14 @@ function initOngletPendant() {
     
     let chauffageHTML = '';
     if (chauffageInfo.type) {
-        chauffageHTML += `<p style="margin-bottom: 0.5rem;"><strong>Type de chauffage :</strong> ${chauffageInfo.type}</p>`;
+        chauffageHTML += `<p style="margin-bottom: 0.5rem;"><strong>${t('type_chauffage')} :</strong> ${chauffageInfo.type}</p>`;
     }
     if (chauffageInfo.clim) {
-        chauffageHTML += `<p style="margin-bottom: 0.5rem;"><strong>Climatisation :</strong> ${chauffageInfo.clim}</p>`;
+        chauffageHTML += `<p style="margin-bottom: 0.5rem;"><strong>${t('climatisation')} :</strong> ${chauffageInfo.clim}</p>`;
     }
     if (chauffageInfo.instructions) {
         chauffageHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.75rem;">
-            <strong style="display: block; margin-bottom: 0.5rem;"><i data-lucide="file-text" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>Instructions :</strong>
+            <strong style="display: block; margin-bottom: 0.5rem;"><i data-lucide="file-text" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>${t('instructions')} :</strong>
             <p style="white-space: pre-line; color: var(--gray-700); line-height: 1.5;">${chauffageInfo.instructions}</p>
         </div>`;
     }
@@ -1763,22 +1872,22 @@ function initOngletPendant() {
     }
     if (cuisineInfo.four) {
         cuisineHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <strong>Four :</strong> ${cuisineInfo.four}
+            <strong>${t('four_label')} :</strong> ${cuisineInfo.four}
         </div>`;
     }
     if (cuisineInfo.plaques) {
         cuisineHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <strong>Plaques :</strong> ${cuisineInfo.plaques}
+            <strong>${t('plaques_label')} :</strong> ${cuisineInfo.plaques}
         </div>`;
     }
     if (cuisineInfo.laveVaisselle) {
         cuisineHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <strong>Lave-vaisselle :</strong> ${cuisineInfo.laveVaisselle}
+            <strong>${t('lave_vaisselle_label')} :</strong> ${cuisineInfo.laveVaisselle}
         </div>`;
     }
     if (cuisineInfo.laveLinge) {
         cuisineHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem;">
-            <strong>👕 Lave-linge :</strong> ${cuisineInfo.laveLinge}
+            <strong>👕 ${t('lave_linge_label')} :</strong> ${cuisineInfo.laveLinge}
         </div>`;
     }
     
@@ -1809,11 +1918,11 @@ function initOngletPendant() {
         dechetsHTML += `<p style="margin-bottom: 0.75rem; white-space: pre-line; line-height: 1.5;">${dechetsInfo.tri}</p>`;
     }
     if (dechetsInfo.collecte) {
-        dechetsHTML += `<p style="margin-bottom: 0.5rem;"><strong>📅 Jours de collecte :</strong> ${dechetsInfo.collecte}</p>`;
+        dechetsHTML += `<p style="margin-bottom: 0.5rem;"><strong>📅 ${t('jours_collecte')} :</strong> ${dechetsInfo.collecte}</p>`;
     }
     if (dechetsInfo.decheterie) {
         dechetsHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; line-height: 1.5;">
-            <strong>🏭 Déchèterie :</strong> ${dechetsInfo.decheterie}
+            <strong>🏭 ${t('decheterie')} :</strong> ${dechetsInfo.decheterie}
         </div>`;
     }
     
@@ -1833,20 +1942,20 @@ function initOngletPendant() {
     
     let lingeHTML = '';
     if (secheLinge) {
-        lingeHTML += `<p style="margin-bottom: 0.5rem;"><strong>🌀 Sèche-linge :</strong> ${secheLinge}</p>`;
+        lingeHTML += `<p style="margin-bottom: 0.5rem;"><strong>🌀 ${t('seche_linge_label')} :</strong> ${secheLinge}</p>`;
     }
     if (ferRepasser) {
-        lingeHTML += `<p style="margin-bottom: 0.5rem;"><strong>👔 Fer et planche à repasser :</strong> ${ferRepasser}</p>`;
+        lingeHTML += `<p style="margin-bottom: 0.5rem;"><strong>👔 ${t('fer_repasser_label')} :</strong> ${ferRepasser}</p>`;
     }
     if (lingeFourni) {
         lingeHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <strong>🛏️ Linge fourni :</strong><br>
+            <strong>🛏️ ${t('linge_fourni_label')} :</strong><br>
             <p style="white-space: pre-line; line-height: 1.5; margin-top: 0.5rem;">${lingeFourni}</p>
         </div>`;
     }
     if (configChambres) {
         lingeHTML += `<div style="background: var(--primary-light, #e8f5e9); padding: 0.75rem; border-radius: 0.5rem;">
-            <strong>🛌 Configuration des chambres :</strong><br>
+            <strong>🛌 ${t('config_chambres_label')} :</strong><br>
             <p style="white-space: pre-line; line-height: 1.5; margin-top: 0.5rem;">${configChambres}</p>
         </div>`;
     }
@@ -1867,16 +1976,16 @@ function initOngletPendant() {
     
     let securiteHTML = '';
     if (detecteurFumee) {
-        securiteHTML += `<p style="margin-bottom: 0.5rem;"><strong>🔔 Détecteur de fumée :</strong> ${detecteurFumee}</p>`;
+        securiteHTML += `<p style="margin-bottom: 0.5rem;"><strong>🔔 ${t('detecteur_fumee_label')} :</strong> ${detecteurFumee}</p>`;
     }
     if (extincteur) {
-        securiteHTML += `<p style="margin-bottom: 0.5rem;"><strong>🧯 Extincteur :</strong> ${extincteur}</p>`;
+        securiteHTML += `<p style="margin-bottom: 0.5rem;"><strong>🧯 ${t('extincteur_label')} :</strong> ${extincteur}</p>`;
     }
     if (coupureEau) {
-        securiteHTML += `<p style="margin-bottom: 0.5rem;"><strong>💧 Coupure d'eau :</strong> ${coupureEau}</p>`;
+        securiteHTML += `<p style="margin-bottom: 0.5rem;"><strong>💧 ${t('coupure_eau_label')} :</strong> ${coupureEau}</p>`;
     }
     if (disjoncteur) {
-        securiteHTML += `<p><strong>⚡ Disjoncteur général :</strong> ${disjoncteur}</p>`;
+        securiteHTML += `<p><strong>⚡ ${t('disjoncteur_label')} :</strong> ${disjoncteur}</p>`;
     }
     
     const securiteSection = document.getElementById('securiteSection');
@@ -1924,11 +2033,11 @@ function initOngletPendant() {
         contactsHTML += `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem; margin-bottom: 0.5rem;">
                 <div>
-                    <div style="font-weight: 600;"><i data-lucide="phone" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>Propriétaire</div>
+                    <div style="font-weight: 600;"><i data-lucide="phone" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>${t('proprietaire_label')}</div>
                     <div style="color: var(--gray-600); font-size: 0.9rem;">${tel}</div>
                 </div>
                 <a href="tel:${tel}" class="btn btn-primary" style="padding: 0.5rem 1rem;">
-                    Appeler
+                    ${t('appeler')}
                 </a>
             </div>`;
     }
@@ -1936,18 +2045,18 @@ function initOngletPendant() {
         contactsHTML += `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem; margin-bottom: 0.5rem;">
                 <div>
-                    <div style="font-weight: 600;">📧 Email</div>
+                    <div style="font-weight: 600;">📧 ${t('email_label')}</div>
                     <div style="color: var(--gray-600); font-size: 0.9rem;">${email}</div>
                 </div>
                 <a href="mailto:${email}" class="btn btn-outline" style="padding: 0.5rem 1rem;">
-                    Envoyer
+                    ${t('envoyer')}
                 </a>
             </div>`;
     }
     if (consignesUrgence) {
         contactsHTML += `
             <div style="background: var(--gray-50); padding: 0.75rem; border-radius: 0.5rem; border-left: 3px solid var(--danger); margin-top: 1rem;">
-                <strong style="color: var(--danger);"><i data-lucide="alert-triangle" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>En cas d'urgence :</strong>
+                <strong style="color: var(--danger);"><i data-lucide="alert-triangle" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>${t('urgence_contact')} :</strong>
                 <p style="margin-top: 0.5rem; white-space: pre-line; line-height: 1.5; color: var(--gray-700);">${consignesUrgence}</p>
             </div>`;
     }
@@ -2094,7 +2203,7 @@ function initOngletSortie() {
     }
     if (restitutionCles) {
         instructionsHTML += `<div style="background: var(--gray-100); padding: 0.75rem; border-radius: 0.5rem; border-left: 3px solid var(--primary);">
-            <strong><i data-lucide="key" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>Restitution des clés :</strong>
+            <strong><i data-lucide="key" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>${t('restitution_cles_label')} :</strong>
             <p style="margin-top: 0.5rem; white-space: pre-line; line-height: 1.5;">${restitutionCles}</p>
         </div>`;
     }
@@ -2113,7 +2222,7 @@ function initOngletSortie() {
 
 function initOngletActivites() {
     if (!reservationData || !giteInfo) {
-        document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
+        document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ ${t('chargement')}</p>`;
         return;
     }
     
@@ -2122,7 +2231,7 @@ function initOngletActivites() {
 
 function initOngletFaq() {
     if (!reservationData) {
-        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
+        document.getElementById('faqListe').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ ${t('chargement')}</p>`;
         return;
     }
     loadFaqData();
@@ -2131,7 +2240,7 @@ function initOngletFaq() {
 async function loadActivitesForClient() {
     try {
         if (!reservationData || !reservationData.gite_id) {
-            document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Chargement...</p>';
+            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ ${t('chargement')}</p>`;
             return;
         }
         
@@ -2145,7 +2254,7 @@ async function loadActivitesForClient() {
         
         if (error) {
             console.error('Erreur chargement activités:', error);
-            document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--danger);">⚠️ Erreur lors du chargement des activités</p>';
+            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--danger);">⚠️ ${t('erreur_chargement_activites')}</p>`;
             return;
         }
         
@@ -2153,14 +2262,14 @@ async function loadActivitesForClient() {
         const giteLon = parseFloat(giteInfo?.gps_lon || giteInfo?.longitude);
         
         if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
-            document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
-            document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Coordonnées du gîte non disponibles</p>';
+            document.getElementById('mapActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ ${t('coordonnees_indisponibles')}</p>`;
+            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ ${t('coordonnees_indisponibles')}</p>`;
             return;
         }
         
         if (!activites || activites.length === 0) {
-            document.getElementById('mapActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
-            document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ Aucune activité configurée pour ce gîte</p>';
+            document.getElementById('mapActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ ${t('aucune_activite')}</p>`;
+            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ ${t('aucune_activite')}</p>`;
             return;
         }
         
@@ -2179,11 +2288,11 @@ async function loadActivitesForClient() {
                 style="border: 1px solid #ccc; border-radius: 8px;">
             </iframe>
             <div style="text-align: center; margin-top: 0.5rem;">
-                <strong style="color: #ef4444;"><i data-lucide="home" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>Votre gîte</strong><br>
+                <strong style="color: #ef4444;"><i data-lucide="home" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>${t('votre_gite')}</strong><br>
                 <a href="https://www.google.com/maps/search/?api=1&query=${giteLat},${giteLon}" 
                    target="_blank" 
                    style="color: var(--primary); font-size: 0.875rem;">
-                    <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 0.25rem;"></i>Voir sur Google Maps
+                    <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 0.25rem;"></i>${t('btn_voir_google_maps')}
                 </a>
             </div>
         `;
@@ -2195,7 +2304,7 @@ async function loadActivitesForClient() {
         displayActivitesListInteractive(activites, giteLat, giteLon);
     } catch (error) {
         console.error('❌ Erreur critique dans loadActivitesForClient:', error);
-        document.getElementById('listeActivites').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--danger);">⚠️ Erreur lors du chargement des activités</p>';
+        document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--danger);">⚠️ ${t('erreur_chargement_activites')}</p>`;
     }
 }
 
@@ -2347,21 +2456,21 @@ function displayActivitesList(activites) {
                                target="_blank" class="btn btn-primary"
                                onclick="trackActiviteConsultation(${activite.id}, 'click_maps')"
                                style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="map" style="width: 16px; height: 16px;"></i> Itinéraire
+                                <i data-lucide="map" style="width: 16px; height: 16px;"></i> ${t('voir_itineraire')}
                             </a>
                         ` : ''}
                         ${activite.website ? `
                             <a href="${activite.website}" target="_blank" class="btn btn-outline"
                                onclick="trackActiviteConsultation(${activite.id}, 'click_website')"
                                style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="globe" style="width: 16px; height: 16px;"></i> Site web
+                                <i data-lucide="globe" style="width: 16px; height: 16px;"></i> ${t('site_web')}
                             </a>
                         ` : ''}
                         ${activite.phone ? `
                             <a href="tel:${activite.phone}" class="btn btn-outline"
                                onclick="trackActiviteConsultation(${activite.id}, 'click_phone')"
                                style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="phone" style="width: 16px; height: 16px;"></i> Appeler
+                                <i data-lucide="phone" style="width: 16px; height: 16px;"></i> ${t('appeler')}
                             </a>
                         ` : ''}
                     </div>
@@ -2858,12 +2967,12 @@ async function loadCommerces() {
     
     if (error) {
         console.error('Erreur chargement commerces:', error);
-        container.innerHTML = '<p style="padding: 1rem; text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
+        container.innerHTML = `<p style="padding: 1rem; text-align: center; color: var(--gray-600);">⚠️ ${t('erreur_chargement')}</p>`;
         return;
     }
     
     if (!commerces || commerces.length === 0) {
-        container.innerHTML = '<p style="padding: 1rem; text-align: center; color: var(--gray-600);">📋 Aucun commerce ajouté pour le moment</p>';
+        container.innerHTML = `<p style="padding: 1rem; text-align: center; color: var(--gray-600);">📋 ${t('aucun_commerce')}</p>`;
         return;
     }
     
@@ -2927,10 +3036,10 @@ function openActiviteModal(activite) {
     
     document.getElementById('modalActiviteImage').src = activite.image || 'images/default-activity.jpg';
     document.getElementById('modalActiviteTitre').textContent = activite.nom;
-    document.getElementById('modalActiviteDescription').textContent = activite.description || 'Aucune description disponible';
-    document.getElementById('modalActiviteAdresse').textContent = activite.adresse || 'Non spécifié';
-    document.getElementById('modalActiviteHoraires').textContent = activite.horaires || 'Se renseigner';
-    document.getElementById('modalActiviteContact').textContent = activite.telephone || 'Non spécifié';
+    document.getElementById('modalActiviteDescription').textContent = activite.description || t('aucune_description');
+    document.getElementById('modalActiviteAdresse').textContent = activite.adresse || t('non_specifie');
+    document.getElementById('modalActiviteHoraires').textContent = activite.horaires || t('horaires_a_verifier');
+    document.getElementById('modalActiviteContact').textContent = activite.telephone || t('non_specifie');
     
     const webLink = document.getElementById('modalActiviteWeb');
     if (activite.site_web) {
@@ -3279,7 +3388,7 @@ let cachedFaqs = []; // Cache pour rafraîchissement lors changement langue
 
 async function loadFaqData() {
     if (!reservationData || !reservationData.gite_id) {
-        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ Données de réservation non disponibles</p>';
+        document.getElementById('faqListe').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⏳ ${t('donnees_indisponibles')}</p>`;
         return;
     }
     
@@ -3292,7 +3401,7 @@ async function loadFaqData() {
     
     if (error) {
         console.error('Erreur chargement FAQs:', error);
-        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ Erreur de chargement</p>';
+        document.getElementById('faqListe').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ ${t('erreur_chargement')}</p>`;
         return;
     }
     
@@ -3300,7 +3409,7 @@ async function loadFaqData() {
     cachedFaqs = faqs || []; // Stocker en cache
     
     if (allFaqs.length === 0) {
-        document.getElementById('faqListe').innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray-600);">📋 Aucune FAQ disponible</p>';
+        document.getElementById('faqListe').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">📋 ${t('aucune_faq')}</p>`;
         return;
     }
     

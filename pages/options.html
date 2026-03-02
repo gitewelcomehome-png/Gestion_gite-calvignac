@@ -1461,27 +1461,31 @@
                         <div style="padding: 1rem 1.25rem; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0.9rem;">
                             <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
                                 <span>Client</span>
-                                <input id="archiveEditClientName" type="text" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                                <input id="archiveEditClientName" type="text" autocomplete="off" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
                             </label>
                             <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
                                 <span>Gîte</span>
-                                <input id="archiveEditGiteName" type="text" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                                <input id="archiveEditGiteName" type="text" autocomplete="off" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
                             </label>
                             <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
                                 <span>Plateforme</span>
-                                <input id="archiveEditPlatform" type="text" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                                <input id="archiveEditPlatform" type="text" autocomplete="off" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
                             </label>
                             <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
                                 <span>Montant (€)</span>
-                                <input id="archiveEditAmount" type="number" step="0.01" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                                <input id="archiveEditAmount" type="number" step="0.01" autocomplete="off" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                            </label>
+                            <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
+                                <span>Nb personnes</span>
+                                <input id="archiveEditGuestCount" type="number" min="1" step="1" autocomplete="off" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
                             </label>
                             <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
                                 <span>Date arrivée</span>
-                                <input id="archiveEditCheckIn" type="date" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                                <input id="archiveEditCheckIn" type="date" autocomplete="off" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
                             </label>
                             <label style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem;">
                                 <span>Date départ</span>
-                                <input id="archiveEditCheckOut" type="date" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                                <input id="archiveEditCheckOut" type="date" autocomplete="off" style="padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
                             </label>
                         </div>
                         <div style="padding: 0 1.25rem 1rem; display: flex; justify-content: flex-end; gap: 0.6rem;">
@@ -2480,6 +2484,7 @@
                 document.getElementById('archiveEditGiteName').value = getReservationArchiveField(reservation, ['gite', 'gite_name'], '');
                 document.getElementById('archiveEditPlatform').value = getReservationArchiveField(reservation, ['platform', 'plateforme', 'site'], '');
                 document.getElementById('archiveEditAmount').value = Number(getReservationArchiveField(reservation, ['total_price', 'montant'], 0)) || '';
+                document.getElementById('archiveEditGuestCount').value = Number(getReservationArchiveField(reservation, ['guest_count', 'nb_personnes', 'nbPersonnes'], 0)) || '';
                 document.getElementById('archiveEditCheckIn').value = toDateInputValue(getReservationArchiveField(reservation, ['check_in', 'date_debut', 'dateDebut'], ''));
                 document.getElementById('archiveEditCheckOut').value = toDateInputValue(getReservationArchiveField(reservation, ['check_out', 'date_fin', 'dateFin'], ''));
 
@@ -2512,6 +2517,8 @@
             const checkOut = document.getElementById('archiveEditCheckOut')?.value || null;
             const amountRaw = document.getElementById('archiveEditAmount')?.value;
             const amount = amountRaw === '' || amountRaw === null || amountRaw === undefined ? null : Number(amountRaw);
+            const guestCountRaw = document.getElementById('archiveEditGuestCount')?.value;
+            const guestCount = guestCountRaw === '' || guestCountRaw === null || guestCountRaw === undefined ? null : Number(guestCountRaw);
 
             setFirstExistingReservationField(payload, reservation, ['client_name', 'nom_client', 'nom'], clientName);
             setFirstExistingReservationField(payload, reservation, ['gite', 'gite_name'], giteName);
@@ -2520,6 +2527,9 @@
             setFirstExistingReservationField(payload, reservation, ['check_out', 'date_fin', 'dateFin'], checkOut);
             if (amount !== null && !Number.isNaN(amount)) {
                 setFirstExistingReservationField(payload, reservation, ['total_price', 'montant'], amount);
+            }
+            if (guestCount !== null && !Number.isNaN(guestCount) && guestCount > 0) {
+                setFirstExistingReservationField(payload, reservation, ['guest_count', 'nb_personnes', 'nbPersonnes'], guestCount);
             }
 
             if (Object.keys(payload).length === 0) {

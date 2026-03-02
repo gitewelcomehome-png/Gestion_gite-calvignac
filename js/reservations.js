@@ -228,6 +228,411 @@ async function forceRefreshReservations() {
     }
 }
 
+function normalizeReservationPlatform(reservation) {
+    const raw = String(
+        reservation?.site
+        || reservation?.plateforme
+        || reservation?.platform
+        || reservation?.provenance
+        || 'direct'
+    ).toLowerCase().trim();
+
+    if (raw.includes('airbnb')) return 'airbnb';
+    if (raw.includes('booking')) return 'booking';
+    if (raw.includes('abritel') || raw.includes('vrbo') || raw.includes('homeaway')) return 'abritel';
+    if (raw.includes('gite') || raw.includes('gdf')) return 'gdf';
+    if (raw.includes('direct')) return 'direct';
+    return raw || 'direct';
+}
+
+async function getTaxesSejourSettingsForGite(giteId) {
+    if (!giteId) return { taxRate: 0, prelevePlatforms: ['airbnb'] };
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('gites')
+            .select('taxe_sejour_tarif, taxe_sejour_plateformes')
+            .eq('id', giteId)
+            .single();
+        if (error || !data) return { taxRate: 0, prelevePlatforms: ['airbnb'] };
+        return {
+            taxRate: Number.isFinite(Number(data.taxe_sejour_tarif)) ? Number(data.taxe_sejour_tarif) : 0,
+            prelevePlatforms: Array.isArray(data.taxe_sejour_plateformes) ? data.taxe_sejour_plateformes : ['airbnb']
+        };
+    } catch (e) {
+        return { taxRate: 0, prelevePlatforms: ['airbnb'] };
+    }
+}
+
+async function saveTaxesSejourSettingsForGite(giteId, settings) {
+    if (!giteId) return;
+    try {
+        await window.supabaseClient
+            .from('gites')
+            .update({
+                taxe_sejour_tarif: Number.isFinite(Number(settings.taxRate)) ? Number(settings.taxRate) : 0,
+                taxe_sejour_plateformes: Array.isArray(settings.prelevePlatforms) ? settings.prelevePlatforms : []
+            })
+            .eq('id', giteId);
+    } catch (e) {
+        // silencieux
+    }
+}
+
+function getReservationGuestCount(reservation) {
+    const value = Number(
+        reservation?.nbPersonnes
+        ?? reservation?.nb_personnes
+        ?? reservation?.guest_count
+        ?? reservation?.nb_guests
+        ?? 1
+    );
+    return Number.isFinite(value) && value > 0 ? value : 1;
+}
+
+function buildTaxMonthRows(reservations, selectedGiteId, selectedMonth, taxRate, platformModes) {
+    if (!selectedGiteId || !selectedMonth) return [];
+
+    const [year, month] = selectedMonth.split('-').map(Number);
+    if (!year || !month) return [];
+
+    const monthStart = new Date(year, month - 1, 1);
+    const monthEnd = new Date(year, month, 0);
+    const rows = [];
+
+    reservations
+        .filter((reservation) => reservation?.giteId === selectedGiteId)
+        .forEach((reservation) => {
+            const checkIn = parseLocalDate(reservation.dateDebut);
+            const checkOutRaw = parseLocalDate(reservation.dateFin);
+
+            const checkOut = new Date(checkOutRaw);
+            checkOut.setDate(checkOut.getDate() - 1);
+
+            if (checkOut < monthStart || checkIn > monthEnd) return;
+
+            const start = checkIn > monthStart ? checkIn : monthStart;
+            const end = checkOut < monthEnd ? checkOut : monthEnd;
+            const platform = normalizeReservationPlatform(reservation);
+            const platformMode = platformModes[platform] || 'payer';
+            const guestCount = getReservationGuestCount(reservation);
+
+            const cursor = new Date(start);
+            while (cursor <= end) {
+                const taxeBruteJour = guestCount * taxRate;
+                const montantAPayerJour = platformMode === 'preleve' ? 0 : taxeBruteJour;
+
+                rows.push({
+                    day: cursor.getDate(),
+                    platform,
+                    guestCount,
+                    taxeBruteJour,
+                    montantAPayerJour,
+                    mode: platformMode
+                });
+
+                cursor.setDate(cursor.getDate() + 1);
+            }
+        });
+
+    rows.sort((a, b) => a.day - b.day || a.platform.localeCompare(b.platform));
+    return rows;
+}
+
+function renderTaxesSejourTable(rows) {
+    if (!rows.length) {
+        return {
+            html: '<tr><td colspan="5" style="padding:12px;text-align:center;color:var(--text-secondary, #94a3b8);background:var(--bg-secondary, #111113);">Aucune donnée pour ce mois</td></tr>',
+            total: 0
+        };
+    }
+
+    const platformLabels = {
+        airbnb: 'Airbnb',
+        booking: 'Booking',
+        abritel: 'Abritel',
+        gdf: 'Gîtes de France',
+        direct: 'Direct'
+    };
+
+    const html = rows.map((row) => {
+        const modeText = row.mode === 'preleve' ? 'Prélevée par plateforme' : 'À payer';
+        return `
+            <tr>
+                <td style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));background:var(--bg-secondary, #111113);color:var(--text-primary, #ffffff);">${String(row.day).padStart(2, '0')}</td>
+                <td style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));background:var(--bg-secondary, #111113);color:var(--text-primary, #ffffff);">${platformLabels[row.platform] || row.platform}</td>
+                <td style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));background:var(--bg-secondary, #111113);color:var(--text-primary, #ffffff);text-align:center;">${row.guestCount}</td>
+                <td style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));background:var(--bg-secondary, #111113);color:var(--text-primary, #ffffff);text-align:right;">${row.montantAPayerJour.toFixed(2)} €</td>
+                <td style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));background:var(--bg-secondary, #111113);color:var(--text-primary, #ffffff);">${modeText}</td>
+            </tr>
+        `;
+    }).join('');
+
+    const total = rows.reduce((sum, row) => sum + row.montantAPayerJour, 0);
+    return { html, total };
+}
+
+function openTaxesPlatformOptionsModal(initialPrelevePlatforms, onSave) {
+    const platforms = [
+        { id: 'airbnb', label: 'Airbnb' },
+        { id: 'booking', label: 'Booking' },
+        { id: 'abritel', label: 'Abritel' },
+        { id: 'gdf', label: 'Gîtes de France' },
+        { id: 'direct', label: 'Direct' }
+    ];
+
+    const selected = new Set(initialPrelevePlatforms || []);
+
+    const existingOverlay = document.getElementById('taxes-platform-options-modal');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'taxes-platform-options-modal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:12050;padding:20px;';
+    overlay.innerHTML = `
+        <div style="position:relative;isolation:isolate;background:var(--bg-secondary, #111113);color:var(--text-primary, #ffffff);border:2px solid var(--border-color, rgba(255,255,255,0.1));border-radius:12px;max-width:560px;width:100%;padding:18px;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+            <h4 style="margin:0 0 10px 0;">✅ Plateformes qui prélèvent la taxe de séjour</h4>
+            <p style="margin:0 0 12px 0;color:var(--text-secondary, #94a3b8);font-size:0.9rem;">Coche les plateformes qui prélèvent la taxe directement.</p>
+            <div id="platformCheckboxList" style="display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:10px 14px;margin-bottom:16px;">
+                ${platforms.map(platform => `
+                    <label style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--border-color, rgba(255,255,255,0.1));border-radius:8px;background:var(--bg-primary, #050506);">
+                        <input type="checkbox" data-platform-checkbox="${platform.id}" ${selected.has(platform.id) ? 'checked' : ''} style="accent-color: var(--upstay-cyan, #00C2CB);">
+                        <span>${platform.label}</span>
+                    </label>
+                `).join('')}
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;">
+                <button id="closePlatformOptions" class="btn-neo" style="padding:8px 12px;">Annuler</button>
+                <button id="savePlatformOptions" class="btn-neo" style="padding:8px 12px;background:#27ae60;color:#fff;">Enregistrer</button>
+            </div>
+        </div>
+    `;
+
+    const closeModal = () => overlay.remove();
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) closeModal();
+    });
+
+    document.body.appendChild(overlay);
+
+    document.getElementById('closePlatformOptions')?.addEventListener('click', closeModal);
+    document.getElementById('savePlatformOptions')?.addEventListener('click', () => {
+        const checkedPlatforms = Array.from(overlay.querySelectorAll('[data-platform-checkbox]:checked'))
+            .map((input) => input.getAttribute('data-platform-checkbox'));
+        onSave(checkedPlatforms);
+        closeModal();
+    });
+}
+
+async function openTaxesSejourModal() {
+    try {
+        const reservations = await getAllReservations(true);
+        const gites = await window.gitesManager.getVisibleGites();
+
+        const monthNameFormatter = new Intl.DateTimeFormat('fr-FR', { month: 'long' });
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1; // 1-12
+
+        const yearOptions = [];
+        for (let y = currentYear - 3; y <= currentYear + 1; y++) {
+            yearOptions.push(y);
+        }
+
+        const monthNames = [];
+        for (let m = 1; m <= 12; m++) {
+            const date = new Date(2000, m - 1, 1);
+            monthNames.push({ value: String(m).padStart(2, '0'), label: monthNameFormatter.format(date) });
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = 'taxes-sejour-modal';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;';
+
+        overlay.innerHTML = `
+            <div style="background:var(--bg-secondary, #111113);color:var(--text-primary, #ffffff);border:2px solid var(--border-color, rgba(255,255,255,0.1));border-radius:12px;max-width:1100px;width:100%;max-height:90vh;overflow:auto;padding:18px;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;">
+                    <h3 style="margin:0;font-size:1.2rem;">💰 Taxes de séjour mensuelles</h3>
+                    <button id="closeTaxesSejourModal" class="btn-neo" style="padding:8px 12px;background:#e74c3c;color:#fff;">Fermer</button>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;margin-bottom:14px;">
+                    <div>
+                        <label for="taxesGiteSelect" style="display:block;font-weight:700;margin-bottom:6px;">Gîte</label>
+                        <select id="taxesGiteSelect" style="width:100%;padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));border-radius:8px;background:var(--bg-primary, #050506);color:var(--text-primary, #ffffff);">
+                            <option value="">Sélectionner</option>
+                            ${gites.map(g => `<option value="${g.id}">${escapeHtml(g.name || 'Sans nom')}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="taxesYearSelect" style="display:block;font-weight:700;margin-bottom:6px;">Année</label>
+                        <select id="taxesYearSelect" style="width:100%;padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));border-radius:8px;background:var(--bg-primary, #050506);color:var(--text-primary, #ffffff);">
+                            ${yearOptions.map(y => `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="taxesMonthSelect" style="display:block;font-weight:700;margin-bottom:6px;">Mois</label>
+                        <select id="taxesMonthSelect" style="width:100%;padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));border-radius:8px;background:var(--bg-primary, #050506);color:var(--text-primary, #ffffff);">
+                            ${monthNames.map(m => `<option value="${m.value}" ${m.value === String(currentMonth).padStart(2, '0') ? 'selected' : ''}>${escapeHtml(m.label)}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="taxesRateInput" style="display:block;font-weight:700;margin-bottom:6px;">Tarif taxe séjour (€ / pers / nuit)</label>
+                        <input id="taxesRateInput" type="number" min="0" step="0.01" value="2.00" style="width:100%;padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));border-radius:8px;background:var(--bg-primary, #050506);color:var(--text-primary, #ffffff);">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                    <div>
+                        <div style="font-weight:700;">Options plateformes</div>
+                        <div id="platformOptionsSummary" style="font-size:0.9rem;color:var(--text-secondary, #94a3b8);">Airbnb prélève la taxe</div>
+                    </div>
+                    <button id="openPlatformOptionsBtn" class="btn-neo" style="padding:8px 12px;">⚙️ Choisir plateformes</button>
+                </div>
+
+                <div style="overflow:auto;">
+                    <table style="width:100%;border-collapse:collapse;min-width:760px;background:var(--bg-secondary, #111113);color:var(--text-primary, #ffffff);">
+                        <thead>
+                            <tr style="background:var(--bg-primary, #050506);">
+                                <th style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));text-align:left;color:var(--text-primary, #ffffff);">Jour du mois</th>
+                                <th style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));text-align:left;color:var(--text-primary, #ffffff);">Plateforme</th>
+                                <th style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));text-align:center;color:var(--text-primary, #ffffff);">Nb personnes</th>
+                                <th style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));text-align:right;color:var(--text-primary, #ffffff);">Tarif à payer / jour</th>
+                                <th style="padding:10px;border:1px solid var(--border-color, rgba(255,255,255,0.1));text-align:left;color:var(--text-primary, #ffffff);">Règle plateforme</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taxesSejourTableBody">
+                            <tr><td colspan="5" style="padding:12px;text-align:center;color:var(--text-secondary, #94a3b8);background:var(--bg-secondary, #111113);">Sélectionner un gîte</td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="background:var(--bg-primary, #050506);font-weight:700;">
+                                <td colspan="3" style="padding:12px;border:1px solid var(--border-color, rgba(255,255,255,0.1));text-align:right;color:var(--text-primary, #ffffff);">Total mois à payer</td>
+                                <td id="taxesSejourTotal" style="padding:12px;border:1px solid var(--border-color, rgba(255,255,255,0.1));text-align:right;color:var(--text-primary, #ffffff);">0.00 €</td>
+                                <td style="padding:12px;border:1px solid var(--border-color, rgba(255,255,255,0.1));background:var(--bg-primary, #050506);"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        const closeModal = () => overlay.remove();
+        overlay.addEventListener('click', (event) => {
+            if (event.target === overlay) closeModal();
+        });
+
+        document.body.appendChild(overlay);
+        document.getElementById('closeTaxesSejourModal')?.addEventListener('click', closeModal);
+
+        const giteSelect = document.getElementById('taxesGiteSelect');
+        const yearSelect = document.getElementById('taxesYearSelect');
+        const monthSelect = document.getElementById('taxesMonthSelect');
+        const rateInput = document.getElementById('taxesRateInput');
+        const platformSummary = document.getElementById('platformOptionsSummary');
+        const openPlatformOptionsBtn = document.getElementById('openPlatformOptionsBtn');
+        const tableBody = document.getElementById('taxesSejourTableBody');
+        const totalElement = document.getElementById('taxesSejourTotal');
+
+        let prelevePlatforms = ['airbnb'];
+
+        const updatePlatformSummary = () => {
+            const labels = {
+                airbnb: 'Airbnb',
+                booking: 'Booking',
+                abritel: 'Abritel',
+                gdf: 'Gîtes de France',
+                direct: 'Direct'
+            };
+            const text = prelevePlatforms.length
+                ? prelevePlatforms.map((platform) => labels[platform] || platform).join(', ')
+                : 'Aucune plateforme ne prélève';
+            platformSummary.textContent = text;
+        };
+
+        const loadGiteSettings = async () => {
+            const giteId = giteSelect?.value;
+            if (!giteId) {
+                rateInput.value = '2.00';
+                prelevePlatforms = ['airbnb'];
+                updatePlatformSummary();
+                return;
+            }
+
+            const settings = await getTaxesSejourSettingsForGite(giteId);
+            rateInput.value = settings.taxRate.toFixed(2);
+            prelevePlatforms = settings.prelevePlatforms;
+            updatePlatformSummary();
+        };
+
+        const refreshTable = () => {
+            const selectedGiteId = giteSelect?.value || '';
+            const selectedMonth = (yearSelect?.value && monthSelect?.value)
+                ? `${yearSelect.value}-${monthSelect.value}`
+                : '';
+            const taxRate = Number(rateInput?.value || 0);
+
+            const platformModes = {
+                airbnb: prelevePlatforms.includes('airbnb') ? 'preleve' : 'payer',
+                booking: prelevePlatforms.includes('booking') ? 'preleve' : 'payer',
+                abritel: prelevePlatforms.includes('abritel') ? 'preleve' : 'payer',
+                gdf: prelevePlatforms.includes('gdf') ? 'preleve' : 'payer',
+                direct: prelevePlatforms.includes('direct') ? 'preleve' : 'payer'
+            };
+
+            const rows = buildTaxMonthRows(reservations, selectedGiteId, selectedMonth, taxRate, platformModes);
+            const rendered = renderTaxesSejourTable(rows);
+            tableBody.innerHTML = rendered.html;
+            totalElement.textContent = `${rendered.total.toFixed(2)} €`;
+        };
+
+        const persistCurrentGiteSettings = async () => {
+            const giteId = giteSelect?.value || '';
+            if (!giteId) return;
+
+            await saveTaxesSejourSettingsForGite(giteId, {
+                taxRate: Number(rateInput?.value || 2),
+                prelevePlatforms
+            });
+        };
+
+        [giteSelect, yearSelect, monthSelect, rateInput].forEach((element) => {
+            element?.addEventListener('change', refreshTable);
+            element?.addEventListener('input', refreshTable);
+        });
+
+        giteSelect?.addEventListener('change', async () => {
+            await loadGiteSettings();
+            refreshTable();
+        });
+
+        rateInput?.addEventListener('change', async () => {
+            await persistCurrentGiteSettings();
+            refreshTable();
+        });
+
+        rateInput?.addEventListener('input', async () => {
+            await persistCurrentGiteSettings();
+            refreshTable();
+        });
+
+        openPlatformOptionsBtn?.addEventListener('click', () => {
+            openTaxesPlatformOptionsModal(prelevePlatforms, async (newPrelevePlatforms) => {
+                prelevePlatforms = newPrelevePlatforms;
+                updatePlatformSummary();
+                await persistCurrentGiteSettings();
+                refreshTable();
+            });
+        });
+
+        await loadGiteSettings();
+        refreshTable();
+    } catch (error) {
+        console.error('❌ Erreur ouverture modal taxes séjour:', error);
+        showToast('Erreur ouverture taxes séjour', 'error');
+    }
+}
+
 // ==========================================
 // �🔍 RECHERCHE RÉSERVATIONS
 // ==========================================

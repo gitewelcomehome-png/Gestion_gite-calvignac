@@ -6175,8 +6175,8 @@ html.style-apple .dashboard-graph-container-benefice .section-header {
 .indicator--cyan .indicator__value {
     color: #ffffff !important;
     font-weight: 800 !important;
-    font-size: 1.4rem !important;
-    word-break: break-word;
+    font-size: clamp(0.75rem, 2.2vw, 1.1rem) !important;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.5), 0 0 4px rgba(0, 0, 0, 0.3);

@@ -2045,33 +2045,43 @@ async function updateFinancialIndicators() {
     
     // console.log('💰 BÉNÉFICE Année (CA - Charges):', beneficeAnnee.toFixed(2), '€');
     
-    // 2. Calculer l'URSSAF pour l'année en cours (somme des cotisations sociales)
+    // 2. Calculer l'URSSAF pour l'année en cours selon le statut fiscal réel
+    //    Même logique que calculerURSSAF() dans fiscalite-v2.js
     const config = window.TAUX_FISCAUX.getConfig(anneeActuelle);
-    
-    const tauxCotisationsSociales = config.URSSAF.indemnites_journalieres.taux + 
-                                     config.URSSAF.retraite_base.taux + 
-                                     config.URSSAF.retraite_complementaire.taux + 
-                                     config.URSSAF.invalidite_deces.taux;
-    
-    const cotisationsSociales = beneficeAnnee * tauxCotisationsSociales;
-    const csgCrds = beneficeAnnee * config.URSSAF.csg_crds.taux;
-    const formationPro = caAnnee * config.URSSAF.formation_pro.taux;
-    
-    // Allocations familiales (progressif entre 110% et 140% du PASS)
-    let allocations = 0;
-    const pass2024 = config.PASS;
-    const af = config.URSSAF.allocations_familiales;
-    if (beneficeAnnee > af.seuil_debut) {
-        const baseAlloc = Math.min(beneficeAnnee - af.seuil_debut, af.seuil_fin - af.seuil_debut);
-        const tauxAlloc = (baseAlloc / (af.seuil_fin - af.seuil_debut)) * af.taux_max;
-        allocations = beneficeAnnee * tauxAlloc;
-    }
-    
-    let urssafTotal = cotisationsSociales + csgCrds + formationPro + allocations;
-    
-    // ⚠️ Appliquer le minimum URSSAF (cotisations minimales légales)
-    if (urssafTotal < config.COTISATIONS_MINIMALES.montant) {
-        urssafTotal = config.COTISATIONS_MINIMALES.montant;
+    const statutFiscal = simFiscale?.donnees_detaillees?.statut_fiscal || 'lmp';
+    const SEUIL_EXONERATION_LMNP = 23000;
+
+    let urssafTotal = 0;
+
+    if (statutFiscal === 'lmnp' && caAnnee < SEUIL_EXONERATION_LMNP) {
+        // LMNP sous 23 000 € de CA → pas de cotisations SSI
+        urssafTotal = 0;
+    } else {
+        // LMP (ou LMNP au-dessus du seuil) → cotisations sociales complètes
+        const urssafConfig = config.URSSAF;
+        const indemnites = beneficeAnnee * urssafConfig.indemnites_journalieres.taux;
+        const revenuPlafonne = Math.min(beneficeAnnee, urssafConfig.retraite_base.plafond || beneficeAnnee);
+        const retraiteBase = revenuPlafonne * urssafConfig.retraite_base.taux;
+        const retraiteCompl = beneficeAnnee * urssafConfig.retraite_complementaire.taux;
+        const invalidite = beneficeAnnee * urssafConfig.invalidite_deces.taux;
+        const csgCrds = beneficeAnnee * urssafConfig.csg_crds.taux;
+        const PASS = config.PASS || 46368;
+        const formationPro = PASS * urssafConfig.formation_pro.taux;
+
+        const af = urssafConfig.allocations_familiales;
+        let allocations = 0;
+        if (beneficeAnnee > af.seuil_debut) {
+            const baseAlloc = Math.min(beneficeAnnee - af.seuil_debut, af.seuil_fin - af.seuil_debut);
+            const tauxAlloc = (baseAlloc / (af.seuil_fin - af.seuil_debut)) * af.taux_max;
+            allocations = beneficeAnnee * tauxAlloc;
+        }
+
+        urssafTotal = indemnites + retraiteBase + retraiteCompl + invalidite + csgCrds + formationPro + allocations;
+
+        // ⚠️ Appliquer le minimum LMP uniquement (pas pour LMNP > seuil)
+        if (statutFiscal === 'lmp' && urssafTotal < config.COTISATIONS_MINIMALES.montant) {
+            urssafTotal = config.COTISATIONS_MINIMALES.montant;
+        }
     }
     
     
@@ -2831,16 +2841,6 @@ async function refreshDashboard() {
         const category = btn.getAttribute('data-todo-category');
         btn.addEventListener('click', () => addTodoItem(category));
     });
-    
-    // Attacher le bouton Actualiser (SecurityUtils supprime les onclick)
-    const btnActualiser = document.querySelector('#tab-dashboard button');
-    if (btnActualiser && btnActualiser.textContent.includes('Actualiser')) {
-        // console.log('✅ Bouton Actualiser attaché');
-        btnActualiser.addEventListener('click', function(e) {
-            e.preventDefault();
-            updateFinancialIndicators();
-        });
-    }
 }
 
 function initializeReponseWhatsappModal() {

@@ -129,6 +129,8 @@ CREATE TABLE public.gites (
     regles_tarifaires JSONB DEFAULT '{}'::jsonb,
     display_order INTEGER DEFAULT 0,
     is_active BOOLEAN DEFAULT true,
+    taxe_sejour_tarif NUMERIC(6,2) DEFAULT 0,
+    taxe_sejour_plateformes JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now(),
     UNIQUE(owner_user_id, slug)

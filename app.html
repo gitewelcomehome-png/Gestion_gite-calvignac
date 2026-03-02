@@ -1177,6 +1177,15 @@
                     
                     // Initialiser le Dashboard après chargement du HTML
                     if (tabId === 'tab-dashboard' && typeof refreshDashboard === 'function') {
+                        // Délégation sur le conteneur — DOMPurify supprime les onclick même avec trusted:true
+                        targetElement.addEventListener('click', function(e) {
+                            const btn = e.target.closest('.btn--refresh');
+                            if (btn) {
+                                e.preventDefault();
+                                refreshDashboard();
+                            }
+                        }, { once: false });
+
                         // Attendre que le DOM soit rendu
                         setTimeout(() => {
                             refreshDashboard();
