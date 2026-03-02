@@ -82,22 +82,28 @@ Deno.serve(async (req: Request) => {
         const heure = demande.heure_demandee || 'Non précisée';
         const motif = demande.motif || 'Aucun motif précisé';
 
-        // Récupérer les infos de la réservation (voyageur + dates)
-        let nomVoyageur = 'Voyageur inconnu';
-        let checkIn = 'Non précisée';
-        let checkOut = 'Non précisée';
-        if (demande.reservation_id) {
+        // Infos voyageur/dates enrichies par le trigger SQL (champs _client_name, _check_in, _check_out)
+        // Fallback : requête directe sur reservations si champs absents
+        let nomVoyageur = demande._client_name || null;
+        let checkIn = demande._check_in ? new Date(demande._check_in).toLocaleDateString('fr-FR') : null;
+        let checkOut = demande._check_out ? new Date(demande._check_out).toLocaleDateString('fr-FR') : null;
+
+        if (!nomVoyageur && demande.reservation_id) {
             const { data: resa } = await supabase
                 .from('reservations')
-                .select('client_name, nom_client, check_in, check_out')
+                .select('client_name, check_in, check_out')
                 .eq('id', demande.reservation_id)
                 .maybeSingle();
             if (resa) {
-                nomVoyageur = resa.client_name || resa.nom_client || 'Voyageur inconnu';
-                checkIn = resa.check_in ? new Date(resa.check_in).toLocaleDateString('fr-FR') : 'Non précisée';
-                checkOut = resa.check_out ? new Date(resa.check_out).toLocaleDateString('fr-FR') : 'Non précisée';
+                nomVoyageur = resa.client_name || null;
+                checkIn = resa.check_in ? new Date(resa.check_in).toLocaleDateString('fr-FR') : null;
+                checkOut = resa.check_out ? new Date(resa.check_out).toLocaleDateString('fr-FR') : null;
             }
         }
+
+        nomVoyageur = nomVoyageur || 'Non renseigné';
+        checkIn = checkIn || 'Non précisée';
+        checkOut = checkOut || 'Non précisée';
 
         // Envoyer via Resend
         const resendKey = Deno.env.get('RESEND_API_KEY');

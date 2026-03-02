@@ -50,12 +50,24 @@ SECURITY DEFINER
 AS $$
 DECLARE
     payload jsonb;
+    resa_record record;
 BEGIN
+    -- Tenter de récupérer les infos de la réservation liée
+    SELECT client_name, check_in, check_out
+    INTO resa_record
+    FROM public.reservations
+    WHERE id = NEW.reservation_id
+    LIMIT 1;
+
     payload := jsonb_build_object(
         'type', 'INSERT',
         'table', 'demandes_horaires',
         'schema', 'public',
-        'record', row_to_json(NEW)::jsonb
+        'record', row_to_json(NEW)::jsonb || jsonb_build_object(
+            '_client_name', COALESCE(resa_record.client_name, ''),
+            '_check_in',    COALESCE(resa_record.check_in::text, ''),
+            '_check_out',   COALESCE(resa_record.check_out::text, '')
+        )
     );
 
     BEGIN
