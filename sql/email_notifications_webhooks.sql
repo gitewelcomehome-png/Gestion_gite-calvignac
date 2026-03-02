@@ -58,14 +58,19 @@ BEGIN
         'record', row_to_json(NEW)::jsonb
     );
 
-    PERFORM net.http_post(
-        url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-demande',
-        headers := jsonb_build_object(
-            'Content-Type', 'application/json',
-            'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
-        ),
-        body := payload::text
-    );
+    BEGIN
+        PERFORM net.http_post(
+            url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-demande',
+            headers := jsonb_build_object(
+                'Content-Type', 'application/json',
+                'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
+            ),
+            body := payload::text
+        );
+    EXCEPTION WHEN OTHERS THEN
+        -- Ne pas bloquer l'INSERT si pg_net indisponible
+        NULL;
+    END;
 
     RETURN NEW;
 END;
@@ -98,14 +103,19 @@ BEGIN
         'record', row_to_json(NEW)::jsonb
     );
 
-    PERFORM net.http_post(
-        url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-reservation',
-        headers := jsonb_build_object(
-            'Content-Type', 'application/json',
-            'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
-        ),
-        body := payload::text
-    );
+    BEGIN
+        PERFORM net.http_post(
+            url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-reservation',
+            headers := jsonb_build_object(
+                'Content-Type', 'application/json',
+                'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
+            ),
+            body := payload::text
+        );
+    EXCEPTION WHEN OTHERS THEN
+        -- Ne pas bloquer l'INSERT si pg_net indisponible
+        NULL;
+    END;
 
     RETURN NEW;
 END;
