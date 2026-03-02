@@ -533,10 +533,7 @@
             if (token) {
                 try {
                     const { data: tokenData, error } = await supabaseClient
-                        .from('cleaner_tokens')
-                        .select('owner_user_id, type')
-                        .eq('token', token)
-                        .in('type', ['company', 'cleaner'])
+                        .rpc('validate_cleaner_token', { p_token: token })
                         .maybeSingle();
                     if (error || !tokenData) throw new Error('Token invalide ou introuvable');
                     window.cleanerOwnerId = tokenData.owner_user_id;
