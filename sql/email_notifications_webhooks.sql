@@ -41,12 +41,6 @@
 SELECT * FROM pg_extension WHERE extname = 'pg_net';
 
 -- ----------------------------------------------------------------
--- IMPORTANT : Configurer le secret webhook dans Postgres
--- Remplacer <meme_secret_que_WEBHOOK_SECRET> par la valeur choisie
--- ----------------------------------------------------------------
-ALTER DATABASE postgres SET app.webhook_secret = '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30';
-
--- ----------------------------------------------------------------
 -- WEBHOOK 1 : Nouvelle demande d'horaire
 -- ----------------------------------------------------------------
 CREATE OR REPLACE FUNCTION notify_new_demande_horaire()
@@ -68,7 +62,7 @@ BEGIN
         url := 'https://ivqiisnudabxemcxxyru.supabase.co/functions/v1/notify-demande',
         headers := jsonb_build_object(
             'Content-Type', 'application/json',
-            'x-webhook-secret', current_setting('app.webhook_secret', true)
+            'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
         ),
         body := payload::text
     );
@@ -108,7 +102,7 @@ BEGIN
         url := 'https://ivqiisnudabxemcxxyru.supabase.co/functions/v1/notify-reservation',
         headers := jsonb_build_object(
             'Content-Type', 'application/json',
-            'x-webhook-secret', current_setting('app.webhook_secret', true)
+            'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
         ),
         body := payload::text
     );
