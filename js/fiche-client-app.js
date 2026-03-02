@@ -2704,8 +2704,10 @@ async function submitDemandeHoraire(type) {
                     statut: 'en_attente'
                 });
             
-            if (error) throw error;
-            // // console.log('✅ Demande créée:', data);
+            if (error) {
+                console.error('❌ Supabase error code:', error.code, '| message:', error.message, '| details:', error.details, '| hint:', error.hint);
+                throw error;
+            }
             showToast(t('demande_envoyee') || '✅ Demande envoyée avec succès !');
         }
         
