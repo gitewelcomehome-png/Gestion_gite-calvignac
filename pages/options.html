@@ -1836,16 +1836,33 @@
         }
 
         async function saveNotificationPreferenceInOptions(key, value) {
-            if (!window.supabaseClient || !optionsNotificationState.user) return;
+            if (!window.supabaseClient || !optionsNotificationState.user) {
+                // Tenter de charger l'user si pas encore fait
+                try {
+                    const { data: { user } } = await window.supabaseClient.auth.getUser();
+                    if (!user) return;
+                    optionsNotificationState.user = user;
+                } catch(e) { return; }
+            }
 
             try {
+                const user = optionsNotificationState.user;
+                const prefs = optionsNotificationState.preferences || {};
+
+                const upsertData = {
+                    user_id: user.id,
+                    email_enabled: prefs.email_enabled ?? true,
+                    email_address: prefs.email_address ?? user.email ?? '',
+                    notify_demandes: prefs.notify_demandes ?? true,
+                    notify_reservations: prefs.notify_reservations ?? true,
+                    notify_taches: prefs.notify_taches ?? true,
+                    email_frequency: prefs.email_frequency ?? 'immediate',
+                    [key]: value
+                };
+
                 const { error } = await window.supabaseClient
                     .from('user_notification_preferences')
-                    .upsert({
-                        user_id: optionsNotificationState.user.id,
-                        ...(optionsNotificationState.preferences || {}),
-                        [key]: value
-                    }, { onConflict: 'user_id' });
+                    .upsert(upsertData, { onConflict: 'user_id' });
 
                 if (error) throw error;
                 optionsNotificationState.preferences = {
@@ -1854,8 +1871,8 @@
                 };
                 setNotificationStatusInOptions('Préférence sauvegardée', 'success');
             } catch (error) {
-                console.error('Erreur sauvegarde préférence notification:', error);
-                setNotificationStatusInOptions('Erreur de sauvegarde', 'error');
+                console.error('Erreur sauvegarde préférence notification:', error.message || error);
+                setNotificationStatusInOptions('Erreur : ' + (error.message || 'inconnue'), 'error');
             }
         }
 
