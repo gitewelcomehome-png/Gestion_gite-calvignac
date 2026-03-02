@@ -51,12 +51,12 @@ Deno.serve(async (req: Request) => {
         // Récupérer l'owner du gîte
         const { data: gite, error: giteError } = await supabase
             .from('gites')
-            .select('user_id, name')
+            .select('owner_user_id, name')
             .eq('id', reservation.gite_id)
             .maybeSingle();
 
         if (giteError) throw giteError;
-        if (!gite?.user_id) {
+        if (!gite?.owner_user_id) {
             return new Response(JSON.stringify({ skipped: true, reason: 'gîte introuvable' }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -66,7 +66,7 @@ Deno.serve(async (req: Request) => {
         const { data: prefs, error: prefsError } = await supabase
             .from('user_notification_preferences')
             .select('email_enabled, email_address, notify_reservations')
-            .eq('user_id', gite.user_id)
+            .eq('user_id', gite.owner_user_id)
             .maybeSingle();
 
         if (prefsError) throw prefsError;
@@ -81,7 +81,7 @@ Deno.serve(async (req: Request) => {
         // Résoudre l'email : soit depuis les prefs, soit depuis auth.users (fallback)
         let emailDest = prefs?.email_address || null;
         if (!emailDest) {
-            const { data: userData } = await supabase.auth.admin.getUserById(gite.user_id);
+            const { data: userData } = await supabase.auth.admin.getUserById(gite.owner_user_id);
             emailDest = userData?.user?.email || null;
         }
 
