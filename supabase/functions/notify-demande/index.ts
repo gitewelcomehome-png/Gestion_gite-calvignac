@@ -57,9 +57,22 @@ Deno.serve(async (req: Request) => {
 
         if (prefsError) throw prefsError;
 
-        // Vérifier si l'email est activé pour les demandes
-        if (!prefs?.email_enabled || !prefs?.notify_demandes || !prefs?.email_address) {
+        // Si préférences explicitement désactivées → skip
+        if (prefs && (prefs.email_enabled === false || prefs.notify_demandes === false)) {
             return new Response(JSON.stringify({ skipped: true, reason: 'notifications désactivées' }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        // Résoudre l'email : soit depuis les prefs, soit depuis auth.users (fallback)
+        let emailDest = prefs?.email_address || null;
+        if (!emailDest) {
+            const { data: userData } = await supabase.auth.admin.getUserById(demande.owner_user_id);
+            emailDest = userData?.user?.email || null;
+        }
+
+        if (!emailDest) {
+            return new Response(JSON.stringify({ skipped: true, reason: 'aucun email disponible' }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
@@ -118,7 +131,7 @@ Deno.serve(async (req: Request) => {
             },
             body: JSON.stringify({
                 from: `${fromName} <${fromEmail}>`,
-                to: [prefs.email_address],
+                to: [emailDest],
                 subject: `📩 Nouvelle demande d'horaire — ${typeLabel}`,
                 html
             })
