@@ -5,7 +5,7 @@
 -- l'envoi d'emails à chaque nouvelle demande ou réservation,
 -- INDÉPENDAMMENT que l'app soit ouverte ou non dans le navigateur.
 --
--- Projet Supabase : ivqiisnudabxemcxxyru
+-- Projet Supabase : fgqimtpjjhdqeyyaptoj
 -- ================================================================
 
 -- ================================================================
@@ -13,18 +13,18 @@
 -- ================================================================
 -- Depuis la racine du projet, exécuter :
 --
---   npx supabase functions deploy notify-demande --project-ref ivqiisnudabxemcxxyru
---   npx supabase functions deploy notify-reservation --project-ref ivqiisnudabxemcxxyru
+--   npx supabase functions deploy notify-demande --project-ref fgqimtpjjhdqeyyaptoj
+--   npx supabase functions deploy notify-reservation --project-ref fgqimtpjjhdqeyyaptoj
 --
 -- ================================================================
 
 -- ================================================================
 -- ÉTAPE 2 : Ajouter les secrets aux Edge Functions (Terminal)
 -- ================================================================
---   npx supabase secrets set RESEND_API_KEY=<votre_cle_resend> --project-ref ivqiisnudabxemcxxyru
---   npx supabase secrets set RESEND_FROM_EMAIL=notifications@liveownerunit.fr --project-ref ivqiisnudabxemcxxyru
---   npx supabase secrets set RESEND_FROM_NAME="Gîte Welcome Home" --project-ref ivqiisnudabxemcxxyru
---   npx supabase secrets set WEBHOOK_SECRET=<chaine_aleatoire_longue> --project-ref ivqiisnudabxemcxxyru
+--   npx supabase secrets set RESEND_API_KEY=<votre_cle_resend> --project-ref fgqimtpjjhdqeyyaptoj
+--   npx supabase secrets set RESEND_FROM_EMAIL=notifications@liveownerunit.fr --project-ref fgqimtpjjhdqeyyaptoj
+--   npx supabase secrets set RESEND_FROM_NAME="Gîte Welcome Home" --project-ref fgqimtpjjhdqeyyaptoj
+--   npx supabase secrets set WEBHOOK_SECRET=<chaine_aleatoire_longue> --project-ref fgqimtpjjhdqeyyaptoj
 --   # Générer un secret : openssl rand -hex 32
 -- ================================================================
 
@@ -59,7 +59,7 @@ BEGIN
     );
 
     PERFORM net.http_post(
-        url := 'https://ivqiisnudabxemcxxyru.supabase.co/functions/v1/notify-demande',
+        url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-demande',
         headers := jsonb_build_object(
             'Content-Type', 'application/json',
             'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
@@ -99,7 +99,7 @@ BEGIN
     );
 
     PERFORM net.http_post(
-        url := 'https://ivqiisnudabxemcxxyru.supabase.co/functions/v1/notify-reservation',
+        url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-reservation',
         headers := jsonb_build_object(
             'Content-Type', 'application/json',
             'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
