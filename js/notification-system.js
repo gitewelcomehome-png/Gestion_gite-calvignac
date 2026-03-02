@@ -797,9 +797,12 @@ class NotificationSystem {
                 <!-- Adresse email -->
                 <div class="setting-group">
                     <label style="display: block; color: #555; font-size: 14px; margin-bottom: 8px; font-weight: 600;">
-                        Adresse email
+                        Adresse email de destination
                     </label>
-                    <input type="email" id="emailAddress" value="${this.userPreferences.email_address || ''}" placeholder="votre@email.com" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;" onchange="window.notificationSystem.savePreference('email_address', this.value)">
+                    <div style="display: flex; gap: 8px;">
+                        <input type="email" id="emailAddress" value="${this.userPreferences.email_address || ''}" placeholder="votre@email.com" style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                        <button onclick="window.notificationSystem.savePreference('email_address', document.getElementById('emailAddress').value)" style="padding: 12px 18px; background: #06b6d4; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; white-space: nowrap;">💾 Sauvegarder</button>
+                    </div>
                     <p style="color: #999; font-size: 12px; margin: 5px 0 0 0;">Par défaut : email de votre compte</p>
                 </div>
 
@@ -881,23 +884,29 @@ class NotificationSystem {
             const { data: { user } } = await window.supabaseClient.auth.getUser();
             if (!user) return;
 
-            const updates = { [key]: value };
+            // Mettre à jour localement d'abord
+            this.userPreferences[key] = value;
+
+            // Upsert : crée la ligne si elle n'existe pas, sinon met à jour
+            const upsertData = {
+                user_id: user.id,
+                email_enabled: this.userPreferences.email_enabled ?? true,
+                email_address: this.userPreferences.email_address ?? user.email ?? '',
+                notify_demandes: this.userPreferences.notify_demandes ?? true,
+                notify_reservations: this.userPreferences.notify_reservations ?? true,
+                notify_taches: this.userPreferences.notify_taches ?? true,
+                email_frequency: this.userPreferences.email_frequency ?? 'immediate'
+            };
 
             const { error } = await window.supabaseClient
                 .from('user_notification_preferences')
-                .update(updates)
-                .eq('user_id', user.id);
+                .upsert(upsertData, { onConflict: 'user_id' });
 
             if (error) throw error;
 
-            // Mettre à jour localement
-            this.userPreferences[key] = value;
-
             if (window.showToast) {
-                window.showToast('Préférence mise à jour', 'success');
+                window.showToast('✅ Préférence sauvegardée', 'success');
             }
-
-            // console.log('✅ Préférence sauvegardée:', key, value);
         } catch (error) {
             console.error('❌ Erreur sauvegarde préférence:', error);
             if (window.showToast) {
