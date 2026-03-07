@@ -700,18 +700,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        // Si la clé Supabase est absente, la récupérer depuis /api/public-config (Vercel env)
-        if (!window.APP_CONFIG?.SUPABASE_KEY) {
-            try {
-                const cfg = await fetch('/api/public-config').then(r => r.json());
-                if (cfg.supabaseKey) {
-                    if (!window.APP_CONFIG) window.APP_CONFIG = {};
-                    window.APP_CONFIG.SUPABASE_KEY = cfg.supabaseKey;
-                    if (cfg.supabaseUrl) window.APP_CONFIG.SUPABASE_URL = cfg.supabaseUrl;
-                }
-            } catch(_) {}
-        }
-
         if (typeof window.createFicheClientSupabase === 'function') {
             window.ficheClientSupabase = window.createFicheClientSupabase(token);
             window.supabaseClient = window.ficheClientSupabase;
