@@ -4,6 +4,7 @@
 -- Objectif : Aligner le schéma de la nouvelle instance Supabase
 --            avec les tables/colonnes attendues par le code JS
 -- À exécuter : dans l'éditeur SQL de Supabase
+-- ✅ SAFE TO RE-RUN : toutes les instructions sont idempotentes
 -- ====================================================================
 
 -- ============================================================
@@ -30,30 +31,41 @@ SELECT * FROM public.notifications;
 -- ============================================================
 
 -- cleaning_schedule.proposed_by (distinction société vs propriétaire)
-ALTER TABLE public.cleaning_schedule
-    ADD COLUMN IF NOT EXISTS proposed_by TEXT DEFAULT NULL;
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+               WHERE table_schema = 'public' AND table_name = 'cleaning_schedule') THEN
+        ALTER TABLE public.cleaning_schedule
+            ADD COLUMN IF NOT EXISTS proposed_by TEXT DEFAULT NULL;
+    END IF;
+END $$;
 
 -- retours_menage : colonnes manquantes
-ALTER TABLE public.retours_menage
-    ADD COLUMN IF NOT EXISTS date_menage DATE DEFAULT NULL;
-
-ALTER TABLE public.retours_menage
-    ADD COLUMN IF NOT EXISTS owner_user_id UUID DEFAULT NULL;
-
-ALTER TABLE public.retours_menage
-    ADD COLUMN IF NOT EXISTS validated BOOLEAN DEFAULT false;
-
-ALTER TABLE public.retours_menage
-    ADD COLUMN IF NOT EXISTS commentaires TEXT DEFAULT NULL;
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+               WHERE table_schema = 'public' AND table_name = 'retours_menage') THEN
+        ALTER TABLE public.retours_menage
+            ADD COLUMN IF NOT EXISTS date_menage DATE DEFAULT NULL;
+        ALTER TABLE public.retours_menage
+            ADD COLUMN IF NOT EXISTS owner_user_id UUID DEFAULT NULL;
+        ALTER TABLE public.retours_menage
+            ADD COLUMN IF NOT EXISTS validated BOOLEAN DEFAULT false;
+        ALTER TABLE public.retours_menage
+            ADD COLUMN IF NOT EXISTS commentaires TEXT DEFAULT NULL;
+    END IF;
+END $$;
 
 -- cm_support_tickets.priorite (alias de priority pour compatibilité frontend)
-ALTER TABLE public.cm_support_tickets
-    ADD COLUMN IF NOT EXISTS priorite TEXT DEFAULT NULL;
-
--- Synchroniser priorite depuis priority si des données existent
-UPDATE public.cm_support_tickets
-    SET priorite = priority
-    WHERE priorite IS NULL AND priority IS NOT NULL;
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+               WHERE table_schema = 'public' AND table_name = 'cm_support_tickets') THEN
+        ALTER TABLE public.cm_support_tickets
+            ADD COLUMN IF NOT EXISTS priorite TEXT DEFAULT NULL;
+        -- Synchroniser priorite depuis priority si des données existent
+        UPDATE public.cm_support_tickets
+            SET priorite = priority
+            WHERE priorite IS NULL AND priority IS NOT NULL;
+    END IF;
+END $$;
 
 -- ============================================================
 -- 3. TABLES MANQUANTES
@@ -299,6 +311,7 @@ ALTER TABLE public.demandes_horaires ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "demandes_horaires_owner_select" ON public.demandes_horaires;
 DROP POLICY IF EXISTS "demandes_horaires_anon_insert" ON public.demandes_horaires;
+DROP POLICY IF EXISTS "demandes_horaires_owner_update" ON public.demandes_horaires;
 CREATE POLICY "demandes_horaires_owner_select" ON public.demandes_horaires
     FOR SELECT USING (auth.uid() = owner_user_id);
 CREATE POLICY "demandes_horaires_anon_insert" ON public.demandes_horaires
@@ -330,6 +343,7 @@ CREATE POLICY "historical_data_authenticated_select" ON public.historical_data
         owner_user_id IS NULL OR auth.uid() = owner_user_id
     );
 
+DROP POLICY IF EXISTS "historical_data_owner_all" ON public.historical_data;
 CREATE POLICY "historical_data_owner_all" ON public.historical_data
     FOR ALL USING (auth.uid() = owner_user_id)
     WITH CHECK (auth.uid() = owner_user_id);
