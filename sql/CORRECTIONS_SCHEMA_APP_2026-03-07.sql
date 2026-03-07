@@ -163,7 +163,13 @@ END $$;
 --    (liaison auth.users car cm_subscriptions ne lie pas auth.users)
 -- ============================================================
 
-DROP VIEW IF EXISTS public.user_subscriptions;
+-- Supprimer l'objet existant quel que soit son type (vue ou table)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.views
+               WHERE table_schema = 'public' AND table_name = 'user_subscriptions') THEN
+        DROP VIEW public.user_subscriptions;
+    END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS public.user_subscriptions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
