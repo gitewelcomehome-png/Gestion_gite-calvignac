@@ -129,15 +129,10 @@ async function initCalendrierTarifs() {
 
 async function loadGitesSelector() {
     try {
-        // Attendre que le subscription manager soit initialisé
-        let retries = 0;
-        while ((!window.subscriptionManager || !window.subscriptionManager.currentSubscription) && retries < 100) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            retries++;
-        }
-        
-        if (!window.subscriptionManager || !window.subscriptionManager.currentSubscription) {
-            console.warn('⚠️ Subscription manager non initialisé après 10 secondes');
+        // Attendre que le subscription manager soit prêt (même sans abonnement actif)
+        if (window.subscriptionManager?._readyPromise) {
+            const timeout = new Promise(resolve => setTimeout(resolve, 5000));
+            await Promise.race([window.subscriptionManager._readyPromise, timeout]);
         }
         
         let gites = [];
@@ -2588,20 +2583,31 @@ async function proposerPrixIATarifs() {
             joursLibres.push(dateStr);
         }
     }
+
+    if (joursLibres.length === 0) {
+        if (btnP) { btnP.textContent = '💰 Proposer des prix'; btnP.disabled = false; }
+        showToast('ℹ️ Aucun jour libre à tarifer sur ce mois', 'error');
+        return;
+    }
     
     // Récupérer l'adresse réelle du gîte depuis infos_gites
     let localisation = '';
+    let contexteGite = 'minimal';
     try {
         const { data: infos } = await window.supabaseClient
             .from('infos_gites')
             .select('adresse')
             .eq('gite', currentGiteNameTarifs.toLowerCase())
             .maybeSingle();
-        if (infos?.adresse) localisation = infos.adresse;
+        if (infos?.adresse) {
+            localisation = infos.adresse;
+            contexteGite = 'complet';
+        }
     } catch (e) { /* pas bloquant */ }
     if (!localisation) {
         // Fallback : nom du gîte tel qu'affiché dans le sélecteur
         localisation = currentGiteNameTarifs || '';
+        contexteGite = localisation ? 'partiel' : 'minimal';
     }
 
     const moisNom = new Date(currentYearTarifs, currentMonthTarifs, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
@@ -2650,14 +2656,21 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         const response = await fetch('/api/openai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt, maxTokens: 600, model: 'gpt-4o-mini' })
+            body: JSON.stringify({
+                prompt,
+                maxTokens: 600,
+                model: 'gpt-4o-mini',
+                webSearch: true,
+                webSearchModel: 'gpt-4.1-mini',
+                systemPrompt: 'Tu es un analyste en revenue management touristique en France. Priorise les informations publiques récentes et factuelles si la recherche web est disponible. Si on te demande du JSON, réponds uniquement en JSON valide strict.'
+            })
         });
         if (!response.ok) throw new Error(`Erreur API ${response.status}`);
         const data = await response.json();
         
         let ai = null;
         try {
-            const raw = (data.result || '').trim();
+            const raw = (data.content || data.result || '').trim();
             const jsonStr = raw.startsWith('{') ? raw : (raw.match(/\{[\s\S]*\}/)?.[0] || '{}');
             ai = JSON.parse(jsonStr);
         } catch(e) { throw new Error('Réponse IA non parseable'); }
@@ -2688,8 +2701,15 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         
         // Afficher le conseil IA dans la légende si présent
         const conseilEl = document.getElementById('ai-conseil-inline');
-        if (conseilEl && ai.conseil) {
-            conseilEl.textContent = '💡 ' + ai.conseil;
+        const sourceIA = data.webSearchUsed ? '🌐 Web utilisée' : '🧠 Sans recherche web';
+        const contexteLabel = contexteGite === 'complet'
+            ? '📍 Contexte gîte complet'
+            : contexteGite === 'partiel'
+                ? '🏡 Contexte partiel (adresse manquante)'
+                : '⚠️ Contexte minimal (infos gîte manquantes)';
+        if (conseilEl) {
+            const conseilTexte = ai.conseil ? `💡 ${ai.conseil}` : '💡 Conseil IA indisponible';
+            conseilEl.textContent = `${conseilTexte} · ${sourceIA} · ${contexteLabel}`;
             conseilEl.style.display = 'block';
         }
         
@@ -2713,8 +2733,18 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         }
         const legende = document.getElementById('ai-demande-legende-tarifs');
         const btnTout = document.getElementById('btnAIToutAccepter');
+        const conseilEl = document.getElementById('ai-conseil-inline');
         if (legende) legende.style.display = 'flex';
         if (btnTout) btnTout.style.display = 'inline-flex';
+        if (conseilEl) {
+            const contexteLabel = contexteGite === 'complet'
+                ? '📍 Contexte gîte complet'
+                : contexteGite === 'partiel'
+                    ? '🏡 Contexte partiel (adresse manquante)'
+                    : '⚠️ Contexte minimal (infos gîte manquantes)';
+            conseilEl.textContent = `⚠️ Mode secours activé : l'IA en ligne n'a pas répondu. Les prix affichés sont calculés automatiquement avec les règles locales. · ${contexteLabel}`;
+            conseilEl.style.display = 'block';
+        }
         _renderCalendrierTarifsImmediate();
         console.warn('⚠️ IA indisponible, analyse locale utilisée :', err.message);
     }

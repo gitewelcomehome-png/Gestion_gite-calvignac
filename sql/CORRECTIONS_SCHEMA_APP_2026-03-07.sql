@@ -111,6 +111,15 @@ DO $$ BEGIN
     END IF;
 END $$;
 
+-- 1g. gites.regles_tarifs (règles de tarification JSONB)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+               WHERE table_schema = 'public' AND table_name = 'gites') THEN
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS regles_tarifs JSONB DEFAULT NULL;
+    END IF;
+END $$;
+
 -- ============================================================
 -- 2. VUES ALIAS
 --    (colonnes nécessaires existent maintenant grâce à la section 1)
@@ -526,6 +535,7 @@ WHERE table_schema = 'public'
     OR (table_name = 'cleaning_schedule' AND column_name IN ('scheduled_date','proposed_by','reservation_end'))
     OR (table_name = 'linen_needs' AND column_name = 'item_label')
     OR (table_name = 'notifications' AND column_name IN ('expires_at','titre','contenu'))
+    OR (table_name = 'gites' AND column_name = 'regles_tarifs')
   )
 ORDER BY table_name, column_name;
 
