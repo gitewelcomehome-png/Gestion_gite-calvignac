@@ -102,6 +102,15 @@ DO $$ BEGIN
     END IF;
 END $$;
 
+-- 1f. linen_needs.item_label (si la table existe déjà sans cette colonne)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+               WHERE table_schema = 'public' AND table_name = 'linen_needs') THEN
+        ALTER TABLE public.linen_needs
+            ADD COLUMN IF NOT EXISTS item_label TEXT DEFAULT NULL;
+    END IF;
+END $$;
+
 -- ============================================================
 -- 2. VUES ALIAS
 --    (colonnes nécessaires existent maintenant grâce à la section 1)
@@ -513,3 +522,9 @@ WHERE table_schema = 'public'
     OR (table_name = 'notifications' AND column_name IN ('expires_at','titre','contenu'))
   )
 ORDER BY table_name, column_name;
+
+-- ============================================================
+-- 7. RECHARGEMENT DU CACHE POSTGREST
+--    Force PostgREST à prendre en compte les nouveaux schémas
+-- ============================================================
+NOTIFY pgrst, 'reload schema';

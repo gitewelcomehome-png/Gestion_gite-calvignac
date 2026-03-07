@@ -45,10 +45,12 @@ class SubscriptionManager {
       `)
       .eq('user_id', user.id)
       .eq('status', 'active')
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (error) {
       console.error('Erreur chargement abonnement:', error);
+    }
+    if (!data) {
       this._resolveReady(null);
       return null;
     }

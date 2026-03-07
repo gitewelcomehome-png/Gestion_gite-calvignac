@@ -137,9 +137,9 @@ class NotificationSystem {
                 .from('user_notification_preferences')
                 .select('*')
                 .eq('user_id', user.id)
-                .single();
+                .maybeSingle();
 
-            if (error && error.code !== 'PGRST116') { // PGRST116 = pas de résultat
+            if (error) {
                 throw error;
             }
 
