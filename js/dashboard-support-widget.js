@@ -12,9 +12,10 @@ async function loadSupportTickets() {
         }
         
         // Récupérer tous les tickets
+        // La colonne priorité peut s'appeler 'priority' ou 'priorite' selon le projet
         const { data: tickets, error } = await window.supabaseClient
             .from('cm_support_tickets')
-            .select('id, status, priorite')
+            .select('id, status, priority, priorite')
             .order('created_at', { ascending: false });
         
         if (error) {
@@ -24,9 +25,11 @@ async function loadSupportTickets() {
         
         if (!tickets) return;
         
-        // Filtrer les tickets non résolus pour les KPI
-        // Normaliser: la table peut avoir 'status' ou 'statut' selon le projet
-        tickets.forEach(t => { if (t.status !== undefined && t.statut === undefined) t.statut = t.status; });
+        // Normaliser : aligner status/statut et priority/priorite selon la colonne disponible
+        tickets.forEach(t => {
+            if (t.status !== undefined && t.statut === undefined) t.statut = t.status;
+            if (t.priority !== undefined && t.priorite === undefined) t.priorite = t.priority;
+        });
         const ticketsActifs = tickets.filter(t => t.statut !== 'résolu' && t.statut !== 'resolu' && t.statut !== 'fermé' && t.statut !== 'ferme');
         
         // Calculer les stats
