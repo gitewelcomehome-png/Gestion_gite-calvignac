@@ -38,7 +38,6 @@ if (!window.ficheClientAppLoaded) {
     window.ficheClientAppLoaded = true;
 
     const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL || window.SUPABASE_URL || 'https://ofdbsymbwdtthnjoxhcd.supabase.co';
-    const SUPABASE_KEY = window.APP_CONFIG?.SUPABASE_KEY || window.SUPABASE_KEY || '';
 
     const createFicheClientSupabase = (clientToken = null) => {
         const createClient = window.supabase?.createClient || window.createClient;
@@ -50,8 +49,10 @@ if (!window.ficheClientAppLoaded) {
             throw new Error('Supabase non initialisé: createClient indisponible');
         }
 
+        // Lire la clé dynamiquement (peut avoir été injectée après fetch /api/public-config)
+        const key = window.APP_CONFIG?.SUPABASE_KEY || window.SUPABASE_KEY || '';
         const headers = clientToken ? { 'x-client-token': clientToken } : {};
-        return createClient(SUPABASE_URL, SUPABASE_KEY, {
+        return createClient(SUPABASE_URL, key, {
             global: { headers }
         });
     };
@@ -699,6 +700,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
+        // Si la clé Supabase est absente, la récupérer depuis /api/public-config (Vercel env)
+        if (!window.APP_CONFIG?.SUPABASE_KEY) {
+            try {
+                const cfg = await fetch('/api/public-config').then(r => r.json());
+                if (cfg.supabaseKey) {
+                    if (!window.APP_CONFIG) window.APP_CONFIG = {};
+                    window.APP_CONFIG.SUPABASE_KEY = cfg.supabaseKey;
+                    if (cfg.supabaseUrl) window.APP_CONFIG.SUPABASE_URL = cfg.supabaseUrl;
+                }
+            } catch(_) {}
+        }
+
         if (typeof window.createFicheClientSupabase === 'function') {
             window.ficheClientSupabase = window.createFicheClientSupabase(token);
             window.supabaseClient = window.ficheClientSupabase;
