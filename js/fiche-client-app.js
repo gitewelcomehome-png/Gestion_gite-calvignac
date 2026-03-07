@@ -37,8 +37,8 @@
 if (!window.ficheClientAppLoaded) {
     window.ficheClientAppLoaded = true;
 
-    const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL || window.SUPABASE_URL || 'https://fgqimtpjjhdqeyyaptoj.supabase.co';
-    const SUPABASE_KEY = window.APP_CONFIG?.SUPABASE_KEY || window.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZncWltdHBqamhkcWV5eWFwdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNTU0MjQsImV4cCI6MjA4MzczMTQyNH0.fOuYg0COYts7XXWxgB7AM01Fg6P86f8oz8XVpGdIaNM';
+    const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL || window.SUPABASE_URL || 'https://ofdbsymbwdtthnjoxhcd.supabase.co';
+    const SUPABASE_KEY = window.APP_CONFIG?.SUPABASE_KEY || window.SUPABASE_KEY || '';
 
     const createFicheClientSupabase = (clientToken = null) => {
         const createClient = window.supabase?.createClient || window.createClient;
@@ -731,16 +731,25 @@ async function loadReservationData() {
         .from('client_access_tokens')
         .select('*, reservation:reservations(*)')
         .eq('token', token)
-        .single();
-    
-    if (tokenError || !tokenData) {
-        throw new Error('Token invalide ou expiré');
+        .maybeSingle();
+
+    if (tokenError) {
+        const reason = tokenError.message || tokenError.details || tokenError.hint || 'erreur inconnue';
+        throw new Error(`Acces token refuse (${reason})`);
+    }
+
+    if (!tokenData) {
+        throw new Error('Token invalide, introuvable ou bloque par RLS');
     }
     
     // Vérifier l'expiration
     const isExpired = new Date(tokenData.expires_at) < new Date();
     if (isExpired) {
         throw new Error('Ce lien a expiré');
+    }
+
+    if (!tokenData.reservation) {
+        throw new Error('Reservation introuvable ou inaccessible pour ce token');
     }
     
     // Mettre à jour le token (colonnes existantes)
@@ -1672,8 +1681,16 @@ function initOngletEntree() {
     // Toujours afficher le bloc arrivée anticipée (validation automatique selon les règles)
     document.getElementById('arriveeAnticipaBlock').style.display = 'block';
     
-    // Code d'entrée
-    document.getElementById('codeEntree').textContent = giteInfo.code_acces || giteInfo.code_entree || '****';
+    // Code d'entrée (prioritaire)
+    const codeEntreeElement = document.getElementById('codeEntree');
+    const codeAccesPrioritaire = String(giteInfo.code_acces || giteInfo.code_entree || '').trim();
+    if (codeEntreeElement) {
+        codeEntreeElement.textContent = codeAccesPrioritaire || (currentLanguage === 'fr' ? 'À confirmer avec le gestionnaire' : 'To be confirmed with manager');
+        codeEntreeElement.style.fontWeight = '800';
+        codeEntreeElement.style.fontSize = '1.35rem';
+        codeEntreeElement.style.letterSpacing = '0.03em';
+        codeEntreeElement.style.color = codeAccesPrioritaire ? 'var(--primary)' : 'var(--gray-500)';
+    }
     
     // Instructions d'accès (affichage direct, pas d'accordion)
     const instructions = currentLanguage === 'fr' 
