@@ -14,17 +14,68 @@
 -- user_notification_preferences → notification_preferences
 DROP VIEW IF EXISTS public.user_notification_preferences;
 CREATE VIEW public.user_notification_preferences AS
-SELECT * FROM public.notification_preferences;
+SELECT
+    id,
+    user_id,
+    email_enabled,
+    email_address,
+    notify_demandes,
+    notify_reservations,
+    notify_taches,
+    email_frequency,
+    push_enabled,
+    sms_enabled,
+    notification_types,
+    updated_at
+FROM public.notification_preferences;
 
--- user_subscriptions → cm_subscriptions
+-- user_subscriptions : table indépendante avec user_id (cm_subscriptions ne lie pas auth.users)
 DROP VIEW IF EXISTS public.user_subscriptions;
-CREATE VIEW public.user_subscriptions AS
-SELECT * FROM public.cm_subscriptions;
+CREATE TABLE IF NOT EXISTS public.user_subscriptions (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    plan_id UUID REFERENCES public.cm_pricing_plans(id),
+    status TEXT DEFAULT 'active',
+    current_period_start TIMESTAMPTZ,
+    current_period_end TIMESTAMPTZ,
+    cancel_at_period_end BOOLEAN DEFAULT false,
+    stripe_subscription_id TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id)
+);
+
+ALTER TABLE public.user_subscriptions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "user_subscriptions_owner_all" ON public.user_subscriptions;
+CREATE POLICY "user_subscriptions_owner_all" ON public.user_subscriptions
+    FOR ALL
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user
+    ON public.user_subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_status
+    ON public.user_subscriptions(status);
+
+-- subscriptions_plans → alias de cm_pricing_plans (attendu par le code JS)
+DROP VIEW IF EXISTS public.subscriptions_plans;
+CREATE VIEW public.subscriptions_plans AS
+SELECT * FROM public.cm_pricing_plans;
 
 -- admin_communications → notifications
 DROP VIEW IF EXISTS public.admin_communications;
 CREATE VIEW public.admin_communications AS
-SELECT * FROM public.notifications;
+SELECT
+    id,
+    titre AS title,
+    contenu AS message,
+    type,
+    created_at,
+    created_at AS date_debut,
+    expires_at AS date_fin,
+    metadata
+FROM public.notifications;
 
 -- ============================================================
 -- 2. COLONNES MANQUANTES dans tables existantes
@@ -64,6 +115,54 @@ DO $$ BEGIN
         UPDATE public.cm_support_tickets
             SET priorite = priority
             WHERE priorite IS NULL AND priority IS NOT NULL;
+    END IF;
+END $$;
+
+-- notification_preferences : colonnes attendues par notification-system.js
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+               WHERE table_schema = 'public' AND table_name = 'notification_preferences') THEN
+        ALTER TABLE public.notification_preferences
+            ADD COLUMN IF NOT EXISTS email_address TEXT DEFAULT NULL;
+        ALTER TABLE public.notification_preferences
+            ADD COLUMN IF NOT EXISTS notify_demandes BOOLEAN DEFAULT true;
+        ALTER TABLE public.notification_preferences
+            ADD COLUMN IF NOT EXISTS notify_reservations BOOLEAN DEFAULT true;
+        ALTER TABLE public.notification_preferences
+            ADD COLUMN IF NOT EXISTS notify_taches BOOLEAN DEFAULT true;
+        ALTER TABLE public.notification_preferences
+            ADD COLUMN IF NOT EXISTS email_frequency TEXT DEFAULT 'immediate';
+    END IF;
+END $$;
+
+-- notifications : colonne date_fin (date expiration pour admin_communications)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+               WHERE table_schema = 'public' AND table_name = 'notifications') THEN
+        ALTER TABLE public.notifications
+            ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ DEFAULT NULL;
+        ALTER TABLE public.notifications
+            ADD COLUMN IF NOT EXISTS titre TEXT DEFAULT NULL;
+        ALTER TABLE public.notifications
+            ADD COLUMN IF NOT EXISTS contenu TEXT DEFAULT NULL;
+    END IF;
+END $$;
+
+-- cleaning_schedule : colonnes attendues par le code JS
+-- La table REBUILD_COMPLETE_DATABASE a 'date' mais le code attend 'scheduled_date'
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+               WHERE table_schema = 'public' AND table_name = 'cleaning_schedule') THEN
+        ALTER TABLE public.cleaning_schedule
+            ADD COLUMN IF NOT EXISTS scheduled_date DATE GENERATED ALWAYS AS (date) STORED;
+        ALTER TABLE public.cleaning_schedule
+            ADD COLUMN IF NOT EXISTS proposed_by TEXT DEFAULT NULL;
+        ALTER TABLE public.cleaning_schedule
+            ADD COLUMN IF NOT EXISTS reservation_end DATE DEFAULT NULL;
+        ALTER TABLE public.cleaning_schedule
+            ADD COLUMN IF NOT EXISTS reservation_start_after DATE DEFAULT NULL;
+        ALTER TABLE public.cleaning_schedule
+            ADD COLUMN IF NOT EXISTS validated_by_company BOOLEAN DEFAULT false;
     END IF;
 END $$;
 
@@ -201,6 +300,7 @@ CREATE TABLE IF NOT EXISTS public.linen_needs (
     owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     gite_id UUID NOT NULL REFERENCES public.gites(id) ON DELETE CASCADE,
     item_key TEXT NOT NULL,
+    item_label TEXT,
     quantity INTEGER DEFAULT 0,
     is_custom BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -379,13 +479,26 @@ GRANT EXECUTE ON FUNCTION public.upsert_error_log(TEXT, TEXT, JSONB, TEXT, TEXT,
 -- ============================================================
 -- 5. VÉRIFICATION FINALE
 -- ============================================================
-SELECT table_name, 'vue/table' AS type
+SELECT table_name, table_type AS type
 FROM information_schema.tables
 WHERE table_schema = 'public'
   AND table_name IN (
     'user_notification_preferences', 'user_subscriptions', 'admin_communications',
+    'subscriptions_plans',
     'todos', 'commandes_prestations', 'lignes_commande_prestations',
     'linen_needs', 'user_settings', 'fiscal_history',
     'suivi_soldes_bancaires', 'demandes_horaires', 'historical_data'
   )
 ORDER BY table_name;
+
+-- Vérifier les nouvelles colonnes critiques
+SELECT table_name, column_name
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND (
+    (table_name = 'notification_preferences' AND column_name IN ('email_address','notify_demandes','email_frequency'))
+    OR (table_name = 'cleaning_schedule' AND column_name IN ('scheduled_date','proposed_by','reservation_end'))
+    OR (table_name = 'linen_needs' AND column_name = 'item_label')
+    OR (table_name = 'notifications' AND column_name IN ('expires_at','titre','contenu'))
+  )
+ORDER BY table_name, column_name;
