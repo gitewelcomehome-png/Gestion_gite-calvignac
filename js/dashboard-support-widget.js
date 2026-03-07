@@ -14,7 +14,7 @@ async function loadSupportTickets() {
         // Récupérer tous les tickets
         const { data: tickets, error } = await window.supabaseClient
             .from('cm_support_tickets')
-            .select('id, statut, priorite')
+            .select('id, status, priorite')
             .order('created_at', { ascending: false });
         
         if (error) {
@@ -25,7 +25,9 @@ async function loadSupportTickets() {
         if (!tickets) return;
         
         // Filtrer les tickets non résolus pour les KPI
-        const ticketsActifs = tickets.filter(t => t.statut !== 'résolu');
+        // Normaliser: la table peut avoir 'status' ou 'statut' selon le projet
+        tickets.forEach(t => { if (t.status !== undefined && t.statut === undefined) t.statut = t.status; });
+        const ticketsActifs = tickets.filter(t => t.statut !== 'résolu' && t.statut !== 'resolu' && t.statut !== 'fermé' && t.statut !== 'ferme');
         
         // Calculer les stats
         const stats = {

@@ -34,7 +34,18 @@ class GitesManager {
                 .order('ordre_affichage', { ascending: true, nullsFirst: false })
                 .order('name', { ascending: true });
 
-            const { data, error } = await query;
+            let { data, error } = await query;
+
+            // Fallback si la colonne ordre_affichage n'existe pas encore
+            if (error && error.code === '42703' && error.message?.includes('ordre_affichage')) {
+                const fallback = await window.supabaseClient
+                    .from('gites')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('name', { ascending: true });
+                data = fallback.data;
+                error = fallback.error;
+            }
 
             if (error) {
                 console.error('❌ Erreur chargement gîtes:', error);
