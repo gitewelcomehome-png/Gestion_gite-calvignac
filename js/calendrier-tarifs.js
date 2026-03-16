@@ -2730,8 +2730,12 @@ Zone vacances scolaires : ${currentGiteZoneVacances} (${joursVacances.length} jo
 3. **Événements locaux** : Identifie festivals, marchés, événements sportifs ou culturels importants ce mois près de "${localisationLabel}" et propose un prix spécifique pour ces dates.
 4. **Conseil** : Une recommandation stratégique courte et actionnables pour ce mois dans cette zone.
 
+IMPORTANT : Ne PAS réutiliser le tarif de base tel quel. Calcule des prix réels basés sur la concurrence locale ET la saisonnalité.
+Fourchette attendue : entre ${prixMin}€ (minimum absolu) et ${prixMax}€ (maximum haute saison).
+Les valeurs "haute", "standard", "faible" doivent être DIFFÉRENTES les unes des autres (au moins 15% d'écart).
+
 Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
-{"haute":${Math.round(prixBase*1.35)},"standard":${prixBase},"faible":${Math.round(prixBase*0.78)},"conseil":"...","evenements":[{"date":"YYYY-MM-DD","nom":"...","prix":0}]}`;
+{"haute":null,"standard":null,"faible":null,"conseil":"...","evenements":[{"date":"YYYY-MM-DD","nom":"...","prix":0}]}`;
     
     try {
         const response = await fetch('/api/openai', {
@@ -2739,11 +2743,11 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 prompt,
-                maxTokens: 600,
+                maxTokens: 900,
                 model: 'gpt-4o-mini',
                 webSearch: true,
                 webSearchModel: 'gpt-4.1-mini',
-                systemPrompt: 'Tu es un analyste en revenue management touristique en France. Priorise les informations publiques récentes et factuelles si la recherche web est disponible. Si on te demande du JSON, réponds uniquement en JSON valide strict.'
+                systemPrompt: 'Tu es un expert en revenue management touristique en France. Utilise la recherche web pour trouver les tarifs réels des concurrents dans la zone demandée. Propose des prix DIFFÉRENTS du tarif de base fourni — ils doivent refléter le marché local réel, pas une simple multiplication. Si on te demande du JSON, réponds uniquement en JSON valide strict sans aucun texte autour.'
             })
         });
         if (!response.ok) throw new Error(`Erreur API ${response.status}`);
