@@ -2707,6 +2707,10 @@ async function proposerPrixIATarifs() {
     const localisationLabel = localisation || 'France';
     const gpsLabel = localisationGPS ? `GPS : ${localisationGPS}` : 'Coordonnées GPS non renseignées';
 
+    // Fourchette de plausibilité basée sur la capacité (sans révéler le prix actuel)
+    const cappedMin = Math.round(prixBase * 0.40);
+    const cappedMax = Math.round(prixBase * 2.00);
+
     const prompt = `Tu es un expert en revenue management pour les hébergements touristiques en France.
 
 ## Gîte à analyser
@@ -2720,13 +2724,20 @@ Frais ménage (séjour) : ${fraisMenage}€. Frais draps (séjour) : ${fraisDrap
 Jours fériés ce mois : ${joursFeries.length > 0 ? joursFeries.join(', ') : 'aucun'}.
 Zone vacances scolaires : ${currentGiteZoneVacances} (${joursVacances.length} jours concernés ce mois).
 
+## Commissions plateformes à intégrer
+Les prix que tu proposes sont les PRIX PROPRIÉTAIRE (ce que reçoit le propriétaire). Les plateformes prennent en plus :
+- Airbnb : +14-18% frais voyageur + 3% propriétaire
+- Booking.com : 12-15% déduits du prix propriétaire
+- Abritel/VRBO : 5-8% propriétaire
+Ces commissions réduisent la rentabilité réelle. Tiens-en compte pour que le propriétaire reste compétitif tout en couvrant ses frais.
+
 ## Tes missions
-1. **Analyse concurrence** : Utilise la recherche web pour trouver les tarifs réels d'hébergements similaires (gîtes, meublés, maisons de vacances) dans un rayon de 20-30 km autour de "${localisationLabel}"${localisationGPS ? ` (GPS ${localisationGPS})` : ''}. Tiens compte de la capacité (${capaciteMax || '?'} pers.) pour comparer avec des biens équivalents sur Airbnb, Booking, Gîtes de France, Abritel.
-2. **3 niveaux de prix** : Propose haute/standard/faible demande **uniquement basés sur le marché local réel**. Le prix week-end doit être plus élevé que le prix semaine. Intègre les frais ménage/draps dans ton raisonnement de rentabilité.
-3. **Événements locaux** : Identifie festivals, marchés, événements sportifs ou culturels importants ce mois près de "${localisationLabel}" et propose un prix spécifique pour ces dates.
+1. **Analyse concurrence** : Utilise la recherche web pour trouver les tarifs réels d'hébergements similaires (gîtes, meublés, maisons de vacances) dans un rayon de 20-30 km autour de "${localisationLabel}"${localisationGPS ? ` (GPS ${localisationGPS})` : ''}. Note le **prix PAR NUIT** affiché pour des biens de capacité similaire (${capaciteMax || '?'} pers.) sur Airbnb, Booking, Gîtes de France, Abritel.
+2. **3 niveaux de prix PAR NUIT** : Propose haute/standard/faible demande **uniquement basés sur les prix par nuit du marché local réel**. IMPORTANT : ce sont des PRIX PAR NUIT (pas par séjour, pas par semaine). Fourchette de plausibilité pour ce type de bien : ${cappedMin}€–${cappedMax}€/nuit.
+3. **Événements locaux** : Identifie festivals, marchés, événements sportifs ou culturels importants ce mois près de "${localisationLabel}" et propose un prix PAR NUIT spécifique pour ces dates.
 4. **Conseil** : Une recommandation stratégique courte et actionnable pour ce mois dans cette zone.
 
-Les 3 niveaux doivent être DIFFÉRENTS les uns des autres (au moins 15% d'écart entre haute et faible).
+Les 3 niveaux doivent être DIFFÉRENTS les uns des autres (au moins 15% d'écart entre haute et faible). Les valeurs "haute", "standard", "faible" sont des ENTIERS représentant des euros PAR NUIT.
 
 Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
 {"haute":null,"standard":null,"faible":null,"conseil":"...","evenements":[{"date":"YYYY-MM-DD","nom":"...","prix":0}]}`;
@@ -2741,7 +2752,7 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
                 model: 'gpt-4o-mini',
                 webSearch: true,
                 webSearchModel: 'gpt-4.1-mini',
-                systemPrompt: 'Tu es un expert en revenue management touristique en France. Utilise la recherche web pour trouver les tarifs réels des concurrents dans la zone demandée. Propose des prix DIFFÉRENTS du tarif de base fourni — ils doivent refléter le marché local réel, pas une simple multiplication. Si on te demande du JSON, réponds uniquement en JSON valide strict sans aucun texte autour.'
+                systemPrompt: 'Tu es un expert en revenue management touristique en France. Utilise la recherche web pour trouver les tarifs réels des concurrents dans la zone demandée. Les prix que tu proposes sont TOUJOURS des prix PAR NUIT en euros entiers — jamais des prix par séjour, par semaine ou par mois. Réponds uniquement en JSON valide strict sans aucun texte autour.'
             })
         });
         if (!response.ok) throw new Error(`Erreur API ${response.status}`);
@@ -2755,6 +2766,16 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         } catch(e) { throw new Error('Réponse IA non parseable'); }
         
         if (!ai.haute || !ai.standard || !ai.faible) throw new Error('Réponse incomplète');
+
+        // Garde-fou : rejeter les valeurs aberrantes (prix de séjour ou hallucination GPT)
+        const plafondGuardrail = prixBase * 2.5;
+        const plancherGuardrail = prixBase * 0.30;
+        for (const niv of ['haute', 'standard', 'faible']) {
+            const v = parseFloat(ai[niv]);
+            if (v > plafondGuardrail || v < plancherGuardrail) {
+                throw new Error(`Prix ${niv} (${v}€) hors fourchette réaliste — fallback local`);
+            }
+        }
         
         // Construire les suggestions jour par jour en se basant sur le niveau de demande
         for (const dateStr of joursLibres) {
