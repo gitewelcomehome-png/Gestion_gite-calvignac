@@ -2697,15 +2697,11 @@ async function proposerPrixIATarifs() {
     }
 
     const prixBase = Math.round(prixBaseConfig);
-    const prixMin = Math.round(prixBase * 0.60);
-    const prixMax = Math.round(prixBase * 1.70);
-
-    // Construire la description du gîte pour le prompt
+    // Construire la description du gîte pour le prompt (sans révéler le prix actuel)
     const descriptionGite = [
         capaciteMax ? `Capacité : ${capaciteMax} personnes` : null,
         configChambres ? `Configuration : ${configChambres}` : null,
         climatisation ? `Climatisation : ${climatisation}` : null,
-        caution ? `Caution : ${caution}€` : null,
     ].filter(Boolean).join('. ');
 
     const localisationLabel = localisation || 'France';
@@ -2718,9 +2714,6 @@ Adresse : "${localisationLabel}".
 ${gpsLabel}.
 ${descriptionGite ? `Caractéristiques : ${descriptionGite}.` : ''}
 Période analysée : ${moisNom}. Jours libres à tarifer : ${joursLibres.length}.
-
-## Tarification actuelle
-Tarif de base actuel : ${prixBase}€/nuit. Fourchette acceptable : ${prixMin}€–${prixMax}€.
 Frais ménage (séjour) : ${fraisMenage}€. Frais draps (séjour) : ${fraisDraps}€.
 
 ## Contexte calendaire
@@ -2728,14 +2721,12 @@ Jours fériés ce mois : ${joursFeries.length > 0 ? joursFeries.join(', ') : 'au
 Zone vacances scolaires : ${currentGiteZoneVacances} (${joursVacances.length} jours concernés ce mois).
 
 ## Tes missions
-1. **Analyse concurrence** : Utilise la recherche web pour trouver les tarifs d'hébergements similaires (gîtes, meublés, chambres d'hôtes) dans un rayon de 20-30 km autour de "${localisationLabel}"${localisationGPS ? ` (GPS ${localisationGPS})` : ''}. Tiens compte de la capacité (${capaciteMax || '?'} pers.) pour comparer avec des biens équivalents.
-2. **3 niveaux de prix** : Propose haute/standard/faible demande en cohérence avec la concurrence locale et rentabilité (base ${prixBase}€ + frais ménage ${fraisMenage}€ + draps ${fraisDraps}€). Le prix week-end doit être plus élevé que le prix semaine.
+1. **Analyse concurrence** : Utilise la recherche web pour trouver les tarifs réels d'hébergements similaires (gîtes, meublés, maisons de vacances) dans un rayon de 20-30 km autour de "${localisationLabel}"${localisationGPS ? ` (GPS ${localisationGPS})` : ''}. Tiens compte de la capacité (${capaciteMax || '?'} pers.) pour comparer avec des biens équivalents sur Airbnb, Booking, Gîtes de France, Abritel.
+2. **3 niveaux de prix** : Propose haute/standard/faible demande **uniquement basés sur le marché local réel**. Le prix week-end doit être plus élevé que le prix semaine. Intègre les frais ménage/draps dans ton raisonnement de rentabilité.
 3. **Événements locaux** : Identifie festivals, marchés, événements sportifs ou culturels importants ce mois près de "${localisationLabel}" et propose un prix spécifique pour ces dates.
-4. **Conseil** : Une recommandation stratégique courte et actionnables pour ce mois dans cette zone.
+4. **Conseil** : Une recommandation stratégique courte et actionnable pour ce mois dans cette zone.
 
-IMPORTANT : Ne PAS réutiliser le tarif de base tel quel. Calcule des prix réels basés sur la concurrence locale ET la saisonnalité.
-Fourchette attendue : entre ${prixMin}€ (minimum absolu) et ${prixMax}€ (maximum haute saison).
-Les valeurs "haute", "standard", "faible" doivent être DIFFÉRENTES les unes des autres (au moins 15% d'écart).
+Les 3 niveaux doivent être DIFFÉRENTS les uns des autres (au moins 15% d'écart entre haute et faible).
 
 Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
 {"haute":null,"standard":null,"faible":null,"conseil":"...","evenements":[{"date":"YYYY-MM-DD","nom":"...","prix":0}]}`;
