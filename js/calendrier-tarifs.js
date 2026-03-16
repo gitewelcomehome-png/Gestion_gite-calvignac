@@ -140,7 +140,7 @@ async function loadGitesSelector() {
         let gites = [];
         
         // Essayer d'utiliser GitesManager d'abord
-        if (window.GitesManager && window.GitesManager.loaded) {
+        if (window.gitesManager?.loaded) {
             gites = await window.gitesManager.getVisibleGites();
         } else {
             // Fallback : requête directe si GitesManager non disponible
@@ -154,7 +154,7 @@ async function loadGitesSelector() {
             if (error) throw error;
             
             // Appliquer manuellement la limite d'abonnement si GitesManager non dispo
-            const maxGites = window.subscriptionManager?.currentSubscription?.plan?.max_gites || 1;
+            const maxGites = window.subscriptionManager?.currentSubscription?.plan?.nb_gites_max || 999;
             gites = (data || []).slice(0, maxGites);
         }
         
@@ -538,12 +538,15 @@ function _renderCalendrierTarifsImmediate() {
                     <div style="position: relative; z-index: 12; font-size: 11px; color: var(--text-secondary);">—</div>
                 `;
             } else {
-                // Jours suivants de la réservation : afficher uniquement le numéro du jour
+                // Jours suivants de la réservation : afficher la plateforme en petit
                 dayCard.style.zIndex = '1'; // Z-index bas pour passer sous la barre
+                const plateformeColor = getPlateformeColor(reservationBar.plateforme);
                 dayCard.innerHTML = `
                     <div class="day-number">${day}</div>
-                    <div style="flex: 1;"></div>
-                    <div style="font-size: 11px; color: var(--text-secondary);">—</div>
+                    <div style="flex: 1; display:flex; align-items:center; justify-content:center;">
+                        <div style="width:6px;height:6px;border-radius:50%;background:${plateformeColor};opacity:0.6;"></div>
+                    </div>
+                    <div style="font-size: 10px; color: ${plateformeColor}; opacity:0.7; font-weight:600; text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:100%;">${reservationBar.plateforme}</div>
                 `;
             }
         } else {
