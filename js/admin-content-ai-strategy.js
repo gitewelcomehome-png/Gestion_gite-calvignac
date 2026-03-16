@@ -6,7 +6,8 @@
 
 // console.log('🤖 Module Stratégie IA chargé');
 
-const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+// ADMIN_FALLBACK_EMAILS est déjà déclaré dans admin-content.js (chargé avant)
+// On réutilise la constante globale pour éviter le doublon
 
 function normalizeEmail(email) {
     return String(email || '').trim().toLowerCase();
@@ -120,7 +121,7 @@ window.validateCurrentWeek = async function() {
             .select('*')
             .eq('statut', 'actif')
             .eq('annee', year)
-            .single();
+            .maybeSingle();
 
         if (findError || !activeWeek) {
             showToast('❌ Aucune semaine active à valider', 'error');
@@ -201,7 +202,7 @@ window.generateLongtermPlan = async function() {
             .select('*')
             .eq('statut', 'actif')
             .eq('annee', year)
-            .single();
+            .maybeSingle();
 
         if (!checkError && activeWeek) {
             showToast('⚠️ Validez la semaine ' + activeWeek.semaine + ' avant de générer la suivante', 'error');
@@ -242,7 +243,8 @@ window.generateLongtermPlan = async function() {
         });
         
         if (!response.ok) {
-            throw new Error('Erreur génération semaine 1');
+            if (response.status === 405) throw new Error('API IA non disponible en local — déployez sur Vercel pour utiliser cette fonctionnalité');
+            throw new Error('Erreur génération semaine 1 (HTTP ' + response.status + ')');
         }
         
         const { week, plan_global } = await response.json();
@@ -1063,7 +1065,8 @@ window.generateWeeklyStrategy = async function() {
         });
         
         if (!response.ok) {
-            throw new Error('Erreur API');
+            if (response.status === 405) throw new Error('API IA non disponible en local — déployez sur Vercel');
+            throw new Error('Erreur API (HTTP ' + response.status + ')');
         }
         
         const { strategy } = await response.json();
@@ -1103,7 +1106,7 @@ async function loadCurrentStrategy() {
             .eq('semaine', weekNumber)
             .eq('annee', year)
             .eq('statut', 'actif')
-            .single();
+            .maybeSingle();
         
         if (error || !data) {
             document.getElementById('currentStrategy').innerHTML = `
@@ -1157,6 +1160,7 @@ async function loadContentQueue() {
         const { data, error } = await window.supabaseClient
             .from('cm_ai_content_queue')
             .select('*')
+            .not('sujet', 'is', null)
             .order('created_at', { ascending: false })
             .limit(20);
         
@@ -1544,7 +1548,7 @@ window.openActionDetails = async function(actionId) {
                     </div>
                     
                     <div style="display: flex; gap: 1rem;">
-                        <button data-action="generate-action-plan" data-action-id="${action.id}" data-action-title="${action.sujet.replace(/"/g, '&quot;')}" data-action-content="${action.contenu.replace(/"/g, '&quot;')}" data-action-type="${action.type}" style="flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(102,126,234,0.3); transition: all 0.3s;">
+                        <button data-action="generate-action-plan" data-action-id="${action.id}" data-action-title="${(action.sujet || '').replace(/"/g, '&quot;')}" data-action-content="${(action.contenu || '').replace(/"/g, '&quot;')}" data-action-type="${action.type || ''}" style="flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(102,126,234,0.3); transition: all 0.3s;">
                             🤖 Générer Plan d'Action Détaillé
                         </button>
                         <button data-action="close-action-modal" style="background: #e2e8f0; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">

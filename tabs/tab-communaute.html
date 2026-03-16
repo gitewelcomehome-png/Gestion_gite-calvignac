@@ -1,0 +1,94 @@
+<div class="tab-container communaute-container">
+    <header class="communaute-header card">
+        <div>
+            <h2 class="section-title-main"><i data-lucide="users"></i> Communauté</h2>
+            <p class="section-description">Annuaire partagé d'artisans et d'experts entre gîtes</p>
+        </div>
+        <div class="communaute-stats">
+            <span id="communauteTotalArtisans">0</span> artisan(s)
+        </div>
+    </header>
+
+    <section class="card communaute-form-card">
+        <h3><i data-lucide="user-plus"></i> Ajouter un artisan / expert</h3>
+        <form id="communauteArtisanForm" class="communaute-form-grid">
+            <div>
+                <label for="communauteGestionnaire">Gérant connecté</label>
+                <input id="communauteGestionnaire" type="text" readonly placeholder="Chargement..." />
+            </div>
+            <div>
+                <label for="communauteNom">Nom <span>*</span></label>
+                <input id="communauteNom" type="text" required maxlength="200" placeholder="Ex: Dupont Services" />
+            </div>
+            <div>
+                <label for="communauteMetier">Métier <span>*</span></label>
+                <select id="communauteMetier" required>
+                    <option value="">Chargement des métiers...</option>
+                </select>
+            </div>
+            <div>
+                <label for="communauteTelephone">Téléphone</label>
+                <input id="communauteTelephone" type="tel" maxlength="50" placeholder="Ex: 06 00 00 00 00" />
+            </div>
+            <div>
+                <label for="communauteVille">Ville</label>
+                <input id="communauteVille" type="text" maxlength="120" placeholder="Ex: Cahors" />
+            </div>
+            <div class="full-width">
+                <label for="communauteAdresse">Adresse artisan <span>*</span></label>
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
+                    <input id="communauteAdresse" type="text" required maxlength="300" placeholder="Ex: 12 Rue Principale, 46160 Calvignac" />
+                    <button type="button" id="communauteGeocodeBtn" class="btn">Calculer GPS</button>
+                </div>
+            </div>
+            <div>
+                <label for="communauteLat">Latitude <span>*</span></label>
+                <input id="communauteLat" type="number" step="0.000001" required placeholder="44.4753" readonly />
+            </div>
+            <div>
+                <label for="communauteLng">Longitude <span>*</span></label>
+                <input id="communauteLng" type="number" step="0.000001" required placeholder="1.8322" readonly />
+            </div>
+            <div class="full-width">
+                <label for="communauteDescription">Description</label>
+                <textarea id="communauteDescription" rows="3" maxlength="2000" placeholder="Spécialités, disponibilité, zone d'intervention..."></textarea>
+            </div>
+            <div>
+                <label for="communauteNoteInitiale">Première note (optionnel)</label>
+                <select id="communauteNoteInitiale">
+                    <option value="">Pas de note</option>
+                    <option value="1">1 étoile</option>
+                    <option value="2">2 étoiles</option>
+                    <option value="3">3 étoiles</option>
+                    <option value="4">4 étoiles</option>
+                    <option value="5">5 étoiles</option>
+                </select>
+            </div>
+            <div class="full-width">
+                <label for="communauteCommentaireInitial">Premier commentaire (optionnel)</label>
+                <textarea id="communauteCommentaireInitial" rows="2" maxlength="2000" placeholder="Retour d'expérience..." ></textarea>
+            </div>
+            <div class="full-width">
+                <button type="submit" class="btn btn--primary"><i data-lucide="plus"></i> Créer l'artisan</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="card communaute-map-card">
+        <h3><i data-lucide="map-pin"></i> Carte interactive</h3>
+        <div id="communauteMap" class="communaute-map"></div>
+    </section>
+
+    <section class="communaute-bottom-grid">
+        <div class="card communaute-list-card">
+            <h3><i data-lucide="list"></i> Artisans</h3>
+            <div class="communaute-filters" id="communauteMetierFilters"></div>
+            <div id="communauteArtisansList" class="communaute-list"></div>
+        </div>
+
+        <div class="card communaute-detail-card">
+            <h3><i data-lucide="file-text"></i> Fiche artisan</h3>
+            <div id="communauteArtisanDetail" class="communaute-detail-empty">Sélectionnez un artisan sur la carte ou la liste.</div>
+        </div>
+    </section>
+</div>

@@ -46,10 +46,7 @@ function recordInternalPerf(metric, payload = {}) {
         }
 
         if (Number.isFinite(entry.durationMs) && entry.durationMs >= PERF_SLOW_THRESHOLD_MS) {
-            console.warn(`[PERF_INTERNE] ${metric} lent`, {
-                durationMs: entry.durationMs,
-                context: payload
-            });
+            // Métrique lente enregistrée silencieusement (sync iCal externe = normal > 1200ms)
         }
     } catch (_) {
         // no-op
@@ -370,25 +367,14 @@ async function syncCalendar(giteId, platform, url) {
     }
 
     // Essayer plusieurs proxies CORS
-    // 1. Notre proxy Vercel serverless (priorité en production uniquement)
+    // 1. Notre proxy Vercel serverless (toujours en premier, échoue silencieusement si absent)
     // 2. Proxies publics (fallback)
-    const proxies = [];
-    
-    // N'utiliser le proxy local qu'en production (pas sur github.dev ou localhost)
-    const isDev = window.location.hostname.includes('github.dev') || 
-                  window.location.hostname === 'localhost' ||
-                  window.location.hostname === '127.0.0.1';
-    
-    if (!isDev) {
-        proxies.push(`/api/cors-proxy?url=${encodeURIComponent(url)}`);
-    }
-    
-    // Ajouter les proxies publics (toujours disponibles)
-    proxies.push(
+    const proxies = [
+        `/api/cors-proxy?url=${encodeURIComponent(url)}`,
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
         `https://api.codetabs.com/v1/proxy/?quest=${url}`
-    );
+    ];
 
     let text;
     let lastError;

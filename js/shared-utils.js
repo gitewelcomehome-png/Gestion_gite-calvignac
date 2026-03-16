@@ -390,6 +390,8 @@ function switchTab(tabName) {
         } else if (typeof renderCalendrierTarifsTab === 'function') {
             renderCalendrierTarifsTab();
         }
+    } else if (tabName === 'communaute' && typeof window.initCommunauteTab === 'function') {
+        window.initCommunauteTab();
     }
 }
 

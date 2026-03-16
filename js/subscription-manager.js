@@ -50,14 +50,14 @@ class SubscriptionManager {
     if (error) {
       console.error('Erreur chargement abonnement:', error);
     }
-    if (!data) {
+    if (!data || !data.plan) {
       this._resolveReady(null);
       return null;
     }
 
     this.currentSubscription = data;
-    this.features = data.plan.features;
-    this.level = data.plan.level;
+    this.features = data.plan.features || {};
+    this.level = data.plan.level ?? data.plan.features?.level ?? null;
     this._resolveReady(data);
     
     return data;
@@ -92,7 +92,7 @@ class SubscriptionManager {
     if (!user) {
       return {
         current: 0,
-        max: this.currentSubscription?.plan?.max_gites || 1,
+        max: this.currentSubscription?.plan?.nb_gites_max || 1,
         canAdd: false
       };
     }
@@ -103,7 +103,7 @@ class SubscriptionManager {
       .eq('owner_user_id', user.id);
 
     const currentCount = gites?.length || 0;
-    const maxGites = this.currentSubscription?.plan?.max_gites || 1;
+    const maxGites = this.currentSubscription?.plan?.nb_gites_max || 1;
 
     return {
       current: currentCount,

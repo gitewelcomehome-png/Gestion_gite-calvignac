@@ -274,6 +274,26 @@
                         <div class="infos-subsection">
                             <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 1.2rem;"><i data-lucide="key"></i> Accès aux Clés</h3>
                             <div style="display: grid; gap: 15px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.2); border-radius: 10px; padding: 12px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Moteur code d'accès (ce gîte)</label>
+                                        <select id="infos_codeGenerationMode" class="form-control" onchange="window.syncGiteAccessCodeConfigUI && window.syncGiteAccessCodeConfigUI()">
+                                            <option value="inherit">Hériter des Options globales</option>
+                                            <option value="universel_auto">Universel automatique (toutes boîtes)</option>
+                                            <option value="systemes_connectes">Systèmes connectés (fallback universel)</option>
+                                            <option value="manuel">Manuel</option>
+                                        </select>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Longueur code</label>
+                                            <input type="number" id="infos_codeLength" class="form-control" min="4" max="10" value="6" onchange="window.syncGiteAccessCodeConfigUI && window.syncGiteAccessCodeConfigUI()">
+                                        </div>
+                                        <button type="button" onclick="window.generateAccessCodeForCurrentGite && window.generateAccessCodeForCurrentGite()" class="btn" style="white-space: nowrap;">
+                                            🔐 Générer code
+                                        </button>
+                                    </div>
+                                </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                     <div>
                                         <label style="display: block; margin-bottom: 8px; font-weight: 600;">Type d'accès <span style="color: #ef4444;">*</span></label>

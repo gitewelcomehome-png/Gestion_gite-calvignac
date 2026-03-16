@@ -158,6 +158,7 @@
     <script src="js/ical-config-modern.js?v=1.0"></script>
     <script src="js/calendrier-tarifs.js?v=4.15"></script>
     <script src="js/remplissage-auto-tarifs.js?v=1.8"></script>
+    <script src="js/communaute.js?v=1.0"></script>
     
     <!-- SheetJS pour export Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
@@ -179,6 +180,7 @@
     <link rel="stylesheet" href="css/tab-calendrier-tarifs.css?v=1.5" />
     <link rel="stylesheet" href="css/tab-calendrier.css?v=1.0" />
     <link rel="stylesheet" href="css/tab-statistiques.css?v=2.1" />
+    <link rel="stylesheet" href="css/tab-communaute.css?v=1.0" />
     <link rel="stylesheet" href="css/gite-form-modern.css?v=6.1" />
     
     <!-- 💳 SYSTÈME D'ABONNEMENTS -->
@@ -1138,6 +1140,7 @@
             'tab-checklists': 'tabs/tab-checklists.html',
             'tab-parrainage': 'tabs/tab-parrainage.html' + cacheBuster,
             'tab-kanban': 'tabs/tab-kanban.html?v=5.0' + cacheBuster,
+            'tab-communaute': 'tabs/tab-communaute.html' + cacheBuster,
         };
         
         // Liste RÉDUITE pour MOBILE (onglets exclus du menu mobile)
@@ -1152,6 +1155,7 @@
             'tab-draps': 'tabs/mobile/draps.html' + cacheBuster,
             'tab-checklists': 'tabs/mobile/checklists.html' + cacheBuster,
             'tab-calendrier-tarifs': 'tabs/mobile/calendrier-tarifs.html?v=1.4' + cacheBuster,
+            'tab-communaute': 'tabs/tab-communaute.html' + cacheBuster,
         };
         
         const tabFiles = isMobile ? mobileTabs : desktopTabs;
@@ -1428,6 +1432,11 @@
                     <span class="tab-label">Infos</span>
                 </button>
 
+                <button class="nav-tab" data-tab="communaute" data-theme="green">
+                    <i data-lucide="users" class="tab-icon"></i>
+                    <span class="tab-label">Communauté</span>
+                </button>
+
             </div>
         </nav>
         
@@ -1450,6 +1459,7 @@
         <div id="tab-calendrier-tarifs" class="tab-content"></div>
         <div id="tab-parrainage" class="tab-content"></div>
         <div id="tab-kanban" class="tab-content"></div>
+        <div id="tab-communaute" class="tab-content"></div>
     </div>
     
         </div>

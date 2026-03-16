@@ -19,7 +19,7 @@ async function updateArchivesDisplay() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        const archives = reservations.filter(r => parseLocalDate(r.dateFin) < today);
+        const archives = reservations.filter(r => parseLocalDate(r.dateFin) < today && r.status !== 'cancelled');
         archives.sort((a, b) => parseLocalDate(b.dateFin) - parseLocalDate(a.dateFin));
         
         // console.log('📁 Archives trouvées:', archives.length);
@@ -47,7 +47,10 @@ async function updateArchivesDisplay() {
                     </div>
                     <div style="margin-top: 8px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
                         <span>💰 ${r.montant ? r.montant.toFixed(2) : '0.00'} € | Statut: ${r.paiement}</span>
-                        <button onclick="openEditModal('${r.id}')" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 0.9rem;" title="Modifier">✏️ Modifier</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="openEditModal('${r.id}')" style="background: #e3f2fd; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 0.9rem;" title="Modifier">✏️ Modifier</button>
+                            <button onclick="deleteArchiveReservation('${r.id}')" style="background: #fdecea; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 0.9rem; color: #c0392b;" title="Supprimer">🗑️</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -192,5 +195,19 @@ function getPlatformBadgeClass(platform) {
 // 🌐 EXPORTS GLOBAUX
 // ==========================================
 
+async function deleteArchiveReservation(id) {
+    if (!confirm('Supprimer définitivement cette réservation ?')) return;
+    try {
+        await deleteReservation(id);
+        window.CACHE.reservations = null; // invalider le cache
+        await updateArchivesDisplay();
+        window.showToast('Réservation supprimée', 'success');
+    } catch (error) {
+        console.error('Erreur suppression archive:', error);
+        window.showToast('Erreur lors de la suppression', 'error');
+    }
+}
+
 window.updateArchivesDisplay = updateArchivesDisplay;
 window.getPlatformBadgeClass = getPlatformBadgeClass;
+window.deleteArchiveReservation = deleteArchiveReservation;

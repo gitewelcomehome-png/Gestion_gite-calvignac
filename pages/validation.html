@@ -374,6 +374,11 @@
             color: #155724;
         }
 
+        .status-owner-validated {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
         .status-refused {
             background: #f8d7da;
             color: #721c24;
@@ -839,6 +844,9 @@
                         .filter(r => r.gite_id === res.gite_id && new Date(r.check_in) >= dateFin)
                         .sort((a, b) => new Date(a.check_in) - new Date(b.check_in))[0];
                     
+                    const ownerValidatedModification = hasClientValidatedModification(cleaning?.notes);
+                    const isValidatedStatus = cleaning?.status === 'validated' || cleaning?.status === 'confirmed';
+
                     const menageInfo = {
                         reservation: res,
                         cleaning: cleaning,
@@ -847,7 +855,7 @@
                         nextReservationDate: nextRes ? new Date(nextRes.check_in) : null,
                         timeOfDay: cleaning?.time_of_day || 'afternoon',
                         status: cleaning?.status || 'pending',
-                        validated: cleaning?.validated_by_company || false,
+                        validated: isValidatedStatus || cleaning?.validated_by_company === true || ownerValidatedModification,
                         giteId: res.gite_id,
                         giteName: giteMap[res.gite_id] || 'Gîte inconnu'
                     };
@@ -972,13 +980,47 @@
             }
         }
 
+        const CLIENT_MODIFICATION_VALIDATED_MARKER = '[MODIFICATION_VALIDEE_CLIENT]';
+
+        function hasClientValidatedModification(notes) {
+            return typeof notes === 'string' && notes.includes(CLIENT_MODIFICATION_VALIDATED_MARKER);
+        }
+
+        function stripClientValidatedMarker(notes) {
+            if (typeof notes !== 'string') return notes || null;
+            const cleaned = notes
+                .split(CLIENT_MODIFICATION_VALIDATED_MARKER)
+                .join('')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+            return cleaned || null;
+        }
+
+        async function getCleanedNotesWithoutClientMarker(reservationId) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .select('notes')
+                    .eq('reservation_id', reservationId)
+                    .maybeSingle();
+
+                if (error) return null;
+                return stripClientValidatedMarker(data?.notes || null);
+            } catch (_) {
+                return null;
+            }
+        }
+
         function generateMenageHTML(menage) {
             const { reservation, cleaning, dateFin, scheduledDate, nextReservationDate, timeOfDay, status, validated } = menage;
             const proposedBy = cleaning?.proposed_by; // Qui a proposé : 'owner' (site principal) ou 'company' (société)
             const autoConflictWarning = renderAutoConflictWarning(cleaning?.notes);
+            const clientValidatedModification = hasClientValidatedModification(cleaning?.notes);
             
-            const statusBadge = validated ? 
-                '<span class="status-badge status-validated">✓ Validé par le client</span>' :
+            const statusBadge = clientValidatedModification ?
+                '<span class="status-badge status-owner-validated">✓ Modification validée par le propriétaire</span>' :
+                validated ? 
+                '<span class="status-badge status-validated">✓ Validé société ménage</span>' :
                 status === 'pending_validation' && proposedBy === 'owner' ?
                 '<span class="status-badge status-waiting">⏰ Proposition du site principal</span>' :
                 status === 'pending_validation' && proposedBy === 'company' ?
@@ -1201,6 +1243,7 @@
                         time_of_day: timeOfDay,
                         status: 'validated',
                         validated_by_company: true,
+                        notes: await getCleanedNotesWithoutClientMarker(reservationId),
                         reservation_end: reservation.check_out
                     }, { onConflict: 'reservation_id' });
                 
@@ -1242,6 +1285,7 @@
                     time_of_day: timeOfDay,
                     status: 'pending_validation',
                     proposed_by: 'company',
+                    notes: await getCleanedNotesWithoutClientMarker(reservationId),
                     validated_by_company: false
                 };
                 
@@ -1272,7 +1316,8 @@
                     .from('cleaning_schedule')
                     .update({
                         status: 'validated',
-                        validated_by_company: true
+                        validated_by_company: true,
+                        notes: await getCleanedNotesWithoutClientMarker(reservationId)
                     })
                     .eq('reservation_id', reservationId);
                 
@@ -1294,7 +1339,8 @@
                     .from('cleaning_schedule')
                     .update({
                         status: 'pending',
-                        validated_by_company: false
+                        validated_by_company: false,
+                        notes: await getCleanedNotesWithoutClientMarker(reservationId)
                     })
                     .eq('reservation_id', reservationId);
                 

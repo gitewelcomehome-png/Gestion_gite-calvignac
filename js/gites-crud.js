@@ -77,8 +77,8 @@ window.showGitesManager = async function() {
         existingModal.closest('.modal-overlay').remove();
     }
     
-    // Charger TOUS les gîtes (sans filtre d'abonnement) pour la gestion
-    const allGites = await window.gitesManager.getAllUnfiltered();
+    // Charger TOUS les gîtes (sans filtre d'abonnement) pour la gestion — forcer rechargement
+    const allGites = await window.gitesManager.getAllUnfiltered(true);
     // console.log('📋 LISTE GÎTES MODERNE V2.0 - Gîtes chargés:', allGites.length);
     
     // Récupérer la limite de gîtes selon le plan
@@ -87,7 +87,7 @@ window.showGitesManager = async function() {
     if (window.subscriptionManager) {
         const limits = await window.subscriptionManager.checkGitesLimit();
         maxGites = limits.max;
-        const planName = window.subscriptionManager.currentSubscription?.plan?.name || 'SOLO';
+        const planName = window.subscriptionManager.currentSubscription?.plan?.display_name || 'SOLO';
         const limitColor = limits.canAdd ? '#718096' : '#e53e3e';
         limitsHtml = `<span style="color: ${limitColor}; font-size: 0.9rem; font-weight: 500;">${limits.current} / ${limits.max} gîtes (${planName})</span>`;
     }
@@ -194,7 +194,7 @@ window.checkGiteLimitAndAdd = async function() {
     
     if (!limits.canAdd) {
         // Limite atteinte
-        const planName = window.subscriptionManager.currentSubscription?.plan?.name || 'SOLO';
+        const planName = window.subscriptionManager.currentSubscription?.plan?.display_name || 'SOLO';
         showNotification(
             `🚫 Limite atteinte : Votre plan ${planName} permet ${limits.max} gîte${limits.max > 1 ? 's' : ''} maximum. Passez au plan supérieur pour en ajouter davantage.`,
             'error',
@@ -424,17 +424,24 @@ window.showAddGiteForm = function(giteToEdit = null) {
                         Équipements & accessibilité (tarification IA)
                     </div>
 
-                    <div class="form-grid-2">
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_wifi" ${isEdit && hasAmenity('wifi') ? 'checked' : ''}>Wi-Fi</label>
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_piscine" ${isEdit && (hasAmenity('piscine_privee') || hasAmenity('piscine_partagee')) ? 'checked' : ''}>Piscine</label>
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_jacuzzi" ${isEdit && hasAmenity('jacuzzi') ? 'checked' : ''}>Jacuzzi</label>
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_sauna" ${isEdit && hasAmenity('sauna') ? 'checked' : ''}>Sauna</label>
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_clim" ${isEdit && hasAmenity('climatisation') ? 'checked' : ''}>Climatisation</label>
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_cheminee" ${isEdit && hasAmenity('cheminee') ? 'checked' : ''}>Cheminée/poêle</label>
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_jardin" ${isEdit && hasAmenity('jardin') ? 'checked' : ''}>Jardin</label>
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_terrasse" ${isEdit && hasAmenity('terrasse') ? 'checked' : ''}>Terrasse</label>
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_barbecue" ${isEdit && hasAmenity('barbecue') ? 'checked' : ''}>Barbecue</label>
-                        <label class="form-label-modern" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="amenity_animaux" ${isEdit && (accessProfile.animaux_acceptes === true) ? 'checked' : ''}>Animaux acceptés</label>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-top:8px;">
+                        ${[
+                            { name:'amenity_wifi',     emoji:'📶', label:'Wi-Fi',           checked: isEdit && hasAmenity('wifi') },
+                            { name:'amenity_piscine',  emoji:'🏊', label:'Piscine',          checked: isEdit && (hasAmenity('piscine_privee') || hasAmenity('piscine_partagee')) },
+                            { name:'amenity_jacuzzi',  emoji:'🛁', label:'Jacuzzi',          checked: isEdit && hasAmenity('jacuzzi') },
+                            { name:'amenity_sauna',    emoji:'🧖', label:'Sauna',            checked: isEdit && hasAmenity('sauna') },
+                            { name:'amenity_clim',     emoji:'❄️', label:'Climatisation',   checked: isEdit && hasAmenity('climatisation') },
+                            { name:'amenity_cheminee', emoji:'🔥', label:'Cheminée/poêle',  checked: isEdit && hasAmenity('cheminee') },
+                            { name:'amenity_jardin',   emoji:'🌿', label:'Jardin',           checked: isEdit && hasAmenity('jardin') },
+                            { name:'amenity_terrasse', emoji:'🪑', label:'Terrasse',         checked: isEdit && hasAmenity('terrasse') },
+                            { name:'amenity_barbecue', emoji:'🍖', label:'Barbecue',         checked: isEdit && hasAmenity('barbecue') },
+                            { name:'amenity_animaux',  emoji:'🐾', label:'Animaux acceptés', checked: isEdit && (accessProfile.animaux_acceptes === true) },
+                        ].map(a => `
+                        <label style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:10px 6px; border:1px solid var(--border-color); border-radius:10px; cursor:pointer; font-size:0.8rem; text-align:center; transition:border-color 0.15s, background 0.15s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                            <input type="checkbox" name="${a.name}" ${a.checked ? 'checked' : ''} style="accent-color:var(--primary-color); width:16px; height:16px;">
+                            <span style="font-size:1.4rem;">${a.emoji}</span>
+                            <span>${a.label}</span>
+                        </label>`).join('')}
                     </div>
 
                     <div class="form-grid-2" style="margin-top:10px;">
@@ -466,12 +473,17 @@ window.showAddGiteForm = function(giteToEdit = null) {
                         </div>
                         <div class="form-group-modern">
                             <label class="form-label-modern">Plateformes actives</label>
-                            <div class="form-grid-2" style="gap:6px;">
-                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_airbnb" ${isEdit && platformsProfile.airbnb ? 'checked' : ''}>Airbnb</label>
-                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_booking" ${isEdit && platformsProfile.booking ? 'checked' : ''}>Booking</label>
-                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_abritel" ${isEdit && platformsProfile.abritel ? 'checked' : ''}>Abritel</label>
-                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_gdf" ${isEdit && platformsProfile.gdf ? 'checked' : ''}>Gîtes de France</label>
-                                <label class="form-label-modern" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" name="platform_direct" ${isEdit && platformsProfile.direct ? 'checked' : ''}>Direct</label>
+                            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:4px;">
+                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
+                                    <input type="checkbox" name="platform_airbnb" ${isEdit && platformsProfile.airbnb ? 'checked' : ''} style="accent-color:var(--primary-color);">🏠 Airbnb</label>
+                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
+                                    <input type="checkbox" name="platform_booking" ${isEdit && platformsProfile.booking ? 'checked' : ''} style="accent-color:var(--primary-color);">🌐 Booking</label>
+                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
+                                    <input type="checkbox" name="platform_abritel" ${isEdit && platformsProfile.abritel ? 'checked' : ''} style="accent-color:var(--primary-color);">🏡 Abritel</label>
+                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
+                                    <input type="checkbox" name="platform_gdf" ${isEdit && platformsProfile.gdf ? 'checked' : ''} style="accent-color:var(--primary-color);">🌻 GdF</label>
+                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
+                                    <input type="checkbox" name="platform_direct" ${isEdit && platformsProfile.direct ? 'checked' : ''} style="accent-color:var(--primary-color);">📩 Direct</label>
                             </div>
                         </div>
                     </div>

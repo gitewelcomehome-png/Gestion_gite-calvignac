@@ -9,6 +9,7 @@ window.ICAL_PLATFORMS = {
     'airbnb': { name: 'Airbnb', color: '#FF5A5F', icon: 'home' },
     'booking': { name: 'Booking.com', color: '#003580', icon: 'bed' },
     'abritel': { name: 'Abritel/VRBO', color: '#0051A5', icon: 'key' },
+    'google-vacation-rentals': { name: 'Google Vacation Rentals', color: '#4285F4', icon: 'map' },
     'gites-de-france': { name: 'Gîtes de France', color: '#2ecc71', icon: 'map-pin' },
     'clevacances': { name: 'Clévacances', color: '#E97E00', icon: 'star' },
     'interhome': { name: 'Interhome', color: '#E20A16', icon: 'building' },
@@ -26,6 +27,11 @@ window.ICAL_PLATFORMS = {
     'bienvenue-ferme': { name: 'Bienvenue à la Ferme', color: '#8BC34A', icon: 'tractor' },
     'custom': { name: 'Personnalisé', color: '#9b59b6', icon: 'edit' }
 };
+
+function isIcalPlatformVisible(platformKey) {
+    if (typeof window.hasChannelCapability !== 'function') return true;
+    return window.hasChannelCapability(platformKey, 'canRead');
+}
 
 /**
  * Afficher la modal de configuration iCal moderne (REMPLACE l'ancienne)
@@ -56,6 +62,10 @@ window.showIcalConfig = async function(giteId) {
             icalSources.push({ platform: 'airbnb', url: '', customName: '' });
         }
 
+        const canUseGoogleVacationRentals = typeof window.hasChannelCapability === 'function'
+            ? window.hasChannelCapability('google-vacation-rentals', 'canWrite')
+            : true;
+
         // Créer la modale moderne
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
@@ -76,6 +86,12 @@ window.showIcalConfig = async function(giteId) {
                         <strong>📌 Comment obtenir vos URLs iCal ?</strong><br>
                         Rendez-vous sur votre plateforme → Calendrier → Exporter/Synchroniser → Copier le lien iCal
                     </div>
+
+                    ${!canUseGoogleVacationRentals ? `
+                    <div class="alert alert-warning" style="background: #fff7ed; border-left: 4px solid #f59e0b; padding: 14px; margin-bottom: 20px; border-radius: 8px; font-size: 0.9rem;">
+                        <strong>ℹ️ Mode Gîtes de France actif</strong><br>
+                        L'option Google Vacation Rentals est masquée dans ce mode.
+                    </div>` : ''}
 
                     <div id="ical-sources-container" style="display: flex; flex-direction: column; gap: 12px;">
                         ${icalSources.map((source, index) => window.generateIcalRow(source, index)).join('')}
@@ -124,6 +140,7 @@ window.generateIcalRow = function(source = {}, index = 0) {
     const isCustom = platform === 'custom';
 
     const platformsOptions = Object.entries(window.ICAL_PLATFORMS)
+        .filter(([key]) => key === platform || isIcalPlatformVisible(key))
         .map(([key, data]) => `<option value="${key}" ${key === platform ? 'selected' : ''}>${data.name}</option>`)
         .join('');
 

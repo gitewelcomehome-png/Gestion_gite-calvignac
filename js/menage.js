@@ -560,7 +560,7 @@ async function afficherPlanningParSemaine() {
         const menageInfo = {
             reservation: r,
             dateMenage: dateMenage,
-            validated: validation ? validation.validated_by_company : false,
+            validated: validation ? ((validation.status === 'validated' || validation.status === 'confirmed') || validation.validated_by_company === true) : false,
             proposedDate: validation ? validation.proposed_date : null,
             status: validation ? validation.status : 'pending',
             timeOfDay: validation ? validation.time_of_day : calculatedTimeOfDay,
@@ -708,15 +708,18 @@ async function afficherPlanningParSemaine() {
 function generateMenageCardHTML(menageInfo) {
     const { reservation, dateMenage, validated, proposedDate, reservationEndBefore, reservationStartAfter, status, timeOfDay, proposedBy, allowedDates, morningOnlyDates, notes } = menageInfo;
     const displayDate = proposedDate ? new Date(proposedDate) : dateMenage;
+    const clientValidatedModification = hasClientValidatedModification(notes);
     
     // Statut
     let statusClass = 'status-pending';
     let statusText = 'Non validé';
     let proposedByCompany = false;
     
+    const ownerValidatedModification = clientValidatedModification || status === 'confirmed';
+
     if (validated) {
         statusClass = 'status-validated';
-        statusText = 'Validé';
+        statusText = ownerValidatedModification ? 'Modification validée par le propriétaire' : 'Validé';
     } else if (status === 'pending_validation') {
         statusClass = 'status-waiting';
         // Vérifier qui a proposé
@@ -782,6 +785,9 @@ function generateMenageCardHTML(menageInfo) {
                 <div class="menage-card-time">
                     ${timeDisplay}
                 </div>
+                <div style="margin-top: 4px; font-size: 0.78rem; font-weight: 700; color: ${ownerValidatedModification ? '#1d4ed8' : (validated ? '#1e8449' : '#8a6d00')};">
+                    ${statusText}
+                </div>
                 ${(departInfo || arriveeInfo) ? `
                 <div class="menage-card-infos">
                     ${departInfo ? `<span><svg style="width:14px;height:14px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><path d="m14 20 1.5-1.5c1-.999 1.5-2 1.5-2.5m-5 4-1.5-1.5c-1-.999-1.5-2-1.5-2.5m0-3c0-.5.5-1.5 1.5-2.5L11 9m3 3c0-.5-.5-1.5-1.5-2.5L11 9m3 0-1.5 1.5M21 5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg> Départ: ${departInfo}</span>` : ''}
@@ -826,6 +832,27 @@ function generateMenageCardHTML(menageInfo) {
  */
 function generateCleaningItemHTML(menageInfo) {
     return generateMenageCardHTML(menageInfo);
+}
+
+const CLIENT_MODIFICATION_VALIDATED_MARKER = '[MODIFICATION_VALIDEE_CLIENT]';
+
+function hasClientValidatedModification(notes) {
+    return typeof notes === 'string' && notes.includes(CLIENT_MODIFICATION_VALIDATED_MARKER);
+}
+
+function stripClientValidatedMarker(notes) {
+    if (typeof notes !== 'string') return notes || null;
+    const cleaned = notes
+        .split(CLIENT_MODIFICATION_VALIDATED_MARKER)
+        .join('')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    return cleaned || null;
+}
+
+function addClientValidatedMarker(notes) {
+    const base = stripClientValidatedMarker(notes);
+    return base ? `${base}\n${CLIENT_MODIFICATION_VALIDATED_MARKER}` : CLIENT_MODIFICATION_VALIDATED_MARKER;
 }
 
 function onMenageDateChanged(reservationId) {
@@ -873,18 +900,25 @@ function onMenageDateChanged(reservationId) {
  */
 async function acceptCompanyProposal(reservationId) {
     try {
+        const { data: existingSchedule } = await window.supabaseClient
+            .from('cleaning_schedule')
+            .select('notes')
+            .eq('reservation_id', reservationId)
+            .maybeSingle();
+
         const { error } = await window.supabaseClient
             .from('cleaning_schedule')
             .update({
                 status: 'validated',
-                validated_by_company: true,
-                proposed_by: null // Réinitialiser après acceptation
+                validated_by_company: false,
+                proposed_by: null,
+                notes: addClientValidatedMarker(existingSchedule?.notes || null)
             })
             .eq('reservation_id', reservationId);
         
         if (error) throw error;
         
-        showToast('✓ Proposition acceptée !', 'success');
+        showToast('✓ Modification validée par le propriétaire', 'info');
         afficherPlanningParSemaine();
     } catch (error) {
         console.error(error);

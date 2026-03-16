@@ -394,6 +394,9 @@ function getActionButtons(todo, status) {
                 <button class="kcard-btn btn-${cat}" onclick="window.updateTaskStatus('${todo.id}', 'in_progress')">
                     <i data-lucide="play"></i> Démarrer
                 </button>
+                <button class="kcard-btn btn-neutral" onclick="window.openEditTaskModal('${todo.id}')" title="Modifier">
+                    <i data-lucide="pencil"></i>
+                </button>
             `;
             break;
 
@@ -405,6 +408,9 @@ function getActionButtons(todo, status) {
                 <button class="kcard-btn btn-neutral" onclick="window.updateTaskStatus('${todo.id}', 'todo')">
                     <i data-lucide="arrow-left"></i>
                 </button>
+                <button class="kcard-btn btn-neutral" onclick="window.openEditTaskModal('${todo.id}')" title="Modifier">
+                    <i data-lucide="pencil"></i>
+                </button>
             `;
             break;
 
@@ -412,6 +418,9 @@ function getActionButtons(todo, status) {
             buttons = `
                 <button class="kcard-btn btn-${cat}" onclick="window.updateTaskStatus('${todo.id}', 'in_progress')">
                     <i data-lucide="rotate-ccw"></i> Réactiver
+                </button>
+                <button class="kcard-btn btn-neutral" onclick="window.openEditTaskModal('${todo.id}')" title="Modifier">
+                    <i data-lucide="pencil"></i>
                 </button>
                 <button class="kcard-btn btn-danger" onclick="window.deleteTask('${todo.id}')">
                     <i data-lucide="trash-2"></i>
@@ -586,6 +595,152 @@ window.refreshKanban = refreshKanban;
 window.filterKanban = filterKanban;
 window.updateTaskStatus = updateTaskStatus;
 window.deleteTask = deleteTask;
+
+// ================================================================
+// MODALE ÉDITION TÂCHE
+// ================================================================
+function ensureEditTaskModal() {
+    if (document.getElementById('kanbanEditModal')) return;
+    const modal = document.createElement('div');
+    modal.id = 'kanbanEditModal';
+    modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;';
+    modal.innerHTML = `
+        <div style="background:white;border-radius:12px;padding:28px;width:100%;max-width:480px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                <h3 style="margin:0;font-size:1.1rem;font-weight:700;color:#111827;">✏️ Modifier la tâche</h3>
+                <button onclick="window.closeEditTaskModal()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:#6b7280;line-height:1;">&times;</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+                <div>
+                    <label style="display:block;font-size:0.85rem;font-weight:600;color:#374151;margin-bottom:4px;">Titre *</label>
+                    <input id="editTaskTitle" type="text" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;box-sizing:border-box;" />
+                </div>
+                <div>
+                    <label style="display:block;font-size:0.85rem;font-weight:600;color:#374151;margin-bottom:4px;">Description</label>
+                    <textarea id="editTaskDesc" rows="3" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;box-sizing:border-box;resize:vertical;"></textarea>
+                </div>
+                <div>
+                    <label style="display:block;font-size:0.85rem;font-weight:600;color:#374151;margin-bottom:4px;">Gîte</label>
+                    <select id="editTaskGite" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;box-sizing:border-box;">
+                        <option value="">Tous les gîtes</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:22px;justify-content:flex-end;">
+                <button onclick="window.closeEditTaskModal()" style="padding:9px 18px;border:1px solid #d1d5db;border-radius:8px;background:white;color:#374151;font-weight:600;cursor:pointer;font-size:0.9rem;">Annuler</button>
+                <button id="editTaskSaveBtn" style="padding:9px 18px;border:none;border-radius:8px;background:#2563eb;color:white;font-weight:600;cursor:pointer;font-size:0.9rem;">💾 Enregistrer</button>
+            </div>
+        </div>
+    `;
+    modal.addEventListener('click', (e) => { if (e.target === modal) window.closeEditTaskModal(); });
+    document.body.appendChild(modal);
+}
+
+window.openEditTaskModal = async function(taskId) {
+    ensureEditTaskModal();
+    const modal = document.getElementById('kanbanEditModal');
+
+    try {
+        const { data: todo, error } = await window.supabaseClient
+            .from('todos')
+            .select('*')
+            .eq('id', taskId)
+            .single();
+        if (error) throw error;
+
+        document.getElementById('editTaskTitle').value = todo.title || '';
+        document.getElementById('editTaskDesc').value = todo.description || '';
+
+        // Remplir le select gîtes
+        const giteSelect = document.getElementById('editTaskGite');
+        giteSelect.innerHTML = '<option value="">Tous les gîtes</option>';
+        const gites = Object.entries(KanbanState.gites || {});
+        gites.forEach(([id, name]) => {
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = name;
+            if (id === todo.gite_id) opt.selected = true;
+            giteSelect.appendChild(opt);
+        });
+        if (!todo.gite_id) giteSelect.value = '';
+
+        const saveBtn = document.getElementById('editTaskSaveBtn');
+        saveBtn.onclick = () => window.saveTaskEdit(taskId);
+
+        modal.style.display = 'flex';
+        document.getElementById('editTaskTitle').focus();
+    } catch (err) {
+        console.error('Erreur chargement tâche:', err);
+    }
+};
+
+window.closeEditTaskModal = function() {
+    const modal = document.getElementById('kanbanEditModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    // Reset du bouton pour la prochaine ouverture
+    const saveBtn = document.getElementById('editTaskSaveBtn');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Enregistrer';
+    }
+};
+
+window.saveTaskEdit = async function(taskId) {
+    const title = document.getElementById('editTaskTitle').value.trim();
+    if (!title) {
+        document.getElementById('editTaskTitle').style.borderColor = '#ef4444';
+        return;
+    }
+    const description = document.getElementById('editTaskDesc').value.trim();
+    const giteId = document.getElementById('editTaskGite').value || null;
+
+    const saveBtn = document.getElementById('editTaskSaveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Enregistrement...';
+
+    // Timeout de sécurité : débloquer le bouton après 10s max
+    const saveTimeout = setTimeout(() => {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Enregistrer';
+        }
+    }, 10000);
+
+    try {
+        const updateData = { title, description: description || null };
+        if (giteId !== undefined) updateData.gite_id = giteId; // null = effacer le gîte
+
+        const { data: updated, error } = await window.supabaseClient
+            .from('todos')
+            .update(updateData)
+            .eq('id', taskId)
+            .select('id');
+
+        if (error) throw error;
+        if (!updated || updated.length === 0) {
+            throw new Error('Modification refusée (droits insuffisants ou tâche introuvable)');
+        }
+
+        clearTimeout(saveTimeout);
+        window.closeEditTaskModal();
+
+        try {
+            await refreshKanban();
+        } catch (e) { /* refresh non bloquant */ }
+
+        if (typeof updateTodoLists === 'function') {
+            try { await updateTodoLists(); } catch (e) { /* non bloquant */ }
+        }
+    } catch (err) {
+        clearTimeout(saveTimeout);
+        console.error('Erreur sauvegarde tâche:', err);
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Enregistrer';
+        }
+    }
+};
 
 /**
  * Afficher/masquer le menu de création rapide

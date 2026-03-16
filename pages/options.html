@@ -1377,6 +1377,14 @@
                                 <input id="optionsNotifTaches" class="notif-switch" type="checkbox" />
                             </label>
 
+                            <label class="notif-row" for="optionsNotifMenageModifs">
+                                <span class="notif-row-label">
+                                    <strong>⚠️ Modifications planning ménage auto</strong>
+                                    <span>Email info/warning lors des replanifications automatiques</span>
+                                </span>
+                                <input id="optionsNotifMenageModifs" class="notif-switch" type="checkbox" />
+                            </label>
+
                             <label class="notif-row" for="optionsNotifRetours">
                                 <span class="notif-row-label">
                                     <strong>💬 Retours / Demandes clients</strong>
@@ -1384,6 +1392,15 @@
                                 </span>
                                 <input id="optionsNotifRetours" class="notif-switch" type="checkbox" />
                             </label>
+
+                            <div style="margin-top: 0.8rem;">
+                                <label for="optionsNotifMenageCompanyEmail" style="display: block; margin-bottom: 0.45rem; color: var(--text-secondary); font-size: 0.86rem;">Email de la société de ménage</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input id="optionsNotifMenageCompanyEmail" type="email" class="support-native-input" placeholder="societe-menage@email.com" style="flex: 1;" />
+                                    <button id="optionsSaveMenageCompanyEmailBtn" style="padding: 10px 16px; background: #06b6d4; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; white-space: nowrap;">💾 Sauvegarder</button>
+                                </div>
+                                <div id="optionsSaveMenageCompanyEmailFeedback" style="display:none; margin-top: 6px; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -1574,6 +1591,48 @@
                     </div>
                 </div>
 
+                <p class="section-description" style="margin-top: 1.5rem; margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    Choisissez le mode de diffusion pour activer/désactiver les accès Google Vacation Rentals
+                </p>
+                <div style="background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+                    <label for="distributionAccessModeSelect" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">
+                        Mode de distribution
+                    </label>
+                    <select id="distributionAccessModeSelect" class="profile-input" onchange="selectDistributionAccessMode(this.value)">
+                        <option value="hors_gites_de_france">Hors Gîtes de France (accès Google Vacation Rentals possible)</option>
+                        <option value="gites_de_france">Gîtes de France (accès Google Vacation Rentals désactivé)</option>
+                    </select>
+                    <small id="distributionAccessModeHint" style="display: block; margin-top: 0.45rem; color: var(--text-secondary);"></small>
+                </div>
+
+                <p class="section-description" style="margin-top: 1.5rem; margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    Paramètres globaux des codes d'accès (boîtes à clés / serrures)
+                </p>
+                <div style="background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; padding: 1rem; display: grid; gap: 0.9rem;">
+                    <div>
+                        <label for="accessCodeEngineSelect" style="display:block; font-weight:600; margin-bottom:0.4rem; color: var(--text-primary);">Moteur par défaut</label>
+                        <select id="accessCodeEngineSelect" class="profile-input" onchange="selectAccessCodeEngine(this.value)">
+                            <option value="universel_auto">Universel automatique (toutes boîtes)</option>
+                            <option value="systemes_connectes">Systèmes connectés (toutes boîtes, fallback universel)</option>
+                            <option value="manuel">Manuel</option>
+                        </select>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div>
+                            <label for="accessCodeLengthInput" style="display:block; font-weight:600; margin-bottom:0.4rem; color: var(--text-primary);">Longueur du code</label>
+                            <input id="accessCodeLengthInput" type="number" min="4" max="10" value="6" class="profile-input" onchange="selectAccessCodeLength(this.value)">
+                        </div>
+                        <div>
+                            <label for="accessCodeCharsetSelect" style="display:block; font-weight:600; margin-bottom:0.4rem; color: var(--text-primary);">Type de code</label>
+                            <select id="accessCodeCharsetSelect" class="profile-input" onchange="selectAccessCodeCharset(this.value)">
+                                <option value="numeric">Numérique</option>
+                                <option value="alnum">Alphanumérique</option>
+                            </select>
+                        </div>
+                    </div>
+                    <small id="accessCodeEngineHint" style="display:block; color: var(--text-secondary);"></small>
+                </div>
+
                 <div class="footer-actions" style="margin-top: 1.5rem; justify-content: flex-end;">
                     <button class="btn" onclick="saveSettings()">
                         <span>💾</span>
@@ -1602,6 +1661,12 @@
         let selectedTheme = 'cyan';
         let selectedAppTheme = 'dark';
         let selectedAppStyle = 'sidebar';
+        let selectedDistributionAccessMode = typeof window.getDistributionAccessMode === 'function'
+            ? window.getDistributionAccessMode()
+            : 'hors_gites_de_france';
+        let selectedAccessCodeEngine = localStorage.getItem('access_code_engine_default') || 'universel_auto';
+        let selectedAccessCodeLength = Number(localStorage.getItem('access_code_length_default') || 6);
+        let selectedAccessCodeCharset = localStorage.getItem('access_code_charset_default') || 'numeric';
         const optionsSupportState = {
             initialized: false,
             loading: false,
@@ -1747,6 +1812,8 @@
                 notify_demandes: true,
                 notify_reservations: true,
                 notify_taches: true,
+                notify_menage_modifications: false,
+                menage_company_email: '',
                 notify_retours: true,
                 email_frequency: 'immediate'
             };
@@ -1817,6 +1884,8 @@
             const notifyDemandes = document.getElementById('optionsNotifDemandes');
             const notifyReservations = document.getElementById('optionsNotifReservations');
             const notifyTaches = document.getElementById('optionsNotifTaches');
+            const notifyMenageModifs = document.getElementById('optionsNotifMenageModifs');
+            const menageCompanyEmail = document.getElementById('optionsNotifMenageCompanyEmail');
             const notifyRetours = document.getElementById('optionsNotifRetours');
             const emailFrequency = document.getElementById('optionsNotifFrequency');
 
@@ -1825,6 +1894,8 @@
             if (notifyDemandes) notifyDemandes.checked = !!prefs.notify_demandes;
             if (notifyReservations) notifyReservations.checked = !!prefs.notify_reservations;
             if (notifyTaches) notifyTaches.checked = !!prefs.notify_taches;
+            if (notifyMenageModifs) notifyMenageModifs.checked = !!prefs.notify_menage_modifications;
+            if (menageCompanyEmail) menageCompanyEmail.value = prefs.menage_company_email || '';
             if (notifyRetours) notifyRetours.checked = prefs.notify_retours !== false;
             if (emailFrequency) emailFrequency.value = prefs.email_frequency || 'immediate';
 
@@ -1870,6 +1941,8 @@
                     notify_demandes: prefs.notify_demandes ?? true,
                     notify_reservations: prefs.notify_reservations ?? true,
                     notify_taches: prefs.notify_taches ?? true,
+                    notify_menage_modifications: prefs.notify_menage_modifications ?? false,
+                    menage_company_email: prefs.menage_company_email ?? '',
                     notify_retours: prefs.notify_retours ?? true,
                     email_frequency: prefs.email_frequency ?? 'immediate',
                     [key]: value
@@ -1895,10 +1968,32 @@
                         setTimeout(() => { fb.style.display = 'none'; }, 4000);
                     }
                 }
+
+                if (key === 'menage_company_email') {
+                    const fb = document.getElementById('optionsSaveMenageCompanyEmailFeedback');
+                    if (fb) {
+                        fb.textContent = '✅ Email société ménage sauvegardé : ' + value;
+                        fb.style.display = 'block';
+                        fb.style.background = '#d1fae5';
+                        fb.style.color = '#065f46';
+                        setTimeout(() => { fb.style.display = 'none'; }, 4000);
+                    }
+                }
             } catch (error) {
                 setNotificationStatusInOptions('Erreur : ' + (error.message || 'inconnue'), 'error');
                 if (key === 'email_address') {
                     const fb = document.getElementById('optionsSaveEmailFeedback');
+                    if (fb) {
+                        fb.textContent = '❌ Erreur : ' + (error.message || 'inconnue');
+                        fb.style.display = 'block';
+                        fb.style.background = '#fee2e2';
+                        fb.style.color = '#991b1b';
+                        setTimeout(() => { fb.style.display = 'none'; }, 5000);
+                    }
+                }
+
+                if (key === 'menage_company_email') {
+                    const fb = document.getElementById('optionsSaveMenageCompanyEmailFeedback');
                     if (fb) {
                         fb.textContent = '❌ Erreur : ' + (error.message || 'inconnue');
                         fb.style.display = 'block';
@@ -1918,6 +2013,8 @@
             const notifyDemandes = document.getElementById('optionsNotifDemandes');
             const notifyReservations = document.getElementById('optionsNotifReservations');
             const notifyTaches = document.getElementById('optionsNotifTaches');
+            const notifyMenageModifs = document.getElementById('optionsNotifMenageModifs');
+            const menageCompanyEmail = document.getElementById('optionsNotifMenageCompanyEmail');
             const notifyRetours = document.getElementById('optionsNotifRetours');
             const emailFrequency = document.getElementById('optionsNotifFrequency');
 
@@ -1951,6 +2048,18 @@
                 });
             }
 
+            if (notifyMenageModifs) {
+                notifyMenageModifs.addEventListener('change', (event) => {
+                    saveNotificationPreferenceInOptions('notify_menage_modifications', event.target.checked);
+                });
+            }
+
+            if (menageCompanyEmail) {
+                menageCompanyEmail.addEventListener('change', (event) => {
+                    saveNotificationPreferenceInOptions('menage_company_email', event.target.value || '');
+                });
+            }
+
             if (notifyRetours) {
                 notifyRetours.addEventListener('change', (event) => {
                     saveNotificationPreferenceInOptions('notify_retours', event.target.checked);
@@ -1969,6 +2078,15 @@
                     const addr = document.getElementById('optionsNotifEmailAddress');
                     const val = addr ? addr.value : '';
                     saveNotificationPreferenceInOptions('email_address', val);
+                });
+            }
+
+            const saveMenageEmailBtn = document.getElementById('optionsSaveMenageCompanyEmailBtn');
+            if (saveMenageEmailBtn) {
+                saveMenageEmailBtn.addEventListener('click', () => {
+                    const addr = document.getElementById('optionsNotifMenageCompanyEmail');
+                    const val = addr ? addr.value : '';
+                    saveNotificationPreferenceInOptions('menage_company_email', val);
                 });
             }
 
@@ -2723,10 +2841,20 @@
             const savedTheme = localStorage.getItem('ficheClientTheme') || 'cyan';
             const savedAppTheme = localStorage.getItem('theme') || localStorage.getItem('icalou-theme') || 'dark';
             const savedAppStyle = localStorage.getItem('style') || localStorage.getItem('icalou-style') || 'sidebar';
+            const savedDistributionMode = (typeof window.getDistributionAccessMode === 'function')
+                ? window.getDistributionAccessMode()
+                : (localStorage.getItem('distribution_access_mode') || 'hors_gites_de_france');
+            const savedAccessCodeEngine = localStorage.getItem('access_code_engine_default') || 'universel_auto';
+            const savedAccessCodeLength = Number(localStorage.getItem('access_code_length_default') || 6);
+            const savedAccessCodeCharset = localStorage.getItem('access_code_charset_default') || 'numeric';
             
             selectTheme(savedTheme);
             selectAppTheme(savedAppTheme);
             selectAppStyle(savedAppStyle);
+            selectDistributionAccessMode(savedDistributionMode);
+            selectAccessCodeEngine(savedAccessCodeEngine);
+            selectAccessCodeLength(savedAccessCodeLength);
+            selectAccessCodeCharset(savedAccessCodeCharset);
             
             // Appliquer le thème à la page options elle-même
             applyThemeToPage(savedAppTheme);
@@ -2873,7 +3001,7 @@
                     `)
                     .eq('user_id', user.id)
                     .eq('status', 'active')
-                    .single();
+                    .maybeSingle();
                 
                 if (error) throw error;
                 
@@ -3015,7 +3143,7 @@
                 .select('*, plan:subscriptions_plans(*)')
                 .eq('user_id', user.id)
                 .eq('status', 'active')
-                .single();
+                .maybeSingle();
             
             if (!currentSubscription) {
                 alert('⚠️ Aucun abonnement actif trouvé');
@@ -3223,6 +3351,65 @@
                 document.getElementById('themeGite').classList.add('active');
             }
         }
+
+        function selectDistributionAccessMode(mode) {
+            const normalizedMode = typeof window.setDistributionAccessMode === 'function'
+                ? window.setDistributionAccessMode(mode, { persist: true })
+                : (mode === 'gites_de_france' ? 'gites_de_france' : 'hors_gites_de_france');
+
+            selectedDistributionAccessMode = normalizedMode;
+
+            const select = document.getElementById('distributionAccessModeSelect');
+            if (select) {
+                select.value = normalizedMode;
+            }
+
+            const hint = document.getElementById('distributionAccessModeHint');
+            if (hint) {
+                if (normalizedMode === 'gites_de_france') {
+                    hint.textContent = 'Google Vacation Rentals est désactivé dans ce mode.';
+                } else {
+                    hint.textContent = 'Google Vacation Rentals peut être activé selon vos intégrations.';
+                }
+            }
+        }
+
+        function selectAccessCodeEngine(engine) {
+            const normalizedInput = engine === 'igloo_api' ? 'systemes_connectes' : engine;
+            const normalized = ['universel_auto', 'systemes_connectes', 'manuel'].includes(normalizedInput) ? normalizedInput : 'universel_auto';
+            selectedAccessCodeEngine = normalized;
+
+            const select = document.getElementById('accessCodeEngineSelect');
+            if (select) select.value = normalized;
+
+            const hint = document.getElementById('accessCodeEngineHint');
+            if (hint) {
+                if (normalized === 'systemes_connectes') {
+                    hint.textContent = 'Appel unifié de tous les systèmes de boîtes connectés, puis fallback universel automatique.';
+                } else if (normalized === 'manuel') {
+                    hint.textContent = 'Aucune génération automatique: le code est saisi manuellement par gîte.';
+                } else {
+                    hint.textContent = 'Génération locale universelle: compatible toutes boîtes à code.';
+                }
+            }
+        }
+
+        function selectAccessCodeLength(lengthValue) {
+            const parsed = Number(lengthValue);
+            selectedAccessCodeLength = Number.isFinite(parsed)
+                ? Math.min(10, Math.max(4, Math.round(parsed)))
+                : 6;
+
+            const input = document.getElementById('accessCodeLengthInput');
+            if (input) input.value = String(selectedAccessCodeLength);
+        }
+
+        function selectAccessCodeCharset(charset) {
+            const normalized = charset === 'alnum' ? 'alnum' : 'numeric';
+            selectedAccessCodeCharset = normalized;
+            const select = document.getElementById('accessCodeCharsetSelect');
+            if (select) select.value = normalized;
+        }
         
         async function saveSettings() {
             try {
@@ -3232,6 +3419,13 @@
                 localStorage.setItem('icalou-theme', selectedAppTheme);
                 localStorage.setItem('style', selectedAppStyle);
                 localStorage.setItem('icalou-style', selectedAppStyle);
+                localStorage.setItem('distribution_access_mode', selectedDistributionAccessMode);
+                localStorage.setItem('access_code_engine_default', selectedAccessCodeEngine);
+                localStorage.setItem('access_code_length_default', String(selectedAccessCodeLength));
+                localStorage.setItem('access_code_charset_default', selectedAccessCodeCharset);
+                if (typeof window.setDistributionAccessMode === 'function') {
+                    window.setDistributionAccessMode(selectedDistributionAccessMode, { persist: true });
+                }
                 
                 // Tenter d'enregistrer dans Supabase pour persistance cross-device
                 try {
@@ -3251,7 +3445,11 @@
                                     preferences: {
                                         theme: selectedAppTheme,
                                         ficheClientTheme: selectedTheme,
-                                        style: selectedAppStyle
+                                        style: selectedAppStyle,
+                                        distributionAccessMode: selectedDistributionAccessMode,
+                                        accessCodeEngine: selectedAccessCodeEngine,
+                                        accessCodeLength: selectedAccessCodeLength,
+                                        accessCodeCharset: selectedAccessCodeCharset
                                     },
                                     updated_at: new Date().toISOString()
                                 })
@@ -3284,7 +3482,11 @@
                         type: 'settingsChange',
                         ficheClientTheme: selectedTheme,
                         theme: selectedAppTheme,
-                        style: selectedAppStyle
+                        style: selectedAppStyle,
+                        distributionAccessMode: selectedDistributionAccessMode,
+                        accessCodeEngine: selectedAccessCodeEngine,
+                        accessCodeLength: selectedAccessCodeLength,
+                        accessCodeCharset: selectedAccessCodeCharset
                     }, '*');
                     
                     // Recharger le parent après un délai
@@ -3526,6 +3728,30 @@
                             selectAppStyle(prefs.style);
                             localStorage.setItem('style', prefs.style);
                             localStorage.setItem('icalou-style', prefs.style);
+                        }
+
+                        if (prefs.distributionAccessMode) {
+                            selectedDistributionAccessMode = prefs.distributionAccessMode;
+                            selectDistributionAccessMode(prefs.distributionAccessMode);
+                            localStorage.setItem('distribution_access_mode', prefs.distributionAccessMode);
+                        }
+
+                        if (prefs.accessCodeEngine) {
+                            selectedAccessCodeEngine = prefs.accessCodeEngine;
+                            selectAccessCodeEngine(prefs.accessCodeEngine);
+                            localStorage.setItem('access_code_engine_default', prefs.accessCodeEngine);
+                        }
+
+                        if (prefs.accessCodeLength) {
+                            selectedAccessCodeLength = Number(prefs.accessCodeLength) || 6;
+                            selectAccessCodeLength(selectedAccessCodeLength);
+                            localStorage.setItem('access_code_length_default', String(selectedAccessCodeLength));
+                        }
+
+                        if (prefs.accessCodeCharset) {
+                            selectedAccessCodeCharset = prefs.accessCodeCharset;
+                            selectAccessCodeCharset(prefs.accessCodeCharset);
+                            localStorage.setItem('access_code_charset_default', prefs.accessCodeCharset);
                         }
                     }
                 } catch (e) {

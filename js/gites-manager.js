@@ -123,20 +123,24 @@ class GitesManager {
         }
         
         // Attendre que le subscription manager soit prêt (avec timeout 3s)
+        let subTimedOut = false;
         if (window.subscriptionManager?._readyPromise) {
-            const timeout = new Promise(resolve => setTimeout(resolve, 3000));
+            const timeout = new Promise(resolve => setTimeout(() => { subTimedOut = true; resolve(); }, 3000));
             await Promise.race([window.subscriptionManager._readyPromise, timeout]);
         }
         
         // Filtrer selon la limite du plan d'abonnement
         if (window.subscriptionManager && window.subscriptionManager.currentSubscription) {
-            const maxGites = window.subscriptionManager.currentSubscription.plan?.max_gites || 1;
+            const maxGites = window.subscriptionManager.currentSubscription.plan?.nb_gites_max || 1;
             // Retourner uniquement les N premiers gîtes selon ordre_affichage
             return this.gites.slice(0, maxGites);
         }
         
-        // Si timeout, retourner tous les gîtes pour ne pas bloquer l'utilisateur
-        console.warn('⚠️ Timeout chargement abonnement, affichage de tous les gîtes');
+        // Timeout réel (subscriptionManager existait mais n'a pas répondu)
+        if (subTimedOut && !this._subTimeoutWarned) {
+            this._subTimeoutWarned = true;
+            console.warn('⚠️ Timeout chargement abonnement, affichage de tous les gîtes');
+        }
         return this.gites;
     }
     

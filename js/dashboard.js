@@ -3040,22 +3040,46 @@ async function handlePropositionsMenageClick(e) {
 
 async function accepterPropositionMenage(propositionId, dateProposee) {
     if (!confirm('Accepter cette nouvelle date de ménage ?')) return;
+
+    const CLIENT_MODIFICATION_VALIDATED_MARKER = '[MODIFICATION_VALIDEE_CLIENT]';
+    const addClientValidatedMarker = (notes) => {
+        const raw = typeof notes === 'string' ? notes : '';
+        const cleaned = raw
+            .split(CLIENT_MODIFICATION_VALIDATED_MARKER)
+            .join('')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+        return cleaned
+            ? `${cleaned}\n${CLIENT_MODIFICATION_VALIDATED_MARKER}`
+            : CLIENT_MODIFICATION_VALIDATED_MARKER;
+    };
     
-    // Si pas de date proposée passée en paramètre, la récupérer depuis la BDD
+    let scheduleData = null;
+
+    // Récupérer les infos nécessaires (notes + date si absente)
     if (!dateProposee || dateProposee === 'undefined') {
         const { data, error } = await supabaseClient
             .from('cleaning_schedule')
-            .select('scheduled_date')
+            .select('scheduled_date, notes')
             .eq('id', propositionId)
             .single();
-        
+
         if (error || !data?.scheduled_date) {
             console.error('❌ Impossible de récupérer la date proposée:', error);
             alert('❌ Erreur : date proposée manquante');
             return;
         }
-        
+
+        scheduleData = data;
         dateProposee = data.scheduled_date;
+    } else {
+        const { data } = await supabaseClient
+            .from('cleaning_schedule')
+            .select('notes')
+            .eq('id', propositionId)
+            .maybeSingle();
+
+        scheduleData = data;
     }
     
     try {
@@ -3065,8 +3089,10 @@ async function accepterPropositionMenage(propositionId, dateProposee) {
             .from('cleaning_schedule')
             .update({
                 status: 'confirmed',
-                validated_by_company: true,
-                validated_at: new Date().toISOString()
+                validated_by_company: false,
+                proposed_by: null,
+                validated_at: new Date().toISOString(),
+                notes: addClientValidatedMarker(scheduleData?.notes || null)
             })
             .eq('id', propositionId);
         

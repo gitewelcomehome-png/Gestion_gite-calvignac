@@ -1333,12 +1333,18 @@ function sauvegardeAutomatique() {
 
 function calculerTempsReel() {
     if (isCalculatingTempsReel) {
+        // Lock actif : on reprogramme pour ne pas perdre la frappe
+        clearTimeout(calculTempsReelTimeout);
+        calculTempsReelTimeout = setTimeout(() => {
+            if (!isCalculatingTempsReel) calculerTempsReel();
+        }, 300);
         return;
     }
     
     clearTimeout(calculTempsReelTimeout);
     calculTempsReelTimeout = setTimeout(async () => {
         isCalculatingTempsReel = true;
+        try {
         const ca = parseFloat(document.getElementById('ca')?.value || 0);
         if (ca === 0) {
             // Réinitialiser l'affichage (avec vérification null)
@@ -1362,10 +1368,13 @@ function calculerTempsReel() {
             if (detailTotalUrssaf) detailTotalUrssaf.textContent = '0 €';
             if (detailTrimestres) detailTrimestres.textContent = '0';
             
-            isCalculatingTempsReel = false;
             return;
         }
         
+        // ✅ Comparatif fiscal indépendant du chargement des gîtes → toujours immédiat
+        calculerTableauComparatif();
+        verifierSeuilsStatut();
+
         // ✅ FISCALITÉ : Charger TOUS les gîtes (pas seulement ceux visibles selon l'abonnement)
         const gites = await window.gitesManager.getAll();
         let chargesBiens = 0;
@@ -1499,7 +1508,6 @@ function calculerTempsReel() {
         // Calculer le reste à vivre
         setTimeout(() => {
             calculerResteAVivre();
-            isCalculatingTempsReel = false; // Réinitialiser le flag
         }, 100);
         
         // 💾 SAUVEGARDE AUTOMATIQUE pour les années précédentes
@@ -1510,6 +1518,11 @@ function calculerTempsReel() {
                 sauvegarderDonneesFiscales(true);
                 setTimeout(() => verifierSauvegardeAnnee(anneeSimulation), 1000);
             }, 600);
+        }
+        } catch (e) {
+            console.error('❌ [calculerTempsReel] Erreur:', e);
+        } finally {
+            isCalculatingTempsReel = false;
         }
         
     }, 500);
@@ -2663,6 +2676,7 @@ async function chargerAnnee(annee) {
             .from('fiscal_history')
             .select('*')
             .eq('year', parseInt(annee))
+            .eq('gite', 'multi')
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -2683,6 +2697,7 @@ async function chargerAnnee(annee) {
                     .from('fiscal_history')
                     .select('*')
                     .eq('year', anneeActuelle)
+                    .eq('gite', 'multi')
                     .order('created_at', { ascending: false })
                     .limit(1)
                     .maybeSingle();
@@ -3034,7 +3049,11 @@ async function chargerAnnee(annee) {
         calculerTempsReel();
         
         // Charger les amortiissements automatiques pour cette année
-        await chargerAmortissementsAnnee(annee);
+        try {
+            await chargerAmortissementsAnnee(annee);
+        } catch (e) {
+            // Table fiscalite_amortissements peut ne pas encore exister (nouvelle instance)
+        }
         
         // Charger les kilomètres de cette année
         await initKilometres(parseInt(annee));

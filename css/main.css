@@ -1509,7 +1509,7 @@ html.theme-dark a {
     border-bottom: 1px solid var(--border-color);
     padding: 12px 20px;
     display: flex;
-    gap: 10px;
+    gap: 0;
     flex-wrap: wrap;
     justify-content: center;
     position: sticky;
@@ -1539,7 +1539,7 @@ html.theme-dark a {
     background: transparent;
     color: var(--text-secondary);
     border: none;
-    padding: 8px 6px;
+    padding: 8px 4px;
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;
@@ -1547,7 +1547,7 @@ html.theme-dark a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
     border-radius: 8px;
     white-space: nowrap;
     flex: 1 1 0;
@@ -1565,7 +1565,7 @@ html.theme-dark a {
     text-overflow: ellipsis;
     flex: 0 0 auto;
     text-align: center;
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 600;
 }
 

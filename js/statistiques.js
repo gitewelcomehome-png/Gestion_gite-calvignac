@@ -127,17 +127,20 @@ async function updateAdvancedStats(reservations) {
         if (el) el.textContent = taux + '%';
     });
     
-    // Prix moyen par nuit
+    // Prix moyen par nuit + durée moyenne
     let totalMontant = 0;
     let totalNuits = 0;
-    
+    let nbResasAvecDates = 0;
+
     reservations.forEach(r => {
-        if (!r.check_in || !r.check_out || !r.total_price) return;
+        if (!r.check_in || !r.check_out) return;
         const debut = new Date(r.check_in);
         const fin = new Date(r.check_out);
         const nuits = Math.round((fin - debut) / (1000 * 60 * 60 * 24));
-        totalMontant += parseFloat(r.total_price) || 0;
+        if (nuits <= 0) return;
         totalNuits += nuits;
+        nbResasAvecDates++;
+        totalMontant += parseFloat(r.total_price) || 0;
     });
     
     const prixMoyen = totalNuits > 0 ? (totalMontant / totalNuits).toFixed(0) : 0;
@@ -145,7 +148,7 @@ async function updateAdvancedStats(reservations) {
     if (elPrixMoyen) elPrixMoyen.textContent = prixMoyen + ' €';
     
     // Durée moyenne
-    const dureeMoyenne = reservations.length > 0 ? (totalNuits / reservations.length).toFixed(1) : 0;
+    const dureeMoyenne = nbResasAvecDates > 0 ? (totalNuits / nbResasAvecDates).toFixed(1) : 0;
     const elDuree = document.getElementById('dureeMoyenne');
     if (elDuree) elDuree.textContent = dureeMoyenne + ' nuits';
     

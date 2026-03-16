@@ -186,6 +186,38 @@ function pushPersistentOwnerNotification({ title, message, data }) {
     }
 }
 
+async function notifyCleaningPlanningAutoChangeByEmail({
+    ownerUserId,
+    giteId,
+    newReservationId,
+    beforeDate,
+    afterDate,
+    conflicts
+}) {
+    try {
+        if (!window.supabaseClient?.functions?.invoke) {
+            return { skipped: true, reason: 'functions.invoke indisponible' };
+        }
+
+        const { data, error } = await window.supabaseClient.functions.invoke('notify-cleaning-planning-change', {
+            body: {
+                owner_user_id: ownerUserId,
+                gite_id: giteId,
+                new_reservation_id: newReservationId,
+                before_date: beforeDate,
+                after_date: afterDate,
+                conflicts: Array.isArray(conflicts) ? conflicts : []
+            }
+        });
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        console.error('❌ Erreur notification email planning ménage auto:', error);
+        return { success: false, error };
+    }
+}
+
 async function autoResolveCleaningConflictForReservation(reservationId) {
     try {
         if (!isAutoCleaningConflictEnabled()) {
@@ -206,7 +238,7 @@ async function autoResolveCleaningConflictForReservation(reservationId) {
 
         const { data: conflictingCleanings, error: conflictError } = await window.supabaseClient
             .from('cleaning_schedule')
-            .select('id, owner_user_id, reservation_id, gite_id, scheduled_date, status, reservation_end, reservation_start_after')
+            .select('id, owner_user_id, reservation_id, gite_id, scheduled_date, status, validated_by_company, reservation_end, reservation_start_after')
             .eq('gite_id', newReservation.gite_id)
             .neq('reservation_id', newReservation.id)
             .gt('scheduled_date', newReservation.check_in)
@@ -221,9 +253,12 @@ async function autoResolveCleaningConflictForReservation(reservationId) {
         const afterDate = newReservation.check_out;
 
         let resolved = 0;
+        const conflictPayload = [];
 
         for (const conflict of conflictingCleanings) {
             if (!conflict?.reservation_id) continue;
+
+            const wasValidated = conflict.status === 'validated' || conflict.validated_by_company === true;
 
             const warningNote = buildAutoConflictNote({
                 newReservationId: newReservation.id,
@@ -271,9 +306,23 @@ async function autoResolveCleaningConflictForReservation(reservationId) {
                 }, { onConflict: 'reservation_id' });
 
             resolved++;
+            conflictPayload.push({
+                old_reservation_id: conflict.reservation_id,
+                old_date: conflict.scheduled_date,
+                was_validated: wasValidated
+            });
         }
 
         if (resolved > 0) {
+            await notifyCleaningPlanningAutoChangeByEmail({
+                ownerUserId: newReservation.owner_user_id,
+                giteId: newReservation.gite_id,
+                newReservationId: newReservation.id,
+                beforeDate,
+                afterDate,
+                conflicts: conflictPayload
+            });
+
             notifyAutoCleaningConflict(`⚠️ ${resolved} ménage(s) replanifié(s) automatiquement (conflit nouvelle réservation)`, 'warning');
             pushPersistentOwnerNotification({
                 title: '⚠️ Replanification ménage automatique',

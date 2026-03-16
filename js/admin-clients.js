@@ -283,12 +283,14 @@ async function displayClientInfos(client) {
     const container = document.getElementById('clientInfoGrid');
     
     // Compter les gîtes réels
-    const { data: gites } = await window.supabaseClient
-        .from('gites')
-        .select('id')
-        .eq('owner_user_id', client.user_id);
-    
-    const nbGitesReels = gites?.length || 0;
+    let nbGitesReels = 0;
+    if (client.user_id) {
+        const { data: gites } = await window.supabaseClient
+            .from('gites')
+            .select('id')
+            .eq('owner_user_id', client.user_id);
+        nbGitesReels = gites?.length || 0;
+    }
     
     container.innerHTML = `
         <div class="info-card">

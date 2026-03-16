@@ -994,6 +994,176 @@ let currentGiteInfos = 'Trévoux';
 let initialAddress = ''; // Adresse initiale chargée pour détecter les changements
 const DB_KEY_INFOS = 'gites_infos_pratiques_complet';
 
+function getDefaultAccessCodeConfig() {
+    return {
+        mode: localStorage.getItem('access_code_engine_default') || 'universel_auto',
+        length: Math.min(10, Math.max(4, Number(localStorage.getItem('access_code_length_default') || 6))),
+        charset: localStorage.getItem('access_code_charset_default') || 'numeric'
+    };
+}
+
+function getGiteAccessCodeConfigStorageKey(giteName) {
+    return `gite_access_code_config_v1_${String(giteName || '').toLowerCase()}`;
+}
+
+function getGiteAccessCodeConfig(giteName) {
+    const defaults = getDefaultAccessCodeConfig();
+    try {
+        const raw = localStorage.getItem(getGiteAccessCodeConfigStorageKey(giteName));
+        if (!raw) {
+            return { mode: 'inherit', length: defaults.length, charset: defaults.charset };
+        }
+
+        const parsed = JSON.parse(raw);
+        const normalizedMode = parsed.mode === 'igloo_api' ? 'systemes_connectes' : (parsed.mode || 'inherit');
+        return {
+            mode: normalizedMode,
+            length: Math.min(10, Math.max(4, Number(parsed.length || defaults.length))),
+            charset: parsed.charset === 'alnum' ? 'alnum' : 'numeric'
+        };
+    } catch (_error) {
+        return { mode: 'inherit', length: defaults.length, charset: defaults.charset };
+    }
+}
+
+function saveGiteAccessCodeConfig(giteName, config) {
+    try {
+        localStorage.setItem(
+            getGiteAccessCodeConfigStorageKey(giteName),
+            JSON.stringify({
+                mode: config?.mode || 'inherit',
+                length: Math.min(10, Math.max(4, Number(config?.length || 6))),
+                charset: config?.charset === 'alnum' ? 'alnum' : 'numeric'
+            })
+        );
+    } catch (_error) {
+        // Non bloquant
+    }
+}
+
+function normalizeAccessCodeMode(mode) {
+    if (mode === 'igloo_api') return 'systemes_connectes';
+    if (mode === 'systemes_connectes' || mode === 'universel_auto' || mode === 'manuel' || mode === 'inherit') {
+        return mode;
+    }
+    return 'universel_auto';
+}
+
+function getEffectiveAccessCodeConfig(giteName) {
+    const defaults = getDefaultAccessCodeConfig();
+    const perGite = getGiteAccessCodeConfig(giteName);
+    return {
+        mode: perGite.mode === 'inherit'
+            ? normalizeAccessCodeMode(defaults.mode)
+            : normalizeAccessCodeMode(perGite.mode),
+        length: perGite.length || defaults.length,
+        charset: perGite.charset || defaults.charset
+    };
+}
+
+function buildGeneratedAccessCode({ length = 6, charset = 'numeric' } = {}) {
+    const safeLength = Math.min(10, Math.max(4, Number(length) || 6));
+    const numericChars = '0123456789';
+    const alphaNumChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const chars = charset === 'alnum' ? alphaNumChars : numericChars;
+
+    let result = '';
+    for (let i = 0; i < safeLength; i++) {
+        result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
+}
+
+async function tryGenerateAccessCodeViaConnectedSystems(giteName, config) {
+    try {
+        const response = await fetch('/api/lock-generate-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                provider: 'auto',
+                providers: 'all_connected',
+                strategy: 'all_connected_lockboxes',
+                gite: giteName,
+                length: config.length,
+                charset: config.charset
+            })
+        });
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const payload = await response.json();
+        return payload?.code ? String(payload.code) : null;
+    } catch (_error) {
+        return null;
+    }
+}
+
+function applyGiteAccessCodeConfigToUI(giteName) {
+    const config = getGiteAccessCodeConfig(giteName);
+    const modeEl = document.getElementById('infos_codeGenerationMode');
+    const lengthEl = document.getElementById('infos_codeLength');
+
+    if (modeEl) modeEl.value = config.mode || 'inherit';
+    if (lengthEl) lengthEl.value = String(config.length || 6);
+}
+
+window.syncGiteAccessCodeConfigUI = function() {
+    const modeEl = document.getElementById('infos_codeGenerationMode');
+    const lengthEl = document.getElementById('infos_codeLength');
+
+    saveGiteAccessCodeConfig(currentGiteInfos, {
+        mode: normalizeAccessCodeMode(modeEl?.value || 'inherit'),
+        length: Number(lengthEl?.value || 6),
+        charset: getDefaultAccessCodeConfig().charset
+    });
+};
+
+window.generateAccessCodeForCurrentGite = async function() {
+    const effectiveConfig = getEffectiveAccessCodeConfig(currentGiteInfos);
+    let generatedCode = null;
+
+    if (effectiveConfig.mode === 'systemes_connectes') {
+        generatedCode = await tryGenerateAccessCodeViaConnectedSystems(currentGiteInfos, effectiveConfig);
+    }
+
+    if (!generatedCode && effectiveConfig.mode !== 'manuel') {
+        generatedCode = buildGeneratedAccessCode(effectiveConfig);
+    }
+
+    if (!generatedCode) {
+        if (typeof showNotification === 'function') {
+            showNotification('ℹ️ Mode manuel actif : saisissez le code d\'accès.', 'info');
+        }
+        return;
+    }
+
+    const codeInput = document.getElementById('infos_codeAcces');
+    if (codeInput) {
+        codeInput.value = generatedCode;
+    }
+
+    const typeAccesInput = document.getElementById('infos_typeAcces');
+    if (typeAccesInput && !typeAccesInput.value) {
+        typeAccesInput.value = 'Boîte à clés';
+    }
+
+    const instructionsInput = document.getElementById('infos_instructionsCles');
+    if (instructionsInput && !String(instructionsInput.value || '').trim()) {
+        instructionsInput.value = `Code d'accès: ${generatedCode}\nMerci de refermer la boîte à clés après utilisation.`;
+    }
+
+    await sauvegarderDonneesInfos();
+
+    if (typeof showNotification === 'function') {
+        const message = effectiveConfig.mode === 'systemes_connectes'
+            ? '✓ Code généré (systèmes connectés ou fallback universel) et sauvegardé'
+            : '✓ Code généré et sauvegardé';
+        showNotification(message, 'success');
+    }
+};
+
 // ==========================================
 // 🎨 APPLICATION COULEUR GÎTE AUX CARDS
 // ==========================================
@@ -1202,6 +1372,7 @@ window.selectGiteFromDropdown = async function(giteName) {
     
     // Charger les données du nouveau gîte (préserve la langue active)
     await chargerDonneesInfos();
+    applyGiteAccessCodeConfigToUI(giteName);
     
     // Charger les photos du gîte
     if (typeof window.loadExistingPhotos === 'function') {
@@ -1480,6 +1651,7 @@ async function chargerDonneesInfos() {
         }
         // Appliquer l'affichage selon la langue active
         applyLanguageDisplay();
+        applyGiteAccessCodeConfigToUI(currentGiteInfos);
         return;
     }
     
@@ -1537,6 +1709,7 @@ async function chargerDonneesInfos() {
     
     // Appliquer l'affichage selon la langue ACTIVE (préservée)
     applyLanguageDisplay();
+    applyGiteAccessCodeConfigToUI(currentGiteInfos);
     
     // Générer le QR code WiFi si les données sont présentes
     setTimeout(() => {
