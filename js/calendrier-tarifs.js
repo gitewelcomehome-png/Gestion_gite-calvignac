@@ -2768,15 +2768,17 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         
         if (!ai.haute || !ai.standard || !ai.faible) throw new Error('Réponse incomplète');
 
-        // Garde-fou : rejeter les valeurs aberrantes (prix de séjour ou hallucination GPT)
-        // Basé sur la capacité uniquement — sans référence au prix actuel du propriétaire
+        // Garde-fou JS strict — prixBase utilisé UNIQUEMENT ici, jamais transmis au prompt
+        // Si GPT retourne un prix de séjour (~7× le prix/nuit), on rejette et on bascule en fallback local
+        const guardrailJsMin = Math.round(prixBase * 0.35);
+        const guardrailJsMax = Math.round(prixBase * 3.0);
         for (const niv of ['haute', 'standard', 'faible']) {
             const v = parseFloat(ai[niv]);
-            if (v > guardrailMax || v < guardrailMin) {
-                throw new Error(`Prix ${niv} (${v}€) hors fourchette réaliste pour ${cap} pers — fallback local`);
+            if (v > guardrailJsMax || v < guardrailJsMin) {
+                throw new Error(`Prix ${niv} (${v}€) hors fourchette réaliste [${guardrailJsMin}–${guardrailJsMax}€] — fallback local`);
             }
         }
-        
+
         // Construire les suggestions jour par jour en se basant sur le niveau de demande
         for (const dateStr of joursLibres) {
             const niv = aiDemandeCacheTarifs[dateStr] || 'standard';
@@ -2785,12 +2787,15 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
             const ajustementPontFerie = getHolidayPontAdjustmentTarifs(dateStr);
             aiSuggestionsCacheTarifs[dateStr] = Math.round(prixNiveau * ajustementWeekend * ajustementPontFerie);
         }
-        
+
         // Appliquer les surcharges pour événements spécifiques détectés par l'IA
+        // Un prix événement ne peut pas être inférieur au niveau "faible" (sinon c'est une confusion ticket/nuit)
+        const prixFaibleIA = Math.round(parseFloat(ai.faible));
         if (Array.isArray(ai.evenements)) {
             for (const ev of ai.evenements) {
                 if (ev.date && ev.prix && aiSuggestionsCacheTarifs[ev.date] !== undefined) {
-                    aiSuggestionsCacheTarifs[ev.date] = Math.round(parseFloat(ev.prix));
+                    const prixEv = Math.round(parseFloat(ev.prix));
+                    aiSuggestionsCacheTarifs[ev.date] = prixEv >= prixFaibleIA ? prixEv : Math.round(prixFaibleIA * 1.20);
                     aiDemandeCacheTarifs[ev.date] = 'evenement';
                 }
             }
