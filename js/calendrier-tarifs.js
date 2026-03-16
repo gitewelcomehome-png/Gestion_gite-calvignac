@@ -2826,13 +2826,14 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         
     } catch (err) {
         if (btnP) { btnP.textContent = '💰 Proposer des prix'; btnP.disabled = false; }
-        // Fallback local si API indisponible
-        const mult = { haute: 1.30, standard: 1.00, faible: 0.75, evenement: 1.50 };
+        // Fallback local si API indisponible ou guardrail déclenché
+        const mult = { haute: 1.30, standard: 1.10, faible: 1.00, evenement: 1.50 };
         for (const dateStr of joursLibres) {
             const niv = aiDemandeCacheTarifs[dateStr] || 'standard';
             const ajustementWeekend = getWeekendAdjustmentTarifs(dateStr);
             const ajustementPontFerie = getHolidayPontAdjustmentTarifs(dateStr);
-            aiSuggestionsCacheTarifs[dateStr] = Math.round(prixBase * (mult[niv] || 1) * ajustementWeekend * ajustementPontFerie);
+            // Jamais sous prixBase — plancher absolu
+            aiSuggestionsCacheTarifs[dateStr] = Math.max(prixBase, Math.round(prixBase * (mult[niv] || 1.10) * ajustementWeekend * ajustementPontFerie));
         }
         const legende = document.getElementById('ai-demande-legende-tarifs');
         const btnTout = document.getElementById('btnAIToutAccepter');
