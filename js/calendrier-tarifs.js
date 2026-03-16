@@ -2765,8 +2765,9 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         
         if (!ai.haute || !ai.standard || !ai.faible) throw new Error('Réponse incomplète');
 
-        // Garde-fou JS : prixBase/2 … prixBase*2 — utilisé UNIQUEMENT ici, jamais transmis au prompt
-        const guardrailJsMin = Math.round(prixBase * 0.5);
+        // Garde-fou JS : prixBase … prixBase*2 — utilisé UNIQUEMENT ici, jamais transmis au prompt
+        // Min = prixBase : on ne descend jamais sous son propre tarif de base
+        const guardrailJsMin = prixBase;
         const guardrailJsMax = Math.round(prixBase * 2.0);
         for (const niv of ['haute', 'standard', 'faible']) {
             const v = parseFloat(ai[niv]);
