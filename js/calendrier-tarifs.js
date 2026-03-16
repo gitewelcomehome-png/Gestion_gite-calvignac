@@ -2707,10 +2707,7 @@ async function proposerPrixIATarifs() {
     const localisationLabel = localisation || 'France';
     const gpsLabel = localisationGPS ? `GPS : ${localisationGPS}` : 'Coordonnées GPS non renseignées';
 
-    // Fourchette de plausibilité par capacité — sans aucune référence au prix actuel
     const cap = capaciteMax || 6;
-    const guardrailMin = Math.max(25, cap * 8);   // ex: 6 pers → 48€ min
-    const guardrailMax = cap * 120;               // ex: 6 pers → 720€ max
 
     const prompt = `Tu es un expert en revenue management pour les hébergements touristiques en France.
 
@@ -2734,7 +2731,7 @@ Ces commissions réduisent la rentabilité réelle. Tiens-en compte pour que le 
 
 ## Tes missions
 1. **Analyse concurrence** : Utilise la recherche web pour trouver les tarifs réels d'hébergements similaires (gîtes, meublés, maisons de vacances) dans un rayon de 20-30 km autour de "${localisationLabel}"${localisationGPS ? ` (GPS ${localisationGPS})` : ''}. Note le **prix PAR NUIT** affiché pour des biens de capacité similaire (${capaciteMax || '?'} pers.) sur Airbnb, Booking, Gîtes de France, Abritel.
-2. **3 niveaux de prix PAR NUIT** : Propose haute/standard/faible demande **uniquement basés sur les prix par nuit du marché local réel**. IMPORTANT : ce sont des PRIX PAR NUIT (pas par séjour, pas par semaine). Fourchette de plausibilité pour un bien de ${cap} personnes en France : ${guardrailMin}€–${guardrailMax}€/nuit.
+2. **3 niveaux de prix PAR NUIT** : Propose haute/standard/faible demande **uniquement basés sur les prix par nuit du marché local réel**. IMPORTANT : ce sont des PRIX PAR NUIT (pas par séjour, pas par semaine).
 3. **Événements locaux** : Identifie festivals, marchés, événements sportifs ou culturels importants ce mois près de "${localisationLabel}" et propose un prix PAR NUIT spécifique pour ces dates.
 4. **Conseil** : Une recommandation stratégique courte et actionnable pour ce mois dans cette zone.
 
@@ -2768,14 +2765,13 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         
         if (!ai.haute || !ai.standard || !ai.faible) throw new Error('Réponse incomplète');
 
-        // Garde-fou JS strict — prixBase utilisé UNIQUEMENT ici, jamais transmis au prompt
-        // Si GPT retourne un prix de séjour (~7× le prix/nuit), on rejette et on bascule en fallback local
-        const guardrailJsMin = Math.round(prixBase * 0.35);
-        const guardrailJsMax = Math.round(prixBase * 3.0);
+        // Garde-fou JS : prixBase/2 … prixBase*2 — utilisé UNIQUEMENT ici, jamais transmis au prompt
+        const guardrailJsMin = Math.round(prixBase * 0.5);
+        const guardrailJsMax = Math.round(prixBase * 2.0);
         for (const niv of ['haute', 'standard', 'faible']) {
             const v = parseFloat(ai[niv]);
             if (v > guardrailJsMax || v < guardrailJsMin) {
-                throw new Error(`Prix ${niv} (${v}€) hors fourchette réaliste [${guardrailJsMin}–${guardrailJsMax}€] — fallback local`);
+                throw new Error(`Prix ${niv} (${v}€) hors fourchette [${guardrailJsMin}–${guardrailJsMax}€] — fallback local`);
             }
         }
 
