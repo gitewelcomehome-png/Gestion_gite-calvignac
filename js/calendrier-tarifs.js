@@ -65,6 +65,8 @@ let aiDemandeCacheTarifs = {}; // { 'YYYY-MM-DD': 'haute'|'standard'|'faible' }
 let aiSuggestionsCacheTarifs = {};
 let currentGiteAdresseTarifs = '';
 let currentGiteNameTarifs = '';
+let currentGiteZoneVacances = 'B'; // zone A/B/C — déterminée depuis l'adresse du gîte
+let currentGiteInfos = null; // cache infos_gites (GPS, capacité, équipements)
 
 // ==========================================
 // INITIALISATION
@@ -2004,12 +2006,32 @@ async function saveConfiguration() {
 // Architecture simplifiée : pas besoin de getUserOrganizationId()
 // RLS filtre automatiquement par owner_user_id = auth.uid()
 
+/**
+ * Charge les infos du gîte (GPS, capacité, équipements) depuis infos_gites
+ * et détermine la zone de vacances scolaires correcte.
+ */
+async function loadInfosGiteTarifs() {
+    if (!currentGiteId || !currentGiteNameTarifs) return;
+    try {
+        const { data } = await window.supabaseClient
+            .from('infos_gites')
+            .select('adresse, gps_lat, gps_lon, nb_max_personnes, configuration_chambres, climatisation, caution')
+            .eq('gite', currentGiteNameTarifs.toLowerCase())
+            .maybeSingle();
+        if (data) {
+            currentGiteInfos = data;
+            currentGiteZoneVacances = getZoneVacancesFromAdresse(data.adresse);
+        }
+    } catch (e) { /* non bloquant */ }
+}
+
 async function loadAllData() {
     try {
         await Promise.all([
             loadTarifsBase(),
             loadRegles(),
-            loadReservations()
+            loadReservations(),
+            loadInfosGiteTarifs()
         ]);
         // Force le rendu du calendrier après chargement
         renderCalendrierTarifs();
@@ -2400,28 +2422,67 @@ function getFeriesNationauxTarifs(year) {
 }
 
 function getVacancesScolairesZoneTarifs(zone) {
-    // Zone B par défaut (couvre la majorité du territoire Lot/Occitanie)
+    // Zone déterminée dynamiquement depuis le code postal de l'adresse du gîte
+    // Mapping (académie → zone) : A=Besançon/Bordeaux/Clermont/Dijon/Grenoble/Limoges/Lyon/Poitiers
+    //                              B=Aix-Marseille/Amiens/Caen/Lille/Nancy/Nantes/Nice/Orléans/Reims/Rennes/Rouen/Strasbourg
+    //                              C=Créteil/Montpellier/Paris/Toulouse/Versailles
     const vacances = {
         'A': [
             { debut: '2025-02-08', fin: '2025-02-24' }, { debut: '2025-04-19', fin: '2025-05-05' },
             { debut: '2025-07-05', fin: '2025-09-01' }, { debut: '2025-10-18', fin: '2025-11-03' },
             { debut: '2025-12-20', fin: '2026-01-05' }, { debut: '2026-02-14', fin: '2026-03-02' },
             { debut: '2026-04-18', fin: '2026-05-04' },
+            // 2026-2027 (dates officielles MEN)
+            { debut: '2026-07-04', fin: '2026-09-01' }, { debut: '2026-10-24', fin: '2026-11-09' },
+            { debut: '2026-12-19', fin: '2027-01-04' }, { debut: '2027-02-20', fin: '2027-03-08' },
+            { debut: '2027-04-17', fin: '2027-05-03' }, { debut: '2027-07-05', fin: '2027-09-01' },
         ],
         'B': [
             { debut: '2025-02-22', fin: '2025-03-10' }, { debut: '2025-04-19', fin: '2025-05-05' },
             { debut: '2025-07-05', fin: '2025-09-01' }, { debut: '2025-10-25', fin: '2025-11-10' },
             { debut: '2025-12-20', fin: '2026-01-05' }, { debut: '2026-02-28', fin: '2026-03-16' },
             { debut: '2026-04-18', fin: '2026-05-04' },
+            // 2026-2027 (dates officielles MEN)
+            { debut: '2026-07-04', fin: '2026-09-01' }, { debut: '2026-10-17', fin: '2026-11-02' },
+            { debut: '2026-12-19', fin: '2027-01-04' }, { debut: '2027-02-13', fin: '2027-03-01' },
+            { debut: '2027-04-24', fin: '2027-05-10' }, { debut: '2027-07-05', fin: '2027-09-01' },
         ],
         'C': [
             { debut: '2025-02-15', fin: '2025-03-03' }, { debut: '2025-04-19', fin: '2025-05-05' },
             { debut: '2025-07-05', fin: '2025-09-01' }, { debut: '2025-10-18', fin: '2025-11-03' },
             { debut: '2025-12-20', fin: '2026-01-05' }, { debut: '2026-02-21', fin: '2026-03-09' },
             { debut: '2026-04-18', fin: '2026-05-04' },
+            // 2026-2027 (dates officielles MEN)
+            { debut: '2026-07-04', fin: '2026-09-01' }, { debut: '2026-10-17', fin: '2026-11-02' },
+            { debut: '2026-12-19', fin: '2027-01-04' }, { debut: '2027-02-27', fin: '2027-03-15' },
+            { debut: '2027-04-17', fin: '2027-05-03' }, { debut: '2027-07-05', fin: '2027-09-01' },
         ],
     };
     return vacances[zone] || vacances['B'];
+}
+
+/**
+ * Détermine la zone de vacances scolaires (A/B/C) à partir d'un code postal français.
+ * Se base sur l'académie dont dépend le département (source : MEN).
+ */
+function getZoneVacancesFromAdresse(adresse) {
+    if (!adresse) return 'B';
+    const match = adresse.match(/\b(\d{5})\b/);
+    if (!match) return 'B';
+    const dep = match[1].substring(0, 2);
+    // Zone A : Besançon (25,39,70,90), Bordeaux (24,33,40,47,64), Clermont (03,15,43,63),
+    //          Dijon (21,58,71,89), Grenoble (07,26,38,73,74), Limoges (19,23,87),
+    //          Lyon (01,42,69), Poitiers (16,17,79,86)
+    const zoneA = new Set(['01','03','07','15','16','17','19','21','23','24','25','26',
+                           '33','38','39','40','42','43','47','52','58','63','64','69',
+                           '70','71','73','74','79','86','87','89','90']);
+    // Zone C : Créteil (77,93,94), Montpellier (11,30,34,48,66), Paris (75),
+    //          Toulouse (09,12,31,32,46,65,81,82), Versailles (78,91,92,95)
+    const zoneC = new Set(['09','11','12','30','31','32','34','46','48','65','66',
+                           '75','77','78','81','82','91','92','93','94','95']);
+    if (zoneA.has(dep)) return 'A';
+    if (zoneC.has(dep)) return 'C';
+    return 'B';
 }
 
 function getDemandePourDateTarifs(dateStr) {
@@ -2446,8 +2507,8 @@ function getDemandePourDateTarifs(dateStr) {
     // Fériés → haute demande
     if (feries.has(dateStr)) return 'haute';
     
-    // Vacances scolaires → haute demande
-    const vacances = getVacancesScolairesZoneTarifs('B');
+    // Vacances scolaires → haute demande (zone déterminée depuis l'adresse du gîte)
+    const vacances = getVacancesScolairesZoneTarifs(currentGiteZoneVacances);
     for (const v of vacances) {
         if (dateStr >= v.debut && dateStr <= v.fin) return 'haute';
     }
@@ -2590,31 +2651,34 @@ async function proposerPrixIATarifs() {
         return;
     }
     
-    // Récupérer l'adresse réelle du gîte depuis infos_gites
-    let localisation = '';
-    let contexteGite = 'minimal';
-    try {
-        const { data: infos } = await window.supabaseClient
-            .from('infos_gites')
-            .select('adresse')
-            .eq('gite', currentGiteNameTarifs.toLowerCase())
-            .maybeSingle();
-        if (infos?.adresse) {
-            localisation = infos.adresse;
-            contexteGite = 'complet';
-        }
-    } catch (e) { /* pas bloquant */ }
-    if (!localisation) {
-        // Fallback : nom du gîte tel qu'affiché dans le sélecteur
-        localisation = currentGiteNameTarifs || '';
-        contexteGite = localisation ? 'partiel' : 'minimal';
+    // Utiliser les infos déjà chargées par loadInfosGiteTarifs() — évite une requête redondante
+    // Si non encore chargées (ex: changement de gîte récent), on re-tente
+    if (!currentGiteInfos) {
+        await loadInfosGiteTarifs();
     }
+
+    const infos = currentGiteInfos || {};
+    const adresse = infos.adresse || '';
+    const gpsLat = parseFloat(infos.gps_lat) || null;
+    const gpsLon = parseFloat(infos.gps_lon) || null;
+    const capaciteMax = infos.nb_max_personnes ? parseInt(infos.nb_max_personnes) : null;
+    const configChambres = infos.configuration_chambres || '';
+    const climatisation = infos.climatisation || '';
+    const caution = infos.caution ? parseInt(infos.caution) : null;
+
+    // Contexte de la localisation : adresse complète + GPS si disponibles
+    let localisation = adresse || currentGiteNameTarifs || '';
+    let localisationGPS = (gpsLat && gpsLon) ? `${gpsLat},${gpsLon}` : '';
+    let contexteGite = 'minimal';
+    if (adresse && gpsLat && gpsLon) contexteGite = 'complet';
+    else if (adresse) contexteGite = 'partiel';
+    else if (currentGiteNameTarifs) { localisation = currentGiteNameTarifs; contexteGite = 'partiel'; }
 
     const moisNom = new Date(currentYearTarifs, currentMonthTarifs, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
     const feries = getFeriesNationauxTarifs(currentYearTarifs);
     const joursFeries = joursLibres.filter(d => feries.has(d));
     const joursVacances = joursLibres.filter(d => {
-        const v = getVacancesScolairesZoneTarifs('B');
+        const v = getVacancesScolairesZoneTarifs(currentGiteZoneVacances);
         return v.some(p => d >= p.debut && d <= p.fin);
     });
     const configGite = reglesCache?.configuration_gite || {};
@@ -2631,23 +2695,40 @@ async function proposerPrixIATarifs() {
 
     const prixBase = Math.round(prixBaseConfig);
     const prixMin = Math.round(prixBase * 0.60);
-    const prixMax = Math.round(prixBase * 1.60);
+    const prixMax = Math.round(prixBase * 1.70);
+
+    // Construire la description du gîte pour le prompt
+    const descriptionGite = [
+        capaciteMax ? `Capacité : ${capaciteMax} personnes` : null,
+        configChambres ? `Configuration : ${configChambres}` : null,
+        climatisation ? `Climatisation : ${climatisation}` : null,
+        caution ? `Caution : ${caution}€` : null,
+    ].filter(Boolean).join('. ');
+
+    const localisationLabel = localisation || 'France';
+    const gpsLabel = localisationGPS ? `GPS : ${localisationGPS}` : 'Coordonnées GPS non renseignées';
 
     const prompt = `Tu es un expert en revenue management pour les hébergements touristiques en France.
 
-Gîte : "${localisation || 'France'}".
+## Gîte à analyser
+Adresse : "${localisationLabel}".
+${gpsLabel}.
+${descriptionGite ? `Caractéristiques : ${descriptionGite}.` : ''}
 Période analysée : ${moisNom}. Jours libres à tarifer : ${joursLibres.length}.
+
+## Tarification actuelle
 Tarif de base actuel : ${prixBase}€/nuit. Fourchette acceptable : ${prixMin}€–${prixMax}€.
 Frais ménage (séjour) : ${fraisMenage}€. Frais draps (séjour) : ${fraisDraps}€.
-Jours fériés ce mois : ${joursFeries.length > 0 ? joursFeries.join(', ') : 'aucun'}.
-Jours vacances scolaires zone B : ${joursVacances.length}.
 
-Ton rôle :
-1. Propose 3 niveaux de prix optimisés (haute/standard/faible demande) adaptés au marché local autour de "${localisation || 'France'}" et à la concurrence des hébergements similaires dans cette zone.
-    Prends explicitement en compte le tarif nuit de base + les frais ménage/draps pour préserver la rentabilité.
-    IMPORTANT: le prix week-end doit être plus élevé que le prix semaine à niveau de demande équivalent.
-2. Identifie les événements locaux, festivals, marchés, fêtes ou week-ends thématiques importants ce mois dans la région proche de "${localisation || 'France'}" et propose un prix spécifique pour ces dates.
-3. Donne un conseil stratégique court et actionnable pour ce mois dans cette région.
+## Contexte calendaire
+Jours fériés ce mois : ${joursFeries.length > 0 ? joursFeries.join(', ') : 'aucun'}.
+Zone vacances scolaires : ${currentGiteZoneVacances} (${joursVacances.length} jours concernés ce mois).
+
+## Tes missions
+1. **Analyse concurrence** : Utilise la recherche web pour trouver les tarifs d'hébergements similaires (gîtes, meublés, chambres d'hôtes) dans un rayon de 20-30 km autour de "${localisationLabel}"${localisationGPS ? ` (GPS ${localisationGPS})` : ''}. Tiens compte de la capacité (${capaciteMax || '?'} pers.) pour comparer avec des biens équivalents.
+2. **3 niveaux de prix** : Propose haute/standard/faible demande en cohérence avec la concurrence locale et rentabilité (base ${prixBase}€ + frais ménage ${fraisMenage}€ + draps ${fraisDraps}€). Le prix week-end doit être plus élevé que le prix semaine.
+3. **Événements locaux** : Identifie festivals, marchés, événements sportifs ou culturels importants ce mois près de "${localisationLabel}" et propose un prix spécifique pour ces dates.
+4. **Conseil** : Une recommandation stratégique courte et actionnables pour ce mois dans cette zone.
 
 Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
 {"haute":${Math.round(prixBase*1.35)},"standard":${prixBase},"faible":${Math.round(prixBase*0.78)},"conseil":"...","evenements":[{"date":"YYYY-MM-DD","nom":"...","prix":0}]}`;
@@ -2702,11 +2783,12 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         // Afficher le conseil IA dans la légende si présent
         const conseilEl = document.getElementById('ai-conseil-inline');
         const sourceIA = data.webSearchUsed ? '🌐 Web utilisée' : '🧠 Sans recherche web';
+        const gpsInfo = (gpsLat && gpsLon) ? ` · GPS ${gpsLat.toFixed(4)},${gpsLon.toFixed(4)}` : '';
         const contexteLabel = contexteGite === 'complet'
-            ? '📍 Contexte gîte complet'
+            ? `📍 Adresse + GPS · Zone ${currentGiteZoneVacances}${gpsInfo}`
             : contexteGite === 'partiel'
-                ? '🏡 Contexte partiel (adresse manquante)'
-                : '⚠️ Contexte minimal (infos gîte manquantes)';
+                ? `🏡 Adresse seule (GPS manquant) · Zone ${currentGiteZoneVacances}`
+                : `⚠️ Contexte minimal (infos gîte manquantes) · Zone ${currentGiteZoneVacances}`;
         if (conseilEl) {
             const conseilTexte = ai.conseil ? `💡 ${ai.conseil}` : '💡 Conseil IA indisponible';
             conseilEl.textContent = `${conseilTexte} · ${sourceIA} · ${contexteLabel}`;
@@ -2738,10 +2820,10 @@ Réponds UNIQUEMENT en JSON valide strict, sans markdown, sans commentaire :
         if (btnTout) btnTout.style.display = 'inline-flex';
         if (conseilEl) {
             const contexteLabel = contexteGite === 'complet'
-                ? '📍 Contexte gîte complet'
+                ? `📍 Adresse + GPS · Zone ${currentGiteZoneVacances}`
                 : contexteGite === 'partiel'
-                    ? '🏡 Contexte partiel (adresse manquante)'
-                    : '⚠️ Contexte minimal (infos gîte manquantes)';
+                    ? `🏡 Adresse seule · Zone ${currentGiteZoneVacances}`
+                    : `⚠️ Infos gîte manquantes · Zone ${currentGiteZoneVacances}`;
             conseilEl.textContent = `⚠️ Mode secours activé : l'IA en ligne n'a pas répondu. Les prix affichés sont calculés automatiquement avec les règles locales. · ${contexteLabel}`;
             conseilEl.style.display = 'block';
         }
