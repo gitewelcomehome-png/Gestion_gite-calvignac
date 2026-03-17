@@ -870,6 +870,7 @@
                 <nav class="sidebar-links">
                     <a href="#options-profile" class="sidebar-link" data-panel="options-profile">👤 Mon Profil</a>
                     <a href="#options-subscription" class="sidebar-link" data-panel="options-subscription">💳 Mon Abonnement</a>
+                    <a href="#options-security" class="sidebar-link" data-panel="options-security">🔒 Sécurité</a>
                     <a href="#options-tools" class="sidebar-link" data-panel="options-tools">🛠️ Outils de Gestion</a>
                     <a href="#options-theme-interface" class="sidebar-link" data-panel="options-theme-interface">🌓 Thème & Style</a>
                     <a href="#options-archives" class="sidebar-link" data-panel="options-archives">📦 Archives</a>
@@ -989,6 +990,35 @@
             </div>
         </div>
         
+        <!-- SÉCURITÉ -->
+        <div id="options-security" data-options-panel class="section-card" style="margin-bottom: 2rem; scroll-margin-top: 1rem;">
+            <div class="section-header">
+                <div class="section-icon">🔒</div>
+                <div class="section-title">Sécurité</div>
+            </div>
+            <p class="section-description">Modifiez votre mot de passe de connexion.</p>
+
+            <div id="securityAlert" style="padding: 14px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 600; display: none; line-height: 1.5;"></div>
+
+            <form id="changePasswordForm" style="max-width: 420px;">
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Mot de passe actuel</label>
+                    <input type="password" id="secCurrentPassword" class="profile-input" autocomplete="current-password" placeholder="••••••••" required>
+                </div>
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Nouveau mot de passe</label>
+                    <input type="password" id="secNewPassword" class="profile-input" autocomplete="new-password" placeholder="••••••••" minlength="8" required>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Confirmer le nouveau mot de passe</label>
+                    <input type="password" id="secConfirmPassword" class="profile-input" autocomplete="new-password" placeholder="••••••••" minlength="8" required>
+                </div>
+                <button type="submit" id="btnChangePassword" class="btn" style="width: auto; min-width: 220px;">
+                    Enregistrer le nouveau mot de passe
+                </button>
+            </form>
+        </div>
+
         <!-- MON ABONNEMENT -->
         <div id="options-subscription" data-options-panel class="section-card" style="margin-bottom: 2rem; scroll-margin-top: 1rem;">
             <div class="section-header">
@@ -3843,6 +3873,79 @@
                 document.getElementById('profileErrorMessage').textContent = error.message || 'Erreur lors de la sauvegarde';
             }
         }
+
+        // ── CHANGEMENT DE MOT DE PASSE ──────────────────────────────────────
+        (function() {
+            const form = document.getElementById('changePasswordForm');
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const alertEl = document.getElementById('securityAlert');
+                alertEl.style.display = 'none';
+
+                const currentPwd = document.getElementById('secCurrentPassword').value;
+                const newPwd     = document.getElementById('secNewPassword').value;
+                const confirmPwd = document.getElementById('secConfirmPassword').value;
+                const btn        = document.getElementById('btnChangePassword');
+
+                if (newPwd !== confirmPwd) {
+                    showSecurityAlert('Les nouveaux mots de passe ne correspondent pas.', 'error');
+                    return;
+                }
+                if (newPwd.length < 8) {
+                    showSecurityAlert('Le nouveau mot de passe doit contenir au moins 8 caractères.', 'error');
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.textContent = 'Enregistrement...';
+
+                try {
+                    // 1. Vérifier le mot de passe actuel via re-login
+                    const { data: { user } } = await window.supabaseClient.auth.getUser();
+                    if (!user) throw new Error('Session expirée, veuillez vous reconnecter.');
+
+                    const { error: signInError } = await window.supabaseClient.auth.signInWithPassword({
+                        email: user.email,
+                        password: currentPwd
+                    });
+                    if (signInError) {
+                        showSecurityAlert('Mot de passe actuel incorrect.', 'error');
+                        return;
+                    }
+
+                    // 2. Mettre à jour le mot de passe
+                    const { error: updateError } = await window.supabaseClient.auth.updateUser({ password: newPwd });
+                    if (updateError) throw updateError;
+
+                    showSecurityAlert('✅ Mot de passe modifié avec succès !', 'success');
+                    form.reset();
+
+                } catch (err) {
+                    console.error('Erreur changement mot de passe:', err);
+                    showSecurityAlert(err.message || 'Une erreur est survenue.', 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Enregistrer le nouveau mot de passe';
+                }
+            });
+
+            function showSecurityAlert(msg, type) {
+                const el = document.getElementById('securityAlert');
+                el.innerHTML = msg;
+                el.style.display = 'block';
+                if (type === 'success') {
+                    el.style.background = 'rgba(34, 197, 94, 0.1)';
+                    el.style.border = '1px solid rgba(34, 197, 94, 0.3)';
+                    el.style.color = '#22c55e';
+                } else {
+                    el.style.background = 'rgba(239, 68, 68, 0.1)';
+                    el.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+                    el.style.color = '#ef4444';
+                }
+            }
+        })();
     </script>
 </body>
 </html>

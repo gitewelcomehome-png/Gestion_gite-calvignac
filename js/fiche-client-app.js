@@ -727,10 +727,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadReservationData() {
-    // Valider le token et charger la réservation
+    // Étape 1 : Valider le token (sans join pour éviter les problèmes RLS embedded)
     const { data: tokenData, error: tokenError } = await supabase
         .from('client_access_tokens')
-        .select('*, reservation:reservations(*)')
+        .select('id, reservation_id, owner_user_id, expires_at, is_active')
         .eq('token', token)
         .maybeSingle();
 
@@ -742,17 +742,33 @@ async function loadReservationData() {
     if (!tokenData) {
         throw new Error('Token invalide, introuvable ou bloque par RLS');
     }
-    
+
     // Vérifier l'expiration
     const isExpired = new Date(tokenData.expires_at) < new Date();
     if (isExpired) {
         throw new Error('Ce lien a expiré');
     }
 
-    if (!tokenData.reservation) {
+    if (!tokenData.reservation_id) {
+        throw new Error('Token non lié à une réservation');
+    }
+
+    // Étape 2 : Charger la réservation séparément
+    const { data: reservation, error: reservationError } = await supabase
+        .from('reservations')
+        .select('*')
+        .eq('id', tokenData.reservation_id)
+        .maybeSingle();
+
+    if (reservationError) {
+        const reason = reservationError.message || reservationError.details || 'erreur inconnue';
+        throw new Error(`Reservation inaccessible (${reason})`);
+    }
+
+    if (!reservation) {
         throw new Error('Reservation introuvable ou inaccessible pour ce token');
     }
-    
+
     // Mettre à jour le token (colonnes existantes)
     await supabase
         .from('client_access_tokens')
@@ -761,8 +777,8 @@ async function loadReservationData() {
             is_active: true
         })
         .eq('id', tokenData.id);
-    
-    reservationData = tokenData.reservation;
+
+    reservationData = reservation;
     
     // Logs désactivés (table fiche_generation_logs optionnelle)
 }
