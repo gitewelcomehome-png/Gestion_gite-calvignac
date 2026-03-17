@@ -748,37 +748,33 @@ async function loadReservationData() {
 }
 
 async function loadGiteInfo() {
-    // Essayer avec le nom normalisé
-    let { data, error } = await supabase
-        .from('infos_gites')
-        .select('*')
-        .eq('gite', normalizeGiteName(reservationData.gite))
-        .maybeSingle();
-    
-    // Si pas de résultat, essayer avec le nom original en minuscules
-    if (!data && !error) {
-        const result = await supabase
-            .from('infos_gites')
-            .select('*')
-            .eq('gite', reservationData.gite.toLowerCase())
-            .maybeSingle();
-        data = result.data;
-        error = result.error;
+    // Utilise RPC SECURITY DEFINER pour éviter le blocage RLS sur infos_gites
+    const { data: rpcData, error: rpcError } = await supabase
+        .rpc('get_gite_info_by_client_token', { p_token: token });
+
+    let data = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+    let error = rpcError;
+
+    // Fallback direct si la fonction RPC n'existe pas encore
+    if (rpcError && rpcError.code === 'PGRST202') {
+        const r1 = await supabase.from('infos_gites').select('*')
+            .eq('gite', normalizeGiteName(reservationData.gite)).maybeSingle();
+        data = r1.data;
+        error = r1.error;
+        if (!data && !error) {
+            const r2 = await supabase.from('infos_gites').select('*')
+                .eq('gite', reservationData.gite.toLowerCase()).maybeSingle();
+            data = r2.data; error = r2.error;
+        }
+        if (!data && !error) {
+            const r3 = await supabase.from('infos_gites').select('*')
+                .eq('gite', reservationData.gite).maybeSingle();
+            data = r3.data; error = r3.error;
+        }
     }
-    
-    // Si toujours pas de résultat, essayer avec le nom original
-    if (!data && !error) {
-        const result = await supabase
-            .from('infos_gites')
-            .select('*')
-            .eq('gite', reservationData.gite)
-            .maybeSingle();
-        data = result.data;
-        error = result.error;
-    }
-    
+
     if (error) throw error;
-    
+
     if (!data) {
         throw new Error(`Aucune information trouvée pour le gîte "${reservationData.gite}". Veuillez configurer les infos pratiques dans le back-office.`);
     }
@@ -2644,56 +2640,21 @@ async function submitDemandeHoraire(type) {
     const typeDb = type === 'arrivee_anticipee' ? 'arrivee' : 'depart';
     
     try {
-        // 1. Vérifier si une demande en_attente existe déjà pour cette réservation et ce type
-        const { data: existingDemandes, error: checkError } = await supabase
-            .from('demandes_horaires')
-            .select('id')
-            .eq('reservation_id', reservationData.id)
-            .eq('type', typeDb)
-            .eq('statut', 'en_attente')
-            .limit(1);
-        
-        if (checkError) {
-            console.error('❌ Erreur vérification:', checkError);
-            
-            if (checkError.message && checkError.message.includes('relation') && checkError.message.includes('does not exist')) {
-                showToast('⚠️ Fonctionnalité non encore activée. Contactez le gestionnaire.');
-                // // console.warn('⚠️ La table demandes_horaires n\'existe pas encore. Exécutez sql/migrate_demandes_horaires.sql dans Supabase.');
-            } else {
-                showToast(t('erreur') || '❌ Erreur lors de la vérification');
-            }
-            return;
-        }
-        
-        let result;
-        
-        // 2. Si une demande existe déjà, la mettre à jour (écraser)
-        if (existingDemandes && existingDemandes.length > 0) {
-            const { data, error } = await supabase
-                .from('demandes_horaires')
-                .update({
-                    heure_demandee: heureDemandee,
-                    motif: motif || null,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', existingDemandes[0].id);
-            
-            if (error) throw error;
-            // // console.log('✅ Demande mise à jour:', data);
-            showToast('✅ Demande mise à jour avec succès !');
-        } 
-        // 3. Sinon, créer une nouvelle demande
-        else {
-            // Utiliser l'owner_user_id de la réservation (accès anonyme par token)
-            const ownerUserId = reservationData.owner_user_id;
-            if (!ownerUserId) {
-                showToast('❌ Erreur : données de réservation manquantes');
-                return;
-            }
-            
-            const { data, error } = await supabase
-                .from('demandes_horaires')
-                .insert({
+        // Utilise RPC SECURITY DEFINER (les policies RLS basées sur headers ne fonctionnent pas)
+        const { data: resultId, error } = await supabase
+            .rpc('upsert_demande_horaire_by_token', {
+                p_token:  token,
+                p_type:   typeDb,
+                p_heure:  heureDemandee,
+                p_motif:  motif || null
+            });
+
+        if (error) {
+            if (error.code === 'PGRST202') {
+                // RPC pas encore créée, fallback direct
+                const ownerUserId = reservationData.owner_user_id;
+                if (!ownerUserId) { showToast('❌ Erreur : données de réservation manquantes'); return; }
+                const { error: insertError } = await supabase.from('demandes_horaires').insert({
                     owner_user_id: ownerUserId,
                     reservation_id: reservationData.id,
                     type: typeDb,
@@ -2701,10 +2662,13 @@ async function submitDemandeHoraire(type) {
                     motif: motif || null,
                     statut: 'en_attente'
                 });
-            
-            if (error) throw error;
-            showToast(t('demande_envoyee') || '✅ Demande envoyée avec succès !');
+                if (insertError) throw insertError;
+            } else {
+                throw error;
+            }
         }
+
+        showToast(t('demande_envoyee') || '✅ Demande envoyée avec succès !');
         
         // Cacher le formulaire
         if (type === 'arrivee_anticipee') {
@@ -2714,11 +2678,7 @@ async function submitDemandeHoraire(type) {
         }
     } catch (error) {
         console.error('❌ Erreur inattendue:', error);
-        
-        // ✅ Table demandes_horaires restaurée le 28/01/2026
-        // Gérer uniquement les vraies erreurs techniques
         if (error?.code === '42P01' || error?.code === 'PGRST204') {
-            console.error('❌ Table demandes_horaires manquante - Contacter admin');
             showToast('❌ Erreur technique. Contactez le gestionnaire.', 'error');
         } else {
             showToast('❌ Erreur lors de l\'envoi de votre demande.', 'error');
@@ -2774,16 +2734,25 @@ async function submitRetourClient() {
     
     try {
         const { error } = await supabase
-            .from('retours_clients')
-            .insert({
-                reservation_id: reservationData.id,
-                type: type,
-                sujet: sujet,
-                description: description,
-                urgence: urgence
+            .rpc('insert_retour_client_by_token', {
+                p_token:       token,
+                p_type:        type,
+                p_sujet:       sujet,
+                p_description: description,
+                p_urgence:     urgence
             });
         
-        if (error) throw error;
+        if (error) {
+            // Fallback direct si RPC pas encore créée
+            if (error.code === 'PGRST202') {
+                const { error: insertError } = await supabase.from('retours_clients').insert({
+                    reservation_id: reservationData.id, type, sujet, description, urgence
+                });
+                if (insertError) throw insertError;
+            } else {
+                throw error;
+            }
+        }
         
         // Message de validation selon le type
         let message = '✓ Demande envoyée avec succès';
@@ -3763,39 +3732,42 @@ async function toggleClientChecklistItem(templateId, type) {
     }
     
     try {
-        // Récupérer l'état actuel
-        const { data: existing, error: fetchError } = await supabase
-            .from('checklist_progress')
-            .select('*')
-            .eq('reservation_id', reservationData.id)
-            .eq('template_id', templateId)
-            .maybeSingle();
+        // Récupérer l'état actuel depuis le cache
+        const existing = cachedProgressMap[templateId];
+        const newCompleted = existing !== undefined ? !existing : true;
         
-        if (fetchError) { // maybeSingle() ne renvoie pas d'erreur si pas de ligne
-            throw fetchError;
-        }
-        
-        const newCompleted = existing ? !existing.completed : true;
-        
-        // Upsert
-        const { error: upsertError } = await supabase
-            .from('checklist_progress')
-            .upsert({
-                owner_user_id: reservationData.owner_user_id,
-                reservation_id: reservationData.id,
-                template_id: templateId,
-                completed: newCompleted,
-                completed_at: newCompleted ? new Date().toISOString() : null
-            }, {
-                onConflict: 'reservation_id,template_id'
+        // Utilise RPC SECURITY DEFINER (les policies RLS headers ne fonctionnent pas)
+        const { error: rpcError } = await supabase
+            .rpc('upsert_checklist_progress_by_token', {
+                p_token:       token,
+                p_template_id: templateId,
+                p_completed:   newCompleted
             });
         
-        if (upsertError) {
-            throw upsertError;
+        if (rpcError) {
+            if (rpcError.code === 'PGRST202') {
+                // Fallback direct si RPC pas encore créée
+                const { error: upsertError } = await supabase
+                    .from('checklist_progress')
+                    .upsert({
+                        owner_user_id: reservationData.owner_user_id,
+                        reservation_id: reservationData.id,
+                        template_id: templateId,
+                        completed: newCompleted,
+                        completed_at: newCompleted ? new Date().toISOString() : null
+                    }, { onConflict: 'reservation_id,template_id' });
+                if (upsertError) throw upsertError;
+            } else {
+                throw rpcError;
+            }
         }
         
-        // Recharger pour mettre à jour l'affichage
-        await loadClientChecklists();
+        // Mettre à jour le cache
+        cachedProgressMap[templateId] = newCompleted;
+        
+        // Re-render sans recharger depuis la DB
+        renderClientChecklist('entree', cachedTemplatesEntree, cachedProgressMap);
+        renderClientChecklist('sortie', cachedTemplatesSortie, cachedProgressMap);
     } catch (error) {
         console.error('❌ Erreur toggle checklist:', error);
         alert('Erreur lors de la sauvegarde. Veuillez réessayer.');
