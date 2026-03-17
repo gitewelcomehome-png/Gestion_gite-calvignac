@@ -727,60 +727,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadReservationData() {
-    // Étape 1 : Valider le token (sans join pour éviter les problèmes RLS embedded)
-    const { data: tokenData, error: tokenError } = await supabase
-        .from('client_access_tokens')
-        .select('id, reservation_id, owner_user_id, expires_at, is_active')
-        .eq('token', token)
-        .maybeSingle();
+    // Utilise un RPC SECURITY DEFINER pour éviter la dépendance aux headers
+    // (le header x-client-token n'est pas transmis par Kong vers PostgREST)
+    const { data, error } = await supabase
+        .rpc('get_reservation_by_client_token', { p_token: token });
 
-    if (tokenError) {
-        const reason = tokenError.message || tokenError.details || tokenError.hint || 'erreur inconnue';
-        throw new Error(`Acces token refuse (${reason})`);
+    if (error) {
+        const reason = error.message || error.details || error.hint || 'erreur inconnue';
+        throw new Error(`Accès refusé (${reason})`);
     }
 
-    if (!tokenData) {
-        throw new Error('Token invalide, introuvable ou bloque par RLS');
-    }
-
-    // Vérifier l'expiration
-    const isExpired = new Date(tokenData.expires_at) < new Date();
-    if (isExpired) {
-        throw new Error('Ce lien a expiré');
-    }
-
-    if (!tokenData.reservation_id) {
-        throw new Error('Token non lié à une réservation');
-    }
-
-    // Étape 2 : Charger la réservation séparément
-    const { data: reservation, error: reservationError } = await supabase
-        .from('reservations')
-        .select('*')
-        .eq('id', tokenData.reservation_id)
-        .maybeSingle();
-
-    if (reservationError) {
-        const reason = reservationError.message || reservationError.details || 'erreur inconnue';
-        throw new Error(`Reservation inaccessible (${reason})`);
-    }
+    // rpc() avec RETURNS SETOF retourne un tableau
+    const reservation = Array.isArray(data) ? data[0] : data;
 
     if (!reservation) {
-        throw new Error('Reservation introuvable ou inaccessible pour ce token');
+        throw new Error('Token invalide, expiré ou réservation introuvable');
     }
 
-    // Mettre à jour le token (colonnes existantes)
-    await supabase
-        .from('client_access_tokens')
-        .update({
-            updated_at: new Date().toISOString(),
-            is_active: true
-        })
-        .eq('id', tokenData.id);
-
     reservationData = reservation;
-    
-    // Logs désactivés (table fiche_generation_logs optionnelle)
 }
 
 async function loadGiteInfo() {
