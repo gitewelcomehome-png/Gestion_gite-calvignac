@@ -125,14 +125,14 @@ function displayClients(clients) {
     tbody.innerHTML = clients.map(client => `
         <tr data-action="open-client-modal" data-client-id="${client.id}">
             <td>
-                <div style="font-weight: 600;">${client.prenom_contact} ${client.nom_contact}</div>
+                <div style="font-weight: 600;">${[client.prenom_contact, client.nom_contact].filter(v => v && v !== 'null').join(' ').trim() || client.email_principal || '—'}</div>
             </td>
             <td>${client.email_principal}</td>
             <td>${client.nom_entreprise || '-'}</td>
             <td><span class="badge badge-${client.type_abonnement}">${client.type_abonnement}</span></td>
             <td><span class="badge badge-${client.statut}">${getStatutLabel(client.statut)}</span></td>
             <td style="font-weight: 600;">${client.montant_mensuel}€</td>
-            <td>${client.nb_gites_actuels} / ${client.nb_gites_max}</td>
+            <td>${client.nb_gites_actuels ?? 0} / ${client.nb_gites_max ?? "—"}</td>
             <td>${new Date(client.date_inscription).toLocaleDateString('fr-FR')}</td>
         </tr>
     `).join('');
@@ -261,7 +261,7 @@ async function loadClientDetails(clientId) {
         
         // Mettre à jour header
         document.getElementById('modalClientName').textContent = 
-            `${client.prenom_contact} ${client.nom_contact}`;
+            `${[client.prenom_contact, client.nom_contact].filter(v => v && v !== 'null').join(' ').trim() || client.email_principal || '—'}`;
         document.getElementById('modalClientEmail').textContent = client.email_principal;
         
         // Tab Informations
@@ -295,7 +295,7 @@ async function displayClientInfos(client) {
     container.innerHTML = `
         <div class="info-card">
             <label><i data-lucide="user" style="width: 14px; height: 14px;"></i> Contact</label>
-            <div class="value">${client.prenom_contact} ${client.nom_contact}</div>
+            <div class="value">${[client.prenom_contact, client.nom_contact].filter(v => v && v !== 'null').join(' ').trim() || client.email_principal || '—'}</div>
         </div>
         <div class="info-card">
             <label><i data-lucide="mail" style="width: 14px; height: 14px;"></i> Email</label>
