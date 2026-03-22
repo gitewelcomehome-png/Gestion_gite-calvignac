@@ -323,3 +323,143 @@ Tour complet des 21 pages admin effectué sur le site de production connecté en
 - `nb_gites_max` n'est PAS une colonne de `cm_clients` — il vient du plan/abonnement (join nécessaire pour affichage correct)
 - Bouton "Site Web" dans sidebar : non fonctionnel (pas de navigation déclenchée)
 
+
+
+---
+
+## 🔍 TOUR VISUEL SITE UTILISATEUR — 22 mars 2026
+
+### `pages/fiche-client.html` — Guide du voyageur (token-protégé)
+
+Accès via URL : `https://www.liveownerunit.fr/pages/fiche-client.html?token=xxxx`
+
+| Tab | Statut | Contenu observé | Notes |
+|-----|--------|-----------------|-------|
+| Entrée | ✅ OK | Infos d'arrivée : heure check-in, code accès, adresse. Instructions d'arrivée personnalisées. Carte de localisation. | Page d'accueil du guide voyageur |
+| Pendant | ✅ OK | Règles de la maison, équipements disponibles, contacts utiles (propriétaire, urgences). | |
+| Sortie | ✅ OK | Instructions départ : heure check-out, consignes ménage, remise des clés. | |
+| Prestations | ✅ OK | Liste des prestations proposées par le propriétaire (services additionnels commandables). | |
+| Activités | ✅ OK | Suggestions d'activités locales et touristiques autour du logement. | |
+| Demandes | ✅ OK | Formulaire de demande/message du voyageur vers le propriétaire. | |
+| Évaluation | ✅ OK | Formulaire d'évaluation du séjour (note, commentaire libre). | |
+| FAQ | ⏭️ SKIPPÉ | Contenu dynamique — questions/réponses créées et modifiées par le propriétaire. | Non cartographié (contenu variable) |
+
+### `app.html` — Dashboard principal propriétaire
+
+Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
+
+| Tab | Statut | Contenu observé | Notes |
+|-----|--------|-----------------|-------|
+| Dashboard | ✅ OK | Vue synthétique : KPIs (taux d'occupation, revenus, prochaine résa), calendrier mini, alertes. | Onglet par défaut à l'ouverture |
+| Résa | ✅ OK | Liste des réservations avec filtres (période, statut). Bouton "Nouvelle résa". CRUD complet. | |
+| Tâches | ✅ OK | Gestionnaire de tâches : liste, priorités, statuts (à faire / en cours / fait). | |
+| Stats | ✅ OK | Statistiques : graphiques revenus, taux d'occupation, comparaisons annuelles. | |
+| Prestations | ✅ OK | Catalogue prestations du gîte, gestion des commandes voyageurs. | |
+| Draps | ✅ OK | Gestion rotations de linge : lots, lavages, suivis. | |
+| Ménage | ✅ OK | Planning ménage : passages programmés, statuts, affectation femme de ménage. | |
+| Fiscal | ✅ OK | Suivi fiscal : déclarations, revenus imposables, export comptable. | |
+| Découvrir | ✅ OK | Contenu activités locales à afficher dans la fiche voyageur. | |
+| Cal. & Tarifs | ✅ OK | Calendrier disponibilité et grille tarifaire (par période, nuit min, etc.). | |
+| Infos | ✅ OK | Informations logement : description, équipements, photos, règles maison. | |
+| Communauté | ✅ OK | Espace communautaire propriétaires (forum / entraide). | |
+
+### Pages standalone utilisateur
+
+| Page | Statut | Contenu observé | Notes |
+|------|--------|-----------------|-------|
+| `login.html` | ✅ OK | Formulaire email/mdp + lien "Mot de passe oublié". Logo LiveOwnerUnit. | Redirige vers `/app` si déjà authentifié |
+| `pages/forgot-password.html` | ✅ OK | Saisie email → envoi lien de réinitialisation. Design épuré. | Accessible sans auth |
+| `pages/reset-password.html` | ⚠️ ÉTAT ERREUR | "Ce lien de réinitialisation est invalide ou a déjà été utilisé" | Comportement attendu sans `?token=` valide — pas un vrai bug |
+| `pages/onboarding.html` | ✅ OK | Tunnel onboarding nouveau propriétaire : création profil gîte, étapes guidées. | Accessible sans auth |
+| `pages/options.html` | ✅ OK | Paramètres compte : nom gîte, adresse (Gite Welcomehome, 46160 Calvignac), abonnement. | Données réelles affichées |
+| `pages/validation.html` | ✅ OK | Interface société de ménage : confirmation/modification des passages nettoyage programmés. | Portail tiers prestataire |
+| `pages/client-support.html` | ✅ OK | Page support : FAQ, formulaire de contact, liens documentation. | |
+| `pages/conformite-rgpd-securite.html` | ✅ OK | RGPD & sécurité : politique données, cookies, droits utilisateurs. | |
+| `pages/dashboard-proposition.html` | ⚠️ DONNÉE MANQUANTE | Dashboard complet affiché. KPI "Trésorerie actuelle" = `-` (tiret). | Champ non renseigné ou non configuré |
+| `pages/desktop-owner-prestations.html` | 🔴 BUG SQL | "📦 Prestations & Revenus Supplémentaires". KPIs à 0. Section "Revenus Mensuels" : erreur rouge. | **BUG** : `column commandes_prestations.date_commande does not exist` |
+| `pages/femme-menage.html` | ✅ OK | Portail femme de ménage : planning, passages, statuts interventions. | Documenté session précédente |
+
+### Bugs découverts — Site utilisateur
+
+- **`desktop-owner-prestations.html` — BUG SQL** : Table "Revenus Mensuels" affiche `Erreur: column commandes_prestations.date_commande does not exist`. La requête Supabase référence une colonne `date_commande` absente du schéma réel. À corriger dans le JS correspondant.
+- **`dashboard-proposition.html`** : `Trésorerie actuelle` affiche `-`. Champ probablement non configuré dans les données du compte de test.
+- **`reset-password.html`** : Affiche un état d'erreur sans `?token=` valide — comportement attendu, non bloquant.
+
+### Observations générales — Site utilisateur
+
+- Toutes les pages auth-protégées redirigent correctement vers `login.html` si non connecté
+- `login.html` redirige automatiquement vers `/app` si déjà authentifié (auth guard OK)
+- Design cohérent avec la partie admin : dark/light mode, navigation fluide
+- Pages standalone (onboarding, reset-password, forgot-password) accessibles sans authentification
+- La fiche client (`fiche-client.html`) nécessite un token valide dans l'URL
+- `pages/femme-menage.html` et `pages/validation.html` sont des portails tiers (pas login Supabase classique)
+
+
+---
+
+## 🔍 TOUR VISUEL SITE UTILISATEUR — 22 mars 2026
+
+### `pages/fiche-client.html` — Guide du voyageur (token-protégé)
+
+Accès via URL : `https://www.liveownerunit.fr/pages/fiche-client.html?token=xxxx`
+
+| Tab | Statut | Contenu observé | Notes |
+|-----|--------|-----------------|-------|
+| Entrée | ✅ OK | Infos d'arrivée : heure check-in, code accès, adresse. Instructions d'arrivée personnalisées. Carte de localisation. | Page d'accueil du guide voyageur |
+| Pendant | ✅ OK | Règles de la maison, équipements disponibles, contacts utiles (propriétaire, urgences). | |
+| Sortie | ✅ OK | Instructions départ : heure check-out, consignes ménage, remise des clés. | |
+| Prestations | ✅ OK | Liste des prestations proposées par le propriétaire (services additionnels commandables). | |
+| Activités | ✅ OK | Suggestions d'activités locales et touristiques autour du logement. | |
+| Demandes | ✅ OK | Formulaire de demande/message du voyageur vers le propriétaire. | |
+| Évaluation | ✅ OK | Formulaire d'évaluation du séjour (note, commentaire libre). | |
+| FAQ | ⏭️ SKIPPÉ | Contenu dynamique — questions/réponses créées et modifiées par le propriétaire. | Non cartographié (contenu variable) |
+
+### `app.html` — Dashboard principal propriétaire
+
+Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
+
+| Tab | Statut | Contenu observé | Notes |
+|-----|--------|-----------------|-------|
+| Dashboard | ✅ OK | Vue synthétique : KPIs (taux d'occupation, revenus, prochaine résa), calendrier mini, alertes. | Onglet par défaut à l'ouverture |
+| Résa | ✅ OK | Liste des réservations avec filtres (période, statut). Bouton "Nouvelle résa". CRUD complet. | |
+| Tâches | ✅ OK | Gestionnaire de tâches : liste, priorités, statuts (à faire / en cours / fait). | |
+| Stats | ✅ OK | Statistiques : graphiques revenus, taux d'occupation, comparaisons annuelles. | |
+| Prestations | ✅ OK | Catalogue prestations du gîte, gestion des commandes voyageurs. | |
+| Draps | ✅ OK | Gestion rotations de linge : lots, lavages, suivis. | |
+| Ménage | ✅ OK | Planning ménage : passages programmés, statuts, affectation femme de ménage. | |
+| Fiscal | ✅ OK | Suivi fiscal : déclarations, revenus imposables, export comptable. | |
+| Découvrir | ✅ OK | Contenu activités locales à afficher dans la fiche voyageur. | |
+| Cal. & Tarifs | ✅ OK | Calendrier disponibilité et grille tarifaire (par période, nuit min, etc.). | |
+| Infos | ✅ OK | Informations logement : description, équipements, photos, règles maison. | |
+| Communauté | ✅ OK | Espace communautaire propriétaires (forum / entraide). | |
+
+### Pages standalone utilisateur
+
+| Page | Statut | Contenu observé | Notes |
+|------|--------|-----------------|-------|
+| `login.html` | ✅ OK | Formulaire email/mdp + lien "Mot de passe oublié". Logo LiveOwnerUnit. | Redirige vers `/app` si déjà authentifié |
+| `pages/forgot-password.html` | ✅ OK | Saisie email → envoi lien de réinitialisation. Design épuré. | Accessible sans auth |
+| `pages/reset-password.html` | ⚠️ ÉTAT ERREUR | "Ce lien de réinitialisation est invalide ou a déjà été utilisé" | Comportement attendu sans `?token=` valide — pas un vrai bug |
+| `pages/onboarding.html` | ✅ OK | Tunnel onboarding nouveau propriétaire : création profil gîte, étapes guidées. | Accessible sans auth |
+| `pages/options.html` | ✅ OK | Paramètres compte : nom gîte, adresse (Gite Welcomehome, 46160 Calvignac), abonnement. | Données réelles affichées |
+| `pages/validation.html` | ✅ OK | Interface société de ménage : confirmation/modification des passages nettoyage programmés. | Portail tiers prestataire |
+| `pages/client-support.html` | ✅ OK | Page support : FAQ, formulaire de contact, liens documentation. | |
+| `pages/conformite-rgpd-securite.html` | ✅ OK | RGPD & sécurité : politique données, cookies, droits utilisateurs. | |
+| `pages/dashboard-proposition.html` | ⚠️ DONNÉE MANQUANTE | Dashboard complet affiché. KPI "Trésorerie actuelle" = `-` (tiret). | Champ non renseigné ou non configuré |
+| `pages/desktop-owner-prestations.html` | 🔴 BUG SQL | "📦 Prestations & Revenus Supplémentaires". KPIs à 0. Section "Revenus Mensuels" : erreur rouge. | **BUG** : `column commandes_prestations.date_commande does not exist` |
+| `pages/femme-menage.html` | ✅ OK | Portail femme de ménage : planning, passages, statuts interventions. | Documenté session précédente |
+
+### Bugs découverts — Site utilisateur
+
+- **`desktop-owner-prestations.html` — BUG SQL** : Table "Revenus Mensuels" affiche `Erreur: column commandes_prestations.date_commande does not exist`. La requête Supabase référence une colonne `date_commande` absente du schéma réel. À corriger dans le JS correspondant.
+- **`dashboard-proposition.html`** : `Trésorerie actuelle` affiche `-`. Champ probablement non configuré dans les données du compte de test.
+- **`reset-password.html`** : Affiche un état d'erreur sans `?token=` valide — comportement attendu, non bloquant.
+
+### Observations générales — Site utilisateur
+
+- Toutes les pages auth-protégées redirigent correctement vers `login.html` si non connecté
+- `login.html` redirige automatiquement vers `/app` si déjà authentifié (auth guard OK)
+- Design cohérent avec la partie admin : dark/light mode, navigation fluide
+- Pages standalone (onboarding, reset-password, forgot-password) accessibles sans authentification
+- La fiche client (`fiche-client.html`) nécessite un token valide dans l'URL
+- `pages/femme-menage.html` et `pages/validation.html` sont des portails tiers (pas login Supabase classique)
