@@ -280,3 +280,46 @@ supabase functions deploy notify-cleaning-planning-change
 - [ ] Version `package.json` incrémentée si besoin
 - [ ] Tag git créé si release
 
+---
+
+## 🔍 TOUR VISUEL ADMIN — 22 mars 2026 (production https://www.liveownerunit.fr/app)
+
+Tour complet des 21 pages admin effectué sur le site de production connecté en tant que QUATTRO.
+
+| Page | Statut | Observations |
+|------|--------|--------------|
+| admin-clients.html | ✅ OK | Liste clients fonctionnelle, recherche, modals détail. Bugs "null null" (contact vide) et "0/undefined" (nb_gites_max absent de cm_clients) → **CORRIGÉS commit aff336e** |
+| admin-communications.html | ✅ OK | Gestion templates email/SMS, liste des communications envoyées |
+| admin-content.html | ✅ OK | Gestion contenus éditoriaux du site |
+| admin-content-analytics.html | ✅ OK | Stats consultation contenus, métriques pages |
+| admin-emails.html | ✅ OK | Templates emails transactionnels, prévisualisation |
+| admin-error-details.html | ⚠️ BUG | **Redirige automatiquement vers admin-fiscal-readable-report.html** — JS redirect parasite dans la page |
+| admin-finance.html | ✅ OK | Vue financière globale, chiffre d'affaires, métriques revenus |
+| admin-fiscal-readable-report.html | ✅ OK | Rapport fiscal généré dynamiquement depuis fiscalite-v2.js et taux-fiscaux-config.js (pas de hardcoding) |
+| admin-monitoring.html | ✅ OK | Monitoring système, alertes temps réel. Bug SecurityUtils.escapeHTML → sanitizeText détecté et **CORRIGÉ** (js/menage.js L934/952, js/femme-menage.js L680/691) |
+| admin-parrainage.html | ✅ OK | Programme de parrainage, codes promo, suivi filleuls |
+| admin-performance-audit.html | ✅ OK | Audit performance Lighthouse-style, métriques Core Web Vitals |
+| admin-prestations.html | ✅ OK | Gestion des prestations/services proposés |
+| admin-prestations-stats.html | ✅ OK | Statistiques consommation prestations par client |
+| admin-promotions.html | ✅ OK | Gestion promotions et codes réduction |
+| admin-prompt-editor.html | ✅ OK | Éditeur de prompts IA (assistant tarification, etc.) |
+| admin-scalabilite-roadmap.html | ✅ OK | Roadmap technique scalabilité, jalons infrastructure |
+| admin-security-audit.html | ✅ OK | Audit sécurité, RLS policies, tentatives connexion |
+| admin-support.html | ✅ OK | Tickets support clients, fil de messages |
+| admin-surveillance-evolution.html | ✅ OK | Suivi évolutions en cours, changelog interne |
+| admin-ticket-workflow.html | ⚠️ BUG | **Redirige automatiquement vers admin-content-analytics.html** — JS redirect parasite dans la page |
+| admin-channel-manager.html | ✅ OK | Gestion canaux distribution (Airbnb, Booking, etc.) |
+
+### Bugs redirect à corriger
+
+- `admin-error-details.html` : contient un `window.location` qui redirige vers `admin-fiscal-readable-report.html`
+- `admin-ticket-workflow.html` : contient un `window.location` qui redirige vers `admin-content-analytics.html`
+
+### Observations générales
+
+- Design cohérent dark/light mode sur toutes les pages
+- Sidebar de navigation fonctionnelle, breadcrumbs présents
+- Authentification Supabase RLS active, pages protégées
+- `nb_gites_max` n'est PAS une colonne de `cm_clients` — il vient du plan/abonnement (join nécessaire pour affichage correct)
+- Bouton "Site Web" dans sidebar : non fonctionnel (pas de navigation déclenchée)
+
