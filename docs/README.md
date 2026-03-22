@@ -6,6 +6,16 @@ Documentation consolidée et organisée du projet.
 
 ## 📖 Guides & Documentation
 
+### [FONCTIONS_SITE.md](FONCTIONS_SITE.md)
+**Référentiel fonctionnel du site** (owner + admin + support + API)
+- Interfaces disponibles
+- Fonctions métier détaillées par module
+- Fonctions transverses (sécurité/config/notifications)
+- Endpoints API actifs
+- Règles métiers structurantes
+- Matrices détaillées entrées/sorties et dépendances inter-modules
+- Gestion des erreurs, stratégies de repli et checklist documentaire production
+
 ### [GUIDE_OPERATIONNEL.md](GUIDE_OPERATIONNEL.md)
 **Guide utilisateur complet** (fusion de 19 guides)
 - Espace femme de ménage

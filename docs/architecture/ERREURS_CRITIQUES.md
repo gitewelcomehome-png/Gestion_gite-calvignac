@@ -31,6 +31,111 @@ Ce qu'il faut faire pour éviter que ça se reproduise
 
 ## 🔴 Erreurs Référencées
 
+### [7 Mars 2026] - Prévention collision RLS entre fiche-client et femme de ménage
+
+**Contexte:**
+Les modules `fiche-client` (header `x-client-token`) et `femme-menage` (header `x-cleaner-token`) manipulent des tables communes (`reservations`, `cleaning_schedule`).
+
+**Risque critique évité:**
+- écrasement de policies avec noms génériques (`anon_read_*`)
+- régression d'accès sur une page après hardening de l'autre
+- ouverture involontaire (`USING true`) sur des tables partagées
+
+**Cause potentielle:**
+1. scripts RLS exécutés en séquence avec des noms de policies non distincts
+2. absence d'alignement explicite des deux modèles tokenisés
+
+**Solution:**
+✅ Script d'alignement ajouté: `sql/securite/RLS_ALIGN_FICHE_CLIENT_FEMME_MENAGE_2026-03-07.sql`
+- policies `gc_client_*` (scope `x-client-token`)
+- policies `gc_cleaner_*` (scope `x-cleaner-token`)
+- nettoyage des anciennes policies génériques conflictuelles
+
+**Prévention:**
+1. utiliser des préfixes de policy dédiés par surface (`gc_client_*`, `gc_cleaner_*`)
+2. ne plus créer de policies anon génériques sur `reservations` / `cleaning_schedule`
+3. vérifier `pg_policies` après chaque migration sécurité liée aux tokens
+
+**Fichiers concernés:**
+- `sql/securite/RLS_ALIGN_FICHE_CLIENT_FEMME_MENAGE_2026-03-07.sql`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [3 Mars 2026] - Prévention régression notifications planning ménage auto (email société)
+
+**Contexte:**
+Ajout d'une notification email automatique vers la société de ménage lors des replanifications automatiques déclenchées par conflit avec une nouvelle réservation.
+
+**Risque critique évité:**
+- absence d'information société ménage après suppression/replanification automatique
+- perte de visibilité des dates annulées et des nouvelles dates
+- non-détection des cas sensibles (ménage déjà validé impacté)
+
+**Cause potentielle:**
+1. préférences notification incomplètes dans `user_notification_preferences`
+2. absence de branchement email dans `autoResolveCleaningConflictForReservation`
+3. payload incomplet (pas de `was_validated` sur les conflits impactés)
+
+**Solution:**
+✅ Correctif complet appliqué:
+- migration BDD: `sql/migrations/ADD_NOTIFICATION_MENAGE_COMPANY_FIELDS_2026-03-03.sql`
+- options owner: ajout toggle + email société dans `pages/options.html`
+- fonction d'envoi: `supabase/functions/notify-cleaning-planning-change/index.ts`
+- orchestration: appel Edge Function depuis `js/supabase-operations.js`
+
+**Prévention:**
+1. conserver les nouveaux champs de préférences lors de tout refactor de `user_notification_preferences`
+2. maintenir la remontée `was_validated` dans les conflits ménage
+3. garder un mode warning explicite si un ménage validé est impacté
+
+**Fichiers concernés:**
+- `sql/migrations/ADD_NOTIFICATION_MENAGE_COMPANY_FIELDS_2026-03-03.sql`
+- `pages/options.html`
+- `js/supabase-operations.js`
+- `supabase/functions/notify-cleaning-planning-change/index.ts`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [2 Mars 2026] - Prévention régression RLS sur module Communauté (annuaire artisans)
+
+**Contexte:**
+Ajout du nouvel onglet owner `Communauté` pour partager un annuaire d'artisans/expert entre gîtes, avec carte Leaflet et notation collaborative.
+
+**Risque critique évité:**
+- Fuite de droits si `UPDATE/DELETE` artisans autorisé à toute la communauté
+- Multiplication de notes par un même propriétaire sur un même artisan
+
+**Cause potentielle:**
+1. politiques RLS trop permissives sur tables partagées
+2. absence de contrainte d'unicité sur le vote utilisateur
+
+**Solution:**
+✅ Migration ajoutée: `sql/create_communaute_artisans.sql`
+- Table `community_artisans`: lecture partagée (`authenticated`), écriture restreinte au créateur (`owner_user_id = auth.uid()`)
+- Table `community_artisan_notes`: lecture partagée, écriture restreinte à l'auteur
+- contrainte `UNIQUE (artisan_id, owner_user_id)` pour garantir une seule note par propriétaire (modifiable via `upsert`)
+
+**Prévention:**
+1. conserver le modèle "partagé en lecture / propriétaire en écriture" pour tout module communautaire
+2. imposer une contrainte d'unicité fonctionnelle dès la création de toute table de votes/avis
+3. valider systématiquement les policies via `pg_policies` après migration
+
+**Fichiers concernés:**
+- `sql/create_communaute_artisans.sql`
+- `js/communaute.js`
+- `tabs/tab-communaute.html`
+- `css/tab-communaute.css`
+- `app.html`
+- `js/shared-utils.js`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
 ### [1 Mars 2026] - Doublons de phases manifest (progression >100%) en reprise de charge
 
 **Contexte:**

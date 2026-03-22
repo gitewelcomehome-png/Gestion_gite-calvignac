@@ -7,6 +7,8 @@
 --
 -- Projet Supabase : fgqimtpjjhdqeyyaptoj
 -- ================================================================
+-- ⚠️ SÉCURITÉ : Ne jamais versionner de secret webhook en clair.
+-- Remplacer WEBHOOK_SECRET_PLACEHOLDER par votre secret réel uniquement au moment d'exécuter ce script.
 
 -- ================================================================
 -- ÉTAPE 1 : Déployer les Edge Functions (Terminal)
@@ -51,6 +53,7 @@ AS $$
 DECLARE
     payload jsonb;
     resa_record record;
+    webhook_secret text := 'WEBHOOK_SECRET_PLACEHOLDER';
 BEGIN
     -- Tenter de récupérer les infos de la réservation liée
     SELECT client_name, check_in, check_out
@@ -75,7 +78,7 @@ BEGIN
             url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-demande',
             headers := jsonb_build_object(
                 'Content-Type', 'application/json',
-                'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
+                'x-webhook-secret', webhook_secret
             ),
             body := payload
         );
@@ -107,6 +110,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     payload jsonb;
+    webhook_secret text := 'WEBHOOK_SECRET_PLACEHOLDER';
 BEGIN
     payload := jsonb_build_object(
         'type', 'INSERT',
@@ -120,7 +124,7 @@ BEGIN
             url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-reservation',
             headers := jsonb_build_object(
                 'Content-Type', 'application/json',
-                'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
+                'x-webhook-secret', webhook_secret
             ),
             body := payload
         );
@@ -159,6 +163,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     payload jsonb;
+    webhook_secret text := 'WEBHOOK_SECRET_PLACEHOLDER';
 BEGIN
     -- owner_user_id et client_name sont insérés directement dans problemes_signales
     payload := jsonb_build_object(
@@ -175,7 +180,7 @@ BEGIN
             url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-retour-client',
             headers := jsonb_build_object(
                 'Content-Type', 'application/json',
-                'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
+                'x-webhook-secret', webhook_secret
             ),
             body := payload
         );

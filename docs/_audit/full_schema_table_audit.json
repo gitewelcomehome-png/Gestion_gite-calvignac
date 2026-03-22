@@ -1,0 +1,2068 @@
+{
+  "generatedAt": "2026-03-06T21:00:18.812Z",
+  "filesScanned": 2691,
+  "referencedTableCount": 184,
+  "schemaTableCount": 49,
+  "schemaTables": [
+    "activites_gites",
+    "auto_ticket_diagnostics",
+    "checklist_progress",
+    "checklist_templates",
+    "cleaning_rules",
+    "cleaning_schedule",
+    "client_access_tokens",
+    "cm_activity_logs",
+    "cm_ai_content_queue",
+    "cm_clients",
+    "cm_error_corrections",
+    "cm_invoices",
+    "cm_pricing_plans",
+    "cm_promo_usage",
+    "cm_promotions",
+    "cm_referrals",
+    "cm_revenue_tracking",
+    "cm_subscriptions",
+    "cm_support_ai_usage_logs",
+    "cm_support_comments",
+    "cm_support_diagnostics",
+    "cm_support_solutions",
+    "cm_support_ticket_history",
+    "cm_support_tickets",
+    "cm_website_pages",
+    "community_artisan_notes",
+    "community_artisans",
+    "error_corrections",
+    "error_logs",
+    "faq",
+    "gites",
+    "historique_donnees",
+    "infos_gites",
+    "km_config_auto",
+    "km_lieux_favoris",
+    "km_trajets",
+    "linen_stock_items",
+    "linen_stock_transactions",
+    "linen_stocks",
+    "notification_preferences",
+    "notifications",
+    "problemes_signales",
+    "reservations",
+    "retours_menage",
+    "shopping_list_items",
+    "shopping_lists",
+    "simulations_fiscales",
+    "sync_logs",
+    "user_roles"
+  ],
+  "unknownTables": [
+    {
+      "table": "AS",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/patches/FIX_DEMANDES_HORAIRES_ID_28JAN2026.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/patches/FIX_PROBLEMES_SIGNALES_ID_28JAN2026.sql",
+        "_archives/sql_obsoletes_2026/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/architecture/ERREURS_CRITIQUES.md",
+        "_backups/backup_site_complet_11feb2026_16h/sql/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/patches/FIX_DEMANDES_HORAIRES_ID_28JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/patches/FIX_PROBLEMES_SIGNALES_ID_28JAN2026.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/README_VERSION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/patches/FIX_DEMANDES_HORAIRES_ID_28JAN2026.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/patches/FIX_PROBLEMES_SIGNALES_ID_28JAN2026.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/patches/FIX_DEMANDES_HORAIRES_ID_28JAN2026.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/patches/FIX_PROBLEMES_SIGNALES_ID_28JAN2026.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/patches/FIX_DEMANDES_HORAIRES_ID_28JAN2026.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/patches/FIX_PROBLEMES_SIGNALES_ID_28JAN2026.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/architecture/ERREURS_CRITIQUES.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/architecture/ERREURS_CRITIQUES.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/patches/FIX_DEMANDES_HORAIRES_ID_28JAN2026.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/patches/FIX_PROBLEMES_SIGNALES_ID_28JAN2026.sql",
+        "docs/architecture/ERREURS_CRITIQUES.md"
+      ]
+    },
+    {
+      "table": "_backup_tarifs_calendrier_09feb2026",
+      "refs": [
+        "_archives/sql_obsoletes_2026/migrate_tarifs_array_to_object.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/migrate_tarifs_array_to_object.sql"
+      ]
+    },
+    {
+      "table": "_cleanup_dropped_tables_20260223",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/CLEANUP_BDD_EXTRA_PROPRE_2026-02-23.sql",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "access_logs",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "activites",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "activites_consultations",
+      "refs": [
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_production/disable_rls_fiches_clients.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiche-client-app.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiche-client-app.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/fiche-client-app.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/fiche-client-app.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/fiche-client-app.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/fiche-client-app.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/fiche-client-app.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/fiche-client-app.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/fiche-client-app.js",
+        "js/fiche-client-app.js"
+      ]
+    },
+    {
+      "table": "admin_communications",
+      "refs": [
+        "_archives/by_category/general/cleanup_20260224_lot2_safe/js/dashboard-communications.js",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_ADMIN_COMMUNICATIONS.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/create_admin_communications.sql",
+        "_archives/docs_redondants_04feb2026/SECTION_COMMUNICATIONS_COMPLETE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/client-communications.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/dashboard-communications.js",
+        "_backups/backup_site_complet_11feb2026_16h/pages/admin-communications.html",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_ADMIN_COMMUNICATIONS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/create_admin_communications.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/client-communications.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/dashboard-communications.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/pages/admin-communications.html",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_ADMIN_COMMUNICATIONS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/create_admin_communications.sql",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/client-communications.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/dashboard-communications.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/pages/admin-communications.html",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/client-communications.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/dashboard-communications.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/pages/admin-communications.html",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/client-communications.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/dashboard-communications.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/pages/admin-communications.html",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_ADMIN_COMMUNICATIONS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/create_admin_communications.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/client-communications.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/dashboard-communications.js",
+        "js/client-communications.js",
+        "pages/admin-communications.html"
+      ]
+    },
+    {
+      "table": "backup_checklists_20260123",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql"
+      ]
+    },
+    {
+      "table": "backup_demandes_horaires_20260123",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql"
+      ]
+    },
+    {
+      "table": "backup_evaluations_sejour_20260123",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql"
+      ]
+    },
+    {
+      "table": "backup_infos_pratiques_20260123",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql"
+      ]
+    },
+    {
+      "table": "backup_problemes_signales_20260123",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql"
+      ]
+    },
+    {
+      "table": "backup_retours_menage_20260123",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql"
+      ]
+    },
+    {
+      "table": "backup_stocks_draps_20260114",
+      "refs": [
+        "_archives/md_20jan2026/SYNTHESE_MAPPING_DRAPS.md"
+      ]
+    },
+    {
+      "table": "backup_suivi_soldes_bancaires_20260123",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_archives/sql_obsoletes_2026/restore_suivi_soldes_bancaires.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/restore_suivi_soldes_bancaires.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/restore_suivi_soldes_bancaires.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/restore_suivi_soldes_bancaires.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql"
+      ]
+    },
+    {
+      "table": "charges",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/docs_obsoletes/COMMANDES_MULTI_TENANT.md",
+        "_archives/docs_obsoletes/MIGRATION_PROGRESSIVE.md",
+        "_archives/docs_obsoletes/RAPPORT_AUDIT_SECURITE.md",
+        "_archives/docs_obsoletes/audits_anciens/AUDIT_SECURITE.md",
+        "_archives/documentation_old/AUDIT_SECURITE.md",
+        "_archives/documentation_old/GUIDE_EXECUTION_PHASE1.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_archives/guides_migration_2026/GUIDE_SETUP_ENV_TEST.md",
+        "_archives/md_20jan2026/GUIDE_EXECUTION_PHASE1.md",
+        "_archives/sql_ancien/SCHEMA_COMPLET_FINAL_2026.sql",
+        "_archives/sql_ancien/migration_production_preserve_data.sql",
+        "_archives/sql_obsoletes/04_add_tenant_columns.sql",
+        "_archives/sql_obsoletes/05_create_rls_policies.sql",
+        "_archives/sql_obsoletes/06_migrate_existing_data.sql",
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_obsoletes/security/01_enable_rls_all_tables.sql",
+        "_archives/sql_production/add_annee_to_charges.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/supabase-operations.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/supabase-operations.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/supabase-operations.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/supabase-operations.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/supabase-operations.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/supabase-operations.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/supabase-operations.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/supabase-operations.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/supabase-operations.js",
+        "js/supabase-operations.js"
+      ]
+    },
+    {
+      "table": "checklist_validations",
+      "refs": [
+        "_archives/sql_production/disable_rls_fiches_clients.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql"
+      ]
+    },
+    {
+      "table": "checklists",
+      "refs": [
+        "_archives/TABLES_SUPPRIMEES_23JAN2026.md",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_archives/fichiers_test/test-fiches-clients.html",
+        "_archives/sql_production/disable_rls_fiches_clients.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiches-clients.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiches-clients.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/fiches-clients.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/fiches-clients.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/fiches-clients.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/fiches-clients.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/fiches-clients.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/fiches-clients.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/fiches-clients.js",
+        "js/fiches-clients.js"
+      ]
+    },
+    {
+      "table": "ci",
+      "refs": [
+        "_archives/sql_production/fix_rls_policies.sql"
+      ]
+    },
+    {
+      "table": "cleaner_tokens",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/create_cleaner_tokens.sql",
+        "_archives/sql/fix_cleaner_tokens_rls_anon.sql",
+        "app.html",
+        "js/femme-menage.js",
+        "js/menage.js"
+      ]
+    },
+    {
+      "table": "cleaning_schedules",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "client_feedback",
+      "refs": [
+        "_archives/refonte_v2_2026-01-02/REPONSES_DONNEES_FICHE_CLIENT.md",
+        "_archives/refonte_v2_2026-01-02/create_client_feedback_table.sql",
+        "_archives/sql_obsoletes/cleanup_immediate.sql",
+        "_archives/sql_production/cleanup_tables_obsoletes.sql"
+      ]
+    },
+    {
+      "table": "clients",
+      "refs": [
+        "_archives/sql_production/create_clients_table.sql"
+      ]
+    },
+    {
+      "table": "clients_preferences",
+      "refs": [
+        "_archives/refonte_v2_2026-01-02/create_fiche_client_preferences.sql",
+        "_archives/sql_obsoletes/cleanup_immediate.sql",
+        "_archives/sql_production/cleanup_tables_obsoletes.sql"
+      ]
+    },
+    {
+      "table": "cm_activity_logs_archive",
+      "refs": [
+        "_archives/docs_integres_audit_2026/AMELIORATIONS_CLIENTS_LISTE.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/AMELIORATIONS_CLIENTS_LISTE.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/AMELIORATIONS_CLIENTS_LISTE.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/AMELIORATIONS_CLIENTS_LISTE.md"
+      ]
+    },
+    {
+      "table": "cm_ai_actions",
+      "refs": [
+        "_archives/by_category/general/cleanup_20260224_154202/js/admin-content-ai-strategy-OLD.js",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_archives/sql_obsoletes_2026/ADD_PERFORMANCE_TRACKING.sql",
+        "_backups/backup_site_complet_11feb2026_16h/api/content-ai.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-content-ai-strategy-OLD.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-content-ai-strategy.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-content-analytics.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/ADD_PERFORMANCE_TRACKING.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-content-ai-strategy.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-content-analytics.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/ADD_PERFORMANCE_TRACKING.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/admin-content-ai-strategy.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/admin-content-analytics.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/admin-content-ai-strategy.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/admin-content-analytics.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/api/content-ai.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/admin-content-ai-strategy.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/admin-content-analytics.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/api/content-ai.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-content-ai-strategy.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-content-analytics.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/ADD_PERFORMANCE_TRACKING.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-content-ai-strategy.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-content-analytics.js",
+        "api/content-ai.js",
+        "js/admin-content-ai-strategy.js",
+        "js/admin-content-analytics.js"
+      ]
+    },
+    {
+      "table": "cm_ai_content_feedback",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_PROMPT_VERSIONING.sql",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/api/content-ai.js",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_PROMPT_VERSIONING.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_PROMPT_VERSIONING.sql",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/api/content-ai.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/api/content-ai.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_PROMPT_VERSIONING.sql",
+        "api/content-ai.js"
+      ]
+    },
+    {
+      "table": "cm_ai_content_history",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/integration/PROMPT_STRATEGIE_AMELIORE.md",
+        "_archives/by_category/general/cleanup_20260224_154202/js/admin-content-ai-strategy-OLD.js",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PROMPT_STRATEGIE_AMELIORE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-content-ai-strategy-OLD.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PROMPT_STRATEGIE_AMELIORE.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PROMPT_STRATEGIE_AMELIORE.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-content-ai-strategy-OLD.js"
+      ]
+    },
+    {
+      "table": "cm_ai_ethique_regles",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_PROMPT_VERSIONING.sql",
+        "_backups/backup_site_complet_11feb2026_16h/api/content-ai.js",
+        "_backups/backup_site_complet_11feb2026_16h/pages/admin-prompt-editor.html",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_PROMPT_VERSIONING.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/pages/admin-prompt-editor.html",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_PROMPT_VERSIONING.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/pages/admin-prompt-editor.html",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/pages/admin-prompt-editor.html",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/api/content-ai.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/pages/admin-prompt-editor.html",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/api/content-ai.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/pages/admin-prompt-editor.html",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_PROMPT_VERSIONING.sql",
+        "api/content-ai.js",
+        "pages/admin-prompt-editor.html"
+      ]
+    },
+    {
+      "table": "cm_ai_insights",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql"
+      ]
+    },
+    {
+      "table": "cm_ai_promotions",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql"
+      ]
+    },
+    {
+      "table": "cm_ai_prompt_versions",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_PROMPT_VERSIONING.sql",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/api/content-ai.js",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_PROMPT_VERSIONING.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_PROMPT_VERSIONING.sql",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/api/content-ai.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/api/content-ai.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_PROMPT_VERSIONING.sql",
+        "api/content-ai.js"
+      ]
+    },
+    {
+      "table": "cm_ai_strategies",
+      "refs": [
+        "_archives/by_category/general/cleanup_20260224_154202/js/admin-content-ai-strategy-OLD.js",
+        "_archives/by_category/general/cleanup_20260224_154202/js/widget-ai-propositions.js",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/api/content-ai.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-content-ai-strategy-OLD.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-content-ai-strategy.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/widget-ai-propositions.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-content-ai-strategy.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/widget-ai-propositions.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/admin-content-ai-strategy.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/widget-ai-propositions.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/admin-content-ai-strategy.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/widget-ai-propositions.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/api/content-ai.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/admin-content-ai-strategy.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/widget-ai-propositions.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/api/content-ai.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-content-ai-strategy.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/widget-ai-propositions.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_AI_MARKETING_AUTONOMOUS.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-content-ai-strategy-OLD.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-content-ai-strategy.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/widget-ai-propositions.js",
+        "api/content-ai.js",
+        "js/admin-content-ai-strategy.js"
+      ]
+    },
+    {
+      "table": "cm_content_generated",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_CONTENT_TABLE.sql",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-content.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_CONTENT_TABLE.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-content.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_CONTENT_TABLE.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/admin-content.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/admin-content.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/admin-content.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-content.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_CONTENT_TABLE.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-content.js",
+        "js/admin-content.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "cm_error_logs",
+      "refs": [
+        "_archives/by_category/general/cleanup_20260224_154202/js/widget-errors.js",
+        "_archives/by_category/general/cleanup_20260224_lot2_safe/js/client-errors-ticket-integration.js",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/UPGRADE_ERROR_DEDUPLICATION.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_ERROR_TRACKING.sql",
+        "_archives/docs_integres_audit_2026/FILTRAGE_ERREURS_UUID_CLIENT.md",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_archives/docs_integres_audit_2026/SYSTEME_ANTI_DOUBLONS.md",
+        "_archives/docs_tickets_monitoring_07feb2026/CORRECTION_HTTP400_VALIDATION_STATUS.md",
+        "_archives/docs_tickets_monitoring_07feb2026/DEDUPLICATION_ERREURS_TICKETS.md",
+        "_archives/nettoyage_10feb2026/md/CORRECTION_ERREURS_CONSOLE_06FEB2026.md",
+        "_archives/sql_obsoletes_2026/ADD_USER_ID_TO_ERROR_LOGS.sql",
+        "_archives/sql_obsoletes_2026/add_validation_columns.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/FILTRAGE_ERREURS_UUID_CLIENT.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/SYSTEME_ANTI_DOUBLONS.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-dashboard.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-error-monitor.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-monitoring.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/auto-ticket-diagnostic.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/auto-ticket-system.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/auto-validator.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/client-errors-ticket-integration.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/test-generator.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/ticket-workflow.js",
+        "_backups/backup_site_complet_11feb2026_16h/pages/admin-error-details.html",
+        "_backups/backup_site_complet_11feb2026_16h/sql/ADD_USER_ID_TO_ERROR_LOGS.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_ERROR_TRACKING.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/UPGRADE_ERROR_DEDUPLICATION.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/add_validation_columns.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-dashboard.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-monitoring.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/error-tracker.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_ERROR_TRACKING.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/admin-dashboard.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/admin-monitoring.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/error-tracker.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/admin-dashboard.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/admin-monitoring.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/error-tracker.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/admin-dashboard.js"
+      ]
+    },
+    {
+      "table": "cm_support_notifications",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_NOTIFICATION_TRIGGER.sql",
+        "_backups/backup_site_complet_11feb2026_16h/js/client-support.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_NOTIFICATION_TRIGGER.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/client-support.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_NOTIFICATION_TRIGGER.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/client-support.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/client-support.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/client-support.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/client-support.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_NOTIFICATION_TRIGGER.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/client-support.js",
+        "js/client-support.js",
+        "pages/options.html"
+      ]
+    },
+    {
+      "table": "cm_support_solution_feedback",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/CREATE_SUPPORT_AI_TABLES.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/CREATE_SUPPORT_AI_TABLES.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/CREATE_SUPPORT_AI_TABLES.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/CREATE_SUPPORT_AI_TABLES.sql"
+      ]
+    },
+    {
+      "table": "commandes_prestations",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/create_prestations_supplementaires.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/sql/create_prestations_simple.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/sql/insert_test_data_prestations.sql",
+        "_archives/desktop-owner-prestations_old.js",
+        "docs/ARCHITECTURE.md",
+        "js/admin-prestations-stats.js",
+        "js/admin-prestations.js",
+        "js/dashboard.js",
+        "js/desktop-owner-prestations.js",
+        "js/fiche-client-prestations.js",
+        "js/prestations.js",
+        "js/reservations.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "commits_log",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/docs_obsoletes/COMMIT_LOGGING_SYSTEM.md",
+        "_archives/documentation_obsolete/FIX_BOUTON_COMMIT.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_archives/scripts_obsoletes/insert_commit_log.js",
+        "_archives/sql_obsoletes/security/rls_enable.sql",
+        "_archives/sql_production/create_commits_log_table.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "communications_clients",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "configuration_calendrier",
+      "refs": [
+        "_archives/fichiers_test/diagnostic-tables.html",
+        "_archives/fichiers_test/test-tables-exist.html",
+        "_archives/fichiers_test/test-tables-standalone.html",
+        "_archives/fichiers_test/verif-tables.html",
+        "_archives/md_20jan2026/PROMPT_CALENDRIER_TARIFS.md"
+      ]
+    },
+    {
+      "table": "demandes_clients",
+      "refs": [
+        "_archives/docs_integres_audit_2026/FICHE_CLIENT_DOCUMENTATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/FICHE_CLIENT_DOCUMENTATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/FICHE_CLIENT_DOCUMENTATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/FICHE_CLIENT_DOCUMENTATION.md"
+      ]
+    },
+    {
+      "table": "demandes_horaires",
+      "refs": [
+        "_archives/DEBUG_DEMANDES_HORAIRES.md",
+        "_archives/TABLES_SUPPRIMEES_23JAN2026.md",
+        "_archives/add_rls_demandes_horaires.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/patches/FIX_DEMANDES_HORAIRES_ID_28JAN2026.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/patches/PATCH_ADD_TABLES_CLIENTS_28JAN2026.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/create_test_demande_horaire.sql",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_archives/fix_demandes_horaires_fk.sql",
+        "_archives/guides_obsoletes/INTEGRATION_INDEX_HTML.js",
+        "_archives/guides_obsoletes/README_DEMANDES_HORAIRES.md",
+        "_archives/sql_ancien/SCHEMA_COMPLET_FINAL_2026.sql",
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_obsoletes_2026/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql",
+        "_archives/sql_obsoletes_2026/RESTAURATION_URGENTE_28JAN2026.sql",
+        "_archives/sql_production/create_demandes_horaires_table.sql",
+        "_archives/sql_production/disable_rls_fiches_clients.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_archives/sql_production/migrate_demandes_horaires.sql",
+        "_backups/backup_site_complet_11feb2026_16h/dashboard.js",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/architecture/ERREURS_CRITIQUES.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/dashboard.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiche-client-app.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiches-clients.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/notification-system.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/widget-horaires-clients.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/FIX_TABLES_ID_MANQUANTS_28JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/RESTAURATION_URGENTE_28JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/patches/FIX_DEMANDES_HORAIRES_ID_28JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/patches/PATCH_ADD_TABLES_CLIENTS_28JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/architecture/ERREURS_CRITIQUES.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/dashboard.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiche-client-app.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiches-clients.js"
+      ]
+    },
+    {
+      "table": "device_tokens",
+      "refs": [
+        "_archives/docs_integres_audit_2026/SPECIFICATIONS_APPLICATION_APPLE.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/SPECIFICATIONS_APPLICATION_APPLE.md"
+      ]
+    },
+    {
+      "table": "email_templates",
+      "refs": [
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/sql_production/create_faq_table.sql"
+      ]
+    },
+    {
+      "table": "emails",
+      "refs": [
+        "_archives/sql_production/create_faq_table.sql"
+      ]
+    },
+    {
+      "table": "etat_lieux",
+      "refs": [
+        "_archives/sql_production/create_client_feedback_tables.sql"
+      ]
+    },
+    {
+      "table": "evaluations",
+      "refs": [
+        "_archives/sql_production/create_client_feedback_tables.sql"
+      ]
+    },
+    {
+      "table": "evaluations_sejour",
+      "refs": [
+        "_archives/TABLES_SUPPRIMEES_23JAN2026.md",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/docs_integres_audit_2026/FICHE_CLIENT_DOCUMENTATION.md",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_production/create_problemes_evaluations.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/FICHE_CLIENT_DOCUMENTATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiche-client-app.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiche-client-app.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/fiche-client-app.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/fiche-client-app.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/FICHE_CLIENT_DOCUMENTATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/fiche-client-app.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/fiche-client-app.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/fiche-client-app.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/FICHE_CLIENT_DOCUMENTATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/fiche-client-app.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/fiche-client-app.js",
+        "js/fiche-client-app.js"
+      ]
+    },
+    {
+      "table": "events",
+      "refs": [
+        "_archives/docs_obsoletes/BILAN_FINAL_REFACTORING.md"
+      ]
+    },
+    {
+      "table": "fiche_generation_logs",
+      "refs": [
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_production/disable_rls_fiches_clients.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_archives/sql_production/fix_rls_fiches_clients.sql",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiches-clients.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiches-clients.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/fiches-clients.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/fiches-clients.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/fiches-clients.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/fiches-clients.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/fiches-clients.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/fiches-clients.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/fiches-clients.js",
+        "js/fiches-clients.js"
+      ]
+    },
+    {
+      "table": "fiches_clients",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/GUIDE_EXECUTION_PHASE1.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_archives/md_20jan2026/GUIDE_EXECUTION_PHASE1.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "fiches_consultations",
+      "refs": [
+        "_archives/refonte_v2_2026-01-02/create_fiche_client_preferences.sql",
+        "_archives/refonte_v2_2026-01-02/create_fiches_consultations_table.sql",
+        "_archives/sql_obsoletes/cleanup_immediate.sql",
+        "_archives/sql_production/cleanup_tables_obsoletes.sql"
+      ]
+    },
+    {
+      "table": "fiches_envoyees",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/AUDIT_COMPLET_LIVEOWNERUNIT_2026_PARTIE2.md"
+      ]
+    },
+    {
+      "table": "fiscal_history",
+      "refs": [
+        "_archives/by_category/js/js_cleanup_20260224_mvp_safe/js/charges.js",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_archives/docs_obsoletes/STRUCTURE_TABLES_FISCALITE.md",
+        "_archives/nettoyage_10feb2026/sql/requetes_fiscal_history.sql",
+        "_archives/test-fiscal-history.html",
+        "_backups/backup_site_complet_11feb2026_16h/dashboard.js",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/charges.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/dashboard.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiscalite-v2.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/charges.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiscalite-v2.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/charges.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/fiscalite-v2.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/requetes_fiscal_history.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/charges.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/fiscalite-v2.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/charges.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/fiscalite-v2.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/charges.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/fiscalite-v2.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/charges.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/fiscalite-v2.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/charges.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/fiscalite-v2.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/requetes_fiscal_history.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/charges.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/dashboard.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/fiscalite-v2.js",
+        "js/dashboard.js",
+        "js/fiscalite-v2.js",
+        "pages/dashboard-proposition.html"
+      ]
+    },
+    {
+      "table": "fiscalite",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "fiscalite_amortissements",
+      "refs": [
+        "_archives/ANALYSE_FUSION_TABLES_23JAN2026.md",
+        "_archives/docs_obsoletes/guides_migration/GUIDE_AMORTISSEMENTS_AUTOMATIQUES.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiscalite-v2.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiscalite-v2.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/fiscalite-v2.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/fiscalite-v2.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/fiscalite-v2.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/fiscalite-v2.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/fiscalite-v2.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/fiscalite-v2.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/fiscalite-v2.js",
+        "js/fiscalite-v2.js"
+      ]
+    },
+    {
+      "table": "fiscalite_lieux_favoris",
+      "refs": [
+        "_archives/md_obsoletes_06feb2026/DESCRIPTION_COMPLETE_PAGE_FISCALITE.md"
+      ]
+    },
+    {
+      "table": "fiscalite_simulations",
+      "refs": [
+        "_archives/md_obsoletes_06feb2026/DESCRIPTION_COMPLETE_PAGE_FISCALITE.md"
+      ]
+    },
+    {
+      "table": "fiscalite_soldes",
+      "refs": [
+        "_archives/md_obsoletes_06feb2026/DESCRIPTION_COMPLETE_PAGE_FISCALITE.md"
+      ]
+    },
+    {
+      "table": "fiscalite_trajets_km",
+      "refs": [
+        "_archives/md_obsoletes_06feb2026/DESCRIPTION_COMPLETE_PAGE_FISCALITE.md"
+      ]
+    },
+    {
+      "table": "gites_base",
+      "refs": [
+        "_archives/SUIVI_SCALABILITE_70K_old.md"
+      ]
+    },
+    {
+      "table": "gites_consignes",
+      "refs": [
+        "_archives/SUIVI_SCALABILITE_70K_old.md"
+      ]
+    },
+    {
+      "table": "gites_contacts",
+      "refs": [
+        "_archives/SUIVI_SCALABILITE_70K_old.md"
+      ]
+    },
+    {
+      "table": "gites_de_france_options",
+      "refs": [
+        "_archives/docs_integres_audit_2026/PROPOSITION_ABONNEMENTS.md",
+        "_backups/backup_docs_abonnements_12feb2026/PROPOSITION_ABONNEMENTS.md"
+      ]
+    },
+    {
+      "table": "gites_equipements",
+      "refs": [
+        "_archives/SUIVI_SCALABILITE_70K_old.md"
+      ]
+    },
+    {
+      "table": "gites_wifi",
+      "refs": [
+        "_archives/SUIVI_SCALABILITE_70K_old.md"
+      ]
+    },
+    {
+      "table": "historical_data",
+      "refs": [
+        "_archives/sql_ancien/SCHEMA_COMPLET_FINAL_2026.sql",
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_obsoletes/security/rls_enable.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_backups/backup_27jan2026_calendrier_couleurs/index.html",
+        "_backups/backup_site_complet_11feb2026_16h/app.html",
+        "_backups/backup_site_complet_11feb2026_16h/js/supabase-operations.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/index.html",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/supabase-operations.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/index.html",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/supabase-operations.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/index.html",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/supabase-operations.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/index.html",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/supabase-operations.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/index.html",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/supabase-operations.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/index.html",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/supabase-operations.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/index.html",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/supabase-operations.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/index.html",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/supabase-operations.js",
+        "app.html",
+        "js/supabase-operations.js"
+      ]
+    },
+    {
+      "table": "ical_subscriptions",
+      "refs": [
+        "docs/ARCHITECTURE.md"
+      ]
+    },
+    {
+      "table": "infos_gites_backup_trevoux",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_archives/sql_ancien/migrations_utilitaires/copy_3eme_to_trevoux.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/SECURISATION_ET_NETTOYAGE_BACKUPS.sql"
+      ]
+    },
+    {
+      "table": "infos_gites_consignes",
+      "refs": [
+        "_archives/PLAN_SCALABILITE_70K_USERS_futur.md"
+      ]
+    },
+    {
+      "table": "infos_gites_contacts",
+      "refs": [
+        "_archives/PLAN_SCALABILITE_70K_USERS_futur.md"
+      ]
+    },
+    {
+      "table": "infos_gites_core",
+      "refs": [
+        "_archives/PLAN_SCALABILITE_70K_USERS_futur.md"
+      ]
+    },
+    {
+      "table": "infos_gites_equipements",
+      "refs": [
+        "_archives/PLAN_SCALABILITE_70K_USERS_futur.md"
+      ]
+    },
+    {
+      "table": "infos_gites_wifi",
+      "refs": [
+        "_archives/PLAN_SCALABILITE_70K_USERS_futur.md"
+      ]
+    },
+    {
+      "table": "infos_pratiques",
+      "refs": [
+        "_archives/TABLES_SUPPRIMEES_23JAN2026.md",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/sql/GUIDE_NETTOYAGE_BDD.md",
+        "_archives/sql_ancien/SCHEMA_COMPLET_FINAL_2026.sql",
+        "_archives/sql_obsoletes/04_add_tenant_columns.sql",
+        "_archives/sql_obsoletes/05_create_rls_policies.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/GUIDE_NETTOYAGE_BDD.md",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/GUIDE_NETTOYAGE_BDD.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/GUIDE_NETTOYAGE_BDD.md",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/GUIDE_NETTOYAGE_BDD.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/GUIDE_NETTOYAGE_BDD.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/securite/RESTAURATION_TABLES_20260123.sql"
+      ]
+    },
+    {
+      "table": "invoices",
+      "refs": [
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md"
+      ]
+    },
+    {
+      "table": "lignes_commande_prestations",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/create_prestations_supplementaires.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/sql/create_prestations_simple.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/sql/insert_test_data_prestations.sql",
+        "docs/ARCHITECTURE.md",
+        "js/fiche-client-prestations.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "linen_needs",
+      "refs": [
+        "_backups/backup_site_complet_11feb2026_16h/js/draps.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/femme-menage.js",
+        "_backups/backup_site_complet_11feb2026_16h/tabs/mobile/draps.html",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/draps.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/femme-menage.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/tabs/mobile/draps.html",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/draps.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/femme-menage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/tabs/mobile/draps.html",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/draps.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/femme-menage.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/tabs/mobile/draps.html",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/draps.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/femme-menage.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/tabs/mobile/draps.html",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/draps.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/femme-menage.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/draps.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/femme-menage.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/tabs/mobile/draps.html",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/draps.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/femme-menage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/tabs/mobile/draps.html",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/draps.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/femme-menage.js",
+        "js/draps.js",
+        "js/femme-menage.js",
+        "tabs/mobile/draps.html"
+      ]
+    },
+    {
+      "table": "ma_table",
+      "refs": [
+        "_archives/docs_obsoletes/readme_anciens/README_TRADUCTION_MULTILINGUE.md"
+      ]
+    },
+    {
+      "table": "migration_context",
+      "refs": [
+        "_archives/sql_obsoletes/06_migrate_existing_data.sql"
+      ]
+    },
+    {
+      "table": "nom_table",
+      "refs": [
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/sql_obsoletes/04_add_tenant_columns.sql"
+      ]
+    },
+    {
+      "table": "organization_members",
+      "refs": [
+        "_archives/backup_structure_avant_phase1.sql",
+        "_archives/docs_obsoletes/COMMANDES_MULTI_TENANT.md",
+        "_archives/docs_obsoletes/MIGRATION_PROGRESSIVE.md",
+        "_archives/docs_obsoletes/PLAN_DEMARRAGE_MULTI_TENANT.md",
+        "_archives/docs_obsoletes/readme_anciens/README_DEV.md",
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/fichiers_test/diagnostic-tables.html",
+        "_archives/fichiers_test/test-tables-standalone.html",
+        "_archives/fichiers_test/verif-tables.html",
+        "_archives/guides_migration_2026/GUIDE_MIGRATION_COMPLET.md",
+        "_archives/md_20jan2026/PROMPT_CALENDRIER_TARIFS.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/scripts_obsoletes/setup-organization.js",
+        "_archives/sql_ancien/SOLUTION_FINALE.sql",
+        "_archives/sql_ancien/workaround_disable_rls.sql",
+        "_archives/sql_ancien/workaround_enable_rls.sql",
+        "_archives/sql_obsoletes/01_seed_data.sql",
+        "_archives/sql_obsoletes/03_create_organization_members_table.sql",
+        "_archives/sql_obsoletes/06_migrate_existing_data.sql",
+        "_archives/tests_html/fix-gites.html"
+      ]
+    },
+    {
+      "table": "organizations",
+      "refs": [
+        "_archives/backup_structure_avant_phase1.sql",
+        "_archives/docs_obsoletes/COMMANDES_MULTI_TENANT.md",
+        "_archives/docs_obsoletes/MIGRATION_PROGRESSIVE.md",
+        "_archives/docs_obsoletes/PLAN_DEMARRAGE_MULTI_TENANT.md",
+        "_archives/docs_obsoletes/readme_anciens/README_DEV.md",
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/guides_migration_2026/GUIDE_MIGRATION_COMPLET.md",
+        "_archives/guides_migration_2026/GUIDE_RAPIDE_TEST.md",
+        "_archives/guides_migration_2026/RAPPORT_AUDIT_BDD_MIGRATION.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART2_ARCHITECTURE.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/sql_ancien/SOLUTION_FINALE.sql",
+        "_archives/sql_ancien/migration_production_preserve_data.sql",
+        "_archives/sql_ancien/workaround_disable_rls.sql",
+        "_archives/sql_ancien/workaround_enable_rls.sql",
+        "_archives/sql_obsoletes/01_create_organizations_table.sql",
+        "_archives/sql_obsoletes/01_seed_data.sql",
+        "_archives/sql_obsoletes/05_create_rls_policies.sql",
+        "_archives/sql_obsoletes/06_migrate_existing_data.sql",
+        "_archives/tests_html/fix-gites.html",
+        "_archives/tests_html/onboarding-old.html"
+      ]
+    },
+    {
+      "table": "payments",
+      "refs": [
+        "_archives/md_obsoletes_06feb2026/idees-virales-liveownerunit.md"
+      ]
+    },
+    {
+      "table": "practical_info",
+      "refs": [
+        "_archives/sql_obsoletes/01_seed_data.sql",
+        "_archives/sql_obsoletes/02_gite_crud_functions.sql"
+      ]
+    },
+    {
+      "table": "prestations_catalogue",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/add_charges_fiscales.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/create_prestations_supplementaires.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/sql/create_prestations_simple.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/sql/insert_test_data_prestations.sql",
+        "docs/ARCHITECTURE.md",
+        "js/admin-prestations.js",
+        "js/desktop-owner-prestations.js",
+        "js/fiche-client-prestations.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "pricing_rules",
+      "refs": [
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md"
+      ]
+    },
+    {
+      "table": "properties",
+      "refs": [
+        "_archives/docs_obsoletes/TABLEAU_RECAPITULATIF_BDD.md",
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql"
+      ]
+    },
+    {
+      "table": "public",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/CLEANUP_BDD_EXTRA_PROPRE_2026-02-23.sql",
+        "_archives/sql_production/force_disable_rls.sql"
+      ]
+    },
+    {
+      "table": "recurrent_actions",
+      "refs": [
+        "_archives/sql_production/fix_rls_all_tables.sql"
+      ]
+    },
+    {
+      "table": "referral_campaigns",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_campaigns.sql",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_archives/fichiers_test/test-console-debug.js",
+        "_archives/md_obsoletes_06feb2026/GUIDE_CAMPAGNES_PARRAINAGE.md",
+        "_archives/nettoyage_10feb2026/sql/parrainage_campaigns_test_data.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_campaigns.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_campaigns.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_campaigns_test_data.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_campaigns.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_campaigns_test_data.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-parrainage.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/parrainage.js",
+        "js/admin-parrainage.js",
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referral_invitations",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_system.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_system_complements.sql",
+        "_archives/docs_integres_audit_2026/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_archives/md_obsoletes_06feb2026/idees-virales-liveownerunit.md",
+        "_archives/nettoyage_10feb2026/sql/parrainage_test_data.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_system.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_system_complements.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_system.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_system_complements.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_test_data.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_system.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_system_complements.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_test_data.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/parrainage.js",
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referral_monthly_payments",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_paiements_mensuels.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_paiements_mensuels.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_paiements_mensuels.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_paiements_mensuels.sql"
+      ]
+    },
+    {
+      "table": "referral_notifications",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_notifications.sql",
+        "_backups/backup_site_complet_11feb2026_16h/js/parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_notifications.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_notifications.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_notifications.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/parrainage.js",
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referral_point_conversions",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_system.sql",
+        "_archives/docs_integres_audit_2026/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_system.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_system.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_system.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/parrainage.js",
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referral_rewards",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_campaigns.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_system.sql",
+        "_archives/docs_integres_audit_2026/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_archives/md_obsoletes_06feb2026/idees-virales-liveownerunit.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_campaigns.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_system.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_campaigns.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_system.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_campaigns.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_system.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/parrainage.js",
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referrals",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_permanent_individual_bonus.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_system.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_system_complements.sql",
+        "_archives/docs_integres_audit_2026/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_archives/md_obsoletes_06feb2026/idees-virales-liveownerunit.md",
+        "_archives/nettoyage_10feb2026/sql/parrainage_test_data.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-clients.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/referral-signup.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_permanent_individual_bonus.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_system.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_system_complements.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-clients.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/referral-signup.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_permanent_individual_bonus.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_system.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_system_complements.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_test_data.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-clients.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/referral-signup.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_permanent_individual_bonus.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_system.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_system_complements.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_test_data.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-clients.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/parrainage.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/referral-signup.js",
+        "js/admin-clients.js",
+        "js/parrainage.js",
+        "js/referral-signup.js",
+        "pages/options.html"
+      ]
+    },
+    {
+      "table": "regles_tarifaires",
+      "refs": [
+        "_archives/fichiers_test/diagnostic-tables.html",
+        "_archives/fichiers_test/test-tables-exist.html",
+        "_archives/fichiers_test/test-tables-standalone.html",
+        "_archives/fichiers_test/verif-tables.html",
+        "_archives/md_20jan2026/PROMPT_CALENDRIER_TARIFS.md"
+      ]
+    },
+    {
+      "table": "reservations_2024",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/AUDIT_COMPLET_LIVEOWNERUNIT_2026_PARTIE2.md",
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/SUIVI_SCALABILITE_100K_TECHNIQUE.md"
+      ]
+    },
+    {
+      "table": "reservations_2025",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/AUDIT_COMPLET_LIVEOWNERUNIT_2026_PARTIE2.md",
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/SUIVI_SCALABILITE_100K_TECHNIQUE.md"
+      ]
+    },
+    {
+      "table": "reservations_2026",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/AUDIT_COMPLET_LIVEOWNERUNIT_2026_PARTIE2.md",
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/SUIVI_SCALABILITE_100K_TECHNIQUE.md"
+      ]
+    },
+    {
+      "table": "reservations_archive",
+      "refs": [
+        "_archives/SUIVI_SCALABILITE_70K_old.md"
+      ]
+    },
+    {
+      "table": "reservations_backup_20260112",
+      "refs": [
+        "_archives/docs_obsoletes/guides_migration/GUIDE_REFONTE_RESERVATIONS.md"
+      ]
+    },
+    {
+      "table": "reservations_old",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/SUIVI_SCALABILITE_100K_TECHNIQUE.md"
+      ]
+    },
+    {
+      "table": "retours_clients",
+      "refs": [
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_production/cleanup_tables_obsoletes.sql",
+        "_archives/sql_production/create_client_feedback_tables.sql",
+        "_archives/sql_production/disable_rls_fiches_clients.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiche-client-app.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiches-clients.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiche-client-app.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiches-clients.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/fiche-client-app.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/fiches-clients.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/fiche-client-app.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/fiches-clients.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/fiche-client-app.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/fiches-clients.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/fiche-client-app.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/fiches-clients.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/fiche-client-app.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/fiches-clients.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/fiche-client-app.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/fiches-clients.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/fiche-client-app.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/fiches-clients.js",
+        "js/fiche-client-app.js",
+        "js/fiches-clients.js"
+      ]
+    },
+    {
+      "table": "rls_access_logs",
+      "refs": [
+        "_archives/docs_obsoletes/COMMANDES_MULTI_TENANT.md",
+        "_archives/sql_obsoletes/05_create_rls_policies.sql"
+      ]
+    },
+    {
+      "table": "rls_policy_backups_fiche_client",
+      "refs": [
+        "sql/securite/fiche_client_rls_lot3_pre_backup_20260223.sql"
+      ]
+    },
+    {
+      "table": "security_logs",
+      "refs": [
+        "_archives/docs_obsoletes/guides_migration/GUIDE_RLS_IMPLEMENTATION.md",
+        "_archives/documentation_old/GUIDE_RLS_IMPLEMENTATION.md"
+      ]
+    },
+    {
+      "table": "soldes_bancaires",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "stocks_draps",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/docs_obsoletes/COMMANDES_MULTI_TENANT.md",
+        "_archives/docs_obsoletes/RAPPORT_AUDIT_SECURITE.md",
+        "_archives/docs_obsoletes/audits_anciens/AUDIT_SECURITE.md",
+        "_archives/documentation_old/AUDIT_SECURITE.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/guides_migration_2026/GUIDE_SETUP_ENV_TEST.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/md_20jan2026/SYNTHESE_MAPPING_DRAPS.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART4_FEATURES.md",
+        "_archives/sql_ancien/SCHEMA_COMPLET_FINAL_2026.sql",
+        "_archives/sql_ancien/migration_production_preserve_data.sql",
+        "_archives/sql_obsoletes/04_add_tenant_columns.sql",
+        "_archives/sql_obsoletes/05_create_rls_policies.sql",
+        "_archives/sql_obsoletes/06_migrate_existing_data.sql",
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_obsoletes/create_stocks_draps.sql",
+        "_archives/sql_obsoletes/security/rls_enable.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "storage",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/PHOTOS_GITES_README.md",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/create_gite_photos_bucket.sql"
+      ]
+    },
+    {
+      "table": "subscription_usage",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/CREATE_SUBSCRIPTION_SYSTEM.sql",
+        "_archives/docs_integres_audit_2026/PROPOSITION_ABONNEMENTS.md",
+        "_backups/backup_docs_abonnements_12feb2026/PROPOSITION_ABONNEMENTS.md"
+      ]
+    },
+    {
+      "table": "subscriptions",
+      "refs": [
+        "_archives/documentation_old/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/documentation_old/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/md_20jan2026/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md",
+        "_archives/md_20jan2026/backups_roadmap/backup_20260107_100429/ROADMAP_MULTI_TENANT_PART3_IMPLEMENTATION.md"
+      ]
+    },
+    {
+      "table": "subscriptions_plans",
+      "refs": [
+        "_archives/by_category/general/cleanup_20260224_154202/pages/test-subscription-system.html",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/CREATE_SUBSCRIPTION_SYSTEM.sql",
+        "_archives/docs_integres_audit_2026/IMPLEMENTATION_ABONNEMENTS.md",
+        "_archives/docs_integres_audit_2026/PROPOSITION_ABONNEMENTS.md",
+        "_backups/backup_docs_abonnements_12feb2026/IMPLEMENTATION_ABONNEMENTS.md",
+        "_backups/backup_docs_abonnements_12feb2026/PROPOSITION_ABONNEMENTS.md"
+      ]
+    },
+    {
+      "table": "suivi_soldes_bancaires",
+      "refs": [
+        "_archives/TABLES_SUPPRIMEES_23JAN2026.md",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/patches/PATCH_RESTAURATION_SUIVI_BANCAIRE_04FEB2026.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_archives/docs_integres_audit_2026/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_archives/guides_obsoletes/README_SUIVI_TRESORERIE.md",
+        "_archives/sql_ancien/SCHEMA_COMPLET_FINAL_2026.sql",
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_production/add_suivi_soldes_bancaires.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_archives/sql_production/fix_rls_policies.sql",
+        "_archives/sql_production/migration_complete_2026-01-02.sql",
+        "_backups/backup_site_complet_11feb2026_16h/dashboard.js",
+        "_backups/backup_site_complet_11feb2026_16h/docs/REFERENCE_TECHNIQUE_APPLICATION_MOBILE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/dashboard.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/fiscalite-v2.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/patches/PATCH_RESTAURATION_SUIVI_BANCAIRE_04FEB2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_backups/backup_site_complet_11feb2026_16h/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/dashboard.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/fiscalite-v2.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/dashboard.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/fiscalite-v2.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/patches/PATCH_RESTAURATION_SUIVI_BANCAIRE_04FEB2026.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/dashboard.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/fiscalite-v2.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/CLEANUP_TABLES_OBSOLETES_23JAN2026.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/NETTOYAGE_SECURISE_BDD_20260123.sql",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/securite/RESTAURATION_TABLES_20260123.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/dashboard.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/fiscalite-v2.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/dashboard.js"
+      ]
+    },
+    {
+      "table": "support_tickets",
+      "refs": [
+        "_archives/by_category/general/cleanup_20260224_lot2_safe/js/ticket-error-integration.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/ticket-error-integration.js",
+        "pages/dashboard-proposition.html"
+      ]
+    },
+    {
+      "table": "sync_queue",
+      "refs": [
+        "_archives/PLAN_SCALABILITE_70K_USERS_futur.md"
+      ]
+    },
+    {
+      "table": "system_config",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/sql/create_prestations_simple.sql",
+        "js/admin-prestations-stats.js",
+        "js/admin-prestations.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "table",
+      "refs": [
+        "_archives/SUIVI_SCALABILITE_70K_old.md"
+      ]
+    },
+    {
+      "table": "table_obsolete",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_mvp_rebuild_sql/sql/rapports/NETTOYAGE_FINAL_RAPPORT_23JAN2026.md",
+        "_backups/backup_site_complet_11feb2026_16h/sql/rapports/NETTOYAGE_FINAL_RAPPORT_23JAN2026.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/sql/rapports/NETTOYAGE_FINAL_RAPPORT_23JAN2026.md",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/rapports/NETTOYAGE_FINAL_RAPPORT_23JAN2026.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/sql/rapports/NETTOYAGE_FINAL_RAPPORT_23JAN2026.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/rapports/NETTOYAGE_FINAL_RAPPORT_23JAN2026.md"
+      ]
+    },
+    {
+      "table": "taches_menage",
+      "refs": [
+        "_backups/backup_site_complet_11feb2026_16h/js/notification-system.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/notification-system.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/notification-system.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/notification-system.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/notification-system.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/notification-system.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/notification-system.js",
+        "js/notification-system.js"
+      ]
+    },
+    {
+      "table": "tarifs_base",
+      "refs": [
+        "_archives/fichiers_test/diagnostic-tables.html",
+        "_archives/fichiers_test/test-tables-exist.html",
+        "_archives/fichiers_test/test-tables-standalone.html",
+        "_archives/fichiers_test/verif-tables.html",
+        "_archives/md_20jan2026/PROMPT_CALENDRIER_TARIFS.md"
+      ]
+    },
+    {
+      "table": "tenants",
+      "refs": [
+        "_archives/docs_obsoletes/TABLEAU_RECAPITULATIF_BDD.md",
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql"
+      ]
+    },
+    {
+      "table": "ticket_messages",
+      "refs": [
+        "_archives/by_category/general/cleanup_20260224_lot2_safe/js/ticket-error-integration.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/ticket-error-integration.js"
+      ]
+    },
+    {
+      "table": "tickets_support",
+      "refs": [
+        "pages/dashboard-proposition.html"
+      ]
+    },
+    {
+      "table": "todos",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/docs_obsoletes/GUIDE_COMPLET.md",
+        "_archives/docs_obsoletes/audits_anciens/AUDIT_SECURITE.md",
+        "_archives/documentation_old/AUDIT_SECURITE.md",
+        "_archives/documentation_old/GUIDE_COMPLET.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_archives/fichiers_test/check_todos.js",
+        "_archives/fix_todos_status_16feb2026.sql",
+        "_archives/guides_obsoletes/README_TACHES_RECURRENTES.md",
+        "_archives/sql_ancien/SCHEMA_COMPLET_FINAL_2026.sql",
+        "_archives/sql_obsoletes/MIGRATION_PHASE1_FONDATIONS.sql",
+        "_archives/sql_obsoletes/insert_tache_lundi_reservations.sql",
+        "_archives/sql_obsoletes/reset_et_test_taches_recurrentes.sql",
+        "_archives/sql_obsoletes/security/rls_enable.sql",
+        "_archives/sql_obsoletes/test_modification_recurrence.sql",
+        "_archives/sql_production/add_recurrent_to_todos.sql",
+        "_archives/sql_production/create_todos_table.sql",
+        "_archives/sql_production/fix_rls_all_tables.sql",
+        "_backups/backup_site_complet_11feb2026_16h/dashboard.js",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/architecture/ERREURS_CRITIQUES.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/archives.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/dashboard.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/draps.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/femme-menage.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/architecture/ERREURS_CRITIQUES.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/archives.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/dashboard.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/draps.js",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/js/femme-menage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/archives.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/dashboard.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/draps.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/femme-menage.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/architecture/ERREURS_CRITIQUES.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/archives.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/dashboard.js",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/js/draps.js"
+      ]
+    },
+    {
+      "table": "transactions_clients",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "transactions_commissions",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/create_prestations_supplementaires.sql"
+      ]
+    },
+    {
+      "table": "user_campaign_participations",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_campaigns.sql",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_campaigns.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_campaigns.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_campaigns.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-parrainage.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/parrainage.js",
+        "js/admin-parrainage.js",
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "user_notification_preferences",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/create_notification_preferences.sql",
+        "_archives/by_category/sql/sql_cleanup_20260303_notifications/insert_notification_preferences_owner.sql",
+        "_backups/backup_site_complet_11feb2026_16h/js/notification-system.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/create_notification_preferences.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/notification-system.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/create_notification_preferences.sql",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/notification-system.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/notification-system.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/notification-system.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/notification-system.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/create_notification_preferences.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/notification-system.js",
+        "js/notification-system.js",
+        "pages/options.html",
+        "sql/fix_rls_user_notification_preferences.sql",
+        "sql/migrations/ADD_NOTIFICATION_MENAGE_COMPANY_FIELDS_2026-03-03.sql",
+        "supabase/functions/notify-cleaning-planning-change/index.ts",
+        "supabase/functions/notify-demande/index.ts",
+        "supabase/functions/notify-reservation/index.ts",
+        "supabase/functions/notify-retour-client/index.ts",
+        "supabase/functions/notify-taches/index.ts"
+      ]
+    },
+    {
+      "table": "user_settings",
+      "refs": [
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/parrainage_system.sql",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/migrations/CREATE_DRAPS_ALERT_SETTINGS.sql",
+        "_archives/docs_integres_audit_2026/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_archives/md_obsoletes_06feb2026/GUIDE_INTEGRATION_PARRAINAGE.md",
+        "_archives/md_obsoletes_06feb2026/GUIDE_INTEGRATION_SIGNUP_PARRAINAGE.md",
+        "_archives/md_obsoletes_06feb2026/SOLUTION_PARRAINAGE_GITES_FRANCE.md",
+        "_archives/nettoyage_10feb2026/sql/parrainage_test_data.sql",
+        "_backups/backup_site_complet_11feb2026_16h/docs/DOCUMENTATION_SYSTEME_PARRAINAGE.md",
+        "_backups/backup_site_complet_11feb2026_16h/js/admin-clients.js",
+        "_backups/backup_site_complet_11feb2026_16h/js/parrainage.js",
+        "_backups/backup_site_complet_11feb2026_16h/sql/parrainage_system.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/admin-clients.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/parrainage.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_system.sql",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/sql/parrainage_test_data.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/admin-clients.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/parrainage.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_system.sql",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/sql/parrainage_test_data.sql",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/admin-clients.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/parrainage.js",
+        "js/admin-clients.js",
+        "js/draps.js",
+        "js/parrainage.js",
+        "pages/options.html"
+      ]
+    },
+    {
+      "table": "user_subscriptions",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/integration/README_SUBSCRIPTION_SYSTEM.md",
+        "_archives/by_category/general/cleanup_20260224_154202/pages/test-subscription-system.html",
+        "_archives/by_category/sql/sql_cleanup_20260224_clean_rebuild/sql/features/CREATE_SUBSCRIPTION_SYSTEM.sql",
+        "_archives/docs_integres_audit_2026/GUIDE_INTEGRATION_ABONNEMENTS.md",
+        "_archives/docs_integres_audit_2026/IMPLEMENTATION_ABONNEMENTS.md",
+        "_archives/docs_integres_audit_2026/INTEGRATION_STRIPE.md",
+        "_archives/docs_integres_audit_2026/PROPOSITION_ABONNEMENTS.md",
+        "_archives/md_obsoletes_06feb2026/idees-virales-liveownerunit.md",
+        "_backups/backup_docs_abonnements_12feb2026/IMPLEMENTATION_ABONNEMENTS.md",
+        "_backups/backup_docs_abonnements_12feb2026/PROPOSITION_ABONNEMENTS.md",
+        "js/subscription-manager.js",
+        "pages/options.html"
+      ]
+    },
+    {
+      "table": "users",
+      "refs": [
+        "_archives/by_category/docs/docs_cleanup_20260224_mvp_reference/docs/business/PLAN_COMMERCIALISATION.md",
+        "_archives/documentation_old/PLAN_COMMERCIALISATION.md",
+        "_backups/backup_site_complet_11feb2026_16h/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V1.1_28JAN2026_RESTAURATION_TABLES_CLIENTS/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V2.0_28JAN2026_FIX_TABLES_ID/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/docs/PLAN_COMMERCIALISATION.md",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/docs/PLAN_COMMERCIALISATION.md"
+      ]
+    },
+    {
+      "table": "v_cm_errors_unresolved",
+      "refs": [
+        "_backups/backup_site_complet_11feb2026_16h/js/widget-errors.js",
+        "_versions/V1.2_05FEB2026_AVANT_ORDRE_AFFICHAGE/js/widget-errors.js",
+        "_versions/V3.0_02FEB2026_FICHE_CLIENT_DOC_DEMO/js/widget-errors.js",
+        "_versions/V4.0_03FEB2026_REFONTE_OPTIONS_MENU/js/widget-errors.js",
+        "_versions/V5.0_04FEB2026_FIX_GRID_LISTE_ITEMS/js/widget-errors.js",
+        "_versions/V6.0_05FEB2026_STOCK_AUTO_DRAPS/js/widget-errors.js",
+        "_versions/V6.2_06FEB2026_SIMPLIFICATION_FISCALITE/js/widget-errors.js"
+      ]
+    }
+  ]
+}

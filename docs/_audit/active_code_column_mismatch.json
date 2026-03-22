@@ -1,0 +1,581 @@
+{
+  "count": 96,
+  "items": [
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-clients.js"
+    },
+    {
+      "type": "update",
+      "table": "cm_clients",
+      "col": "statut",
+      "file": "js/admin-clients.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-content-ai-strategy.js"
+    },
+    {
+      "type": "update",
+      "table": "cm_ai_content_queue",
+      "col": "plan_detaille",
+      "file": "js/admin-content-ai-strategy.js"
+    },
+    {
+      "type": "update",
+      "table": "cm_ai_content_queue",
+      "col": "statut",
+      "file": "js/admin-content-ai-strategy.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-content-analytics.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-content.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "montant_mensuel",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "statut",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_tickets",
+      "col": "csat_score",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_revenue_tracking",
+      "col": "mrr",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "nom_contact",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "prenom_contact",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "email_principal",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "nom_entreprise",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "entreprise",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "nb_gites_actuels",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_promotions",
+      "col": "nom",
+      "file": "js/admin-dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-finance.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_invoices",
+      "col": "montant_ttc",
+      "file": "js/admin-finance.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_invoices",
+      "col": "statut",
+      "file": "js/admin-finance.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_invoices",
+      "col": "date_emission",
+      "file": "js/admin-finance.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "montant_mensuel",
+      "file": "js/admin-finance.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "date_inscription",
+      "file": "js/admin-finance.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "type_abonnement",
+      "file": "js/admin-finance.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "statut",
+      "file": "js/admin-finance.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_clients",
+      "col": "date_fin_abonnement",
+      "file": "js/admin-finance.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-monitoring.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-parrainage.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-prestations-stats.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-prestations.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-promotions.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_promo_usage",
+      "col": "montant_reduction",
+      "file": "js/admin-promotions.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_promo_usage",
+      "col": "ca_genere",
+      "file": "js/admin-promotions.js"
+    },
+    {
+      "type": "update",
+      "table": "cm_promotions",
+      "col": "actif",
+      "file": "js/admin-promotions.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "js/admin-support.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_tickets",
+      "col": "csat_score",
+      "file": "js/admin-support.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_tickets",
+      "col": "cm_clients!inner",
+      "file": "js/admin-support.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_tickets",
+      "col": "nom_entreprise",
+      "file": "js/admin-support.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_tickets",
+      "col": "telephone)",
+      "file": "js/admin-support.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_solutions",
+      "col": "efficacite_score",
+      "file": "js/admin-support.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_solutions",
+      "col": "nb_utilisations",
+      "file": "js/admin-support.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_tickets",
+      "col": "statut",
+      "file": "js/admin-support.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_tickets",
+      "col": "categorie",
+      "file": "js/admin-support.js"
+    },
+    {
+      "type": "select",
+      "table": "gites",
+      "col": "regles_tarifs",
+      "file": "js/calendrier-tarifs.js"
+    },
+    {
+      "type": "update",
+      "table": "gites",
+      "col": "regles_tarifs",
+      "file": "js/calendrier-tarifs.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_promo_usage",
+      "col": "montant_reduction",
+      "file": "js/dashboard-promotions-widget.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_promo_usage",
+      "col": "ca_genere",
+      "file": "js/dashboard-promotions-widget.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_tickets",
+      "col": "statut",
+      "file": "js/dashboard-support-widget.js"
+    },
+    {
+      "type": "select",
+      "table": "cm_support_tickets",
+      "col": "priorite",
+      "file": "js/dashboard-support-widget.js"
+    },
+    {
+      "type": "select",
+      "table": "cleaning_schedule",
+      "col": "scheduled_date",
+      "file": "js/dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "retours_menage",
+      "col": "gites",
+      "file": "js/dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "cleaning_schedule",
+      "col": "reservation_end",
+      "file": "js/dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "retours_menage",
+      "col": "date_menage",
+      "file": "js/dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "retours_menage",
+      "col": "commentaires",
+      "file": "js/dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "retours_menage",
+      "col": "validated",
+      "file": "js/dashboard.js"
+    },
+    {
+      "type": "update",
+      "table": "retours_menage",
+      "col": "validated",
+      "file": "js/dashboard.js"
+    },
+    {
+      "type": "select",
+      "table": "client_access_tokens",
+      "col": "reservations",
+      "file": "js/fiche-client-app.js"
+    },
+    {
+      "type": "update",
+      "table": "gites",
+      "col": "ordre_affichage",
+      "file": "js/gites-manager.js"
+    },
+    {
+      "type": "select",
+      "table": "infos_gites",
+      "col": "photos",
+      "file": "js/gites-photos.js"
+    },
+    {
+      "type": "update",
+      "table": "infos_gites",
+      "col": "photos",
+      "file": "js/gites-photos.js"
+    },
+    {
+      "type": "select",
+      "table": "infos_gites",
+      "col": "photos",
+      "file": "js/infos-gites-photos.js"
+    },
+    {
+      "type": "select",
+      "table": "cleaning_schedule",
+      "col": "validated_by_company",
+      "file": "js/menage.js"
+    },
+    {
+      "type": "select",
+      "table": "reservations",
+      "col": "date_debut",
+      "file": "js/menage.js"
+    },
+    {
+      "type": "select",
+      "table": "reservations",
+      "col": "date_fin",
+      "file": "js/menage.js"
+    },
+    {
+      "type": "update",
+      "table": "retours_menage",
+      "col": "validated",
+      "file": "js/menage.js"
+    },
+    {
+      "type": "select",
+      "table": "reservations",
+      "col": "gites",
+      "file": "js/notification-system.js"
+    },
+    {
+      "type": "select",
+      "table": "cleaning_schedule",
+      "col": "scheduled_date",
+      "file": "js/supabase-operations.js"
+    },
+    {
+      "type": "select",
+      "table": "cleaning_schedule",
+      "col": "validated_by_company",
+      "file": "js/supabase-operations.js"
+    },
+    {
+      "type": "select",
+      "table": "cleaning_schedule",
+      "col": "reservation_end",
+      "file": "js/supabase-operations.js"
+    },
+    {
+      "type": "select",
+      "table": "cleaning_schedule",
+      "col": "reservation_start_after",
+      "file": "js/supabase-operations.js"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "pages/admin-communications.html"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "pages/admin-emails.html"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "pages/admin-error-details.html"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "pages/admin-prompt-editor.html"
+    },
+    {
+      "type": "select",
+      "table": "user_roles",
+      "col": "is_active",
+      "file": "pages/admin-ticket-workflow.html"
+    },
+    {
+      "type": "update",
+      "table": "infos_gites",
+      "col": "fiche_client_theme",
+      "file": "pages/options.html"
+    },
+    {
+      "type": "select",
+      "table": "cleaning_schedule",
+      "col": "scheduled_date",
+      "file": "pages/validation.html"
+    },
+    {
+      "type": "select",
+      "table": "cleaning_schedule",
+      "col": "proposed_by",
+      "file": "pages/validation.html"
+    },
+    {
+      "type": "select",
+      "table": "gites",
+      "col": "regles_tarifs",
+      "file": "tabs/mobile/calendrier-tarifs.html"
+    },
+    {
+      "type": "select",
+      "table": "gites",
+      "col": "adresse",
+      "file": "tabs/mobile/calendrier-tarifs.html"
+    },
+    {
+      "type": "update",
+      "table": "gites",
+      "col": "regles_tarifs",
+      "file": "tabs/mobile/calendrier-tarifs.html"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "email_enabled",
+      "file": "supabase/functions/notify-taches/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "email_address",
+      "file": "supabase/functions/notify-taches/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "notify_taches",
+      "file": "supabase/functions/notify-taches/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "email_enabled",
+      "file": "supabase/functions/notify-retour-client/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "email_address",
+      "file": "supabase/functions/notify-retour-client/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "notify_retours",
+      "file": "supabase/functions/notify-retour-client/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "email_enabled",
+      "file": "supabase/functions/notify-reservation/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "email_address",
+      "file": "supabase/functions/notify-reservation/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "notify_reservations",
+      "file": "supabase/functions/notify-reservation/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "email_enabled",
+      "file": "supabase/functions/notify-demande/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "email_address",
+      "file": "supabase/functions/notify-demande/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "notify_demandes",
+      "file": "supabase/functions/notify-demande/index.ts"
+    },
+    {
+      "type": "select",
+      "table": "user_notification_preferences",
+      "col": "email_enabled",
+      "file": "supabase/functions/notify-cleaning-planning-change/index.ts"
+    }
+  ]
+}

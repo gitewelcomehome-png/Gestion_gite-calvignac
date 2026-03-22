@@ -1,7 +1,7 @@
 # 🏗️ Architecture - Gestion Gîte Calvignac
 
-**Version :** 2.13.45  
-**Dernière MAJ :** 1 mars 2026  
+**Version :** 2.13.47  
+**Dernière MAJ :** 3 mars 2026  
 **Environnement :** Production (Supabase + Vercel)
 
 ---
@@ -23,6 +23,14 @@ psql "$DATABASE_URL" -f sql/rebuild/01_REBUILD_SITE_ORDER.sql
 
 **⏱️ Setup complet :** ~10 minutes
 
+### 🔐 RLS token pages (07 mars 2026)
+
+Script d'alignement des politiques tokenisées des pages client/menage :
+
+```bash
+psql "$DATABASE_URL" -f sql/securite/RLS_ALIGN_FICHE_CLIENT_FEMME_MENAGE_2026-03-07.sql
+```
+
 ---
 
 ## 📋 Vue d'Ensemble
@@ -34,12 +42,57 @@ Application SaaS de gestion de gîtes avec :
 - 👥 Interface Admin (Channel Manager)
 - 📊 Interface Owner (stats, prestations)
 - 🛒 Interface Client (fiche gîte, commande prestations)
+- 🤝 Module Communauté (annuaire partagé artisans/experts + notation)
 
 ---
 
 ## 🗄️ Base de Données (Supabase PostgreSQL)
 
 ### Tables Principales
+
+#### **community_artisans** ✨ **NOUVEAU v2.14.0**
+```sql
+id                UUID PRIMARY KEY DEFAULT uuid_generate_v4()
+owner_user_id     UUID → auth.users(id) ON DELETE CASCADE         -- Créateur
+creator_gite_id   UUID → gites(id) ON DELETE SET NULL             -- Gîte créateur
+nom               VARCHAR(200) NOT NULL
+metier            VARCHAR(200) NOT NULL
+telephone         VARCHAR(50)
+ville             VARCHAR(120)
+latitude          DOUBLE PRECISION NOT NULL
+longitude         DOUBLE PRECISION NOT NULL
+description       TEXT
+created_at        TIMESTAMPTZ DEFAULT NOW()
+updated_at        TIMESTAMPTZ DEFAULT NOW()
+
+-- Indexes
+CREATE INDEX idx_community_artisans_created_at ON community_artisans(created_at DESC);
+CREATE INDEX idx_community_artisans_owner ON community_artisans(owner_user_id);
+CREATE INDEX idx_community_artisans_creator_gite ON community_artisans(creator_gite_id);
+CREATE INDEX idx_community_artisans_geo ON community_artisans(latitude, longitude);
+
+-- RLS
+-- SELECT: tous les authenticated (annuaire partagé)
+-- INSERT/UPDATE/DELETE: créateur uniquement (owner_user_id = auth.uid())
+```
+
+#### **community_artisan_notes** ✨ **NOUVEAU v2.14.0**
+```sql
+id                BIGSERIAL PRIMARY KEY
+artisan_id        UUID → community_artisans(id) ON DELETE CASCADE
+owner_user_id     UUID → auth.users(id) ON DELETE CASCADE
+note              SMALLINT NOT NULL CHECK (note BETWEEN 1 AND 5)
+commentaire       TEXT
+created_at        TIMESTAMPTZ DEFAULT NOW()
+updated_at        TIMESTAMPTZ DEFAULT NOW()
+
+-- Contraintes
+UNIQUE (artisan_id, owner_user_id)       -- Un seul vote par gîte/propriétaire
+
+-- RLS
+-- SELECT: tous les authenticated
+-- INSERT/UPDATE/DELETE: auteur de la note uniquement (owner_user_id = auth.uid())
+```
 
 #### **system_config** ✨ **NOUVEAU v2.13.0**
 ```sql
@@ -62,25 +115,28 @@ updated_at        TIMESTAMPTZ DEFAULT NOW()
 
 #### **gites**
 ```sql
-id                UUID PRIMARY KEY DEFAULT uuid_generate_v4()
-owner_id          UUID → auth.users(id)
-name              VARCHAR(200)                  -- ⚠️ Pas "nom"
+id                UUID PRIMARY KEY DEFAULT gen_random_uuid()
+owner_user_id     UUID → auth.users(id) ON DELETE CASCADE  -- ⚠️ owner_user_id PAS owner_id
+name              TEXT NOT NULL
+slug              TEXT NOT NULL
+description       TEXT
 address           TEXT
-city              VARCHAR(100)
-postal_code       VARCHAR(20)
-country           VARCHAR(100) DEFAULT 'France'
+city              TEXT
+postal_code       TEXT
+country           TEXT DEFAULT 'France'
+department        TEXT
+region            TEXT
 capacity          INTEGER
 bedrooms          INTEGER
 beds              INTEGER
 bathrooms         INTEGER
-surface_m2        DECIMAL(10,2)
-type_hebergement  VARCHAR(80)
-label_classement  VARCHAR(80)
-department        VARCHAR(100)
-region            VARCHAR(100)
+surface_m2        NUMERIC(7,2)
+categorie_hebergement TEXT DEFAULT 'gite'  -- ✨ 'gite' | 'chambre_hotes' (impacte régime fiscal)
+type_hebergement  TEXT
+label_classement  TEXT
 environment       TEXT
 situation         TEXT
-cuisine_niveau    VARCHAR(40)
+cuisine_niveau    TEXT
 animaux_acceptes  BOOLEAN DEFAULT false
 access_pmr        BOOLEAN DEFAULT false
 parking           BOOLEAN DEFAULT false
@@ -89,18 +145,28 @@ platform_booking  BOOLEAN DEFAULT false
 platform_abritel  BOOLEAN DEFAULT false
 platform_gdf      BOOLEAN DEFAULT false
 platform_direct   BOOLEAN DEFAULT false
-price_per_night   DECIMAL(10,2)
-description       TEXT
-description_en    TEXT
-amenities         JSONB                         -- ["wifi", "piscine", ...]
-images            JSONB                         -- [{url: "...", caption: "..."}]
+price_per_night   NUMERIC(10,2)
+amenities         JSONB DEFAULT '[]'           -- ["wifi", "piscine", ...]
+ical_sources      JSONB DEFAULT '{}'           -- format objet unifié
+ical_urls         JSONB DEFAULT '[]'           -- alias tableau de ical_sources
+settings          JSONB DEFAULT '{}'
+tarifs_calendrier JSONB DEFAULT '{}'
+regles_tarifaires JSONB DEFAULT '{}'
+regles_tarifs     JSONB                        -- règles tarifaires custom
+icon              TEXT DEFAULT 'home'
+color             TEXT DEFAULT '#667eea'
+display_order     INTEGER DEFAULT 0
+taxe_sejour_tarif NUMERIC(6,2) DEFAULT 0
+taxe_sejour_plateformes JSONB DEFAULT '[]'
 is_active         BOOLEAN DEFAULT true
-created_at        TIMESTAMP DEFAULT NOW()
-updated_at        TIMESTAMP DEFAULT NOW()
+created_at        TIMESTAMPTZ DEFAULT now()
+updated_at        TIMESTAMPTZ DEFAULT now()
+
+UNIQUE(owner_user_id, slug)
 
 -- Indexes
-CREATE INDEX idx_gites_owner ON gites(owner_id);
-CREATE INDEX idx_gites_active ON gites(is_active);
+CREATE INDEX idx_gites_owner ON gites(owner_user_id);
+CREATE INDEX idx_gites_active ON gites(owner_user_id, is_active);
 ```
 
 #### **reservations**
@@ -137,6 +203,81 @@ CREATE INDEX idx_reservations_ical ON reservations(ical_uid);
 
 -- ⚠️ Règle Métier : UN SEUL BOOKING PAR JOUR ET PAR GÎTE
 -- Vérifié par check-overlapping-reservations.js au moment des imports iCal
+```
+
+#### **todos**
+```sql
+id                UUID PRIMARY KEY DEFAULT gen_random_uuid()
+owner_user_id     UUID → auth.users(id) ON DELETE CASCADE
+gite_id           UUID → gites(id) ON DELETE CASCADE
+title             TEXT NOT NULL
+description       TEXT
+category          TEXT DEFAULT 'general'
+status            TEXT DEFAULT 'todo'           -- todo|in_progress|done
+completed         BOOLEAN DEFAULT false
+completed_at      TIMESTAMPTZ DEFAULT NULL
+archived_at       TIMESTAMPTZ
+created_at        TIMESTAMPTZ DEFAULT NOW()
+updated_at        TIMESTAMPTZ DEFAULT NOW()
+
+-- Indexes
+CREATE INDEX idx_todos_owner ON todos(owner_user_id);
+CREATE INDEX idx_todos_gite ON todos(gite_id);
+CREATE INDEX idx_todos_status ON todos(status, completed);
+```
+
+#### **fiscalite_amortissements**
+```sql
+id                    UUID PRIMARY KEY DEFAULT gen_random_uuid()
+user_id               UUID → auth.users(id) ON DELETE CASCADE
+annee                 INTEGER NOT NULL
+type                  TEXT NOT NULL              -- 'travaux' | 'frais' | 'produits'
+description           TEXT
+gite                  TEXT
+montant               NUMERIC(12,2) DEFAULT 0
+amortissement_origine JSONB                      -- {annee_origine, duree, montant_total}
+created_at            TIMESTAMPTZ DEFAULT NOW()
+updated_at            TIMESTAMPTZ DEFAULT NOW()
+
+-- RLS : user_id = auth.uid()
+CREATE INDEX idx_fiscalite_amortissements_user_annee ON fiscalite_amortissements(user_id, annee);
+```
+
+#### **fiscalite_amortissements**
+```sql
+id                    UUID PRIMARY KEY DEFAULT gen_random_uuid()
+user_id               UUID → auth.users(id) ON DELETE CASCADE
+annee                 INTEGER NOT NULL              -- Année fiscale concernée
+type                  TEXT NOT NULL                 -- 'travaux' | 'frais'
+description           TEXT
+gite                  TEXT                          -- Slug du gîte concerné
+montant               NUMERIC(12,2) DEFAULT 0       -- Montant annuel amorti
+amortissement_origine JSONB                         -- {annee_origine, duree, montant_total}
+created_at            TIMESTAMPTZ DEFAULT NOW()
+updated_at            TIMESTAMPTZ DEFAULT NOW()
+
+-- RLS : user_id = auth.uid()
+CREATE INDEX idx_fiscalite_amort_user_annee ON fiscalite_amortissements(user_id, annee);
+```
+
+#### **fiscal_history**
+```sql
+id                UUID PRIMARY KEY DEFAULT gen_random_uuid()
+owner_user_id     UUID → auth.users(id) ON DELETE CASCADE
+year              INTEGER NOT NULL
+gite              TEXT NOT NULL DEFAULT 'multi'   -- identifiant gîte ou 'multi'
+revenus           NUMERIC(12,2) DEFAULT 0
+charges           NUMERIC(12,2) DEFAULT 0
+resultat          NUMERIC(12,2) DEFAULT 0
+regime            TEXT                            -- 'reel' | 'micro'
+donnees_detaillees JSONB                          -- toutes les données du simulateur
+created_at        TIMESTAMPTZ DEFAULT NOW()
+updated_at        TIMESTAMPTZ DEFAULT NOW()
+
+UNIQUE (owner_user_id, year, gite)               -- contrainte pour upsert onConflict
+
+-- RLS : propriétaire unique
+CREATE INDEX idx_fiscal_history_owner_year ON fiscal_history(owner_user_id, year);
 ```
 
 #### **ical_subscriptions**
@@ -231,6 +372,136 @@ CREATE INDEX idx_lignes_commande ON lignes_commande_prestations(commande_id);
 CREATE INDEX idx_lignes_prestation ON lignes_commande_prestations(prestation_id);
 ```
 
+#### **infos_gites** ✨ *Colonnes ajoutées 10 mars 2026*
+> Table de guide d'accueil pour les voyageurs. `gite_id` rendu nullable (REBUILD), colonne `gite TEXT UNIQUE` ajoutée pour compatibilité old-schema. ~100 colonnes ajoutées via ALTER TABLE.
+
+```sql
+id                      UUID PRIMARY KEY DEFAULT gen_random_uuid()
+owner_user_id           UUID → auth.users(id)
+gite_id                 UUID NULLABLE → gites(id)  -- ⚠️ NOT NULL supprimé lors migration REBUILD
+gite                    TEXT UNIQUE                 -- Nom court du gîte (couzon, 3ème, trévoux…)
+
+-- Localisation
+gps_lat                 NUMERIC(10,8)
+gps_lon                 NUMERIC(11,8)
+
+-- WiFi (+ variantes _en anglais)
+wifi_ssid               TEXT
+wifi_password           TEXT
+wifi_debit              TEXT
+wifi_localisation       TEXT
+wifi_zones              TEXT
+wifi_ssid_en            TEXT
+wifi_password_en        TEXT
+wifi_debit_en           TEXT
+wifi_localisation_en    TEXT
+wifi_zones_en           TEXT
+
+-- Arrivée / Accès (+ variantes _en)
+heure_arrivee           TEXT
+arrivee_tardive         TEXT
+parking_dispo           TEXT
+parking_places          TEXT
+parking_details         TEXT
+type_acces              TEXT
+code_acces              TEXT
+instructions_cles       TEXT
+etage                   TEXT
+ascenseur               TEXT
+itineraire_logement     TEXT
+premiere_visite         TEXT
+-- …_en variants pour chaque colonne arrivée
+
+-- Logement / Équipements (+ variantes _en)
+type_chauffage          TEXT
+climatisation           TEXT
+instructions_chauffage  TEXT
+equipements_cuisine     TEXT
+instructions_four       TEXT
+instructions_plaques    TEXT
+instructions_lave_vaisselle TEXT
+instructions_lave_linge TEXT
+seche_linge             TEXT
+fer_repasser            TEXT
+linge_fourni            TEXT
+configuration_chambres  TEXT
+-- …_en variants
+
+-- Déchets (+ variantes _en)
+instructions_tri        TEXT
+jours_collecte          TEXT
+decheterie              TEXT
+
+-- Sécurité (+ variantes _en)
+detecteur_fumee         TEXT
+extincteur              TEXT
+coupure_eau             TEXT
+disjoncteur             TEXT
+consignes_urgence       TEXT
+
+-- Départ (+ variantes _en)
+heure_depart            TEXT
+depart_tardif           TEXT
+checklist_depart        TEXT
+restitution_cles        TEXT
+
+-- Règlement intérieur (+ variantes _en)
+tabac                   TEXT
+animaux                 TEXT
+nb_max_personnes        INTEGER
+caution                 TEXT
+
+-- Médias / Thème
+photos                  JSONB DEFAULT '[]'       -- URLs photos du gîte
+fiche_client_theme      TEXT                    -- Thème couleur fiche voyageur
+
+date_modification       TIMESTAMPTZ
+
+-- Contraintes
+UNIQUE(gite)
+
+-- RLS
+-- SELECT/INSERT/UPDATE/DELETE : owner_user_id = auth.uid()
+```
+
+#### **subscriptions_plans** ✨ *Nouveau 10 mars 2026*
+> Remplace la vue `cm_pricing_plans` (old). Table des plans d'abonnement SaaS avec niveaux hiérarchiques.
+
+```sql
+id              UUID PRIMARY KEY DEFAULT gen_random_uuid()
+code            TEXT UNIQUE                 -- 'solo' | 'duo' | 'quattro'
+display_name    TEXT                        -- Nom affiché dans l'UI
+level           INTEGER                     -- 1=solo, 2=duo, 3=quattro (utilisé dans les conditions JS)
+price_monthly   NUMERIC(10,2)               -- 15€ / 22€ / 33€
+price_yearly    NUMERIC(10,2)
+nb_gites_max    INTEGER                     -- 1 / 2 / 4
+features        JSONB                       -- Liste des fonctionnalités incluses
+is_active       BOOLEAN DEFAULT true
+created_at      TIMESTAMPTZ DEFAULT NOW()
+
+-- Plans insérés
+-- solo    : level=1, 15€/mois, 1 gîte max
+-- duo     : level=2, 22€/mois, 2 gîtes max
+-- quattro : level=3, 33€/mois, 4 gîtes max
+
+-- RLS : lecture publique pour les utilisateurs authentifiés
+```
+
+#### **user_subscriptions** ⚠️ *FK modifiée 10 mars 2026*
+> Table existante — la contrainte FK `plan_id` a été modifiée :
+
+```sql
+-- AVANT  : plan_id UUID → cm_pricing_plans(id)   ← ancienne vue/table
+-- APRÈS  : plan_id UUID → subscriptions_plans(id) ← nouvelle table
+
+-- Commande SQL exécutée :
+ALTER TABLE public.user_subscriptions
+    DROP CONSTRAINT IF EXISTS user_subscriptions_plan_id_fkey;
+ALTER TABLE public.user_subscriptions
+    ADD CONSTRAINT user_subscriptions_plan_id_fkey
+    FOREIGN KEY (plan_id) REFERENCES public.subscriptions_plans(id);
+```
+
 ### 📊 Vues Matérialisées
 
 #### **v_ca_prestations_mensuel**
@@ -301,6 +572,35 @@ CREATE POLICY "Clients can view their reservation details"
 CREATE POLICY "Clients can view active prestations"
     ON prestations_catalogue FOR SELECT
     USING (is_active = true);
+```
+
+---
+
+### 🪣 Storage Supabase
+
+#### **gite-photos** ✨ *Bucket créé 10 mars 2026*
+> Bucket public Supabase Storage pour les photos du guide d'accueil des gîtes.
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Type | Public |
+| Taille max | 10 MB par fichier |
+| Formats autorisés | JPEG, PNG, WebP, GIF |
+| Path pattern | `{gite_name}/{category}/{filename}` |
+
+```sql
+-- Policies appliquées
+CREATE POLICY "Authenticated users can upload"
+    ON storage.objects FOR INSERT
+    WITH CHECK (bucket_id = 'gite-photos' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Public read access"
+    ON storage.objects FOR SELECT
+    USING (bucket_id = 'gite-photos');
+
+CREATE POLICY "Users can delete their own photos"
+    ON storage.objects FOR DELETE
+    USING (bucket_id = 'gite-photos' AND auth.role() = 'authenticated');
 ```
 
 ---
@@ -877,6 +1177,47 @@ psql $DATABASE_URL < backup_20260215.sql
 
 ## 🔄 Changelog
 
+### v2.13.48 - 10 mars 2026 🗄️
+- ✅ Restauration données `infos_gites` depuis export_snapshot.json (3 gîtes : couzon, 3ème, trévoux)
+  - ~100 colonnes ajoutées via ALTER TABLE (WiFi, accès, logement, déchets, sécurité, départ, règlement)
+  - Colonne `gite TEXT UNIQUE` ajoutée, `gite_id` rendu nullable (compat. REBUILD)
+  - Colonne `photos JSONB DEFAULT '[]'` ajoutée
+  - Fichier SQL : `sql/IMPORT_INFOS_GITES_2026-03-10.sql`
+- ✅ Création bucket Storage `gite-photos` (public, 10MB, JPEG/PNG/WebP/GIF)
+- ✅ Nouveau système d'abonnements : table `subscriptions_plans` (solo/duo/quattro)
+  - Remplace l'ancienne vue `cm_pricing_plans`
+  - FK de `user_subscriptions.plan_id` mise à jour → `subscriptions_plans(id)`
+  - Fichier SQL : `sql/ACTIVER_ABONNEMENT_QUATTRO.sql`
+- ✅ Fix PGRST116 dans `pages/options.html` : `.single()` → `.maybeSingle()` (2 occurrences)
+
+### v2.13.47 - 3 mars 2026 🔀
+- ✅ Ajout d'un switch centralisé de mode distribution pour préparer l'intégration Google Vacation Rentals avec bascule simple:
+    - nouveaux modes globaux: `gites_de_france` / `hors_gites_de_france`
+    - implémentation dans `js/shared-config.js`:
+        - `window.getDistributionAccessMode(context?)`
+        - `window.setDistributionAccessMode(mode, options?)`
+        - `window.getChannelCapabilities(channel, context?)`
+        - `window.hasChannelCapability(channel, capability?, context?)`
+    - mapping de capacités par canal selon le mode (lecture/écriture/gestion annonce)
+- ✅ Intégration du switch dans la configuration des plateformes iCal (`js/ical-config-modern.js`):
+    - ajout de la plateforme `google-vacation-rentals`
+    - affichage conditionnel des plateformes selon le mode actif
+    - message explicite en mode `gites_de_france` quand Google Vacation Rentals est indisponible
+
+### v2.13.46 - 3 mars 2026 🧹
+- ✅ Notifications automatiques de replanification ménage (conflits réservation) :
+    - nouvelles préférences owner dans `user_notification_preferences` :
+        - `notify_menage_modifications`
+        - `menage_company_email`
+    - migration: `sql/migrations/ADD_NOTIFICATION_MENAGE_COMPANY_FIELDS_2026-03-03.sql`
+    - ajout options UI dans `pages/options.html` (toggle + email société ménage)
+    - ajout Edge Function `supabase/functions/notify-cleaning-planning-change/index.ts`
+    - branchement dans `js/supabase-operations.js` après `autoResolveCleaningConflictForReservation`
+    - email envoyé à la société de ménage avec:
+        - dates annulées
+        - nouvelles dates proposées
+        - niveau avertissement si ménage déjà validé impacté
+
 ### v2.13.43 - 27 février 2026 🗄️
 - ✅ Ajout BDD des champs Intelligence Tarifaire LOU dans `public.gites` via migration:
     - `sql/migrations/ADD_GITES_TARIFICATION_FIELDS_2026-02-27.sql`
@@ -1305,8 +1646,174 @@ psql $DATABASE_URL < backup_20260215.sql
 - Gestion réservations chevauchantes
 - Dashboard owner amélioré
 
+### v2.15.0 - 10 mars 2026 (Session fixes schéma)
+
+#### Colonnes ajoutées (ALTER TABLE)
+
+| Table | Colonnes ajoutées | Raison |
+|-------|-------------------|--------|
+| `cm_clients` | `user_id`, `email_principal`, `nom_contact`, `prenom_contact`, `type_abonnement`, `statut`, `date_inscription`, `montant_mensuel`, `nb_gites_actuels`, `nom_entreprise`, `entreprise` | options.html + admin-dashboard.js |
+| `cm_clients.email` | `NOT NULL` → nullable | JS n'envoie que `email_principal` |
+| `cm_subscriptions` | `date_debut` (alias de `current_period_start`) | admin-clients.js |
+| `cm_support_tickets` | `sujet`, `categorie`, `priorite`, `statut`, `csat_score` | options.html + admin-dashboard.js |
+| `cm_support_tickets.title` | `NOT NULL` → nullable | JS n'envoie que `sujet` |
+| `cm_promo_usage` | `montant_reduction`, `ca_genere`, `statut`, `promo_id` | admin-promotions.js |
+| `cm_revenue_tracking` | `mrr`, `mois` | admin-dashboard.js |
+| `cm_activity_logs` | `type_activite` | admin-dashboard.js |
+| `cm_promotions` | `nom`, `actif`, `date_fin` | admin-dashboard.js |
+| `user_settings` | `subscription_type` | options.html parrainage |
+| `user_roles` | `is_active` | admin auth check |
+| `cleaning_schedule` | `gite TEXT` (sync depuis `gites.name`) | fiche-client-app.js |
+| `problemes_signales` | `gite`, `client_name`, `sujet`, `statut`, `telephone` + `gite_id` nullable | fiche-client-app.js |
+| `retours_menage` | `reported_by UUID` + `description` nullable | femme-menage.js |
+| `referrals` | `registered_at` | admin-clients.js |
+
+#### Tables créées
+
+| Table | Raison |
+|-------|--------|
+| `prestations_catalogue` | fiche-client-prestations.js |
+| `referrals` | parrainage options.html |
+
+#### Vues créées
+
+| Vue | Alias de | Raison |
+|-----|----------|--------|
+| `cm_error_logs` | `error_logs` | admin-error-monitor.js |
+
+#### RLS ajoutées
+- `cm_clients` : SELECT/INSERT/UPDATE par `auth.uid() = user_id`
+- `cm_support_tickets` : SELECT/INSERT via sous-requête `cm_clients.user_id`
+- `referrals` : SELECT par `auth.uid() = referrer_id`
+
+#### Scripts SQL disponibles
+- `sql/FIX_FICHE_CLIENT_SCHEMA.sql` — cleaning_schedule, problemes_signales, prestations_catalogue
+- `sql/FIX_RETOURS_MENAGE_SCHEMA.sql` — retours_menage
+- `sql/FIX_CM_CLIENTS_SCHEMA.sql` — cm_clients, user_settings, referrals, cm_support_tickets, cm_promo_usage, user_roles
+- `sql/FIX_ADMIN_DASHBOARD_SCHEMA.sql` — cm_error_logs (vue), cm_revenue_tracking, cm_activity_logs, cm_promotions, cm_subscriptions, csat_score
+
+---
+
+---
+
+## v2.16.0 — 10 mars 2026 (session après-midi)
+
+### Colonnes ajoutées
+
+| Table | Colonne | Type | Alias de |
+|-------|---------|------|----------|
+| `cm_clients` | `telephone` | TEXT | — |
+| `cm_clients` | `date_fin_abonnement` | TIMESTAMPTZ | `trial_ends_at` |
+| `cm_support_comments` | `is_ai_generated` | BOOLEAN | — |
+| `cm_support_comments` | `user_id` | UUID | — |
+| `cm_support_comments` | `author_email` | TEXT nullable | était NOT NULL |
+| `cm_support_solutions` | `efficacite_score` | NUMERIC(3,2) | `score_pertinence` |
+| `cm_support_solutions` | `nb_utilisations` | INTEGER | `reussite_count` |
+| `cm_promotions` | `type_promotion` | TEXT | `type` |
+| `cm_promotions` | `valeur` | NUMERIC(10,2) | `value` |
+| `cm_promotions` | `cible` | TEXT | — |
+| `cm_promotions` | `date_debut` | TIMESTAMPTZ | `valid_from` |
+| `cm_promotions` | `max_utilisations` | INTEGER | `max_uses` |
+| `cm_promotions` | `nb_utilisations` | INTEGER | `uses_count` |
+| `cm_invoices` | `montant_ttc` | NUMERIC(10,2) | `total` |
+| `cm_invoices` | `statut` | TEXT | `status` |
+| `cm_invoices` | `date_emission` | DATE | `issued_date` |
+| `cm_subscriptions` | `type_abonnement` | TEXT | `billing_cycle` |
+
+### Tables créées
+
+| Table | Raison |
+|-------|--------|
+| `referral_campaigns` | admin-parrainage.js — gestion campagnes |
+| `user_campaign_participations` | admin-parrainage.js — stats participants |
+| `cm_content_generated` | admin-content.js — contenu IA sauvegardé |
+
+### Bugs JS corrigés
+- `admin-content-ai-strategy.js` : doublon `const ADMIN_FALLBACK_EMAILS` supprimé (conflit avec `admin-content.js`)
+
+### Scripts SQL disponibles
+- `sql/FIX_FICHE_CLIENT_SCHEMA.sql`
+- `sql/FIX_RETOURS_MENAGE_SCHEMA.sql`
+- `sql/FIX_CM_CLIENTS_SCHEMA.sql`
+- `sql/FIX_ADMIN_DASHBOARD_SCHEMA.sql` ← principal, 16 fixes cumulés
+
+---
+
+## v2.17.0 — 17 mars 2026 (suppression localStorage + fiche client RPCs)
+
+### Migration localStorage → BDD
+
+| Clé supprimée | Nouvelle persistance | Fichiers modifiés |
+|---|---|---|
+| `fiscalite_options_perso` | `user_settings.fiscalite_options_perso` (BOOLEAN) | `fiscalite-v2.js`, `dashboard.js` |
+| `checklistFilter` | `window._checklistFilter` (navigation inter-onglets) | `dashboard.js`, `checklists.js` |
+| `panier_prestations` | Mémoire seule (variable module) | `fiche-client-prestations.js` |
+
+### Colonne ajoutée
+
+| Table | Colonne | Type | Défaut |
+|---|---|---|---|
+| `user_settings` | `fiscalite_options_perso` | BOOLEAN | false |
+
+### RPCs SECURITY DEFINER — Fiche client (contournement Kong)
+
+| Fonction | Rôle |
+|---|---|
+| `get_reservation_by_client_token(text)` | Réservation via token |
+| `get_client_token_data(text)` | Données brutes du token |
+| `get_gite_info_by_client_token(text)` | Infos gîte via token (JOIN réservation) |
+| `upsert_demande_horaire_by_token(text,text,text,text)` | Insert/update demande horaire |
+| `upsert_checklist_progress_by_token(text,uuid,boolean)` | Progression checklist |
+| `insert_retour_client_by_token(text,text,text,text,text)` | Retour/feedback client |
+
+### Policies anon READ créées
+
+| Policy | Table |
+|---|---|
+| `anon_read_infos_gites` | `infos_gites` |
+| `anon_read_activites_gites` | `activites_gites` |
+| `anon_read_faq` | `faq` |
+| `anon_read_cleaning_schedule_client` | `cleaning_schedule` |
+| `anon_read_checklist_templates` | `checklist_templates` |
+| `anon_read_checklist_progress` | `checklist_progress` |
+| `anon_read_demandes_horaires_client` | `demandes_horaires` |
+
+### Scripts SQL disponibles
+- `sql/FIX_FICHE_CLIENT_RPC_TOKEN_2026-03-17.sql` — RPCs + policies anon (exécuté en prod)
+- `sql/MIGRATION_REMOVE_LOCALSTORAGE_2026-03-17.sql` — ADD COLUMN fiscalite_options_perso
+
+### Note technique
+Contexte Kong : La passerelle Supabase Kong ne transmet pas les headers custom (`x-client-token`) jusqu'à PostgREST. Toutes les opérations fiche client passent désormais par des RPCs SECURITY DEFINER avec le token en paramètre direct.
+
+---
+
+## v2.18.0 — 17 mars 2026 (emails confirmation commande prestations)
+
+### Nouvelle Edge Function
+| Fonction | Déclencheur | Rôle |
+|---|---|---|
+| `confirm-commande-prestations` | Appel direct JS après INSERT | Envoie 2 emails via Resend : confirmation client + notification owner |
+
+### Comportement
+- **Email client** : envoyé à `reservations.client_email` si présent — récapitulatif lignes + total
+- **Email owner** : envoyé après vérification `user_notification_preferences` (`notify_commandes`) — récapitulatif + montant net
+- **Fire & forget** : les emails n'bloquent pas la confirmation UI
+- L'`alert()` remplacé par un `showToast()` propre
+
+### Fichiers modifiés
+- `supabase/functions/confirm-commande-prestations/index.ts` ← NOUVEAU
+- `js/fiche-client-prestations.js` — appel Edge Function après commande réussie
+
+### À déployer
+```bash
+supabase functions deploy confirm-commande-prestations
+```
+
+### Note technique
+`user_notification_preferences` est une **vue** sur `notification_preferences` — tout `ALTER TABLE` doit cibler `notification_preferences` directement, puis recréer la vue.
+
 ---
 
 **Document maintenu par :** GitHub Copilot  
 **Contact Support :** admin@gite-calvignac.fr  
-**Dernière révision :** 1 mars 2026, 19:15
+**Dernière révision :** 17 mars 2026, 20:00

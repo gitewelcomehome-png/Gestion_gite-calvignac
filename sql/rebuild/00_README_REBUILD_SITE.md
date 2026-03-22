@@ -21,10 +21,14 @@ psql "$DATABASE_URL" -f sql/rebuild/01_REBUILD_SITE_ORDER.sql
 - `sql/create_km_management.sql`
 - `sql/create_linen_stock_transactions.sql`
 - `sql/create_auto_ticket_tables.sql`
+- `sql/create_communaute_artisans.sql`
 - `sql/migrations/CREATE_SUPPORT_AI_USAGE_LOGS.sql`
+- `sql/migrations/ADD_GITES_TARIFICATION_FIELDS_2026-02-27.sql`
+- `sql/migrations/ADD_NOTIFICATION_MENAGE_COMPANY_FIELDS_2026-03-03.sql`
 - `sql/security_hardening_rls_fiche_client_token.sql`
 - `sql/securite/FIX_USER_ROLES_RLS_RECURSION_2026-02-23.sql`
 - `sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql`
+- `sql/securite/RLS_HARDENING_CM_TABLES_2026-03-06.sql`
 - `sql/securite/fiche_client_rls_lot3_postcheck_20260223.sql`
 - `sql/securite/SUIVI_HEBDO_SECURITE_ADMIN_2026-02-23.sql`
 

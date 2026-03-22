@@ -3,6 +3,7 @@
 -- Couvre : cleaning_schedule (planning) ET todos (achats/travaux)
 -- À exécuter dans Supabase SQL Editor
 -- ================================================================
+-- ⚠️ SÉCURITÉ : Remplacer WEBHOOK_SECRET_PLACEHOLDER lors de l'exécution.
 
 -- ----------------------------------------------------------------
 -- TRIGGER 1 : Planning ménage (cleaning_schedule)
@@ -14,6 +15,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     payload jsonb;
+    webhook_secret text := 'WEBHOOK_SECRET_PLACEHOLDER';
 BEGIN
     payload := jsonb_build_object(
         'type', 'INSERT',
@@ -27,7 +29,7 @@ BEGIN
             url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-taches',
             headers := jsonb_build_object(
                 'Content-Type', 'application/json',
-                'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
+                'x-webhook-secret', webhook_secret
             ),
             body := payload
         );
@@ -56,6 +58,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     payload jsonb;
+    webhook_secret text := 'WEBHOOK_SECRET_PLACEHOLDER';
 BEGIN
     -- Notifier uniquement les tâches achats et travaux (pas les todos personnels)
     IF NEW.category NOT IN ('achats', 'travaux') THEN
@@ -74,7 +77,7 @@ BEGIN
             url := 'https://fgqimtpjjhdqeyyaptoj.supabase.co/functions/v1/notify-taches',
             headers := jsonb_build_object(
                 'Content-Type', 'application/json',
-                'x-webhook-secret', '3745a7fba3b63baf6dbe981f41eb71b527a87ba57e0a713ae6f86e790c47fb30'
+                'x-webhook-secret', webhook_secret
             ),
             body := payload
         );

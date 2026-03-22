@@ -1,0 +1,327 @@
+{
+  "filesScanned": 232,
+  "referencedCount": 91,
+  "schemaCount": 49,
+  "unknownCount": 42,
+  "unknown": [
+    {
+      "table": "_cleanup_dropped_tables_20260223",
+      "refs": [
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "activites_consultations",
+      "refs": [
+        "js/fiche-client-app.js"
+      ]
+    },
+    {
+      "table": "admin_communications",
+      "refs": [
+        "js/client-communications.js",
+        "pages/admin-communications.html"
+      ]
+    },
+    {
+      "table": "charges",
+      "refs": [
+        "js/supabase-operations.js"
+      ]
+    },
+    {
+      "table": "checklists",
+      "refs": [
+        "js/fiches-clients.js"
+      ]
+    },
+    {
+      "table": "cleaner_tokens",
+      "refs": [
+        "app.html",
+        "js/femme-menage.js",
+        "js/menage.js"
+      ]
+    },
+    {
+      "table": "cm_ai_actions",
+      "refs": [
+        "api/content-ai.js",
+        "js/admin-content-ai-strategy.js",
+        "js/admin-content-analytics.js"
+      ]
+    },
+    {
+      "table": "cm_ai_content_feedback",
+      "refs": [
+        "api/content-ai.js"
+      ]
+    },
+    {
+      "table": "cm_ai_ethique_regles",
+      "refs": [
+        "api/content-ai.js",
+        "pages/admin-prompt-editor.html"
+      ]
+    },
+    {
+      "table": "cm_ai_prompt_versions",
+      "refs": [
+        "api/content-ai.js"
+      ]
+    },
+    {
+      "table": "cm_ai_strategies",
+      "refs": [
+        "api/content-ai.js",
+        "js/admin-content-ai-strategy.js"
+      ]
+    },
+    {
+      "table": "cm_content_generated",
+      "refs": [
+        "js/admin-content.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "cm_error_logs",
+      "refs": [
+        "js/admin-dashboard.js",
+        "js/admin-error-monitor.js",
+        "js/admin-monitoring.js",
+        "js/auto-ticket-diagnostic.js",
+        "js/auto-ticket-system.js",
+        "js/auto-validator.js",
+        "js/test-generator.js",
+        "js/ticket-workflow.js",
+        "pages/admin-error-details.html",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "cm_support_notifications",
+      "refs": [
+        "js/client-support.js",
+        "pages/options.html"
+      ]
+    },
+    {
+      "table": "commandes_prestations",
+      "refs": [
+        "js/admin-prestations-stats.js",
+        "js/admin-prestations.js",
+        "js/dashboard.js",
+        "js/desktop-owner-prestations.js",
+        "js/fiche-client-prestations.js",
+        "js/prestations.js",
+        "js/reservations.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "demandes_horaires",
+      "refs": [
+        "js/dashboard.js",
+        "js/fiche-client-app.js",
+        "js/fiches-clients.js",
+        "js/notification-system.js",
+        "js/widget-horaires-clients.js",
+        "pages/dashboard-proposition.html"
+      ]
+    },
+    {
+      "table": "evaluations_sejour",
+      "refs": [
+        "js/fiche-client-app.js"
+      ]
+    },
+    {
+      "table": "fiche_generation_logs",
+      "refs": [
+        "js/fiches-clients.js"
+      ]
+    },
+    {
+      "table": "fiscal_history",
+      "refs": [
+        "js/dashboard.js",
+        "js/fiscalite-v2.js",
+        "pages/dashboard-proposition.html"
+      ]
+    },
+    {
+      "table": "fiscalite_amortissements",
+      "refs": [
+        "js/fiscalite-v2.js"
+      ]
+    },
+    {
+      "table": "historical_data",
+      "refs": [
+        "app.html",
+        "js/supabase-operations.js"
+      ]
+    },
+    {
+      "table": "lignes_commande_prestations",
+      "refs": [
+        "js/fiche-client-prestations.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "linen_needs",
+      "refs": [
+        "js/draps.js",
+        "js/femme-menage.js",
+        "tabs/mobile/draps.html"
+      ]
+    },
+    {
+      "table": "prestations_catalogue",
+      "refs": [
+        "js/admin-prestations.js",
+        "js/desktop-owner-prestations.js",
+        "js/fiche-client-prestations.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "referral_campaigns",
+      "refs": [
+        "js/admin-parrainage.js",
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referral_invitations",
+      "refs": [
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referral_notifications",
+      "refs": [
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referral_point_conversions",
+      "refs": [
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referral_rewards",
+      "refs": [
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "referrals",
+      "refs": [
+        "js/admin-clients.js",
+        "js/parrainage.js",
+        "js/referral-signup.js",
+        "pages/options.html"
+      ]
+    },
+    {
+      "table": "retours_clients",
+      "refs": [
+        "js/fiche-client-app.js",
+        "js/fiches-clients.js"
+      ]
+    },
+    {
+      "table": "rls_policy_backups_fiche_client",
+      "refs": [
+        "sql/securite/fiche_client_rls_lot3_pre_backup_20260223.sql"
+      ]
+    },
+    {
+      "table": "suivi_soldes_bancaires",
+      "refs": [
+        "js/dashboard.js",
+        "js/fiscalite-v2.js",
+        "pages/dashboard-proposition.html"
+      ]
+    },
+    {
+      "table": "support_tickets",
+      "refs": [
+        "pages/dashboard-proposition.html"
+      ]
+    },
+    {
+      "table": "system_config",
+      "refs": [
+        "js/admin-prestations-stats.js",
+        "js/admin-prestations.js",
+        "sql/securite/RLS_HARDENING_TABLES_RESTANTES_2026-02-23.sql"
+      ]
+    },
+    {
+      "table": "taches_menage",
+      "refs": [
+        "js/notification-system.js"
+      ]
+    },
+    {
+      "table": "tickets_support",
+      "refs": [
+        "pages/dashboard-proposition.html"
+      ]
+    },
+    {
+      "table": "todos",
+      "refs": [
+        "js/archives.js",
+        "js/dashboard.js",
+        "js/draps.js",
+        "js/femme-menage.js",
+        "js/kanban.js",
+        "pages/dashboard-proposition.html",
+        "pages/options.html"
+      ]
+    },
+    {
+      "table": "user_campaign_participations",
+      "refs": [
+        "js/admin-parrainage.js",
+        "js/parrainage.js"
+      ]
+    },
+    {
+      "table": "user_notification_preferences",
+      "refs": [
+        "js/notification-system.js",
+        "pages/options.html",
+        "sql/fix_rls_user_notification_preferences.sql",
+        "sql/migrations/ADD_NOTIFICATION_MENAGE_COMPANY_FIELDS_2026-03-03.sql",
+        "supabase/functions/notify-cleaning-planning-change/index.ts",
+        "supabase/functions/notify-demande/index.ts",
+        "supabase/functions/notify-reservation/index.ts",
+        "supabase/functions/notify-retour-client/index.ts",
+        "supabase/functions/notify-taches/index.ts"
+      ]
+    },
+    {
+      "table": "user_settings",
+      "refs": [
+        "js/admin-clients.js",
+        "js/draps.js",
+        "js/parrainage.js",
+        "pages/options.html"
+      ]
+    },
+    {
+      "table": "user_subscriptions",
+      "refs": [
+        "js/subscription-manager.js",
+        "pages/options.html"
+      ]
+    }
+  ]
+}

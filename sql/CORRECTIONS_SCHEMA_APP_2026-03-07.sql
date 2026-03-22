@@ -111,10 +111,67 @@ DO $$ BEGIN
     END IF;
 END $$;
 
--- 1g. gites.regles_tarifs (règles de tarification JSONB)
+-- 1g. gites : colonnes manquantes
 DO $$ BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables
                WHERE table_schema = 'public' AND table_name = 'gites') THEN
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS regles_tarifs JSONB DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS amenities JSONB DEFAULT '[]'::jsonb;
+        -- Colonnes adresse détaillée (attendues par gites-crud.js)
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS city TEXT DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS postal_code TEXT DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS country TEXT DEFAULT 'France';
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS department TEXT DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS region TEXT DEFAULT NULL;
+        -- Caractéristiques du logement
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS surface_m2 NUMERIC(7,2) DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS beds INTEGER DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS type_hebergement TEXT DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS label_classement TEXT DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS environment TEXT DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS situation TEXT DEFAULT NULL;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS cuisine_niveau TEXT DEFAULT NULL;
+        -- Tarifs de base
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS price_per_night NUMERIC(10,2) DEFAULT NULL;
+        -- Équipements et accessibilité
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS amenities JSONB DEFAULT '[]'::jsonb;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS animaux_acceptes BOOLEAN DEFAULT false;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS access_pmr BOOLEAN DEFAULT false;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS parking BOOLEAN DEFAULT false;
+        -- Plateformes de diffusion
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS platform_airbnb BOOLEAN DEFAULT false;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS platform_booking BOOLEAN DEFAULT false;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS platform_abritel BOOLEAN DEFAULT false;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS platform_gdf BOOLEAN DEFAULT false;
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS platform_direct BOOLEAN DEFAULT false;
+        -- ical_urls : alias de ical_sources (attendu par gites-crud.js)
+        ALTER TABLE public.gites
+            ADD COLUMN IF NOT EXISTS ical_urls JSONB DEFAULT '[]'::jsonb;
+        -- Règles tarifaires
         ALTER TABLE public.gites
             ADD COLUMN IF NOT EXISTS regles_tarifs JSONB DEFAULT NULL;
     END IF;
@@ -136,6 +193,7 @@ SELECT
     notify_demandes,
     notify_reservations,
     notify_taches,
+    notify_commandes,
     email_frequency,
     push_enabled,
     sms_enabled,
@@ -237,6 +295,7 @@ CREATE TABLE IF NOT EXISTS public.todos (
     category TEXT DEFAULT 'general',
     status TEXT DEFAULT 'todo',
     completed BOOLEAN DEFAULT false,
+    completed_at TIMESTAMPTZ DEFAULT NULL,
     archived_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -388,16 +447,68 @@ CREATE POLICY "user_settings_owner_all" ON public.user_settings
 
 CREATE INDEX IF NOT EXISTS idx_user_settings_user ON public.user_settings(user_id);
 
+-- fiscalite_amortissements (lignes d'amortissement pluriannuelles)
+CREATE TABLE IF NOT EXISTS public.fiscalite_amortissements (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    annee INTEGER NOT NULL,
+    type TEXT NOT NULL,                    -- 'travaux' | 'frais'
+    description TEXT,
+    gite TEXT,
+    montant NUMERIC(12,2) DEFAULT 0,
+    amortissement_origine JSONB,          -- {annee_origine, duree, montant_total}
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.fiscalite_amortissements ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "fiscalite_amortissements_owner_all" ON public.fiscalite_amortissements;
+CREATE POLICY "fiscalite_amortissements_owner_all" ON public.fiscalite_amortissements
+    FOR ALL
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_fiscalite_amort_user_annee
+    ON public.fiscalite_amortissements(user_id, annee);
+CREATE INDEX IF NOT EXISTS idx_fiscalite_amort_annee
+    ON public.fiscalite_amortissements(annee);
+
 -- fiscal_history (simulations fiscales)
 CREATE TABLE IF NOT EXISTS public.fiscal_history (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     year INTEGER NOT NULL,
+    gite TEXT NOT NULL DEFAULT 'multi',
+    revenus NUMERIC(12,2) DEFAULT 0,
+    charges NUMERIC(12,2) DEFAULT 0,
+    resultat NUMERIC(12,2) DEFAULT 0,
     regime TEXT,
     donnees_detaillees JSONB,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (owner_user_id, year, gite)
 );
+
+-- Ajout des colonnes manquantes si la table existe déjà sans elles
+ALTER TABLE public.fiscal_history ADD COLUMN IF NOT EXISTS gite TEXT NOT NULL DEFAULT 'multi';
+ALTER TABLE public.fiscal_history ADD COLUMN IF NOT EXISTS revenus NUMERIC(12,2) DEFAULT 0;
+ALTER TABLE public.fiscal_history ADD COLUMN IF NOT EXISTS charges NUMERIC(12,2) DEFAULT 0;
+ALTER TABLE public.fiscal_history ADD COLUMN IF NOT EXISTS resultat NUMERIC(12,2) DEFAULT 0;
+
+-- Contrainte unique (idempotent via DO block)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'fiscal_history_owner_year_gite_key'
+          AND conrelid = 'public.fiscal_history'::regclass
+    ) THEN
+        ALTER TABLE public.fiscal_history
+            ADD CONSTRAINT fiscal_history_owner_year_gite_key
+            UNIQUE (owner_user_id, year, gite);
+    END IF;
+END $$;
 
 ALTER TABLE public.fiscal_history ENABLE ROW LEVEL SECURITY;
 
@@ -409,6 +520,33 @@ CREATE POLICY "fiscal_history_owner_all" ON public.fiscal_history
 
 CREATE INDEX IF NOT EXISTS idx_fiscal_history_owner_year
     ON public.fiscal_history(owner_user_id, year);
+
+-- fiscalite_amortissements (amortissements comptables par année)
+CREATE TABLE IF NOT EXISTS public.fiscalite_amortissements (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    annee INTEGER NOT NULL,
+    type TEXT NOT NULL,                    -- 'travaux' | 'frais' | 'produits'
+    description TEXT,
+    gite TEXT,
+    montant NUMERIC(12,2) DEFAULT 0,
+    amortissement_origine JSONB DEFAULT NULL,  -- {annee_origine, duree, montant_total}
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.fiscalite_amortissements ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "fiscalite_amortissements_owner_all" ON public.fiscalite_amortissements;
+CREATE POLICY "fiscalite_amortissements_owner_all" ON public.fiscalite_amortissements
+    FOR ALL
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_fiscalite_amortissements_user_annee
+    ON public.fiscalite_amortissements(user_id, annee);
+CREATE INDEX IF NOT EXISTS idx_fiscalite_amortissements_type
+    ON public.fiscalite_amortissements(type);
 
 -- suivi_soldes_bancaires (trésorerie mensuelle)
 CREATE TABLE IF NOT EXISTS public.suivi_soldes_bancaires (

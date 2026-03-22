@@ -50,6 +50,10 @@ CREATE TABLE IF NOT EXISTS public.km_lieux_favoris (
     CONSTRAINT km_lieux_favoris_distance_ck CHECK (distance_km >= 0)
 );
 
+-- Ensure compatibility when km_trajets already exists with an older schema.
+ALTER TABLE IF EXISTS public.km_trajets
+    ADD COLUMN IF NOT EXISTS annee_fiscale INTEGER;
+
 CREATE INDEX IF NOT EXISTS idx_km_config_auto_owner ON public.km_config_auto(owner_user_id);
 CREATE INDEX IF NOT EXISTS idx_km_trajets_owner_year_date ON public.km_trajets(owner_user_id, annee_fiscale, date_trajet DESC);
 CREATE INDEX IF NOT EXISTS idx_km_trajets_gite ON public.km_trajets(gite_id);

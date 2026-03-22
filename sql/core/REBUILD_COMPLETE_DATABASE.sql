@@ -404,6 +404,8 @@ CREATE TABLE public.cleaning_schedule (
     gite_id UUID NOT NULL REFERENCES public.gites(id) ON DELETE CASCADE,
     reservation_id UUID REFERENCES public.reservations(id) ON DELETE CASCADE,
     date DATE NOT NULL,
+    scheduled_date DATE,          -- alias de date, utilisé par fiche-client-app.js
+    gite TEXT,                    -- nom texte du gîte, utilisé par fiche-client-app.js
     type TEXT CHECK (type IN ('entree', 'sortie', 'intermediaire')),
     status TEXT DEFAULT 'a_faire',
     assignee_email TEXT,
@@ -443,10 +445,14 @@ CREATE INDEX idx_cleaning_rules_code ON public.cleaning_rules(rule_code);
 CREATE TABLE public.retours_menage (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    reported_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     cleaning_schedule_id UUID REFERENCES public.cleaning_schedule(id) ON DELETE CASCADE,
     gite_id UUID NOT NULL REFERENCES public.gites(id) ON DELETE CASCADE,
     type TEXT,
-    description TEXT NOT NULL,
+    description TEXT,
+    commentaires TEXT,
+    date_menage DATE,
+    validated BOOLEAN DEFAULT false,
     photos JSONB,
     urgence TEXT,
     status TEXT DEFAULT 'non_traite',
@@ -465,19 +471,49 @@ CREATE INDEX idx_retours_menage_gite ON public.retours_menage(gite_id);
 -- --------------------------------------------------------------
 CREATE TABLE public.problemes_signales (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    owner_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     reservation_id UUID REFERENCES public.reservations(id) ON DELETE CASCADE,
-    gite_id UUID NOT NULL REFERENCES public.gites(id) ON DELETE CASCADE,
+    gite_id UUID REFERENCES public.gites(id) ON DELETE CASCADE,
+    gite TEXT,                    -- nom texte du gîte (fiche-client-app.js)
+    client_name TEXT,             -- nom du client (fiche-client-app.js)
     type TEXT,
-    description TEXT NOT NULL,
+    sujet TEXT,                   -- sujet du problème (fiche-client-app.js)
+    description TEXT,
+    telephone TEXT,               -- téléphone client (fiche-client-app.js)
     photos JSONB,
     urgence TEXT,
+    statut TEXT DEFAULT 'nouveau',-- statut côté client (fiche-client-app.js)
     status TEXT DEFAULT 'non_traite',
     reponse TEXT,
     traite_par UUID REFERENCES auth.users(id),
     traite_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- --------------------------------------------------------------
+-- TABLE: prestations_catalogue
+-- --------------------------------------------------------------
+CREATE TABLE public.prestations_catalogue (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_user_id   UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    gite_id         UUID NOT NULL REFERENCES public.gites(id) ON DELETE CASCADE,
+    nom             TEXT NOT NULL,
+    nom_en          TEXT,
+    description     TEXT,
+    description_en  TEXT,
+    prix            NUMERIC(10,2) NOT NULL DEFAULT 0,
+    icone           TEXT,
+    photo_url       TEXT,
+    categorie       TEXT,
+    is_active       BOOLEAN DEFAULT true,
+    ordre           INTEGER DEFAULT 0,
+    created_at      TIMESTAMPTZ DEFAULT now(),
+    updated_at      TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_prestations_gite   ON public.prestations_catalogue(gite_id);
+CREATE INDEX idx_prestations_active ON public.prestations_catalogue(is_active);
+CREATE INDEX idx_prestations_owner  ON public.prestations_catalogue(owner_user_id);
 
 CREATE INDEX idx_problemes_owner ON public.problemes_signales(owner_user_id);
 CREATE INDEX idx_problemes_resa ON public.problemes_signales(reservation_id);
