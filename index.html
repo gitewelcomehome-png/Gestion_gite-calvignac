@@ -2279,5 +2279,31 @@
             <p>support@liveownerunit.fr</p>
         </div>
     </footer>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.price-option').forEach(function(opt) {
+    opt.addEventListener('click', function() {
+      var container = this.closest('.price-options');
+      var card = this.closest('.price-card');
+      container.querySelectorAll('.price-option').forEach(function(o) { o.classList.remove('selected'); });
+      this.classList.add('selected');
+      var strong = this.querySelector('strong');
+      if (strong) {
+        var amount = strong.textContent.replace('/mois', '').trim();
+        var amountEl = card.querySelector('.price-amount');
+        if (amountEl) amountEl.innerHTML = amount + '<small>/mois</small>';
+      }
+      var isAvec = this.textContent.includes('Avec');
+      var saveEl = card.querySelector('.price-save');
+      if (saveEl) saveEl.style.display = isAvec ? '' : 'none';
+      var periodEl = card.querySelector('.price-period');
+      if (periodEl) {
+        if (isAvec) periodEl.textContent = periodEl.textContent.replace('Sans engagement', 'Engagement 12 mois');
+        else periodEl.textContent = periodEl.textContent.replace('Engagement 12 mois', 'Sans engagement');
+      }
+    });
+  });
+});
+</script>
 </body>
 </html>
