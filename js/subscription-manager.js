@@ -22,6 +22,10 @@ class SubscriptionManager {
     this.currentSubscription = null;
     this.features = null;
     this.level = null;
+    this.billingCycle = 'mensuel';
+    this.isInTrial = false;
+    this.trialDaysLeft = 0;
+    this.trialEndsAt = null;
     // Promise résolue quand l'abonnement est chargé
     this._readyPromise = new Promise(resolve => { this._resolveReady = resolve; });
   }
@@ -51,13 +55,16 @@ class SubscriptionManager {
       console.error('Erreur chargement abonnement:', error);
     }
     if (!data || !data.plan) {
+      // Vérifier si l'utilisateur est en période d'essai
+      await this._loadTrialInfo(user.id);
       this._resolveReady(null);
       return null;
     }
 
     this.currentSubscription = data;
     this.features = data.plan.features || {};
-    this.level = data.plan.level ?? data.plan.features?.level ?? null;
+    this.level = data.plan.level ?? null;
+    this.billingCycle = data.billing_cycle || 'mensuel';
     this._resolveReady(data);
     
     return data;
@@ -70,6 +77,10 @@ class SubscriptionManager {
    */
   hasFeatureAccess(featureName) {
     if (!this.features) return false;
+    // La fiscalité dépend du billing_cycle (annuel uniquement)
+    if (featureName === 'fiscalite') {
+      return this.billingCycle === 'annuel' && this.features.fiscalite === true;
+    }
     const feature = this.features[featureName];
     return feature === true || (typeof feature === 'string' && feature !== 'false' && feature !== false);
   }
@@ -121,12 +132,58 @@ class SubscriptionManager {
     const featureRequirements = {
       'ai_autocomplete': { level: 2, plan: 'DUO' },
       'gdf_table': { level: 2, plan: 'DUO' },
-      'ai_communication': { level: 3, plan: 'QUATTRO' },
+      'communication': { level: 2, plan: 'DUO' },
+      'multi_gites': { level: 2, plan: 'DUO' },
+      'formation': { level: 2, plan: 'DUO' },
+      'tableaux_avances': { level: 3, plan: 'QUATTRO' },
       'api_access': { level: 3, plan: 'QUATTRO' },
-      'multi_gites_view': { level: 2, plan: 'DUO' }
+      'support_vip': { level: 3, plan: 'QUATTRO' },
+      'formation_perso': { level: 3, plan: 'QUATTRO' }
     };
 
     return featureRequirements[featureName] || { level: 1, plan: 'SOLO' };
+  }
+
+  /**
+   * Charger les informations d'essai depuis cm_clients
+   * @param {string} userId
+   */
+  async _loadTrialInfo(userId) {
+    try {
+      const { data: client } = await supabase
+        .from('cm_clients')
+        .select('statut, trial_ends_at, type_abonnement, billing_cycle')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!client || client.statut !== 'trial') return;
+
+      this.isInTrial = true;
+      this.trialEndsAt = client.trial_ends_at || null;
+      this.billingCycle = client.billing_cycle || 'mensuel';
+
+      if (client.trial_ends_at) {
+        const msLeft = new Date(client.trial_ends_at) - new Date();
+        this.trialDaysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+      } else {
+        this.trialDaysLeft = 14;
+      }
+
+      // Charger les features du plan choisi depuis la BDD
+      const planSlug = (client.type_abonnement || 'solo') + '_' + (client.billing_cycle || 'mensuel');
+      const { data: planData } = await supabase
+        .from('cm_pricing_plans')
+        .select('features, level, nb_gites_max')
+        .eq('slug', planSlug)
+        .maybeSingle();
+
+      if (planData) {
+        this.features = planData.features || {};
+        this.level = planData.level ?? 1;
+      }
+    } catch (err) {
+      console.error('Erreur chargement infos trial:', err);
+    }
   }
 }
 
@@ -176,10 +233,10 @@ function controlAIFeatures() {
     }
   });
 
-  // Communication IA (QUATTRO)
-  const aiCommunicationElements = document.querySelectorAll('[data-feature="ai_communication"]');
+  // Communication Meublé de tourisme (DUO+)
+  const aiCommunicationElements = document.querySelectorAll('[data-feature="communication"]');
   aiCommunicationElements.forEach(el => {
-    if (subscriptionManager.hasFeatureAccess('ai_communication')) {
+    if (subscriptionManager.hasFeatureAccess('communication')) {
       el.style.display = '';
       el.classList.remove('feature-locked');
       el.removeAttribute('disabled');
@@ -248,6 +305,23 @@ async function controlGitesLimit() {
  */
 function displaySubscriptionBanner() {
   const sub = subscriptionManager.currentSubscription;
+
+  // Cas trial : pas d'abonnement actif mais en essai
+  if (!sub && subscriptionManager.isInTrial) {
+    const banner = document.getElementById('subscription-banner');
+    if (!banner) return;
+    const daysLeft = subscriptionManager.trialDaysLeft;
+    const colorClass = daysLeft <= 3 ? 'color:#dc2626;' : 'color:#16a34a;';
+    banner.innerHTML = `
+      <span style="font-weight:600;">Essai gratuit</span>
+      &nbsp;—&nbsp;
+      <span style="${colorClass}font-weight:700;">${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''}</span>
+      &nbsp;—&nbsp;
+      <a href="../index.html#pricing" style="color:#667eea;font-weight:600;text-decoration:none;">↗ Choisir un abonnement</a>
+    `;
+    return;
+  }
+
   if (!sub) return;
 
   const banner = document.getElementById('subscription-banner');
@@ -272,9 +346,13 @@ function showUpgradeModal(featureName) {
   const featureLabels = {
     'ai_autocomplete': 'Auto-complétion IA',
     'gdf_table': 'Tableau Gîtes de France',
-    'ai_communication': 'Conseil/Communication IA',
+    'communication': 'Communication Meublé de tourisme',
+    'multi_gites': 'Vue multi-propriétés',
+    'formation': 'Formation vidéo',
+    'tableaux_avances': 'Tableaux de bord avancés',
     'api_access': 'Accès API',
-    'multi_gites_view': 'Vue multi-gîtes'
+    'support_vip': 'Support VIP téléphone',
+    'formation_perso': 'Formation 1h personnalisée'
   };
 
   const featureLabel = featureLabels[featureName] || 'Cette fonctionnalité';

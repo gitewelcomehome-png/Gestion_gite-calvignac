@@ -129,7 +129,7 @@ function displayClients(clients) {
             </td>
             <td>${client.email_principal}</td>
             <td>${client.nom_entreprise || '-'}</td>
-            <td><span class="badge badge-${client.type_abonnement}">${client.type_abonnement}</span></td>
+            <td><span class="badge badge-${client.type_abonnement}">${(client.type_abonnement || '').toUpperCase()}</span> <span class="badge badge-${client.billing_cycle || 'mensuel'}">${client.billing_cycle === 'annuel' ? 'Annuel' : 'Mensuel'}</span></td>
             <td><span class="badge badge-${client.statut}">${getStatutLabel(client.statut)}</span></td>
             <td style="font-weight: 600;">${client.montant_mensuel}€</td>
             <td>${client.nb_gites_actuels ?? 0} / ${client.nb_gites_max ?? "—"}</td>
@@ -223,7 +223,11 @@ function filterClients() {
     
     // Filtre abonnement
     if (abonnementFilter) {
-        filtered = filtered.filter(client => client.type_abonnement === abonnementFilter);
+        const [plan, cycle] = abonnementFilter.split('_');
+        filtered = filtered.filter(client =>
+            client.type_abonnement === plan &&
+            (client.billing_cycle || 'mensuel') === cycle
+        );
     }
     
     displayClients(filtered);
@@ -324,7 +328,8 @@ async function displayClientInfos(client) {
         <div class="info-card">
             <label><i data-lucide="package" style="width: 14px; height: 14px;"></i> Abonnement</label>
             <div class="value">
-                <span class="badge badge-${client.type_abonnement}">${client.type_abonnement.toUpperCase()}</span>
+                <span class="badge badge-${client.type_abonnement}">${(client.type_abonnement || '').toUpperCase()}</span>
+                <span class="badge badge-${client.billing_cycle || 'mensuel'}" style="margin-left: 6px;">${client.billing_cycle === 'annuel' ? '🔒 Avec engagement' : '⌛ Sans engagement'}</span>
             </div>
         </div>
         <div class="info-card">
@@ -403,7 +408,8 @@ async function loadAbonnements(clientId) {
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div>
                                 <div style="font-weight: 600; margin-bottom: 5px;">
-                                    <span class="badge badge-${sub.type_abonnement}">${sub.type_abonnement}</span>
+                                    <span class="badge badge-${sub.type_abonnement}">${(sub.type_abonnement || '').toUpperCase()}</span>
+                                    <span class="badge badge-${sub.billing_cycle || 'mensuel'}">${sub.billing_cycle === 'annuel' ? '🔒 Annuel' : '⌛ Mensuel'}</span>
                                     <span class="badge badge-${sub.statut}">${sub.statut}</span>
                                 </div>
                                 <div style="color: #64748b; font-size: 14px;">

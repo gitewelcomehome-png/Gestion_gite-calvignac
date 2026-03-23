@@ -96,9 +96,11 @@
         .badge-suspendu { background: #fed7aa; color: #c2410c; }
         .badge-resilie { background: #fecaca; color: #991b1b; }
 
-        .badge-basic { background: #e0e7ff; color: #4338ca; }
-        .badge-pro { background: #fce7f3; color: #be185d; }
-        .badge-premium { background: #fef3c7; color: #92400e; }
+        .badge-solo { background: #dbeafe; color: #1e40af; }
+        .badge-duo { background: #d1fae5; color: #065f46; }
+        .badge-quattro { background: #fef3c7; color: #92400e; }
+        .badge-mensuel { background: #f3f4f6; color: #374151; }
+        .badge-annuel { background: #ede9fe; color: #5b21b6; }
 
         /* Modal Fiche Client */
         .modal-overlay {
@@ -487,9 +489,18 @@
             </select>
             <select class="filter-select" id="filterAbonnement">
                 <option value="">Tous les abonnements</option>
-                <option value="basic">Basic</option>
-                <option value="pro">Pro</option>
-                <option value="premium">Premium</option>
+                <optgroup label="Solo (1 gîte)">
+                    <option value="solo_annuel">Solo — Avec engagement (10€/mois)</option>
+                    <option value="solo_mensuel">Solo — Sans engagement (15€/mois)</option>
+                </optgroup>
+                <optgroup label="Duo (2 gîtes)">
+                    <option value="duo_annuel">Duo — Avec engagement (15€/mois)</option>
+                    <option value="duo_mensuel">Duo — Sans engagement (22€/mois)</option>
+                </optgroup>
+                <optgroup label="Quattro (4 gîtes)">
+                    <option value="quattro_annuel">Quattro — Avec engagement (23€/mois)</option>
+                    <option value="quattro_mensuel">Quattro — Sans engagement (33€/mois)</option>
+                </optgroup>
             </select>
         </div>
 

@@ -338,14 +338,21 @@ async function loadGraphiques() {
         // Graphique répartition par abonnement
         const { data: clients, error: errorClients } = await window.supabaseClient
             .from('cm_clients')
-            .select('type_abonnement')
+            .select('type_abonnement, billing_cycle')
             .eq('statut', 'actif');
         
         if (errorClients) throw errorClients;
         
-        const repartition = { basic: 0, pro: 0, premium: 0 };
+        const repartition = {
+            solo_annuel: 0, solo_mensuel: 0,
+            duo_annuel: 0, duo_mensuel: 0,
+            quattro_annuel: 0, quattro_mensuel: 0
+        };
         clients?.forEach(c => {
-            repartition[c.type_abonnement] = (repartition[c.type_abonnement] || 0) + 1;
+            const plan = c.type_abonnement || 'solo';
+            const cycle = c.billing_cycle || 'mensuel';
+            const key = `${plan}_${cycle}`;
+            if (key in repartition) repartition[key] = (repartition[key] || 0) + 1;
         });
         
         if (repartitionChartInstance) repartitionChartInstance.destroy();
@@ -354,13 +361,24 @@ async function loadGraphiques() {
         repartitionChartInstance = new Chart(ctxRepartition, {
             type: 'doughnut',
             data: {
-                labels: ['Basic', 'Pro', 'Premium'],
+                labels: [
+                    'Solo Annuel', 'Solo Mensuel',
+                    'Duo Annuel', 'Duo Mensuel',
+                    'Quattro Annuel', 'Quattro Mensuel'
+                ],
                 datasets: [{
-                    data: [repartition.basic, repartition.pro, repartition.premium],
+                    data: [
+                        repartition.solo_annuel, repartition.solo_mensuel,
+                        repartition.duo_annuel, repartition.duo_mensuel,
+                        repartition.quattro_annuel, repartition.quattro_mensuel
+                    ],
                     backgroundColor: [
                         'rgba(59, 130, 246, 0.8)',
+                        'rgba(147, 197, 253, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(110, 231, 183, 0.8)',
                         'rgba(245, 158, 11, 0.8)',
-                        'rgba(139, 92, 246, 0.8)'
+                        'rgba(253, 211, 77, 0.8)'
                     ],
                     borderWidth: 2,
                     borderColor: '#fff'

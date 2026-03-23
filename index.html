@@ -906,28 +906,6 @@
             flex-shrink: 0;
         }
 
-        .feature-highlight {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(0, 255, 209, 0.08));
-            padding: 1.5rem;
-            border-radius: 12px;
-            border-left: 4px solid var(--electric);
-        }
-
-        .feature-hl-label {
-            font-size: 0.85rem;
-            color: var(--gray-mid);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-hl-value {
-            font-family: 'Archivo Black', sans-serif;
-            font-size: 2.5rem;
-            color: var(--electric);
-        }
-
         .feature-visual {
             background: linear-gradient(135deg, var(--gray-light), white);
             padding: 3rem;
@@ -1143,6 +1121,42 @@
             background: var(--electric);
             color: white;
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Toggle Mensuel / Annuel */
+        /* Fiscalité : visible avec engagement, masquée sans engagement */
+        .engagement-only {
+            display: flex;
+        }
+
+        .price-card.no-engagement .engagement-only {
+            display: none !important;
+        }
+
+        .annual-tag {
+            background: linear-gradient(135deg, var(--electric), var(--cyan));
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.15rem 0.55rem;
+            border-radius: 20px;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        .feature-annual-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(0, 255, 209, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--electric);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            letter-spacing: 0.03em;
         }
 
         /* Testimonials */
@@ -1651,7 +1665,7 @@
                 </div>
                 
                 <h1>
-                    Le <span class="gradient-text">Channel Manager</span> qui automatise votre activité locative
+                    Le <span class="gradient-text">Channel Manager</span> qui simplifie votre activité locative
                 </h1>
                 
                 <p class="hero-subtitle">
@@ -1669,7 +1683,7 @@
                     </div>
                     <div class="feature-chip">
                         <div class="icon">✓</div>
-                        <span>Fiscalité LMNP simplifiée</span>
+                        <span>Fiscalité simplifiée</span>
                     </div>
                     <div class="feature-chip">
                         <div class="icon">✓</div>
@@ -1684,7 +1698,6 @@
 
                 <div class="hero-trust">
                     <div class="trust-dot">Configuration en 2 min</div>
-                    <div class="trust-dot">Support 7j/7</div>
                 </div>
             </div>
 
@@ -1765,8 +1778,8 @@
                 <div class="stat-text">Configuration</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">7j/7</div>
-                <div class="stat-text">Support disponible</div>
+                <div class="stat-number">100%</div>
+                <div class="stat-text">Français</div>
             </div>
         </div>
     </section>
@@ -1883,7 +1896,7 @@
                 <div class="benefit-card">
                     <div class="benefit-icon">💰</div>
                     <h3 class="benefit-title">Économies</h3>
-                    <div class="benefit-number">2 000€</div>
+                    <div class="benefit-number">1 500€</div>
                     <p class="benefit-text">par an sur la fiscalité</p>
                 </div>
             </div>
@@ -1909,20 +1922,15 @@
                         <li>Import iCal automatique depuis Airbnb, Booking, Abritel</li>
                         <li>Détection intelligente des conflits avec alertes</li>
                         <li>Vue multi-propriétés avec code couleur</li>
-                        <li>Sync bidirectionnelle en 30 secondes max</li>
+                        <li>Sync bidirectionnelle</li>
                         <li>Historique complet + export Excel/PDF</li>
                     </ul>
 
-                    <div class="feature-highlight">
-                        <div class="feature-hl-label">Impact réel</div>
-                        <div class="feature-hl-value">5h/semaine</div>
-                    </div>
                 </div>
                 <div class="feature-visual">
                 <img src="images/screens/screen_calendrier.png" alt="Calendrier unifié" style="width:100%;border-radius:8px;display:block;">
               </div>
                 </div>
-            </div>
 
             <div class="feature-block">
                 <div>
@@ -1938,21 +1946,17 @@
                         <li>Historique complet par gîte</li>
                     </ul>
 
-                    <div class="feature-highlight">
-                        <div class="feature-hl-label">Efficacité</div>
-                        <div class="feature-hl-value">-70%</div>
-                    </div>
                 </div>
                 <div class="feature-visual">
                 <img src="images/screens/screen_menage.png" alt="Planning ménage" style="width:100%;border-radius:8px;display:block;">
               </div>
                 </div>
-            </div>
 
             <div class="feature-block">
                 <div>
                     <div class="feature-emoji">💰</div>
-                    <h3 class="feature-title">Simulation Fiscale LMNP/LMP</h3>
+                    <h3 class="feature-title">Simulation Fiscale</h3>
+                    <span class="feature-annual-badge">⭐ Inclus dans le forfait annuel uniquement</span>
                     <p class="feature-desc">Testez TOUS les régimes fiscaux pour savoir lequel choisir. Estimatifs URSSAF, calculs impôts, kilomètres URSSAF et IR.</p>
                     
                     <ul class="feature-list">
@@ -1964,16 +1968,11 @@
                         <li>Comparaison régime réel vs micro-BIC</li>
                     </ul>
 
-                    <div class="feature-highlight">
-                        <div class="feature-hl-label">Testez avant de choisir</div>
-                        <div class="feature-hl-value">Toutes simulations</div>
-                    </div>
                 </div>
                 <div class="feature-visual">
                 <img src="images/screens/screen_fiscal.png" alt="Simulation fiscale" style="width:100%;border-radius:8px;display:block;">
               </div>
                 </div>
-            </div>
 
             <div class="feature-block">
                 <div>
@@ -1990,20 +1989,16 @@
                         <li>Partage WhatsApp, Email, lien</li>
                     </ul>
 
-                    <div class="feature-highlight">
-                        <div class="feature-hl-label">Résultat</div>
-                        <div class="feature-hl-value">0 appel</div>
-                    </div>
                 </div>
                 <div class="feature-visual">
                 <img src="images/screens/screen_fiche.png" alt="Fiche voyageur" style="width:100%;border-radius:8px;display:block;">
               </div>
                 </div>
-            </div>
         </div>
     </section>
 
-    <!-- Blog / Actualités -->
+    <!-- Blog / Actualités — à activer plus tard -->
+    <!--
     <section class="section section-alt" id="blog">
         <div class="container">
             <div class="section-head">
@@ -2043,6 +2038,7 @@
             </div>
         </div>
     </section>
+    -->
 
     <!-- Comparison -->
     <section class="section">
@@ -2079,7 +2075,7 @@
                 </div>
 
                 <div class="compare-row">
-                    <div class="compare-feature">Fiscalité LMNP</div>
+                    <div class="compare-feature">Fiscalité</div>
                     <div class="compare-check check-no">1 500€/an</div>
                     <div class="compare-check check-yes">Inclus</div>
                 </div>
@@ -2120,8 +2116,8 @@
                 <p class="section-subtitle">Rentabilisez votre abonnement dès le premier mois</p>
             </div>
 
-            <div class="pricing-grid">
-                <div class="price-card">
+            <div class="pricing-grid" id="pricing-grid">
+                <div class="price-card" data-plan="solo">
                     <h3 class="price-name">Solo</h3>
                     <p class="price-desc">Parfait pour démarrer</p>
                     
@@ -2137,16 +2133,15 @@
                     <ul class="price-features">
                         <li>Calendrier multi-plateformes</li>
                         <li>Planning ménage automatique</li>
-                        <li>Fiscalité LMNP complète</li>
+                        <li class="engagement-only">Fiscalité complète&nbsp;<span class="annual-tag">forfait annuel</span></li>
                         <li>Fiche voyageur QR WiFi</li>
                         <li>Analytics & stats</li>
-                        <li>Support chat 7j/7</li>
                     </ul>
 
-                    <a href="app.html" class="btn btn-outline price-cta">Essayer 14 jours</a>
+                    <a href="pages/onboarding.html?plan=solo&cycle=annuel" class="btn btn-outline price-cta">Essayer 14 jours</a>
                 </div>
 
-                <div class="price-card featured">
+                <div class="price-card featured" data-plan="duo">
                     <div class="price-badge">⭐ Le plus populaire</div>
                     <h3 class="price-name">Duo</h3>
                     <p class="price-desc">Pour développer</p>
@@ -2164,15 +2159,17 @@
                         <li>Tout Solo +</li>
                         <li>2 gîtes synchronisés</li>
                         <li>Vue multi-propriétés</li>
+                        <li class="engagement-only">Fiscalité complète&nbsp;<span class="annual-tag">forfait annuel</span></li>
                         <li>Équipe ménage multi-sites</li>
+                        <li>Communication actualité Meublé de tourisme</li>
                         <li>Support prioritaire</li>
                         <li>Formation vidéo</li>
                     </ul>
 
-                    <a href="app.html" class="btn price-cta">Essayer 14 jours</a>
+                    <a href="pages/onboarding.html?plan=duo&cycle=annuel" class="btn price-cta">Essayer 14 jours</a>
                 </div>
 
-                <div class="price-card">
+                <div class="price-card" data-plan="quattro">
                     <h3 class="price-name">Quattro</h3>
                     <p class="price-desc">Pour les pros</p>
                     
@@ -2188,13 +2185,14 @@
                     <ul class="price-features">
                         <li>Tout Duo +</li>
                         <li>4 gîtes synchronisés</li>
-                        <li>API connexions custom</li>
+                        <li class="engagement-only">Fiscalité complète&nbsp;<span class="annual-tag">forfait annuel</span></li>
                         <li>Tableaux de bord avancés</li>
+                        <li>Communication actualité Meublé de tourisme</li>
                         <li>Support VIP téléphone</li>
                         <li>Formation 1h perso</li>
                     </ul>
 
-                    <a href="app.html" class="btn btn-outline price-cta">Essayer 14 jours</a>
+                    <a href="pages/onboarding.html?plan=quattro&cycle=annuel" class="btn btn-outline price-cta">Essayer 14 jours</a>
                 </div>
             </div>
         </div>
@@ -2207,13 +2205,12 @@
             <p>Testez toutes les fonctionnalités pendant 14 jours gratuitement</p>
             
             <div class="cta-buttons">
-                <a href="app.html" class="btn-white">🚀 Démarrer l'essai de 14 jours</a>
+                <a href="pages/onboarding.html" class="btn-white">🚀 Démarrer l'essai de 14 jours</a>
             </div>
 
             <div class="cta-trust-items">
                 <div class="trust-dot">14 jours gratuits</div>
                 <div class="trust-dot">Config 2 min</div>
-                <div class="trust-dot">Support 7j/7</div>
             </div>
         </div>
     </section>
@@ -2285,6 +2282,8 @@
     </footer>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+  // ── Toggle Avec / Sans engagement (par carte) ────────────────
   document.querySelectorAll('.price-option').forEach(function(opt) {
     opt.addEventListener('click', function() {
       var container = this.closest('.price-options');
@@ -2298,12 +2297,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (amountEl) amountEl.innerHTML = amount + '<small>/mois</small>';
       }
       var isAvec = this.textContent.includes('Avec');
+      // Fiscalité visible uniquement avec engagement 12 mois
+      if (isAvec) {
+        card.classList.remove('no-engagement');
+      } else {
+        card.classList.add('no-engagement');
+      }
       var saveEl = card.querySelector('.price-save');
       if (saveEl) saveEl.style.display = isAvec ? '' : 'none';
       var periodEl = card.querySelector('.price-period');
       if (periodEl) {
         if (isAvec) periodEl.textContent = periodEl.textContent.replace('Sans engagement', 'Engagement 12 mois');
         else periodEl.textContent = periodEl.textContent.replace('Engagement 12 mois', 'Sans engagement');
+      }
+      // Mettre à jour le lien CTA avec le plan et le cycle choisis
+      var planName = card.dataset.plan;
+      var cycle = isAvec ? 'annuel' : 'mensuel';
+      var cta = card.querySelector('.price-cta');
+      if (cta && planName) {
+        cta.href = 'pages/onboarding.html?plan=' + planName + '&cycle=' + cycle;
       }
     });
   });
