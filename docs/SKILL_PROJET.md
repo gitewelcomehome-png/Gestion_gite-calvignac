@@ -463,3 +463,50 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - Pages standalone (onboarding, reset-password, forgot-password) accessibles sans authentification
 - La fiche client (`fiche-client.html`) nécessite un token valide dans l'URL
 - `pages/femme-menage.html` et `pages/validation.html` sont des portails tiers (pas login Supabase classique)
+
+## Audit automatise -- 23 mars 2026
+
+### Resume
+- Pages testees : 8 (index.html, login, onboarding, reset-password, cgu-cgv, privacy, legal, support)
+- Elements interactifs cartographies : 8 liens nav, 6 toggles prix, 3 CTA tarifs, 4 liens footer, 3 liens blog, 1 formulaire onboarding
+- Bugs trouves : 2 (1 critique, 1 majeur)
+- Corrections appliquees : 1 (BUG-004)
+- Issues GitHub creees : 1 (#5)
+
+### Pages testees
+| Page | Statut | Notes |
+|------|--------|-------|
+| index.html (accueil) | OK | BUG-004 corrige dans cette session |
+| pages/login.html | OK | Redirige vers /app si session active |
+| pages/onboarding.html | OK | Formulaire creation compte fonctionnel |
+| pages/reset-password.html | OK | Message erreur attendu sans token |
+| cgu-cgv.html | ANOM | Pas de header/footer site, statut provisoire |
+| privacy.html | ANOM | Pas de header/footer site, champs a completer |
+| legal.html | ANOM | Pas de header/footer site |
+| pages/support.html | BUG | 404 NOT_FOUND -- issue #5 creee |
+
+### BUG-004 -- CORRIGE
+- Page : index.html section Tarifs
+- Symptome : Toggle Avec/Sans engagement ne met pas a jour le prix affiche
+- Cause : Aucun event listener JS sur les .price-option (CSS present mais JS absent)
+- Fix : Bloc script avec addEventListener DOMContentLoaded injecte avant </body>
+- Commit : fc3d1bc
+
+### BUG-005 -- OUVERT
+- Page : pages/support.html
+- Symptome : 404 NOT_FOUND sur Vercel
+- Cause : Fichier jamais cree
+- Issue GitHub : #5
+- Fix suggere : Creer pages/support.html avec formulaire contact
+
+### Anomalies detectees
+- ANOM-003 : Pages legales (CGU, Privacy, Legal) sans navigation coherente avec le site
+- ANOM-004 : Section Blog -- liens Lire les articles et Voir les videos pointent sur #blog (meme page), pas de vrai contenu
+- ANOM-005 : Voir la demo et App mobile pointent vers app.html (login), pas de page dediee
+
+### Corrections appliquees
+- fc3d1bc : fix toggle prix Avec/Sans engagement index.html (26 insertions)
+
+### Issues creees
+- #5 : support.html Page 404 -- fichier manquant
+
