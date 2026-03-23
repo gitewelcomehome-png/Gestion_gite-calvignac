@@ -42,12 +42,12 @@ class SubscriptionManager {
     }
 
     const { data, error } = await supabase
-      .from('user_subscriptions')
+      .from('cm_subscriptions')
       .select(`
         *,
-        plan:subscriptions_plans(*)
+        plan:cm_pricing_plans(*)
       `)
-      .eq('user_id', user.id)
+      .eq('client_id', user.id)
       .eq('status', 'active')
       .maybeSingle();
 

@@ -46,8 +46,8 @@ class NotificationSystem {
      */
     async start() {
         try {
-            // Charger les notifications existantes depuis localStorage
-            this.loadNotifications();
+            // Charger les notifications existantes depuis localStorage (scopé par user)
+            await this.loadNotifications();
             
             // Charger les préférences utilisateur
             await this.loadUserPreferences();
@@ -551,15 +551,31 @@ class NotificationSystem {
     /**
      * Sauvegarder les notifications
      */
+    async _getStorageKey() {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            return user ? `notifications_${user.id}` : 'notifications_guest';
+        } catch (e) {
+            return 'notifications_guest';
+        }
+    }
+
     saveNotifications() {
-        localStorage.setItem('notifications', JSON.stringify(this.notifications));
+        const key = this._storageKey || 'notifications_guest';
+        localStorage.setItem(key, JSON.stringify(this.notifications));
     }
 
     /**
      * Charger les notifications
      */
-    loadNotifications() {
-        const stored = localStorage.getItem('notifications');
+    async loadNotifications() {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            this._storageKey = user ? `notifications_${user.id}` : 'notifications_guest';
+        } catch (e) {
+            this._storageKey = 'notifications_guest';
+        }
+        const stored = localStorage.getItem(this._storageKey);
         if (stored) {
             try {
                 const parsed = JSON.parse(stored);
@@ -574,6 +590,7 @@ class NotificationSystem {
                 }
             } catch (e) {
                 console.error('Erreur chargement notifications:', e);
+                this.notifications = [];
             }
         }
     }
