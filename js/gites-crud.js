@@ -294,6 +294,22 @@ window.showAddGiteForm = function(giteToEdit = null) {
                         Informations générales
                     </div>
                     
+                    <!-- Catégorie d'hébergement -->
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" style="font-weight:700; color:#2c3e50;">Catégorie d'hébergement *</label>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;">
+                            <label onclick="this.classList.add('cat-selected'); this.parentElement.querySelector('.cat-chambre').classList.remove('cat-selected');" class="cat-selected" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; border:2px solid var(--primary-color); border-radius:10px; cursor:pointer; font-weight:600; font-size:0.95rem; background:rgba(0,194,203,0.08); transition:all 0.2s;">
+                                <input type="radio" name="categorie_hebergement" value="gite" ${(!isEdit || !giteToEdit.categorie_hebergement || giteToEdit.categorie_hebergement === 'gite') ? 'checked' : ''} style="accent-color:var(--primary-color); width:18px; height:18px;">
+                                🏡 <span>Gîte</span>
+                            </label>
+                            <label class="cat-chambre ${isEdit && giteToEdit.categorie_hebergement === 'chambre_hotes' ? 'cat-selected' : ''}" onclick="this.classList.add('cat-selected'); this.parentElement.querySelector('label:first-child').classList.remove('cat-selected');" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; border:2px solid #e0e0e0; border-radius:10px; cursor:pointer; font-weight:600; font-size:0.95rem; background:white; transition:all 0.2s;">
+                                <input type="radio" name="categorie_hebergement" value="chambre_hotes" ${isEdit && giteToEdit.categorie_hebergement === 'chambre_hotes' ? 'checked' : ''} style="accent-color:#e67e22; width:18px; height:18px;">
+                                🛏️ <span>Chambre d'hôtes</span>
+                            </label>
+                        </div>
+                        <div style="font-size:0.78rem; color:#888; margin-top:6px;"><i data-lucide="info" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Ce choix impacte le régime fiscal applicable</div>
+                    </div>
+
                     <div class="form-group-modern">
                         <label class="form-label-modern">Nom du gîte *</label>
                         <input type="text" name="name" class="form-input-modern" required placeholder="Ex: Gîte des Vignes" value="${isEdit ? (giteToEdit.name || '') : ''}">
@@ -304,11 +320,15 @@ window.showAddGiteForm = function(giteToEdit = null) {
                             <label class="form-label-modern">Capacité</label>
                             <input type="number" name="capacity" class="form-input-modern" min="1" max="20" placeholder="Personnes" value="${isEdit && giteToEdit.capacity ? giteToEdit.capacity : ''}">
                         </div>
-                        
                         <div class="form-group-modern">
-                            <label class="form-label-modern">Localisation</label>
-                            <input type="text" name="location" class="form-input-modern" placeholder="Ex: Trévoux, Ain" value="${isEdit ? (giteToEdit.address || '') : ''}">
+                            <label class="form-label-modern">Tarif de base / nuit (€)</label>
+                            <input type="number" name="price_per_night" class="form-input-modern" min="0" step="1" placeholder="Ex: 150" value="${isEdit && giteToEdit.price_per_night ? giteToEdit.price_per_night : ''}">
                         </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Adresse</label>
+                        <input type="text" name="address" class="form-input-modern" placeholder="Ex: 42 chemin des Vignes" value="${isEdit ? (giteToEdit.address || '') : ''}">
                     </div>
 
                     <div class="form-grid-2">
@@ -316,34 +336,9 @@ window.showAddGiteForm = function(giteToEdit = null) {
                             <label class="form-label-modern">Ville</label>
                             <input type="text" name="city" class="form-input-modern" placeholder="Ex: Calvignac" value="${isEdit ? (giteToEdit.city || pricingProfile.city || '') : ''}">
                         </div>
-
                         <div class="form-group-modern">
                             <label class="form-label-modern">Code postal</label>
                             <input type="text" name="postal_code" class="form-input-modern" placeholder="Ex: 46160" value="${isEdit ? (giteToEdit.postal_code || pricingProfile.postal_code || '') : ''}">
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group-modern">
-                            <label class="form-label-modern">Département</label>
-                            <input type="text" name="department" class="form-input-modern" placeholder="Ex: Lot" value="${isEdit ? (pricingProfile.department || '') : ''}">
-                        </div>
-
-                        <div class="form-group-modern">
-                            <label class="form-label-modern">Région</label>
-                            <input type="text" name="region" class="form-input-modern" placeholder="Ex: Occitanie" value="${isEdit ? (pricingProfile.region || '') : ''}">
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group-modern">
-                            <label class="form-label-modern">Pays</label>
-                            <input type="text" name="country" class="form-input-modern" placeholder="France" value="${isEdit ? (giteToEdit.country || 'France') : 'France'}">
-                        </div>
-
-                        <div class="form-group-modern">
-                            <label class="form-label-modern">Tarif de base / nuit (€)</label>
-                            <input type="number" name="price_per_night" class="form-input-modern" min="0" step="1" placeholder="Ex: 150" value="${isEdit && giteToEdit.price_per_night ? giteToEdit.price_per_night : ''}">
                         </div>
                     </div>
 
@@ -473,18 +468,26 @@ window.showAddGiteForm = function(giteToEdit = null) {
                         </div>
                         <div class="form-group-modern">
                             <label class="form-label-modern">Plateformes actives</label>
-                            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:4px;">
-                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
-                                    <input type="checkbox" name="platform_airbnb" ${isEdit && platformsProfile.airbnb ? 'checked' : ''} style="accent-color:var(--primary-color);">🏠 Airbnb</label>
-                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
-                                    <input type="checkbox" name="platform_booking" ${isEdit && platformsProfile.booking ? 'checked' : ''} style="accent-color:var(--primary-color);">🌐 Booking</label>
-                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
-                                    <input type="checkbox" name="platform_abritel" ${isEdit && platformsProfile.abritel ? 'checked' : ''} style="accent-color:var(--primary-color);">🏡 Abritel</label>
-                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
-                                    <input type="checkbox" name="platform_gdf" ${isEdit && platformsProfile.gdf ? 'checked' : ''} style="accent-color:var(--primary-color);">🌻 GdF</label>
-                                <label style="display:flex; gap:7px; align-items:center; padding:7px 10px; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-size:0.875rem;">
-                                    <input type="checkbox" name="platform_direct" ${isEdit && platformsProfile.direct ? 'checked' : ''} style="accent-color:var(--primary-color);">📩 Direct</label>
-                            </div>
+                            <details style="border:1px solid var(--border-color);border-radius:10px;overflow:hidden;">
+                                <summary style="padding:10px 14px;cursor:pointer;list-style:none;font-size:0.875rem;background:var(--bg-card,#fff);user-select:none;display:flex;justify-content:space-between;align-items:center;">Sélectionner les plateformes <span style="opacity:0.5;">▼</span></summary>
+                                <div style="padding:8px;display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bg-card,#fff);">
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_airbnb" ${isEdit && platformsProfile.airbnb ? 'checked' : ''} style="accent-color:var(--primary-color);">🏠 Airbnb</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_booking" ${isEdit && platformsProfile.booking ? 'checked' : ''} style="accent-color:var(--primary-color);">🌐 Booking.com</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_abritel" ${isEdit && platformsProfile.abritel ? 'checked' : ''} style="accent-color:var(--primary-color);">🏡 Abritel / Vrbo</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_gdf" ${isEdit && platformsProfile.gdf ? 'checked' : ''} style="accent-color:var(--primary-color);">🌻 Gîtes de France</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_clevacances" ${isEdit && platformsProfile.clevacances ? 'checked' : ''} style="accent-color:var(--primary-color);">🔑 Clévacances</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_homelidays" ${isEdit && platformsProfile.homelidays ? 'checked' : ''} style="accent-color:var(--primary-color);">🏘️ Homelidays</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_tripadvisor" ${isEdit && platformsProfile.tripadvisor ? 'checked' : ''} style="accent-color:var(--primary-color);">⭐ TripAdvisor Rentals</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_expedia" ${isEdit && platformsProfile.expedia ? 'checked' : ''} style="accent-color:var(--primary-color);">✈️ Expedia Vacation Rentals</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_google" ${isEdit && platformsProfile.google ? 'checked' : ''} style="accent-color:var(--primary-color);">🔍 Google Vacances</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_leboncoin" ${isEdit && platformsProfile.leboncoin ? 'checked' : ''} style="accent-color:var(--primary-color);">📋 Leboncoin</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_locasun" ${isEdit && platformsProfile.locasun ? 'checked' : ''} style="accent-color:var(--primary-color);">☀️ Locasun</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_holidu" ${isEdit && platformsProfile.holidu ? 'checked' : ''} style="accent-color:var(--primary-color);">🌍 Holidu</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_maeva" ${isEdit && platformsProfile.maeva ? 'checked' : ''} style="accent-color:var(--primary-color);">🏖️ Maeva</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_toprural" ${isEdit && platformsProfile.toprural ? 'checked' : ''} style="accent-color:var(--primary-color);">🌿 Toprural</label>
+                                    <label style="display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.875rem;"><input type="checkbox" name="platform_direct" ${isEdit && platformsProfile.direct ? 'checked' : ''} style="accent-color:var(--primary-color);">📩 Direct / Site personnel</label>
+                                </div>
+                            </details>
                         </div>
                     </div>
                 </div>
@@ -765,6 +768,16 @@ window.handleSaveGite = async function(event, giteId = null) {
         booking: Boolean(formData.get('platform_booking')),
         abritel: Boolean(formData.get('platform_abritel')),
         gdf: Boolean(formData.get('platform_gdf')),
+        clevacances: Boolean(formData.get('platform_clevacances')),
+        homelidays: Boolean(formData.get('platform_homelidays')),
+        tripadvisor: Boolean(formData.get('platform_tripadvisor')),
+        expedia: Boolean(formData.get('platform_expedia')),
+        google: Boolean(formData.get('platform_google')),
+        leboncoin: Boolean(formData.get('platform_leboncoin')),
+        locasun: Boolean(formData.get('platform_locasun')),
+        holidu: Boolean(formData.get('platform_holidu')),
+        maeva: Boolean(formData.get('platform_maeva')),
+        toprural: Boolean(formData.get('platform_toprural')),
         direct: Boolean(formData.get('platform_direct'))
     };
 
@@ -777,7 +790,7 @@ window.handleSaveGite = async function(event, giteId = null) {
     const giteData = {
         name: formData.get('name'),
         capacity: toIntegerOrNull(formData.get('capacity')),
-        address: formData.get('location') || null,
+        address: formData.get('address') || null,
         city: (formData.get('city') || '').trim() || null,
         postal_code: (formData.get('postal_code') || '').trim() || null,
         country: (formData.get('country') || 'France').trim() || 'France',
@@ -785,6 +798,7 @@ window.handleSaveGite = async function(event, giteId = null) {
         beds: toIntegerOrNull(formData.get('beds')),
         bathrooms: toIntegerOrNull(formData.get('bathrooms')),
         surface_m2: toNumberOrNull(formData.get('surface_m2')),
+        categorie_hebergement: (formData.get('categorie_hebergement') || 'gite'),
         type_hebergement: (formData.get('type_hebergement') || '').trim() || null,
         label_classement: (formData.get('label_classement') || '').trim() || null,
         department: (formData.get('department') || '').trim() || null,
