@@ -209,10 +209,10 @@ function filterClients() {
     // Recherche texte
     if (searchTerm) {
         filtered = filtered.filter(client => 
-            client.nom_contact.toLowerCase().includes(searchTerm) ||
-            client.prenom_contact.toLowerCase().includes(searchTerm) ||
-            client.email_principal.toLowerCase().includes(searchTerm) ||
-            (client.nom_entreprise && client.nom_entreprise.toLowerCase().includes(searchTerm))
+            (client.nom_contact || '').toLowerCase().includes(searchTerm) ||
+            (client.prenom_contact || '').toLowerCase().includes(searchTerm) ||
+            (client.email_principal || '').toLowerCase().includes(searchTerm) ||
+            (client.nom_entreprise || '').toLowerCase().includes(searchTerm)
         );
     }
     
@@ -266,7 +266,8 @@ async function loadClientDetails(clientId) {
         // Mettre à jour header
         document.getElementById('modalClientName').textContent = 
             `${[client.prenom_contact, client.nom_contact].filter(v => v && v !== 'null').join(' ').trim() || client.email_principal || '—'}`;
-        document.getElementById('modalClientEmail').textContent = client.email_principal;
+        document.getElementById('modalClientEmail').textContent = 
+            (client.email_principal && client.email_principal !== 'null') ? client.email_principal : '—';
         
         // Tab Informations
         displayClientInfos(client);
@@ -303,7 +304,7 @@ async function displayClientInfos(client) {
         </div>
         <div class="info-card">
             <label><i data-lucide="mail" style="width: 14px; height: 14px;"></i> Email</label>
-            <div class="value">${client.email_principal}</div>
+            <div class="value">${(client.email_principal && client.email_principal !== 'null') ? client.email_principal : '—'}</div>
         </div>
         <div class="info-card">
             <label><i data-lucide="phone" style="width: 14px; height: 14px;"></i> Téléphone</label>
@@ -365,7 +366,7 @@ async function displayClientInfos(client) {
         </div>
         <div class="info-card">
             <label><i data-lucide="key" style="width: 14px; height: 14px;"></i> User ID</label>
-            <div class="value" style="font-size: 12px; word-break: break-all;">${client.user_id}</div>
+            <div class="value" style="font-size: 12px; word-break: break-all;">${client.user_id || 'Non renseigné'}</div>
         </div>
         ${client.notes ? `
         <div class="info-card">
@@ -831,6 +832,45 @@ async function sendPasswordResetEmail() {
 
 function editClient() {
     showToast('⚠️ Fonctionnalité à implémenter', 'warning');
+}
+
+async function deleteClient() {
+    if (!currentClientId) return;
+
+    const client = allClients.find(c => c.id === currentClientId);
+    if (!client) return;
+
+    const displayName = [client.prenom_contact, client.nom_contact]
+        .filter(v => v && v !== 'null')
+        .join(' ').trim() ||
+        ((client.email_principal && client.email_principal !== 'null') ? client.email_principal : 'ce client');
+
+    const confirmed = window.confirm(
+        `⚠️ SUPPRESSION DÉFINITIVE\n\nVous êtes sur le point de supprimer le compte de "${displayName}".\n\nCette action est irréversible. Continuer ?`
+    );
+    if (!confirmed) return;
+
+    const doubleConfirm = window.confirm(
+        `Dernière confirmation : supprimer définitivement "${displayName}" ?`
+    );
+    if (!doubleConfirm) return;
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('cm_clients')
+            .delete()
+            .eq('id', currentClientId);
+
+        if (error) throw error;
+
+        showToast(`✅ Compte supprimé`, 'success');
+        closeClientModal();
+        await loadClients();
+
+    } catch (err) {
+        console.error('❌ Erreur suppression client:', err);
+        showToast('❌ Erreur lors de la suppression : ' + (err.message || 'inconnue'), 'error');
+    }
 }
 
 async function suspendClient() {

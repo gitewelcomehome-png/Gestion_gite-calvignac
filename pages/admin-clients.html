@@ -559,6 +559,10 @@
                         <i data-lucide="user-x"></i>
                         Suspendre
                     </button>
+                    <button class="btn" style="background:#7f1d1d;color:white;border:none;" data-action="delete-client">
+                        <i data-lucide="trash-2"></i>
+                        Supprimer
+                    </button>
                 </div>
 
                 <!-- Tabs -->
@@ -650,6 +654,9 @@
                     break;
                 case 'suspend-client':
                     await window.suspendClient?.();
+                    break;
+                case 'delete-client':
+                    await window.deleteClient?.();
                     break;
                 case 'switch-client-tab':
                     if (actionEl.dataset.tab) {
