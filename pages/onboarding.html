@@ -1037,10 +1037,27 @@
                     trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
                 };
 
-                const { error: insertError } = await window.supabaseClient
+                // Vérifier si un client existe déjà pour cet user_id
+                const { data: existingClient } = await window.supabaseClient
                     .from('cm_clients')
-                    .upsert(clientData, { onConflict: 'user_id' });
-                
+                    .select('id')
+                    .eq('user_id', currentUser.id)
+                    .maybeSingle();
+
+                let insertError;
+                if (existingClient?.id) {
+                    const { error: updateErr } = await window.supabaseClient
+                        .from('cm_clients')
+                        .update(clientData)
+                        .eq('id', existingClient.id);
+                    insertError = updateErr;
+                } else {
+                    const { error: insertErr } = await window.supabaseClient
+                        .from('cm_clients')
+                        .insert(clientData);
+                    insertError = insertErr;
+                }
+
                 if (insertError) {
                     console.error('Erreur insertion client:', insertError);
                     throw new Error('Erreur lors de l\'enregistrement du profil: ' + insertError.message);
