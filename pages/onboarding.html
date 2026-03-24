@@ -1018,26 +1018,22 @@
                 // Attendre un peu que Supabase enregistre le compte
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                // ÉTAPE 2: Créer le profil client — colonnes garanties en base
-                const clientDataCore = {
+                // ÉTAPE 2: Créer le profil client avec toutes les informations
+                const clientData = {
                     user_id: currentUser.id,
                     email_principal: email,
                     prenom_contact: document.getElementById('prenom').value.trim(),
                     nom_contact: document.getElementById('nom').value.trim(),
                     telephone: document.getElementById('telephone').value.trim() || null,
                     nom_entreprise: document.getElementById('entreprise').value.trim() || null,
-                    type_abonnement: selectedPlan,
-                    billing_cycle: selectedCycle,
-                    statut: 'trial'
-                };
-
-                // Colonnes ajoutées par ALTER_CM_CLIENTS_ADD_ADDRESS (peuvent manquer)
-                const clientDataExtra = {
                     adresse: document.getElementById('adresse').value.trim() || null,
                     code_postal: document.getElementById('codePostal').value.trim() || null,
                     ville: document.getElementById('ville').value.trim() || null,
                     pays: document.getElementById('pays').value || 'France',
                     onboarding_completed: true,
+                    type_abonnement: selectedPlan,
+                    billing_cycle: selectedCycle,
+                    statut: 'trial',
                     trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
                 };
 
@@ -1048,30 +1044,15 @@
                     .eq('user_id', currentUser.id)
                     .maybeSingle();
 
-                // 1ère tentative avec toutes les colonnes
                 let insertError;
-                const fullData = { ...clientDataCore, ...clientDataExtra };
                 if (existingClient?.id) {
                     const { error: e } = await window.supabaseClient
-                        .from('cm_clients').update(fullData).eq('id', existingClient.id);
+                        .from('cm_clients').update(clientData).eq('id', existingClient.id);
                     insertError = e;
                 } else {
                     const { error: e } = await window.supabaseClient
-                        .from('cm_clients').insert(fullData);
+                        .from('cm_clients').insert(clientData);
                     insertError = e;
-                }
-
-                // Si erreur de colonne manquante → retenter avec colonnes core uniquement
-                if (insertError?.code === 'PGRST204') {
-                    if (existingClient?.id) {
-                        const { error: e } = await window.supabaseClient
-                            .from('cm_clients').update(clientDataCore).eq('id', existingClient.id);
-                        insertError = e;
-                    } else {
-                        const { error: e } = await window.supabaseClient
-                            .from('cm_clients').insert(clientDataCore);
-                        insertError = e;
-                    }
                 }
 
                 if (insertError) {
